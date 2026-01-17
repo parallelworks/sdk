@@ -1,0 +1,11 @@
+{
+  "name": "parallelworks-sdk",
+  "private": true,
+  "packageManager": "pnpm@10.3.0",
+  "engines": {
+    "node": "24"
+  },
+  "scripts": {
+    "generate": "./scripts/generate.sh"
+  }
+}
