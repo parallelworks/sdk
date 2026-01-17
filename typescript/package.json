@@ -1,0 +1,50 @@
+{
+  "name": "@parallelworks/sdk",
+  "version": "0.0.0",
+  "description": "Official TypeScript SDK for Parallel Works ACTIVATE",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "generate": "openapi-ts -i ../openapi.json -o ./src -c @hey-api/client-fetch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@hey-api/client-fetch": "^0.6.0",
+    "@hey-api/openapi-ts": "^0.61.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  },
+  "peerDependencies": {
+    "@hey-api/client-fetch": "^0.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/parallelworks/sdk.git",
+    "directory": "typescript"
+  },
+  "keywords": [
+    "parallelworks",
+    "sdk",
+    "api",
+    "client",
+    "activate"
+  ],
+  "author": "Parallel Works <support@parallelworks.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/parallelworks/sdk/issues"
+  },
+  "homepage": "https://github.com/parallelworks/sdk#readme"
+}

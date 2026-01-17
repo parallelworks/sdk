@@ -1,0 +1,161 @@
+name: '🔧 Generate and Publish SDKs'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'openapi.json'
+  repository_dispatch:
+    types: [generate-sdks]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., v6.9.0)'
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  # Determine if this is a release (has version) or just a regeneration
+  IS_RELEASE: ${{ github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch' }}
+
+jobs:
+  generate-and-publish:
+    name: '🔧 Generate and Publish'
+    runs-on: ubuntu-latest
+    steps:
+      - name: '🔍 Checkout'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: '🔢 Parse version'
+        id: version
+        if: env.IS_RELEASE == 'true'
+        run: |
+          VERSION="${{ github.event.client_payload.version || inputs.version }}"
+          VERSION="${VERSION#v}"  # Remove 'v' prefix
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
+
+      # ============ UPDATE VERSIONS ============
+      - name: '⚙️ Setup Node.js'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: '📝 Update TypeScript version'
+        if: env.IS_RELEASE == 'true'
+        run: |
+          cd typescript
+          npm version "${{ steps.version.outputs.version }}" --no-git-tag-version
+
+      - name: '📝 Update Python version'
+        if: env.IS_RELEASE == 'true'
+        run: |
+          cd python
+          sed -i "s/^version = .*/version = \"${{ steps.version.outputs.version }}\"/" pyproject.toml
+          sed -i "s/__version__ = .*/__version__ = \"${{ steps.version.outputs.version }}\"/" parallelworks_client/__init__.py
+
+      # ============ GENERATE TYPESCRIPT ============
+      - name: '📥 Install TypeScript dependencies'
+        run: |
+          cd typescript
+          npm install
+
+      - name: '🔧 Generate TypeScript client'
+        run: |
+          cd typescript
+          npm run generate
+
+      # ============ GENERATE GO ============
+      - name: '⚙️ Setup Go'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: '📥 Install oapi-codegen'
+        run: go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+
+      - name: '🔧 Generate Go client'
+        run: |
+          oapi-codegen -generate types,client \
+            -package parallelworks \
+            ./openapi.json > ./go/client.go
+
+      - name: '🧹 Format Go code'
+        run: |
+          cd go
+          go mod tidy
+          go fmt ./...
+
+      # ============ GENERATE PYTHON ============
+      - name: '⚙️ Setup Python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: '📥 Install Python tools'
+        run: pip install openapi-python-client build twine
+
+      - name: '🔧 Generate Python client'
+        run: |
+          # Remove existing generated code (keep __init__.py with version)
+          find python/parallelworks_client -type f ! -name '__init__.py' -delete 2>/dev/null || true
+
+          # Generate new client
+          openapi-python-client generate \
+            --path ./openapi.json \
+            --output-path ./python/parallelworks_client \
+            --meta none
+
+      # ============ COMMIT ALL CHANGES ============
+      - name: '💾 Commit all changes'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if [ "${{ env.IS_RELEASE }}" == "true" ]; then
+            git commit -m "chore: update SDKs to ${{ steps.version.outputs.tag }}" || echo "No changes to commit"
+          else
+            git commit -m "chore: regenerate SDKs" || echo "No changes to commit"
+          fi
+
+          git push
+
+      # ============ PUBLISH (only for releases) ============
+      - name: '🚀 Publish TypeScript to npm'
+        if: env.IS_RELEASE == 'true'
+        run: |
+          cd typescript
+          npm run build
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: '🚀 Publish Python to PyPI'
+        if: env.IS_RELEASE == 'true'
+        run: |
+          cd python
+          python -m build
+          twine upload dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
+      - name: '🚀 Create Go module tag'
+        if: env.IS_RELEASE == 'true'
+        run: |
+          # Go modules in subdirectories need prefix: go/v1.2.3
+          TAG="go/${{ steps.version.outputs.tag }}"
+
+          git tag "$TAG"
+          git push origin "$TAG"
+
+          echo "Created tag: $TAG"
+          echo "Install with: go get github.com/parallelworks/sdk/go@${{ steps.version.outputs.tag }}"
