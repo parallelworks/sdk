@@ -24,7 +24,7 @@ import { Client } from '@parallelworks/client'
 // The platform host is automatically extracted from your credential
 const client = Client.fromCredential(process.env.PW_API_KEY!)
 
-const { data, error } = await client.GET('/api/organizations')
+const { data, error } = await client.GET('/api/buckets')
 ```
 
 See the [examples](./examples) directory for complete runnable examples.
@@ -86,19 +86,19 @@ export const { useQuery, useImmutable, useInfinite } = createSwrHooks(client)
 ```
 
 ```tsx
-// components/OrganizationList.tsx
+// components/BucketList.tsx
 import { useQuery } from '@/lib/api'
 
-export function OrganizationList() {
-  const { data, error, isLoading } = useQuery('/api/organizations')
+export function BucketList() {
+  const { data, error, isLoading } = useQuery('/api/buckets')
 
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error: {error.message}</div>
 
   return (
     <ul>
-      {data?.map(org => (
-        <li key={org.id}>{org.name}</li>
+      {data?.map(bucket => (
+        <li key={bucket.id}>{bucket.name}</li>
       ))}
     </ul>
   )

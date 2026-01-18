@@ -27,8 +27,8 @@ type AuthenticatedClient = ReturnType<Client['withApiKey']>
  * export const { useQuery, useImmutable, useInfinite } = createSwrHooks(client)
  *
  * // In your component
- * function OrganizationList() {
- *   const { data, error, isLoading } = useQuery('/api/organizations')
+ * function BucketList() {
+ *   const { data, error, isLoading } = useQuery('/api/buckets')
  *
  *   if (isLoading) return <div>Loading...</div>
  *   if (error) return <div>Error: {error.message}</div>

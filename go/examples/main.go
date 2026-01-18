@@ -1,4 +1,4 @@
-// Example: List organizations using the Parallel Works Go client
+// Example: List buckets and clusters using the Parallel Works Go client
 //
 // Usage:
 //
@@ -27,24 +27,52 @@ func main() {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
-	// List organizations
-	fmt.Println("Fetching organizations...")
-	resp, err := client.GetOrganizationsWithResponse(context.Background())
+	ctx := context.Background()
+
+	fmt.Println("Fetching resources...")
+	fmt.Println()
+
+	// List buckets
+	bucketsResp, err := client.GetBucketsWithResponse(ctx, nil)
 	if err != nil {
-		log.Fatalf("Failed to get organizations: %v", err)
+		log.Fatalf("Failed to get buckets: %v", err)
 	}
 
-	if resp.StatusCode() != 200 {
-		log.Fatalf("Unexpected status code: %d", resp.StatusCode())
+	if bucketsResp.StatusCode() != 200 {
+		log.Fatalf("Failed to get buckets: status %d", bucketsResp.StatusCode())
 	}
 
-	if resp.JSON200 == nil {
-		fmt.Println("No organizations found")
-		return
+	buckets := bucketsResp.JSON200
+	if buckets == nil || len(*buckets) == 0 {
+		fmt.Println("Buckets (0):")
+		fmt.Println("  No buckets found")
+	} else {
+		fmt.Printf("Buckets (%d):\n", len(*buckets))
+		for _, bucket := range *buckets {
+			fmt.Printf("  - %s (%s)\n", bucket.Name, bucket.Csp)
+		}
 	}
 
-	fmt.Printf("\nFound %d organization(s):\n\n", len(*resp.JSON200))
-	for _, org := range *resp.JSON200 {
-		fmt.Printf("  - %s (ID: %s)\n", org.Name, org.Id)
+	fmt.Println()
+
+	// List clusters
+	clustersResp, err := client.GetClustersWithResponse(ctx)
+	if err != nil {
+		log.Fatalf("Failed to get clusters: %v", err)
+	}
+
+	if clustersResp.StatusCode() != 200 {
+		log.Fatalf("Failed to get clusters: status %d", clustersResp.StatusCode())
+	}
+
+	clusters := clustersResp.JSON200
+	if clusters == nil || len(*clusters) == 0 {
+		fmt.Println("Clusters (0):")
+		fmt.Println("  No clusters found")
+	} else {
+		fmt.Printf("Clusters (%d):\n", len(*clusters))
+		for _, cluster := range *clusters {
+			fmt.Printf("  - %s (%s)\n", cluster.Name, cluster.Status)
+		}
 	}
 }

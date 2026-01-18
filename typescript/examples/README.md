@@ -20,10 +20,10 @@ pnpm install
 export PW_API_KEY="your-api-key-or-token"
 
 # Run the example
-pnpm list-organizations
+pnpm list-resources
 
 # Or directly with tsx
-pnpm tsx list-organizations.ts
+pnpm tsx list-resources.ts
 ```
 
 The platform host is automatically extracted from your credential.
@@ -31,10 +31,12 @@ The platform host is automatically extracted from your credential.
 ## Expected Output
 
 ```
-Fetching organizations...
+Fetching resources...
 
-Found 2 organization(s):
+Buckets (2):
+  - my-data-bucket (AWS)
+  - archive-bucket (GCP)
 
-  - My Organization (ID: 507f1f77bcf86cd799439011)
-  - Another Org (ID: 507f1f77bcf86cd799439012)
+Clusters (1):
+  - dev-cluster (on)
 ```

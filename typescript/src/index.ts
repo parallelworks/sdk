@@ -167,7 +167,7 @@ function extractHostFromToken(token: string): string {
  * const client = Client.fromCredential(process.env.PW_API_KEY!)
  *
  * // Make requests
- * const { data, error } = await client.GET('/api/organizations')
+ * const { data, error } = await client.GET('/api/buckets')
  * ```
  */
 export class Client {

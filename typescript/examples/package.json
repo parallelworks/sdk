@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "list-organizations": "node list-organizations.ts"
+    "list-resources": "node list-resources.ts"
   },
   "dependencies": {
     "@parallelworks/client": "link:.."

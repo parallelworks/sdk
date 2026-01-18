@@ -20,10 +20,12 @@ The platform host is automatically extracted from your credential.
 ## Expected Output
 
 ```
-Fetching organizations...
+Fetching resources...
 
-Found 2 organization(s):
+Buckets (2):
+  - my-data-bucket (AWS)
+  - archive-bucket (GCP)
 
-  - My Organization (ID: 507f1f77bcf86cd799439011)
-  - Another Org (ID: 507f1f77bcf86cd799439012)
+Clusters (1):
+  - dev-cluster (on)
 ```

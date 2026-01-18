@@ -21,7 +21,7 @@ if err != nil {
     log.Fatal(err)
 }
 
-resp, err := client.GetOrganizationsWithResponse(context.Background())
+resp, err := client.GetBucketsWithResponse(context.Background())
 ```
 
 See the [examples](./examples) directory for complete runnable examples.
