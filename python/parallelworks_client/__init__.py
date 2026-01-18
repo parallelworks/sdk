@@ -1,6 +1,6 @@
 """Parallel Works SDK - Official Python client for the ACTIVATE platform API."""
 
-__version__ = "0.0.0"
+__version__ = "6.12.0"
 
 from parallelworks_client.auth import (
     API_KEY_PREFIX,
