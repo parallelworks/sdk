@@ -1,8 +1,8 @@
-module github.com/parallelworks/client-go/examples
+module github.com/parallelworks/sdk/go/examples
 
 go 1.25.4
 
-require github.com/parallelworks/client-go v0.0.0
+require github.com/parallelworks/sdk/go v0.0.0
 
 require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
@@ -10,4 +10,4 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1 // indirect
 )
 
-replace github.com/parallelworks/client-go => ../
+replace github.com/parallelworks/sdk/go => ../

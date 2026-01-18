@@ -1,4 +1,4 @@
-module github.com/parallelworks/client-go
+module github.com/parallelworks/sdk/go
 
 go 1.25.4
 

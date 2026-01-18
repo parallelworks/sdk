@@ -5,7 +5,7 @@ Official Go client for the Parallel Works ACTIVATE platform API.
 ## Installation
 
 ```bash
-go get github.com/parallelworks/client-go
+go get github.com/parallelworks/sdk/go
 ```
 
 ## Quick Start
@@ -13,7 +13,7 @@ go get github.com/parallelworks/client-go
 The simplest way to create a client - just pass your credential:
 
 ```go
-import parallelworks "github.com/parallelworks/client-go"
+import parallelworks "github.com/parallelworks/sdk/go"
 
 // The platform host is automatically extracted from your credential
 client, err := parallelworks.NewClientFromCredential(os.Getenv("PW_API_KEY"))
