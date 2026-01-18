@@ -1,0 +1,81 @@
+{
+  "name": "@parallelworks/client",
+  "version": "6.12.0",
+  "description": "Official TypeScript client for Parallel Works ACTIVATE API",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./swr": {
+      "import": "./dist/swr/index.js",
+      "types": "./dist/swr/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "generate": "openapi-typescript ../openapi.json -o ./src/types/api.d.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.15.0"
+  },
+  "peerDependencies": {
+    "swr": "^2.0.0",
+    "swr-openapi": "^5.0.0",
+    "openapi-typescript-helpers": "^0.0.15",
+    "type-fest": "^4.0.0 || ^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "swr": {
+      "optional": true
+    },
+    "swr-openapi": {
+      "optional": true
+    },
+    "openapi-typescript-helpers": {
+      "optional": true
+    },
+    "type-fest": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "openapi-typescript": "^7.9.1",
+    "openapi-typescript-helpers": "^0.0.15",
+    "type-fest": "^5.4.1",
+    "typescript": "^5.4.0",
+    "swr": "^2.3.6",
+    "swr-openapi": "^5.4.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/parallelworks/sdk.git",
+    "directory": "typescript"
+  },
+  "keywords": [
+    "parallelworks",
+    "client",
+    "api",
+    "activate",
+    "openapi"
+  ],
+  "author": "Parallel Works <support@parallelworks.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/parallelworks/sdk/issues"
+  },
+  "homepage": "https://github.com/parallelworks/sdk#readme",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  }
+}
