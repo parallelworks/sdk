@@ -2,8 +2,7 @@
 //
 // Usage:
 //
-//	export PW_API_KEY="your-api-key"
-//	export PW_HOST="https://cloud.parallel.works"  # optional, defaults to cloud.parallel.works
+//	export PW_API_KEY="your-api-key-or-token"
 //	go run main.go
 package main
 
@@ -22,10 +21,8 @@ func main() {
 		log.Fatal("PW_API_KEY environment variable is required")
 	}
 
-	// Create an authenticated client
-	client, err := parallelworks.NewClientFromCredential(
-		apiKey,
-	)
+	// Create an authenticated client - host is auto-detected from credential
+	client, err := parallelworks.NewClientFromCredential(apiKey)
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
