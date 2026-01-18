@@ -14,45 +14,73 @@ For SWR hooks support (React):
 npm install @parallelworks/client swr swr-openapi
 ```
 
-## Usage
+## Quick Start
 
-### Basic Client
+The simplest way to create a client - just pass your credential:
 
 ```typescript
 import { Client } from '@parallelworks/client'
 
-// Using API Key (Basic Auth) - recommended for integrations
-const client = new Client('https://cloud.parallel.works')
-  .withApiKey(process.env.PW_API_KEY!)
+// The platform host is automatically extracted from your credential
+const client = Client.fromCredential(process.env.PW_API_KEY!)
 
-// Or using Bearer Token (JWT) - for scripts, expires in 24h
-const client = new Client('https://cloud.parallel.works')
-  .withToken(process.env.PW_TOKEN!)
-
-// Make requests with full type safety
 const { data, error } = await client.GET('/api/organizations')
-
-if (error) {
-  console.error('Error:', error)
-} else {
-  console.log('Organizations:', data)
-}
-
-// POST example
-const { data: newOrg } = await client.POST('/api/organizations', {
-  body: { name: 'My Organization' }
-})
 ```
 
-### SWR Hooks (React)
+See the [examples](./examples) directory for complete runnable examples.
+
+## Authentication
+
+### Automatic Host Detection
+
+API keys (`pwt_...`) and JWT tokens contain the platform host encoded within them. Use `fromCredential` to automatically extract it:
+
+```typescript
+// API key - host decoded from first segment after pwt_
+const client = Client.fromCredential('pwt_Y2xvdWQucGFyYWxsZWwud29ya3M.xxxxx')
+// Connects to: https://activate.parallel.works
+
+// JWT token - host read from platform_host claim
+const client = Client.fromCredential('eyJhbGci...')
+// Connects to the host in the token's platform_host claim
+```
+
+### Explicit Host
+
+If you prefer to specify the host explicitly:
+
+```typescript
+// API Key (Basic Auth) - best for long-running integrations
+const client = new Client('https://activate.parallel.works')
+  .withApiKey('pwt_...')
+
+// JWT Token (Bearer) - best for scripts, expires in 24h
+const client = new Client('https://activate.parallel.works')
+  .withToken('eyJhbGci...')
+
+// Auto-detect credential type
+const client = new Client('https://activate.parallel.works')
+  .withCredential(process.env.PW_CREDENTIAL!)
+```
+
+### Credential Helpers
+
+```typescript
+import { isApiKey, isToken, extractPlatformHost } from '@parallelworks/client'
+
+isApiKey('pwt_abc.xyz')           // true
+isToken('eyJ.abc.def')            // true
+extractPlatformHost('pwt_...')    // "activate.parallel.works"
+```
+
+## SWR Hooks (React)
 
 ```tsx
 // lib/api.ts
 import { Client } from '@parallelworks/client'
 import { createSwrHooks } from '@parallelworks/client/swr'
 
-const client = new Client('https://cloud.parallel.works')
-  .withApiKey(process.env.NEXT_PUBLIC_PW_API_KEY!)
+const client = Client.fromCredential(process.env.NEXT_PUBLIC_PW_API_KEY!)
 
 export const { useQuery, useImmutable, useInfinite } = createSwrHooks(client)
 ```
@@ -76,30 +104,6 @@ export function OrganizationList() {
   )
 }
 ```
-
-## Authentication
-
-The client supports two authentication methods:
-
-### API Key (Basic Auth)
-
-Best for long-running integrations with configurable expiration dates.
-
-```typescript
-const client = new Client('https://cloud.parallel.works')
-  .withApiKey('your-api-key')
-```
-
-### Bearer Token (JWT)
-
-Best for scripts and CLI tools. Tokens expire after 24 hours.
-
-```typescript
-const client = new Client('https://cloud.parallel.works')
-  .withToken('your-jwt-token')
-```
-
-Both API keys and tokens can be generated from your ACTIVATE account settings.
 
 ## Documentation
 
