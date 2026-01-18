@@ -41,13 +41,26 @@ jobs:
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
           echo "Publishing version: $VERSION"
 
-      # ============ UPDATE VERSIONS ============
+      # ============ SETUP TOOLS ============
       - name: '⚙️ Setup Node.js'
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version-file: 'package.json'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: '⚙️ Setup pnpm'
+        uses: pnpm/action-setup@v4
+        # Reads version from package.json packageManager field
+
+      - name: '⚙️ Setup Go'
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go/go.mod'
+
+      - name: '⚙️ Setup uv'
+        uses: astral-sh/setup-uv@v5
+
+      # ============ UPDATE VERSIONS ============
       - name: '📝 Update TypeScript version'
         if: env.IS_RELEASE == 'true'
         run: |
@@ -58,34 +71,31 @@ jobs:
         if: env.IS_RELEASE == 'true'
         run: |
           cd python
-          sed -i "s/^version = .*/version = \"${{ steps.version.outputs.version }}\"/" pyproject.toml
-          sed -i "s/__version__ = .*/__version__ = \"${{ steps.version.outputs.version }}\"/" parallelworks_client/__init__.py
+          perl -i -pe "s/^version = .*/version = \"${{ steps.version.outputs.version }}\"/" pyproject.toml
+          perl -i -pe "s/__version__ = .*/__version__ = \"${{ steps.version.outputs.version }}\"/" parallelworks_client/__init__.py
 
       # ============ GENERATE TYPESCRIPT ============
       - name: '📥 Install TypeScript dependencies'
         run: |
           cd typescript
-          npm install
+          pnpm install
 
-      - name: '🔧 Generate TypeScript client'
+      - name: '🔧 Generate TypeScript types'
         run: |
           cd typescript
-          npm run generate
+          # Generate types from OpenAPI 3.1 spec
+          pnpm run generate
 
       # ============ GENERATE GO ============
-      - name: '⚙️ Setup Go'
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23'
-
       - name: '📥 Install oapi-codegen'
         run: go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
 
       - name: '🔧 Generate Go client'
         run: |
+          # oapi-codegen doesn't support OpenAPI 3.1, use the 3.0 version
           oapi-codegen -generate types,client \
             -package parallelworks \
-            ./openapi.json > ./go/client.go
+            ./openapi-3.0.json > ./go/client.go
 
       - name: '🧹 Format Go code'
         run: |
@@ -94,24 +104,14 @@ jobs:
           go fmt ./...
 
       # ============ GENERATE PYTHON ============
-      - name: '⚙️ Setup Python'
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: '📥 Install Python tools'
-        run: pip install openapi-python-client build twine
-
       - name: '🔧 Generate Python client'
         run: |
-          # Remove existing generated code (keep __init__.py with version)
-          find python/parallelworks_client -type f ! -name '__init__.py' -delete 2>/dev/null || true
-
-          # Generate new client
-          openapi-python-client generate \
+          # Generate new client (overwrites existing)
+          uvx openapi-python-client generate \
             --path ./openapi.json \
             --output-path ./python/parallelworks_client \
-            --meta none
+            --meta none \
+            --overwrite
 
       # ============ COMMIT ALL CHANGES ============
       - name: '💾 Commit all changes'
@@ -129,29 +129,27 @@ jobs:
           git push
 
       # ============ PUBLISH (only for releases) ============
-      - name: '🚀 Publish TypeScript to npm'
+      - name: '🚀 Build and publish TypeScript to npm'
         if: env.IS_RELEASE == 'true'
         run: |
           cd typescript
-          npm run build
-          npm publish --access public
+          pnpm run build
+          pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: '🚀 Publish Python to PyPI'
+      - name: '🚀 Build and publish Python to PyPI'
         if: env.IS_RELEASE == 'true'
         run: |
           cd python
-          python -m build
-          twine upload dist/*
+          uv build
+          uv publish
         env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
 
       - name: '🚀 Create Go module tag'
         if: env.IS_RELEASE == 'true'
         run: |
-          # Go modules in subdirectories need prefix: go/v1.2.3
           TAG="go/${{ steps.version.outputs.tag }}"
 
           git tag "$TAG"
