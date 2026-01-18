@@ -1,33 +1,60 @@
 {
-  "name": "@parallelworks/sdk",
+  "name": "@parallelworks/client",
   "version": "0.0.0",
-  "description": "Official TypeScript SDK for Parallel Works ACTIVATE",
+  "description": "Official TypeScript client for Parallel Works ACTIVATE API",
+  "type": "module",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
+      "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./swr": {
+      "import": "./dist/swr/index.js",
+      "types": "./dist/swr/index.d.ts"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "generate": "openapi-ts -i ../openapi.json -o ./src -c @hey-api/client-fetch",
+    "build": "tsc",
+    "generate": "openapi-typescript ../openapi.json -o ./src/types/api.d.ts",
     "clean": "rm -rf dist"
   },
-  "devDependencies": {
-    "@hey-api/client-fetch": "^0.6.0",
-    "@hey-api/openapi-ts": "^0.61.0",
-    "tsup": "^8.0.0",
-    "typescript": "^5.4.0"
+  "dependencies": {
+    "openapi-fetch": "^0.15.0"
   },
   "peerDependencies": {
-    "@hey-api/client-fetch": "^0.6.0"
+    "swr": "^2.0.0",
+    "swr-openapi": "^5.0.0",
+    "openapi-typescript-helpers": "^0.0.15",
+    "type-fest": "^4.0.0 || ^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "swr": {
+      "optional": true
+    },
+    "swr-openapi": {
+      "optional": true
+    },
+    "openapi-typescript-helpers": {
+      "optional": true
+    },
+    "type-fest": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "openapi-typescript": "^7.9.1",
+    "openapi-typescript-helpers": "^0.0.15",
+    "type-fest": "^5.4.1",
+    "typescript": "^5.4.0",
+    "swr": "^2.3.6",
+    "swr-openapi": "^5.4.1"
   },
   "repository": {
     "type": "git",
@@ -36,10 +63,10 @@
   },
   "keywords": [
     "parallelworks",
-    "sdk",
-    "api",
     "client",
-    "activate"
+    "api",
+    "activate",
+    "openapi"
   ],
   "author": "Parallel Works <support@parallelworks.com>",
   "license": "MIT",
