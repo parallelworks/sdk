@@ -1,0 +1,11 @@
+[project]
+name = "parallelworks-examples"
+version = "0.0.0"
+description = "Examples for the Parallel Works Python client"
+requires-python = ">=3.9"
+dependencies = [
+    "parallelworks-client",
+]
+
+[tool.uv.sources]
+parallelworks-client = { path = "../" }

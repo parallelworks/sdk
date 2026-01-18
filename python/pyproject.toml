@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "parallelworks-sdk"
+name = "parallelworks-client"
 version = "0.0.0"
 description = "Official Python SDK for Parallel Works ACTIVATE"
 readme = "README.md"
@@ -33,7 +33,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/parallelworks/sdk"
-Documentation = "https://docs.parallel.works"
+Documentation = "https://parallelworks.com/docs"
 Repository = "https://github.com/parallelworks/sdk"
 Issues = "https://github.com/parallelworks/sdk/issues"
 
