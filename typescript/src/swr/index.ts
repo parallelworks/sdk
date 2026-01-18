@@ -21,8 +21,9 @@ type AuthenticatedClient = ReturnType<Client['withApiKey']>
  * import { Client } from '@parallelworks/client'
  * import { createSwrHooks } from '@parallelworks/client/swr'
  *
+ * // Server-side only - never expose API keys to the client
  * const client = new Client('https://activate.parallel.works')
- *   .withApiKey(process.env.NEXT_PUBLIC_PW_API_KEY!)
+ *   .withApiKey(process.env.PW_API_KEY!)
  *
  * export const { useQuery, useImmutable, useInfinite } = createSwrHooks(client)
  *

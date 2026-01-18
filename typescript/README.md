@@ -80,7 +80,8 @@ extractPlatformHost('pwt_...')    // "activate.parallel.works"
 import { Client } from '@parallelworks/client'
 import { createSwrHooks } from '@parallelworks/client/swr'
 
-const client = Client.fromCredential(process.env.NEXT_PUBLIC_PW_API_KEY!)
+// Credential should be securely provided by your server (e.g., via session)
+const client = Client.fromCredential(credential)
 
 export const { useQuery, useImmutable, useInfinite } = createSwrHooks(client)
 ```
