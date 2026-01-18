@@ -1,11 +1,11 @@
-# Parallel Works Go SDK
+# Parallel Works Go Client
 
-Official Go SDK for the Parallel Works ACTIVATE platform API.
+Official Go client for the Parallel Works ACTIVATE platform API.
 
 ## Installation
 
 ```bash
-go get github.com/parallelworks/sdk/go
+go get github.com/parallelworks/client-go
 ```
 
 ## Usage
@@ -16,30 +16,25 @@ package main
 import (
     "context"
     "fmt"
-    "net/http"
+    "log"
 
-    parallelworks "github.com/parallelworks/sdk/go"
+    parallelworks "github.com/parallelworks/client-go"
 )
 
 func main() {
-    platformHost := "https://your-instance.parallel.works"
-    apiKey := "YOUR_API_KEY" // Generate token from ACTIVATE UI
-    // Create a client with authentication
+    // Create a client with API Key authentication
     client, err := parallelworks.NewClientWithResponses(
-        platformHost,
-        parallelworks.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
-            req.Header.Set("Authorization", "Bearer " + apiKey)
-            return nil
-        }),
+        "https://cloud.parallel.works",
+        parallelworks.WithAPIKey("your-api-key"),
     )
     if err != nil {
-        panic(err)
+        log.Fatal(err)
     }
 
     // Make API calls
     resp, err := client.GetOrganizationsWithResponse(context.Background())
     if err != nil {
-        panic(err)
+        log.Fatal(err)
     }
 
     if resp.JSON200 != nil {
@@ -52,11 +47,43 @@ func main() {
 
 ## Authentication
 
-The SDK supports three authentication methods:
+The client supports two authentication methods via functional options:
 
-1. **API Key (Basic Auth)**: Use your API key as the password
-2. **Bearer Token (JWT)**: Use a JWT token in the Authorization header
-3. **Session Cookie**: Use session-based authentication
+### API Key (Basic Auth)
+
+Best for long-running integrations with configurable expiration. API keys can be generated from your ACTIVATE account settings.
+
+```go
+client, err := parallelworks.NewClientWithResponses(
+    "https://cloud.parallel.works",
+    parallelworks.WithAPIKey("your-api-key"),
+)
+```
+
+### Bearer Token (JWT)
+
+Best for scripts and CLI tools. Tokens expire after 24 hours and can be generated from your ACTIVATE account settings.
+
+```go
+client, err := parallelworks.NewClientWithResponses(
+    "https://cloud.parallel.works",
+    parallelworks.WithToken("your-jwt-token"),
+)
+```
+
+## Advanced Configuration
+
+You can combine multiple options:
+
+```go
+client, err := parallelworks.NewClientWithResponses(
+    "https://cloud.parallel.works",
+    parallelworks.WithAPIKey("your-api-key"),
+    parallelworks.WithHTTPClient(&http.Client{
+        Timeout: 30 * time.Second,
+    }),
+)
+```
 
 ## Documentation
 
