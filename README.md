@@ -1,14 +1,14 @@
-# Parallel Works SDKs
+# Parallel Works Clients
 
-Official SDKs for the Parallel Works ACTIVATE platform API.
+Official API clients for the Parallel Works ACTIVATE platform.
 
-## Available SDKs
+## Available Clients
 
 | Language   | Package                             | Installation                                    |
 |------------|-------------------------------------|-------------------------------------------------|
-| TypeScript | `@parallelworks/sdk`                | `npm install @parallelworks/sdk`                |
-| Go         | `github.com/parallelworks/sdk/go`   | `go get github.com/parallelworks/sdk/go`        |
-| Python     | `parallelworks-sdk`                 | `pip install parallelworks-sdk`                 |
+| TypeScript | `@parallelworks/client`             | `npm install @parallelworks/client`             |
+| Go         | `github.com/parallelworks/client-go`| `go get github.com/parallelworks/client-go`     |
+| Python     | `parallelworks-client`              | `pip install parallelworks-client`              |
 
 ## Version Compatibility
 
