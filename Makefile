@@ -28,8 +28,8 @@ publish-ts:
 
 publish-py:
 	@echo "📦 Publishing Python $(TAG)..."
-	cd python && sed -i '' 's/^version = .*/version = "$(VERSION)"/' pyproject.toml
-	cd python && sed -i '' 's/__version__ = .*/__version__ = "$(VERSION)"/' parallelworks_client/__init__.py
+	cd python && perl -i -pe 's/^version = .*/version = "$(VERSION)"/' pyproject.toml
+	cd python && perl -i -pe 's/__version__ = .*/__version__ = "$(VERSION)"/' parallelworks_client/__init__.py
 	cd python && uv build && uv publish
 	@echo "✅ pip install parallelworks-client==$(VERSION)"
 
