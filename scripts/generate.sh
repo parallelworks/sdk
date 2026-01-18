@@ -10,11 +10,11 @@ echo "🔧 Generating SDKs from openapi.json..."
 echo ""
 
 # ============ TypeScript ============
-echo "📦 Generating TypeScript SDK..."
+echo "📦 Generating TypeScript client..."
 cd "$ROOT_DIR/typescript"
 pnpm install --frozen-lockfile 2>/dev/null || pnpm install
 pnpm run generate
-echo "✅ TypeScript SDK generated"
+echo "✅ TypeScript client generated"
 echo ""
 
 # ============ Go ============
