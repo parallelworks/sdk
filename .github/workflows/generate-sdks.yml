@@ -3,7 +3,7 @@ name: '📦 Build and Publish SDKs'
 on:
   push:
     branches:
-      - main
+      - canary
   workflow_dispatch:
     inputs:
       version:
