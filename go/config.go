@@ -229,10 +229,10 @@ func (c *CredentialConfig) identityFromCredential(credential string, platformHos
 	id := &Identity{
 		Server: host,
 	}
-	if IsAPIKey(credential) {
-		id.ApiKey = credential
-	} else {
+	if IsToken(credential) {
 		id.Token = credential
+	} else {
+		id.ApiKey = credential
 	}
 	return id, nil
 }
@@ -463,12 +463,12 @@ func NewClientFromCredentialConfig(opts ...any) (*Client, error) {
 		return nil, ErrNoCredentials
 	}
 
-	// Build auth from credential type
+	// Use Bearer for JWT tokens, Basic for API keys (any format)
 	var auth AuthProvider
-	if IsAPIKey(credential) {
-		auth = &BasicAuth{Username: credential, Password: ""}
-	} else {
+	if IsToken(credential) {
 		auth = &BearerAuth{Token: credential}
+	} else {
+		auth = &BasicAuth{Username: credential, Password: ""}
 	}
 
 	// Use identity.Server as base URL (respects platform host overrides)

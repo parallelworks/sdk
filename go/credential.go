@@ -144,11 +144,12 @@ func NewClientFromCredential(credential string, opts ...ClientOption) (*Client, 
 
 	credential = strings.TrimSpace(credential)
 
+	// Use Bearer for JWT tokens, Basic for API keys (any format)
 	var auth AuthProvider
-	if IsAPIKey(credential) {
-		auth = &BasicAuth{Username: credential, Password: ""}
-	} else {
+	if IsToken(credential) {
 		auth = &BearerAuth{Token: credential}
+	} else {
+		auth = &BasicAuth{Username: credential, Password: ""}
 	}
 
 	allOpts := append([]ClientOption{WithAuth(auth)}, opts...)
