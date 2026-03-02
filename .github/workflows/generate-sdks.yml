@@ -1,29 +1,21 @@
-name: '🔧 Generate and Publish SDKs'
+name: '📦 Build and Publish SDKs'
 
 on:
   push:
     branches:
       - main
-    paths:
-      - 'openapi.json'
-  repository_dispatch:
-    types: [generate-sdks]
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to publish (e.g., v6.9.0)'
-        required: true
+        description: 'Version to publish (e.g., v6.9.0). Leave empty to skip publishing.'
+        required: false
 
 permissions:
   contents: write
 
-env:
-  # Determine if this is a release (has version) or just a regeneration
-  IS_RELEASE: ${{ github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch' }}
-
 jobs:
-  generate-and-publish:
-    name: '🔧 Generate and Publish'
+  publish:
+    name: '📦 Build and Publish'
     runs-on: ubuntu-latest
     steps:
       - name: '🔍 Checkout'
@@ -31,106 +23,64 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: '🔢 Parse version'
+      - name: '🔢 Detect version'
         id: version
-        if: env.IS_RELEASE == 'true'
         run: |
-          VERSION="${{ github.event.client_payload.version || inputs.version }}"
-          VERSION="${VERSION#v}"  # Remove 'v' prefix
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
-          echo "Publishing version: $VERSION"
+          # Check for manual input first
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+            VERSION="${VERSION#v}"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "is_release=true" >> $GITHUB_OUTPUT
+            echo "Publishing version: $VERSION (manual trigger)"
+            exit 0
+          fi
+
+          # Check if this push was from the core repo sync (commit message contains version)
+          COMMIT_MSG=$(git log -1 --pretty=%s)
+          if [[ "$COMMIT_MSG" =~ sync\ SDK\ v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "is_release=true" >> $GITHUB_OUTPUT
+            echo "Publishing version: $VERSION (synced from core)"
+          else
+            echo "is_release=false" >> $GITHUB_OUTPUT
+            echo "No version detected, skipping publish"
+          fi
 
       # ============ SETUP TOOLS ============
       - name: '⚙️ Setup Node.js'
+        if: steps.version.outputs.is_release == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version-file: 'package.json'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
       - name: '⚙️ Setup pnpm'
+        if: steps.version.outputs.is_release == 'true'
         uses: pnpm/action-setup@v4
-        # Reads version from package.json packageManager field
-
-      - name: '⚙️ Setup Go'
-        uses: actions/setup-go@v5
         with:
-          go-version-file: 'go/go.mod'
+          version: 10
 
       - name: '⚙️ Setup uv'
+        if: steps.version.outputs.is_release == 'true'
         uses: astral-sh/setup-uv@v5
 
-      # ============ UPDATE VERSIONS ============
-      - name: '📝 Update TypeScript version'
-        if: env.IS_RELEASE == 'true'
-        run: |
-          cd typescript
-          npm version "${{ steps.version.outputs.version }}" --no-git-tag-version
-
-      - name: '📝 Update Python version'
-        if: env.IS_RELEASE == 'true'
-        run: |
-          cd python
-          perl -i -pe "s/^version = .*/version = \"${{ steps.version.outputs.version }}\"/" pyproject.toml
-          perl -i -pe "s/__version__ = .*/__version__ = \"${{ steps.version.outputs.version }}\"/" parallelworks_client/__init__.py
-
-      # ============ GENERATE TYPESCRIPT ============
+      # ============ PUBLISH TYPESCRIPT ============
       - name: '📥 Install TypeScript dependencies'
+        if: steps.version.outputs.is_release == 'true'
         run: |
           cd typescript
           pnpm install
 
       - name: '🔧 Generate TypeScript types'
+        if: steps.version.outputs.is_release == 'true'
         run: |
           cd typescript
-          # Generate types from OpenAPI 3.1 spec
           pnpm run generate
 
-      # ============ GENERATE GO ============
-      - name: '📥 Install oapi-codegen'
-        run: go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
-
-      - name: '🔧 Generate Go client'
-        run: |
-          # oapi-codegen doesn't support OpenAPI 3.1, use the 3.0 version
-          oapi-codegen -generate types,client \
-            -package parallelworks \
-            ./openapi-3.0.json > ./go/client.go
-
-      - name: '🧹 Format Go code'
-        run: |
-          cd go
-          go mod tidy
-          go fmt ./...
-
-      # ============ GENERATE PYTHON ============
-      - name: '🔧 Generate Python client'
-        run: |
-          # Generate new client (overwrites existing)
-          uvx openapi-python-client generate \
-            --path ./openapi.json \
-            --output-path ./python/parallelworks_client \
-            --meta none \
-            --overwrite
-
-      # ============ COMMIT ALL CHANGES ============
-      - name: '💾 Commit all changes'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-
-          if [ "${{ env.IS_RELEASE }}" == "true" ]; then
-            git commit -m "chore: update SDKs to ${{ steps.version.outputs.tag }}" || echo "No changes to commit"
-          else
-            git commit -m "chore: regenerate SDKs" || echo "No changes to commit"
-          fi
-
-          git push
-
-      # ============ PUBLISH (only for releases) ============
       - name: '🚀 Build and publish TypeScript to npm'
-        if: env.IS_RELEASE == 'true'
+        if: steps.version.outputs.is_release == 'true'
         run: |
           cd typescript
           pnpm run build
@@ -138,8 +88,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      # ============ PUBLISH PYTHON ============
       - name: '🚀 Build and publish Python to PyPI'
-        if: env.IS_RELEASE == 'true'
+        if: steps.version.outputs.is_release == 'true'
         run: |
           cd python
           uv build
@@ -147,13 +98,19 @@ jobs:
         env:
           UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
 
-      - name: '🚀 Create Go module tag'
-        if: env.IS_RELEASE == 'true'
+      # ============ GO TAG ============
+      # Go module tag is created by the core repo sync step.
+      # This is a no-op unless manually triggered.
+      - name: '🚀 Create Go module tag (manual only)'
+        if: steps.version.outputs.is_release == 'true' && github.event_name == 'workflow_dispatch'
         run: |
-          TAG="go/${{ steps.version.outputs.tag }}"
+          TAG="go/v${{ steps.version.outputs.version }}"
 
-          git tag "$TAG"
-          git push origin "$TAG"
-
-          echo "Created tag: $TAG"
-          echo "Install with: go get github.com/parallelworks/sdk/go@${{ steps.version.outputs.tag }}"
+          # Only create tag if it doesn't exist
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists, skipping"
+          else
+            git tag "$TAG"
+            git push origin "$TAG"
+            echo "Created tag: $TAG"
+          fi
