@@ -1,3 +1,7 @@
+# Generated SDK clients — regenerate with ./generate.sh
+python/parallelworks_client/generated/
+typescript/src/types/api.d.ts
+
 # Dependencies
 node_modules/
 __pycache__/

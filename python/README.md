@@ -34,7 +34,7 @@ API keys (`pwt_...`) and JWT tokens contain the platform host encoded within the
 ```python
 # API key - host decoded from first segment after pwt_
 client = Client.from_credential("pwt_Y2xvdWQucGFyYWxsZWwud29ya3M.xxxxx")
-# Connects to: https://activate.parallel.works
+# Connects to: https://cloud.parallel.works
 
 # JWT token - host read from platform_host claim
 client = Client.from_credential("eyJhbGci...")
@@ -48,19 +48,19 @@ If you prefer to specify the host explicitly:
 ```python
 # API Key (Basic Auth) - best for long-running integrations
 client = Client.with_api_key(
-    "https://activate.parallel.works",
+    "https://cloud.parallel.works",
     "pwt_..."
 )
 
 # JWT Token (Bearer) - best for scripts, expires in 24h
 client = Client.with_token(
-    "https://activate.parallel.works",
+    "https://cloud.parallel.works",
     "eyJhbGci..."
 )
 
 # Auto-detect credential type
 client = Client.with_credential(
-    "https://activate.parallel.works",
+    "https://cloud.parallel.works",
     os.environ["PW_CREDENTIAL"]
 )
 ```
@@ -72,7 +72,7 @@ from parallelworks_client import is_api_key, is_token, extract_platform_host
 
 is_api_key("pwt_abc.xyz")           # True
 is_token("eyJ.abc.def")             # True
-extract_platform_host("pwt_...")    # "activate.parallel.works"
+extract_platform_host("pwt_...")    # "cloud.parallel.works"
 ```
 
 ## Async Support

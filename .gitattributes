@@ -1,0 +1,10 @@
+go/auth.go linguist-generated=true
+go/client.go linguist-generated=true
+go/errors.go linguist-generated=true
+go/helpers.go linguist-generated=true
+go/middleware.go linguist-generated=true
+go/operations.go linguist-generated=true
+go/options.go linguist-generated=true
+go/pagination.go linguist-generated=true
+go/retry.go linguist-generated=true
+go/types.go linguist-generated=true

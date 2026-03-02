@@ -33,16 +33,11 @@ func main() {
 	fmt.Println()
 
 	// List buckets
-	bucketsResp, err := client.GetBucketsWithResponse(ctx, nil)
+	buckets, err := client.GetBuckets(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get buckets: %v", err)
 	}
 
-	if bucketsResp.StatusCode() != 200 {
-		log.Fatalf("Failed to get buckets: status %d", bucketsResp.StatusCode())
-	}
-
-	buckets := bucketsResp.JSON200
 	if buckets == nil || len(*buckets) == 0 {
 		fmt.Println("Buckets (0):")
 		fmt.Println("  No buckets found")
@@ -56,16 +51,11 @@ func main() {
 	fmt.Println()
 
 	// List clusters
-	clustersResp, err := client.GetClustersWithResponse(ctx)
+	clusters, err := client.GetClusters(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get clusters: %v", err)
 	}
 
-	if clustersResp.StatusCode() != 200 {
-		log.Fatalf("Failed to get clusters: status %d", clustersResp.StatusCode())
-	}
-
-	clusters := clustersResp.JSON200
 	if clusters == nil || len(*clusters) == 0 {
 		fmt.Println("Clusters (0):")
 		fmt.Println("  No clusters found")

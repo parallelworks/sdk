@@ -38,7 +38,7 @@ API keys (`pwt_...`) and JWT tokens contain the platform host encoded within the
 ```typescript
 // API key - host decoded from first segment after pwt_
 const client = Client.fromCredential('pwt_Y2xvdWQucGFyYWxsZWwud29ya3M.xxxxx')
-// Connects to: https://activate.parallel.works
+// Connects to: https://cloud.parallel.works
 
 // JWT token - host read from platform_host claim
 const client = Client.fromCredential('eyJhbGci...')
@@ -51,15 +51,15 @@ If you prefer to specify the host explicitly:
 
 ```typescript
 // API Key (Basic Auth) - best for long-running integrations
-const client = new Client('https://activate.parallel.works')
+const client = new Client('https://cloud.parallel.works')
   .withApiKey('pwt_...')
 
 // JWT Token (Bearer) - best for scripts, expires in 24h
-const client = new Client('https://activate.parallel.works')
+const client = new Client('https://cloud.parallel.works')
   .withToken('eyJhbGci...')
 
 // Auto-detect credential type
-const client = new Client('https://activate.parallel.works')
+const client = new Client('https://cloud.parallel.works')
   .withCredential(process.env.PW_CREDENTIAL!)
 ```
 
@@ -70,7 +70,7 @@ import { isApiKey, isToken, extractPlatformHost } from '@parallelworks/client'
 
 isApiKey('pwt_abc.xyz')           // true
 isToken('eyJ.abc.def')            // true
-extractPlatformHost('pwt_...')    // "activate.parallel.works"
+extractPlatformHost('pwt_...')    // "cloud.parallel.works"
 ```
 
 ## SWR Hooks (React)

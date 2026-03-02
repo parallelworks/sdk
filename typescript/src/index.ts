@@ -1,4 +1,6 @@
-import createClient, { type ClientOptions as OpenAPIClientOptions } from 'openapi-fetch'
+import createClient, {
+  type ClientOptions as OpenAPIClientOptions,
+} from 'openapi-fetch'
 import type { paths } from './types/api'
 
 export type { paths }
@@ -198,7 +200,10 @@ export class Client {
    * const client = Client.fromCredential(process.env.PW_API_KEY!)
    * ```
    */
-  static fromCredential(credential: string, options: ClientOptions = {}): OpenAPIFetchClient {
+  static fromCredential(
+    credential: string,
+    options: ClientOptions = {}
+  ): OpenAPIFetchClient {
     let host = extractPlatformHost(credential)
 
     // Ensure https:// prefix
@@ -222,9 +227,10 @@ export class Client {
     // Trim whitespace to handle env vars with trailing newlines
     apiKey = apiKey.trim()
     // API Keys use Basic Auth with base64(apiKey:)
-    const encoded = typeof btoa !== 'undefined'
-      ? btoa(`${apiKey}:`)
-      : Buffer.from(`${apiKey}:`).toString('base64')
+    const encoded =
+      typeof btoa !== 'undefined'
+        ? btoa(`${apiKey}:`)
+        : Buffer.from(`${apiKey}:`).toString('base64')
     this.authHeader = `Basic ${encoded}`
     return this.build()
   }
@@ -260,13 +266,18 @@ export class Client {
     return this.withToken(credential)
   }
 
-  private build(): OpenAPIFetchClient {
+  /**
+   * Build the openapi-fetch client with configured options.
+   *
+   * @returns Configured openapi-fetch client instance
+   */
+  build(): OpenAPIFetchClient {
     return createClient<paths>({
       baseUrl: this.baseUrl,
       ...this.options,
       headers: {
-        ...(this.authHeader && { Authorization: this.authHeader }),
         ...this.options.headers,
+        ...(this.authHeader && { Authorization: this.authHeader }),
       },
     })
   }

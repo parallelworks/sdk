@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Go 1.23 or later
+- Go 1.18 or later
 - A Parallel Works API key or token (from your ACTIVATE account settings)
 
 ## Running the Example
