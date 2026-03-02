@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   publish:
@@ -84,9 +85,7 @@ jobs:
         run: |
           cd typescript
           pnpm run build
-          pnpm publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          pnpm publish --no-git-checks --provenance
 
       # ============ PUBLISH PYTHON ============
       - name: '🚀 Build and publish Python to PyPI'
@@ -94,9 +93,7 @@ jobs:
         run: |
           cd python
           uv build
-          uv publish
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          uv publish --trusted-publishing always
 
       # ============ GO TAG ============
       # Go module tag is created by the core repo sync step.
