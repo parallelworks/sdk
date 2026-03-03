@@ -12,7 +12,7 @@ import (
 	"log"
 	"os"
 
-	parallelworks "github.com/parallelworks/sdk/go"
+	parallelworks "github.com/parallelworks/sdk/go/v7"
 )
 
 func main() {

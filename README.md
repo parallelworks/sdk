@@ -7,7 +7,7 @@ Official API clients for the Parallel Works ACTIVATE platform.
 | Language   | Package                        | Installation                               |
 |------------|--------------------------------|--------------------------------------------|
 | TypeScript | `@parallelworks/client`        | `npm install @parallelworks/client`        |
-| Go         | `github.com/parallelworks/sdk/go` | `go get github.com/parallelworks/sdk/go` |
+| Go         | `github.com/parallelworks/sdk/go/v7` | `go get github.com/parallelworks/sdk/go/v7` |
 | Python     | `parallelworks-client`         | `pip install parallelworks-client`         |
 
 ## Version Compatibility
