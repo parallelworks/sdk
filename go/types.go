@@ -7,449 +7,779 @@ import (
 )
 
 type AccessManagementBody struct {
-	HomeDirectories      bool           `json:"homeDirectories"`
-	SSHKeys              bool           `json:"sshKeys"`
-	SudoAccess           bool           `json:"sudoAccess"`
+	// Enable pam_mkhomedir for automatic home directory creation
+	HomeDirectories bool `json:"homeDirectories"`
+	// Enable AuthorizedKeysCommand for SSH key lookup
+	SSHKeys bool `json:"sshKeys"`
+	// Enable sudoers.d for pwsudo group
+	SudoAccess bool `json:"sudoAccess"`
+	// Enable libnss_cache, nsswitch, and user/group cache file sync
 	UserPopulation       bool           `json:"userPopulation"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AddOtpMfaOutputBody struct {
-	QrImage              string         `json:"qrImage"`
+	// Base64 encoded QR code image for authenticator apps
+	QrImage string `json:"qrImage"`
+	// TOTP secret key
 	Secret               string         `json:"secret"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AddPermissionInputBody struct {
-	EntireOrganization   *bool          `json:"entireOrganization,omitempty"`
-	Permission           string         `json:"permission"`
+	// Share with entire organization
+	EntireOrganization *bool `json:"entireOrganization,omitempty"`
+	// Permission level
+	Permission string `json:"permission"`
+	// Team ID to share with
 	Team                 *string        `json:"team,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AiChatProviderResponse struct {
-	BucketName           *string            `json:"bucketName,omitempty"`
-	Csp                  string             `json:"csp"`
-	Documents            []string           `json:"documents,omitempty"`
-	EnabledModels        []string           `json:"enabledModels,omitempty"`
-	Endpoint             *string            `json:"endpoint,omitempty"`
-	ID                   string             `json:"id"`
-	Ingested             bool               `json:"ingested"`
-	Model                *string            `json:"model,omitempty"`
-	Name                 string             `json:"name"`
-	RefreshInterval      *string            `json:"refreshInterval,omitempty"`
-	Region               *string            `json:"region,omitempty"`
-	Shared               []SharedPermission `json:"shared"`
-	Status               string             `json:"status"`
-	User                 string             `json:"user"`
-	AdditionalProperties map[string]any     `json:"-,omitempty"`
+	// Attached storage bucket name
+	BucketName *string `json:"bucketName,omitempty"`
+	// Cloud service provider
+	Csp string `json:"csp"`
+	// List of ingested documents
+	Documents []string `json:"documents,omitempty"`
+	// List of model IDs enabled for the chat interface
+	EnabledModels []string `json:"enabledModels,omitempty"`
+	// Custom provider endpoint URL
+	Endpoint *string `json:"endpoint,omitempty"`
+	// Unique identifier for the resource
+	ID string `json:"id"`
+	// Whether documents have been ingested
+	Ingested bool `json:"ingested"`
+	// AI model name
+	Model *string `json:"model,omitempty"`
+	// Name of the AI Chat provider
+	Name string `json:"name"`
+	// Refresh interval for the AI provider
+	RefreshInterval *string `json:"refreshInterval,omitempty"`
+	// AI provider region (for managed providers)
+	Region *string `json:"region,omitempty"`
+	// Groups this AI Chat provider is shared with
+	Shared []SharedPermission `json:"shared"`
+	// Current status of the AI Chat provider
+	Status string `json:"status"`
+	// The username of the user that owns this resource
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AiChatProvidersResponse struct {
-	Csp                  string             `json:"csp"`
-	Healthy              *bool              `json:"healthy,omitempty"`
-	ID                   string             `json:"id"`
-	Model                *string            `json:"model"`
-	Name                 string             `json:"name"`
-	Region               *string            `json:"region"`
-	Shared               []SharedPermission `json:"shared"`
-	Status               string             `json:"status"`
-	User                 string             `json:"user"`
-	AdditionalProperties map[string]any     `json:"-,omitempty"`
+	// Cloud service provider
+	Csp string `json:"csp"`
+	// Whether the tunnel's remote destination is reachable (tunnel providers only).
+	Healthy *bool `json:"healthy,omitempty"`
+	// Unique identifier for the AI Chat provider
+	ID string `json:"id"`
+	// AI model name
+	Model *string `json:"model"`
+	// Name of the AI Chat provider
+	Name string `json:"name"`
+	// AI provider region
+	Region *string `json:"region"`
+	// Groups this AI Chat provider is shared with
+	Shared []SharedPermission `json:"shared"`
+	// Current status of the AI Chat provider
+	Status string `json:"status"`
+	// The username of the user that owns this resource.
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Alert struct {
-	CreatedAt            time.Time      `json:"createdAt"`
-	ID                   string         `json:"id"`
-	Message              string         `json:"message"`
-	Title                string         `json:"title"`
+	// Alert creation time
+	CreatedAt time.Time `json:"createdAt"`
+	// Alert Id
+	ID string `json:"id"`
+	// Alert message
+	Message string `json:"message"`
+	// Alert title
+	Title string `json:"title"`
+	// Alert last update time
 	UpdatedAt            time.Time      `json:"updatedAt"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Allocation struct {
-	CurrentOrgThreshold  *int64         `json:"currentOrgThreshold,omitempty"`
-	EstimatedUsed        *float64       `json:"estimatedUsed,omitempty"`
-	HasCloudUsage        *bool          `json:"hasCloudUsage,omitempty"`
-	Name                 string         `json:"name"`
-	Parent               *string        `json:"parent,omitempty"`
-	Total                float64        `json:"total"`
-	Unit                 string         `json:"unit"`
+	// Current organization threshold level
+	CurrentOrgThreshold *int64 `json:"currentOrgThreshold,omitempty"`
+	// Estimated amount used
+	EstimatedUsed *float64 `json:"estimatedUsed,omitempty"`
+	// Whether this allocation has associated cloud usage records
+	HasCloudUsage *bool `json:"hasCloudUsage,omitempty"`
+	// Allocation name
+	Name string `json:"name"`
+	// Parent allocation name
+	Parent *string `json:"parent,omitempty"`
+	// Total allocation amount
+	Total float64 `json:"total"`
+	// Unit of measurement
+	Unit string `json:"unit"`
+	// Amount used
 	Used                 *float64       `json:"used,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AllocationThreshold struct {
-	Description          string         `json:"description"`
-	LabelColor           string         `json:"labelColor"`
-	Name                 string         `json:"name"`
+	// The description of the threshold.
+	Description string `json:"description"`
+	// The color for the threshold label.
+	LabelColor string `json:"labelColor"`
+	// The name of the threshold.
+	Name string `json:"name"`
+	// The threshold percentage.
 	Threshold            float64        `json:"threshold"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Allocations struct {
-	EstimatedUsed        *float64       `json:"estimatedUsed,omitempty"`
-	Total                *float64       `json:"total,omitempty"`
+	// Estimated used allocation
+	EstimatedUsed *float64 `json:"estimatedUsed,omitempty"`
+	// Total allocation
+	Total *float64 `json:"total,omitempty"`
+	// Used allocation
 	Used                 *float64       `json:"used,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type APIKey struct {
-	Created              time.Time      `json:"created"`
-	Expiration           *time.Time     `json:"expiration,omitempty"`
-	ID                   string         `json:"id"`
+	// The timestamp the API key was created.
+	Created time.Time `json:"created"`
+	// The timestamp when the API key will expire. Not present or null if the key does not expire.
+	Expiration *time.Time `json:"expiration,omitempty"`
+	// The unique identifier for the API key.
+	ID string `json:"id"`
+	// The title of the API key.
 	Title                string         `json:"title"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AttachmentResponse struct {
-	ContentType          string         `json:"contentType"`
-	ConversationID       *string        `json:"conversationId,omitempty"`
-	Filename             string         `json:"filename"`
-	ID                   string         `json:"id"`
-	MessageID            *string        `json:"messageId,omitempty"`
-	Size                 int64          `json:"size"`
+	// MIME type
+	ContentType string `json:"contentType"`
+	// Parent conversation ID
+	ConversationID *string `json:"conversationId,omitempty"`
+	// Original filename
+	Filename string `json:"filename"`
+	// Attachment ID
+	ID string `json:"id"`
+	// Associated message ID
+	MessageID *string `json:"messageId,omitempty"`
+	// File size in bytes
+	Size int64 `json:"size"`
+	// Upload timestamp
 	UploadedAt           time.Time      `json:"uploadedAt"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AuthMethod struct {
-	DisplayName          *string        `json:"displayName,omitempty"`
-	ID                   string         `json:"id"`
-	Name                 string         `json:"name"`
+	// Display name of the authentication method.
+	DisplayName *string `json:"displayName,omitempty"`
+	// ID of the authentication method.
+	ID string `json:"id"`
+	// Name of the authentication method.
+	Name string `json:"name"`
+	// Type of the authentication method.
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AuthSession struct {
-	Admin                bool           `json:"admin"`
-	Email                string         `json:"email"`
-	Features             []string       `json:"features"`
-	ImpersonatedBy       *string        `json:"impersonatedBy,omitempty"`
-	Name                 string         `json:"name"`
-	Organization         string         `json:"organization"`
-	OrganizationAdmin    bool           `json:"organizationAdmin"`
-	OrganizationRoles    []string       `json:"organizationRoles"`
-	Partner              bool           `json:"partner"`
-	PasswordUpdatedAt    *time.Time     `json:"passwordUpdatedAt,omitempty"`
-	SafeUsername         string         `json:"safeUsername"`
-	SidebarOptions       []string       `json:"sidebarOptions,omitempty"`
-	Username             string         `json:"username"`
+	// Indicates if the user is an admin.
+	Admin bool `json:"admin"`
+	// Email address of the user.
+	Email string `json:"email"`
+	// List of enabled feature previews.
+	Features []string `json:"features"`
+	// Original user who is impersonating this user, if any.
+	ImpersonatedBy *string `json:"impersonatedBy,omitempty"`
+	// Full name of the user.
+	Name string `json:"name"`
+	// Organization the user belongs to.
+	Organization string `json:"organization"`
+	// Indicates if the user is an admin of the organization.
+	OrganizationAdmin bool `json:"organizationAdmin"`
+	// Roles the user has within the organization.
+	OrganizationRoles []string `json:"organizationRoles"`
+	// Indicates if the user is a partner.
+	Partner bool `json:"partner"`
+	// Timestamp of when the password was last updated.
+	PasswordUpdatedAt *time.Time `json:"passwordUpdatedAt,omitempty"`
+	// Safe username of the user, used when names have stricter rules.
+	SafeUsername string `json:"safeUsername"`
+	// Options for the sidebar.
+	SidebarOptions []string `json:"sidebarOptions,omitempty"`
+	// Username of the user.
+	Username string `json:"username"`
+	// Whether the user workspace is using VS Code
 	Vscode               bool           `json:"vscode"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AwsBucket struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	BucketName            *string             `json:"bucketName,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	Region                *string             `json:"region,omitempty"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Status                *string             `json:"status,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	Versioning            *bool               `json:"versioning,omitempty"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Name of the AWS bucket
+	BucketName *string `json:"bucketName,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the AWS bucket is in
+	Region           *string       `json:"region,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User string `json:"user"`
+	// Indicates if the AWS bucket has versioning enabled
+	Versioning           *bool          `json:"versioning,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AwsDisk struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	Encrypted             *bool               `json:"encrypted,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	Region                *string             `json:"region,omitempty"`
-	RestoreSnapshot       *bool               `json:"restoreSnapshot,omitempty"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	SizeGb                *int32              `json:"sizeGb,omitempty"`
-	Status                *string             `json:"status,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  *string             `json:"type,omitempty"`
-	User                  string              `json:"user"`
-	Zone                  *string             `json:"zone,omitempty"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the disk is encrypted
+	Encrypted *bool `json:"encrypted,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the AWS bucket is in
+	Region *string `json:"region,omitempty"`
+	// Indicates if the disk is restored from a snapshot
+	RestoreSnapshot  *bool         `json:"restoreSnapshot,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Size of the AWS disk in GB
+	SizeGb *int32 `json:"sizeGb,omitempty"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of the AWS disk
+	Type *string `json:"type,omitempty"`
+	// User associated with the storage.
+	User string `json:"user"`
+	// Availability zone of the AWS disk
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AwsEfs struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	FileSystemID          *string             `json:"fileSystemId,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	MountTargets          map[string]any      `json:"mountTargets,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	Region                *string             `json:"region,omitempty"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Status                *string             `json:"status,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	ThroughputMode        *string             `json:"throughputMode,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// ID of the AWS elastic filesystem
+	FileSystemID *string `json:"fileSystemId,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Mount targets of the AWS elastic filesystem
+	MountTargets map[string]any `json:"mountTargets,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the AWS bucket is in
+	Region           *string       `json:"region,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Throughput mode of the AWS elastic filesystem
+	ThroughputMode *string `json:"throughputMode,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AwsLustre struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	AvailabilityZone      *string             `json:"availabilityZone,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	Ephemeral             *bool               `json:"ephemeral,omitempty"`
-	ExportPath            *string             `json:"exportPath,omitempty"`
-	FsName                *string             `json:"fsName,omitempty"`
-	FsxCompression        *string             `json:"fsxCompression,omitempty"`
-	FsxDeployment         *string             `json:"fsxDeployment,omitempty"`
-	FsxID                 *string             `json:"fsxId,omitempty"`
-	FsxThroughput         *string             `json:"fsxThroughput,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	ImportPath            *string             `json:"importPath,omitempty"`
-	Mds                   *string             `json:"mds,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	Region                *string             `json:"region,omitempty"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Status                *string             `json:"status,omitempty"`
-	StorageCapacity       *int32              `json:"storageCapacity,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Availability zone of the AWS Lustre file system
+	AvailabilityZone *string `json:"availabilityZone,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is ephemeral.
+	Ephemeral *bool `json:"ephemeral,omitempty"`
+	// Export path for the AWS Lustre file system
+	ExportPath *string `json:"exportPath,omitempty"`
+	// Name of the AWS Lustre file system
+	FsName *string `json:"fsName,omitempty"`
+	// Compression type of the AWS Lustre file system
+	FsxCompression *string `json:"fsxCompression,omitempty"`
+	// Deployment type of the AWS Lustre file system
+	FsxDeployment *string `json:"fsxDeployment,omitempty"`
+	// ID of the AWS Lustre file system
+	FsxID *string `json:"fsxId,omitempty"`
+	// Throughput type of the AWS Lustre file system
+	FsxThroughput *string `json:"fsxThroughput,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Import path for the AWS Lustre file system
+	ImportPath *string `json:"importPath,omitempty"`
+	// Metadata server of the AWS Lustre file system
+	Mds *string `json:"mds,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the AWS bucket is in
+	Region           *string       `json:"region,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Storage capacity of the AWS Lustre file system
+	StorageCapacity *int32 `json:"storageCapacity,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AwsSagemakerDetail struct {
-	CreatedAt            *time.Time     `json:"createdAt,omitempty"`
-	Csp                  string         `json:"csp"`
-	Description          string         `json:"description"`
-	Endpoint             *string        `json:"endpoint,omitempty"`
-	Group                string         `json:"group"`
-	ID                   *string        `json:"id,omitempty"`
-	Link                 *string        `json:"link,omitempty"`
-	Name                 string         `json:"name"`
-	Network              string         `json:"network"`
-	ProvisionStatus      *string        `json:"provisionStatus,omitempty"`
-	Provisioned          *bool          `json:"provisioned,omitempty"`
-	Region               string         `json:"region"`
-	Tags                 []string       `json:"tags"`
-	User                 *string        `json:"user,omitempty"`
-	UserProfileName      *string        `json:"userProfileName,omitempty"`
+	// The creation timestamp of the Machine Learning Workspace.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// The cloud service provider for the Machine Learning Workspace.
+	Csp string `json:"csp"`
+	// The description of the Machine Learning Workspace.
+	Description string `json:"description"`
+	// The endpoint URL to access the Machine Learning Workspace Studio.
+	Endpoint *string `json:"endpoint,omitempty"`
+	// The group to which the Machine Learning Workspace will be associated.
+	Group string `json:"group"`
+	// The unique identifier of the resource.
+	ID *string `json:"id,omitempty"`
+	// The link to the Machine Learning Workspace.
+	Link *string `json:"link,omitempty"`
+	// The name of the Machine Learning Workspace resource.
+	Name string `json:"name"`
+	// The network name to which the Machine Learning Workspace is attached.
+	Network string `json:"network"`
+	// The current provisioning status of the Machine Learning Workspace.
+	ProvisionStatus *string `json:"provisionStatus,omitempty"`
+	// Whether the Machine Learning Workspace is provisioned.
+	Provisioned *bool `json:"provisioned,omitempty"`
+	// The region where the Machine Learning Workspace will be provisioned.
+	Region string `json:"region"`
+	// The tags associated with the Machine Learning Workspace.
+	Tags []string `json:"tags"`
+	// Username of the user that owns the resource
+	User *string `json:"user,omitempty"`
+	// The user profile name associated with the SageMaker Studio.
+	UserProfileName *string `json:"userProfileName,omitempty"`
+	// The workspace ID associated with the Machine Learning Workspace Studio.
 	WorkspaceID          *string        `json:"workspaceId,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AzureBlobStorage struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	BucketName            *string             `json:"bucketName,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	Region                *string             `json:"region,omitempty"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Status                *string             `json:"status,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Name of the Azure blob storage
+	BucketName *string `json:"bucketName,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the Azure blob storage is in
+	Region           *string       `json:"region,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AzureDisk struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Status                *string             `json:"status,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned      bool          `json:"provisioned"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AzureFiles struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	AzfilesName           *string             `json:"azfilesName,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	Region                *string             `json:"region,omitempty"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Size                  *int32              `json:"size,omitempty"`
-	Status                *string             `json:"status,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Name of the Azure Files
+	AzfilesName *string `json:"azfilesName,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the Azure files is in
+	Region           *string       `json:"region,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Size of the Azure files in GB
+	Size *int32 `json:"size,omitempty"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AzureMachineLearningDetail struct {
-	CreatedAt            *time.Time     `json:"createdAt,omitempty"`
-	Csp                  string         `json:"csp"`
-	Description          string         `json:"description"`
-	Endpoint             *string        `json:"endpoint,omitempty"`
-	Group                string         `json:"group"`
-	ID                   *string        `json:"id,omitempty"`
-	Link                 *string        `json:"link,omitempty"`
-	Name                 string         `json:"name"`
-	Network              string         `json:"network"`
-	Password             *string        `json:"password,omitempty"`
-	PrincipalName        *string        `json:"principalName,omitempty"`
-	ProvisionStatus      *string        `json:"provisionStatus,omitempty"`
-	Provisioned          *bool          `json:"provisioned,omitempty"`
-	Region               string         `json:"region"`
-	Tags                 []string       `json:"tags"`
-	User                 *string        `json:"user,omitempty"`
-	UserID               *string        `json:"userId,omitempty"`
+	// The creation timestamp of the Machine Learning Workspace.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// The cloud service provider for the Machine Learning Workspace.
+	Csp string `json:"csp"`
+	// The description of the Machine Learning Workspace.
+	Description string `json:"description"`
+	// The endpoint URL to access the Machine Learning Workspace Studio.
+	Endpoint *string `json:"endpoint,omitempty"`
+	// The group to which the Machine Learning Workspace will be associated.
+	Group string `json:"group"`
+	// The unique identifier of the resource.
+	ID *string `json:"id,omitempty"`
+	// The link to the Machine Learning Workspace.
+	Link *string `json:"link,omitempty"`
+	// The name of the Machine Learning Workspace resource.
+	Name string `json:"name"`
+	// The network name to which the Machine Learning Workspace is attached.
+	Network string `json:"network"`
+	// The password associated with the Machine Learning Workspace.
+	Password *string `json:"password,omitempty"`
+	// The principal name associated with the Machine Learning Workspace.
+	PrincipalName *string `json:"principalName,omitempty"`
+	// The current provisioning status of the Machine Learning Workspace.
+	ProvisionStatus *string `json:"provisionStatus,omitempty"`
+	// Whether the Machine Learning Workspace is provisioned.
+	Provisioned *bool `json:"provisioned,omitempty"`
+	// The region where the Machine Learning Workspace will be provisioned.
+	Region string `json:"region"`
+	// The tags associated with the Machine Learning Workspace.
+	Tags []string `json:"tags"`
+	// Username of the user that owns the resource
+	User *string `json:"user,omitempty"`
+	// The user ID associated with the Machine Learning Workspace.
+	UserID *string `json:"userId,omitempty"`
+	// The workspace ID associated with the Machine Learning Workspace Studio.
 	WorkspaceID          *string        `json:"workspaceId,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AzureManagedLustre struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	FilesystemID          *string             `json:"filesystemId,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	MaintenanceWindowDay  *string             `json:"maintenanceWindowDay,omitempty"`
-	MaintenanceWindowTime *string             `json:"maintenanceWindowTime,omitempty"`
-	MgsAddress            *string             `json:"mgsAddress,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	Region                *string             `json:"region,omitempty"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Status                *string             `json:"status,omitempty"`
-	StorageSize           *int32              `json:"storageSize,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  *string             `json:"type,omitempty"`
-	User                  string              `json:"user"`
-	Zone                  *string             `json:"zone,omitempty"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// ID of the Lustre filesystem
+	FilesystemID *string `json:"filesystemId,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Day of the week for maintenance window
+	MaintenanceWindowDay *string `json:"maintenanceWindowDay,omitempty"`
+	// Time of the day for maintenance window
+	MaintenanceWindowTime *string `json:"maintenanceWindowTime,omitempty"`
+	// Address of the MGS (Management Server) in the Azure managed Lustre storage
+	MgsAddress *string `json:"mgsAddress,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the Azure Managed Lustre is in
+	Region           *string       `json:"region,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Size of the Azure managed Lustre storage in TB
+	StorageSize *int32 `json:"storageSize,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of the Azure managed Lustre storage
+	Type *string `json:"type,omitempty"`
+	// User associated with the storage.
+	User string `json:"user"`
+	// Zone the Azure managed Lustre storage is in
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AzureNetAppFiles struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	ExportPath            *string             `json:"exportPath,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	MountIP               *string             `json:"mountIp,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	Region                *string             `json:"region,omitempty"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	Service               *string             `json:"service,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Size                  *int32              `json:"size,omitempty"`
-	Status                *string             `json:"status,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Export path of the Azure NetApp Files
+	ExportPath *string `json:"exportPath,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Mount IP of the Azure NetApp Files
+	MountIP *string `json:"mountIp,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the Azure NetApp Files is in
+	Region       *string   `json:"region,omitempty"`
+	RuntimeAlert *RunAlert `json:"runtimeAlert,omitempty"`
+	// Service level of the Azure NetApp Files
+	Service          *string       `json:"service,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Size of the Azure NetApp Files storage in TB
+	Size *int32 `json:"size,omitempty"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AzureSasToken struct {
-	Expiry               time.Time      `json:"expiry"`
-	StorageName          string         `json:"storageName"`
+	// The expiration time of the SAS token.
+	Expiry time.Time `json:"expiry"`
+	// The name of the blob container on Azure.
+	StorageName string `json:"storageName"`
+	// The URL of the storage bucket with the SAS token appended in the query parameters.
 	URL                  string         `json:"url"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -464,152 +794,255 @@ type BillingResponse struct {
 }
 
 type BooleanPolicyOutput struct {
-	Level                string         `json:"level"`
-	Name                 *string        `json:"name,omitempty"`
+	// Level of the policy
+	Level string `json:"level"`
+	// Name of the policy
+	Name *string `json:"name,omitempty"`
+	// Value of the policy
 	Value                *bool          `json:"value,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type BootstrapScript struct {
-	CreatedAt            time.Time      `json:"createdAt"`
-	Script               string         `json:"script"`
-	Type                 string         `json:"type"`
+	// The creation timestamp of the bootstrap script.
+	CreatedAt time.Time `json:"createdAt"`
+	// A bootstrap script belonging to the organization.
+	Script string `json:"script"`
+	// The type of the bootstrap script.
+	Type string `json:"type"`
+	// The last update timestamp of the bootstrap script.
 	UpdatedAt            time.Time      `json:"updatedAt"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Bucket struct {
-	BucketAccountName    string         `json:"bucketAccountName"`
-	BucketName           string         `json:"bucketName"`
-	Csp                  string         `json:"csp"`
-	DisplayName          string         `json:"displayName"`
-	Favorite             bool           `json:"favorite"`
-	GovCloud             bool           `json:"govCloud"`
-	Group                *string        `json:"group,omitempty"`
-	ID                   string         `json:"id"`
-	ImageURL             string         `json:"imageUrl"`
-	Name                 string         `json:"name"`
-	Namespace            string         `json:"namespace"`
-	Network              *string        `json:"network,omitempty"`
-	Region               string         `json:"region"`
-	Sessionless          bool           `json:"sessionless"`
-	Shared               []Shared       `json:"shared"`
-	Status               string         `json:"status"`
-	Tags                 []string       `json:"tags"`
-	Type                 string         `json:"type"`
-	URI                  string         `json:"uri"`
+	// Account name associated with the bucket (Azure only)
+	BucketAccountName string `json:"bucketAccountName"`
+	// Name of the bucket in the cloud provider
+	BucketName string `json:"bucketName"`
+	// Cloud service provider of the bucket
+	Csp string `json:"csp"`
+	// Display name of the bucket
+	DisplayName string `json:"displayName"`
+	// Whether the bucket is favorited by the user
+	Favorite bool `json:"favorite"`
+	// Indicates if the bucket is in GovCloud
+	GovCloud bool `json:"govCloud"`
+	// The group name to which the bucket is billing to
+	Group *string `json:"group,omitempty"`
+	// Unique identifier of the bucket
+	ID string `json:"id"`
+	// URL of the bucket's image/icon
+	ImageURL string `json:"imageUrl"`
+	// Platform name of the bucket
+	Name string `json:"name"`
+	// Deprecated: Use 'user' instead. Username of the bucket owner.
+	//
+	// Deprecated: this field is deprecated.
+	Namespace string `json:"namespace"`
+	// The network name to which the bucket is attached.
+	Network *string `json:"network,omitempty"`
+	// Region where the bucket is located
+	Region string `json:"region"`
+	// Indicates if the bucket is sessionless
+	Sessionless bool `json:"sessionless"`
+	// List of groups with whom the bucket is shared
+	Shared []Shared `json:"shared"`
+	// Current provision status of the bucket
+	Status string `json:"status"`
+	// Tags associated with the bucket
+	Tags []string `json:"tags"`
+	// Type of storage, should be 'bucket'
+	Type string `json:"type"`
+	// Parallel Works URI for the bucket (pw://user/name)
+	URI string `json:"uri"`
+	// Username of the bucket owner
 	User                 string         `json:"user"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type BucketOutput struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	BucketName            *string             `json:"bucketName,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	Region                *string             `json:"region,omitempty"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Status                *string             `json:"status,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	Versioning            *bool               `json:"versioning,omitempty"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Name of the bucket
+	BucketName *string `json:"bucketName,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the bucket is in
+	Region           *string       `json:"region,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User string `json:"user"`
+	// Indicates if the bucket has versioning enabled
+	Versioning           *bool          `json:"versioning,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type BucketResource struct {
-	BucketName           *string        `json:"bucketName,omitempty"`
-	Description          *string        `json:"description,omitempty"`
-	DisplayName          *string        `json:"displayName,omitempty"`
-	EnableVersioning     *bool          `json:"enableVersioning,omitempty"`
-	Group                string         `json:"group"`
-	Network              string         `json:"network"`
-	Region               string         `json:"region"`
+	// Name of the bucket.
+	BucketName *string `json:"bucketName,omitempty"`
+	// The description of the storage.
+	Description *string `json:"description,omitempty"`
+	// The display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if versioning will be enabled. For AWS buckets only.
+	EnableVersioning *bool `json:"enableVersioning,omitempty"`
+	// The group to which the storage will be associated.
+	Group string `json:"group"`
+	// The network name to which the storage is attached.
+	Network string `json:"network"`
+	// Region the storage will be provisioned in.
+	Region string `json:"region"`
+	// The tags associated with the storage.
 	Tags                 []string       `json:"tags,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ChartsBody struct {
-	Charts               []HelmChart    `json:"charts"`
+	// List of Helm charts across all clusters
+	Charts []HelmChart `json:"charts"`
+	// List of cluster errors, if any
 	Errors               []ClusterError `json:"errors,omitempty"`
 	Metadata             ChartsMetadata `json:"metadata"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ChartsMetadata struct {
-	SuccessfulClusters   int64          `json:"successfulClusters"`
-	TotalCharts          int64          `json:"totalCharts"`
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total unique Helm charts across all clusters
+	TotalCharts int64 `json:"totalCharts"`
+	// Total number of clusters queried
 	TotalClusters        int64          `json:"totalClusters"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ChatCompletionChunk struct {
-	Choices              []Choice       `json:"choices"`
-	Created              int64          `json:"created"`
-	ID                   string         `json:"id"`
-	Model                string         `json:"model"`
-	Object               string         `json:"object"`
+	// Completion choices
+	Choices []Choice `json:"choices"`
+	// Unix timestamp
+	Created int64 `json:"created"`
+	// Unique completion ID
+	ID string `json:"id"`
+	// Model used
+	Model string `json:"model"`
+	// Object type (chat.completion.chunk)
+	Object string `json:"object"`
+	// System fingerprint
 	SystemFingerprint    *string        `json:"system_fingerprint,omitempty"`
 	Usage                *Usage         `json:"usage,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ChatCompletionRequest struct {
-	FrequencyPenalty     *float64        `json:"frequency_penalty,omitempty"`
-	LogitBias            map[string]any  `json:"logit_bias,omitempty"`
-	Logprobs             *bool           `json:"logprobs,omitempty"`
-	MaxCompletionTokens  *int64          `json:"max_completion_tokens,omitempty"`
-	MaxTokens            *int64          `json:"max_tokens,omitempty"`
-	Messages             []ChatMessage   `json:"messages"`
-	Metadata             map[string]any  `json:"metadata,omitempty"`
-	Model                string          `json:"model"`
-	N                    *int64          `json:"n,omitempty"`
-	ParallelToolCalls    *bool           `json:"parallel_tool_calls,omitempty"`
-	PresencePenalty      *float64        `json:"presence_penalty,omitempty"`
-	ReasoningEffort      *string         `json:"reasoning_effort,omitempty"`
-	ResponseFormat       *ResponseFormat `json:"response_format,omitempty"`
-	Seed                 *int64          `json:"seed,omitempty"`
-	ServiceTier          *string         `json:"service_tier,omitempty"`
-	Stop                 any             `json:"stop,omitempty"`
-	Stream               *bool           `json:"stream,omitempty"`
-	StreamOptions        map[string]any  `json:"stream_options,omitempty"`
-	Temperature          *float64        `json:"temperature,omitempty"`
-	Thinking             map[string]any  `json:"thinking,omitempty"`
-	ToolChoice           any             `json:"tool_choice,omitempty"`
-	Tools                []Tool          `json:"tools,omitempty"`
-	TopLogprobs          *int64          `json:"top_logprobs,omitempty"`
-	TopP                 *float64        `json:"top_p,omitempty"`
-	User                 *string         `json:"user,omitempty"`
-	AdditionalProperties map[string]any  `json:"-,omitempty"`
+	// Frequency penalty (-2 to 2)
+	FrequencyPenalty *float64 `json:"frequency_penalty,omitempty"`
+	// Token logit biases
+	LogitBias map[string]any `json:"logit_bias,omitempty"`
+	// Whether to return log probabilities
+	Logprobs *bool `json:"logprobs,omitempty"`
+	// Maximum completion tokens (newer OpenAI API)
+	MaxCompletionTokens *int64 `json:"max_completion_tokens,omitempty"`
+	// Maximum tokens to generate
+	MaxTokens *int64 `json:"max_tokens,omitempty"`
+	// List of messages in the conversation
+	Messages []ChatMessage `json:"messages"`
+	// Arbitrary metadata for the request
+	Metadata map[string]any `json:"metadata,omitempty"`
+	// Model ID in format 'provider-id/model-name'
+	Model string `json:"model"`
+	// Number of completions to generate
+	N *int64 `json:"n,omitempty"`
+	// Whether to run tool calls in parallel
+	ParallelToolCalls *bool `json:"parallel_tool_calls,omitempty"`
+	// Presence penalty (-2 to 2)
+	PresencePenalty *float64 `json:"presence_penalty,omitempty"`
+	// Reasoning effort level (low/medium/high) for reasoning models
+	ReasoningEffort *string         `json:"reasoning_effort,omitempty"`
+	ResponseFormat  *ResponseFormat `json:"response_format,omitempty"`
+	// Random seed for deterministic output
+	Seed *int64 `json:"seed,omitempty"`
+	// Service tier for the request
+	ServiceTier *string `json:"service_tier,omitempty"`
+	// Stop sequences
+	Stop any `json:"stop,omitempty"`
+	// Whether to stream the response
+	Stream *bool `json:"stream,omitempty"`
+	// Options for streaming (e.g., include_usage)
+	StreamOptions map[string]any `json:"stream_options,omitempty"`
+	// Sampling temperature (0-2)
+	Temperature *float64 `json:"temperature,omitempty"`
+	// Thinking/reasoning configuration for supported models
+	Thinking map[string]any `json:"thinking,omitempty"`
+	// Controls tool usage
+	ToolChoice any `json:"tool_choice,omitempty"`
+	// List of tools the model can use
+	Tools []Tool `json:"tools,omitempty"`
+	// Number of top log probabilities to return
+	TopLogprobs *int64 `json:"top_logprobs,omitempty"`
+	// Nucleus sampling parameter
+	TopP *float64 `json:"top_p,omitempty"`
+	// End-user identifier
+	User                 *string        `json:"user,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ChatMessage struct {
-	AttachmentIds        []string       `json:"attachment_ids,omitempty"`
-	Content              any            `json:"content"`
-	Name                 *string        `json:"name,omitempty"`
-	ReasoningContent     *string        `json:"reasoning_content,omitempty"`
-	Role                 string         `json:"role"`
-	ToolCallID           *string        `json:"tool_call_id,omitempty"`
+	// IDs of attachments to include with this message
+	AttachmentIds []string `json:"attachment_ids,omitempty"`
+	// Message content (string or array for multimodal)
+	Content any `json:"content"`
+	// Optional name for the participant
+	Name *string `json:"name,omitempty"`
+	// Reasoning content for assistant messages (required by DeepSeek)
+	ReasoningContent *string `json:"reasoning_content,omitempty"`
+	// Message role: system, user, assistant, or tool
+	Role string `json:"role"`
+	// ID of the tool call this message responds to
+	ToolCallID *string `json:"tool_call_id,omitempty"`
+	// Tool calls made by the assistant
 	ToolCalls            []ToolCall     `json:"tool_calls,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Choice struct {
-	Delta                *DeltaMessage  `json:"delta,omitempty"`
-	FinishReason         *string        `json:"finish_reason"`
+	Delta *DeltaMessage `json:"delta,omitempty"`
+	// Reason for finishing: stop, length, tool_calls, etc.
+	FinishReason *string `json:"finish_reason"`
+	// Choice index
 	Index                int64          `json:"index"`
 	Message              *ChatMessage   `json:"message,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -662,30 +1095,53 @@ type CloudAccountCredentials struct {
 }
 
 type CloudAccountCredentialsInput struct {
-	AwsAccessKeyID            *string        `json:"awsAccessKeyId,omitempty"`
-	AwsSecretAccessKey        *string        `json:"awsSecretAccessKey,omitempty"`
-	AzureClientID             *string        `json:"azureClientId,omitempty"`
-	AzureClientSecret         *string        `json:"azureClientSecret,omitempty"`
-	AzureTenantID             *string        `json:"azureTenantId,omitempty"`
-	CspID                     string         `json:"cspId"`
-	EncryptKey                *string        `json:"encryptKey,omitempty"`
-	GoogleRoles               *string        `json:"googleRoles,omitempty"`
-	GoogleServiceAccountKey   *string        `json:"googleServiceAccountKey,omitempty"`
-	GovCloud                  *bool          `json:"govCloud,omitempty"`
-	OpenstackComputeEndpoint  *string        `json:"openstackComputeEndpoint,omitempty"`
-	OpenstackIdentityEndpoint *string        `json:"openstackIdentityEndpoint,omitempty"`
-	OpenstackNetworkEndpoint  *string        `json:"openstackNetworkEndpoint,omitempty"`
-	OpenstackPassword         *string        `json:"openstackPassword,omitempty"`
-	OpenstackProjectDomain    *string        `json:"openstackProjectDomain,omitempty"`
-	OpenstackProjectName      *string        `json:"openstackProjectName,omitempty"`
-	OpenstackUserDomain       *string        `json:"openstackUserDomain,omitempty"`
-	OpenstackUsername         *string        `json:"openstackUsername,omitempty"`
-	OracleCompartmentID       *string        `json:"oracleCompartmentId,omitempty"`
-	OracleFingerprint         *string        `json:"oracleFingerprint,omitempty"`
-	OraclePrivateKey          *string        `json:"oraclePrivateKey,omitempty"`
-	OracleTenancyOcid         *string        `json:"oracleTenancyOcid,omitempty"`
-	OracleUserOcid            *string        `json:"oracleUserOcid,omitempty"`
-	AdditionalProperties      map[string]any `json:"-,omitempty"`
+	// AWS access key ID
+	AwsAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+	// AWS secret access key
+	AwsSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
+	// Azure client ID
+	AzureClientID *string `json:"azureClientId,omitempty"`
+	// Azure client secret
+	AzureClientSecret *string `json:"azureClientSecret,omitempty"`
+	// Azure tenant ID
+	AzureTenantID *string `json:"azureTenantId,omitempty"`
+	// Cloud service provider ID
+	CspID string `json:"cspId"`
+	// The ID of the CMEK crypto key for encryption
+	EncryptKey *string `json:"encryptKey,omitempty"`
+	// Google IAM roles
+	GoogleRoles *string `json:"googleRoles,omitempty"`
+	// Google service account key (JSON format)
+	GoogleServiceAccountKey *string `json:"googleServiceAccountKey,omitempty"`
+	// When true, API calls will use gov-cloud specific endpoints
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// OpenStack compute endpoint URL
+	OpenstackComputeEndpoint *string `json:"openstackComputeEndpoint,omitempty"`
+	// OpenStack identity endpoint URL
+	OpenstackIdentityEndpoint *string `json:"openstackIdentityEndpoint,omitempty"`
+	// OpenStack network endpoint URL
+	OpenstackNetworkEndpoint *string `json:"openstackNetworkEndpoint,omitempty"`
+	// OpenStack password
+	OpenstackPassword *string `json:"openstackPassword,omitempty"`
+	// OpenStack project domain
+	OpenstackProjectDomain *string `json:"openstackProjectDomain,omitempty"`
+	// OpenStack project name
+	OpenstackProjectName *string `json:"openstackProjectName,omitempty"`
+	// OpenStack user domain
+	OpenstackUserDomain *string `json:"openstackUserDomain,omitempty"`
+	// OpenStack username
+	OpenstackUsername *string `json:"openstackUsername,omitempty"`
+	// Oracle Cloud compartment OCID
+	OracleCompartmentID *string `json:"oracleCompartmentId,omitempty"`
+	// Oracle Cloud API key fingerprint
+	OracleFingerprint *string `json:"oracleFingerprint,omitempty"`
+	// Oracle Cloud API private key (PEM format)
+	OraclePrivateKey *string `json:"oraclePrivateKey,omitempty"`
+	// Oracle Cloud tenancy OCID
+	OracleTenancyOcid *string `json:"oracleTenancyOcid,omitempty"`
+	// Oracle Cloud user OCID
+	OracleUserOcid       *string        `json:"oracleUserOcid,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CloudAccountPermissions struct {
@@ -695,20 +1151,31 @@ type CloudAccountPermissions struct {
 }
 
 type CloudImage struct {
-	Architecture         string         `json:"architecture"`
-	Category             string         `json:"category"`
-	Description          string         `json:"description"`
-	IconName             string         `json:"iconName"`
-	ImageID              string         `json:"imageId"`
-	Name                 string         `json:"name"`
-	OsName               string         `json:"osName"`
-	OsType               string         `json:"osType"`
+	// CPU architecture (amd64, arm64)
+	Architecture string `json:"architecture"`
+	// Image category (quick-start, community)
+	Category string `json:"category"`
+	// Image description
+	Description string `json:"description"`
+	// Icon identifier for the OS (amazon-linux, ubuntu, windows, rhel, debian, suse)
+	IconName string `json:"iconName"`
+	// Cloud provider image ID (AMI ID, Azure URN, or GCP image path)
+	ImageID string `json:"imageId"`
+	// Display name of the image
+	Name string `json:"name"`
+	// Operating system name (Amazon Linux, Ubuntu, Windows Server, etc.)
+	OsName string `json:"osName"`
+	// Operating system type (linux, windows)
+	OsType string `json:"osType"`
+	// Operating system version
 	OsVersion            string         `json:"osVersion"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ClusterError struct {
-	Cluster              string         `json:"cluster"`
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// Error message
 	Error                string         `json:"error"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -734,78 +1201,120 @@ type ClusterMetricsDataPoint struct {
 }
 
 type ClusterNodeResponse struct {
-	CreatedAt            time.Time      `json:"createdAt"`
-	ID                   string         `json:"id"`
-	Name                 string         `json:"name"`
-	PrivateIP            string         `json:"privateIp"`
-	PublicIP             string         `json:"publicIp"`
-	Status               string         `json:"status"`
+	// The node creation timestamp in milliseconds
+	CreatedAt time.Time `json:"createdAt"`
+	// The node ID
+	ID string `json:"id"`
+	// The node hostname
+	Name string `json:"name"`
+	// The node private IP address
+	PrivateIP string `json:"privateIp"`
+	// The node public IP address
+	PublicIP string `json:"publicIp"`
+	// The node status
+	Status string `json:"status"`
+	// The node type
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ClusterResponse struct {
-	CostTrackingStatus   *string        `json:"costTrackingStatus,omitempty"`
-	Cpus                 int64          `json:"cpus"`
-	ID                   string         `json:"id"`
-	ImageURL             *string        `json:"imageUrl,omitempty"`
-	Memory               int64          `json:"memory"`
+	// Cost tracking status for the cluster
+	CostTrackingStatus *string `json:"costTrackingStatus,omitempty"`
+	// Number of CPUs in the cluster
+	Cpus int64 `json:"cpus"`
+	// Unique identifier for the cluster
+	ID string `json:"id"`
+	// URL of the cluster image
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Amount of memory in the cluster in bytes
+	Memory int64 `json:"memory"`
+	// Name of the cluster
 	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ClusterWorkspaceMount struct {
-	ClusterPath          string         `json:"clusterPath"`
+	// The path on the cluster.
+	ClusterPath string `json:"clusterPath"`
+	// The path in the workspace.
 	WorkspacePath        string         `json:"workspacePath"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CompleteOnboardingBody struct {
+	// Whether the user needs to complete onboarding
 	NeedsOnboarding      bool           `json:"needsOnboarding"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Config struct {
-	Cluster              string         `json:"cluster"`
-	CreatedAt            time.Time      `json:"createdAt"`
-	DataCount            int64          `json:"dataCount"`
-	Keys                 []string       `json:"keys"`
-	Labels               map[string]any `json:"labels,omitempty"`
-	Name                 string         `json:"name"`
-	Namespace            string         `json:"namespace"`
-	SecretType           *string        `json:"secretType,omitempty"`
-	Type                 string         `json:"type"`
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// Creation timestamp of the config
+	CreatedAt time.Time `json:"createdAt"`
+	// Number of data entries
+	DataCount int64 `json:"dataCount"`
+	// List of keys
+	Keys []string `json:"keys"`
+	// Labels attached to the config
+	Labels map[string]any `json:"labels,omitempty"`
+	// Name of the config
+	Name string `json:"name"`
+	// Namespace of the config
+	Namespace string `json:"namespace"`
+	// Type of secret (for secrets only)
+	SecretType *string `json:"secretType,omitempty"`
+	// Config type
+	Type string `json:"type"`
+	// Resources using this config
 	UsedBy               []string       `json:"usedBy,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ConfigsBody struct {
-	Configs              []Config        `json:"configs"`
+	// List of configs
+	Configs []Config `json:"configs"`
+	// List of cluster errors, if any
 	Errors               []ClusterError  `json:"errors,omitempty"`
 	Metadata             ConfigsMetadata `json:"metadata"`
 	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
 type ConfigsMetadata struct {
-	SuccessfulClusters   int64          `json:"successfulClusters"`
-	TotalClusters        int64          `json:"totalClusters"`
-	TotalConfigMaps      int64          `json:"totalConfigMaps"`
-	TotalConfigs         int64          `json:"totalConfigs"`
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total number of clusters queried
+	TotalClusters int64 `json:"totalClusters"`
+	// Total number of ConfigMaps
+	TotalConfigMaps int64 `json:"totalConfigMaps"`
+	// Total number of configs returned
+	TotalConfigs int64 `json:"totalConfigs"`
+	// Total number of Secrets
 	TotalSecrets         int64          `json:"totalSecrets"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ConversationResponse struct {
-	ActiveBranchID       *string           `json:"activeBranchId"`
-	Branches             []string          `json:"branches,omitempty"`
-	CanCollaborate       bool              `json:"canCollaborate"`
-	CreatedAt            time.Time         `json:"createdAt"`
-	ID                   string            `json:"id"`
-	IsOwner              bool              `json:"isOwner"`
-	Messages             []MessageResponse `json:"messages"`
-	Title                *string           `json:"title"`
-	UpdatedAt            *time.Time        `json:"updatedAt"`
-	AdditionalProperties map[string]any    `json:"-,omitempty"`
+	// Currently active branch leaf ID
+	ActiveBranchID *string `json:"activeBranchId"`
+	// All branch leaf IDs
+	Branches []string `json:"branches,omitempty"`
+	// Whether the user can add messages
+	CanCollaborate bool `json:"canCollaborate"`
+	// Creation timestamp
+	CreatedAt time.Time `json:"createdAt"`
+	// Conversation ID
+	ID string `json:"id"`
+	// Whether the current user owns this conversation
+	IsOwner bool `json:"isOwner"`
+	// Message tree
+	Messages []MessageResponse `json:"messages"`
+	// Conversation title
+	Title *string `json:"title"`
+	// Last update timestamp
+	UpdatedAt            *time.Time     `json:"updatedAt"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ConversationSummary struct {
@@ -822,87 +1331,138 @@ type ConversationSummary struct {
 }
 
 type CopySnapshotInputBody struct {
-	Name                 string         `json:"name"`
+	// Name for the new snapshot copy
+	Name string `json:"name"`
+	// Target region for the snapshot copy
 	Region               string         `json:"region"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CopySnapshotOutputBody struct {
-	ID                   string         `json:"id"`
-	Message              string         `json:"message"`
-	Name                 string         `json:"name"`
-	Region               string         `json:"region"`
+	// ID of the newly created snapshot copy
+	ID string `json:"id"`
+	// Success message
+	Message string `json:"message"`
+	// Name of the newly created snapshot copy
+	Name string `json:"name"`
+	// Region where the snapshot copy is being created
+	Region string `json:"region"`
+	// Current status of the copy operation
 	Status               string         `json:"status"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CostTrackingPricesBody struct {
-	CpuPrice             float64        `json:"cpuPrice"`
+	// The price per CPU unit
+	CpuPrice float64 `json:"cpuPrice"`
+	// The price per GB of memory
 	MemoryPrice          float64        `json:"memoryPrice"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CostTrackingResponse struct {
-	CostTrackingStatus   string         `json:"costTrackingStatus"`
+	// Current cost tracking status
+	CostTrackingStatus string `json:"costTrackingStatus"`
+	// Whether cost tracking is enabled for this cluster
 	EnableTracking       bool           `json:"enableTracking"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CpuMetrics struct {
-	Idle                 float64        `json:"idle"`
-	IOWait               float64        `json:"ioWait"`
-	Steal                float64        `json:"steal"`
-	System               float64        `json:"system"`
-	TotalCores           int64          `json:"totalCores"`
-	UsedPercent          float64        `json:"usedPercent"`
+	// Idle CPU percentage
+	Idle float64 `json:"idle"`
+	// IO wait percentage
+	IOWait float64 `json:"ioWait"`
+	// Steal percentage
+	Steal float64 `json:"steal"`
+	// System CPU percentage
+	System float64 `json:"system"`
+	// Total number of CPU cores
+	TotalCores int64 `json:"totalCores"`
+	// Total used CPU percentage
+	UsedPercent float64 `json:"usedPercent"`
+	// User CPU percentage
 	User                 float64        `json:"user"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateAiChatProviderBody struct {
-	Csp                  string           `json:"csp"`
-	Description          *string          `json:"description"`
-	Group                *string          `json:"group,omitempty"`
-	Name                 string           `json:"name"`
-	Network              *string          `json:"network,omitempty"`
+	// Cloud service provider (azure, custom)
+	Csp string `json:"csp"`
+	// Description of the AI Chat provider
+	Description *string `json:"description"`
+	// Billing group name for the AI Chat provider (required for managed providers, not used for custom)
+	Group *string `json:"group,omitempty"`
+	// Name of the AI Chat provider
+	Name string `json:"name"`
+	// Network name
+	Network *string `json:"network,omitempty"`
+	// Tags for the AI Chat provider
 	Tags                 *string          `json:"tags"`
 	Variables            VariablesRequest `json:"variables"`
 	AdditionalProperties map[string]any   `json:"-,omitempty"`
 }
 
 type CreateAlertBody struct {
-	Message              string         `json:"message"`
+	// Detailed alert text shown to users.
+	Message string `json:"message"`
+	// Short, human-readable alert title.
 	Title                string         `json:"title"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateCloudAccountBody struct {
-	AwsAccessKeyID            *string        `json:"awsAccessKeyId,omitempty"`
-	AwsSecretAccessKey        *string        `json:"awsSecretAccessKey,omitempty"`
-	AzureClientID             *string        `json:"azureClientId,omitempty"`
-	AzureClientSecret         *string        `json:"azureClientSecret,omitempty"`
-	AzureTenantID             *string        `json:"azureTenantId,omitempty"`
-	Csp                       string         `json:"csp"`
-	CspID                     string         `json:"cspId"`
-	EncryptKey                *string        `json:"encryptKey,omitempty"`
-	GoogleRoles               *string        `json:"googleRoles,omitempty"`
-	GoogleServiceAccountKey   *string        `json:"googleServiceAccountKey,omitempty"`
-	GovCloud                  *bool          `json:"govCloud,omitempty"`
-	Name                      string         `json:"name"`
-	OpenstackComputeEndpoint  *string        `json:"openstackComputeEndpoint,omitempty"`
-	OpenstackIdentityEndpoint *string        `json:"openstackIdentityEndpoint,omitempty"`
-	OpenstackNetworkEndpoint  *string        `json:"openstackNetworkEndpoint,omitempty"`
-	OpenstackPassword         *string        `json:"openstackPassword,omitempty"`
-	OpenstackProjectDomain    *string        `json:"openstackProjectDomain,omitempty"`
-	OpenstackProjectName      *string        `json:"openstackProjectName,omitempty"`
-	OpenstackUserDomain       *string        `json:"openstackUserDomain,omitempty"`
-	OpenstackUsername         *string        `json:"openstackUsername,omitempty"`
-	OracleCompartmentID       *string        `json:"oracleCompartmentId,omitempty"`
-	OracleFingerprint         *string        `json:"oracleFingerprint,omitempty"`
-	OraclePrivateKey          *string        `json:"oraclePrivateKey,omitempty"`
-	OracleTenancyOcid         *string        `json:"oracleTenancyOcid,omitempty"`
-	OracleUserOcid            *string        `json:"oracleUserOcid,omitempty"`
-	AdditionalProperties      map[string]any `json:"-,omitempty"`
+	// AWS access key ID
+	AwsAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+	// AWS secret access key
+	AwsSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
+	// Azure client ID
+	AzureClientID *string `json:"azureClientId,omitempty"`
+	// Azure client secret
+	AzureClientSecret *string `json:"azureClientSecret,omitempty"`
+	// Azure tenant ID
+	AzureTenantID *string `json:"azureTenantId,omitempty"`
+	// Cloud service provider
+	Csp string `json:"csp"`
+	// Cloud service provider ID
+	CspID string `json:"cspId"`
+	// The ID of the CMEK crypto key for encryption
+	EncryptKey *string `json:"encryptKey,omitempty"`
+	// Google IAM roles
+	GoogleRoles *string `json:"googleRoles,omitempty"`
+	// Google service account key (JSON format)
+	GoogleServiceAccountKey *string `json:"googleServiceAccountKey,omitempty"`
+	// When true, API calls will use gov-cloud specific endpoints
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Cloud account name (lowercase letters and numbers only)
+	Name string `json:"name"`
+	// OpenStack compute endpoint URL
+	OpenstackComputeEndpoint *string `json:"openstackComputeEndpoint,omitempty"`
+	// OpenStack identity endpoint URL
+	OpenstackIdentityEndpoint *string `json:"openstackIdentityEndpoint,omitempty"`
+	// OpenStack network endpoint URL
+	OpenstackNetworkEndpoint *string `json:"openstackNetworkEndpoint,omitempty"`
+	// OpenStack password
+	OpenstackPassword *string `json:"openstackPassword,omitempty"`
+	// OpenStack project domain
+	OpenstackProjectDomain *string `json:"openstackProjectDomain,omitempty"`
+	// OpenStack project name
+	OpenstackProjectName *string `json:"openstackProjectName,omitempty"`
+	// OpenStack user domain
+	OpenstackUserDomain *string `json:"openstackUserDomain,omitempty"`
+	// OpenStack username
+	OpenstackUsername *string `json:"openstackUsername,omitempty"`
+	// Oracle Cloud compartment OCID
+	OracleCompartmentID *string `json:"oracleCompartmentId,omitempty"`
+	// Oracle Cloud API key fingerprint
+	OracleFingerprint *string `json:"oracleFingerprint,omitempty"`
+	// Oracle Cloud API private key (PEM format)
+	OraclePrivateKey *string `json:"oraclePrivateKey,omitempty"`
+	// Oracle Cloud tenancy OCID
+	OracleTenancyOcid *string `json:"oracleTenancyOcid,omitempty"`
+	// Oracle Cloud user OCID
+	OracleUserOcid       *string        `json:"oracleUserOcid,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateConversationInputBody struct {
@@ -911,122 +1471,182 @@ type CreateConversationInputBody struct {
 }
 
 type CreateDiskSnapshotBody struct {
+	// Name of the snapshot
 	SnapshotName         string         `json:"snapshotName"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateInstanceSnapshotBody struct {
+	// Name of the snapshot
 	SnapshotName         string         `json:"snapshotName"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateManagedClusterInputBody struct {
-	Description          *string        `json:"description,omitempty"`
-	DisplayName          *string        `json:"displayName,omitempty"`
-	Name                 string         `json:"name"`
+	// Description of the cluster
+	Description *string `json:"description,omitempty"`
+	// Display name for the cluster
+	DisplayName *string `json:"displayName,omitempty"`
+	// Cluster name
+	Name string `json:"name"`
+	// Tags for the cluster
 	Tags                 []string       `json:"tags,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateManagedClusterOutputBody struct {
-	DisplayName          *string        `json:"displayName,omitempty"`
-	ID                   string         `json:"id"`
+	// Display name
+	DisplayName *string `json:"displayName,omitempty"`
+	// Cluster ID
+	ID string `json:"id"`
+	// Cluster name
 	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateNetAppOntapInputBody struct {
-	AdminAccount         string         `json:"adminAccount"`
-	AdminPassword        string         `json:"adminPassword"`
-	Description          *string        `json:"description,omitempty"`
-	Name                 string         `json:"name"`
-	ServerAddress        string         `json:"serverAddress"`
+	// Admin account username
+	AdminAccount string `json:"adminAccount"`
+	// Admin account password
+	AdminPassword string `json:"adminPassword"`
+	// Description of the NetApp ONTAP
+	Description *string `json:"description,omitempty"`
+	// Name of the NetApp ONTAP
+	Name string `json:"name"`
+	// IP address or hostname of the NetApp ONTAP server
+	ServerAddress string `json:"serverAddress"`
+	// Tags for the NetApp ONTAP
 	Tags                 *string        `json:"tags,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateNetworkBody struct {
-	Name                 string          `json:"name"`
-	PeeredToPlatform     bool            `json:"peeredToPlatform"`
-	ProvisioningMode     string          `json:"provisioningMode"`
-	Regions              []NetworkRegion `json:"regions"`
-	TransitGatewayID     string          `json:"transitGatewayId"`
-	AdditionalProperties map[string]any  `json:"-,omitempty"`
+	// Name of the network
+	Name string `json:"name"`
+	// Whether the private network should be peered to the platform via transit gateway (AWS only)
+	PeeredToPlatform bool `json:"peeredToPlatform"`
+	// Provisioning mode for the network
+	ProvisioningMode string `json:"provisioningMode"`
+	// List of regions and their CIDR blocks
+	Regions []NetworkRegion `json:"regions"`
+	// Transit Gateway ID (required for private mode on AWS when peered to platform)
+	TransitGatewayID     string         `json:"transitGatewayId"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateQuotaBody struct {
-	Cpu                  string         `json:"cpu"`
-	Gpu                  *int64         `json:"gpu"`
-	Memory               string         `json:"memory"`
+	// CPU limit with Kubernetes quantity format in cores (e.g., '1000m', '2000m')
+	Cpu string `json:"cpu"`
+	// GPU limit count
+	Gpu *int64 `json:"gpu"`
+	// Memory limit with Kubernetes quantity format (e.g., '2Gi', '1024Mi')
+	Memory string `json:"memory"`
+	// The namespace for the quota
 	Namespace            string         `json:"namespace"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateReportBody struct {
-	Email                string         `json:"email"`
-	Frequency            string         `json:"frequency"`
-	Period               *string        `json:"period,omitempty"`
-	Type                 string         `json:"type"`
+	// Email address to send the report to.
+	Email string `json:"email"`
+	// Frequency of the report.
+	Frequency string `json:"frequency"`
+	// Time period for the report.
+	Period *string `json:"period,omitempty"`
+	// Type of report to generate.
+	Type string `json:"type"`
+	// Specific user or group for the report.
 	Who                  *string        `json:"who,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateSnapshotBody struct {
+	// Name of the snapshot
 	SnapshotName         string         `json:"snapshotName"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateSnapshotOutputBody struct {
-	ID                   string         `json:"id"`
-	Message              string         `json:"message"`
-	Name                 string         `json:"name"`
+	// ID of the newly created snapshot
+	ID string `json:"id"`
+	// Success message
+	Message string `json:"message"`
+	// Name of the snapshot
+	Name string `json:"name"`
+	// Current status of the snapshot
 	Status               string         `json:"status"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateUnitRuleBody struct {
+	// USD rate per unit
 	Rate                 float64        `json:"rate"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateVolumeRequestBody struct {
-	Aggregate            string         `json:"aggregate"`
-	Path                 string         `json:"path"`
-	Size                 string         `json:"size"`
-	Svm                  string         `json:"svm"`
+	// Aggregate name where the volume will be created
+	Aggregate string `json:"aggregate"`
+	// Export path for the volume (must start with /)
+	Path string `json:"path"`
+	// Size of the volume in GB
+	Size string `json:"size"`
+	// Storage VM name
+	Svm string `json:"svm"`
+	// Name of the volume to create
 	VolumeName           string         `json:"volumeName"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateWebhookBody struct {
-	Description          *string        `json:"description,omitempty"`
-	Enabled              *bool          `json:"enabled"`
-	Name                 *string        `json:"name"`
-	Type                 *string        `json:"type"`
+	// Optional description of the webhook.
+	Description *string `json:"description,omitempty"`
+	// Whether the webhook should be enabled.
+	Enabled *bool `json:"enabled"`
+	// Name of the webhook.
+	Name *string `json:"name"`
+	// Event type that triggers the webhook.
+	Type *string `json:"type"`
+	// URL to receive the webhook POST request.
 	URL                  *string        `json:"url"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateWorkflowBody struct {
-	Description          *string                 `json:"description,omitempty"`
-	DisplayName          *string                 `json:"displayName,omitempty"`
-	Name                 string                  `json:"name"`
-	Remote               *RemoteWorkflowSettings `json:"remote,omitempty"`
-	SkipCheckout         *bool                   `json:"skipCheckout,omitempty"`
-	Subtype              *string                 `json:"subtype,omitempty"`
-	Tags                 []string                `json:"tags,omitempty"`
-	Type                 string                  `json:"type"`
-	AdditionalProperties map[string]any          `json:"-,omitempty"`
+	// Resource description
+	Description *string `json:"description,omitempty"`
+	// Display name of the workflow
+	DisplayName *string `json:"displayName,omitempty"`
+	// Resource name
+	Name   string                  `json:"name"`
+	Remote *RemoteWorkflowSettings `json:"remote,omitempty"`
+	// Skip automatic repository checkout during job preparation
+	SkipCheckout *bool `json:"skipCheckout,omitempty"`
+	// Selected workflow subtype (required for remote type)
+	Subtype *string `json:"subtype,omitempty"`
+	// Resource tags
+	Tags []string `json:"tags,omitempty"`
+	// Selected workflow type
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateWorkflowRunInputBody struct {
-	DisplayName          *string        `json:"displayName,omitempty"`
-	DryRun               *bool          `json:"dryRun,omitempty"`
-	Inputs               map[string]any `json:"inputs,omitempty"`
-	Marketplace          *string        `json:"marketplace,omitempty"`
-	SessionNames         map[string]any `json:"sessionNames,omitempty"`
-	Slug                 *string        `json:"slug,omitempty"`
-	Workflow             *string        `json:"workflow,omitempty"`
+	// Display name for the run
+	DisplayName *string `json:"displayName,omitempty"`
+	// Validate only, don't execute
+	DryRun *bool `json:"dryRun,omitempty"`
+	// Input variables
+	Inputs map[string]any `json:"inputs,omitempty"`
+	// Slug of a marketplace item to run
+	Marketplace *string `json:"marketplace,omitempty"`
+	// Session names
+	SessionNames map[string]any `json:"sessionNames,omitempty"`
+	// User-provided slug
+	Slug *string `json:"slug,omitempty"`
+	// Name of a saved workflow to run
+	Workflow *string `json:"workflow,omitempty"`
+	// Inline YAML workflow content
 	Yaml                 *string        `json:"yaml,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -1038,219 +1658,327 @@ type CreateWorkflowRunOutputBody struct {
 }
 
 type CustomSku struct {
-	Code                 string         `json:"code"`
-	DeletedAt            *time.Time     `json:"deletedAt,omitempty"`
-	Description          *string        `json:"description,omitempty"`
-	ID                   string         `json:"id"`
-	Name                 string         `json:"name"`
-	OrganizationID       string         `json:"organizationId"`
-	Subtype              string         `json:"subtype"`
-	Type                 string         `json:"type"`
+	// SKU code (e.g., SLURM_NODE_HOUR)
+	Code string `json:"code"`
+	// Deletion timestamp
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
+	// Description
+	Description *string `json:"description,omitempty"`
+	// SKU ID
+	ID string `json:"id"`
+	// Display name
+	Name string `json:"name"`
+	// Organization ID
+	OrganizationID string `json:"organizationId"`
+	// SKU subtype (e.g., NodeHour, Token)
+	Subtype string `json:"subtype"`
+	// SKU type (e.g., Compute, Licenses)
+	Type string `json:"type"`
+	// Parent unit ID
 	UnitID               string         `json:"unitId"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type DailyActiveUsers struct {
-	ActiveUsers          int64          `json:"activeUsers"`
+	// Number of active users on this date
+	ActiveUsers int64 `json:"activeUsers"`
+	// Date in YYYY-MM-DD format
 	Date                 string         `json:"date"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type DeleteMfaInputBody struct {
-	MfaMethod            *string        `json:"mfaMethod,omitempty"`
+	// MFA method type to remove
+	MfaMethod *string `json:"mfaMethod,omitempty"`
+	// Remove all MFA settings
 	RemoveAll            *bool          `json:"removeAll,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type DeleteOldWorkflowRunsBody struct {
+	// Delete workflow runs older than this many months
 	Months               int64          `json:"months"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type DeleteOldWorkflowRunsResultBody struct {
-	CutoffDate           time.Time      `json:"cutoffDate"`
+	// Workflow runs created before this date were deleted
+	CutoffDate time.Time `json:"cutoffDate"`
+	// Number of workflow runs deleted
 	DeletedCount         int64          `json:"deletedCount"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type DeleteOrphanedWorkflowRunsResultBody struct {
+	// Number of orphaned workflow runs deleted
 	DeletedCount         int64          `json:"deletedCount"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type DeleteRatedCostsRequestBody struct {
+	// Array of rated cost IDs to delete
 	Ids                  []string       `json:"ids"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type DeleteRatedCostsResponseBody struct {
+	// Number of rated costs deleted
 	Deleted              int64          `json:"deleted"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type DeltaMessage struct {
-	Content              any            `json:"content,omitempty"`
-	Name                 *string        `json:"name,omitempty"`
-	ReasoningContent     *string        `json:"reasoning_content,omitempty"`
-	Role                 *string        `json:"role,omitempty"`
-	ToolCallID           *string        `json:"tool_call_id,omitempty"`
+	// Message content delta
+	Content any `json:"content,omitempty"`
+	// Optional name for the participant
+	Name *string `json:"name,omitempty"`
+	// Reasoning/thinking content from models like o1/o3
+	ReasoningContent *string `json:"reasoning_content,omitempty"`
+	// Message role (only in first chunk)
+	Role *string `json:"role,omitempty"`
+	// ID of the tool call this message responds to
+	ToolCallID *string `json:"tool_call_id,omitempty"`
+	// Tool calls made by the assistant
 	ToolCalls            []ToolCall     `json:"tool_calls,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type DuplicateWorkflowBody struct {
+	// Display name for the duplicated workflow
 	NewName              string         `json:"newName"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Error struct {
-	Error                bool           `json:"error"`
-	Errors               []string       `json:"errors,omitempty"`
+	// Will always be true, indicating this is an error response.
+	Error bool `json:"error"`
+	// If there are multiple errors, this will contain a list of them.
+	Errors []string `json:"errors,omitempty"`
+	// A human-readable message describing the error.
 	Message              string         `json:"message"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ExistingCluster struct {
-	AutoReconnect        bool                     `json:"autoReconnect"`
-	Group                *string                  `json:"group,omitempty"`
-	ID                   string                   `json:"id"`
-	Key                  string                   `json:"key"`
-	Name                 string                   `json:"name"`
-	Status               string                   `json:"status"`
-	Type                 string                   `json:"type"`
+	// Auto-reconnect enabled
+	AutoReconnect bool `json:"autoReconnect"`
+	// Group name
+	Group *string `json:"group,omitempty"`
+	// Cluster ID
+	ID string `json:"id"`
+	// SSH key name
+	Key string `json:"key"`
+	// Cluster name
+	Name string `json:"name"`
+	// Cluster status
+	Status string `json:"status"`
+	// Provider type
+	Type string `json:"type"`
+	// Username of the cluster owner
 	User                 string                   `json:"user"`
 	Variables            ExistingClusterVariables `json:"variables"`
 	AdditionalProperties map[string]any           `json:"-,omitempty"`
 }
 
 type ExistingClusterLoginNode struct {
+	// Login node hostname
 	Node                 string         `json:"node"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ExistingClusterVariables struct {
-	JumpNodeHost         string                          `json:"jumpNodeHost"`
-	JumpNodeUser         string                          `json:"jumpNodeUser"`
-	SlurmLoginNodes      []ExistingClusterLoginNode      `json:"slurmLoginNodes"`
-	SlurmUsername        string                          `json:"slurmUsername"`
+	// Jump node hostname
+	JumpNodeHost string `json:"jumpNodeHost"`
+	// Jump node username
+	JumpNodeUser string `json:"jumpNodeUser"`
+	// SLURM login nodes
+	SlurmLoginNodes []ExistingClusterLoginNode `json:"slurmLoginNodes"`
+	// SLURM username
+	SlurmUsername string `json:"slurmUsername"`
+	// Workspace mount points
 	WorkspaceMounts      []ExistingClusterWorkspaceMount `json:"workspaceMounts"`
 	AdditionalProperties map[string]any                  `json:"-,omitempty"`
 }
 
 type ExistingClusterWorkspaceMount struct {
-	ClusterPath          string         `json:"clusterPath"`
+	// Path on the cluster
+	ClusterPath string `json:"clusterPath"`
+	// Path in the workspace
 	WorkspacePath        string         `json:"workspacePath"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Fact struct {
-	Csp                  string         `json:"csp"`
-	CspID                string         `json:"csp_id"`
-	Debug                bool           `json:"debug"`
-	DnsZone              string         `json:"dns_zone"`
-	Hostname             string         `json:"hostname"`
-	ID                   string         `json:"id"`
-	Name                 string         `json:"name"`
-	NodeType             string         `json:"node_type"`
-	PrivateIP            string         `json:"private_ip"`
-	PublicIP             string         `json:"public_ip"`
-	Session              string         `json:"session"`
-	User                 string         `json:"user"`
-	UserBootstrap        string         `json:"user_bootstrap"`
-	WorkspaceMounts      []string       `json:"workspace_mounts"`
+	// The cloud service provider the instance is provisioned in.
+	Csp string `json:"csp"`
+	// Identifier for the instance on the cloud service provider.
+	CspID string `json:"csp_id"`
+	// Whether debug mode is enabled.
+	Debug bool `json:"debug"`
+	// The DNS zone for the instance.
+	DnsZone string `json:"dns_zone"`
+	// Label for instance that can be separate from instance name.
+	Hostname string `json:"hostname"`
+	// The instance ID.
+	ID string `json:"id"`
+	// The instance name.
+	Name string `json:"name"`
+	// The type of node - for example, compute, controller or instance.
+	NodeType string `json:"node_type"`
+	// Private IP address of instance.
+	PrivateIP string `json:"private_ip"`
+	// Public IP address of instance.
+	PublicIP string `json:"public_ip"`
+	// The session ID for the instance.
+	Session string `json:"session"`
+	// The username of the user that owns this resource.
+	User string `json:"user"`
+	// The script input by users to bootstrap the instance.
+	UserBootstrap string `json:"user_bootstrap"`
+	// Mounts of local directories to instance directories.
+	WorkspaceMounts []string `json:"workspace_mounts"`
+	// The zone of the instance, if applicable.
 	Zone                 string         `json:"zone"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Feature struct {
-	Feature              string         `json:"feature"`
+	// Name of the feature.
+	Feature string `json:"feature"`
+	// Indicates if the feature was enabled at a platform-wide level.
 	Platform             bool           `json:"platform"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type FilesystemInfo struct {
-	Device               string         `json:"device"`
-	Free                 int64          `json:"free"`
-	Fstype               string         `json:"fstype"`
-	Mountpoint           string         `json:"mountpoint"`
-	Total                int64          `json:"total"`
-	Used                 int64          `json:"used"`
+	// Device name (e.g., /dev/sda1)
+	Device string `json:"device"`
+	// Free space in bytes
+	Free int64 `json:"free"`
+	// Filesystem type (e.g., ext4, xfs, nfs)
+	Fstype string `json:"fstype"`
+	// Mount point path
+	Mountpoint string `json:"mountpoint"`
+	// Total space in bytes
+	Total int64 `json:"total"`
+	// Used space in bytes
+	Used int64 `json:"used"`
+	// Usage percentage
 	UsedPct              float64        `json:"usedPct"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type FlavorCostUpdate struct {
-	CostPerHour          float64        `json:"costPerHour"`
+	// Cost per hour for this flavor
+	CostPerHour float64 `json:"costPerHour"`
+	// OpenStack flavor ID
 	ID                   string         `json:"id"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ForkMarketplaceItemBody struct {
-	ConvertToLocal       *bool          `json:"convertToLocal,omitempty"`
-	Ephemeral            *bool          `json:"ephemeral,omitempty"`
-	NewName              string         `json:"newName"`
+	// For remote workflows, convert to local by fetching the YAML.
+	ConvertToLocal *bool `json:"convertToLocal,omitempty"`
+	// For storage items, whether the storage is ephemeral.
+	Ephemeral *bool `json:"ephemeral,omitempty"`
+	// Name for the forked resource.
+	NewName string `json:"newName"`
+	// Version of the marketplace item to fork.
 	Version              string         `json:"version"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ForkMarketplaceItemOutputBody struct {
-	Name                 string         `json:"name"`
+	// Name of the created resource.
+	Name string `json:"name"`
+	// Type of the created resource (e.g., bucket, nfs, cluster).
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ForkWorkflowBody struct {
+	// Display name for the forked workflow
 	NewName              string         `json:"newName"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Function struct {
-	Description          *string        `json:"description,omitempty"`
-	Name                 string         `json:"name"`
+	// Function description
+	Description *string `json:"description,omitempty"`
+	// Function name
+	Name string `json:"name"`
+	// JSON Schema for parameters
 	Parameters           map[string]any `json:"parameters,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type FunctionCall struct {
-	Arguments            string         `json:"arguments"`
+	// JSON string of arguments
+	Arguments string `json:"arguments"`
+	// Function name
 	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type GeneralCluster struct {
-	ActiveNodes          int64                   `json:"activeNodes"`
-	AllocationThreshold  *AllocationThreshold    `json:"allocationThreshold,omitempty"`
-	ConnectionString     *string                 `json:"connectionString,omitempty"`
-	Csp                  *string                 `json:"csp,omitempty"`
-	Description          *string                 `json:"description"`
-	DisplayName          *string                 `json:"displayName"`
-	Favorite             bool                    `json:"favorite"`
-	Group                *string                 `json:"group,omitempty"`
-	ID                   *string                 `json:"id,omitempty"`
-	ImageURL             *string                 `json:"imageUrl,omitempty"`
-	IPAddress            string                  `json:"ipAddress"`
-	MaxNodes             int64                   `json:"maxNodes"`
-	Name                 string                  `json:"name"`
-	Region               *string                 `json:"region,omitempty"`
-	RequestedNodes       int64                   `json:"requestedNodes"`
-	SchedulerType        *string                 `json:"schedulerType,omitempty"`
-	Status               string                  `json:"status"`
-	Tags                 []string                `json:"tags"`
-	Type                 *string                 `json:"type"`
-	User                 *string                 `json:"user,omitempty"`
+	// The number of active nodes in the cluster.
+	ActiveNodes         int64                `json:"activeNodes"`
+	AllocationThreshold *AllocationThreshold `json:"allocationThreshold,omitempty"`
+	// The SSH connection string for the resource.
+	ConnectionString *string `json:"connectionString,omitempty"`
+	// The cloud service provider for the resource.
+	Csp *string `json:"csp,omitempty"`
+	// The description of the resource.
+	Description *string `json:"description"`
+	// The display name of the resource.
+	DisplayName *string `json:"displayName"`
+	// Whether the cluster is favorited by the user.
+	Favorite bool `json:"favorite"`
+	// The group which is responsible for billing.
+	Group *string `json:"group,omitempty"`
+	// The unique identifier of the resource.
+	ID *string `json:"id,omitempty"`
+	// The image URL of the resource.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// The IP address of the resource.
+	IPAddress string `json:"ipAddress"`
+	// The maximum number of nodes the cluster can scale to.
+	MaxNodes int64 `json:"maxNodes"`
+	// The name of the resource.
+	Name string `json:"name"`
+	// The region where the resource is provisioned.
+	Region *string `json:"region,omitempty"`
+	// The number of requested nodes in the cluster.
+	RequestedNodes int64 `json:"requestedNodes"`
+	// The scheduler type used by the cluster.
+	SchedulerType *string `json:"schedulerType,omitempty"`
+	// The status of the resource.
+	Status string `json:"status"`
+	// The tags associated with the resource.
+	Tags []string `json:"tags"`
+	// The type of the resource.
+	Type *string `json:"type"`
+	// The owner of the resource.
+	User *string `json:"user,omitempty"`
+	// The workspace mount points for this cluster.
 	WorkspaceMounts      []ClusterWorkspaceMount `json:"workspaceMounts"`
 	AdditionalProperties map[string]any          `json:"-,omitempty"`
 }
 
 type GenerateNodeTokenOutputBody struct {
-	Cluster              string         `json:"cluster"`
-	ExpiresAt            time.Time      `json:"expiresAt"`
-	Organization         string         `json:"organization"`
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// Token expiration time
+	ExpiresAt time.Time `json:"expiresAt"`
+	// Organization name
+	Organization string `json:"organization"`
+	// Node registration token
 	Token                string         `json:"token"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type GetAccessResponse struct {
+	// Access permissions by permission type
 	Permissions          map[string]any `json:"permissions"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -1285,7 +2013,9 @@ type GetMessageSiblingsBody struct {
 }
 
 type GetMfaSettingsOutputBody struct {
-	Enabled              bool                 `json:"enabled"`
+	// Whether MFA is enabled for the user
+	Enabled bool `json:"enabled"`
+	// List of configured MFA methods
 	MfaSettings          []MfaSettingResponse `json:"mfaSettings"`
 	AdditionalProperties map[string]any       `json:"-,omitempty"`
 }
@@ -1297,7 +2027,9 @@ type GetNodeMetricsOutputBody struct {
 }
 
 type GetUserContainersResponse struct {
-	UnreachableHosts     []string        `json:"unreachableHosts"`
+	// List of user workspace hosts that could not be reached
+	UnreachableHosts []string `json:"unreachableHosts"`
+	// List of all user workspaces
 	Workspaces           []UserWorkspace `json:"workspaces"`
 	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
@@ -1308,315 +2040,521 @@ type GetUserResourcesOutputBody struct {
 }
 
 type GoogleBucket struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	BucketName            *string             `json:"bucketName,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	Region                *string             `json:"region,omitempty"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Status                *string             `json:"status,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Name of the Google Bucket
+	BucketName *string `json:"bucketName,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the Google bucket is in
+	Region           *string       `json:"region,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type GoogleDisk struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Status                *string             `json:"status,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned      bool          `json:"provisioned"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type GoogleFilestore struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	FileserverIP          *string             `json:"fileserverIp,omitempty"`
-	FilestoreTier         *string             `json:"filestoreTier,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	Region                *string             `json:"region,omitempty"`
-	RegionFs              *string             `json:"regionFs,omitempty"`
-	RegionFsType          *string             `json:"regionFsType,omitempty"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Size                  *float64            `json:"size,omitempty"`
-	Status                *string             `json:"status,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	Zone                  *string             `json:"zone,omitempty"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// IP address of the Google Filestore file server
+	FileserverIP *string `json:"fileserverIp,omitempty"`
+	// Tier of the Google Filestore
+	FilestoreTier *string `json:"filestoreTier,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the Google Filestore is in
+	Region *string `json:"region,omitempty"`
+	// Export path of the Google Filestore instance
+	RegionFs *string `json:"regionFs,omitempty"`
+	// Filesystem type to format the export disk with
+	RegionFsType     *string       `json:"regionFsType,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Size of the Google Filestore in TB
+	Size *float64 `json:"size,omitempty"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User string `json:"user"`
+	// Zone the Google Filestore is in
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type GoogleManagedLustre struct {
-	DeploymentType       bool                   `json:"deploymentType"`
-	Description          string                 `json:"description"`
-	DisplayName          string                 `json:"displayName"`
-	Group                string                 `json:"group"`
-	Name                 string                 `json:"name"`
-	Performance          int64                  `json:"performance"`
-	Region               string                 `json:"region"`
-	RuntimeAlert         *RuntimeAlertInput     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit     *SessionCostLimitInput `json:"sessionCostLimit,omitempty"`
-	Size                 int64                  `json:"size"`
-	Tags                 string                 `json:"tags"`
-	VpcNetwork           string                 `json:"vpcNetwork"`
-	Zone                 string                 `json:"zone"`
-	AdditionalProperties map[string]any         `json:"-,omitempty"`
+	// Can be ephemeral or persistent
+	DeploymentType bool `json:"deploymentType"`
+	// The description of the instance.
+	Description string `json:"description"`
+	// The display name of the instance.
+	DisplayName string `json:"displayName"`
+	// The group the instance bills to.
+	Group string `json:"group"`
+	// Identifier. The name of the instance.
+	Name string `json:"name"`
+	// The full name of the VPC network to which the instance is connected.
+	Performance int64 `json:"performance"`
+	// The gcp region of the instance
+	Region           string                 `json:"region"`
+	RuntimeAlert     *RuntimeAlertInput     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit *SessionCostLimitInput `json:"sessionCostLimit,omitempty"`
+	// The storage capacity of the instance in gibibytes (GiB)
+	Size int64 `json:"size"`
+	// The tags associated with the instance.
+	Tags string `json:"tags"`
+	// The full name of the VPC network to which the instance is connected.
+	VpcNetwork string `json:"vpcNetwork"`
+	// The gcp location of the instance
+	Zone                 string         `json:"zone"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Group struct {
-	Allocation           *float64       `json:"allocation,omitempty"`
-	AllocationUsed       *float64       `json:"allocationUsed,omitempty"`
-	Allocations          *Allocations   `json:"allocations,omitempty"`
-	CreatedAt            *time.Time     `json:"createdAt,omitempty"`
-	Description          *string        `json:"description,omitempty"`
-	ID                   *string        `json:"id,omitempty"`
-	Members              *int64         `json:"members,omitempty"`
-	Name                 *string        `json:"name"`
-	Organization         *string        `json:"organization,omitempty"`
+	// The total allocation for this group.
+	Allocation *float64 `json:"allocation,omitempty"`
+	// The allocation used for this group
+	AllocationUsed *float64     `json:"allocationUsed,omitempty"`
+	Allocations    *Allocations `json:"allocations,omitempty"`
+	// Group creation time
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// The group description.
+	Description *string `json:"description,omitempty"`
+	// The group ID.
+	ID *string `json:"id,omitempty"`
+	// Number of group members
+	Members *int64 `json:"members,omitempty"`
+	// The group name.
+	Name *string `json:"name"`
+	// Organization name
+	Organization *string `json:"organization,omitempty"`
+	// List of roles assigned to the group.
 	Roles                []string       `json:"roles,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type GroupAllocationBody struct {
-	Allocation           *float64       `json:"allocation"`
+	// The allocation for the group.
+	Allocation *float64 `json:"allocation"`
+	// The allocation used by the group. When provided, must be non-negative and should not exceed the 'allocation' value.
 	AllocationUsed       *float64       `json:"allocationUsed,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type GroupDescriptionBody struct {
+	// The description for the group.
 	Description          *string        `json:"description,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type GroupRolesBody struct {
+	// The roles for the group.
 	Roles                []string       `json:"roles,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type GroupWithMembers struct {
-	Allocations          *Allocations   `json:"allocations,omitempty"`
-	CreatedAt            *time.Time     `json:"createdAt,omitempty"`
-	Description          *string        `json:"description,omitempty"`
-	ID                   *string        `json:"id,omitempty"`
-	Members              []MemberDetail `json:"members"`
-	Name                 *string        `json:"name"`
-	Organization         *string        `json:"organization,omitempty"`
+	Allocations *Allocations `json:"allocations,omitempty"`
+	// Group creation time
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// The group description.
+	Description *string `json:"description,omitempty"`
+	// The group ID.
+	ID *string `json:"id,omitempty"`
+	// List of group members with details.
+	Members []MemberDetail `json:"members"`
+	// The group name.
+	Name *string `json:"name"`
+	// Organization name
+	Organization *string `json:"organization,omitempty"`
+	// List of roles assigned to the group.
 	Roles                []string       `json:"roles,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Hammerspace struct {
-	AnvilInstanceType     *string             `json:"anvilInstanceType,omitempty"`
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	BucketName            *string             `json:"bucketName,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	DataDiskSize          *int32              `json:"dataDiskSize,omitempty"`
-	DataNodeCount         *int32              `json:"dataNodeCount,omitempty"`
-	DataNodeDiskCount     *int32              `json:"dataNodeDiskCount,omitempty"`
-	DataNodeDiskSize      *int32              `json:"dataNodeDiskSize,omitempty"`
-	DataNodeType          *string             `json:"dataNodeType,omitempty"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	DsxInstanceCount      *int32              `json:"dsxInstanceCount,omitempty"`
-	DsxInstanceType       *string             `json:"dsxInstanceType,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	HighAvailability      *bool               `json:"highAvailability,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	MetadataDiskCount     *int32              `json:"metadataDiskCount,omitempty"`
-	MetadataDiskSize      *int32              `json:"metadataDiskSize,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	Region                *string             `json:"region,omitempty"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Status                *string             `json:"status,omitempty"`
-	StorageBackend        *string             `json:"storageBackend,omitempty"`
-	StorageType           *string             `json:"storageType,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	Zone                  *string             `json:"zone,omitempty"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Instance type of the Anvil nodes in the Hammerspace storage
+	AnvilInstanceType *string `json:"anvilInstanceType,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Name of the bucket in the Hammerspace storage
+	BucketName *string `json:"bucketName,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Size of the data disk in the Hammerspace storage in GB
+	DataDiskSize *int32 `json:"dataDiskSize,omitempty"`
+	// Number of data nodes in the Hammerspace storage
+	DataNodeCount *int32 `json:"dataNodeCount,omitempty"`
+	// Number of data node disks in the Hammerspace storage
+	DataNodeDiskCount *int32 `json:"dataNodeDiskCount,omitempty"`
+	// Size of the data node disk in the Hammerspace storage in GB
+	DataNodeDiskSize *int32 `json:"dataNodeDiskSize,omitempty"`
+	// Instance type of the data nodes in the Hammerspace storage
+	DataNodeType *string `json:"dataNodeType,omitempty"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Number of DSX (Data Storage eXtension) instances in the Hammerspace storage
+	DsxInstanceCount *int32 `json:"dsxInstanceCount,omitempty"`
+	// Instance type of the DSX nodes in the Hammerspace storage
+	DsxInstanceType *string `json:"dsxInstanceType,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// Indicates if the Hammerspace storage is in high availability mode
+	HighAvailability *bool `json:"highAvailability,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Number of metadata disks in the Hammerspace storage
+	MetadataDiskCount *int32 `json:"metadataDiskCount,omitempty"`
+	// Size of the metadata disk in the Hammerspace storage in GB
+	MetadataDiskSize *int32 `json:"metadataDiskSize,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the Hammerspace storage is in
+	Region           *string       `json:"region,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Storage backend used by the Hammerspace storage
+	StorageBackend *string `json:"storageBackend,omitempty"`
+	// Type of the Hammerspace storage
+	StorageType *string `json:"storageType,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User string `json:"user"`
+	// Zone the Hammerspace storage is in
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type HeartbeatAccessManagement struct {
-	HomeDirectories      bool           `json:"homeDirectories"`
-	SSHKeys              bool           `json:"sshKeys"`
-	SudoAccess           bool           `json:"sudoAccess"`
+	// Enable pam_mkhomedir for automatic home directory creation
+	HomeDirectories bool `json:"homeDirectories"`
+	// Enable AuthorizedKeysCommand for SSH key lookup
+	SSHKeys bool `json:"sshKeys"`
+	// Enable sudoers.d for pwsudo group
+	SudoAccess bool `json:"sudoAccess"`
+	// Enable libnss_cache, nsswitch, and user/group cache file sync
 	UserPopulation       bool           `json:"userPopulation"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type HeartbeatGroup struct {
-	Gid                  int64          `json:"gid"`
-	Members              []string       `json:"members"`
-	Name                 string         `json:"name"`
+	// POSIX group ID
+	Gid int64 `json:"gid"`
+	// List of usernames in the group
+	Members []string `json:"members"`
+	// Group name
+	Name string `json:"name"`
+	// List of usernames with sudo access in the group
 	Sudoers              []string       `json:"sudoers"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type HeartbeatInputBody struct {
-	AgentVersion         string           `json:"agentVersion"`
-	Arch                 string           `json:"arch"`
-	Filesystems          []FilesystemInfo `json:"filesystems,omitempty"`
-	Hostname             string           `json:"hostname"`
-	IPAddresses          []string         `json:"ipAddresses"`
-	Metrics              *NodeMetrics     `json:"metrics,omitempty"`
-	Os                   string           `json:"os"`
-	OsRelease            *string          `json:"osRelease,omitempty"`
-	Scheduler            *SchedulerInfo   `json:"scheduler,omitempty"`
-	SystemInfo           *SystemInfo      `json:"systemInfo,omitempty"`
-	AdditionalProperties map[string]any   `json:"-,omitempty"`
+	// Agent version
+	AgentVersion string `json:"agentVersion"`
+	// Architecture
+	Arch string `json:"arch"`
+	// Mounted filesystems
+	Filesystems []FilesystemInfo `json:"filesystems,omitempty"`
+	// Node hostname
+	Hostname string `json:"hostname"`
+	// Node IP addresses
+	IPAddresses []string     `json:"ipAddresses"`
+	Metrics     *NodeMetrics `json:"metrics,omitempty"`
+	// Operating system
+	Os string `json:"os"`
+	// OS release name (e.g., Ubuntu 22.04)
+	OsRelease            *string        `json:"osRelease,omitempty"`
+	Scheduler            *SchedulerInfo `json:"scheduler,omitempty"`
+	SystemInfo           *SystemInfo    `json:"systemInfo,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type HeartbeatOutputBody struct {
-	AccessManagement     HeartbeatAccessManagement `json:"accessManagement"`
-	Groups               []HeartbeatGroup          `json:"groups,omitempty"`
-	NodeOverrides        map[string]any            `json:"nodeOverrides,omitempty"`
-	Status               string                    `json:"status"`
-	Users                []HeartbeatUser           `json:"users,omitempty"`
-	AdditionalProperties map[string]any            `json:"-,omitempty"`
+	AccessManagement HeartbeatAccessManagement `json:"accessManagement"`
+	// Groups with access to this cluster
+	Groups []HeartbeatGroup `json:"groups,omitempty"`
+	// Per-node access management overrides (only nodes with overrides)
+	NodeOverrides map[string]any `json:"nodeOverrides,omitempty"`
+	// Heartbeat status
+	Status string `json:"status"`
+	// Users with access to this cluster
+	Users                []HeartbeatUser `json:"users,omitempty"`
+	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
 type HeartbeatUser struct {
-	Gid                  int64          `json:"gid"`
-	Groups               []string       `json:"groups"`
-	Permissions          []string       `json:"permissions"`
-	Uid                  int64          `json:"uid"`
+	// Primary group ID
+	Gid int64 `json:"gid"`
+	// List of group names the user belongs to
+	Groups []string `json:"groups"`
+	// List of permissions (cluster:admin, cluster:sudo, cluster:login)
+	Permissions []string `json:"permissions"`
+	// POSIX user ID
+	Uid int64 `json:"uid"`
+	// Username
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type HelmChart struct {
-	AppVersion           string         `json:"appVersion"`
-	Chart                string         `json:"chart"`
-	Cluster              string         `json:"cluster"`
-	Name                 string         `json:"name"`
-	Namespace            string         `json:"namespace"`
-	Revision             int64          `json:"revision"`
-	Status               string         `json:"status"`
-	UpdatedAt            time.Time      `json:"updatedAt"`
+	// Application version
+	AppVersion string `json:"appVersion"`
+	// Chart name
+	Chart string `json:"chart"`
+	// Cluster where the Helm release is installed
+	Cluster string `json:"cluster"`
+	// Name of the Helm release
+	Name string `json:"name"`
+	// Namespace of the Helm release
+	Namespace string `json:"namespace"`
+	// Current revision number
+	Revision int64 `json:"revision"`
+	// Current status of the release
+	Status string `json:"status"`
+	// Last update time
+	UpdatedAt time.Time `json:"updatedAt"`
+	// Chart version
 	Version              string         `json:"version"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type HelmChartDetails struct {
-	Chart                string         `json:"chart"`
-	Name                 string         `json:"name"`
-	Namespace            string         `json:"namespace"`
-	Revision             int64          `json:"revision"`
-	Status               string         `json:"status"`
-	UpdatedAt            time.Time      `json:"updatedAt"`
+	// Chart name and version
+	Chart string `json:"chart"`
+	// Name of the Helm chart
+	Name string `json:"name"`
+	// Kubernetes namespace of the Helm chart
+	Namespace string `json:"namespace"`
+	// Current revision
+	Revision int64 `json:"revision"`
+	// Current status
+	Status string `json:"status"`
+	// Last update time
+	UpdatedAt time.Time `json:"updatedAt"`
+	// Chart version
 	Version              string         `json:"version"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type HelmChartHistoryEntry struct {
-	AppVersion           string         `json:"appVersion"`
-	Chart                string         `json:"chart"`
-	Namespace            string         `json:"namespace"`
-	Revision             int64          `json:"revision"`
-	Status               string         `json:"status"`
+	// Application version
+	AppVersion string `json:"appVersion"`
+	// Chart name and version
+	Chart string `json:"chart"`
+	// Kubernetes namespace
+	Namespace string `json:"namespace"`
+	// Revision number
+	Revision int64 `json:"revision"`
+	// Status of this revision
+	Status string `json:"status"`
+	// Update time
 	UpdatedAt            time.Time      `json:"updatedAt"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type HelmChartInstallBody struct {
-	CreateNamespace      bool           `json:"createNamespace"`
-	HelmChartName        string         `json:"helmChartName"`
-	HelmChartVersion     *string        `json:"helmChartVersion,omitempty"`
-	HelmReleaseName      string         `json:"helmReleaseName"`
-	HelmRepoURL          string         `json:"helmRepoUrl"`
+	// Whether to create the namespace if it doesn't exist
+	CreateNamespace bool `json:"createNamespace"`
+	// The name of the Helm chart
+	HelmChartName string `json:"helmChartName"`
+	// The version of the Helm chart (optional, defaults to latest)
+	HelmChartVersion *string `json:"helmChartVersion,omitempty"`
+	// The name for the Helm release
+	HelmReleaseName string `json:"helmReleaseName"`
+	// The URL of the Helm repository
+	HelmRepoURL string `json:"helmRepoUrl"`
+	// Array of key=value pairs for chart configuration
 	SetValues            []string       `json:"setValues"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type HelmChartRollbackBody struct {
+	// The revision number to rollback to
 	Revision             int64          `json:"revision"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type HelmChartValuesOutputBody struct {
+	// The Helm chart values in YAML format.
 	Values               string         `json:"values"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type HelmReleaseResponse struct {
-	AppVersion           string         `json:"appVersion"`
-	Chart                string         `json:"chart"`
-	Name                 string         `json:"name"`
-	Namespace            string         `json:"namespace"`
-	Revision             int64          `json:"revision"`
-	Status               string         `json:"status"`
-	Type                 string         `json:"type"`
+	// Application version
+	AppVersion string `json:"appVersion"`
+	// Chart name and version
+	Chart string `json:"chart"`
+	// Name of the Helm release
+	Name string `json:"name"`
+	// Kubernetes namespace of the Helm release
+	Namespace string `json:"namespace"`
+	// Current revision number
+	Revision int64 `json:"revision"`
+	// Current status of the release
+	Status string `json:"status"`
+	// Type of the release (always 'helm')
+	Type string `json:"type"`
+	// Last update time
 	UpdatedAt            time.Time      `json:"updatedAt"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Image struct {
-	Architecture         string         `json:"architecture"`
-	CreatedAt            *time.Time     `json:"createdAt,omitempty"`
-	Csp                  string         `json:"csp"`
-	CspID                string         `json:"cspId"`
-	ID                   *string        `json:"id,omitempty"`
-	Latest               *bool          `json:"latest,omitempty"`
-	Name                 string         `json:"name"`
-	Published            bool           `json:"published"`
-	Region               string         `json:"region"`
-	SizeGb               *int64         `json:"sizeGb,omitempty"`
-	Type                 string         `json:"type"`
+	// Image architecture
+	Architecture string `json:"architecture"`
+	// Creation timestamp (immutable)
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// Cloud service provider
+	Csp string `json:"csp"`
+	// Cloud provider specific image ID
+	CspID string `json:"cspId"`
+	// Unique identifier
+	ID *string `json:"id,omitempty"`
+	// Whether this is the image that gets used when using Latest on compute resources
+	Latest *bool `json:"latest,omitempty"`
+	// Image name
+	Name string `json:"name"`
+	// Whether the image is selectable on image dropdowns
+	Published bool `json:"published"`
+	// Region where the image is located
+	Region string `json:"region"`
+	// Image size in GB
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Image type
+	Type string `json:"type"`
+	// Last update timestamp
 	UpdatedAt            *time.Time     `json:"updatedAt,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -1664,58 +2602,101 @@ type Infrastructure struct {
 }
 
 type Instance struct {
-	Architecture          *string                `json:"architecture,omitempty"`
-	Csp                   string                 `json:"csp"`
-	CspID                 *string                `json:"cspId,omitempty"`
-	DebugMode             *bool                  `json:"debugMode,omitempty"`
-	Description           string                 `json:"description"`
-	DisplayName           string                 `json:"displayName"`
-	ExpiresAt             *time.Time             `json:"expiresAt,omitempty"`
-	Favorite              *bool                  `json:"favorite,omitempty"`
-	Group                 string                 `json:"group"`
-	Hostname              string                 `json:"hostname"`
-	ID                    *string                `json:"id,omitempty"`
-	Image                 *string                `json:"image,omitempty"`
-	InstanceType          string                 `json:"instanceType"`
-	IPAddress             string                 `json:"ipAddress"`
-	Name                  string                 `json:"name"`
-	Network               string                 `json:"network"`
-	Region                string                 `json:"region"`
-	RuntimeAlert          *RuntimeAlertInput     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit      *SessionCostLimitInput `json:"sessionCostLimit,omitempty"`
-	Sessionless           *string                `json:"sessionless,omitempty"`
-	SizeGb                int64                  `json:"sizeGb"`
-	Status                *string                `json:"status,omitempty"`
-	Tags                  []string               `json:"tags"`
-	Type                  *string                `json:"type,omitempty"`
-	User                  *string                `json:"user,omitempty"`
-	UserBootstrap         *string                `json:"userBootstrap,omitempty"`
-	UserBootstrapInstance *bool                  `json:"userBootstrapInstance,omitempty"`
-	WorkspaceMounts       []WorkspaceMount       `json:"workspaceMounts,omitempty"`
-	Zone                  string                 `json:"zone"`
-	AdditionalProperties  map[string]any         `json:"-,omitempty"`
+	// The architecture of the Instance.
+	Architecture *string `json:"architecture,omitempty"`
+	// The cloud service provider for the Instance.
+	Csp string `json:"csp"`
+	// The cloud service provider's unique identifier for the instance.
+	CspID *string `json:"cspId,omitempty"`
+	// Whether to enable debug mode for the Instance.
+	DebugMode *bool `json:"debugMode,omitempty"`
+	// The description of the Instance.
+	Description string `json:"description"`
+	// The display name of the Instance.
+	DisplayName string `json:"displayName"`
+	// The timestamp when the record of this instance will be automatically deleted (RFC3339 format).
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	// Whether this Instance is favorited by the user.
+	Favorite *bool `json:"favorite,omitempty"`
+	// The group to which the Instance will be associated.
+	Group string `json:"group"`
+	// The hostname of the Instance.
+	Hostname string `json:"hostname"`
+	// The unique identifier of the Instance.
+	ID *string `json:"id,omitempty"`
+	// The image name used to launch the Instance.
+	Image *string `json:"image,omitempty"`
+	// The type of the Instance.
+	InstanceType string `json:"instanceType"`
+	// The IP address of the Instance.
+	IPAddress string `json:"ipAddress"`
+	// The name of the Instance resource.
+	Name string `json:"name"`
+	// The network name to which the Instance is attached.
+	Network string `json:"network"`
+	// The region where the Instance will be provisioned.
+	Region           string                 `json:"region"`
+	RuntimeAlert     *RuntimeAlertInput     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit *SessionCostLimitInput `json:"sessionCostLimit,omitempty"`
+	// Indicates if the Instance is sessionless.
+	Sessionless *string `json:"sessionless,omitempty"`
+	// The root disk size of the Instance in GB.
+	SizeGb int64 `json:"sizeGb"`
+	// The status of the Instance.
+	Status *string `json:"status,omitempty"`
+	// The tags associated with the Instance.
+	Tags []string `json:"tags"`
+	// The type of the compute resource.
+	Type *string `json:"type,omitempty"`
+	// The user that owns this Instance.
+	User *string `json:"user,omitempty"`
+	// The user bootstrap script to be executed on Instance launch.
+	UserBootstrap *string `json:"userBootstrap,omitempty"`
+	// Whether to run the user bootstrap script on the Instance.
+	UserBootstrapInstance *bool `json:"userBootstrapInstance,omitempty"`
+	// The workspace mounts for the Instance.
+	WorkspaceMounts []WorkspaceMount `json:"workspaceMounts,omitempty"`
+	// The availability zone where the Instance will be provisioned.
+	Zone                 string         `json:"zone"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type IntPolicyOutput struct {
-	Level                string         `json:"level"`
-	Name                 *string        `json:"name,omitempty"`
+	// Level of the policy
+	Level string `json:"level"`
+	// Name of the policy
+	Name *string `json:"name,omitempty"`
+	// Value of the policy
 	Value                *int64         `json:"value,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type IP struct {
-	AttachedTo           *string        `json:"attachedTo,omitempty"`
-	Csp                  string         `json:"csp"`
-	Description          string         `json:"description"`
-	Group                string         `json:"group"`
-	ID                   *string        `json:"id,omitempty"`
-	IP                   *string        `json:"ip,omitempty"`
-	Name                 string         `json:"name"`
-	Network              string         `json:"network"`
-	ProvisionStatus      *string        `json:"provisionStatus,omitempty"`
-	Provisioned          *bool          `json:"provisioned,omitempty"`
-	Region               string         `json:"region"`
-	Tags                 []string       `json:"tags"`
+	// The resource to which this IP is attached.
+	AttachedTo *string `json:"attachedTo,omitempty"`
+	// The cloud service provider for the IP.
+	Csp string `json:"csp"`
+	// The description of the IP resource.
+	Description string `json:"description"`
+	// The group name to which the IP will be associated.
+	Group string `json:"group"`
+	// The unique identifier of the IP resource.
+	ID *string `json:"id,omitempty"`
+	// The IP address provisioned.
+	IP *string `json:"ip,omitempty"`
+	// The name of the IP resource.
+	Name string `json:"name"`
+	// The network name to which the IP is attached.
+	Network string `json:"network"`
+	// The current provisioning status of the IP.
+	ProvisionStatus *string `json:"provisionStatus,omitempty"`
+	// Whether the IP is provisioned.
+	Provisioned *bool `json:"provisioned,omitempty"`
+	// The region where the IP will be provisioned.
+	Region string `json:"region"`
+	// The tags associated with the IP resource.
+	Tags []string `json:"tags"`
+	// The username of the user that owns this resource.
 	User                 *string        `json:"user,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -1729,90 +2710,136 @@ type Item struct {
 }
 
 type Jwk struct {
-	Alg                  string         `json:"alg"`
-	E                    string         `json:"e"`
-	Kid                  string         `json:"kid"`
-	Kty                  string         `json:"kty"`
-	N                    string         `json:"n"`
+	// The alg member identifies the cryptographic algorithm family used with the key. Values defined by this specification are EC and RSA. Specific additional members are required to represent the key, depending upon the alg value. The alg value is case sensitive.
+	Alg string `json:"alg"`
+	// The exp member contains the exponent value for the RSA public key. It is represented as the base64url encoding of the value's big endian representation.
+	E string `json:"e"`
+	// The kid (Key ID) member can be used to match a specific key. This can be used, for instance, to choose among a set of keys within the JWK during key rollover. The kid value MAY correspond to a JWS kid value. The interpretation of the kid value is unspecified.
+	Kid string `json:"kid"`
+	// The kty (key type) member identifies the cryptographic algorithm family used with the key. Values defined by this specification are RSA and EC. The kty value is case sensitive.
+	Kty string `json:"kty"`
+	// The mod member contains the modulus value for the RSA public key. It is represented as the base64url encoding of the value's big endian representation.
+	N string `json:"n"`
+	// The use member identifies the intended use of the key. Values defined by this specification are sig (signature) and enc (encryption). Other values MAY be used. The use value is case sensitive.
 	Use                  string         `json:"use"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type JobInfo struct {
-	JobID                string         `json:"jobId"`
-	Name                 string         `json:"name"`
-	Nodes                string         `json:"nodes"`
-	Partition            string         `json:"partition"`
-	StartTime            *string        `json:"startTime,omitempty"`
-	State                string         `json:"state"`
-	TimeLimit            *string        `json:"timeLimit,omitempty"`
+	// Job ID
+	JobID string `json:"jobId"`
+	// Job name
+	Name string `json:"name"`
+	// Allocated nodes
+	Nodes string `json:"nodes"`
+	// Job partition
+	Partition string `json:"partition"`
+	// Job start time
+	StartTime *string `json:"startTime,omitempty"`
+	// Job state
+	State string `json:"state"`
+	// Job time limit
+	TimeLimit *string `json:"timeLimit,omitempty"`
+	// Job owner username
 	User                 string         `json:"user"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Jwks struct {
+	// List of keys used for JWT verification
 	Keys                 []Jwk          `json:"keys"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type KubernetesCpuMetrics struct {
-	Limit                *float64       `json:"limit,omitempty"`
-	Request              *float64       `json:"request,omitempty"`
+	// CPU limit in cores
+	Limit *float64 `json:"limit,omitempty"`
+	// CPU request in cores
+	Request *float64 `json:"request,omitempty"`
+	// CPU usage in cores
 	Usage                float64        `json:"usage"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type KubernetesMetricEntry struct {
-	Cpu                  KubernetesCpuMetrics   `json:"cpu"`
-	Memory               KubernetesUsageMetrics `json:"memory"`
-	Storage              KubernetesUsageMetrics `json:"storage"`
-	Timestamp            time.Time              `json:"timestamp"`
-	AdditionalProperties map[string]any         `json:"-,omitempty"`
+	Cpu     KubernetesCpuMetrics   `json:"cpu"`
+	Memory  KubernetesUsageMetrics `json:"memory"`
+	Storage KubernetesUsageMetrics `json:"storage"`
+	// Metric timestamp
+	Timestamp            time.Time      `json:"timestamp"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type KubernetesTunnelInfo struct {
-	Name                 *string        `json:"name,omitempty"`
-	Namespace            *string        `json:"namespace,omitempty"`
-	ResourceName         *string        `json:"resourceName,omitempty"`
+	// Kubernetes resource name.
+	Name *string `json:"name,omitempty"`
+	// Kubernetes namespace.
+	Namespace *string `json:"namespace,omitempty"`
+	// Kubernetes resource name.
+	ResourceName *string `json:"resourceName,omitempty"`
+	// Kubernetes resource type.
 	ResourceType         *string        `json:"resourceType,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type KubernetesUsageMetrics struct {
-	Limit                *float64       `json:"limit,omitempty"`
-	Request              *float64       `json:"request,omitempty"`
+	// Limit amount
+	Limit *float64 `json:"limit,omitempty"`
+	// Request amount
+	Request *float64 `json:"request,omitempty"`
+	// Usage amount
 	Usage                float64        `json:"usage"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type LanguageInputBody struct {
+	// User's preferred language
 	Language             string         `json:"language"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Ldap struct {
-	BaseDn               string         `json:"baseDN"`
-	ClientCert           string         `json:"clientCert"`
-	ClientKey            *string        `json:"clientKey,omitempty"`
-	DisplayName          string         `json:"displayName"`
-	Email                string         `json:"email"`
-	Filter               string         `json:"filter"`
-	FullName             string         `json:"fullName"`
-	ID                   string         `json:"id"`
-	Level                string         `json:"level"`
-	Name                 string         `json:"name"`
-	Server               string         `json:"server"`
-	Type                 string         `json:"type"`
-	UidNumber            *string        `json:"uidNumber,omitempty"`
-	UniqueIdentifier     string         `json:"uniqueIdentifier"`
-	UseServiceAccount    *bool          `json:"useServiceAccount"`
-	UseTLS               *bool          `json:"useTLS"`
+	// Base DN for LDAP authentication
+	BaseDn string `json:"baseDN"`
+	// Client certificate for LDAP authentication
+	ClientCert string `json:"clientCert"`
+	// Client secret of the LDAP authentication method
+	ClientKey *string `json:"clientKey,omitempty"`
+	// Display name of the LDAP authentication method
+	DisplayName string `json:"displayName"`
+	// Email for LDAP authentication
+	Email string `json:"email"`
+	// Filter for LDAP authentication
+	Filter string `json:"filter"`
+	// Full name for LDAP authentication
+	FullName string `json:"fullName"`
+	// ID of the LDAP authentication method
+	ID string `json:"id"`
+	// Level of the LDAP authentication method, e.g., organization or user
+	Level string `json:"level"`
+	// Name of the LDAP authentication method
+	Name string `json:"name"`
+	// LDAP server address
+	Server string `json:"server"`
+	// Type of the LDAP authentication method
+	Type string `json:"type"`
+	// LDAP attribute containing the Unix UID number for the user
+	UidNumber *string `json:"uidNumber,omitempty"`
+	// Unique identifier for LDAP authentication
+	UniqueIdentifier string `json:"uniqueIdentifier"`
+	// Whether to use service account for LDAP authentication
+	UseServiceAccount *bool `json:"useServiceAccount"`
+	// Whether to use TLS for LDAP authentication
+	UseTLS *bool `json:"useTLS"`
+	// Username for LDAP authentication
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type LicenseData struct {
-	Expiration           *time.Time     `json:"expiration,omitempty"`
+	// License expiration date, if available
+	Expiration *time.Time `json:"expiration,omitempty"`
+	// The platform license
 	License              string         `json:"license"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -1829,12 +2856,15 @@ type ListConversationsBody struct {
 }
 
 type ListModelsResponse struct {
+	// List of available model IDs
 	Models               []string       `json:"models"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ListOrgUsersOutputBody struct {
-	Total                int64          `json:"total"`
+	// Total count of users matching filters (before pagination)
+	Total int64 `json:"total"`
+	// List of organization users
 	Users                []OrgUser      `json:"users"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -1857,126 +2887,215 @@ type ListWorkflowRunsBody struct {
 }
 
 type LoginBannerResponse struct {
-	Body                 *string        `json:"body,omitempty"`
+	// Body text shown in the login page notice panel. Supports markdown formatting.
+	Body *string `json:"body,omitempty"`
+	// Title shown in the login page notice panel. When set, the org login page uses a split layout with the notice on the left.
 	Title                *string        `json:"title,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Lustre struct {
-	Csp                  string         `json:"csp"`
-	DisplayName          string         `json:"displayName"`
-	Ephemeral            *bool          `json:"ephemeral,omitempty"`
-	ID                   string         `json:"id"`
-	ImageURL             string         `json:"imageUrl"`
-	Name                 string         `json:"name"`
-	Namespace            string         `json:"namespace"`
-	Network              *string        `json:"network,omitempty"`
-	Performance          *int64         `json:"performance,omitempty"`
-	Region               *string        `json:"region,omitempty"`
-	Sessionless          bool           `json:"sessionless"`
-	Shared               []Shared       `json:"shared"`
-	SizeGb               *int64         `json:"sizeGb,omitempty"`
-	Status               string         `json:"status"`
-	Tags                 []string       `json:"tags"`
-	Team                 *string        `json:"team,omitempty"`
-	Type                 string         `json:"type"`
-	URI                  string         `json:"uri"`
+	// Cloud service provider of the Lustre
+	Csp string `json:"csp"`
+	// Display name of the Lustre
+	DisplayName string `json:"displayName"`
+	// Indicates if the Lustre is ephemeral
+	Ephemeral *bool `json:"ephemeral,omitempty"`
+	// Unique identifier of the Lustre
+	ID string `json:"id"`
+	// URL of the Lustre's image/icon
+	ImageURL string `json:"imageUrl"`
+	// Platform name of the Lustre
+	Name string `json:"name"`
+	// User who created the Lustre
+	Namespace string `json:"namespace"`
+	// VPC Network associated with the Lustre
+	Network *string `json:"network,omitempty"`
+	// Performance tier of the Lustre
+	Performance *int64 `json:"performance,omitempty"`
+	// Region of the Lustre
+	Region *string `json:"region,omitempty"`
+	// Indicates if the Lustre is sessionless
+	Sessionless bool `json:"sessionless"`
+	// List of groups with whom the Lustre is shared
+	Shared []Shared `json:"shared"`
+	// Size of the Lustre in GiB
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Current provision status of the Lustre
+	Status string `json:"status"`
+	// Tags associated with the Lustre
+	Tags []string `json:"tags"`
+	// Team to which the Lustre is billed to
+	Team *string `json:"team,omitempty"`
+	// Type of storage, should be 'lustre'
+	Type string `json:"type"`
+	// Parallel Works URI for the Lustre (pw://user/name)
+	URI string `json:"uri"`
+	// Zone of the Lustre
 	Zone                 *string        `json:"zone,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type MachineLearningWorkspace struct {
-	CreatedAt            *time.Time     `json:"createdAt,omitempty"`
-	Csp                  string         `json:"csp"`
-	Description          string         `json:"description"`
-	Endpoint             *string        `json:"endpoint,omitempty"`
-	Group                string         `json:"group"`
-	ID                   *string        `json:"id,omitempty"`
-	Link                 *string        `json:"link,omitempty"`
-	Name                 string         `json:"name"`
-	Network              string         `json:"network"`
-	ProvisionStatus      *string        `json:"provisionStatus,omitempty"`
-	Provisioned          *bool          `json:"provisioned,omitempty"`
-	Region               string         `json:"region"`
-	Tags                 []string       `json:"tags"`
-	User                 *string        `json:"user,omitempty"`
+	// The creation timestamp of the Machine Learning Workspace.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// The cloud service provider for the Machine Learning Workspace.
+	Csp string `json:"csp"`
+	// The description of the Machine Learning Workspace.
+	Description string `json:"description"`
+	// The endpoint URL to access the Machine Learning Workspace Studio.
+	Endpoint *string `json:"endpoint,omitempty"`
+	// The group to which the Machine Learning Workspace will be associated.
+	Group string `json:"group"`
+	// The unique identifier of the resource.
+	ID *string `json:"id,omitempty"`
+	// The link to the Machine Learning Workspace.
+	Link *string `json:"link,omitempty"`
+	// The name of the Machine Learning Workspace resource.
+	Name string `json:"name"`
+	// The network name to which the Machine Learning Workspace is attached.
+	Network string `json:"network"`
+	// The current provisioning status of the Machine Learning Workspace.
+	ProvisionStatus *string `json:"provisionStatus,omitempty"`
+	// Whether the Machine Learning Workspace is provisioned.
+	Provisioned *bool `json:"provisioned,omitempty"`
+	// The region where the Machine Learning Workspace will be provisioned.
+	Region string `json:"region"`
+	// The tags associated with the Machine Learning Workspace.
+	Tags []string `json:"tags"`
+	// Username of the user that owns the resource
+	User *string `json:"user,omitempty"`
+	// The workspace ID associated with the Machine Learning Workspace Studio.
 	WorkspaceID          *string        `json:"workspaceId,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ManagedClusterOutputBody struct {
-	AccessManagement     *AccessManagementBody `json:"accessManagement,omitempty"`
-	ActiveNodes          int64                 `json:"activeNodes"`
-	ConnectionString     *string               `json:"connectionString,omitempty"`
-	CreatedAt            time.Time             `json:"createdAt"`
-	Description          *string               `json:"description,omitempty"`
-	DisplayName          *string               `json:"displayName,omitempty"`
-	ID                   string                `json:"id"`
-	ImageURL             *string               `json:"imageUrl,omitempty"`
-	IPAddress            *string               `json:"ipAddress,omitempty"`
-	LoginNode            *string               `json:"loginNode,omitempty"`
-	Markdown             *string               `json:"markdown,omitempty"`
-	MaxNodes             int64                 `json:"maxNodes"`
-	Name                 string                `json:"name"`
-	Nodes                []ManagedNode         `json:"nodes"`
-	Partitions           []ManagedPartition    `json:"partitions,omitempty"`
-	ProxySSH             bool                  `json:"proxySsh"`
-	SchedulerJobs        []ManagedSchedulerJob `json:"schedulerJobs,omitempty"`
-	Tags                 []string              `json:"tags,omitempty"`
-	Type                 string                `json:"type"`
-	AdditionalProperties map[string]any        `json:"-,omitempty"`
+	AccessManagement *AccessManagementBody `json:"accessManagement,omitempty"`
+	// Number of nodes currently online
+	ActiveNodes int64 `json:"activeNodes"`
+	// SSH connection string (username@ip)
+	ConnectionString *string `json:"connectionString,omitempty"`
+	// Creation time
+	CreatedAt time.Time `json:"createdAt"`
+	// Description
+	Description *string `json:"description,omitempty"`
+	// Display name
+	DisplayName *string `json:"displayName,omitempty"`
+	// Cluster ID
+	ID string `json:"id"`
+	// Custom thumbnail image URL
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// IP address of the login node
+	IPAddress *string `json:"ipAddress,omitempty"`
+	// Hostname of the login node for SSH, or 'user-workspace'
+	LoginNode *string `json:"loginNode,omitempty"`
+	// Markdown content for additional documentation/notes
+	Markdown *string `json:"markdown,omitempty"`
+	// Total number of registered nodes
+	MaxNodes int64 `json:"maxNodes"`
+	// Cluster name
+	Name string `json:"name"`
+	// Connected nodes
+	Nodes []ManagedNode `json:"nodes"`
+	// Partitions
+	Partitions []ManagedPartition `json:"partitions,omitempty"`
+	// Force SSH connections to proxy through the platform
+	ProxySSH bool `json:"proxySsh"`
+	// Active scheduler jobs
+	SchedulerJobs []ManagedSchedulerJob `json:"schedulerJobs,omitempty"`
+	// Tags
+	Tags []string `json:"tags,omitempty"`
+	// Cluster type
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ManagedClusterPermissionsResponse struct {
-	Groups               map[string]any `json:"groups"`
+	// Map of group names to permissions
+	Groups map[string]any `json:"groups"`
+	// Map of permission names to whether entire organization has that access
 	Organization         map[string]any `json:"organization"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ManagedFilesystem struct {
-	Device               string         `json:"device"`
-	Free                 int64          `json:"free"`
-	Fstype               string         `json:"fstype"`
-	Mountpoint           string         `json:"mountpoint"`
-	Total                int64          `json:"total"`
-	Used                 int64          `json:"used"`
+	// Device name
+	Device string `json:"device"`
+	// Free space in bytes
+	Free int64 `json:"free"`
+	// Filesystem type
+	Fstype string `json:"fstype"`
+	// Mount point path
+	Mountpoint string `json:"mountpoint"`
+	// Total space in bytes
+	Total int64 `json:"total"`
+	// Used space in bytes
+	Used int64 `json:"used"`
+	// Usage percentage
 	UsedPct              float64        `json:"usedPct"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ManagedNode struct {
-	AgentVersion         *string              `json:"agentVersion,omitempty"`
-	Arch                 *string              `json:"arch,omitempty"`
-	Filesystems          []ManagedFilesystem  `json:"filesystems,omitempty"`
-	Hostname             string               `json:"hostname"`
-	IPAddress            *string              `json:"ipAddress,omitempty"`
-	IPAddresses          []string             `json:"ipAddresses"`
-	IsController         bool                 `json:"isController"`
-	LastHeartbeat        time.Time            `json:"lastHeartbeat"`
-	Metrics              *ManagedNodeMetrics  `json:"metrics,omitempty"`
-	Os                   *string              `json:"os,omitempty"`
-	OsRelease            *string              `json:"osRelease,omitempty"`
-	RegisteredAt         time.Time            `json:"registeredAt"`
-	Settings             *ManagedNodeSettings `json:"settings,omitempty"`
-	Status               string               `json:"status"`
-	SystemInfo           *ManagedSystemInfo   `json:"systemInfo,omitempty"`
-	AdditionalProperties map[string]any       `json:"-,omitempty"`
+	// Agent version
+	AgentVersion *string `json:"agentVersion,omitempty"`
+	// Architecture
+	Arch *string `json:"arch,omitempty"`
+	// Mounted filesystems
+	Filesystems []ManagedFilesystem `json:"filesystems,omitempty"`
+	// Node hostname
+	Hostname string `json:"hostname"`
+	// Primary IP address
+	IPAddress *string `json:"ipAddress,omitempty"`
+	// Node IP addresses
+	IPAddresses []string `json:"ipAddresses"`
+	// Is controller node
+	IsController bool `json:"isController"`
+	// Last heartbeat time
+	LastHeartbeat time.Time           `json:"lastHeartbeat"`
+	Metrics       *ManagedNodeMetrics `json:"metrics,omitempty"`
+	// Operating system
+	Os *string `json:"os,omitempty"`
+	// OS release name
+	OsRelease *string `json:"osRelease,omitempty"`
+	// Registration time
+	RegisteredAt time.Time            `json:"registeredAt"`
+	Settings     *ManagedNodeSettings `json:"settings,omitempty"`
+	// Node status (online, offline)
+	Status               string             `json:"status"`
+	SystemInfo           *ManagedSystemInfo `json:"systemInfo,omitempty"`
+	AdditionalProperties map[string]any     `json:"-,omitempty"`
 }
 
 type ManagedNodeMetrics struct {
-	CpuUsage             float64        `json:"cpuUsage"`
-	DiskFree             int64          `json:"diskFree"`
-	DiskUsage            float64        `json:"diskUsage"`
-	DiskUsed             int64          `json:"diskUsed"`
-	LoadAvg1             float64        `json:"loadAvg1"`
-	LoadAvg15            float64        `json:"loadAvg15"`
-	LoadAvg5             float64        `json:"loadAvg5"`
-	MemoryFree           int64          `json:"memoryFree"`
-	MemoryUsage          float64        `json:"memoryUsage"`
-	MemoryUsed           int64          `json:"memoryUsed"`
-	NetworkRxBytes       int64          `json:"networkRxBytes"`
-	NetworkTxBytes       int64          `json:"networkTxBytes"`
-	Processes            int64          `json:"processes"`
+	// CPU usage percentage
+	CpuUsage float64 `json:"cpuUsage"`
+	// Disk free in bytes
+	DiskFree int64 `json:"diskFree"`
+	// Disk usage percentage
+	DiskUsage float64 `json:"diskUsage"`
+	// Disk used in bytes
+	DiskUsed int64 `json:"diskUsed"`
+	// 1 minute load average
+	LoadAvg1 float64 `json:"loadAvg1"`
+	// 15 minute load average
+	LoadAvg15 float64 `json:"loadAvg15"`
+	// 5 minute load average
+	LoadAvg5 float64 `json:"loadAvg5"`
+	// Memory free in bytes
+	MemoryFree int64 `json:"memoryFree"`
+	// Memory usage percentage
+	MemoryUsage float64 `json:"memoryUsage"`
+	// Memory used in bytes
+	MemoryUsed int64 `json:"memoryUsed"`
+	// Total bytes received
+	NetworkRxBytes int64 `json:"networkRxBytes"`
+	// Total bytes transmitted
+	NetworkTxBytes int64 `json:"networkTxBytes"`
+	// Number of running processes
+	Processes int64 `json:"processes"`
+	// System uptime in seconds
 	Uptime               int64          `json:"uptime"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -1987,66 +3106,99 @@ type ManagedNodeSettings struct {
 }
 
 type ManagedPartition struct {
-	Name                 string         `json:"name"`
-	Nodes                int64          `json:"nodes"`
+	// Partition name
+	Name string `json:"name"`
+	// Number of nodes
+	Nodes int64 `json:"nodes"`
+	// Partition state
 	State                string         `json:"state"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ManagedSchedulerJob struct {
-	JobID                string         `json:"jobId"`
-	Name                 string         `json:"name"`
-	Nodes                string         `json:"nodes"`
-	Partition            string         `json:"partition"`
-	StartTime            *string        `json:"startTime,omitempty"`
-	State                string         `json:"state"`
-	TimeLimit            *string        `json:"timeLimit,omitempty"`
+	// Job ID
+	JobID string `json:"jobId"`
+	// Job name
+	Name string `json:"name"`
+	// Node list
+	Nodes string `json:"nodes"`
+	// Partition name
+	Partition string `json:"partition"`
+	// Start time
+	StartTime *string `json:"startTime,omitempty"`
+	// Job state
+	State string `json:"state"`
+	// Time limit
+	TimeLimit *string `json:"timeLimit,omitempty"`
+	// Job owner
 	User                 string         `json:"user"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ManagedSystemInfo struct {
-	CpuCores             int64          `json:"cpuCores"`
-	CpuModel             *string        `json:"cpuModel,omitempty"`
-	DiskTotal            int64          `json:"diskTotal"`
+	// Number of CPU cores
+	CpuCores int64 `json:"cpuCores"`
+	// CPU model name
+	CpuModel *string `json:"cpuModel,omitempty"`
+	// Total disk space in bytes
+	DiskTotal int64 `json:"diskTotal"`
+	// Total memory in bytes
 	MemoryTotal          int64          `json:"memoryTotal"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type MemberBodyInput struct {
+	// The username of the member to add.
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type MemberDetail struct {
-	Email                string         `json:"email"`
-	ID                   string         `json:"id"`
+	// The member's email address.
+	Email string `json:"email"`
+	// The member's user ID.
+	ID string `json:"id"`
+	// The member's username.
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type MessageResponse struct {
-	Attachments          []AttachmentResponse `json:"attachments,omitempty"`
-	Content              *string              `json:"content"`
-	ID                   string               `json:"id"`
-	Model                *string              `json:"model"`
-	ParentID             *string              `json:"parentId"`
-	ProviderID           *string              `json:"providerId"`
-	Reasoning            *string              `json:"reasoning,omitempty"`
-	ReasoningDuration    *float64             `json:"reasoningDuration,omitempty"`
-	Role                 string               `json:"role"`
-	Timestamp            time.Time            `json:"timestamp"`
-	TokensUsed           *Usage               `json:"tokensUsed,omitempty"`
-	ToolCallID           *string              `json:"toolCallId,omitempty"`
-	ToolCalls            []ToolCall           `json:"toolCalls,omitempty"`
-	AdditionalProperties map[string]any       `json:"-,omitempty"`
+	// Attachment details
+	Attachments []AttachmentResponse `json:"attachments,omitempty"`
+	// Message content
+	Content *string `json:"content"`
+	// Message UUID
+	ID string `json:"id"`
+	// Model used
+	Model *string `json:"model"`
+	// Parent message ID
+	ParentID *string `json:"parentId"`
+	// Provider ID
+	ProviderID *string `json:"providerId"`
+	// Reasoning/thinking content from the model
+	Reasoning *string `json:"reasoning,omitempty"`
+	// Reasoning duration in milliseconds
+	ReasoningDuration *float64 `json:"reasoningDuration,omitempty"`
+	// Message role
+	Role string `json:"role"`
+	// Message timestamp
+	Timestamp  time.Time `json:"timestamp"`
+	TokensUsed *Usage    `json:"tokensUsed,omitempty"`
+	// Tool call ID
+	ToolCallID *string `json:"toolCallId,omitempty"`
+	// Tool calls
+	ToolCalls            []ToolCall     `json:"toolCalls,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type MetricEntry struct {
-	Cpu                  CpuMetrics     `json:"cpu"`
-	Hostname             string         `json:"hostname"`
-	Memory               UsageMetrics   `json:"memory"`
-	Storage              *UsageMetrics  `json:"storage,omitempty"`
+	Cpu CpuMetrics `json:"cpu"`
+	// Hostname of the node
+	Hostname string        `json:"hostname"`
+	Memory   UsageMetrics  `json:"memory"`
+	Storage  *UsageMetrics `json:"storage,omitempty"`
+	// Time when the metric was recorded
 	Timestamp            time.Time      `json:"timestamp"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -2073,15 +3225,21 @@ type MetricsDataPoint struct {
 }
 
 type MfaLoginInputBody struct {
-	MfaMethod            string         `json:"mfaMethod"`
+	// Type of MFA method to verify
+	MfaMethod string `json:"mfaMethod"`
+	// MFA verification values (e.g., code for OTP)
 	Values               map[string]any `json:"values"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type MfaSettingResponse struct {
-	Enabled              bool           `json:"enabled"`
-	ID                   string         `json:"id"`
-	Type                 string         `json:"type"`
+	// Whether this MFA method is enabled
+	Enabled bool `json:"enabled"`
+	// MFA setting ID
+	ID string `json:"id"`
+	// MFA method type (e.g., otp)
+	Type string `json:"type"`
+	// Last update timestamp
 	UpdatedAt            time.Time      `json:"updatedAt"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -2096,25 +3254,41 @@ type MigrationRegistryItem struct {
 }
 
 type MigrationRunLogResponse struct {
-	Actor                *string                 `json:"actor"`
-	CreatedAt            *time.Time              `json:"createdAt"`
-	EndedAt              *time.Time              `json:"endedAt,omitempty"`
-	Error                *string                 `json:"error,omitempty"`
-	ID                   string                  `json:"id"`
-	MongoDone            *bool                   `json:"mongoDone"`
-	PostgresDone         *bool                   `json:"postgresDone"`
-	StartedAt            *time.Time              `json:"startedAt"`
-	Status               *string                 `json:"status"`
-	Steps                []MigrationStepResponse `json:"steps"`
-	UpdatedAt            *time.Time              `json:"updatedAt"`
-	AdditionalProperties map[string]any          `json:"-,omitempty"`
+	// Who initiated the migration (auto or username)
+	Actor *string `json:"actor"`
+	// When the log entry was created
+	CreatedAt *time.Time `json:"createdAt"`
+	// When the migration run completed
+	EndedAt *time.Time `json:"endedAt,omitempty"`
+	// Error message if migration failed
+	Error *string `json:"error,omitempty"`
+	// Unique identifier for the migration run
+	ID string `json:"id"`
+	// Whether Mongo migrations completed
+	MongoDone *bool `json:"mongoDone"`
+	// Whether Postgres migrations completed
+	PostgresDone *bool `json:"postgresDone"`
+	// When the migration run started
+	StartedAt *time.Time `json:"startedAt"`
+	// Migration run status (running, ok, error)
+	Status *string `json:"status"`
+	// Individual migration steps executed
+	Steps []MigrationStepResponse `json:"steps"`
+	// When the log entry was last updated
+	UpdatedAt            *time.Time     `json:"updatedAt"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type MigrationStepResponse struct {
-	EndedAt              *time.Time     `json:"endedAt,omitempty"`
-	Message              *string        `json:"message,omitempty"`
-	Name                 *string        `json:"name"`
-	StartedAt            *time.Time     `json:"startedAt"`
+	// When the step completed
+	EndedAt *time.Time `json:"endedAt,omitempty"`
+	// Step message or error details
+	Message *string `json:"message,omitempty"`
+	// Name of the migration step
+	Name *string `json:"name"`
+	// When the step started
+	StartedAt *time.Time `json:"startedAt"`
+	// Step status (running, ok, error)
 	Status               *string        `json:"status"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -2137,159 +3311,257 @@ type ModelsResponse struct {
 }
 
 type MountWorkspaceDirectoryBody struct {
-	ClusterPath          string         `json:"clusterPath"`
+	// The cluster directory to mount to the workspace.
+	ClusterPath string `json:"clusterPath"`
+	// The folder in the workspace to mount to the cluster.
 	WorkspacePath        string         `json:"workspacePath"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NamespaceResponse struct {
-	Cluster              string         `json:"cluster"`
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// List of namespaces in the cluster
 	Namespaces           []string       `json:"namespaces"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NamespacesBody struct {
-	Errors               []ClusterError      `json:"errors,omitempty"`
-	Metadata             NamespacesMetadata  `json:"metadata"`
-	Namespaces           []string            `json:"namespaces"`
+	// List of cluster errors, if any
+	Errors   []ClusterError     `json:"errors,omitempty"`
+	Metadata NamespacesMetadata `json:"metadata"`
+	// Unique list of namespaces across all clusters
+	Namespaces []string `json:"namespaces"`
+	// Namespaces grouped by cluster
 	NamespacesByCluster  []NamespaceResponse `json:"namespacesByCluster"`
 	AdditionalProperties map[string]any      `json:"-,omitempty"`
 }
 
 type NamespacesMetadata struct {
-	SuccessfulClusters   int64          `json:"successfulClusters"`
-	TotalClusters        int64          `json:"totalClusters"`
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total number of clusters queried
+	TotalClusters int64 `json:"totalClusters"`
+	// Total unique namespaces across all clusters
 	TotalNamespaces      int64          `json:"totalNamespaces"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NetAppOntap struct {
-	AttachedTo            []StorageAttachment `json:"attachedTo,omitempty"`
-	Csp                   string              `json:"csp"`
-	CurrentlyProvisioning bool                `json:"currentlyProvisioning"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	GovCloud              *bool               `json:"govCloud,omitempty"`
-	Group                 *string             `json:"group,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	Name                  string              `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	ProvisionError        *string             `json:"provisionError,omitempty"`
-	Provisioned           bool                `json:"provisioned"`
-	RuntimeAlert          *RunAlert           `json:"runtimeAlert,omitempty"`
-	ServerAddress         *string             `json:"serverAddress,omitempty"`
-	SessionCostAlert      *SessionAlert       `json:"sessionCostAlert,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Shared                []Shared            `json:"shared"`
-	Status                *string             `json:"status,omitempty"`
-	Svms                  []OntapSvm          `json:"svms,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Type                  string              `json:"type"`
-	User                  string              `json:"user"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned  bool      `json:"provisioned"`
+	RuntimeAlert *RunAlert `json:"runtimeAlert,omitempty"`
+	// IP address of the NetApp ONTAP management host
+	ServerAddress    *string       `json:"serverAddress,omitempty"`
+	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// List of Storage Virtual Machines (SVMs) and their aggregates
+	Svms []OntapSvm `json:"svms,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NetAppOntapResponse struct {
-	Csp                  string          `json:"csp"`
-	ID                   string          `json:"id"`
-	Name                 string          `json:"name"`
-	Namespace            string          `json:"namespace"`
-	Provisioned          bool            `json:"provisioned"`
-	Type                 string          `json:"type"`
+	// Cloud service provider
+	Csp string `json:"csp"`
+	// Unique identifier of the NetApp ONTAP
+	ID string `json:"id"`
+	// Name of the NetApp ONTAP
+	Name string `json:"name"`
+	// User namespace
+	Namespace string `json:"namespace"`
+	// Whether the NetApp ONTAP is provisioned
+	Provisioned bool `json:"provisioned"`
+	// Storage type
+	Type string `json:"type"`
+	// List of volumes
 	Volumes              []VolumeSummary `json:"volumes,omitempty"`
 	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
 type Network struct {
-	CloudAccount          string         `json:"cloudAccount"`
-	CreatedAt             time.Time      `json:"createdAt"`
-	Csp                   string         `json:"csp"`
-	CspID                 *string        `json:"cspId,omitempty"`
-	CurrentlyProvisioning bool           `json:"currentlyProvisioning"`
-	Description           string         `json:"description"`
-	DnsZoneID             *string        `json:"dnsZoneId,omitempty"`
-	DnszoneName           string         `json:"dnszoneName"`
-	ID                    string         `json:"id"`
-	Name                  string         `json:"name"`
-	NetworkName           *string        `json:"networkName,omitempty"`
-	Organization          string         `json:"organization"`
-	Provisioned           bool           `json:"provisioned"`
-	ProvisioningMode      string         `json:"provisioningMode"`
-	Regions               []string       `json:"regions"`
-	Tags                  []string       `json:"tags"`
-	TransitGatewayID      string         `json:"transitGatewayId"`
-	AdditionalProperties  map[string]any `json:"-,omitempty"`
+	// The ID of the cloud account associated with the network.
+	CloudAccount string `json:"cloudAccount"`
+	// The timestamp when the network was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The cloud service provider for the network.
+	Csp   string  `json:"csp"`
+	CspID *string `json:"cspId,omitempty"`
+	// Whether the network is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// The description of the network.
+	Description string  `json:"description"`
+	DnsZoneID   *string `json:"dnsZoneId,omitempty"`
+	// The DNS zone name associated with the network.
+	DnszoneName string `json:"dnszoneName"`
+	// The network ID.
+	ID string `json:"id"`
+	// The network name.
+	Name        string  `json:"name"`
+	NetworkName *string `json:"networkName,omitempty"`
+	// The ID of the organization that owns the network.
+	Organization string `json:"organization"`
+	// Whether the network has been successfully provisioned.
+	Provisioned bool `json:"provisioned"`
+	// The provisioning mode of the network.
+	ProvisioningMode string `json:"provisioningMode"`
+	// The list of regions available for the network.
+	Regions []string `json:"regions"`
+	// The tags associated with the network.
+	Tags []string `json:"tags"`
+	// The ID of the transit gateway associated with the network.
+	TransitGatewayID     string         `json:"transitGatewayId"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NetworkPermissions struct {
-	Groups               []string       `json:"groups"`
+	// The names of the groups that have access
+	Groups []string `json:"groups"`
+	// Whether the organization has access
 	Organization         bool           `json:"organization"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NetworkRegion struct {
-	Cidr                 string         `json:"cidr"`
+	// CIDR block for the network in this region
+	Cidr string `json:"cidr"`
+	// Region for the network
 	Region               string         `json:"region"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Nfs struct {
-	Csp                  string         `json:"csp"`
-	DisplayName          string         `json:"displayName"`
-	ID                   string         `json:"id"`
-	ImageURL             string         `json:"imageUrl"`
-	Name                 string         `json:"name"`
-	Namespace            string         `json:"namespace"`
-	Shared               []Shared       `json:"shared"`
-	SizeGb               *int64         `json:"sizeGb,omitempty"`
-	Status               string         `json:"status"`
-	Tags                 []string       `json:"tags"`
-	Type                 string         `json:"type"`
+	// Cloud service provider of the NFS
+	Csp string `json:"csp"`
+	// Display name of the NFS
+	DisplayName string `json:"displayName"`
+	// Unique identifier of the NFS
+	ID string `json:"id"`
+	// URL of the NFS's image/icon
+	ImageURL string `json:"imageUrl"`
+	// Platform name of the NFS
+	Name string `json:"name"`
+	// User who created the NFS
+	Namespace string `json:"namespace"`
+	// List of groups with whom the NFS is shared
+	Shared []Shared `json:"shared"`
+	// Size of the NFS in GiB
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Current provision status of the NFS
+	Status string `json:"status"`
+	// Tags associated with the NFS
+	Tags []string `json:"tags"`
+	// Type of storage, should be 'nfs'
+	Type string `json:"type"`
+	// Parallel Works URI for the NFS (pw://user/name)
 	URI                  string         `json:"uri"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NodeAccessManagementBody struct {
-	HomeDirectories      *bool          `json:"homeDirectories,omitempty"`
-	SSHKeys              *bool          `json:"sshKeys,omitempty"`
-	SudoAccess           *bool          `json:"sudoAccess,omitempty"`
+	// Enable pam_mkhomedir for automatic home directory creation
+	HomeDirectories *bool `json:"homeDirectories,omitempty"`
+	// Enable AuthorizedKeysCommand for SSH key lookup
+	SSHKeys *bool `json:"sshKeys,omitempty"`
+	// Enable sudoers.d for pwsudo group
+	SudoAccess *bool `json:"sudoAccess,omitempty"`
+	// Enable libnss_cache, nsswitch, and user/group cache file sync
 	UserPopulation       *bool          `json:"userPopulation,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NodeMetrics struct {
-	CpuUsage             float64        `json:"cpuUsage"`
-	DiskFree             int64          `json:"diskFree"`
-	DiskUsage            float64        `json:"diskUsage"`
-	DiskUsed             int64          `json:"diskUsed"`
-	LoadAvg1             float64        `json:"loadAvg1"`
-	LoadAvg15            float64        `json:"loadAvg15"`
-	LoadAvg5             float64        `json:"loadAvg5"`
-	MemoryFree           int64          `json:"memoryFree"`
-	MemoryUsage          float64        `json:"memoryUsage"`
-	MemoryUsed           int64          `json:"memoryUsed"`
-	NetworkRxBytes       int64          `json:"networkRxBytes"`
-	NetworkTxBytes       int64          `json:"networkTxBytes"`
-	Processes            int64          `json:"processes"`
+	// CPU usage percentage
+	CpuUsage float64 `json:"cpuUsage"`
+	// Free disk space in bytes
+	DiskFree int64 `json:"diskFree"`
+	// Disk usage percentage
+	DiskUsage float64 `json:"diskUsage"`
+	// Used disk space in bytes
+	DiskUsed int64 `json:"diskUsed"`
+	// 1-minute load average
+	LoadAvg1 float64 `json:"loadAvg1"`
+	// 15-minute load average
+	LoadAvg15 float64 `json:"loadAvg15"`
+	// 5-minute load average
+	LoadAvg5 float64 `json:"loadAvg5"`
+	// Free memory in bytes
+	MemoryFree int64 `json:"memoryFree"`
+	// Memory usage percentage
+	MemoryUsage float64 `json:"memoryUsage"`
+	// Used memory in bytes
+	MemoryUsed int64 `json:"memoryUsed"`
+	// Total bytes received
+	NetworkRxBytes int64 `json:"networkRxBytes"`
+	// Total bytes transmitted
+	NetworkTxBytes int64 `json:"networkTxBytes"`
+	// Total running processes
+	Processes int64 `json:"processes"`
+	// System uptime in seconds
 	Uptime               int64          `json:"uptime"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NodeResponse struct {
-	Allocatable             map[string]any `json:"allocatable"`
-	Architecture            string         `json:"architecture"`
-	Capacity                map[string]any `json:"capacity"`
-	Cluster                 string         `json:"cluster"`
-	ContainerRuntimeVersion string         `json:"containerRuntimeVersion"`
-	InternalIP              string         `json:"internalIP"`
-	KernelVersion           string         `json:"kernelVersion"`
-	KubernetesVersion       string         `json:"kubernetesVersion"`
-	Labels                  map[string]any `json:"labels"`
-	Name                    string         `json:"name"`
-	OperatingSystem         string         `json:"operatingSystem"`
-	OsImage                 string         `json:"osImage"`
-	AdditionalProperties    map[string]any `json:"-,omitempty"`
+	// Resource allocatable of the node
+	Allocatable map[string]any `json:"allocatable"`
+	// Architecture of the node
+	Architecture string `json:"architecture"`
+	// Resource capacity of the node
+	Capacity map[string]any `json:"capacity"`
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// Container runtime version running on the node
+	ContainerRuntimeVersion string `json:"containerRuntimeVersion"`
+	// Internal IP address of the node
+	InternalIP string `json:"internalIP"`
+	// Kernel version running on the node
+	KernelVersion string `json:"kernelVersion"`
+	// Kubernetes version running on the node
+	KubernetesVersion string `json:"kubernetesVersion"`
+	// Labels assigned to the node
+	Labels map[string]any `json:"labels"`
+	// Name of the node
+	Name string `json:"name"`
+	// Operating system running on the node
+	OperatingSystem string `json:"operatingSystem"`
+	// Operating system image running on the node
+	OsImage              string         `json:"osImage"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NodeSettingsBody struct {
@@ -2298,46 +3570,66 @@ type NodeSettingsBody struct {
 }
 
 type NodesBody struct {
-	Errors               []ClusterError `json:"errors,omitempty"`
-	Metadata             NodesMetadata  `json:"metadata"`
+	// List of cluster errors, if any
+	Errors   []ClusterError `json:"errors,omitempty"`
+	Metadata NodesMetadata  `json:"metadata"`
+	// List of nodes
 	Nodes                []NodeResponse `json:"nodes"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NodesMetadata struct {
-	SuccessfulClusters   int64          `json:"successfulClusters"`
-	TotalClusters        int64          `json:"totalClusters"`
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total number of clusters queried
+	TotalClusters int64 `json:"totalClusters"`
+	// Total number of nodes returned
 	TotalNodes           int64          `json:"totalNodes"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Notification struct {
-	CreatedAt            string         `json:"createdAt"`
-	Delivered            bool           `json:"delivered"`
-	ID                   string         `json:"id"`
-	Message              string         `json:"message"`
-	Read                 bool           `json:"read"`
-	Title                string         `json:"title"`
-	Type                 string         `json:"type"`
+	// Creation timestamp of the notification.
+	CreatedAt string `json:"createdAt"`
+	// Delivery status of the notification.
+	Delivered bool `json:"delivered"`
+	// ID of the notification.
+	ID string `json:"id"`
+	// Message content of the notification.
+	Message string `json:"message"`
+	// Read status of the notification.
+	Read bool `json:"read"`
+	// Title of the notification.
+	Title string `json:"title"`
+	// Type/category of the notification.
+	Type string `json:"type"`
+	// User associated with the notification.
 	User                 string         `json:"user"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NotificationCategory struct {
-	Category             string               `json:"category"`
-	Description          string               `json:"description"`
+	// Category name.
+	Category string `json:"category"`
+	// Category description.
+	Description string `json:"description"`
+	// Available options in this category.
 	Options              []NotificationOption `json:"options"`
 	AdditionalProperties map[string]any       `json:"-,omitempty"`
 }
 
 type NotificationChannelSettings struct {
-	Email                bool           `json:"email"`
+	// Enable email notifications for this type.
+	Email bool `json:"email"`
+	// Enable web notifications for this type.
 	Web                  bool           `json:"web"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type NotificationOption struct {
-	Name                 string         `json:"name"`
+	// Display name of the notification option.
+	Name string `json:"name"`
+	// Value of the notification option.
 	Value                string         `json:"value"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -2350,52 +3642,85 @@ type NotificationSettings struct {
 }
 
 type Oidc struct {
-	AllowNewUserCreation    *bool          `json:"allowNewUserCreation,omitempty"`
-	AuthorizationEndpoint   *string        `json:"authorizationEndpoint,omitempty"`
-	ClientID                string         `json:"clientId"`
-	ClientSecret            *string        `json:"clientSecret,omitempty"`
-	DiscoverEndpoints       *bool          `json:"discoverEndpoints"`
-	DisplayName             *string        `json:"displayName,omitempty"`
-	EndSessionEndpoint      *string        `json:"endSessionEndpoint,omitempty"`
-	ID                      *string        `json:"id,omitempty"`
-	Issuer                  *string        `json:"issuer,omitempty"`
-	Level                   *string        `json:"level,omitempty"`
-	Name                    string         `json:"name"`
-	PrivateKeyPem           *string        `json:"privateKeyPEM,omitempty"`
-	Scopes                  string         `json:"scopes"`
-	SkipMfaVerification     *bool          `json:"skipMfaVerification,omitempty"`
-	TitleCase               *bool          `json:"titleCase,omitempty"`
-	TokenEndpoint           *string        `json:"tokenEndpoint,omitempty"`
-	TokenEndpointAuthMethod string         `json:"tokenEndpointAuthMethod"`
-	Type                    *string        `json:"type,omitempty"`
-	UserinfoEndpoint        *string        `json:"userinfoEndpoint,omitempty"`
-	AdditionalProperties    map[string]any `json:"-,omitempty"`
+	// Whether to allow new user creation
+	AllowNewUserCreation *bool `json:"allowNewUserCreation,omitempty"`
+	// Authorization endpoint of the OIDC authentication method
+	AuthorizationEndpoint *string `json:"authorizationEndpoint,omitempty"`
+	// Client ID of the OIDC authentication method
+	ClientID string `json:"clientId"`
+	// Client secret of the OIDC authentication method
+	ClientSecret *string `json:"clientSecret,omitempty"`
+	// Whether to discover endpoints or not
+	DiscoverEndpoints *bool `json:"discoverEndpoints"`
+	// Display name of the OIDC authentication method
+	DisplayName *string `json:"displayName,omitempty"`
+	// End session endpoint of the OIDC authentication method
+	EndSessionEndpoint *string `json:"endSessionEndpoint,omitempty"`
+	// ID of the OIDC authentication method
+	ID *string `json:"id,omitempty"`
+	// Issuer of the OIDC authentication method
+	Issuer *string `json:"issuer,omitempty"`
+	// Level of the OIDC authentication method, e.g., organization or user
+	Level *string `json:"level,omitempty"`
+	// Name of the OIDC authentication method
+	Name string `json:"name"`
+	// Private key PEM for JWT authentication method
+	PrivateKeyPem *string `json:"privateKeyPEM,omitempty"`
+	// Scopes of the OIDC authentication method
+	Scopes string `json:"scopes"`
+	// Whether to skip Platform MFA verification for this OIDC authentication method
+	SkipMfaVerification *bool `json:"skipMfaVerification,omitempty"`
+	// Whether to convert the username to title case
+	TitleCase *bool `json:"titleCase,omitempty"`
+	// Token endpoint of the OIDC authentication method
+	TokenEndpoint *string `json:"tokenEndpoint,omitempty"`
+	// Token endpoint authentication method of the OIDC authentication method
+	TokenEndpointAuthMethod string `json:"tokenEndpointAuthMethod"`
+	// Type of the OIDC authentication method
+	Type *string `json:"type,omitempty"`
+	// userinfo endpoint of the OIDC authentication method
+	UserinfoEndpoint     *string        `json:"userinfoEndpoint,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type OntapAggregate struct {
-	AvailableSize        int64          `json:"availableSize"`
-	Name                 string         `json:"name"`
-	SnapLockType         string         `json:"snapLockType"`
-	State                string         `json:"state"`
-	Type                 string         `json:"type"`
+	// Available size in bytes
+	AvailableSize int64 `json:"availableSize"`
+	// Name of the aggregate
+	Name string `json:"name"`
+	// SnapLock type of the aggregate
+	SnapLockType string `json:"snapLockType"`
+	// State of the aggregate
+	State string `json:"state"`
+	// Type of the aggregate
+	Type string `json:"type"`
+	// UUID of the aggregate
 	Uuid                 string         `json:"uuid"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type OntapSvm struct {
-	Aggregates           []OntapAggregate `json:"aggregates"`
-	Name                 string           `json:"name"`
-	Uuid                 string           `json:"uuid"`
-	AdditionalProperties map[string]any   `json:"-,omitempty"`
+	// List of aggregates available in the SVM
+	Aggregates []OntapAggregate `json:"aggregates"`
+	// Name of the SVM
+	Name string `json:"name"`
+	// UUID of the SVM
+	Uuid                 string         `json:"uuid"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type OpenIDConfiguration struct {
-	ClaimsSupported                  []string       `json:"claims_supported"`
-	IDTokenSigningAlgValuesSupported []string       `json:"id_token_signing_alg_values_supported"`
-	Issuer                           string         `json:"issuer"`
-	JwksURI                          string         `json:"jwks_uri"`
-	SubjectTypesSupported            []string       `json:"subject_types_supported"`
-	AdditionalProperties             map[string]any `json:"-,omitempty"`
+	// JSON array containing a list of claim names
+	ClaimsSupported []string `json:"claims_supported"`
+	// JSON array containing signing algorithms supported for ID tokens
+	IDTokenSigningAlgValuesSupported []string `json:"id_token_signing_alg_values_supported"`
+	// The authorization server's issuer identifier
+	Issuer string `json:"issuer"`
+	// URL of the JSON Web Key Set
+	JwksURI string `json:"jwks_uri"`
+	// JSON array containing a list of subject identifier types
+	SubjectTypesSupported []string       `json:"subject_types_supported"`
+	AdditionalProperties  map[string]any `json:"-,omitempty"`
 }
 
 type OpenStackFlavor struct {
@@ -2438,162 +3763,238 @@ type OpenstackSyncResponse struct {
 }
 
 type OrgMauBreakdown struct {
-	Mau                  int64          `json:"mau"`
-	Organization         string         `json:"organization"`
+	// Monthly active users count
+	Mau int64 `json:"mau"`
+	// Organization name
+	Organization string `json:"organization"`
+	// Organization MongoDB ObjectId
 	OrganizationOid      string         `json:"organizationOid"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type OrgMauResponse struct {
-	Daily                []DailyActiveUsers `json:"daily"`
-	EndDate              string             `json:"endDate"`
-	Mau                  int64              `json:"mau"`
-	Organization         string             `json:"organization"`
-	StartDate            string             `json:"startDate"`
-	AdditionalProperties map[string]any     `json:"-,omitempty"`
+	// Daily active users breakdown
+	Daily []DailyActiveUsers `json:"daily"`
+	// End date of the query period
+	EndDate string `json:"endDate"`
+	// Monthly active users count for the organization
+	Mau int64 `json:"mau"`
+	// Organization name
+	Organization string `json:"organization"`
+	// Start date of the query period
+	StartDate            string         `json:"startDate"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type OrgUser struct {
-	Active               bool           `json:"active"`
-	CreatedAt            *time.Time     `json:"createdAt,omitempty"`
-	Email                *string        `json:"email,omitempty"`
-	ID                   string         `json:"id"`
-	LastLogin            *time.Time     `json:"lastLogin,omitempty"`
-	LastPing             *time.Time     `json:"lastPing,omitempty"`
-	Name                 *string        `json:"name,omitempty"`
-	Uid                  *int64         `json:"uid,omitempty"`
+	// Whether the user is active
+	Active bool `json:"active"`
+	// Account creation time
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// User email address
+	Email *string `json:"email,omitempty"`
+	// User ID
+	ID string `json:"id"`
+	// Last login timestamp
+	LastLogin *time.Time `json:"lastLogin,omitempty"`
+	// Last activity timestamp
+	LastPing *time.Time `json:"lastPing,omitempty"`
+	// User's full name
+	Name *string `json:"name,omitempty"`
+	// User's UID
+	Uid *int64 `json:"uid,omitempty"`
+	// Username
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Organization struct {
-	DisplayName          string         `json:"displayName"`
-	ID                   string         `json:"id"`
-	ImageBackgroundColor *string        `json:"imageBackgroundColor,omitempty"`
-	ImageURL             *string        `json:"imageUrl,omitempty"`
-	InvertLogoOnDark     *bool          `json:"invertLogoOnDark,omitempty"`
-	ManagedBy            *string        `json:"managedBy,omitempty"`
-	Members              int64          `json:"members"`
-	Name                 string         `json:"name"`
+	// The organization display name.
+	DisplayName string `json:"displayName"`
+	// The organization ID.
+	ID string `json:"id"`
+	// The background color for the organization's logo, determined by the 'banner' theme field.
+	ImageBackgroundColor *string `json:"imageBackgroundColor,omitempty"`
+	// The URL of the organization's logo.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// If true, applies CSS invert filter to the light logo when displayed on dark themes.
+	InvertLogoOnDark *bool `json:"invertLogoOnDark,omitempty"`
+	// The organization that manages this organization.
+	ManagedBy *string `json:"managedBy,omitempty"`
+	// The number of members in the organization.
+	Members int64 `json:"members"`
+	// The organization name.
+	Name string `json:"name"`
+	// Whether the organization is a partner organization.
 	Partner              bool           `json:"partner"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type OrganizationVariable struct {
-	Key                  string         `json:"key"`
-	Secret               *bool          `json:"secret,omitempty"`
+	// The key of the variable
+	Key string `json:"key"`
+	// Whether the variable is secret or not
+	Secret *bool `json:"secret,omitempty"`
+	// The value of the variable
 	Value                *string        `json:"value"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type OrphanedWorkflowRunsPreviewBody struct {
-	MissingUserIds        []string       `json:"missingUserIds"`
-	MissingWorkflowIds    []string       `json:"missingWorkflowIds"`
-	OrphanedUserCount     int64          `json:"orphanedUserCount"`
-	OrphanedWorkflowCount int64          `json:"orphanedWorkflowCount"`
-	SampleRunIds          []string       `json:"sampleRunIds"`
-	TotalCount            int64          `json:"totalCount"`
-	AdditionalProperties  map[string]any `json:"-,omitempty"`
+	// List of user IDs that don't exist but are referenced by workflow runs
+	MissingUserIds []string `json:"missingUserIds"`
+	// List of workflow IDs that don't exist but are referenced by workflow runs
+	MissingWorkflowIds []string `json:"missingWorkflowIds"`
+	// Number of workflow runs with non-existent user references
+	OrphanedUserCount int64 `json:"orphanedUserCount"`
+	// Number of non-dev workflow runs with non-existent workflow references
+	OrphanedWorkflowCount int64 `json:"orphanedWorkflowCount"`
+	// Sample of workflow run IDs that would be deleted (up to 10)
+	SampleRunIds []string `json:"sampleRunIds"`
+	// Total number of orphaned workflow runs
+	TotalCount           int64          `json:"totalCount"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PartitionInfo struct {
-	AvailNodes           int64          `json:"availNodes"`
-	DefaultTime          *string        `json:"defaultTime,omitempty"`
-	MaxTime              *string        `json:"maxTime,omitempty"`
-	Name                 string         `json:"name"`
-	State                string         `json:"state"`
+	// Available nodes in partition
+	AvailNodes int64 `json:"availNodes"`
+	// Default job time
+	DefaultTime *string `json:"defaultTime,omitempty"`
+	// Maximum job time
+	MaxTime *string `json:"maxTime,omitempty"`
+	// Partition name
+	Name string `json:"name"`
+	// Partition state
+	State string `json:"state"`
+	// Total nodes in partition
 	TotalNodes           int64          `json:"totalNodes"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PasswordChangeInputBody struct {
-	NewPassword          string         `json:"newPassword"`
+	// New password (must be at least 15 characters with lowercase, uppercase, number, and special character)
+	NewPassword string `json:"newPassword"`
+	// Current password
 	OldPassword          string         `json:"oldPassword"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PasswordLoginInputBody struct {
-	Password             string         `json:"password"`
+	// User's password
+	Password string `json:"password"`
+	// Username or email address of the user
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PasswordResetEmailInputBody struct {
+	// Username or email address of the user requesting password reset
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PasswordResetVerifyInputBody struct {
-	NewPassword          string         `json:"newPassword"`
+	// New password (must be at least 15 characters with lowercase, uppercase, number, and special character)
+	NewPassword string `json:"newPassword"`
+	// Password reset token received via email
 	Token                string         `json:"token"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PatchAccessBodyType struct {
-	Groups               []string       `json:"groups"`
+	// List of group names to grant access
+	Groups []string `json:"groups"`
+	// Whether to grant organization-wide access
 	Organization         bool           `json:"organization"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PatchExistingClusterBody struct {
+	// Auto-reconnect enabled
 	AutoReconnect        bool           `json:"autoReconnect"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PatchImageInputBody struct {
-	Latest               *bool          `json:"latest,omitempty"`
+	// Set the image as latest
+	Latest *bool `json:"latest,omitempty"`
+	// Set the image as published
 	Published            *bool          `json:"published,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PatchInstanceStatusBody struct {
-	CspID                *string        `json:"cspId,omitempty"`
-	ErrorMsg             *string        `json:"errorMsg,omitempty"`
-	Hostname             string         `json:"hostname"`
+	// Cloud provider instance ID (first element of provisionOutput.cspId[]).
+	CspID *string `json:"cspId,omitempty"`
+	// Error message if status is 'failed'.
+	ErrorMsg *string `json:"errorMsg,omitempty"`
+	// Instance hostname
+	Hostname string `json:"hostname"`
+	// Desired status to set for the instance.
 	Status               *string        `json:"status,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PatchNetworkBody struct {
+	// List of regions with corresponding CIDR ranges
 	Regions              []map[string]any `json:"regions"`
 	AdditionalProperties map[string]any   `json:"-,omitempty"`
 }
 
 type PatchOpenstackFlavorsBody struct {
+	// List of flavor cost updates
 	Flavors              []FlavorCostUpdate `json:"flavors"`
 	AdditionalProperties map[string]any     `json:"-,omitempty"`
 }
 
 type PatchProvisionStatusBody struct {
-	ProvisionStatusID    string         `json:"provisionStatusId"`
+	// Provision status ID to update
+	ProvisionStatusID string `json:"provisionStatusId"`
+	// Status to set
 	Status               *string        `json:"status,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PatchResourceBody struct {
+	// YAML representation of the resource to update
 	YamlData             string         `json:"yamlData"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PatchSessionBody struct {
-	APIKey               *string               `json:"apiKey,omitempty"`
-	Healthy              *bool                 `json:"healthy,omitempty"`
-	LastHealthCheck      *time.Time            `json:"lastHealthCheck,omitempty"`
-	LocalPort            *int64                `json:"localPort,omitempty"`
-	Name                 *string               `json:"name,omitempty"`
-	OpenAi               *bool                 `json:"openAI,omitempty"`
-	RemoteHost           *string               `json:"remoteHost,omitempty"`
-	RemotePort           *int64                `json:"remotePort,omitempty"`
-	Slug                 *string               `json:"slug,omitempty"`
-	Status               *string               `json:"status,omitempty"`
-	TargetID             *string               `json:"targetId,omitempty"`
-	TargetInfo           *KubernetesTunnelInfo `json:"targetInfo,omitempty"`
-	Type                 *string               `json:"type,omitempty"`
-	URL                  *string               `json:"url,omitempty"`
-	AdditionalProperties map[string]any        `json:"-,omitempty"`
+	// API key for the session.
+	APIKey *string `json:"apiKey,omitempty"`
+	// Whether the tunnel's remote destination is reachable.
+	Healthy *bool `json:"healthy,omitempty"`
+	// When the tunnel health was last checked.
+	LastHealthCheck *time.Time `json:"lastHealthCheck,omitempty"`
+	// User workspace port.
+	LocalPort *int64 `json:"localPort,omitempty"`
+	// New session name (alphanumeric and underscores only).
+	Name *string `json:"name,omitempty"`
+	// Indicates if this is an OpenAI session.
+	OpenAi *bool `json:"openAI,omitempty"`
+	// Remote host.
+	RemoteHost *string `json:"remoteHost,omitempty"`
+	// Port on compute resource.
+	RemotePort *int64 `json:"remotePort,omitempty"`
+	// Session slug for URL path.
+	Slug *string `json:"slug,omitempty"`
+	// Session status.
+	Status *string `json:"status,omitempty"`
+	// Target resource ID.
+	TargetID   *string               `json:"targetId,omitempty"`
+	TargetInfo *KubernetesTunnelInfo `json:"targetInfo,omitempty"`
+	// Session type.
+	Type *string `json:"type,omitempty"`
+	// Session URL.
+	URL                  *string        `json:"url,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PatchWebhookBody struct {
+	// Whether the webhook should be enabled.
 	Enabled              *bool          `json:"enabled"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -2609,11 +4010,15 @@ type PermissionEntry struct {
 }
 
 type PlatformMauResponse struct {
-	ByOrganization       []OrgMauBreakdown `json:"byOrganization"`
-	EndDate              string            `json:"endDate"`
-	StartDate            string            `json:"startDate"`
-	TotalMau             int64             `json:"totalMAU"`
-	AdditionalProperties map[string]any    `json:"-,omitempty"`
+	// MAU breakdown by organization
+	ByOrganization []OrgMauBreakdown `json:"byOrganization"`
+	// End date of the query period
+	EndDate string `json:"endDate"`
+	// Start date of the query period
+	StartDate string `json:"startDate"`
+	// Total monthly active users across all organizations
+	TotalMau             int64          `json:"totalMAU"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PlatformNotificationSettings struct {
@@ -2626,75 +4031,123 @@ type PlatformNotificationSettings struct {
 }
 
 type PlatformSettings struct {
-	AvailableAuthMethods  []string       `json:"availableAuthMethods"`
-	EnforceMaxTtl         *bool          `json:"enforceMaxTTL,omitempty"`
-	ExpirationDays        *int64         `json:"expirationDays,omitempty"`
-	Features              []string       `json:"features"`
-	ForgotPasswordEnabled bool           `json:"forgotPasswordEnabled"`
-	Language              *string        `json:"language,omitempty"`
-	LegacyTheme           *string        `json:"legacyTheme,omitempty"`
-	LicenseExpiresAt      *time.Time     `json:"licenseExpiresAt,omitempty"`
-	LicenseGracePeriod    *bool          `json:"licenseGracePeriod,omitempty"`
-	MaintenanceMessage    *string        `json:"maintenanceMessage,omitempty"`
-	MaintenanceMode       *bool          `json:"maintenanceMode,omitempty"`
-	NeedsLicense          *bool          `json:"needsLicense,omitempty"`
-	NeedsOnboarding       *bool          `json:"needsOnboarding,omitempty"`
-	NeedsSetup            *bool          `json:"needsSetup,omitempty"`
-	OrgNameForHostname    *string        `json:"orgNameForHostname,omitempty"`
-	OrgTheme              *Theme         `json:"orgTheme,omitempty"`
-	PlatformName          *string        `json:"platformName,omitempty"`
-	SingleOrgName         *string        `json:"singleOrgName,omitempty"`
-	SingleOrgPlatform     *bool          `json:"singleOrgPlatform,omitempty"`
-	StatusURL             *string        `json:"statusUrl,omitempty"`
-	TerminalFontSize      *int64         `json:"terminalFontSize,omitempty"`
-	TerminalTheme         *string        `json:"terminalTheme,omitempty"`
-	Theme                 *string        `json:"theme,omitempty"`
-	TopBannerMessage      *string        `json:"topBannerMessage,omitempty"`
-	UsercontainerDevMode  *string        `json:"usercontainerDevMode,omitempty"`
-	Version               string         `json:"version"`
-	AdditionalProperties  map[string]any `json:"-,omitempty"`
+	// The platform-wide authentication methods available.
+	AvailableAuthMethods []string `json:"availableAuthMethods"`
+	// Indicates if the platform requires a maximum TTL for API Keys. Only returned if the user is authenticated.
+	EnforceMaxTtl *bool `json:"enforceMaxTTL,omitempty"`
+	// The maximum number of days after which API Keys expire. Only returned if the user is authenticated.
+	ExpirationDays *int64 `json:"expirationDays,omitempty"`
+	// Platform-wide enabled feature previews.
+	Features []string `json:"features"`
+	// Indicates if the forgot password feature is enabled on the platform.
+	ForgotPasswordEnabled bool `json:"forgotPasswordEnabled"`
+	// User's preferred language
+	Language *string `json:"language,omitempty"`
+	// The theme to use for the platform, determined by the hostname.
+	LegacyTheme *string `json:"legacyTheme,omitempty"`
+	// The expiration date of the platform license. Only returned when needsLicense is true.
+	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
+	// Indicates if the license is in the grace period. Only returned when needsLicense is true.
+	LicenseGracePeriod *bool `json:"licenseGracePeriod,omitempty"`
+	// If set, the maintenance message will show as an alert on all pages of the platform.
+	MaintenanceMessage *string `json:"maintenanceMessage,omitempty"`
+	// Indicates if the platform is in maintenance mode, preventing certain actions.
+	MaintenanceMode *bool `json:"maintenanceMode,omitempty"`
+	// Indicates if the platform needs a license update (no license, expired, or in grace period). Only returned when true.
+	NeedsLicense *bool `json:"needsLicense,omitempty"`
+	// Indicates if the user needs to complete onboarding. Only returned when true.
+	NeedsOnboarding *bool `json:"needsOnboarding,omitempty"`
+	// Indicates if the platform needs initial setup (first user and organization creation). Only returned when true.
+	NeedsSetup *bool `json:"needsSetup,omitempty"`
+	// The org name matching the current hostname's custom domain, if any.
+	OrgNameForHostname *string `json:"orgNameForHostname,omitempty"`
+	OrgTheme           *Theme  `json:"orgTheme,omitempty"`
+	// The display name of the platform.
+	PlatformName *string `json:"platformName,omitempty"`
+	// The name of the single organization, if applicable.
+	SingleOrgName *string `json:"singleOrgName,omitempty"`
+	// Indicates if the platform is a single organization platform.
+	SingleOrgPlatform *bool `json:"singleOrgPlatform,omitempty"`
+	// The URL to the platform status page, if set.
+	StatusURL *string `json:"statusUrl,omitempty"`
+	// Terminal font size
+	TerminalFontSize *int64 `json:"terminalFontSize,omitempty"`
+	// Terminal theme
+	TerminalTheme *string `json:"terminalTheme,omitempty"`
+	// User's preferred theme
+	Theme *string `json:"theme,omitempty"`
+	// The message to show in the top banner, if set.
+	TopBannerMessage     *string `json:"topBannerMessage,omitempty"`
+	UsercontainerDevMode *string `json:"usercontainerDevMode,omitempty"`
+	// The version of the platform, determined by the build.
+	Version              string         `json:"version"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PlatformSettingsAdmin struct {
-	Createk8sPvc          *bool          `json:"createk8sPVC,omitempty"`
-	DefaultUserHost       *string        `json:"defaultUserHost,omitempty"`
-	DefaultWorkspaceImage *string        `json:"defaultWorkspaceImage,omitempty"`
-	DefaultWorkspaceType  *string        `json:"defaultWorkspaceType,omitempty"`
-	Dns                   []string       `json:"dns"`
-	Envs                  []string       `json:"envs"`
-	HomeDirPrefix         string         `json:"homeDirPrefix"`
-	K8sMounts             []string       `json:"k8sMounts"`
-	LicenseExpiresAt      *time.Time     `json:"licenseExpiresAt,omitempty"`
-	LicenseGracePeriod    *bool          `json:"licenseGracePeriod,omitempty"`
-	Mounts                []string       `json:"mounts"`
-	ValidLicense          *bool          `json:"validLicense,omitempty"`
-	AdditionalProperties  map[string]any `json:"-,omitempty"`
+	// Indicates if k8s PVC should be created for workspaces.
+	Createk8sPvc *bool `json:"createk8sPVC,omitempty"`
+	// The default host pattern for users.
+	DefaultUserHost *string `json:"defaultUserHost,omitempty"`
+	// Default image for user workspaces.
+	DefaultWorkspaceImage *string `json:"defaultWorkspaceImage,omitempty"`
+	// Default type for workspaces.
+	DefaultWorkspaceType *string `json:"defaultWorkspaceType,omitempty"`
+	// A list of hosts to add to the DNS search path for workspaces.
+	Dns []string `json:"dns"`
+	// A list of environment variables to set in workspaces.
+	Envs []string `json:"envs"`
+	// The prefix for the home directory in workspaces.
+	HomeDirPrefix string `json:"homeDirPrefix"`
+	// A list of mounts to be used in Kubernetes workspaces.
+	K8sMounts []string `json:"k8sMounts"`
+	// The expiration date of the platform license, if valid.
+	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
+	// Indicates if the license is in the grace period.
+	LicenseGracePeriod *bool `json:"licenseGracePeriod,omitempty"`
+	// A list of mounts to be used in docker workspaces.
+	Mounts []string `json:"mounts"`
+	// Indicates if the platform license is valid.
+	ValidLicense         *bool          `json:"validLicense,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PodInfo struct {
-	CreatedAt            time.Time      `json:"createdAt"`
-	Name                 string         `json:"name"`
-	Ready                string         `json:"ready"`
-	Restarts             int32          `json:"restarts"`
+	// Pod creation timestamp
+	CreatedAt time.Time `json:"createdAt"`
+	// Pod name
+	Name string `json:"name"`
+	// Ready containers (ready/total)
+	Ready string `json:"ready"`
+	// Number of container restarts
+	Restarts int32 `json:"restarts"`
+	// Pod status
 	Status               string         `json:"status"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PodLogsResponse struct {
-	LastLogHash          *string        `json:"lastLogHash,omitempty"`
-	LastSinceTime        *time.Time     `json:"lastSinceTime,omitempty"`
+	// Hash of the last log line, used for deduplication when polling
+	LastLogHash *string `json:"lastLogHash,omitempty"`
+	// Timestamp of the last log line for pagination. Null if no logs with valid timestamps.
+	LastSinceTime *time.Time `json:"lastSinceTime,omitempty"`
+	// The pod logs as a string
 	Logs                 string         `json:"logs"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Policy struct {
-	Level                string         `json:"level"`
-	Name                 *string        `json:"name,omitempty"`
+	// Level of the policy
+	Level string `json:"level"`
+	// Name of the policy
+	Name *string `json:"name,omitempty"`
+	// Value of the policy
 	Value                any            `json:"value,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PostImpersonateInputBody struct {
+	// Username of the user to impersonate
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -2705,56 +4158,86 @@ type PostLogoutOutputBody struct {
 }
 
 type PostProvisionStatusBody struct {
-	ProvisionStatusID    string         `json:"provisionStatusId"`
-	ProvisionStatusIds   []string       `json:"provisionStatusIds,omitempty"`
+	// Provision status ID to add
+	ProvisionStatusID string `json:"provisionStatusId"`
+	// List of provision status IDs to add (optional, used for batch creation)
+	ProvisionStatusIds []string `json:"provisionStatusIds,omitempty"`
+	// Status for the provision step
 	Status               *string        `json:"status,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PostSessionAccessBody struct {
-	Access               bool           `json:"access"`
+	// Whether to grant (true) or revoke (false) access.
+	Access bool `json:"access"`
+	// Group ID to grant or revoke access.
 	GroupID              string         `json:"groupId"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PostSessionBody struct {
-	APIKey               *string               `json:"apiKey,omitempty"`
-	LocalPort            *int64                `json:"localPort,omitempty"`
-	Name                 *string               `json:"name,omitempty"`
-	OpenAi               *bool                 `json:"openAI,omitempty"`
-	RemoteHost           *string               `json:"remoteHost,omitempty"`
-	RemotePort           *int64                `json:"remotePort,omitempty"`
-	Slug                 *string               `json:"slug,omitempty"`
-	TargetID             *string               `json:"targetId,omitempty"`
-	TargetInfo           *KubernetesTunnelInfo `json:"targetInfo,omitempty"`
-	Type                 string                `json:"type"`
-	URL                  *string               `json:"url,omitempty"`
-	UseCustomDomain      *bool                 `json:"useCustomDomain,omitempty"`
-	UseTLS               *bool                 `json:"useTLS,omitempty"`
-	AdditionalProperties map[string]any        `json:"-,omitempty"`
+	// API key for the session.
+	APIKey *string `json:"apiKey,omitempty"`
+	// Local port (0 = random).
+	LocalPort *int64 `json:"localPort,omitempty"`
+	// Session name (alphanumeric and underscores only). Auto-generated if omitted.
+	Name *string `json:"name,omitempty"`
+	// If true, marks this as an OpenAI chat session (routes to /chat).
+	OpenAi *bool `json:"openAI,omitempty"`
+	// Remote host (defaults to localhost).
+	RemoteHost *string `json:"remoteHost,omitempty"`
+	// Remote port.
+	RemotePort *int64 `json:"remotePort,omitempty"`
+	// Session slug for URL path.
+	Slug *string `json:"slug,omitempty"`
+	// Target resource ID.
+	TargetID   *string               `json:"targetId,omitempty"`
+	TargetInfo *KubernetesTunnelInfo `json:"targetInfo,omitempty"`
+	// Session type.
+	Type string `json:"type"`
+	// Session URL.
+	URL *string `json:"url,omitempty"`
+	// Whether to use custom domain.
+	UseCustomDomain *bool `json:"useCustomDomain,omitempty"`
+	// Whether TLS is used.
+	UseTLS               *bool          `json:"useTLS,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PostSkuBody struct {
-	Code                 string         `json:"code"`
-	Description          *string        `json:"description,omitempty"`
-	Name                 string         `json:"name"`
-	Subtype              string         `json:"subtype"`
+	// SKU code (e.g., SLURM_NODE_HOUR)
+	Code string `json:"code"`
+	// SKU description
+	Description *string `json:"description,omitempty"`
+	// SKU display name
+	Name string `json:"name"`
+	// SKU subtype (e.g., NodeHour, Token)
+	Subtype string `json:"subtype"`
+	// SKU type (e.g., Compute, Licenses)
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PostUnitInput struct {
-	CostPerUnit          float64        `json:"costPerUnit"`
+	// Cost per unit in USD
+	CostPerUnit float64 `json:"costPerUnit"`
+	// Unit name
 	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PostUsageEventInput struct {
-	EndedAt              time.Time      `json:"endedAt"`
-	Metadata             map[string]any `json:"metadata,omitempty"`
-	Quantity             float64        `json:"quantity"`
-	Sku                  string         `json:"sku"`
-	StartedAt            time.Time      `json:"startedAt"`
+	// The end time of the usage event.
+	EndedAt time.Time `json:"endedAt"`
+	// Optional metadata for this usage event.
+	Metadata map[string]any `json:"metadata,omitempty"`
+	// The quantity of usage for this event.
+	Quantity float64 `json:"quantity"`
+	// The SKU Code for this usage event.
+	Sku string `json:"sku"`
+	// The start time of the usage event.
+	StartedAt time.Time `json:"startedAt"`
+	// The user who this usage event will be associated with.
 	User                 *string        `json:"user,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -2766,8 +4249,11 @@ type Prices struct {
 }
 
 type ProvisionStatusAttribute struct {
-	Key                  string         `json:"key"`
-	Type                 *string        `json:"type,omitempty"`
+	// The attribute key.
+	Key string `json:"key"`
+	// The attribute type (e.g., date, admin).
+	Type *string `json:"type,omitempty"`
+	// The attribute value.
 	Value                string         `json:"value"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -2794,73 +4280,114 @@ type ProvisionStatusRecordAttribute struct {
 }
 
 type ProvisionStatusResponseRecord struct {
-	Attributes           []ProvisionStatusAttribute `json:"attributes"`
-	CreatedAt            string                     `json:"createdAt"`
-	Error                string                     `json:"error"`
-	ID                   string                     `json:"id"`
-	Index                int64                      `json:"index"`
-	Label                string                     `json:"label"`
-	Logs                 string                     `json:"logs"`
-	Name                 string                     `json:"name"`
-	Status               string                     `json:"status"`
-	UpdatedAt            string                     `json:"updatedAt"`
-	AdditionalProperties map[string]any             `json:"-,omitempty"`
+	// Additional attributes associated with the provision step.
+	Attributes []ProvisionStatusAttribute `json:"attributes"`
+	// The creation timestamp in RFC3339 format.
+	CreatedAt string `json:"createdAt"`
+	// Error message if the provision step failed.
+	Error string `json:"error"`
+	// The unique identifier of the provision status record.
+	ID string `json:"id"`
+	// The index of the record in the provision sequence.
+	Index int64 `json:"index"`
+	// The label or title of the provision step.
+	Label string `json:"label"`
+	// Logs associated with the provision step.
+	Logs string `json:"logs"`
+	// The name of the provision step.
+	Name string `json:"name"`
+	// The current status of the provision step (e.g., pending, provisioning, provisioned, failed, skipped, deleting, deleted, warning).
+	Status string `json:"status"`
+	// The last update timestamp in RFC3339 format.
+	UpdatedAt            string         `json:"updatedAt"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ProvisionStatusStruct struct {
-	ErrorMessage         string         `json:"errorMessage"`
-	ID                   string         `json:"id"`
-	Logs                 string         `json:"logs"`
+	// Base64 encoded error message
+	ErrorMessage string `json:"errorMessage"`
+	// The provision status ID
+	ID string `json:"id"`
+	// Base64 encoded logs
+	Logs string `json:"logs"`
+	// The provision status
 	Status               string         `json:"status"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PutImageInputBody struct {
-	Architecture         string         `json:"architecture"`
-	Csp                  string         `json:"csp"`
-	CspID                string         `json:"cspId"`
-	Name                 string         `json:"name"`
-	Published            bool           `json:"published"`
-	Region               string         `json:"region"`
-	SizeGb               *int64         `json:"sizeGb,omitempty"`
+	// Image architecture
+	Architecture string `json:"architecture"`
+	// Cloud service provider
+	Csp string `json:"csp"`
+	// Cloud provider specific image ID
+	CspID string `json:"cspId"`
+	// Image name
+	Name string `json:"name"`
+	// Whether the image is selectable on image dropdowns
+	Published bool `json:"published"`
+	// Region where the image is located
+	Region string `json:"region"`
+	// Image size in GB
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Image type
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type PvResponse struct {
-	AccessModes           []string       `json:"accessModes"`
-	Capacity              string         `json:"capacity"`
-	Claim                 string         `json:"claim"`
-	CreatedAt             time.Time      `json:"createdAt"`
-	Name                  string         `json:"name"`
-	Reason                string         `json:"reason"`
-	ReclaimPolicy         string         `json:"reclaimPolicy"`
-	Status                string         `json:"status"`
-	StorageClass          string         `json:"storageClass"`
+	// Access modes supported by the volume
+	AccessModes []string `json:"accessModes"`
+	// Storage capacity of the volume
+	Capacity string `json:"capacity"`
+	// Associated persistent volume claim
+	Claim string `json:"claim"`
+	// Creation timestamp of the volume
+	CreatedAt time.Time `json:"createdAt"`
+	// Name of the persistent volume
+	Name string `json:"name"`
+	// Reason for current status
+	Reason string `json:"reason"`
+	// Reclaim policy for the volume
+	ReclaimPolicy string `json:"reclaimPolicy"`
+	// Current status of the volume
+	Status string `json:"status"`
+	// Storage class of the volume
+	StorageClass string `json:"storageClass"`
+	// Volume attributes class
 	VolumeAttributesClass string         `json:"volumeAttributesClass"`
 	AdditionalProperties  map[string]any `json:"-,omitempty"`
 }
 
 type QuotaResponse struct {
-	Cluster              string         `json:"cluster"`
-	CreatedAt            time.Time      `json:"createdAt"`
-	Limit                ResourceQuota  `json:"limit"`
-	Name                 string         `json:"name"`
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// Creation timestamp of the quota
+	CreatedAt time.Time     `json:"createdAt"`
+	Limit     ResourceQuota `json:"limit"`
+	// Name of the quota
+	Name string `json:"name"`
+	// Namespace name
 	Namespace            string         `json:"namespace"`
 	Request              ResourceQuota  `json:"request"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type QuotasBody struct {
-	Errors               []ClusterError  `json:"errors,omitempty"`
-	Metadata             QuotasMetadata  `json:"metadata"`
+	// List of cluster errors, if any
+	Errors   []ClusterError `json:"errors,omitempty"`
+	Metadata QuotasMetadata `json:"metadata"`
+	// List of quotas
 	Quotas               []QuotaResponse `json:"quotas"`
 	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
 type QuotasMetadata struct {
-	SuccessfulClusters   int64          `json:"successfulClusters"`
-	TotalClusters        int64          `json:"totalClusters"`
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total number of clusters queried
+	TotalClusters int64 `json:"totalClusters"`
+	// Total number of quotas returned
 	TotalQuotas          int64          `json:"totalQuotas"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -2900,20 +4427,30 @@ type RatedCostsPaginatedResponse struct {
 }
 
 type RecommendedResource struct {
-	Csp                  *string        `json:"csp,omitempty"`
-	Description          *string        `json:"description,omitempty"`
-	Icon                 *string        `json:"icon,omitempty"`
-	ID                   string         `json:"id"`
-	Name                 string         `json:"name"`
-	Slug                 string         `json:"slug"`
-	Subtype              *string        `json:"subtype,omitempty"`
-	Type                 string         `json:"type"`
+	// Cloud provider (aws, google, azure)
+	Csp *string `json:"csp,omitempty"`
+	// Item description
+	Description *string `json:"description,omitempty"`
+	// Icon URL
+	Icon *string `json:"icon,omitempty"`
+	// Marketplace item ID
+	ID string `json:"id"`
+	// Display name
+	Name string `json:"name"`
+	// Unique slug for the item
+	Slug string `json:"slug"`
+	// Subtype (e.g., aws-slurm, local)
+	Subtype *string `json:"subtype,omitempty"`
+	// Type: compute, workflow, storage
+	Type string `json:"type"`
+	// Available versions for marketplace items
 	Versions             []string       `json:"versions,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type RecommendedResourcesResponse struct {
-	Compute              ResourceSection `json:"compute"`
+	Compute ResourceSection `json:"compute"`
+	// Name of the organization for display
 	OrganizationName     *string         `json:"organizationName,omitempty"`
 	Storage              ResourceSection `json:"storage"`
 	Workflows            ResourceSection `json:"workflows"`
@@ -2921,122 +4458,179 @@ type RecommendedResourcesResponse struct {
 }
 
 type RegisterNodeByTokenInputBody struct {
-	Arch                 string         `json:"arch"`
-	Hostname             string         `json:"hostname"`
-	IPAddresses          []string       `json:"ipAddresses"`
-	Os                   string         `json:"os"`
+	// Architecture
+	Arch string `json:"arch"`
+	// Node hostname
+	Hostname string `json:"hostname"`
+	// Node IP addresses
+	IPAddresses []string `json:"ipAddresses"`
+	// Operating system
+	Os string `json:"os"`
+	// Registration token (pwrt format with embedded org/cluster)
 	Token                string         `json:"token"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type RegisterNodeOutputBody struct {
-	APIKey               string         `json:"apiKey"`
-	ClusterName          string         `json:"clusterName"`
-	Hostname             string         `json:"hostname"`
+	// Long-term API key for the agent
+	APIKey string `json:"apiKey"`
+	// Cluster name
+	ClusterName string `json:"clusterName"`
+	// Registered hostname
+	Hostname string `json:"hostname"`
+	// Organization name
 	Organization         string         `json:"organization"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type RemoteWorkflowSettings struct {
-	Branch               *string        `json:"branch,omitempty"`
-	Readme               *string        `json:"readme,omitempty"`
-	Repo                 *string        `json:"repo,omitempty"`
-	SparseCheckout       []string       `json:"sparseCheckout,omitempty"`
-	Thumbnail            *string        `json:"thumbnail,omitempty"`
+	// Branch name.
+	Branch *string `json:"branch,omitempty"`
+	// Path to the README file in the repository.
+	Readme *string `json:"readme,omitempty"`
+	// Git repository URL.
+	Repo *string `json:"repo,omitempty"`
+	// Sparse checkout paths.
+	SparseCheckout []string `json:"sparseCheckout,omitempty"`
+	// Path to the thumbnail image in the repository.
+	Thumbnail *string `json:"thumbnail,omitempty"`
+	// Path to the YAML file in the repository.
 	Yaml                 *string        `json:"yaml,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ReplicaSetInfo struct {
-	CreatedAt            time.Time      `json:"createdAt"`
-	Current              int32          `json:"current"`
-	Desired              int32          `json:"desired"`
-	Name                 string         `json:"name"`
-	Ready                int32          `json:"ready"`
+	// ReplicaSet creation timestamp
+	CreatedAt time.Time `json:"createdAt"`
+	// Current number of replicas
+	Current int32 `json:"current"`
+	// Desired number of replicas
+	Desired int32 `json:"desired"`
+	// ReplicaSet name
+	Name string `json:"name"`
+	// Number of ready replicas
+	Ready int32 `json:"ready"`
+	// Deployment revision number
 	Revision             string         `json:"revision"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Report struct {
-	CreatedAt            time.Time      `json:"createdAt"`
-	Email                string         `json:"email"`
-	Frequency            string         `json:"frequency"`
-	ID                   string         `json:"id"`
-	Period               *string        `json:"period,omitempty"`
-	Type                 string         `json:"type"`
-	User                 *string        `json:"user,omitempty"`
+	// Report creation time
+	CreatedAt time.Time `json:"createdAt"`
+	// Email address that receives the report
+	Email string `json:"email"`
+	// Report frequency
+	Frequency string `json:"frequency"`
+	// Report ID
+	ID string `json:"id"`
+	// Report period specification
+	Period *string `json:"period,omitempty"`
+	// Type of report
+	Type string `json:"type"`
+	// Creator of the report
+	User *string `json:"user,omitempty"`
+	// Username that the report monitors
 	Who                  *string        `json:"who,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ReservationItem struct {
-	Csp                  string         `json:"csp"`
-	Description          *string        `json:"description,omitempty"`
-	Group                string         `json:"group"`
+	// Cloud service provider
+	Csp string `json:"csp"`
+	// Reservation description
+	Description *string `json:"description,omitempty"`
+	// Name of the group that can use this reservation
+	Group string `json:"group"`
+	// Cloud service provider reservation identifier
 	ID                   string         `json:"id"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ResourceGroup struct {
-	Allocation           *string        `json:"allocation"`
-	Name                 *string        `json:"name"`
+	// Current allocation name
+	Allocation *string `json:"allocation"`
+	// Resource group name
+	Name *string `json:"name"`
+	// Owner username
 	User                 *string        `json:"user,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ResourceQuota struct {
-	Cpu                  float64        `json:"cpu"`
-	Gpu                  float64        `json:"gpu"`
+	// CPU in cores
+	Cpu float64 `json:"cpu"`
+	// GPU count
+	Gpu float64 `json:"gpu"`
+	// Memory in MB
 	Memory               float64        `json:"memory"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ResourceSection struct {
-	MarketplaceFeatured  []RecommendedResource `json:"marketplaceFeatured"`
+	// Featured resources from marketplace
+	MarketplaceFeatured []RecommendedResource `json:"marketplaceFeatured"`
+	// Resources recommended by the organization
 	OrgRecommended       []RecommendedResource `json:"orgRecommended"`
 	AdditionalProperties map[string]any        `json:"-,omitempty"`
 }
 
 type ResourceYamlResponse struct {
-	JSONData             any              `json:"jsonData"`
-	PodList              []PodInfo        `json:"podList,omitempty"`
-	ReplicaSetList       []ReplicaSetInfo `json:"replicaSetList,omitempty"`
-	YamlData             string           `json:"yamlData"`
-	AdditionalProperties map[string]any   `json:"-,omitempty"`
+	// JSON representation of the resource
+	JSONData any `json:"jsonData"`
+	// List of pods associated with this resource (for workloads)
+	PodList []PodInfo `json:"podList,omitempty"`
+	// List of replica sets associated with this resource (for deployments)
+	ReplicaSetList []ReplicaSetInfo `json:"replicaSetList,omitempty"`
+	// YAML representation of the resource
+	YamlData             string         `json:"yamlData"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ResponseFormat struct {
+	// Response type: text or json_object
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ResponseMetadata struct {
-	SuccessfulClusters   int64          `json:"successfulClusters"`
-	TotalClusters        int64          `json:"totalClusters"`
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total number of clusters queried
+	TotalClusters int64 `json:"totalClusters"`
+	// Total number of workloads returned
 	TotalWorkloads       int64          `json:"totalWorkloads"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type RestartOption struct {
+	// Whether to force kill the workspace.
 	ForceKill            bool           `json:"forceKill"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type RevokeLoginSessionOption struct {
+	// Whether to also revoke login sessions for all platform-managed cloud resources.
 	IncludeResources     *bool          `json:"includeResources"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type RunAlert struct {
-	Enabled              bool           `json:"enabled"`
-	IntervalHours        int64          `json:"intervalHours"`
+	// Indicates if runtime alert is enabled for the storage.
+	Enabled bool `json:"enabled"`
+	// Interval in hours for the runtime alert.
+	IntervalHours int64 `json:"intervalHours"`
+	// Next time the runtime alert will be triggered.
 	NextAlertTime        time.Time      `json:"nextAlertTime"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type RunInBody struct {
-	AutoOnly             *bool          `json:"autoOnly,omitempty"`
-	Kind                 *string        `json:"kind"`
+	// Only run migrations marked as auto-migratable
+	AutoOnly *bool `json:"autoOnly,omitempty"`
+	// Type of migrations to run
+	Kind *string `json:"kind"`
+	// Timeout in seconds for the migration run
 	TimeoutSec           *int64         `json:"timeoutSec,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -3049,7 +4643,9 @@ type RuntimeAlert struct {
 }
 
 type RuntimeAlertInput struct {
-	Enabled              bool           `json:"enabled"`
+	// Whether to enable runtime alerts.
+	Enabled bool `json:"enabled"`
+	// Runtime alert interval in hours (1-168).
 	IntervalHours        *int64         `json:"intervalHours,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -3060,31 +4656,49 @@ type SseError struct {
 }
 
 type SseErrorDetail struct {
-	Message              string         `json:"message"`
+	// Error message
+	Message string `json:"message"`
+	// Error type
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type SchedulerInfo struct {
-	IsController         bool            `json:"isController"`
-	Jobs                 []JobInfo       `json:"jobs,omitempty"`
-	Partitions           []PartitionInfo `json:"partitions,omitempty"`
-	Type                 *string         `json:"type,omitempty"`
-	Version              *string         `json:"version,omitempty"`
-	AdditionalProperties map[string]any  `json:"-,omitempty"`
+	// Whether this node is the scheduler controller
+	IsController bool `json:"isController"`
+	// Active jobs
+	Jobs []JobInfo `json:"jobs,omitempty"`
+	// Scheduler partitions/queues
+	Partitions []PartitionInfo `json:"partitions,omitempty"`
+	// Scheduler type (slurm, pbs, etc.)
+	Type *string `json:"type,omitempty"`
+	// Scheduler version
+	Version              *string        `json:"version,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type SchedulerJob struct {
-	Cluster              string         `json:"cluster"`
-	ClusterType          string         `json:"clusterType"`
-	CreatedAt            int64          `json:"createdAt"`
-	ID                   int64          `json:"id"`
-	ImageURL             string         `json:"imageUrl"`
-	Name                 string         `json:"name"`
-	Nodes                string         `json:"nodes"`
-	Partition            string         `json:"partition"`
-	State                []string       `json:"state"`
-	Time                 int64          `json:"time"`
+	// Cluster identifier where the job is running
+	Cluster string `json:"cluster"`
+	// Type of cluster (slurm, kubernetes, etc.)
+	ClusterType string `json:"clusterType"`
+	// Job creation time in milliseconds
+	CreatedAt int64 `json:"createdAt"`
+	// Job ID from the scheduler
+	ID int64 `json:"id"`
+	// URL to cluster icon/image
+	ImageURL string `json:"imageUrl"`
+	// Job name
+	Name string `json:"name"`
+	// Node list allocated to the job
+	Nodes string `json:"nodes"`
+	// Partition name where the job is running
+	Partition string `json:"partition"`
+	// Current state(s) of the job
+	State []string `json:"state"`
+	// Job start time as Unix timestamp
+	Time int64 `json:"time"`
+	// Username who submitted the job
 	User                 string         `json:"user"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -3096,78 +4710,129 @@ type SchedulerNotificationSettings struct {
 }
 
 type ServiceResponse struct {
-	Cluster              string         `json:"cluster"`
-	ClusterIP            string         `json:"clusterIP"`
-	CreatedAt            time.Time      `json:"createdAt"`
-	ExternalIP           *string        `json:"externalIP,omitempty"`
-	Name                 string         `json:"name"`
-	Namespace            string         `json:"namespace"`
-	Ports                []string       `json:"ports"`
-	Selector             string         `json:"selector"`
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// Cluster IP address
+	ClusterIP string `json:"clusterIP"`
+	// Creation timestamp of the service
+	CreatedAt time.Time `json:"createdAt"`
+	// External IP address
+	ExternalIP *string `json:"externalIP,omitempty"`
+	// Name of the service
+	Name string `json:"name"`
+	// Namespace of the service
+	Namespace string `json:"namespace"`
+	// Service ports
+	Ports []string `json:"ports"`
+	// Pod selector
+	Selector string `json:"selector"`
+	// Service type
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ServicesBody struct {
-	Errors               []ClusterError    `json:"errors,omitempty"`
-	Metadata             ServicesMetadata  `json:"metadata"`
+	// List of cluster errors, if any
+	Errors   []ClusterError   `json:"errors,omitempty"`
+	Metadata ServicesMetadata `json:"metadata"`
+	// List of services
 	Services             []ServiceResponse `json:"services"`
 	AdditionalProperties map[string]any    `json:"-,omitempty"`
 }
 
 type ServicesMetadata struct {
-	SuccessfulClusters   int64          `json:"successfulClusters"`
-	TotalClusters        int64          `json:"totalClusters"`
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total number of clusters queried
+	TotalClusters int64 `json:"totalClusters"`
+	// Total number of services returned
 	TotalServices        int64          `json:"totalServices"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Session struct {
-	CreatedAt            *time.Time            `json:"createdAt,omitempty"`
-	DomainName           *string               `json:"domainName,omitempty"`
-	ErrorMessage         *string               `json:"errorMessage,omitempty"`
-	ExternalHref         *string               `json:"externalHref,omitempty"`
-	HasAPIKey            *bool                 `json:"hasApiKey,omitempty"`
-	Healthy              *bool                 `json:"healthy,omitempty"`
-	ID                   *string               `json:"id,omitempty"`
-	ImageURL             *string               `json:"imageUrl,omitempty"`
-	InternalHref         *string               `json:"internalHref,omitempty"`
-	KubernetesInfo       *KubernetesTunnelInfo `json:"kubernetesInfo,omitempty"`
-	LastHealthCheck      *time.Time            `json:"lastHealthCheck,omitempty"`
-	LocalPort            *int64                `json:"localPort,omitempty"`
-	Name                 *string               `json:"name"`
-	Namespace            *string               `json:"namespace,omitempty"`
-	NodeHostname         *string               `json:"nodeHostname,omitempty"`
-	OpenAi               *bool                 `json:"openAI,omitempty"`
-	RemoteHost           *string               `json:"remoteHost,omitempty"`
-	RemotePort           *int64                `json:"remotePort,omitempty"`
-	Shared               *TunnelShared         `json:"shared,omitempty"`
-	Slug                 *string               `json:"slug,omitempty"`
-	Software             *SessionSoftware      `json:"software,omitempty"`
-	Status               *string               `json:"status,omitempty"`
-	StoppedAt            *time.Time            `json:"stoppedAt,omitempty"`
-	Target               *string               `json:"target,omitempty"`
-	TargetCsp            *string               `json:"targetCsp,omitempty"`
-	TargetID             *string               `json:"targetId,omitempty"`
-	TargetImageURL       *string               `json:"targetImageUrl,omitempty"`
-	TargetInfo           *KubernetesTunnelInfo `json:"targetInfo,omitempty"`
-	TargetName           *string               `json:"targetName,omitempty"`
-	TargetType           *string               `json:"targetType,omitempty"`
-	Type                 *string               `json:"type"`
-	URL                  *string               `json:"url,omitempty"`
-	UseCustomDomain      *bool                 `json:"useCustomDomain,omitempty"`
-	UseTLS               *bool                 `json:"useTLS,omitempty"`
-	User                 *string               `json:"user"`
-	WorkflowRun          *WorkflowRunInfo      `json:"workflowRun,omitempty"`
-	WorkflowRunningSteps []StepStruct          `json:"workflowRunningSteps,omitempty"`
-	AdditionalProperties map[string]any        `json:"-,omitempty"`
+	// Session creation time.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// Domain name for the session.
+	DomainName *string `json:"domainName,omitempty"`
+	// Error message if session failed.
+	ErrorMessage *string `json:"errorMessage,omitempty"`
+	// External session URL.
+	ExternalHref *string `json:"externalHref,omitempty"`
+	// Whether the session has an API key configured.
+	HasAPIKey *bool `json:"hasApiKey,omitempty"`
+	// Whether the tunnel's remote destination is reachable.
+	Healthy *bool `json:"healthy,omitempty"`
+	// The unique identifier of the resource.
+	ID *string `json:"id,omitempty"`
+	// Icon shown in the UI for the session. Comes from the workflow if associated with one.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Internal session URL.
+	InternalHref   *string               `json:"internalHref,omitempty"`
+	KubernetesInfo *KubernetesTunnelInfo `json:"kubernetesInfo,omitempty"`
+	// When the tunnel health was last checked.
+	LastHealthCheck *time.Time `json:"lastHealthCheck,omitempty"`
+	// Local workspace port.
+	LocalPort *int64 `json:"localPort,omitempty"`
+	// Session name (alphanumeric and underscores only).
+	Name *string `json:"name"`
+	// Deprecated. Use user instead
+	Namespace *string `json:"namespace,omitempty"`
+	// Node hostname.
+	NodeHostname *string `json:"nodeHostname,omitempty"`
+	// Indicates if this is an OpenAI session.
+	OpenAi *bool `json:"openAI,omitempty"`
+	// Remote host.
+	RemoteHost *string `json:"remoteHost,omitempty"`
+	// Port on compute resource.
+	RemotePort *int64        `json:"remotePort,omitempty"`
+	Shared     *TunnelShared `json:"shared,omitempty"`
+	// Session slug for URL path.
+	Slug     *string          `json:"slug,omitempty"`
+	Software *SessionSoftware `json:"software,omitempty"`
+	// Current session status.
+	Status *string `json:"status,omitempty"`
+	// Session stop time.
+	StoppedAt *time.Time `json:"stoppedAt,omitempty"`
+	// Target resource ID.
+	Target *string `json:"target,omitempty"`
+	// Cloud service provider of the target resource.
+	TargetCsp *string `json:"targetCsp,omitempty"`
+	// Target resource ID.
+	TargetID *string `json:"targetId,omitempty"`
+	// Icon URL for the target resource.
+	TargetImageURL *string               `json:"targetImageUrl,omitempty"`
+	TargetInfo     *KubernetesTunnelInfo `json:"targetInfo,omitempty"`
+	// Target name.
+	TargetName *string `json:"targetName,omitempty"`
+	// Target type (pool, cluster, managed-cluster).
+	TargetType *string `json:"targetType,omitempty"`
+	// Session type.
+	Type *string `json:"type"`
+	// Session URL.
+	URL *string `json:"url,omitempty"`
+	// Whether to use custom domain.
+	UseCustomDomain *bool `json:"useCustomDomain,omitempty"`
+	// Whether TLS is used.
+	UseTLS *bool `json:"useTLS,omitempty"`
+	// Username of the user that owns the resource
+	User        *string          `json:"user"`
+	WorkflowRun *WorkflowRunInfo `json:"workflowRun,omitempty"`
+	// Workflow running steps.
+	WorkflowRunningSteps []StepStruct   `json:"workflowRunningSteps,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type SessionAlert struct {
-	AutoTerminate        bool           `json:"autoTerminate"`
-	Enabled              bool           `json:"enabled"`
-	Limit                float64        `json:"limit"`
-	NextAlertTime        time.Time      `json:"nextAlertTime"`
+	// Indicates if the storage will be automatically terminated when the cost limit is reached.
+	AutoTerminate bool `json:"autoTerminate"`
+	// Indicates if session cost alert is enabled for the storage.
+	Enabled bool `json:"enabled"`
+	// Cost limit for the session cost alert.
+	Limit float64 `json:"limit"`
+	// Next time the session cost alert will be triggered.
+	NextAlertTime time.Time `json:"nextAlertTime"`
+	// Indicates if the session cost alert uses realtime estimated cost data.
 	UseRealtime          bool           `json:"useRealtime"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -3182,53 +4847,81 @@ type SessionCostAlert struct {
 }
 
 type SessionCostLimitInput struct {
-	AutoTerminate        *bool          `json:"autoTerminate,omitempty"`
-	Enabled              bool           `json:"enabled"`
-	Limit                *float64       `json:"limit,omitempty"`
+	// Auto-terminate when cost limit is reached.
+	AutoTerminate *bool `json:"autoTerminate,omitempty"`
+	// Whether to enable session cost limit alerts.
+	Enabled bool `json:"enabled"`
+	// Cost limit in USD.
+	Limit *float64 `json:"limit,omitempty"`
+	// Use realtime-estimated cost data.
 	UseRealtime          *bool          `json:"useRealtime,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type SessionResponse struct {
-	Csp                  string         `json:"csp"`
-	CurrentStatus        string         `json:"currentStatus"`
-	DeleteStatus         string         `json:"deleteStatus"`
-	ID                   string         `json:"id"`
-	InfraID              string         `json:"infraId"`
-	InfraName            string         `json:"infraName"`
-	InfraType            string         `json:"infraType"`
-	ProvisionStatus      map[string]any `json:"provisionStatus"`
-	SessionNumber        int64          `json:"sessionNumber"`
+	// The cloud service provider
+	Csp string `json:"csp"`
+	// The current status
+	CurrentStatus string `json:"currentStatus"`
+	// The delete status
+	DeleteStatus string `json:"deleteStatus"`
+	// The session ID
+	ID string `json:"id"`
+	// The infrastructure ID
+	InfraID string `json:"infraId"`
+	// The infrastructure name
+	InfraName string `json:"infraName"`
+	// The infrastructure type
+	InfraType string `json:"infraType"`
+	// The provision status
+	ProvisionStatus map[string]any `json:"provisionStatus"`
+	// The session number
+	SessionNumber int64 `json:"sessionNumber"`
+	// The user that owns this session
 	User                 *string        `json:"user,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type SessionSoftware struct {
-	Port                 int64          `json:"port"`
-	Type                 string         `json:"type"`
+	// Port the software is running on.
+	Port int64 `json:"port"`
+	// Software type (vscode-server or vnc).
+	Type string `json:"type"`
+	// Software version.
 	Version              string         `json:"version"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type SetupData struct {
-	Email                *string        `json:"email,omitempty"`
-	Name                 *string        `json:"name,omitempty"`
-	Organization         string         `json:"organization"`
-	Password             string         `json:"password"`
-	Theme                *string        `json:"theme,omitempty"`
+	// Email for the initial admin user (optional)
+	Email *string `json:"email,omitempty"`
+	// Full name of the initial admin user (optional)
+	Name *string `json:"name,omitempty"`
+	// Organization name
+	Organization string `json:"organization"`
+	// Password for the initial admin user
+	Password string `json:"password"`
+	// User's preferred theme (activate for light, dark for dark)
+	Theme *string `json:"theme,omitempty"`
+	// Username for the initial admin user
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Shared struct {
-	Group                string         `json:"group"`
+	// Group the storage is shared with.
+	Group string `json:"group"`
+	// Permissions granted to the group for this storage.
 	Permissions          any            `json:"permissions"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type SharedPermission struct {
-	Group                *string        `json:"group,omitempty"`
-	Organization         *bool          `json:"organization,omitempty"`
+	// Group ID
+	Group *string `json:"group,omitempty"`
+	// Whether shared with organization
+	Organization *bool `json:"organization,omitempty"`
+	// Permissions granted
 	Permissions          any            `json:"permissions,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -3241,207 +4934,325 @@ type SharedPermissions struct {
 }
 
 type SingleClusterResponse struct {
-	CaCert               string                  `json:"caCert"`
-	CostTrackingStatus   *string                 `json:"costTrackingStatus,omitempty"`
-	Endpoint             string                  `json:"endpoint"`
-	Groups               map[string]any          `json:"groups"`
-	ID                   string                  `json:"id"`
-	ImageURL             *string                 `json:"imageUrl,omitempty"`
-	Name                 string                  `json:"name"`
-	ResourcePrices       *CostTrackingPricesBody `json:"resourcePrices,omitempty"`
-	Type                 string                  `json:"type"`
-	AdditionalProperties map[string]any          `json:"-,omitempty"`
+	// Base64-encoded CA certificate
+	CaCert string `json:"caCert"`
+	// Cost tracking status
+	CostTrackingStatus *string `json:"costTrackingStatus,omitempty"`
+	// Kubernetes API endpoint
+	Endpoint string `json:"endpoint"`
+	// Map of team names to team IDs that have access to this cluster
+	Groups map[string]any `json:"groups"`
+	// Cluster MongoDB ID
+	ID string `json:"id"`
+	// Cluster icon URL
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Cluster name
+	Name           string                  `json:"name"`
+	ResourcePrices *CostTrackingPricesBody `json:"resourcePrices,omitempty"`
+	// Infrastructure type
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type SingleQuotaResponse struct {
-	CreatedAt            time.Time      `json:"createdAt"`
-	Limit                ResourceQuota  `json:"limit"`
+	// Creation timestamp of the quota
+	CreatedAt time.Time     `json:"createdAt"`
+	Limit     ResourceQuota `json:"limit"`
+	// Name of the quota
 	Name                 string         `json:"name"`
 	Request              ResourceQuota  `json:"request"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type SingleVolume struct {
-	Aggregates           []string       `json:"aggregates"`
-	Name                 string         `json:"name"`
-	Path                 string         `json:"path"`
-	SizeAvailable        int64          `json:"sizeAvailable"`
-	SizeTotal            int64          `json:"sizeTotal"`
-	SizeUsed             int64          `json:"sizeUsed"`
-	State                string         `json:"state"`
-	Svm                  Svm            `json:"svm"`
+	// List of aggregate names
+	Aggregates []string `json:"aggregates"`
+	// Volume name
+	Name string `json:"name"`
+	// Export path for the volume
+	Path string `json:"path"`
+	// Available size in bytes
+	SizeAvailable int64 `json:"sizeAvailable"`
+	// Total size in bytes
+	SizeTotal int64 `json:"sizeTotal"`
+	// Used size in bytes
+	SizeUsed int64 `json:"sizeUsed"`
+	// Volume state (e.g., online, offline)
+	State string `json:"state"`
+	Svm   Svm    `json:"svm"`
+	// Volume UUID
 	Uuid                 string         `json:"uuid"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Snapshot struct {
-	Csp                  string         `json:"csp"`
-	ID                   string         `json:"id"`
-	Name                 string         `json:"name"`
-	Namespace            string         `json:"namespace"`
-	Region               string         `json:"region"`
-	Root                 bool           `json:"root"`
-	Shared               []Shared       `json:"shared"`
-	Size                 int32          `json:"size"`
+	// Cloud service provider of the snapshot
+	Csp string `json:"csp"`
+	// Unique identifier of the snapshot
+	ID string `json:"id"`
+	// Name of the snapshot
+	Name string `json:"name"`
+	// User who created the snapshot
+	Namespace string `json:"namespace"`
+	// Region where the snapshot is stored
+	Region string `json:"region"`
+	// Indicates if the snapshot is a root snapshot
+	Root bool `json:"root"`
+	// Lists the groups the snapshot is shared with, if any
+	Shared []Shared `json:"shared"`
+	// Size of the snapshot in bytes
+	Size int32 `json:"size"`
+	// Current provision status of the snapshot
 	Status               string         `json:"status"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type SSHPrivateKey struct {
-	CreatedAt            *string        `json:"createdAt,omitempty"`
-	Description          *string        `json:"description,omitempty"`
-	ID                   *string        `json:"id,omitempty"`
-	KeyFile              *string        `json:"keyFile,omitempty"`
-	Name                 string         `json:"name"`
-	SSHPrivateKey        *string        `json:"sshPrivateKey,omitempty"`
-	Type                 *string        `json:"type,omitempty"`
+	// The creation date of the SSH key
+	CreatedAt *string `json:"createdAt,omitempty"`
+	// The description of the SSH key
+	Description *string `json:"description,omitempty"`
+	// The unique identifier of the SSH key
+	ID *string `json:"id,omitempty"`
+	// The path to the key in the user workspace
+	KeyFile *string `json:"keyFile,omitempty"`
+	// The name of the SSH key
+	Name string `json:"name"`
+	// The SSH private key content
+	SSHPrivateKey *string `json:"sshPrivateKey,omitempty"`
+	// The type of the SSH key
+	Type *string `json:"type,omitempty"`
+	// The user ID (owner) of the SSH key
 	User                 *string        `json:"user,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type StepStruct struct {
-	Name                 *string        `json:"name,omitempty"`
+	// Step name.
+	Name *string `json:"name,omitempty"`
+	// Step status.
 	Status               *string        `json:"status,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type StorageAttachment struct {
-	ID                   string         `json:"id"`
-	Name                 string         `json:"name"`
-	Status               string         `json:"status"`
-	Type                 *string        `json:"type,omitempty"`
+	// ID of the resource.
+	ID string `json:"id"`
+	// Name of the resource.
+	Name string `json:"name"`
+	// Status of the resource.
+	Status string `json:"status"`
+	// Type of the resource, e.g., 'cluster', 'pool', etc.
+	Type *string `json:"type,omitempty"`
+	// Username of the resource owner.
 	User                 string         `json:"user"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type StorageBody struct {
-	Errors               []ClusterError    `json:"errors,omitempty"`
-	Metadata             StorageMetadata   `json:"metadata"`
+	// List of cluster errors, if any
+	Errors   []ClusterError  `json:"errors,omitempty"`
+	Metadata StorageMetadata `json:"metadata"`
+	// List of storage resources
 	Storage              []StorageResponse `json:"storage"`
 	AdditionalProperties map[string]any    `json:"-,omitempty"`
 }
 
 type StorageMetadata struct {
-	SuccessfulClusters   int64          `json:"successfulClusters"`
-	TotalClusters        int64          `json:"totalClusters"`
-	TotalPvCs            int64          `json:"totalPVCs"`
-	TotalPVs             int64          `json:"totalPVs"`
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total number of clusters queried
+	TotalClusters int64 `json:"totalClusters"`
+	// Total number of PVCs
+	TotalPvCs int64 `json:"totalPVCs"`
+	// Total number of PVs
+	TotalPVs int64 `json:"totalPVs"`
+	// Total number of storage resources returned
 	TotalStorage         int64          `json:"totalStorage"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type StorageResponse struct {
-	AccessModes          string         `json:"accessModes"`
-	Capacity             string         `json:"capacity"`
-	Claim                *string        `json:"claim,omitempty"`
-	Cluster              string         `json:"cluster"`
-	CreatedAt            time.Time      `json:"createdAt"`
-	Name                 string         `json:"name"`
-	Namespace            *string        `json:"namespace,omitempty"`
-	ReclaimPolicy        *string        `json:"reclaimPolicy,omitempty"`
-	Status               string         `json:"status"`
-	StorageClass         string         `json:"storageClass"`
-	Type                 string         `json:"type"`
-	UsedBy               *string        `json:"usedBy,omitempty"`
+	// Access modes
+	AccessModes string `json:"accessModes"`
+	// Storage capacity
+	Capacity string `json:"capacity"`
+	// Bound claim (for PVs)
+	Claim *string `json:"claim,omitempty"`
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// Creation timestamp of the resource
+	CreatedAt time.Time `json:"createdAt"`
+	// Name of the storage resource
+	Name string `json:"name"`
+	// Kubernetes namespace (for PVCs)
+	Namespace *string `json:"namespace,omitempty"`
+	// Reclaim policy (for PVs)
+	ReclaimPolicy *string `json:"reclaimPolicy,omitempty"`
+	// Storage status
+	Status string `json:"status"`
+	// Storage class name
+	StorageClass string `json:"storageClass"`
+	// Storage type
+	Type string `json:"type"`
+	// Pod using this PVC
+	UsedBy *string `json:"usedBy,omitempty"`
+	// Bound volume name (for PVCs)
 	Volume               *string        `json:"volume,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type SubjectPermissions struct {
-	Groups               map[string]any `json:"groups"`
+	// Map of group names to permissions
+	Groups map[string]any `json:"groups"`
+	// Map of permission names to whether entire organization has that access
 	Organization         map[string]any `json:"organization"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Svm struct {
-	Name                 string         `json:"name"`
+	// Storage VM name
+	Name string `json:"name"`
+	// Storage VM UUID
 	Uuid                 string         `json:"uuid"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type SystemInfo struct {
-	CpuCores             int64          `json:"cpuCores"`
-	CpuModel             *string        `json:"cpuModel,omitempty"`
-	DiskTotal            int64          `json:"diskTotal"`
+	// Number of CPU cores
+	CpuCores int64 `json:"cpuCores"`
+	// CPU model name
+	CpuModel *string `json:"cpuModel,omitempty"`
+	// Total disk space in bytes
+	DiskTotal int64 `json:"diskTotal"`
+	// Total memory in bytes
 	MemoryTotal          int64          `json:"memoryTotal"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Theme struct {
-	AccentColor          *string        `json:"accentColor,omitempty"`
-	AppBg                *string        `json:"appBg,omitempty"`
-	AppColor             *string        `json:"appColor,omitempty"`
-	Banner               *string        `json:"banner,omitempty"`
-	BorderColor          *string        `json:"borderColor,omitempty"`
-	DefaultTheme         *string        `json:"defaultTheme,omitempty"`
-	Element              *string        `json:"element,omitempty"`
-	ElementText          *string        `json:"elementText,omitempty"`
-	HoverColor           *string        `json:"hoverColor,omitempty"`
-	HoverTextColor       *string        `json:"hoverTextColor,omitempty"`
-	InputBg              *string        `json:"inputBg,omitempty"`
-	InputDisabledBg      *string        `json:"inputDisabledBg,omitempty"`
-	InputDisabledText    *string        `json:"inputDisabledText,omitempty"`
-	InvertLogoOnDark     *bool          `json:"invertLogoOnDark,omitempty"`
-	IsDark               *bool          `json:"isDark,omitempty"`
-	LinkColor            *string        `json:"linkColor,omitempty"`
-	LogoDark             *string        `json:"logoDark,omitempty"`
-	MutedPanelBg         *string        `json:"mutedPanelBg,omitempty"`
-	MutedPanelColor      *string        `json:"mutedPanelColor,omitempty"`
-	MutedTextColor       *string        `json:"mutedTextColor,omitempty"`
-	PanelBg              *string        `json:"panelBg,omitempty"`
-	PanelColor           *string        `json:"panelColor,omitempty"`
-	PoweredBy            *bool          `json:"poweredBy,omitempty"`
-	SidebarActiveBg      *string        `json:"sidebarActiveBg,omitempty"`
-	SidebarActiveText    *string        `json:"sidebarActiveText,omitempty"`
-	SidebarHoverBg       *string        `json:"sidebarHoverBg,omitempty"`
-	SidebarHoverText     *string        `json:"sidebarHoverText,omitempty"`
-	SidebarText          *string        `json:"sidebarText,omitempty"`
-	TopBannerBgColor     *string        `json:"topBannerBgColor,omitempty"`
-	TopBannerMessage     *string        `json:"topBannerMessage,omitempty"`
-	TopBannerTextColor   *string        `json:"topBannerTextColor,omitempty"`
+	// Primary accent color for buttons, links, and active states. Overrides element when set.
+	AccentColor *string `json:"accentColor,omitempty"`
+	// Background color for the main application area
+	AppBg *string `json:"appBg,omitempty"`
+	// Text color for the main application area
+	AppColor *string `json:"appColor,omitempty"`
+	// Background color for sidebar
+	Banner *string `json:"banner,omitempty"`
+	// Border color for inputs and elements
+	BorderColor *string `json:"borderColor,omitempty"`
+	// Default theme for new users in this organization. Can be 'system', 'light', 'dark', etc.
+	DefaultTheme *string `json:"defaultTheme,omitempty"`
+	// Background color for elements
+	Element *string `json:"element,omitempty"`
+	// Text color for elements
+	ElementText *string `json:"elementText,omitempty"`
+	// Color for hover states
+	HoverColor *string `json:"hoverColor,omitempty"`
+	// Text color for hover states
+	HoverTextColor *string `json:"hoverTextColor,omitempty"`
+	// Background color for input fields
+	InputBg *string `json:"inputBg,omitempty"`
+	// Background color for disabled input fields
+	InputDisabledBg *string `json:"inputDisabledBg,omitempty"`
+	// Text color for disabled input fields
+	InputDisabledText *string `json:"inputDisabledText,omitempty"`
+	// If true, applies CSS invert filter to the light logo when displayed on dark themes. Only used if logoDark is not set.
+	InvertLogoOnDark *bool `json:"invertLogoOnDark,omitempty"`
+	// Whether this is a dark theme
+	IsDark *bool `json:"isDark,omitempty"`
+	// Color for links
+	LinkColor *string `json:"linkColor,omitempty"`
+	// URL or path to the dark mode variant of the organization logo
+	LogoDark *string `json:"logoDark,omitempty"`
+	// Background color for muted panels
+	MutedPanelBg *string `json:"mutedPanelBg,omitempty"`
+	// Text color for muted panels
+	MutedPanelColor *string `json:"mutedPanelColor,omitempty"`
+	// Color for muted text
+	MutedTextColor *string `json:"mutedTextColor,omitempty"`
+	// Background color for panels
+	PanelBg *string `json:"panelBg,omitempty"`
+	// Text color for panels
+	PanelColor *string `json:"panelColor,omitempty"`
+	// Whether to show the Powered by Parallel Works logo on the sidebar, this can only be set by platform administrators
+	PoweredBy *bool `json:"poweredBy,omitempty"`
+	// Background color for active page on sidebar
+	SidebarActiveBg *string `json:"sidebarActiveBg,omitempty"`
+	// Text color for active page on sidebar
+	SidebarActiveText *string `json:"sidebarActiveText,omitempty"`
+	// Background color for links on sidebar when being hovered
+	SidebarHoverBg *string `json:"sidebarHoverBg,omitempty"`
+	// Text color for links on sidebar when being hovered
+	SidebarHoverText *string `json:"sidebarHoverText,omitempty"`
+	// Text color on sidebar
+	SidebarText *string `json:"sidebarText,omitempty"`
+	// Background color for the top banner
+	TopBannerBgColor *string `json:"topBannerBgColor,omitempty"`
+	// The message to show in the top banner
+	TopBannerMessage *string `json:"topBannerMessage,omitempty"`
+	// Text color for the top banner
+	TopBannerTextColor *string `json:"topBannerTextColor,omitempty"`
+	// Whether to show the organization logo on the sidebar
 	UseLogo              *bool          `json:"useLogo,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Tool struct {
-	Function             Function       `json:"function"`
+	Function Function `json:"function"`
+	// Tool type (currently only 'function')
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ToolCall struct {
-	Function             FunctionCall   `json:"function"`
-	ID                   *string        `json:"id,omitempty"`
-	Index                *int64         `json:"index,omitempty"`
+	Function FunctionCall `json:"function"`
+	// Unique tool call ID
+	ID *string `json:"id,omitempty"`
+	// Tool call index (for streaming)
+	Index *int64 `json:"index,omitempty"`
+	// Tool type
 	Type                 *string        `json:"type,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type TunnelShared struct {
-	Organization         *bool          `json:"organization,omitempty"`
+	// Whether shared with organization.
+	Organization *bool `json:"organization,omitempty"`
+	// Shared team IDs.
 	Teams                []string       `json:"teams,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Unit struct {
-	Rules                []UnitRule     `json:"Rules"`
-	CreatedAt            *time.Time     `json:"createdAt,omitempty"`
-	ID                   string         `json:"id"`
-	Name                 string         `json:"name"`
+	Rules []UnitRule `json:"Rules"`
+	// Creation timestamp
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// Unit ID
+	ID string `json:"id"`
+	// Unit name
+	Name string `json:"name"`
+	// Organization ID
 	OrganizationID       string         `json:"organizationId"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UnitRule struct {
-	EffectiveFrom        time.Time      `json:"effectiveFrom"`
-	EffectiveTo          *time.Time     `json:"effectiveTo,omitempty"`
-	ID                   string         `json:"id"`
-	Rate                 float64        `json:"rate"`
+	// Start of effective period
+	EffectiveFrom time.Time `json:"effectiveFrom"`
+	// End of effective period (null = open-ended)
+	EffectiveTo *time.Time `json:"effectiveTo,omitempty"`
+	// Rule ID
+	ID string `json:"id"`
+	// USD rate per unit
+	Rate float64 `json:"rate"`
+	// Parent unit ID
 	UnitID               string         `json:"unitId"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UnmountWorkspaceDirectoryBody struct {
+	// The folder in the workspace to unmount.
 	WorkspacePath        string         `json:"workspacePath"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -3453,29 +5264,41 @@ type UnreachableSession struct {
 }
 
 type UpdateAiChatInputBody struct {
-	APIKey               *string        `json:"apiKey,omitempty"`
-	EnabledModels        []string       `json:"enabledModels,omitempty"`
-	Endpoint             *string        `json:"endpoint,omitempty"`
+	// Custom provider API key
+	APIKey *string `json:"apiKey,omitempty"`
+	// List of model IDs enabled for the chat interface
+	EnabledModels []string `json:"enabledModels,omitempty"`
+	// Custom provider endpoint URL
+	Endpoint *string `json:"endpoint,omitempty"`
+	// AI model name
 	Model                *string        `json:"model,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateAiProviderPermissionsInputBody struct {
-	Groups               map[string]any `json:"groups"`
+	// Map of group names to permission
+	Groups map[string]any `json:"groups"`
+	// Map of permission names to whether to share with entire organization
 	Organization         map[string]any `json:"organization"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateAccessManagementBody struct {
-	HomeDirectories      *bool          `json:"homeDirectories,omitempty"`
-	SSHKeys              *bool          `json:"sshKeys,omitempty"`
-	SudoAccess           *bool          `json:"sudoAccess,omitempty"`
+	// Enable pam_mkhomedir for automatic home directory creation
+	HomeDirectories *bool `json:"homeDirectories,omitempty"`
+	// Enable AuthorizedKeysCommand for SSH key lookup
+	SSHKeys *bool `json:"sshKeys,omitempty"`
+	// Enable sudoers.d for pwsudo group
+	SudoAccess *bool `json:"sudoAccess,omitempty"`
+	// Enable libnss_cache, nsswitch, and user/group cache file sync
 	UserPopulation       *bool          `json:"userPopulation,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateAllocationPermissionsInputBody struct {
-	Groups               map[string]any `json:"groups"`
+	// Map of group names to permission
+	Groups map[string]any `json:"groups"`
+	// Map of permission names to whether to share with entire organization
 	Organization         map[string]any `json:"organization"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -3487,43 +5310,60 @@ type UpdateConversationInputBody struct {
 }
 
 type UpdateCostTrackingBody struct {
+	// Whether to enable or disable cost tracking for this cluster
 	EnableTracking       bool           `json:"enableTracking"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateGpuOperatorBody struct {
-	MigStrategy          string         `json:"migStrategy"`
+	// MIG strategy to apply (e.g., 'mixed', 'single')
+	MigStrategy string `json:"migStrategy"`
+	// MIG configuration to apply (e.g., 'all-balanced', 'all-1g.6gb')
 	MigStrategyConfig    string         `json:"migStrategyConfig"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateGpuOperatorResponseBody struct {
-	MigStrategy          string         `json:"migStrategy"`
-	MigStrategyConfig    string         `json:"migStrategyConfig"`
+	// The applied MIG strategy
+	MigStrategy string `json:"migStrategy"`
+	// The applied MIG configuration
+	MigStrategyConfig string `json:"migStrategyConfig"`
+	// The name of the updated node
 	NodeName             string         `json:"nodeName"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateManagedClusterInputBody struct {
-	AccessManagement     *UpdateAccessManagementBody `json:"accessManagement,omitempty"`
-	Description          *string                     `json:"description,omitempty"`
-	DisplayName          *string                     `json:"displayName,omitempty"`
-	LoginNode            *string                     `json:"loginNode,omitempty"`
-	Markdown             *string                     `json:"markdown,omitempty"`
-	ProxySSH             *bool                       `json:"proxySsh,omitempty"`
-	Tags                 []string                    `json:"tags,omitempty"`
-	AdditionalProperties map[string]any              `json:"-,omitempty"`
+	AccessManagement *UpdateAccessManagementBody `json:"accessManagement,omitempty"`
+	// Description of the cluster
+	Description *string `json:"description,omitempty"`
+	// Display name for the cluster
+	DisplayName *string `json:"displayName,omitempty"`
+	// Hostname of the login node for SSH connections, or 'user-workspace'
+	LoginNode *string `json:"loginNode,omitempty"`
+	// Markdown content for documentation/notes
+	Markdown *string `json:"markdown,omitempty"`
+	// Force SSH connections to proxy through the platform
+	ProxySSH *bool `json:"proxySsh,omitempty"`
+	// Tags for the cluster
+	Tags                 []string       `json:"tags,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateManagedClusterOutputBody struct {
-	DisplayName          *string        `json:"displayName,omitempty"`
-	ID                   string         `json:"id"`
+	// Display name
+	DisplayName *string `json:"displayName,omitempty"`
+	// Cluster ID
+	ID string `json:"id"`
+	// Cluster name
 	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateManagedClusterPermissionsInputBody struct {
-	Groups               map[string]any `json:"groups"`
+	// Map of group names to permission
+	Groups map[string]any `json:"groups"`
+	// Map of permission names to whether to share with entire organization
 	Organization         map[string]any `json:"organization"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -3534,33 +5374,45 @@ type UpdateManagedNodeInputBody struct {
 }
 
 type UpdateManagedNodeOutputBody struct {
+	// Hostname of the updated node
 	Hostname             string         `json:"hostname"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdatePermissionInputBody struct {
+	// New permission level
 	Permission           string         `json:"permission"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateQuotaBody struct {
-	Cpu                  string         `json:"cpu"`
-	Gpu                  *int64         `json:"gpu"`
+	// CPU limit in cores
+	Cpu string `json:"cpu"`
+	// GPU limit count
+	Gpu *int64 `json:"gpu"`
+	// Memory limit with Kubernetes quantity format (e.g., '2Gi', '1024Mi')
 	Memory               string         `json:"memory"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateReportBody struct {
-	Email                *string        `json:"email,omitempty"`
-	Frequency            *string        `json:"frequency,omitempty"`
-	Period               *string        `json:"period,omitempty"`
-	Type                 *string        `json:"type,omitempty"`
+	// Email address to send the report to.
+	Email *string `json:"email,omitempty"`
+	// Frequency of the report.
+	Frequency *string `json:"frequency,omitempty"`
+	// Time period for the report.
+	Period *string `json:"period,omitempty"`
+	// Type of report to generate.
+	Type *string `json:"type,omitempty"`
+	// Specific user or group for the report.
 	Who                  *string        `json:"who,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateResourceGroupPermissionsInputBody struct {
-	Groups               map[string]any `json:"groups"`
+	// Map of group names to permissions
+	Groups map[string]any `json:"groups"`
+	// Map of permission names to whether to share with entire organization
 	Organization         map[string]any `json:"organization"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -3571,72 +5423,102 @@ type UpdateSessionInputBody struct {
 }
 
 type UpdateUserProfileInputBody struct {
+	// Full name of the user
 	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateUserProfileOutputBody struct {
+	// Updated full name of the user
 	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateUserSidebarInputBody struct {
+	// Array of sidebar option IDs to display. Send null to reset to defaults.
 	SidebarOptions       []string       `json:"sidebarOptions"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateWorkflowBody struct {
-	Description          *string                 `json:"description,omitempty"`
-	DescriptionMarkdown  *string                 `json:"descriptionMarkdown,omitempty"`
-	DisplayName          *string                 `json:"displayName,omitempty"`
-	ImageURL             *string                 `json:"imageUrl,omitempty"`
-	Remote               *RemoteWorkflowSettings `json:"remote,omitempty"`
-	SkipCheckout         *bool                   `json:"skipCheckout,omitempty"`
-	Yaml                 *string                 `json:"yaml,omitempty"`
-	AdditionalProperties map[string]any          `json:"-,omitempty"`
+	// Description of the workflow.
+	Description *string `json:"description,omitempty"`
+	// Markdown description of the workflow.
+	DescriptionMarkdown *string `json:"descriptionMarkdown,omitempty"`
+	// Display name of the workflow.
+	DisplayName *string `json:"displayName,omitempty"`
+	// URL of the workflow icon.
+	ImageURL *string                 `json:"imageUrl,omitempty"`
+	Remote   *RemoteWorkflowSettings `json:"remote,omitempty"`
+	// Skip automatic repository checkout during job preparation.
+	SkipCheckout *bool `json:"skipCheckout,omitempty"`
+	// Workflow YAML definition as a YAML string.
+	Yaml                 *string        `json:"yaml,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateWorkflowRunInputBody struct {
-	DisplayName          *string        `json:"displayName,omitempty"`
+	// A custom display name for the run
+	DisplayName *string `json:"displayName,omitempty"`
+	// The status of the workflow run
 	Status               *string        `json:"status,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type URLResponse struct {
-	ExpirationSeconds    int32          `json:"expirationSeconds"`
-	URL                  string         `json:"url"`
+	// The number of seconds until the presigned URL expires.
+	ExpirationSeconds int32 `json:"expirationSeconds"`
+	// The presigned URL for accessing the ML workspace.
+	URL string `json:"url"`
+	// The name of the user profile for accessing the ML workspace.
 	UserProfileName      string         `json:"userProfileName"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Usage struct {
-	CompletionTokens     int64          `json:"completion_tokens"`
-	PromptTokens         int64          `json:"prompt_tokens"`
+	// Tokens in the completion
+	CompletionTokens int64 `json:"completion_tokens"`
+	// Tokens in the prompt
+	PromptTokens int64 `json:"prompt_tokens"`
+	// Total tokens used
 	TotalTokens          int64          `json:"total_tokens"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UsageEventOutput struct {
-	Allocation           string         `json:"allocation"`
-	CreatedAt            time.Time      `json:"createdAt"`
-	EndedAt              time.Time      `json:"endedAt"`
-	ID                   string         `json:"id"`
-	Organization         string         `json:"organization"`
-	Quantity             float64        `json:"quantity"`
+	// The allocation associated with this usage event.
+	Allocation string `json:"allocation"`
+	// The time the usage event was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The end time of the usage event.
+	EndedAt time.Time `json:"endedAt"`
+	// The ID of the created usage event.
+	ID string `json:"id"`
+	// The organization associated with this usage event.
+	Organization string `json:"organization"`
+	// The quantity of usage for this event.
+	Quantity float64 `json:"quantity"`
+	// The start time of the usage event.
 	StartedAt            time.Time      `json:"startedAt"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UsageMetrics struct {
-	Free                 float64        `json:"free"`
-	Total                float64        `json:"total"`
-	Used                 float64        `json:"used"`
+	// Free capacity in GB
+	Free float64 `json:"free"`
+	// Total capacity in GB
+	Total float64 `json:"total"`
+	// Used capacity in GB
+	Used float64 `json:"used"`
+	// Used percentage
 	UsedPercent          float64        `json:"usedPercent"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UserActivityResponse struct {
-	ActiveDays           []string       `json:"activeDays"`
+	// List of dates when user was active in YYYY-MM-DD format
+	ActiveDays []string `json:"activeDays"`
+	// Username
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -3650,105 +5532,162 @@ type UserResource struct {
 }
 
 type UserSettings struct {
-	Language             *string        `json:"language,omitempty"`
-	TerminalFontSize     *int64         `json:"terminalFontSize,omitempty"`
-	TerminalTheme        *string        `json:"terminalTheme,omitempty"`
+	// User's preferred language
+	Language *string `json:"language,omitempty"`
+	// Terminal font size
+	TerminalFontSize *int64 `json:"terminalFontSize,omitempty"`
+	// Terminal theme
+	TerminalTheme *string `json:"terminalTheme,omitempty"`
+	// User's preferred theme
 	Theme                *string        `json:"theme,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UserWorkspace struct {
-	Active               bool           `json:"active"`
-	CreatedAt            time.Time      `json:"createdAt"`
-	CurrentImage         string         `json:"currentImage"`
-	Image                string         `json:"image"`
-	Name                 string         `json:"name"`
-	NotSafeToKillReason  *string        `json:"notSafeToKillReason,omitempty"`
-	SafeToKill           bool           `json:"safeToKill"`
-	SafeUsername         *string        `json:"safeUsername,omitempty"`
-	Type                 string         `json:"type"`
-	User                 *string        `json:"user,omitempty"`
-	Userhost             *string        `json:"userhost,omitempty"`
+	// whether this user workspace is currently in use by the user. If switching between docker and k8s, then there will be one workspace for each, and one will be active at a time.
+	Active bool `json:"active"`
+	// the time when the user workspace was started
+	CreatedAt time.Time `json:"createdAt"`
+	// the image the user workspace is currently running. This will be always be set to the same as Image when the workspace restarts.
+	CurrentImage string `json:"currentImage"`
+	// the image set for the user workspace
+	Image string `json:"image"`
+	// name of the user workspace
+	Name string `json:"name"`
+	// the reason why the user workspace cannot be safely killed, if applicable
+	NotSafeToKillReason *string `json:"notSafeToKillReason,omitempty"`
+	// whether the user workspace can be safely killed without disrupting the user
+	SafeToKill bool `json:"safeToKill"`
+	// the safe username of the user associated with the workspace
+	SafeUsername *string `json:"safeUsername,omitempty"`
+	// type of the user workspace
+	Type string `json:"type"`
+	// the username of the user associated with the workspace
+	User *string `json:"user,omitempty"`
+	// the userhost where the docker workspace is running, if applicable
+	Userhost *string `json:"userhost,omitempty"`
+	// unique identifier for the user workspace, same as name for docker workspaces
 	WorkspaceID          *string        `json:"workspaceId,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type VariablesRequest struct {
-	APIKey               *string        `json:"apiKey,omitempty"`
-	Endpoint             *string        `json:"endpoint,omitempty"`
-	Model                *string        `json:"model,omitempty"`
-	RefreshInterval      *string        `json:"refreshInterval,omitempty"`
+	// Custom provider API key
+	APIKey *string `json:"apiKey,omitempty"`
+	// Custom provider endpoint
+	Endpoint *string `json:"endpoint,omitempty"`
+	// AI model name
+	Model *string `json:"model,omitempty"`
+	// Refresh interval for the AI provider
+	RefreshInterval *string `json:"refreshInterval,omitempty"`
+	// AI provider region
 	Region               *string        `json:"region,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type VerifyOtpInputBody struct {
+	// 6-digit OTP code from authenticator app
 	Code                 string         `json:"code"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type VerifyOtpOutputBody struct {
+	// Success message
 	Message              string         `json:"message"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type VolumeSummary struct {
-	Name                 string         `json:"name"`
+	// Volume name
+	Name string `json:"name"`
+	// Volume UUID
 	Uuid                 string         `json:"uuid"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type Webhook struct {
-	CreatedAt            *time.Time     `json:"createdAt,omitempty"`
-	Description          *string        `json:"description,omitempty"`
-	Enabled              *bool          `json:"enabled"`
-	ID                   string         `json:"id"`
-	Name                 *string        `json:"name"`
-	Type                 *string        `json:"type"`
+	// Timestamp when the webhook was created.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// Optional description of the webhook.
+	Description *string `json:"description,omitempty"`
+	// Whether the webhook is currently enabled.
+	Enabled *bool `json:"enabled"`
+	// Unique identifier of the webhook.
+	ID string `json:"id"`
+	// Name of the webhook.
+	Name *string `json:"name"`
+	// Event type that triggers the webhook.
+	Type *string `json:"type"`
+	// URL to receive the webhook POST request.
 	URL                  *string        `json:"url"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type WorkflowAgentAliveUpdate struct {
+	// The id of the workflow run that spawned the agent
 	WorkflowRunID        *string        `json:"workflowRunId,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type WorkflowAgentResponse struct {
+	// indicates if the agent and it's subprocesses should be stopped
 	ShouldStop           *bool          `json:"shouldStop,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type WorkflowConfiguration struct {
-	Builtin              *bool          `json:"builtin,omitempty"`
-	ID                   string         `json:"id"`
-	Inputs               map[string]any `json:"inputs,omitempty"`
-	Name                 string         `json:"name"`
+	// Boolean to determine if the configuration is from the yaml or is user selected
+	Builtin *bool `json:"builtin,omitempty"`
+	// Configuration ID.
+	ID string `json:"id"`
+	// Input values to load when selected.
+	Inputs map[string]any `json:"inputs,omitempty"`
+	// Configuration name.
+	Name string `json:"name"`
+	// Target tags for this configuration.
 	TargetTags           []string       `json:"targetTags,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type WorkflowItem struct {
-	Configurations       []WorkflowConfiguration `json:"configurations,omitempty"`
-	Description          *string                 `json:"description,omitempty"`
-	Directory            *string                 `json:"directory,omitempty"`
-	DisplayName          *string                 `json:"displayName,omitempty"`
-	Favorite             bool                    `json:"favorite"`
-	ID                   string                  `json:"id"`
-	ImageURL             *string                 `json:"imageUrl,omitempty"`
-	MarketplaceItem      *string                 `json:"marketplaceItem,omitempty"`
-	MarketplaceSlug      *string                 `json:"marketplaceSlug,omitempty"`
-	MarketplaceVersion   *string                 `json:"marketplaceVersion,omitempty"`
-	Name                 string                  `json:"name"`
-	Remote               *RemoteWorkflowSettings `json:"remote,omitempty"`
-	SkipCheckout         *bool                   `json:"skipCheckout,omitempty"`
-	Slug                 *string                 `json:"slug,omitempty"`
-	Subtype              *string                 `json:"subtype,omitempty"`
-	Tags                 []string                `json:"tags,omitempty"`
-	Type                 string                  `json:"type"`
-	User                 *string                 `json:"user,omitempty"`
-	Yaml                 map[string]any          `json:"yaml,omitempty"`
-	AdditionalProperties map[string]any          `json:"-,omitempty"`
+	// Configurations for the workflow.
+	Configurations []WorkflowConfiguration `json:"configurations,omitempty"`
+	// Description of the workflow.
+	Description *string `json:"description,omitempty"`
+	// Directory of the workflow.
+	Directory *string `json:"directory,omitempty"`
+	// Display name of the workflow.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Whether the workflow is favorited.
+	Favorite bool `json:"favorite"`
+	// Id of the workflow.
+	ID string `json:"id"`
+	// URL of the workflow icon.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// ID of the marketplace item if installed from marketplace.
+	MarketplaceItem *string `json:"marketplaceItem,omitempty"`
+	// Slug of the marketplace item.
+	MarketplaceSlug *string `json:"marketplaceSlug,omitempty"`
+	// Version of the marketplace item.
+	MarketplaceVersion *string `json:"marketplaceVersion,omitempty"`
+	// Name of the workflow.
+	Name   string                  `json:"name"`
+	Remote *RemoteWorkflowSettings `json:"remote,omitempty"`
+	// Whether to skip automatic repository checkout during job preparation.
+	SkipCheckout *bool `json:"skipCheckout,omitempty"`
+	// Name without namespace prefix, used for URLs.
+	Slug *string `json:"slug,omitempty"`
+	// Subtype of the workflow (github for remote).
+	Subtype *string `json:"subtype,omitempty"`
+	// Tags associated with the workflow.
+	Tags []string `json:"tags,omitempty"`
+	// Type of the workflow (local or remote).
+	Type string `json:"type"`
+	// User which owns the workflow.
+	User *string `json:"user,omitempty"`
+	// YAML configuration of the workflow.
+	Yaml                 map[string]any `json:"yaml,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type WorkflowNotificationSettings struct {
@@ -3778,11 +5717,17 @@ type WorkflowRunDetailResponse struct {
 }
 
 type WorkflowRunInfo struct {
-	DisplayName          *string        `json:"displayName,omitempty"`
-	ID                   *string        `json:"id,omitempty"`
-	Name                 *string        `json:"name,omitempty"`
-	Number               *int64         `json:"number,omitempty"`
-	Slug                 *string        `json:"slug,omitempty"`
+	// Workflow display name.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Workflow run ID.
+	ID *string `json:"id,omitempty"`
+	// Workflow name.
+	Name *string `json:"name,omitempty"`
+	// Workflow run number.
+	Number *int64 `json:"number,omitempty"`
+	// Workflow run slug.
+	Slug *string `json:"slug,omitempty"`
+	// Workflow type.
 	Type                 *string        `json:"type,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -3805,28 +5750,42 @@ type WorkflowRunResponse struct {
 }
 
 type WorkflowRunsCleanupPreviewBody struct {
-	Count                int64          `json:"count"`
+	// Number of workflow runs that would be deleted
+	Count int64 `json:"count"`
+	// Workflow runs created before this date would be deleted
 	CutoffDate           time.Time      `json:"cutoffDate"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type WorkloadResponse struct {
-	Cluster              string         `json:"cluster"`
-	Cpu                  *string        `json:"cpu,omitempty"`
-	CreatedAt            time.Time      `json:"createdAt"`
-	Memory               *string        `json:"memory,omitempty"`
-	Name                 string         `json:"name"`
-	Namespace            string         `json:"namespace"`
-	Pods                 string         `json:"pods"`
-	Restarts             *int64         `json:"restarts,omitempty"`
-	Status               string         `json:"status"`
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// CPU usage
+	Cpu *string `json:"cpu,omitempty"`
+	// Creation timestamp of the workload
+	CreatedAt time.Time `json:"createdAt"`
+	// Memory usage
+	Memory *string `json:"memory,omitempty"`
+	// Name of the workload
+	Name string `json:"name"`
+	// Kubernetes namespace of the workload
+	Namespace string `json:"namespace"`
+	// Pod count (ready/total)
+	Pods string `json:"pods"`
+	// Number of restarts
+	Restarts *int64 `json:"restarts,omitempty"`
+	// Status of the workload
+	Status string `json:"status"`
+	// Type of workload
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type WorkloadsBody struct {
-	Errors               []ClusterError     `json:"errors,omitempty"`
-	Metadata             ResponseMetadata   `json:"metadata"`
+	// List of cluster errors, if any
+	Errors   []ClusterError   `json:"errors,omitempty"`
+	Metadata ResponseMetadata `json:"metadata"`
+	// List of workloads
 	Workloads            []WorkloadResponse `json:"workloads"`
 	AdditionalProperties map[string]any     `json:"-,omitempty"`
 }

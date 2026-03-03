@@ -12,11 +12,19 @@ import (
 
 // GetPlatformAlertsParams contains optional parameters for the GetPlatformAlerts operation.
 type GetPlatformAlertsParams struct {
+	// Maximum number of alerts to return
 	Limit *int64 `json:"limit,omitempty"`
-	Skip  *int64 `json:"skip,omitempty"`
+	// Number of alerts to skip
+	Skip *int64 `json:"skip,omitempty"`
 }
 
-// GetPlatformAlerts - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Returns a list of all platform alerts
+// GetPlatformAlerts - Get platform alerts
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns a list of all platform alerts
 func (c *Client) GetPlatformAlerts(ctx context.Context, opts ...GetPlatformAlertsParams) (*[]Alert, error) {
 	path := "/api/admin/alerts"
 
@@ -36,7 +44,13 @@ func (c *Client) GetPlatformAlerts(ctx context.Context, opts ...GetPlatformAlert
 	return &result, nil
 }
 
-// CreatePlatformAlert - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Create a new platform alert
+// CreatePlatformAlert - Create a platform alert
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Create a new platform alert
 func (c *Client) CreatePlatformAlert(ctx context.Context, body *CreateAlertBody) (*Alert, error) {
 	path := "/api/admin/alerts"
 
@@ -47,7 +61,13 @@ func (c *Client) CreatePlatformAlert(ctx context.Context, body *CreateAlertBody)
 	return &result, nil
 }
 
-// DeletePlatformAlert - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Deletes a platform alert by its ID.
+// DeletePlatformAlert - Delete a platform alert
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Deletes a platform alert by its ID.
 func (c *Client) DeletePlatformAlert(ctx context.Context, id string) error {
 	path := "/api/admin/alerts/{id}"
 	path = pathReplace(path, "id", id)
@@ -58,7 +78,13 @@ func (c *Client) DeletePlatformAlert(ctx context.Context, id string) error {
 	return nil
 }
 
-// CleanupOldWorkflowRuns - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Permanently deletes workflow runs older than the specified number of months
+// CleanupOldWorkflowRuns - Delete old workflow runs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Permanently deletes workflow runs older than the specified number of months
 func (c *Client) CleanupOldWorkflowRuns(ctx context.Context, body *DeleteOldWorkflowRunsBody) (*DeleteOldWorkflowRunsResultBody, error) {
 	path := "/api/admin/maintenance/workflow-runs/old/cleanup"
 
@@ -69,7 +95,13 @@ func (c *Client) CleanupOldWorkflowRuns(ctx context.Context, body *DeleteOldWork
 	return &result, nil
 }
 
-// PreviewOldWorkflowRunsCleanup - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Returns the count of workflow runs that would be deleted if cleanup is performed
+// PreviewOldWorkflowRunsCleanup - Preview old workflow runs cleanup
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns the count of workflow runs that would be deleted if cleanup is performed
 func (c *Client) PreviewOldWorkflowRunsCleanup(ctx context.Context) (*WorkflowRunsCleanupPreviewBody, error) {
 	path := "/api/admin/maintenance/workflow-runs/old/preview"
 
@@ -80,7 +112,13 @@ func (c *Client) PreviewOldWorkflowRunsCleanup(ctx context.Context) (*WorkflowRu
 	return &result, nil
 }
 
-// CleanupOrphanedWorkflowRuns - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Permanently deletes workflow runs with non-existent user or workflow references
+// CleanupOrphanedWorkflowRuns - Delete orphaned workflow runs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Permanently deletes workflow runs with non-existent user or workflow references
 func (c *Client) CleanupOrphanedWorkflowRuns(ctx context.Context) (*DeleteOrphanedWorkflowRunsResultBody, error) {
 	path := "/api/admin/maintenance/workflow-runs/orphaned/cleanup"
 
@@ -91,7 +129,13 @@ func (c *Client) CleanupOrphanedWorkflowRuns(ctx context.Context) (*DeleteOrphan
 	return &result, nil
 }
 
-// PreviewOrphanedWorkflowRunsCleanup - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Returns the count of orphaned workflow runs (runs with non-existent user or workflow references)
+// PreviewOrphanedWorkflowRunsCleanup - Preview orphaned workflow runs cleanup
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns the count of orphaned workflow runs (runs with non-existent user or workflow references)
 func (c *Client) PreviewOrphanedWorkflowRunsCleanup(ctx context.Context) (*OrphanedWorkflowRunsPreviewBody, error) {
 	path := "/api/admin/maintenance/workflow-runs/orphaned/preview"
 
@@ -104,10 +148,17 @@ func (c *Client) PreviewOrphanedWorkflowRunsCleanup(ctx context.Context) (*Orpha
 
 // GetPlatformMauParams contains optional parameters for the GetPlatformMau operation.
 type GetPlatformMauParams struct {
+	// End date in YYYY-MM-DD format. Defaults to current date
 	EndDate *string `json:"endDate,omitempty"`
 }
 
-// GetPlatformMau - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Returns monthly active user statistics for the entire platform, including per-organization breakdown.
+// GetPlatformMau - Get platform MAU statistics
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns monthly active user statistics for the entire platform, including per-organization breakdown.
 func (c *Client) GetPlatformMau(ctx context.Context, opts ...GetPlatformMauParams) (*PlatformMauResponse, error) {
 	path := "/api/admin/mau"
 
@@ -126,7 +177,9 @@ func (c *Client) GetPlatformMau(ctx context.Context, opts ...GetPlatformMauParam
 	return &result, nil
 }
 
-// ListMigrationRunLogs - Returns the list of all migration run logs
+// ListMigrationRunLogs - List migration runs
+//
+// Returns the list of all migration run logs
 func (c *Client) ListMigrationRunLogs(ctx context.Context) (*[]MigrationRunLogResponse, error) {
 	path := "/api/admin/migrations/logs"
 
@@ -137,7 +190,9 @@ func (c *Client) ListMigrationRunLogs(ctx context.Context) (*[]MigrationRunLogRe
 	return &result, nil
 }
 
-// DeleteAllMigrationLogs - Delete all migration run logs
+// DeleteAllMigrationLogs - Delete all migration logs
+//
+// Delete all migration run logs
 func (c *Client) DeleteAllMigrationLogs(ctx context.Context) error {
 	path := "/api/admin/migrations/logs"
 
@@ -147,7 +202,9 @@ func (c *Client) DeleteAllMigrationLogs(ctx context.Context) error {
 	return nil
 }
 
-// DeleteMigrationLog - Delete a specific migration run log by its ID
+// DeleteMigrationLog - Delete a migration log
+//
+// Delete a specific migration run log by its ID
 func (c *Client) DeleteMigrationLog(ctx context.Context, id string) error {
 	path := "/api/admin/migrations/logs/{id}"
 	path = pathReplace(path, "id", id)
@@ -158,7 +215,9 @@ func (c *Client) DeleteMigrationLog(ctx context.Context, id string) error {
 	return nil
 }
 
-// ListMongoMigrationsRegistry - Returns the list of all available mongo migrations along with their applied status
+// ListMongoMigrationsRegistry - List mongo migrations registry
+//
+// Returns the list of all available mongo migrations along with their applied status
 func (c *Client) ListMongoMigrationsRegistry(ctx context.Context) (*[]MigrationRegistryItem, error) {
 	path := "/api/admin/migrations/registry"
 
@@ -169,7 +228,9 @@ func (c *Client) ListMongoMigrationsRegistry(ctx context.Context) (*[]MigrationR
 	return &result, nil
 }
 
-// RunMigrations - Run pending migrations
+// RunMigrations - Run migrations
+//
+// Run pending migrations
 func (c *Client) RunMigrations(ctx context.Context, body RunInBody) (*MigrationRunLogResponse, error) {
 	path := "/api/admin/migrations/run"
 
@@ -180,7 +241,9 @@ func (c *Client) RunMigrations(ctx context.Context, body RunInBody) (*MigrationR
 	return &result, nil
 }
 
-// RunSpecificMongoMigration - Run or re-run a specific mongo migration by its ID
+// RunSpecificMongoMigration - Run a specific mongo migration
+//
+// Run or re-run a specific mongo migration by its ID
 func (c *Client) RunSpecificMongoMigration(ctx context.Context, id string) (*MigrationRunLogResponse, error) {
 	path := "/api/admin/migrations/run/{id}"
 	path = pathReplace(path, "id", id)
@@ -194,11 +257,21 @@ func (c *Client) RunSpecificMongoMigration(ctx context.Context, id string) (*Mig
 
 // GetPlatformReportsParams contains optional parameters for the GetPlatformReports operation.
 type GetPlatformReportsParams struct {
+	// Maximum number of reports to return
 	Limit *int64 `json:"limit,omitempty"`
-	Skip  *int64 `json:"skip,omitempty"`
+	// Number of reports to skip
+	Skip *int64 `json:"skip,omitempty"`
 }
 
-// GetPlatformReports - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Returns all configured platform reports. This route is deprecated, and does not have a replacement. DO NOT USE.
+// GetPlatformReports - List platform reports
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns all configured platform reports. This route is deprecated, and does not have a replacement. DO NOT USE.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetPlatformReports(ctx context.Context, opts ...GetPlatformReportsParams) (*[]Report, error) {
 	path := "/api/admin/reports"
 
@@ -218,7 +291,15 @@ func (c *Client) GetPlatformReports(ctx context.Context, opts ...GetPlatformRepo
 	return &result, nil
 }
 
-// CreateAdminReport - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Create a new report. This route is deprecated, and does not have a replacement. DO NOT USE.
+// CreateAdminReport - Create a platform report
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Create a new report. This route is deprecated, and does not have a replacement. DO NOT USE.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) CreateAdminReport(ctx context.Context, body *CreateReportBody) (*Report, error) {
 	path := "/api/admin/reports"
 
@@ -229,7 +310,15 @@ func (c *Client) CreateAdminReport(ctx context.Context, body *CreateReportBody) 
 	return &result, nil
 }
 
-// GetPlatformReport - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Get a report by ID. This route is deprecated, and does not have a replacement. DO NOT USE.
+// GetPlatformReport - Get a single platform report
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Get a report by ID. This route is deprecated, and does not have a replacement. DO NOT USE.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetPlatformReport(ctx context.Context, id string) (*Report, error) {
 	path := "/api/admin/reports/{id}"
 	path = pathReplace(path, "id", id)
@@ -241,7 +330,15 @@ func (c *Client) GetPlatformReport(ctx context.Context, id string) (*Report, err
 	return &result, nil
 }
 
-// DeletePlatformReport - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Delete a report by ID. This route is deprecated, and does not have a replacement. DO NOT USE.
+// DeletePlatformReport - Delete a platform report
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Delete a report by ID. This route is deprecated, and does not have a replacement. DO NOT USE.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) DeletePlatformReport(ctx context.Context, id string) error {
 	path := "/api/admin/reports/{id}"
 	path = pathReplace(path, "id", id)
@@ -252,7 +349,15 @@ func (c *Client) DeletePlatformReport(ctx context.Context, id string) error {
 	return nil
 }
 
-// UpdatePlatformReport - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Update a report by ID. This route is deprecated, and does not have a replacement. DO NOT USE.
+// UpdatePlatformReport - Update a platform report
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Update a report by ID. This route is deprecated, and does not have a replacement. DO NOT USE.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) UpdatePlatformReport(ctx context.Context, id string, body *UpdateReportBody) (*Report, error) {
 	path := "/api/admin/reports/{id}"
 	path = pathReplace(path, "id", id)
@@ -264,7 +369,13 @@ func (c *Client) UpdatePlatformReport(ctx context.Context, id string, body *Upda
 	return &result, nil
 }
 
-// KillUserWorkspace - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Force kills a user workspace for the specified user and workspace type.
+// KillUserWorkspace - Kill User Workspace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Force kills a user workspace for the specified user and workspace type.
 func (c *Client) KillUserWorkspace(ctx context.Context, user string, type_ string) error {
 	path := "/api/admin/user-workspace/users/{user}/{type}/kill"
 	path = pathReplace(path, "user", user)
@@ -276,7 +387,11 @@ func (c *Client) KillUserWorkspace(ctx context.Context, user string, type_ strin
 	return nil
 }
 
-// ReceiveAgentAlive - > This is a system-level route, so the response will be independent of the currently authenticated user.  Tells an agent whether it should exit based on the status of a workflow run.
+// ReceiveAgentAlive - Receive Agent Alive
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Tells an agent whether it should exit based on the status of a workflow run.
 func (c *Client) ReceiveAgentAlive(ctx context.Context, body WorkflowAgentAliveUpdate) (*WorkflowAgentResponse, error) {
 	path := "/api/agent/alive"
 
@@ -287,7 +402,11 @@ func (c *Client) ReceiveAgentAlive(ctx context.Context, body WorkflowAgentAliveU
 	return &result, nil
 }
 
-// AgentHeartbeat - > This is a system-level route, so the response will be independent of the currently authenticated user.  Reports node status, metrics, and scheduler information to the cluster.
+// AgentHeartbeat - Node Heartbeat
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Reports node status, metrics, and scheduler information to the cluster.
 func (c *Client) AgentHeartbeat(ctx context.Context, body HeartbeatInputBody) (*HeartbeatOutputBody, error) {
 	path := "/api/agent/heartbeat"
 
@@ -298,7 +417,11 @@ func (c *Client) AgentHeartbeat(ctx context.Context, body HeartbeatInputBody) (*
 	return &result, nil
 }
 
-// RegisterNode - > This is a system-level route, so the response will be independent of the currently authenticated user.  Registers a node using a registration token.
+// RegisterNode - Register Node
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Registers a node using a registration token.
 func (c *Client) RegisterNode(ctx context.Context, body RegisterNodeByTokenInputBody) (*RegisterNodeOutputBody, error) {
 	path := "/api/agent/register"
 
@@ -311,12 +434,19 @@ func (c *Client) RegisterNode(ctx context.Context, body RegisterNodeByTokenInput
 
 // ListUserAiChatAttachmentsParams contains optional parameters for the ListUserAiChatAttachments operation.
 type ListUserAiChatAttachmentsParams struct {
-	Limit       *int64  `json:"limit,omitempty"`
-	Offset      *int64  `json:"offset,omitempty"`
+	// Max attachments to return
+	Limit *int64 `json:"limit,omitempty"`
+	// Pagination offset
+	Offset *int64 `json:"offset,omitempty"`
+	// Filter by content type prefix (e.g. image/)
 	ContentType *string `json:"contentType,omitempty"`
 }
 
-// ListUserAiChatAttachments - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  List all attachments uploaded by the user across all conversations.
+// ListUserAiChatAttachments - List user attachments
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List all attachments uploaded by the user across all conversations.
 func (c *Client) ListUserAiChatAttachments(ctx context.Context, opts ...ListUserAiChatAttachmentsParams) (*ListUserAttachmentsBody, error) {
 	path := "/api/aichat/attachments"
 
@@ -337,7 +467,11 @@ func (c *Client) ListUserAiChatAttachments(ctx context.Context, opts ...ListUser
 	return &result, nil
 }
 
-// UploadStandaloneAiChatAttachment - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Upload a file attachment without a conversation. Use for new chat creation.
+// UploadStandaloneAiChatAttachment - Upload standalone attachment
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Upload a file attachment without a conversation. Use for new chat creation.
 func (c *Client) UploadStandaloneAiChatAttachment(ctx context.Context, body *any) (*AttachmentResponse, error) {
 	path := "/api/aichat/attachments"
 
@@ -348,7 +482,11 @@ func (c *Client) UploadStandaloneAiChatAttachment(ctx context.Context, body *any
 	return &result, nil
 }
 
-// DeleteAiChatAttachmentDirect - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Delete an attachment by its ID. User must own the attachment.
+// DeleteAiChatAttachmentDirect - Delete attachment by ID
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Delete an attachment by its ID. User must own the attachment.
 func (c *Client) DeleteAiChatAttachmentDirect(ctx context.Context, attachmentID string) error {
 	path := "/api/aichat/attachments/{attachmentId}"
 	path = pathReplace(path, "attachmentId", attachmentID)
@@ -359,7 +497,11 @@ func (c *Client) DeleteAiChatAttachmentDirect(ctx context.Context, attachmentID 
 	return nil
 }
 
-// DownloadAiChatAttachmentDirect - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Download an attachment by its ID. User must own the attachment.
+// DownloadAiChatAttachmentDirect - Download attachment by ID
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Download an attachment by its ID. User must own the attachment.
 func (c *Client) DownloadAiChatAttachmentDirect(ctx context.Context, attachmentID string) (*string, error) {
 	path := "/api/aichat/attachments/{attachmentId}/download"
 	path = pathReplace(path, "attachmentId", attachmentID)
@@ -373,11 +515,17 @@ func (c *Client) DownloadAiChatAttachmentDirect(ctx context.Context, attachmentI
 
 // ListAiChatConversationsParams contains optional parameters for the ListAiChatConversations operation.
 type ListAiChatConversationsParams struct {
-	Limit  *int64 `json:"limit,omitempty"`
+	// Max conversations to return
+	Limit *int64 `json:"limit,omitempty"`
+	// Pagination offset
 	Offset *int64 `json:"offset,omitempty"`
 }
 
-// ListAiChatConversations - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  List all conversations owned by or shared with the user.
+// ListAiChatConversations - List conversations
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List all conversations owned by or shared with the user.
 func (c *Client) ListAiChatConversations(ctx context.Context, opts ...ListAiChatConversationsParams) (*ListConversationsBody, error) {
 	path := "/api/aichat/conversations"
 
@@ -397,7 +545,11 @@ func (c *Client) ListAiChatConversations(ctx context.Context, opts ...ListAiChat
 	return &result, nil
 }
 
-// CreateAiChatConversation - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Create a new conversation.
+// CreateAiChatConversation - Create conversation
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Create a new conversation.
 func (c *Client) CreateAiChatConversation(ctx context.Context, body CreateConversationInputBody) (*ConversationResponse, error) {
 	path := "/api/aichat/conversations"
 
@@ -410,10 +562,15 @@ func (c *Client) CreateAiChatConversation(ctx context.Context, body CreateConver
 
 // ListAiChatAttachmentsParams contains optional parameters for the ListAiChatAttachments operation.
 type ListAiChatAttachmentsParams struct {
+	// Filter by message ID (optional)
 	MessageID *string `json:"messageId,omitempty"`
 }
 
-// ListAiChatAttachments - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  List all attachments for a conversation.
+// ListAiChatAttachments - List attachments
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List all attachments for a conversation.
 func (c *Client) ListAiChatAttachments(ctx context.Context, conversationID string, opts ...ListAiChatAttachmentsParams) (*ListAttachmentsBody, error) {
 	path := "/api/aichat/conversations/{conversationId}/attachments"
 	path = pathReplace(path, "conversationId", conversationID)
@@ -435,10 +592,15 @@ func (c *Client) ListAiChatAttachments(ctx context.Context, conversationID strin
 
 // UploadAiChatAttachmentParams contains optional parameters for the UploadAiChatAttachment operation.
 type UploadAiChatAttachmentParams struct {
+	// Message ID to attach to (optional)
 	MessageID *string `json:"messageId,omitempty"`
 }
 
-// UploadAiChatAttachment - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Upload a file attachment. Max 25MB for regular files, 100MB for documents.
+// UploadAiChatAttachment - Upload attachment
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Upload a file attachment. Max 25MB for regular files, 100MB for documents.
 func (c *Client) UploadAiChatAttachment(ctx context.Context, conversationID string, body *any, opts ...UploadAiChatAttachmentParams) (*AttachmentResponse, error) {
 	path := "/api/aichat/conversations/{conversationId}/attachments"
 	path = pathReplace(path, "conversationId", conversationID)
@@ -458,7 +620,11 @@ func (c *Client) UploadAiChatAttachment(ctx context.Context, conversationID stri
 	return &result, nil
 }
 
-// DownloadAiChatAttachment - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Download an attachment file.
+// DownloadAiChatAttachment - Download attachment
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Download an attachment file.
 func (c *Client) DownloadAiChatAttachment(ctx context.Context, conversationID string, attachmentID string) (*string, error) {
 	path := "/api/aichat/conversations/{conversationId}/attachments/{attachmentId}"
 	path = pathReplace(path, "conversationId", conversationID)
@@ -471,7 +637,11 @@ func (c *Client) DownloadAiChatAttachment(ctx context.Context, conversationID st
 	return &result, nil
 }
 
-// DeleteAiChatAttachment - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Delete an attachment. Only owner can delete.
+// DeleteAiChatAttachment - Delete attachment
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Delete an attachment. Only owner can delete.
 func (c *Client) DeleteAiChatAttachment(ctx context.Context, conversationID string, attachmentID string) error {
 	path := "/api/aichat/conversations/{conversationId}/attachments/{attachmentId}"
 	path = pathReplace(path, "conversationId", conversationID)
@@ -483,7 +653,11 @@ func (c *Client) DeleteAiChatAttachment(ctx context.Context, conversationID stri
 	return nil
 }
 
-// GetAiChatMessageSiblings - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Get all sibling messages (same parent) for branch navigation.
+// GetAiChatMessageSiblings - Get message siblings
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Get all sibling messages (same parent) for branch navigation.
 func (c *Client) GetAiChatMessageSiblings(ctx context.Context, conversationID string, messageID string) (*GetMessageSiblingsBody, error) {
 	path := "/api/aichat/conversations/{conversationId}/messages/{messageId}/siblings"
 	path = pathReplace(path, "conversationId", conversationID)
@@ -496,7 +670,11 @@ func (c *Client) GetAiChatMessageSiblings(ctx context.Context, conversationID st
 	return &result, nil
 }
 
-// ListAiChatPermissions - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  List all sharing permissions for a conversation. Only owner can view.
+// ListAiChatPermissions - List sharing permissions
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List all sharing permissions for a conversation. Only owner can view.
 func (c *Client) ListAiChatPermissions(ctx context.Context, conversationID string) (*ListPermissionsBody, error) {
 	path := "/api/aichat/conversations/{conversationId}/permissions"
 	path = pathReplace(path, "conversationId", conversationID)
@@ -508,7 +686,11 @@ func (c *Client) ListAiChatPermissions(ctx context.Context, conversationID strin
 	return &result, nil
 }
 
-// AddAiChatPermission - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Share a conversation with a team or entire organization.
+// AddAiChatPermission - Add sharing permission
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Share a conversation with a team or entire organization.
 func (c *Client) AddAiChatPermission(ctx context.Context, conversationID string, body AddPermissionInputBody) (*PermissionEntry, error) {
 	path := "/api/aichat/conversations/{conversationId}/permissions"
 	path = pathReplace(path, "conversationId", conversationID)
@@ -520,7 +702,11 @@ func (c *Client) AddAiChatPermission(ctx context.Context, conversationID string,
 	return &result, nil
 }
 
-// RemoveAiChatPermission - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Remove a sharing permission.
+// RemoveAiChatPermission - Remove permission
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Remove a sharing permission.
 func (c *Client) RemoveAiChatPermission(ctx context.Context, conversationID string, permissionID string) error {
 	path := "/api/aichat/conversations/{conversationId}/permissions/{permissionId}"
 	path = pathReplace(path, "conversationId", conversationID)
@@ -532,7 +718,11 @@ func (c *Client) RemoveAiChatPermission(ctx context.Context, conversationID stri
 	return nil
 }
 
-// UpdateAiChatPermission - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Update a sharing permission level.
+// UpdateAiChatPermission - Update permission
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Update a sharing permission level.
 func (c *Client) UpdateAiChatPermission(ctx context.Context, conversationID string, permissionID string, body UpdatePermissionInputBody) (*PermissionEntry, error) {
 	path := "/api/aichat/conversations/{conversationId}/permissions/{permissionId}"
 	path = pathReplace(path, "conversationId", conversationID)
@@ -547,10 +737,15 @@ func (c *Client) UpdateAiChatPermission(ctx context.Context, conversationID stri
 
 // GetAiChatConversationParams contains optional parameters for the GetAiChatConversation operation.
 type GetAiChatConversationParams struct {
+	// Specific branch to return (optional)
 	BranchID *string `json:"branchId,omitempty"`
 }
 
-// GetAiChatConversation - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Get a conversation by ID. Optionally specify a branch to view.
+// GetAiChatConversation - Get conversation
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Get a conversation by ID. Optionally specify a branch to view.
 func (c *Client) GetAiChatConversation(ctx context.Context, id string, opts ...GetAiChatConversationParams) (*ConversationResponse, error) {
 	path := "/api/aichat/conversations/{id}"
 	path = pathReplace(path, "id", id)
@@ -570,7 +765,11 @@ func (c *Client) GetAiChatConversation(ctx context.Context, id string, opts ...G
 	return &result, nil
 }
 
-// DeleteAiChatConversation - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Delete a conversation. Only the owner can delete.
+// DeleteAiChatConversation - Delete conversation
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Delete a conversation. Only the owner can delete.
 func (c *Client) DeleteAiChatConversation(ctx context.Context, id string) error {
 	path := "/api/aichat/conversations/{id}"
 	path = pathReplace(path, "id", id)
@@ -581,7 +780,11 @@ func (c *Client) DeleteAiChatConversation(ctx context.Context, id string) error 
 	return nil
 }
 
-// UpdateAiChatConversation - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Update conversation title or active branch.
+// UpdateAiChatConversation - Update conversation
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Update conversation title or active branch.
 func (c *Client) UpdateAiChatConversation(ctx context.Context, id string, body UpdateConversationInputBody) (*ConversationResponse, error) {
 	path := "/api/aichat/conversations/{id}"
 	path = pathReplace(path, "id", id)
@@ -595,13 +798,21 @@ func (c *Client) UpdateAiChatConversation(ctx context.Context, id string, body U
 
 // ListUserAllocationsParams contains optional parameters for the ListUserAllocations operation.
 type ListUserAllocationsParams struct {
-	Limit *int64  `json:"limit,omitempty"`
-	Skip  *int64  `json:"skip,omitempty"`
-	Name  *string `json:"name,omitempty"`
-	Sort  *string `json:"sort,omitempty"`
+	// Maximum number of allocations to return
+	Limit *int64 `json:"limit,omitempty"`
+	// Number of allocations to skip
+	Skip *int64 `json:"skip,omitempty"`
+	// Filter by allocation name (case-insensitive contains)
+	Name *string `json:"name,omitempty"`
+	// Sort field and direction
+	Sort *string `json:"sort,omitempty"`
 }
 
-// ListUserAllocations - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns allocations the user can access.
+// ListUserAllocations - List allocations
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns allocations the user can access.
 func (c *Client) ListUserAllocations(ctx context.Context, opts ...ListUserAllocationsParams) (*[]Allocation, error) {
 	path := "/api/allocations"
 
@@ -623,7 +834,11 @@ func (c *Client) ListUserAllocations(ctx context.Context, opts ...ListUserAlloca
 	return &result, nil
 }
 
-// GetApikeys - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the API keys for the currently authenticated user.
+// GetApikeys - List API keys
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the API keys for the currently authenticated user.
 func (c *Client) GetApikeys(ctx context.Context) (*[]APIKey, error) {
 	path := "/api/apikeys"
 
@@ -634,7 +849,11 @@ func (c *Client) GetApikeys(ctx context.Context) (*[]APIKey, error) {
 	return &result, nil
 }
 
-// GetAuthSession - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the current session for the authenticated subject.
+// GetAuthSession - Get current session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the current session for the authenticated subject.
 func (c *Client) GetAuthSession(ctx context.Context) (*AuthSession, error) {
 	path := "/api/auth/session"
 
@@ -645,7 +864,11 @@ func (c *Client) GetAuthSession(ctx context.Context) (*AuthSession, error) {
 	return &result, nil
 }
 
-// GetAuthSsoOidcRedirect - > This is a system-level route, so the response will be independent of the currently authenticated user.  Redirects the user to the OIDC authorization endpoint.
+// GetAuthSsoOidcRedirect - Redirect to OIDC auth
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Redirects the user to the OIDC authorization endpoint.
 func (c *Client) GetAuthSsoOidcRedirect(ctx context.Context, authID string) error {
 	path := "/api/auth/sso/oidc/redirect/{authID}"
 	path = pathReplace(path, "authID", authID)
@@ -658,10 +881,15 @@ func (c *Client) GetAuthSsoOidcRedirect(ctx context.Context, authID string) erro
 
 // GetAuthTokenOidcParams contains optional parameters for the GetAuthTokenOidc operation.
 type GetAuthTokenOidcParams struct {
+	// Name of the Kubernetes cluster
 	ClusterName *string `json:"clusterName,omitempty"`
 }
 
-// GetAuthTokenOidc - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Get an OIDC token for the logged in user to access a Kubernetes cluster.
+// GetAuthTokenOidc - Get OIDC token
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Get an OIDC token for the logged in user to access a Kubernetes cluster.
 func (c *Client) GetAuthTokenOidc(ctx context.Context, opts ...GetAuthTokenOidcParams) (*string, error) {
 	path := "/api/auth/token/oidc"
 
@@ -680,7 +908,11 @@ func (c *Client) GetAuthTokenOidc(ctx context.Context, opts ...GetAuthTokenOidcP
 	return &result, nil
 }
 
-// GetWhoami - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the currently authenticated subject.
+// GetWhoami - Identify the currently authenticated subject
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the currently authenticated subject.
 func (c *Client) GetWhoami(ctx context.Context) (*string, error) {
 	path := "/api/auth/whoami"
 
@@ -691,7 +923,11 @@ func (c *Client) GetWhoami(ctx context.Context) (*string, error) {
 	return &result, nil
 }
 
-// GetWhoamiOrganization - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the currently authenticated subject's organization.
+// GetWhoamiOrganization - Identify organization
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the currently authenticated subject's organization.
 func (c *Client) GetWhoamiOrganization(ctx context.Context) (*string, error) {
 	path := "/api/auth/whoami/organization"
 
@@ -702,7 +938,11 @@ func (c *Client) GetWhoamiOrganization(ctx context.Context) (*string, error) {
 	return &result, nil
 }
 
-// GetAvailableCsps - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the CSP names available to the authenticated user based on cloud account access.
+// GetAvailableCsps - Get available CSPs
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the CSP names available to the authenticated user based on cloud account access.
 func (c *Client) GetAvailableCsps(ctx context.Context) (*[]string, error) {
 	path := "/api/available-csps"
 
@@ -715,11 +955,17 @@ func (c *Client) GetAvailableCsps(ctx context.Context) (*[]string, error) {
 
 // GetBucketsParams contains optional parameters for the GetBuckets operation.
 type GetBucketsParams struct {
-	Permission  *string `json:"permission,omitempty"`
-	Provisioned *bool   `json:"provisioned,omitempty"`
+	// Permission to filter the bucket by
+	Permission *string `json:"permission,omitempty"`
+	// Filter buckets by if they are provisioned or not
+	Provisioned *bool `json:"provisioned,omitempty"`
 }
 
-// GetBuckets - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns buckets the user can access.
+// GetBuckets - List buckets
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns buckets the user can access.
 func (c *Client) GetBuckets(ctx context.Context, opts ...GetBucketsParams) (*[]Bucket, error) {
 	path := "/api/buckets"
 
@@ -739,7 +985,11 @@ func (c *Client) GetBuckets(ctx context.Context, opts ...GetBucketsParams) (*[]B
 	return &result, nil
 }
 
-// GetClusters - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns a list of clusters.
+// GetClusters - Get Clusters
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns a list of clusters.
 func (c *Client) GetClusters(ctx context.Context) (*[]GeneralCluster, error) {
 	path := "/api/clusters"
 
@@ -750,7 +1000,11 @@ func (c *Client) GetClusters(ctx context.Context) (*[]GeneralCluster, error) {
 	return &result, nil
 }
 
-// GetFeaturePreviews - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the enabled feature previews for the current user.
+// GetFeaturePreviews - Get feature previews
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the enabled feature previews for the current user.
 func (c *Client) GetFeaturePreviews(ctx context.Context) (*[]Feature, error) {
 	path := "/api/features"
 
@@ -761,7 +1015,11 @@ func (c *Client) GetFeaturePreviews(ctx context.Context) (*[]Feature, error) {
 	return &result, nil
 }
 
-// EnableFeaturePreview - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Enables a feature preview for the authenticated user. The feature must exist in the platform's available features list. Features are stored per user and can be enabled or disabled individually.
+// EnableFeaturePreview - Enable a feature preview for the current user
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Enables a feature preview for the authenticated user. The feature must exist in the platform's available features list. Features are stored per user and can be enabled or disabled individually.
 func (c *Client) EnableFeaturePreview(ctx context.Context, flag string) error {
 	path := "/api/features/{flag}"
 	path = pathReplace(path, "flag", flag)
@@ -772,7 +1030,11 @@ func (c *Client) EnableFeaturePreview(ctx context.Context, flag string) error {
 	return nil
 }
 
-// DisableFeaturePreview - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Disables a feature preview for the authenticated user. The feature must exist in the platform's available features list. Features are stored per user and can be enabled or disabled individually.
+// DisableFeaturePreview - Disable a feature preview for the current user
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Disables a feature preview for the authenticated user. The feature must exist in the platform's available features list. Features are stored per user and can be enabled or disabled individually.
 func (c *Client) DisableFeaturePreview(ctx context.Context, flag string) error {
 	path := "/api/features/{flag}"
 	path = pathReplace(path, "flag", flag)
@@ -783,7 +1045,11 @@ func (c *Client) DisableFeaturePreview(ctx context.Context, flag string) error {
 	return nil
 }
 
-// GetFeaturePreviewMarkdown - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the markdown description for a feature preview. This is used to display feature previews in the UI. The feature must exist in the platform's available features list.
+// GetFeaturePreviewMarkdown - Get feature preview markdown description
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the markdown description for a feature preview. This is used to display feature previews in the UI. The feature must exist in the platform's available features list.
 func (c *Client) GetFeaturePreviewMarkdown(ctx context.Context, flag string) (*string, error) {
 	path := "/api/features/{flag}/markdown"
 	path = pathReplace(path, "flag", flag)
@@ -797,11 +1063,17 @@ func (c *Client) GetFeaturePreviewMarkdown(ctx context.Context, flag string) (*s
 
 // GetGroupsParams contains optional parameters for the GetGroups operation.
 type GetGroupsParams struct {
+	// Filters groups that cannot use this provider. This is a legacy query parameter. Prefer the 'network' parameter instead to filter by network access.
 	Provider *string `json:"provider,omitempty"`
-	Network  *string `json:"network,omitempty"`
+	// Only return groups that have access to this network.
+	Network *string `json:"network,omitempty"`
 }
 
-// GetGroups - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the groups for the currently authenticated subject.
+// GetGroups - Get user groups
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the groups for the currently authenticated subject.
 func (c *Client) GetGroups(ctx context.Context, opts ...GetGroupsParams) (*[]Group, error) {
 	path := "/api/groups"
 
@@ -823,13 +1095,21 @@ func (c *Client) GetGroups(ctx context.Context, opts ...GetGroupsParams) (*[]Gro
 
 // GetHelmChartValuesParams contains optional parameters for the GetHelmChartValues operation.
 type GetHelmChartValuesParams struct {
-	RepoURL   *string `json:"repoURL,omitempty"`
-	Version   *string `json:"version,omitempty"`
+	// The URL of the Helm repository.
+	RepoURL *string `json:"repoURL,omitempty"`
+	// The version of the Helm chart.
+	Version *string `json:"version,omitempty"`
+	// The name of the Helm chart.
 	ChartName *string `json:"chartName,omitempty"`
-	RepoName  *string `json:"repoName,omitempty"`
+	// The name of the Helm repository.
+	RepoName *string `json:"repoName,omitempty"`
 }
 
-// GetHelmChartValues - > This is a system-level route, so the response will be independent of the currently authenticated user.  Retrieves the default values for a Helm chart from a repository.
+// GetHelmChartValues - Get Helm chart default values
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Retrieves the default values for a Helm chart from a repository.
 func (c *Client) GetHelmChartValues(ctx context.Context, opts ...GetHelmChartValuesParams) (*HelmChartValuesOutputBody, error) {
 	path := "/api/helm-charts/values"
 
@@ -851,7 +1131,11 @@ func (c *Client) GetHelmChartValues(ctx context.Context, opts ...GetHelmChartVal
 	return &result, nil
 }
 
-// GetInstanceFacts - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the instance facts needed for the Ansible to run initial instance configuration.
+// GetInstanceFacts - Get instance facts for pwagent
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the instance facts needed for the Ansible to run initial instance configuration.
 func (c *Client) GetInstanceFacts(ctx context.Context) (*Fact, error) {
 	path := "/api/instances/facts"
 
@@ -862,7 +1146,11 @@ func (c *Client) GetInstanceFacts(ctx context.Context) (*Fact, error) {
 	return &result, nil
 }
 
-// UpdateInstanceStatus - > This is a system-level route, so the response will be independent of the currently authenticated user.  Updates the instance status based on updates from agent running on instance.
+// UpdateInstanceStatus - Update instance status
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates the instance status based on updates from agent running on instance.
 func (c *Client) UpdateInstanceStatus(ctx context.Context, body PatchInstanceStatusBody) error {
 	path := "/api/instances/status"
 
@@ -872,7 +1160,11 @@ func (c *Client) UpdateInstanceStatus(ctx context.Context, body PatchInstanceSta
 	return nil
 }
 
-// GetExistingClusters - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns existing clusters for the authenticated user.
+// GetExistingClusters - Get existing clusters
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns existing clusters for the authenticated user.
 func (c *Client) GetExistingClusters(ctx context.Context) (*[]ExistingCluster, error) {
 	path := "/api/internal/usercontainer/existing"
 
@@ -883,7 +1175,11 @@ func (c *Client) GetExistingClusters(ctx context.Context) (*[]ExistingCluster, e
 	return &result, nil
 }
 
-// UpdateExistingClusterAutoreconnect - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Updates an existing cluster's auto-reconnect status.
+// UpdateExistingClusterAutoreconnect - Update existing cluster auto-reconnect
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates an existing cluster's auto-reconnect status.
 func (c *Client) UpdateExistingClusterAutoreconnect(ctx context.Context, name string, body PatchExistingClusterBody) (*ExistingCluster, error) {
 	path := "/api/internal/usercontainer/existing/{name}"
 	path = pathReplace(path, "name", name)
@@ -897,12 +1193,19 @@ func (c *Client) UpdateExistingClusterAutoreconnect(ctx context.Context, name st
 
 // GetIpsParams contains optional parameters for the GetIps operation.
 type GetIpsParams struct {
-	Csp         *string `json:"csp,omitempty"`
-	Region      *string `json:"region,omitempty"`
-	Provisioned *bool   `json:"provisioned,omitempty"`
+	// The cloud service provider for the IP.
+	Csp *string `json:"csp,omitempty"`
+	// The region where the IP is provisioned.
+	Region *string `json:"region,omitempty"`
+	// If provided, will filter the response based on the provisioned status.
+	Provisioned *bool `json:"provisioned,omitempty"`
 }
 
-// GetIps - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the list of IP Addresses
+// GetIps - Get IP Addresses
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the list of IP Addresses
 func (c *Client) GetIps(ctx context.Context, opts ...GetIpsParams) (*[]IP, error) {
 	path := "/api/ips"
 
@@ -923,7 +1226,11 @@ func (c *Client) GetIps(ctx context.Context, opts ...GetIpsParams) (*[]IP, error
 	return &result, nil
 }
 
-// ListKubernetesClusters - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the list of Kubernetes clusters accessible to the user.
+// ListKubernetesClusters - List Kubernetes clusters
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the list of Kubernetes clusters accessible to the user.
 func (c *Client) ListKubernetesClusters(ctx context.Context) (*[]ClusterResponse, error) {
 	path := "/api/kubernetes"
 
@@ -936,11 +1243,17 @@ func (c *Client) ListKubernetesClusters(ctx context.Context) (*[]ClusterResponse
 
 // GetLustreParams contains optional parameters for the GetLustre operation.
 type GetLustreParams struct {
-	Permission  *string `json:"permission,omitempty"`
-	Provisioned *bool   `json:"provisioned,omitempty"`
+	// Permission to filter the Lustre by
+	Permission *string `json:"permission,omitempty"`
+	// Filter Lustre by if they are provisioned or not
+	Provisioned *bool `json:"provisioned,omitempty"`
 }
 
-// GetLustre - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns Lustre Filesystems the user can access.
+// GetLustre - List Lustre
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns Lustre Filesystems the user can access.
 func (c *Client) GetLustre(ctx context.Context, opts ...GetLustreParams) (*[]Lustre, error) {
 	path := "/api/lustre"
 
@@ -960,7 +1273,11 @@ func (c *Client) GetLustre(ctx context.Context, opts ...GetLustreParams) (*[]Lus
 	return &result, nil
 }
 
-// ForkMarketplaceItem - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new resource by forking a marketplace item. Supports workflows, apps, storage, and compute items.
+// ForkMarketplaceItem - Fork Marketplace Item
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new resource by forking a marketplace item. Supports workflows, apps, storage, and compute items.
 func (c *Client) ForkMarketplaceItem(ctx context.Context, slug string, body ForkMarketplaceItemBody) (*ForkMarketplaceItemOutputBody, error) {
 	path := "/api/marketplace/{slug}/fork"
 	path = pathReplace(path, "slug", slug)
@@ -972,7 +1289,11 @@ func (c *Client) ForkMarketplaceItem(ctx context.Context, slug string, body Fork
 	return &result, nil
 }
 
-// GetMarketplaceItemDescription - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the raw markdown description of a marketplace item
+// GetMarketplaceItemDescription - Get marketplace item description
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the raw markdown description of a marketplace item
 func (c *Client) GetMarketplaceItemDescription(ctx context.Context, version string, slug string) (*string, error) {
 	path := "/api/marketplace/{slug}/version/{version}/markdown"
 	path = pathReplace(path, "version", version)
@@ -985,7 +1306,11 @@ func (c *Client) GetMarketplaceItemDescription(ctx context.Context, version stri
 	return &result, nil
 }
 
-// GetMarketplaceItemYaml - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the YAML of an specific version of an item on the marketplace. The marketplace item must be a workflow.
+// GetMarketplaceItemYaml - Get marketplace item YAML
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the YAML of an specific version of an item on the marketplace. The marketplace item must be a workflow.
 func (c *Client) GetMarketplaceItemYaml(ctx context.Context, version string, slug string) (*map[string]any, error) {
 	path := "/api/marketplace/{slug}/version/{version}/yaml"
 	path = pathReplace(path, "version", version)
@@ -1000,12 +1325,19 @@ func (c *Client) GetMarketplaceItemYaml(ctx context.Context, version string, slu
 
 // GetMachineLearningWorkspacesParams contains optional parameters for the GetMachineLearningWorkspaces operation.
 type GetMachineLearningWorkspacesParams struct {
-	Csp         *string `json:"csp,omitempty"`
-	Region      *string `json:"region,omitempty"`
-	Provisioned *bool   `json:"provisioned,omitempty"`
+	// The cloud service provider for the MACHINELEARNING WORKSPACE.
+	Csp *string `json:"csp,omitempty"`
+	// The region where the MACHINELEARNING WORKSPACE is provisioned.
+	Region *string `json:"region,omitempty"`
+	// If provided, will filter the response based on the provisioned status.
+	Provisioned *bool `json:"provisioned,omitempty"`
 }
 
-// GetMachineLearningWorkspaces - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the list of Machine Learning Workspaces
+// GetMachineLearningWorkspaces - Get Machine Learning Workspaces
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the list of Machine Learning Workspaces
 func (c *Client) GetMachineLearningWorkspaces(ctx context.Context, opts ...GetMachineLearningWorkspacesParams) (*[]MachineLearningWorkspace, error) {
 	path := "/api/mlworkspaces"
 
@@ -1026,7 +1358,11 @@ func (c *Client) GetMachineLearningWorkspaces(ctx context.Context, opts ...GetMa
 	return &result, nil
 }
 
-// GetNetworks - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns all networks the user can access.
+// GetNetworks - List networks
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns all networks the user can access.
 func (c *Client) GetNetworks(ctx context.Context) (*[]Network, error) {
 	path := "/api/networks"
 
@@ -1039,11 +1375,17 @@ func (c *Client) GetNetworks(ctx context.Context) (*[]Network, error) {
 
 // GetNfsParams contains optional parameters for the GetNfs operation.
 type GetNfsParams struct {
-	Permission  *string `json:"permission,omitempty"`
-	Provisioned *bool   `json:"provisioned,omitempty"`
+	// Permission to filter the NFS by
+	Permission *string `json:"permission,omitempty"`
+	// Filter NFS by if they are provisioned or not
+	Provisioned *bool `json:"provisioned,omitempty"`
 }
 
-// GetNfs - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns NFS filesystems the user can access.
+// GetNfs - List NFS
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns NFS filesystems the user can access.
 func (c *Client) GetNfs(ctx context.Context, opts ...GetNfsParams) (*[]Nfs, error) {
 	path := "/api/nfs"
 
@@ -1065,12 +1407,19 @@ func (c *Client) GetNfs(ctx context.Context, opts ...GetNfsParams) (*[]Nfs, erro
 
 // GetNotificationsParams contains optional parameters for the GetNotifications operation.
 type GetNotificationsParams struct {
+	// Limit the number of notifications returned.
 	Limit *int64 `json:"limit,omitempty"`
-	Skip  *int64 `json:"skip,omitempty"`
-	Read  *bool  `json:"read,omitempty"`
+	// Number of notifications to skip.
+	Skip *int64 `json:"skip,omitempty"`
+	// Filter notifications by read status.
+	Read *bool `json:"read,omitempty"`
 }
 
-// GetNotifications - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the notifications for the currently authenticated subject.
+// GetNotifications - Get notifications
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the notifications for the currently authenticated subject.
 func (c *Client) GetNotifications(ctx context.Context, opts ...GetNotificationsParams) (*[]Notification, error) {
 	path := "/api/notifications"
 
@@ -1091,7 +1440,11 @@ func (c *Client) GetNotifications(ctx context.Context, opts ...GetNotificationsP
 	return &result, nil
 }
 
-// GetNotificationsOptions - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the different notification categories and their options. This is used to populate the notification settings UI.
+// GetNotificationsOptions - Get notification options
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the different notification categories and their options. This is used to populate the notification settings UI.
 func (c *Client) GetNotificationsOptions(ctx context.Context) (*[]NotificationCategory, error) {
 	path := "/api/notifications/options"
 
@@ -1102,7 +1455,11 @@ func (c *Client) GetNotificationsOptions(ctx context.Context) (*[]NotificationCa
 	return &result, nil
 }
 
-// NotificationsSettings - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the notification settings for the currently authenticated subject.
+// NotificationsSettings - Get user notification settings
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the notification settings for the currently authenticated subject.
 func (c *Client) NotificationsSettings(ctx context.Context) (*NotificationSettings, error) {
 	path := "/api/notifications/settings"
 
@@ -1113,7 +1470,11 @@ func (c *Client) NotificationsSettings(ctx context.Context) (*NotificationSettin
 	return &result, nil
 }
 
-// SetNotificationsSettings - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Updates the notification settings for the currently authenticated subject.
+// SetNotificationsSettings - Update user notification settings
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates the notification settings for the currently authenticated subject.
 func (c *Client) SetNotificationsSettings(ctx context.Context, body *NotificationSettings) (*NotificationSettings, error) {
 	path := "/api/notifications/settings"
 
@@ -1124,7 +1485,11 @@ func (c *Client) SetNotificationsSettings(ctx context.Context, body *Notificatio
 	return &result, nil
 }
 
-// GetOidcConfiguration - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the openid configuration.
+// GetOidcConfiguration - Get OIDC configuration
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the openid configuration.
 func (c *Client) GetOidcConfiguration(ctx context.Context) (*OpenIDConfiguration, error) {
 	path := "/api/oidc/.well-known/openid-configuration"
 
@@ -1135,7 +1500,11 @@ func (c *Client) GetOidcConfiguration(ctx context.Context) (*OpenIDConfiguration
 	return &result, nil
 }
 
-// GetRecommendedResources - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns marketplace items recommended for new user onboarding.
+// GetRecommendedResources - Get recommended resources
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns marketplace items recommended for new user onboarding.
 func (c *Client) GetRecommendedResources(ctx context.Context) (*RecommendedResourcesResponse, error) {
 	path := "/api/onboarding/recommended-resources"
 
@@ -1148,12 +1517,19 @@ func (c *Client) GetRecommendedResources(ctx context.Context) (*RecommendedResou
 
 // StreamChatCompletionParams contains optional parameters for the StreamChatCompletion operation.
 type StreamChatCompletionParams struct {
-	XConversationID  *string `json:"X-Conversation-Id,omitempty"`
+	// Persist to existing conversation
+	XConversationID *string `json:"X-Conversation-Id,omitempty"`
+	// Branch from specific message
 	XParentMessageID *string `json:"X-Parent-Message-Id,omitempty"`
-	XPersist         *string `json:"X-Persist,omitempty"`
+	// Whether to persist the conversation (true/false)
+	XPersist *string `json:"X-Persist,omitempty"`
 }
 
-// StreamChatCompletion - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  OpenAI-compatible streaming chat completions endpoint. Model format: 'provider-id/model-name'
+// StreamChatCompletion - Create chat completion (streaming)
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// OpenAI-compatible streaming chat completions endpoint. Model format: 'provider-id/model-name'
 func (c *Client) StreamChatCompletion(ctx context.Context, body ChatCompletionRequest, opts ...StreamChatCompletionParams) (*[]any, error) {
 	path := "/api/openai/v1/chat/completions"
 
@@ -1178,7 +1554,11 @@ func (c *Client) StreamChatCompletion(ctx context.Context, body ChatCompletionRe
 	return &result, nil
 }
 
-// ListAiChatModels - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns all AI models the user has access to. Model IDs are formatted as 'provider-id/model-name'.
+// ListAiChatModels - List available AI models
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns all AI models the user has access to. Model IDs are formatted as 'provider-id/model-name'.
 func (c *Client) ListAiChatModels(ctx context.Context) (*ModelsResponse, error) {
 	path := "/api/openai/v1/models"
 
@@ -1189,7 +1569,11 @@ func (c *Client) ListAiChatModels(ctx context.Context) (*ModelsResponse, error) 
 	return &result, nil
 }
 
-// GetOrganizations - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the organizations the user can access.
+// GetOrganizations - List organizations
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the organizations the user can access.
 func (c *Client) GetOrganizations(ctx context.Context) (*[]Organization, error) {
 	path := "/api/organizations"
 
@@ -1202,14 +1586,23 @@ func (c *Client) GetOrganizations(ctx context.Context) (*[]Organization, error) 
 
 // ListOrgAllocationsParams contains optional parameters for the ListOrgAllocations operation.
 type ListOrgAllocationsParams struct {
-	Limit  *int64  `json:"limit,omitempty"`
-	Skip   *int64  `json:"skip,omitempty"`
-	Name   *string `json:"name,omitempty"`
+	// Maximum number of allocations to return
+	Limit *int64 `json:"limit,omitempty"`
+	// Number of allocations to skip
+	Skip *int64 `json:"skip,omitempty"`
+	// Filter by allocation name (case-insensitive contains)
+	Name *string `json:"name,omitempty"`
+	// Filter by parent allocation name
 	Parent *string `json:"parent,omitempty"`
-	Sort   *string `json:"sort,omitempty"`
+	// Sort field and direction
+	Sort *string `json:"sort,omitempty"`
 }
 
-// ListOrgAllocations - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns all allocations for the organization. Requires org admin access.
+// ListOrgAllocations - List all organization allocations
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns all allocations for the organization. Requires org admin access.
 func (c *Client) ListOrgAllocations(ctx context.Context, organization string, opts ...ListOrgAllocationsParams) (*[]Allocation, error) {
 	path := "/api/organizations/{organization}/allocations"
 	path = pathReplace(path, "organization", organization)
@@ -1233,7 +1626,11 @@ func (c *Client) ListOrgAllocations(ctx context.Context, organization string, op
 	return &result, nil
 }
 
-// CreateAllocation - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new budget allocation.
+// CreateAllocation - Create a budget allocation
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new budget allocation.
 func (c *Client) CreateAllocation(ctx context.Context, organization string, body *Allocation) (*Allocation, error) {
 	path := "/api/organizations/{organization}/allocations"
 	path = pathReplace(path, "organization", organization)
@@ -1245,7 +1642,11 @@ func (c *Client) CreateAllocation(ctx context.Context, organization string, body
 	return &result, nil
 }
 
-// DeleteAllocation - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes a budget allocation, its associated permissions, and all related costs. Requires org admin access.
+// DeleteAllocation - Delete a budget allocation
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a budget allocation, its associated permissions, and all related costs. Requires org admin access.
 func (c *Client) DeleteAllocation(ctx context.Context, organization string, name string) error {
 	path := "/api/organizations/{organization}/allocations/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -1257,7 +1658,9 @@ func (c *Client) DeleteAllocation(ctx context.Context, organization string, name
 	return nil
 }
 
-// GetAllocationPermissions - Get permissions for an allocation
+// GetAllocationPermissions - Get allocation permissions
+//
+// Get permissions for an allocation
 func (c *Client) GetAllocationPermissions(ctx context.Context, organization string, name string) (*SubjectPermissions, error) {
 	path := "/api/organizations/{organization}/allocations/{name}/permissions"
 	path = pathReplace(path, "organization", organization)
@@ -1270,7 +1673,9 @@ func (c *Client) GetAllocationPermissions(ctx context.Context, organization stri
 	return &result, nil
 }
 
-// UpdateAllocationPermissions - Update permissions for an allocation
+// UpdateAllocationPermissions - Update allocation permissions
+//
+// Update permissions for an allocation
 func (c *Client) UpdateAllocationPermissions(ctx context.Context, organization string, name string, body UpdateAllocationPermissionsInputBody) error {
 	path := "/api/organizations/{organization}/allocations/{name}/permissions"
 	path = pathReplace(path, "organization", organization)
@@ -1284,26 +1689,47 @@ func (c *Client) UpdateAllocationPermissions(ctx context.Context, organization s
 
 // ListAllocationUsageEventsParams contains optional parameters for the ListAllocationUsageEvents operation.
 type ListAllocationUsageEventsParams struct {
-	PageSize      *int64   `json:"pageSize,omitempty"`
-	Page          *int64   `json:"page,omitempty"`
-	StartedAtFrom *string  `json:"startedAtFrom,omitempty"`
-	StartedAtTo   *string  `json:"startedAtTo,omitempty"`
-	EndedAtFrom   *string  `json:"endedAtFrom,omitempty"`
-	EndedAtTo     *string  `json:"endedAtTo,omitempty"`
-	CreatedAtFrom *string  `json:"createdAtFrom,omitempty"`
-	CreatedAtTo   *string  `json:"createdAtTo,omitempty"`
-	Type          *string  `json:"type,omitempty"`
-	Subtype       *string  `json:"subtype,omitempty"`
-	QuantityMin   *float64 `json:"quantityMin,omitempty"`
-	QuantityMax   *float64 `json:"quantityMax,omitempty"`
-	UnitRateMin   *float64 `json:"unitRateMin,omitempty"`
-	UnitRateMax   *float64 `json:"unitRateMax,omitempty"`
-	AmountMin     *float64 `json:"amountMin,omitempty"`
-	AmountMax     *float64 `json:"amountMax,omitempty"`
-	Metadata      *string  `json:"metadata,omitempty"`
+	// Number of items per page
+	PageSize *int64 `json:"pageSize,omitempty"`
+	// Page number (1-indexed)
+	Page *int64 `json:"page,omitempty"`
+	// Filter: started_at >= this ISO datetime
+	StartedAtFrom *string `json:"startedAtFrom,omitempty"`
+	// Filter: started_at <= this ISO datetime
+	StartedAtTo *string `json:"startedAtTo,omitempty"`
+	// Filter: ended_at >= this ISO datetime
+	EndedAtFrom *string `json:"endedAtFrom,omitempty"`
+	// Filter: ended_at <= this ISO datetime
+	EndedAtTo *string `json:"endedAtTo,omitempty"`
+	// Filter: created_at >= this ISO datetime
+	CreatedAtFrom *string `json:"createdAtFrom,omitempty"`
+	// Filter: created_at <= this ISO datetime
+	CreatedAtTo *string `json:"createdAtTo,omitempty"`
+	// Filter: type contains this string (case-insensitive)
+	Type *string `json:"type,omitempty"`
+	// Filter: subtype contains this string (case-insensitive)
+	Subtype *string `json:"subtype,omitempty"`
+	// Filter: quantity >= this value
+	QuantityMin *float64 `json:"quantityMin,omitempty"`
+	// Filter: quantity <= this value
+	QuantityMax *float64 `json:"quantityMax,omitempty"`
+	// Filter: unit_applied_rate >= this value
+	UnitRateMin *float64 `json:"unitRateMin,omitempty"`
+	// Filter: unit_applied_rate <= this value
+	UnitRateMax *float64 `json:"unitRateMax,omitempty"`
+	// Filter: amount >= this value
+	AmountMin *float64 `json:"amountMin,omitempty"`
+	// Filter: amount <= this value
+	AmountMax *float64 `json:"amountMax,omitempty"`
+	// Filter: metadata contains this string (case-insensitive search in JSON)
+	Metadata *string `json:"metadata,omitempty"`
 }
 
-// ListAllocationUsageEvents - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns all usage events associated with a budget allocation.
+// ListAllocationUsageEvents - List usage events for an allocation
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns all usage events associated with a budget allocation.
 func (c *Client) ListAllocationUsageEvents(ctx context.Context, organization string, name string, opts ...ListAllocationUsageEventsParams) (*RatedCostsPaginatedResponse, error) {
 	path := "/api/organizations/{organization}/allocations/{name}/usage"
 	path = pathReplace(path, "organization", organization)
@@ -1340,7 +1766,9 @@ func (c *Client) ListAllocationUsageEvents(ctx context.Context, organization str
 	return &result, nil
 }
 
-// CreateUsageEvent - Creates a usage event for an allocation. Requires allocation write access.
+// CreateUsageEvent - Create an allocation usage event
+//
+// Creates a usage event for an allocation. Requires allocation write access.
 func (c *Client) CreateUsageEvent(ctx context.Context, organization string, name string, body *PostUsageEventInput) (*UsageEventOutput, error) {
 	path := "/api/organizations/{organization}/allocations/{name}/usage"
 	path = pathReplace(path, "organization", organization)
@@ -1353,7 +1781,11 @@ func (c *Client) CreateUsageEvent(ctx context.Context, organization string, name
 	return &result, nil
 }
 
-// DeleteAllocationUsageEvents - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes specified usage events by their IDs.
+// DeleteAllocationUsageEvents - Delete usage events for an allocation
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes specified usage events by their IDs.
 func (c *Client) DeleteAllocationUsageEvents(ctx context.Context, organization string, name string, body DeleteRatedCostsRequestBody) (*DeleteRatedCostsResponseBody, error) {
 	path := "/api/organizations/{organization}/allocations/{name}/usage"
 	path = pathReplace(path, "organization", organization)
@@ -1368,24 +1800,43 @@ func (c *Client) DeleteAllocationUsageEvents(ctx context.Context, organization s
 
 // DeleteAllAllocationUsageEventsParams contains optional parameters for the DeleteAllAllocationUsageEvents operation.
 type DeleteAllAllocationUsageEventsParams struct {
-	StartedAtFrom *string  `json:"startedAtFrom,omitempty"`
-	StartedAtTo   *string  `json:"startedAtTo,omitempty"`
-	EndedAtFrom   *string  `json:"endedAtFrom,omitempty"`
-	EndedAtTo     *string  `json:"endedAtTo,omitempty"`
-	CreatedAtFrom *string  `json:"createdAtFrom,omitempty"`
-	CreatedAtTo   *string  `json:"createdAtTo,omitempty"`
-	Type          *string  `json:"type,omitempty"`
-	Subtype       *string  `json:"subtype,omitempty"`
-	QuantityMin   *float64 `json:"quantityMin,omitempty"`
-	QuantityMax   *float64 `json:"quantityMax,omitempty"`
-	UnitRateMin   *float64 `json:"unitRateMin,omitempty"`
-	UnitRateMax   *float64 `json:"unitRateMax,omitempty"`
-	AmountMin     *float64 `json:"amountMin,omitempty"`
-	AmountMax     *float64 `json:"amountMax,omitempty"`
-	Metadata      *string  `json:"metadata,omitempty"`
+	// Filter: started_at >= this ISO datetime
+	StartedAtFrom *string `json:"startedAtFrom,omitempty"`
+	// Filter: started_at <= this ISO datetime
+	StartedAtTo *string `json:"startedAtTo,omitempty"`
+	// Filter: ended_at >= this ISO datetime
+	EndedAtFrom *string `json:"endedAtFrom,omitempty"`
+	// Filter: ended_at <= this ISO datetime
+	EndedAtTo *string `json:"endedAtTo,omitempty"`
+	// Filter: created_at >= this ISO datetime
+	CreatedAtFrom *string `json:"createdAtFrom,omitempty"`
+	// Filter: created_at <= this ISO datetime
+	CreatedAtTo *string `json:"createdAtTo,omitempty"`
+	// Filter: type contains this string (case-insensitive)
+	Type *string `json:"type,omitempty"`
+	// Filter: subtype contains this string (case-insensitive)
+	Subtype *string `json:"subtype,omitempty"`
+	// Filter: quantity >= this value
+	QuantityMin *float64 `json:"quantityMin,omitempty"`
+	// Filter: quantity <= this value
+	QuantityMax *float64 `json:"quantityMax,omitempty"`
+	// Filter: unit_applied_rate >= this value
+	UnitRateMin *float64 `json:"unitRateMin,omitempty"`
+	// Filter: unit_applied_rate <= this value
+	UnitRateMax *float64 `json:"unitRateMax,omitempty"`
+	// Filter: amount >= this value
+	AmountMin *float64 `json:"amountMin,omitempty"`
+	// Filter: amount <= this value
+	AmountMax *float64 `json:"amountMax,omitempty"`
+	// Filter: metadata contains this string (case-insensitive search in JSON)
+	Metadata *string `json:"metadata,omitempty"`
 }
 
-// DeleteAllAllocationUsageEvents - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes all usage events matching the specified filters. If no filters provided, deletes all.
+// DeleteAllAllocationUsageEvents - Delete all usage events for an allocation
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes all usage events matching the specified filters. If no filters provided, deletes all.
 func (c *Client) DeleteAllAllocationUsageEvents(ctx context.Context, organization string, name string, opts ...DeleteAllAllocationUsageEventsParams) (*DeleteRatedCostsResponseBody, error) {
 	path := "/api/organizations/{organization}/allocations/{name}/usage/all"
 	path = pathReplace(path, "organization", organization)
@@ -1420,7 +1871,11 @@ func (c *Client) DeleteAllAllocationUsageEvents(ctx context.Context, organizatio
 	return &result, nil
 }
 
-// GetOrganizationAuthMethods - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the auth methods available for the organization.
+// GetOrganizationAuthMethods - List organization auth methods
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the auth methods available for the organization.
 func (c *Client) GetOrganizationAuthMethods(ctx context.Context, organization string) (*[]AuthMethod, error) {
 	path := "/api/organizations/{organization}/auth"
 	path = pathReplace(path, "organization", organization)
@@ -1432,7 +1887,11 @@ func (c *Client) GetOrganizationAuthMethods(ctx context.Context, organization st
 	return &result, nil
 }
 
-// GetOrganizationAuthMethodLdap - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a specific LDAP auth method, by auth method name.
+// GetOrganizationAuthMethodLdap - Get organization auth method: LDAP
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a specific LDAP auth method, by auth method name.
 func (c *Client) GetOrganizationAuthMethodLdap(ctx context.Context, organization string, authName string) (*Ldap, error) {
 	path := "/api/organizations/{organization}/auth-methods/ldap/{authName}"
 	path = pathReplace(path, "organization", organization)
@@ -1445,7 +1904,11 @@ func (c *Client) GetOrganizationAuthMethodLdap(ctx context.Context, organization
 	return &result, nil
 }
 
-// AddOrganizationAuthMethodOidc - > This is a system-level route, so the response will be independent of the currently authenticated user.  Adds a new OIDC auth method.
+// AddOrganizationAuthMethodOidc - Add organization auth method: OIDC
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds a new OIDC auth method.
 func (c *Client) AddOrganizationAuthMethodOidc(ctx context.Context, organization string, body Oidc) (*Oidc, error) {
 	path := "/api/organizations/{organization}/auth-methods/oidc"
 	path = pathReplace(path, "organization", organization)
@@ -1457,7 +1920,11 @@ func (c *Client) AddOrganizationAuthMethodOidc(ctx context.Context, organization
 	return &result, nil
 }
 
-// GetOrganizationAuthMethodOidc - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a specific OIDC auth method, by auth method name.
+// GetOrganizationAuthMethodOidc - Get organization auth method: OIDC
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a specific OIDC auth method, by auth method name.
 func (c *Client) GetOrganizationAuthMethodOidc(ctx context.Context, organization string, authName string) (*Oidc, error) {
 	path := "/api/organizations/{organization}/auth-methods/oidc/{authName}"
 	path = pathReplace(path, "organization", organization)
@@ -1470,7 +1937,11 @@ func (c *Client) GetOrganizationAuthMethodOidc(ctx context.Context, organization
 	return &result, nil
 }
 
-// UpdateOrganizationAuthMethodOidc - > This is a system-level route, so the response will be independent of the currently authenticated user.  Update an OIDC auth method
+// UpdateOrganizationAuthMethodOidc - Update organization auth method: OIDC
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update an OIDC auth method
 func (c *Client) UpdateOrganizationAuthMethodOidc(ctx context.Context, organization string, authName string, body Oidc) (*Oidc, error) {
 	path := "/api/organizations/{organization}/auth-methods/oidc/{authName}"
 	path = pathReplace(path, "organization", organization)
@@ -1483,7 +1954,11 @@ func (c *Client) UpdateOrganizationAuthMethodOidc(ctx context.Context, organizat
 	return &result, nil
 }
 
-// AddOrganizationAuthMethodPassword - > This is a system-level route, so the response will be independent of the currently authenticated user.  Adds a password auth method to the organization.
+// AddOrganizationAuthMethodPassword - Add organization auth method: Password
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds a password auth method to the organization.
 func (c *Client) AddOrganizationAuthMethodPassword(ctx context.Context, organization string) (*AuthMethod, error) {
 	path := "/api/organizations/{organization}/auth-methods/password"
 	path = pathReplace(path, "organization", organization)
@@ -1497,10 +1972,15 @@ func (c *Client) AddOrganizationAuthMethodPassword(ctx context.Context, organiza
 
 // GetOrganizationBootstrapScriptsParams contains optional parameters for the GetOrganizationBootstrapScripts operation.
 type GetOrganizationBootstrapScriptsParams struct {
+	// The type of the bootstrap script.
 	Type *string `json:"type,omitempty"`
 }
 
-// GetOrganizationBootstrapScripts - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns an organization's bootstrap scripts.
+// GetOrganizationBootstrapScripts - List organization bootstrap scripts
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an organization's bootstrap scripts.
 func (c *Client) GetOrganizationBootstrapScripts(ctx context.Context, organization string, opts ...GetOrganizationBootstrapScriptsParams) (*[]BootstrapScript, error) {
 	path := "/api/organizations/{organization}/bootstrap"
 	path = pathReplace(path, "organization", organization)
@@ -1520,7 +2000,11 @@ func (c *Client) GetOrganizationBootstrapScripts(ctx context.Context, organizati
 	return &result, nil
 }
 
-// GetOrganizationCloudAccounts - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns all cloud accounts for an organization
+// GetOrganizationCloudAccounts - Get organization cloud accounts
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns all cloud accounts for an organization
 func (c *Client) GetOrganizationCloudAccounts(ctx context.Context, organization string) (*[]CloudAccount, error) {
 	path := "/api/organizations/{organization}/cloud-accounts"
 	path = pathReplace(path, "organization", organization)
@@ -1532,7 +2016,11 @@ func (c *Client) GetOrganizationCloudAccounts(ctx context.Context, organization 
 	return &result, nil
 }
 
-// CreateOrganizationCloudAccount - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new cloud account for an organization with the given cloud credentials
+// CreateOrganizationCloudAccount - Create organization cloud account
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new cloud account for an organization with the given cloud credentials
 func (c *Client) CreateOrganizationCloudAccount(ctx context.Context, organization string, body CreateCloudAccountBody) (*CloudAccount, error) {
 	path := "/api/organizations/{organization}/cloud-accounts"
 	path = pathReplace(path, "organization", organization)
@@ -1544,7 +2032,11 @@ func (c *Client) CreateOrganizationCloudAccount(ctx context.Context, organizatio
 	return &result, nil
 }
 
-// GetOrganizationCloudAccount - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a specific cloud account by name.
+// GetOrganizationCloudAccount - Get organization cloud account
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a specific cloud account by name.
 func (c *Client) GetOrganizationCloudAccount(ctx context.Context, organization string, name string) (*GetCloudAccountResponse, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -1557,7 +2049,11 @@ func (c *Client) GetOrganizationCloudAccount(ctx context.Context, organization s
 	return &result, nil
 }
 
-// DeleteOrganizationCloudAccount - > This is a system-level route, so the response will be independent of the currently authenticated user.  Delete a cloud account by name.
+// DeleteOrganizationCloudAccount - Delete organization cloud account
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Delete a cloud account by name.
 func (c *Client) DeleteOrganizationCloudAccount(ctx context.Context, organization string, name string) error {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -1569,7 +2065,11 @@ func (c *Client) DeleteOrganizationCloudAccount(ctx context.Context, organizatio
 	return nil
 }
 
-// GetOrganizationCloudAccountAccess - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns access information for a cloud account.
+// GetOrganizationCloudAccountAccess - Get cloud account access
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns access information for a cloud account.
 func (c *Client) GetOrganizationCloudAccountAccess(ctx context.Context, organization string, name string) (*GetAccessResponse, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/access"
 	path = pathReplace(path, "organization", organization)
@@ -1582,7 +2082,11 @@ func (c *Client) GetOrganizationCloudAccountAccess(ctx context.Context, organiza
 	return &result, nil
 }
 
-// UpdateOrganizationCloudAccountAccess - > This is a system-level route, so the response will be independent of the currently authenticated user.  Update the access of a given cloud account.
+// UpdateOrganizationCloudAccountAccess - Update cloud account access
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update the access of a given cloud account.
 func (c *Client) UpdateOrganizationCloudAccountAccess(ctx context.Context, organization string, name string, body PatchAccessBodyType) error {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/access"
 	path = pathReplace(path, "organization", organization)
@@ -1594,7 +2098,11 @@ func (c *Client) UpdateOrganizationCloudAccountAccess(ctx context.Context, organ
 	return nil
 }
 
-// GetCloudAccountBilling - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns billing infrastructure information for a cloud account.
+// GetCloudAccountBilling - Get cloud account billing information
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns billing infrastructure information for a cloud account.
 func (c *Client) GetCloudAccountBilling(ctx context.Context, organization string, name string) (*BillingResponse, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/billing"
 	path = pathReplace(path, "organization", organization)
@@ -1607,7 +2115,11 @@ func (c *Client) GetCloudAccountBilling(ctx context.Context, organization string
 	return &result, nil
 }
 
-// PostCloudAccountBilling - > This is a system-level route, so the response will be independent of the currently authenticated user.  Provisions billing infrastructure for a cloud account.
+// PostCloudAccountBilling - Provision billing for cloud account
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Provisions billing infrastructure for a cloud account.
 func (c *Client) PostCloudAccountBilling(ctx context.Context, organization string, name string) (*BillingResponse, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/billing"
 	path = pathReplace(path, "organization", organization)
@@ -1620,7 +2132,11 @@ func (c *Client) PostCloudAccountBilling(ctx context.Context, organization strin
 	return &result, nil
 }
 
-// DeleteCloudAccountBilling - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deprovisions billing infrastructure for a cloud account.
+// DeleteCloudAccountBilling - Deprovision cloud account billing
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deprovisions billing infrastructure for a cloud account.
 func (c *Client) DeleteCloudAccountBilling(ctx context.Context, organization string, name string) error {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/billing"
 	path = pathReplace(path, "organization", organization)
@@ -1632,7 +2148,11 @@ func (c *Client) DeleteCloudAccountBilling(ctx context.Context, organization str
 	return nil
 }
 
-// UpdateOrganizationCloudAccountCredentials - > This is a system-level route, so the response will be independent of the currently authenticated user.  Updates the credentials of a given cloud account.
+// UpdateOrganizationCloudAccountCredentials - Update cloud account credentials
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates the credentials of a given cloud account.
 func (c *Client) UpdateOrganizationCloudAccountCredentials(ctx context.Context, organization string, name string, body CloudAccountCredentialsInput) error {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/credentials"
 	path = pathReplace(path, "organization", organization)
@@ -1644,7 +2164,11 @@ func (c *Client) UpdateOrganizationCloudAccountCredentials(ctx context.Context, 
 	return nil
 }
 
-// GetOrganizationCloudAccountNetworks - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns all networks associated with a cloud account.
+// GetOrganizationCloudAccountNetworks - Get networks for cloud account
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns all networks associated with a cloud account.
 func (c *Client) GetOrganizationCloudAccountNetworks(ctx context.Context, organization string, name string) (*[]Infrastructure, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/networks"
 	path = pathReplace(path, "organization", organization)
@@ -1657,7 +2181,11 @@ func (c *Client) GetOrganizationCloudAccountNetworks(ctx context.Context, organi
 	return &result, nil
 }
 
-// CreateOrganizationCloudAccountNetwork - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new network for the specified cloud account.
+// CreateOrganizationCloudAccountNetwork - Create network for cloud account
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new network for the specified cloud account.
 func (c *Client) CreateOrganizationCloudAccountNetwork(ctx context.Context, organization string, name string, body CreateNetworkBody) (*Infrastructure, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/networks"
 	path = pathReplace(path, "organization", organization)
@@ -1670,7 +2198,11 @@ func (c *Client) CreateOrganizationCloudAccountNetwork(ctx context.Context, orga
 	return &result, nil
 }
 
-// GetOrganizationCloudAccountNetwork - > This is a system-level route, so the response will be independent of the currently authenticated user.  Get information about a network associated with a cloud account.
+// GetOrganizationCloudAccountNetwork - Get network information
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Get information about a network associated with a cloud account.
 func (c *Client) GetOrganizationCloudAccountNetwork(ctx context.Context, organization string, name string, networkName string) (*Infrastructure, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/networks/{networkName}"
 	path = pathReplace(path, "organization", organization)
@@ -1684,7 +2216,11 @@ func (c *Client) GetOrganizationCloudAccountNetwork(ctx context.Context, organiz
 	return &result, nil
 }
 
-// DeleteOrganizationCloudAccountNetwork - > This is a system-level route, so the response will be independent of the currently authenticated user.  Delete a network from a cloud account.
+// DeleteOrganizationCloudAccountNetwork - Delete network
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Delete a network from a cloud account.
 func (c *Client) DeleteOrganizationCloudAccountNetwork(ctx context.Context, organization string, name string, networkName string) error {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/networks/{networkName}"
 	path = pathReplace(path, "organization", organization)
@@ -1697,7 +2233,11 @@ func (c *Client) DeleteOrganizationCloudAccountNetwork(ctx context.Context, orga
 	return nil
 }
 
-// UpdateOrganizationCloudAccountNetwork - > This is a system-level route, so the response will be independent of the currently authenticated user.  Update the regions of a network in a cloud account.
+// UpdateOrganizationCloudAccountNetwork - Update network regions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update the regions of a network in a cloud account.
 func (c *Client) UpdateOrganizationCloudAccountNetwork(ctx context.Context, organization string, name string, networkName string, body PatchNetworkBody) error {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/networks/{networkName}"
 	path = pathReplace(path, "organization", organization)
@@ -1710,7 +2250,11 @@ func (c *Client) UpdateOrganizationCloudAccountNetwork(ctx context.Context, orga
 	return nil
 }
 
-// GetOpenstackFlavors - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the list of available OpenStack flavors (instance types).
+// GetOpenstackFlavors - Get OpenStack flavors
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the list of available OpenStack flavors (instance types).
 func (c *Client) GetOpenstackFlavors(ctx context.Context, organization string, name string) (*[]OpenStackFlavor, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/openstack/flavors"
 	path = pathReplace(path, "organization", organization)
@@ -1723,7 +2267,11 @@ func (c *Client) GetOpenstackFlavors(ctx context.Context, organization string, n
 	return &result, nil
 }
 
-// PatchOpenstackFlavors - > This is a system-level route, so the response will be independent of the currently authenticated user.  Updates costPerHour values for specified OpenStack flavors.
+// PatchOpenstackFlavors - Update OpenStack flavor costs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates costPerHour values for specified OpenStack flavors.
 func (c *Client) PatchOpenstackFlavors(ctx context.Context, organization string, name string, body PatchOpenstackFlavorsBody) error {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/openstack/flavors"
 	path = pathReplace(path, "organization", organization)
@@ -1735,7 +2283,11 @@ func (c *Client) PatchOpenstackFlavors(ctx context.Context, organization string,
 	return nil
 }
 
-// GetOpenstackMetadata - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns cached OpenStack metadata including regions, flavors, and networks.
+// GetOpenstackMetadata - Get OpenStack cloud account metadata
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns cached OpenStack metadata including regions, flavors, and networks.
 func (c *Client) GetOpenstackMetadata(ctx context.Context, organization string, name string) (*OpenStackMetadata, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/openstack/metadata"
 	path = pathReplace(path, "organization", organization)
@@ -1748,7 +2300,11 @@ func (c *Client) GetOpenstackMetadata(ctx context.Context, organization string, 
 	return &result, nil
 }
 
-// GetOpenstackNetworks - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the list of available OpenStack networks.
+// GetOpenstackNetworks - Get OpenStack networks
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the list of available OpenStack networks.
 func (c *Client) GetOpenstackNetworks(ctx context.Context, organization string, name string) (*[]OpenStackNetwork, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/openstack/networks"
 	path = pathReplace(path, "organization", organization)
@@ -1761,7 +2317,11 @@ func (c *Client) GetOpenstackNetworks(ctx context.Context, organization string, 
 	return &result, nil
 }
 
-// GetOpenstackRegions - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the list of available OpenStack regions.
+// GetOpenstackRegions - Get OpenStack regions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the list of available OpenStack regions.
 func (c *Client) GetOpenstackRegions(ctx context.Context, organization string, name string) (*[]string, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/openstack/regions"
 	path = pathReplace(path, "organization", organization)
@@ -1774,7 +2334,11 @@ func (c *Client) GetOpenstackRegions(ctx context.Context, organization string, n
 	return &result, nil
 }
 
-// PostOpenstackSync - > This is a system-level route, so the response will be independent of the currently authenticated user.  Triggers a sync of OpenStack metadata (regions, flavors, networks) from the cloud provider.
+// PostOpenstackSync - Trigger OpenStack metadata sync
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Triggers a sync of OpenStack metadata (regions, flavors, networks) from the cloud provider.
 func (c *Client) PostOpenstackSync(ctx context.Context, organization string, name string) (*OpenstackSyncResponse, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/openstack/sync"
 	path = pathReplace(path, "organization", organization)
@@ -1789,10 +2353,15 @@ func (c *Client) PostOpenstackSync(ctx context.Context, organization string, nam
 
 // GetCloudImagesParams contains optional parameters for the GetCloudImages operation.
 type GetCloudImagesParams struct {
+	// Network name to use for cloud account credentials
 	Network *string `json:"network,omitempty"`
 }
 
-// GetCloudImages - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns public cloud images (AWS AMIs, Azure VM images, GCP images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.
+// GetCloudImages - List public cloud images
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns public cloud images (AWS AMIs, Azure VM images, GCP images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.
 func (c *Client) GetCloudImages(ctx context.Context, organization string, csp string, region string, opts ...GetCloudImagesParams) (*[]CloudImage, error) {
 	path := "/api/organizations/{organization}/clouds/{csp}/regions/{region}/cloudimages"
 	path = pathReplace(path, "organization", organization)
@@ -1816,11 +2385,17 @@ func (c *Client) GetCloudImages(ctx context.Context, organization string, csp st
 
 // GetOrganizationGroupsParams contains optional parameters for the GetOrganizationGroups operation.
 type GetOrganizationGroupsParams struct {
+	// Maximum number of groups to return
 	Limit *int64 `json:"limit,omitempty"`
-	Skip  *int64 `json:"skip,omitempty"`
+	// Number of groups to skip
+	Skip *int64 `json:"skip,omitempty"`
 }
 
-// GetOrganizationGroups - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns all groups in an organization.
+// GetOrganizationGroups - Get organization groups
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns all groups in an organization.
 func (c *Client) GetOrganizationGroups(ctx context.Context, organization string, opts ...GetOrganizationGroupsParams) (*[]Group, error) {
 	path := "/api/organizations/{organization}/groups"
 	path = pathReplace(path, "organization", organization)
@@ -1841,7 +2416,11 @@ func (c *Client) GetOrganizationGroups(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// CreateGroup - > This is a system-level route, so the response will be independent of the currently authenticated user.  Create group for the organization
+// CreateGroup - Create Group
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Create group for the organization
 func (c *Client) CreateGroup(ctx context.Context, organization string, body Group) (*Group, error) {
 	path := "/api/organizations/{organization}/groups"
 	path = pathReplace(path, "organization", organization)
@@ -1853,7 +2432,11 @@ func (c *Client) CreateGroup(ctx context.Context, organization string, body Grou
 	return &result, nil
 }
 
-// GetGroup - > This is a system-level route, so the response will be independent of the currently authenticated user.  Get details for a specific group including member list
+// GetGroup - Get Group
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Get details for a specific group including member list
 func (c *Client) GetGroup(ctx context.Context, organization string, group string) (*GroupWithMembers, error) {
 	path := "/api/organizations/{organization}/groups/{group}"
 	path = pathReplace(path, "organization", organization)
@@ -1866,7 +2449,11 @@ func (c *Client) GetGroup(ctx context.Context, organization string, group string
 	return &result, nil
 }
 
-// DeleteGroup - > This is a system-level route, so the response will be independent of the currently authenticated user.  Delete a group and clean up shared resource references
+// DeleteGroup - Delete Group
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Delete a group and clean up shared resource references
 func (c *Client) DeleteGroup(ctx context.Context, organization string, group string) error {
 	path := "/api/organizations/{organization}/groups/{group}"
 	path = pathReplace(path, "organization", organization)
@@ -1878,7 +2465,11 @@ func (c *Client) DeleteGroup(ctx context.Context, organization string, group str
 	return nil
 }
 
-// PatchGroup - > This is a system-level route, so the response will be independent of the currently authenticated user.  Update description for the group
+// PatchGroup - Update Group Description
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update description for the group
 func (c *Client) PatchGroup(ctx context.Context, organization string, group string, body GroupDescriptionBody) (*Group, error) {
 	path := "/api/organizations/{organization}/groups/{group}"
 	path = pathReplace(path, "organization", organization)
@@ -1891,7 +2482,11 @@ func (c *Client) PatchGroup(ctx context.Context, organization string, group stri
 	return &result, nil
 }
 
-// PatchGroupAllocations - > This is a system-level route, so the response will be independent of the currently authenticated user.  Update allocations for the group
+// PatchGroupAllocations - Update Group Allocations
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update allocations for the group
 func (c *Client) PatchGroupAllocations(ctx context.Context, organization string, group string, body GroupAllocationBody) (*Group, error) {
 	path := "/api/organizations/{organization}/groups/{group}/allocations"
 	path = pathReplace(path, "organization", organization)
@@ -1904,7 +2499,11 @@ func (c *Client) PatchGroupAllocations(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// GetGroupMembers - > This is a system-level route, so the response will be independent of the currently authenticated user.  List all members of a group
+// GetGroupMembers - Get Group Members
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// List all members of a group
 func (c *Client) GetGroupMembers(ctx context.Context, organization string, group string) (*[]MemberDetail, error) {
 	path := "/api/organizations/{organization}/groups/{group}/members"
 	path = pathReplace(path, "organization", organization)
@@ -1917,7 +2516,11 @@ func (c *Client) GetGroupMembers(ctx context.Context, organization string, group
 	return &result, nil
 }
 
-// AddGroupMember - > This is a system-level route, so the response will be independent of the currently authenticated user.  Add a user to a group
+// AddGroupMember - Add Group Member
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Add a user to a group
 func (c *Client) AddGroupMember(ctx context.Context, organization string, group string, body MemberBodyInput) (*GroupWithMembers, error) {
 	path := "/api/organizations/{organization}/groups/{group}/members"
 	path = pathReplace(path, "organization", organization)
@@ -1930,7 +2533,11 @@ func (c *Client) AddGroupMember(ctx context.Context, organization string, group 
 	return &result, nil
 }
 
-// RemoveGroupMember - > This is a system-level route, so the response will be independent of the currently authenticated user.  Remove a user from a group
+// RemoveGroupMember - Remove Group Member
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Remove a user from a group
 func (c *Client) RemoveGroupMember(ctx context.Context, organization string, group string, body MemberBodyInput) error {
 	path := "/api/organizations/{organization}/groups/{group}/members"
 	path = pathReplace(path, "organization", organization)
@@ -1944,10 +2551,15 @@ func (c *Client) RemoveGroupMember(ctx context.Context, organization string, gro
 
 // GetGroupCapacityReservationsParams contains optional parameters for the GetGroupCapacityReservations operation.
 type GetGroupCapacityReservationsParams struct {
+	// Filter by cloud service provider
 	Csp *string `json:"csp,omitempty"`
 }
 
-// GetGroupCapacityReservations - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  List capacity reservations for a group.
+// GetGroupCapacityReservations - List group capacity reservations
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List capacity reservations for a group.
 func (c *Client) GetGroupCapacityReservations(ctx context.Context, organization string, group string, opts ...GetGroupCapacityReservationsParams) (*[]ReservationItem, error) {
 	path := "/api/organizations/{organization}/groups/{group}/reservations"
 	path = pathReplace(path, "organization", organization)
@@ -1968,7 +2580,11 @@ func (c *Client) GetGroupCapacityReservations(ctx context.Context, organization 
 	return &result, nil
 }
 
-// PatchGroupRoles - > This is a system-level route, so the response will be independent of the currently authenticated user.  Update roles for the group
+// PatchGroupRoles - Update Group Roles
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update roles for the group
 func (c *Client) PatchGroupRoles(ctx context.Context, organization string, group string, body GroupRolesBody) (*Group, error) {
 	path := "/api/organizations/{organization}/groups/{group}/roles"
 	path = pathReplace(path, "organization", organization)
@@ -1983,13 +2599,19 @@ func (c *Client) PatchGroupRoles(ctx context.Context, organization string, group
 
 // ListKubernetesConfigsParams contains optional parameters for the ListKubernetesConfigs operation.
 type ListKubernetesConfigsParams struct {
-	Clusters   *[]string `json:"clusters,omitempty"`
+	// Filter by cluster names
+	Clusters *[]string `json:"clusters,omitempty"`
+	// Filter by namespaces
 	Namespaces *[]string `json:"namespaces,omitempty"`
-	Types      *[]string `json:"types,omitempty"`
-	Search     *string   `json:"search,omitempty"`
+	// Filter by config types (configmap, secret)
+	Types *[]string `json:"types,omitempty"`
+	// Search string to filter by name
+	Search *string `json:"search,omitempty"`
 }
 
-// ListKubernetesConfigs - Lists Kubernetes ConfigMaps and Secrets across multiple clusters with filtering support.
+// ListKubernetesConfigs - List Kubernetes ConfigMaps and Secrets
+//
+// Lists Kubernetes ConfigMaps and Secrets across multiple clusters with filtering support.
 func (c *Client) ListKubernetesConfigs(ctx context.Context, organization string, opts ...ListKubernetesConfigsParams) (*ConfigsBody, error) {
 	path := "/api/organizations/{organization}/kubernetes/configs"
 	path = pathReplace(path, "organization", organization)
@@ -2014,12 +2636,17 @@ func (c *Client) ListKubernetesConfigs(ctx context.Context, organization string,
 
 // ListKubernetesHelmParams contains optional parameters for the ListKubernetesHelm operation.
 type ListKubernetesHelmParams struct {
-	Clusters   *[]string `json:"clusters,omitempty"`
+	// Filter by cluster names
+	Clusters *[]string `json:"clusters,omitempty"`
+	// Filter by namespaces
 	Namespaces *[]string `json:"namespaces,omitempty"`
-	Search     *string   `json:"search,omitempty"`
+	// Search string to filter by name
+	Search *string `json:"search,omitempty"`
 }
 
-// ListKubernetesHelm - Lists Kubernetes Helm Charts across multiple clusters with filtering support.
+// ListKubernetesHelm - List Kubernetes Helm Charts
+//
+// Lists Kubernetes Helm Charts across multiple clusters with filtering support.
 func (c *Client) ListKubernetesHelm(ctx context.Context, organization string, opts ...ListKubernetesHelmParams) (*ChartsBody, error) {
 	path := "/api/organizations/{organization}/kubernetes/helm"
 	path = pathReplace(path, "organization", organization)
@@ -2043,10 +2670,15 @@ func (c *Client) ListKubernetesHelm(ctx context.Context, organization string, op
 
 // GetAllKubernetesNamespacesParams contains optional parameters for the GetAllKubernetesNamespaces operation.
 type GetAllKubernetesNamespacesParams struct {
+	// Filter by cluster names
 	Clusters *[]string `json:"clusters,omitempty"`
 }
 
-// GetAllKubernetesNamespaces - > This is a system-level route, so the response will be independent of the currently authenticated user.  Retrieves a list of all available namespaces across all Kubernetes clusters.
+// GetAllKubernetesNamespaces - Get all Kubernetes namespaces
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Retrieves a list of all available namespaces across all Kubernetes clusters.
 func (c *Client) GetAllKubernetesNamespaces(ctx context.Context, organization string, opts ...GetAllKubernetesNamespacesParams) (*NamespacesBody, error) {
 	path := "/api/organizations/{organization}/kubernetes/namespaces"
 	path = pathReplace(path, "organization", organization)
@@ -2068,11 +2700,15 @@ func (c *Client) GetAllKubernetesNamespaces(ctx context.Context, organization st
 
 // ListKubernetesNodesParams contains optional parameters for the ListKubernetesNodes operation.
 type ListKubernetesNodesParams struct {
+	// Filter by cluster names
 	Clusters *[]string `json:"clusters,omitempty"`
-	Search   *string   `json:"search,omitempty"`
+	// Search string to filter by node name
+	Search *string `json:"search,omitempty"`
 }
 
-// ListKubernetesNodes - Lists Kubernetes nodes across multiple clusters with filtering support.
+// ListKubernetesNodes - List Kubernetes nodes
+//
+// Lists Kubernetes nodes across multiple clusters with filtering support.
 func (c *Client) ListKubernetesNodes(ctx context.Context, organization string, opts ...ListKubernetesNodesParams) (*NodesBody, error) {
 	path := "/api/organizations/{organization}/kubernetes/nodes"
 	path = pathReplace(path, "organization", organization)
@@ -2095,11 +2731,17 @@ func (c *Client) ListKubernetesNodes(ctx context.Context, organization string, o
 
 // ListKubernetesQuotasParams contains optional parameters for the ListKubernetesQuotas operation.
 type ListKubernetesQuotasParams struct {
-	Clusters   *[]string `json:"clusters,omitempty"`
+	// Filter by cluster names
+	Clusters *[]string `json:"clusters,omitempty"`
+	// Filter by namespaces
 	Namespaces *[]string `json:"namespaces,omitempty"`
 }
 
-// ListKubernetesQuotas - > This is a system-level route, so the response will be independent of the currently authenticated user.  Lists Kubernetes resource quotas managed by Parallel Works across multiple clusters with filtering support.
+// ListKubernetesQuotas - List Kubernetes resource quotas
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Lists Kubernetes resource quotas managed by Parallel Works across multiple clusters with filtering support.
 func (c *Client) ListKubernetesQuotas(ctx context.Context, organization string, opts ...ListKubernetesQuotasParams) (*QuotasBody, error) {
 	path := "/api/organizations/{organization}/kubernetes/quotas"
 	path = pathReplace(path, "organization", organization)
@@ -2122,12 +2764,17 @@ func (c *Client) ListKubernetesQuotas(ctx context.Context, organization string, 
 
 // ListKubernetesServicesParams contains optional parameters for the ListKubernetesServices operation.
 type ListKubernetesServicesParams struct {
-	Clusters   *[]string `json:"clusters,omitempty"`
+	// Filter by cluster names
+	Clusters *[]string `json:"clusters,omitempty"`
+	// Filter by namespaces
 	Namespaces *[]string `json:"namespaces,omitempty"`
-	Search     *string   `json:"search,omitempty"`
+	// Search string to filter by service name
+	Search *string `json:"search,omitempty"`
 }
 
-// ListKubernetesServices - Lists Kubernetes services across multiple clusters with filtering support.
+// ListKubernetesServices - List Kubernetes services
+//
+// Lists Kubernetes services across multiple clusters with filtering support.
 func (c *Client) ListKubernetesServices(ctx context.Context, organization string, opts ...ListKubernetesServicesParams) (*ServicesBody, error) {
 	path := "/api/organizations/{organization}/kubernetes/services"
 	path = pathReplace(path, "organization", organization)
@@ -2151,13 +2798,19 @@ func (c *Client) ListKubernetesServices(ctx context.Context, organization string
 
 // ListKubernetesStorageParams contains optional parameters for the ListKubernetesStorage operation.
 type ListKubernetesStorageParams struct {
-	Clusters   *[]string `json:"clusters,omitempty"`
+	// Filter by cluster names
+	Clusters *[]string `json:"clusters,omitempty"`
+	// Filter by kubernetes namespace names
 	Namespaces *[]string `json:"namespaces,omitempty"`
-	Types      *[]string `json:"types,omitempty"`
-	Search     *string   `json:"search,omitempty"`
+	// Filter by storage types (pvc, pv)
+	Types *[]string `json:"types,omitempty"`
+	// Search string to filter by name
+	Search *string `json:"search,omitempty"`
 }
 
-// ListKubernetesStorage - Lists Kubernetes PersistentVolumeClaims and PersistentVolumes across multiple clusters with filtering support.
+// ListKubernetesStorage - List Kubernetes storage resources
+//
+// Lists Kubernetes PersistentVolumeClaims and PersistentVolumes across multiple clusters with filtering support.
 func (c *Client) ListKubernetesStorage(ctx context.Context, organization string, opts ...ListKubernetesStorageParams) (*StorageBody, error) {
 	path := "/api/organizations/{organization}/kubernetes/storage"
 	path = pathReplace(path, "organization", organization)
@@ -2182,13 +2835,19 @@ func (c *Client) ListKubernetesStorage(ctx context.Context, organization string,
 
 // ListKubernetesWorkloadsParams contains optional parameters for the ListKubernetesWorkloads operation.
 type ListKubernetesWorkloadsParams struct {
-	Clusters   *[]string `json:"clusters,omitempty"`
+	// Filter by cluster names
+	Clusters *[]string `json:"clusters,omitempty"`
+	// Filter by kubernetes namespace names
 	Namespaces *[]string `json:"namespaces,omitempty"`
-	Types      *[]string `json:"types,omitempty"`
-	Search     *string   `json:"search,omitempty"`
+	// Filter by workload types (deployment, statefulset, daemonset, job, cronjob, pod)
+	Types *[]string `json:"types,omitempty"`
+	// Search string to filter by workload name
+	Search *string `json:"search,omitempty"`
 }
 
-// ListKubernetesWorkloads - Lists Kubernetes workloads across multiple clusters and namespaces with filtering support.
+// ListKubernetesWorkloads - List Kubernetes workloads
+//
+// Lists Kubernetes workloads across multiple clusters and namespaces with filtering support.
 func (c *Client) ListKubernetesWorkloads(ctx context.Context, organization string, opts ...ListKubernetesWorkloadsParams) (*WorkloadsBody, error) {
 	path := "/api/organizations/{organization}/kubernetes/workloads"
 	path = pathReplace(path, "organization", organization)
@@ -2211,7 +2870,11 @@ func (c *Client) ListKubernetesWorkloads(ctx context.Context, organization strin
 	return &result, nil
 }
 
-// ListHelmReleases - > This is a system-level route, so the response will be independent of the currently authenticated user.  Lists all Helm releases deployed in the specified Kubernetes namespace.
+// ListHelmReleases - List Helm releases in namespace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Lists all Helm releases deployed in the specified Kubernetes namespace.
 func (c *Client) ListHelmReleases(ctx context.Context, organization string, clusterName string, namespace string) (*[]HelmReleaseResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespace}/helm-charts"
 	path = pathReplace(path, "organization", organization)
@@ -2225,7 +2888,11 @@ func (c *Client) ListHelmReleases(ctx context.Context, organization string, clus
 	return &result, nil
 }
 
-// InstallHelmChart - > This is a system-level route, so the response will be independent of the currently authenticated user.  Installs a new Helm chart in the specified Kubernetes namespace.
+// InstallHelmChart - Install Helm chart
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Installs a new Helm chart in the specified Kubernetes namespace.
 func (c *Client) InstallHelmChart(ctx context.Context, organization string, clusterName string, namespace string, body HelmChartInstallBody) error {
 	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespace}/helm-charts"
 	path = pathReplace(path, "organization", organization)
@@ -2238,7 +2905,11 @@ func (c *Client) InstallHelmChart(ctx context.Context, organization string, clus
 	return nil
 }
 
-// UpgradeHelmChart - > This is a system-level route, so the response will be independent of the currently authenticated user.  Upgrades an existing Helm chart or installs it if it doesn't exist in the specified namespace.
+// UpgradeHelmChart - Upgrade Helm chart
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Upgrades an existing Helm chart or installs it if it doesn't exist in the specified namespace.
 func (c *Client) UpgradeHelmChart(ctx context.Context, organization string, clusterName string, namespace string, body HelmChartInstallBody) error {
 	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespace}/helm-charts"
 	path = pathReplace(path, "organization", organization)
@@ -2251,7 +2922,11 @@ func (c *Client) UpgradeHelmChart(ctx context.Context, organization string, clus
 	return nil
 }
 
-// GetHelmChartDetails - > This is a system-level route, so the response will be independent of the currently authenticated user.  Retrieves detailed information about a specific Helm chart across all namespaces.
+// GetHelmChartDetails - Get Helm chart details
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Retrieves detailed information about a specific Helm chart across all namespaces.
 func (c *Client) GetHelmChartDetails(ctx context.Context, organization string, clusterName string, namespace string, chartName string) (*HelmChartDetails, error) {
 	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespace}/helm-charts/{chartName}"
 	path = pathReplace(path, "organization", organization)
@@ -2266,7 +2941,11 @@ func (c *Client) GetHelmChartDetails(ctx context.Context, organization string, c
 	return &result, nil
 }
 
-// RollbackHelmRelease - > This is a system-level route, so the response will be independent of the currently authenticated user.  Rolls back a Helm release to a specific revision in the specified namespace.
+// RollbackHelmRelease - Rollback Helm release
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Rolls back a Helm release to a specific revision in the specified namespace.
 func (c *Client) RollbackHelmRelease(ctx context.Context, organization string, clusterName string, namespace string, chartName string, body HelmChartRollbackBody) error {
 	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespace}/helm-charts/{chartName}"
 	path = pathReplace(path, "organization", organization)
@@ -2280,7 +2959,11 @@ func (c *Client) RollbackHelmRelease(ctx context.Context, organization string, c
 	return nil
 }
 
-// DeleteHelmRelease - > This is a system-level route, so the response will be independent of the currently authenticated user.  Uninstalls a Helm release from the specified Kubernetes namespace.
+// DeleteHelmRelease - Delete Helm release
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Uninstalls a Helm release from the specified Kubernetes namespace.
 func (c *Client) DeleteHelmRelease(ctx context.Context, organization string, clusterName string, namespace string, chartName string) error {
 	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespace}/helm-charts/{chartName}"
 	path = pathReplace(path, "organization", organization)
@@ -2294,7 +2977,11 @@ func (c *Client) DeleteHelmRelease(ctx context.Context, organization string, clu
 	return nil
 }
 
-// GetHelmChartHistory - > This is a system-level route, so the response will be independent of the currently authenticated user.  Retrieves the revision history for a specific Helm chart.
+// GetHelmChartHistory - Get Helm chart history
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Retrieves the revision history for a specific Helm chart.
 func (c *Client) GetHelmChartHistory(ctx context.Context, organization string, clusterName string, namespace string, chartName string) (*[]HelmChartHistoryEntry, error) {
 	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespace}/helm-charts/{chartName}/history"
 	path = pathReplace(path, "organization", organization)
@@ -2311,11 +2998,15 @@ func (c *Client) GetHelmChartHistory(ctx context.Context, organization string, c
 
 // DeleteKubernetesWorkloadParams contains optional parameters for the DeleteKubernetesWorkload operation.
 type DeleteKubernetesWorkloadParams struct {
-	Cascade     *bool  `json:"cascade,omitempty"`
+	// Whether to delete dependent resources. Default is true.
+	Cascade *bool `json:"cascade,omitempty"`
+	// Grace period in seconds for pod termination. Default is 30.
 	GracePeriod *int64 `json:"gracePeriod,omitempty"`
 }
 
-// DeleteKubernetesWorkload - Deletes a specific Kubernetes workload (deployment, statefulset, daemonset, replicaset, job, cronjob, or pod) from the specified namespace.
+// DeleteKubernetesWorkload - Delete Kubernetes workload
+//
+// Deletes a specific Kubernetes workload (deployment, statefulset, daemonset, replicaset, job, cronjob, or pod) from the specified namespace.
 func (c *Client) DeleteKubernetesWorkload(ctx context.Context, organization string, clusterName string, namespace string, workloadType string, workloadName string, opts ...DeleteKubernetesWorkloadParams) error {
 	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespace}/workloads/{workloadType}/{workloadName}"
 	path = pathReplace(path, "organization", organization)
@@ -2339,7 +3030,11 @@ func (c *Client) DeleteKubernetesWorkload(ctx context.Context, organization stri
 	return nil
 }
 
-// GetSingleKubernetesCluster - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Retrieves detailed information about a specific Kubernetes cluster including endpoint, CA certificate, access groups, and cost tracking status.
+// GetSingleKubernetesCluster - Get Kubernetes cluster details
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Retrieves detailed information about a specific Kubernetes cluster including endpoint, CA certificate, access groups, and cost tracking status.
 func (c *Client) GetSingleKubernetesCluster(ctx context.Context, organization string, infraName string) (*SingleClusterResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}"
 	path = pathReplace(path, "organization", organization)
@@ -2352,7 +3047,11 @@ func (c *Client) GetSingleKubernetesCluster(ctx context.Context, organization st
 	return &result, nil
 }
 
-// UpdateKubernetesCostTracking - > This is a system-level route, so the response will be independent of the currently authenticated user.  Enable or disable cost tracking for a Kubernetes cluster.
+// UpdateKubernetesCostTracking - Enable or disable cost tracking
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Enable or disable cost tracking for a Kubernetes cluster.
 func (c *Client) UpdateKubernetesCostTracking(ctx context.Context, organization string, infraName string, body *UpdateCostTrackingBody) (*CostTrackingResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/costtracking"
 	path = pathReplace(path, "organization", organization)
@@ -2365,7 +3064,11 @@ func (c *Client) UpdateKubernetesCostTracking(ctx context.Context, organization 
 	return &result, nil
 }
 
-// UpdateKubernetesCostTrackingPrices - > This is a system-level route, so the response will be independent of the currently authenticated user.  Update CPU and memory prices for cost tracking calculations.
+// UpdateKubernetesCostTrackingPrices - Update cost tracking prices
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update CPU and memory prices for cost tracking calculations.
 func (c *Client) UpdateKubernetesCostTrackingPrices(ctx context.Context, organization string, infraName string, body CostTrackingPricesBody) (*CostTrackingPricesBody, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/costtracking/prices"
 	path = pathReplace(path, "organization", organization)
@@ -2378,7 +3081,11 @@ func (c *Client) UpdateKubernetesCostTrackingPrices(ctx context.Context, organiz
 	return &result, nil
 }
 
-// GetKubernetesNamespaces - > This is a system-level route, so the response will be independent of the currently authenticated user.  Retrieves a list of available namespaces in the specified Kubernetes cluster.
+// GetKubernetesNamespaces - Get Kubernetes namespaces
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Retrieves a list of available namespaces in the specified Kubernetes cluster.
 func (c *Client) GetKubernetesNamespaces(ctx context.Context, organization string, infraName string) (*[]string, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/namespaces"
 	path = pathReplace(path, "organization", organization)
@@ -2393,12 +3100,19 @@ func (c *Client) GetKubernetesNamespaces(ctx context.Context, organization strin
 
 // GetPodLogsParams contains optional parameters for the GetPodLogs operation.
 type GetPodLogsParams struct {
-	TailLines   *int64     `json:"tailLines,omitempty"`
-	SinceTime   *time.Time `json:"sinceTime,omitempty"`
-	LastLogHash *string    `json:"lastLogHash,omitempty"`
+	// Number of lines to tail from the end of the logs
+	TailLines *int64 `json:"tailLines,omitempty"`
+	// Only return logs newer than this timestamp (RFC3339 format)
+	SinceTime *time.Time `json:"sinceTime,omitempty"`
+	// Hash of the last log line received, used for deduplication when polling
+	LastLogHash *string `json:"lastLogHash,omitempty"`
 }
 
-// GetPodLogs - > This is a system-level route, so the response will be independent of the currently authenticated user.  Retrieves logs from a specific pod in a Kubernetes cluster.
+// GetPodLogs - Get pod logs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Retrieves logs from a specific pod in a Kubernetes cluster.
 func (c *Client) GetPodLogs(ctx context.Context, organization string, infraName string, namespace string, podName string, opts ...GetPodLogsParams) (*PodLogsResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/namespaces/{namespace}/pods/{podName}/logs"
 	path = pathReplace(path, "organization", organization)
@@ -2423,7 +3137,11 @@ func (c *Client) GetPodLogs(ctx context.Context, organization string, infraName 
 	return &result, nil
 }
 
-// GetKubernetesResource - > This is a system-level route, so the response will be independent of the currently authenticated user.  Gets a specific Kubernetes resource (pvc, service, configmap, secret, deployment, statefulset, daemonset, job, cronjob, pod, replicaset) with YAML and JSON representations.
+// GetKubernetesResource - Get Kubernetes resource
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Gets a specific Kubernetes resource (pvc, service, configmap, secret, deployment, statefulset, daemonset, job, cronjob, pod, replicaset) with YAML and JSON representations.
 func (c *Client) GetKubernetesResource(ctx context.Context, organization string, infraName string, namespace string, resourceType string, resourceName string) (*ResourceYamlResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/namespaces/{namespace}/resourceType/{resourceType}/resourceName/{resourceName}"
 	path = pathReplace(path, "organization", organization)
@@ -2439,7 +3157,11 @@ func (c *Client) GetKubernetesResource(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// PatchKubernetesResource - > This is a system-level route, so the response will be independent of the currently authenticated user.  Updates a specific Kubernetes resource using YAML data.
+// PatchKubernetesResource - Update Kubernetes resource
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates a specific Kubernetes resource using YAML data.
 func (c *Client) PatchKubernetesResource(ctx context.Context, organization string, infraName string, namespace string, resourceType string, resourceName string, body PatchResourceBody) (*ResourceYamlResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/namespaces/{namespace}/resourceType/{resourceType}/resourceName/{resourceName}"
 	path = pathReplace(path, "organization", organization)
@@ -2455,7 +3177,11 @@ func (c *Client) PatchKubernetesResource(ctx context.Context, organization strin
 	return &result, nil
 }
 
-// GetKubernetesResourceMetrics - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns metrics for a specific Kubernetes resource in the organization.
+// GetKubernetesResourceMetrics - Get Kubernetes resource metrics
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns metrics for a specific Kubernetes resource in the organization.
 func (c *Client) GetKubernetesResourceMetrics(ctx context.Context, organization string, infraName string, namespace string, resourceType string, resourceName string) (*[]KubernetesMetricEntry, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/namespaces/{namespace}/resourceType/{resourceType}/resourceName/{resourceName}/metrics"
 	path = pathReplace(path, "organization", organization)
@@ -2471,7 +3197,11 @@ func (c *Client) GetKubernetesResourceMetrics(ctx context.Context, organization 
 	return &result, nil
 }
 
-// GetKubernetesNodes - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns all nodes from the specified Kubernetes cluster.
+// GetKubernetesNodes - List Kubernetes nodes
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns all nodes from the specified Kubernetes cluster.
 func (c *Client) GetKubernetesNodes(ctx context.Context, organization string, infraName string) (*[]NodeResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/nodes"
 	path = pathReplace(path, "organization", organization)
@@ -2484,7 +3214,11 @@ func (c *Client) GetKubernetesNodes(ctx context.Context, organization string, in
 	return &result, nil
 }
 
-// UpdateKubernetesGpuOperator - > This is a system-level route, so the response will be independent of the currently authenticated user.  Updates the GPU MIG strategy and configuration for a specific node in the Kubernetes cluster.
+// UpdateKubernetesGpuOperator - Update GPU operator configuration
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates the GPU MIG strategy and configuration for a specific node in the Kubernetes cluster.
 func (c *Client) UpdateKubernetesGpuOperator(ctx context.Context, organization string, infraName string, nodeName string, body *UpdateGpuOperatorBody) (*UpdateGpuOperatorResponseBody, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/nodes/{nodeName}/gpu-operator"
 	path = pathReplace(path, "organization", organization)
@@ -2498,7 +3232,11 @@ func (c *Client) UpdateKubernetesGpuOperator(ctx context.Context, organization s
 	return &result, nil
 }
 
-// GetKubernetesPersistentVolumes - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a list of persistent volumes in the specified Kubernetes cluster.
+// GetKubernetesPersistentVolumes - List Kubernetes persistent volumes
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a list of persistent volumes in the specified Kubernetes cluster.
 func (c *Client) GetKubernetesPersistentVolumes(ctx context.Context, organization string, infraName string) (*[]PvResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/pv"
 	path = pathReplace(path, "organization", organization)
@@ -2511,7 +3249,11 @@ func (c *Client) GetKubernetesPersistentVolumes(ctx context.Context, organizatio
 	return &result, nil
 }
 
-// CreateKubernetesQuota - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new resource quota for a specific namespace in a Kubernetes cluster.
+// CreateKubernetesQuota - Create Kubernetes resource quota
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new resource quota for a specific namespace in a Kubernetes cluster.
 func (c *Client) CreateKubernetesQuota(ctx context.Context, organization string, infraName string, body *CreateQuotaBody) (*SingleQuotaResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/quotas"
 	path = pathReplace(path, "organization", organization)
@@ -2524,7 +3266,11 @@ func (c *Client) CreateKubernetesQuota(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// GetKubernetesQuota - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the resource quota for a specific namespace in a Kubernetes cluster.
+// GetKubernetesQuota - Get Kubernetes resource quota
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the resource quota for a specific namespace in a Kubernetes cluster.
 func (c *Client) GetKubernetesQuota(ctx context.Context, organization string, infraName string, namespace string) (*SingleQuotaResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/quotas/namespaces/{namespace}"
 	path = pathReplace(path, "organization", organization)
@@ -2538,7 +3284,11 @@ func (c *Client) GetKubernetesQuota(ctx context.Context, organization string, in
 	return &result, nil
 }
 
-// DeleteKubernetesQuota - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes the resource quota for a specific namespace in a Kubernetes cluster.
+// DeleteKubernetesQuota - Delete Kubernetes resource quota
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes the resource quota for a specific namespace in a Kubernetes cluster.
 func (c *Client) DeleteKubernetesQuota(ctx context.Context, organization string, infraName string, namespace string) error {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/quotas/namespaces/{namespace}"
 	path = pathReplace(path, "organization", organization)
@@ -2551,7 +3301,11 @@ func (c *Client) DeleteKubernetesQuota(ctx context.Context, organization string,
 	return nil
 }
 
-// UpdateKubernetesQuota - > This is a system-level route, so the response will be independent of the currently authenticated user.  Updates the resource quota for a specific namespace in a Kubernetes cluster.
+// UpdateKubernetesQuota - Update Kubernetes resource quota
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates the resource quota for a specific namespace in a Kubernetes cluster.
 func (c *Client) UpdateKubernetesQuota(ctx context.Context, organization string, infraName string, namespace string, body *UpdateQuotaBody) (*SingleQuotaResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/quotas/namespaces/{namespace}"
 	path = pathReplace(path, "organization", organization)
@@ -2565,7 +3319,11 @@ func (c *Client) UpdateKubernetesQuota(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// GetOrganizationLoginBanner - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the login banner for the organization. This endpoint is public to support org-specific login pages.
+// GetOrganizationLoginBanner - Get organization login banner
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the login banner for the organization. This endpoint is public to support org-specific login pages.
 func (c *Client) GetOrganizationLoginBanner(ctx context.Context, organization string) (*LoginBannerResponse, error) {
 	path := "/api/organizations/{organization}/login-banner"
 	path = pathReplace(path, "organization", organization)
@@ -2577,7 +3335,11 @@ func (c *Client) GetOrganizationLoginBanner(ctx context.Context, organization st
 	return &result, nil
 }
 
-// PatchOrganizationLoginBanner - > This is a system-level route, so the response will be independent of the currently authenticated user.  Sets the login banner for the organization.
+// PatchOrganizationLoginBanner - Set organization login banner
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the login banner for the organization.
 func (c *Client) PatchOrganizationLoginBanner(ctx context.Context, organization string, body *LoginBannerResponse) (*LoginBannerResponse, error) {
 	path := "/api/organizations/{organization}/login-banner"
 	path = pathReplace(path, "organization", organization)
@@ -2589,7 +3351,11 @@ func (c *Client) PatchOrganizationLoginBanner(ctx context.Context, organization 
 	return &result, nil
 }
 
-// GetOrganizationLogo - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the current logo that is set for the organization. This endpoint is public to support org-specific login pages.
+// GetOrganizationLogo - Get organization logo
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the current logo that is set for the organization. This endpoint is public to support org-specific login pages.
 func (c *Client) GetOrganizationLogo(ctx context.Context, organization string) (*string, error) {
 	path := "/api/organizations/{organization}/logo"
 	path = pathReplace(path, "organization", organization)
@@ -2601,7 +3367,11 @@ func (c *Client) GetOrganizationLogo(ctx context.Context, organization string) (
 	return &result, nil
 }
 
-// PutOrganizationLogo - > This is a system-level route, so the response will be independent of the currently authenticated user.  Uploads a new logo for the organization.
+// PutOrganizationLogo - Upload organization logo
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Uploads a new logo for the organization.
 func (c *Client) PutOrganizationLogo(ctx context.Context, organization string, body *any) error {
 	path := "/api/organizations/{organization}/logo"
 	path = pathReplace(path, "organization", organization)
@@ -2612,7 +3382,11 @@ func (c *Client) PutOrganizationLogo(ctx context.Context, organization string, b
 	return nil
 }
 
-// DeleteOrganizationLogo - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes the current logo that is set for the organization.
+// DeleteOrganizationLogo - Delete organization logo
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes the current logo that is set for the organization.
 func (c *Client) DeleteOrganizationLogo(ctx context.Context, organization string) error {
 	path := "/api/organizations/{organization}/logo"
 	path = pathReplace(path, "organization", organization)
@@ -2623,7 +3397,11 @@ func (c *Client) DeleteOrganizationLogo(ctx context.Context, organization string
 	return nil
 }
 
-// GetOrganizationLogoDark - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the dark mode logo variant for the organization. This endpoint is public to support org-specific login pages.
+// GetOrganizationLogoDark - Get organization dark mode logo
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the dark mode logo variant for the organization. This endpoint is public to support org-specific login pages.
 func (c *Client) GetOrganizationLogoDark(ctx context.Context, organization string) (*string, error) {
 	path := "/api/organizations/{organization}/logo-dark"
 	path = pathReplace(path, "organization", organization)
@@ -2635,7 +3413,11 @@ func (c *Client) GetOrganizationLogoDark(ctx context.Context, organization strin
 	return &result, nil
 }
 
-// PutOrganizationLogoDark - > This is a system-level route, so the response will be independent of the currently authenticated user.  Uploads a dark mode variant of the logo for the organization.
+// PutOrganizationLogoDark - Upload organization dark mode logo
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Uploads a dark mode variant of the logo for the organization.
 func (c *Client) PutOrganizationLogoDark(ctx context.Context, organization string, body *any) error {
 	path := "/api/organizations/{organization}/logo-dark"
 	path = pathReplace(path, "organization", organization)
@@ -2646,7 +3428,11 @@ func (c *Client) PutOrganizationLogoDark(ctx context.Context, organization strin
 	return nil
 }
 
-// DeleteOrganizationLogoDark - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes the dark mode logo variant for the organization.
+// DeleteOrganizationLogoDark - Delete organization dark mode logo
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes the dark mode logo variant for the organization.
 func (c *Client) DeleteOrganizationLogoDark(ctx context.Context, organization string) error {
 	path := "/api/organizations/{organization}/logo-dark"
 	path = pathReplace(path, "organization", organization)
@@ -2657,7 +3443,11 @@ func (c *Client) DeleteOrganizationLogoDark(ctx context.Context, organization st
 	return nil
 }
 
-// CreateManagedCluster - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Creates a new managed cluster (org admins only).
+// CreateManagedCluster - Create Managed Cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Creates a new managed cluster (org admins only).
 func (c *Client) CreateManagedCluster(ctx context.Context, organization string, body CreateManagedClusterInputBody) (*CreateManagedClusterOutputBody, error) {
 	path := "/api/organizations/{organization}/managed-clusters"
 	path = pathReplace(path, "organization", organization)
@@ -2669,7 +3459,11 @@ func (c *Client) CreateManagedCluster(ctx context.Context, organization string, 
 	return &result, nil
 }
 
-// GetManagedCluster - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns details of a managed cluster.
+// GetManagedCluster - Get Managed Cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns details of a managed cluster.
 func (c *Client) GetManagedCluster(ctx context.Context, organization string, cluster string) (*ManagedClusterOutputBody, error) {
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}"
 	path = pathReplace(path, "organization", organization)
@@ -2682,7 +3476,11 @@ func (c *Client) GetManagedCluster(ctx context.Context, organization string, clu
 	return &result, nil
 }
 
-// DeleteManagedCluster - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Deletes a managed cluster (org admins only).
+// DeleteManagedCluster - Delete Managed Cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes a managed cluster (org admins only).
 func (c *Client) DeleteManagedCluster(ctx context.Context, organization string, cluster string) error {
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}"
 	path = pathReplace(path, "organization", organization)
@@ -2694,7 +3492,11 @@ func (c *Client) DeleteManagedCluster(ctx context.Context, organization string, 
 	return nil
 }
 
-// UpdateManagedCluster - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Updates a managed cluster (org admins only).
+// UpdateManagedCluster - Update Managed Cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates a managed cluster (org admins only).
 func (c *Client) UpdateManagedCluster(ctx context.Context, organization string, cluster string, body UpdateManagedClusterInputBody) (*UpdateManagedClusterOutputBody, error) {
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}"
 	path = pathReplace(path, "organization", organization)
@@ -2709,10 +3511,15 @@ func (c *Client) UpdateManagedCluster(ctx context.Context, organization string, 
 
 // GetManagedClusterMetricsParams contains optional parameters for the GetManagedClusterMetrics operation.
 type GetManagedClusterMetricsParams struct {
+	// Number of hours of history to retrieve (default: 24)
 	Hours *int64 `json:"hours,omitempty"`
 }
 
-// GetManagedClusterMetrics - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns historical metrics for all nodes in the cluster.
+// GetManagedClusterMetrics - Get Cluster Metrics History
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns historical metrics for all nodes in the cluster.
 func (c *Client) GetManagedClusterMetrics(ctx context.Context, organization string, cluster string, opts ...GetManagedClusterMetricsParams) (*GetClusterMetricsOutputBody, error) {
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}/metrics"
 	path = pathReplace(path, "organization", organization)
@@ -2733,7 +3540,11 @@ func (c *Client) GetManagedClusterMetrics(ctx context.Context, organization stri
 	return &result, nil
 }
 
-// GenerateNodeToken - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Generates a token for registering a node with the cluster.
+// GenerateNodeToken - Generate Node Token
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Generates a token for registering a node with the cluster.
 func (c *Client) GenerateNodeToken(ctx context.Context, organization string, cluster string) (*GenerateNodeTokenOutputBody, error) {
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}/node-token"
 	path = pathReplace(path, "organization", organization)
@@ -2746,7 +3557,11 @@ func (c *Client) GenerateNodeToken(ctx context.Context, organization string, clu
 	return &result, nil
 }
 
-// DeleteManagedClusterNode - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Deletes a node from a managed cluster (org admins only).
+// DeleteManagedClusterNode - Delete Managed Cluster Node
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes a node from a managed cluster (org admins only).
 func (c *Client) DeleteManagedClusterNode(ctx context.Context, organization string, cluster string, hostname string) error {
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}/nodes/{hostname}"
 	path = pathReplace(path, "organization", organization)
@@ -2759,7 +3574,11 @@ func (c *Client) DeleteManagedClusterNode(ctx context.Context, organization stri
 	return nil
 }
 
-// UpdateManagedClusterNode - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Updates settings for a specific node in a managed cluster (org admins only).
+// UpdateManagedClusterNode - Update Managed Cluster Node
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates settings for a specific node in a managed cluster (org admins only).
 func (c *Client) UpdateManagedClusterNode(ctx context.Context, organization string, cluster string, hostname string, body UpdateManagedNodeInputBody) (*UpdateManagedNodeOutputBody, error) {
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}/nodes/{hostname}"
 	path = pathReplace(path, "organization", organization)
@@ -2775,10 +3594,15 @@ func (c *Client) UpdateManagedClusterNode(ctx context.Context, organization stri
 
 // GetManagedClusterNodeMetricsParams contains optional parameters for the GetManagedClusterNodeMetrics operation.
 type GetManagedClusterNodeMetricsParams struct {
+	// Number of hours of history to retrieve (default: 24)
 	Hours *int64 `json:"hours,omitempty"`
 }
 
-// GetManagedClusterNodeMetrics - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns historical metrics for a specific node.
+// GetManagedClusterNodeMetrics - Get Node Metrics History
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns historical metrics for a specific node.
 func (c *Client) GetManagedClusterNodeMetrics(ctx context.Context, organization string, cluster string, hostname string, opts ...GetManagedClusterNodeMetricsParams) (*GetNodeMetricsOutputBody, error) {
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}/nodes/{hostname}/metrics"
 	path = pathReplace(path, "organization", organization)
@@ -2800,7 +3624,11 @@ func (c *Client) GetManagedClusterNodeMetrics(ctx context.Context, organization 
 	return &result, nil
 }
 
-// GetManagedClusterPermissions - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Gets access permissions for a managed cluster.
+// GetManagedClusterPermissions - Get Managed Cluster Permissions
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Gets access permissions for a managed cluster.
 func (c *Client) GetManagedClusterPermissions(ctx context.Context, organization string, cluster string) (*ManagedClusterPermissionsResponse, error) {
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}/permissions"
 	path = pathReplace(path, "organization", organization)
@@ -2813,7 +3641,11 @@ func (c *Client) GetManagedClusterPermissions(ctx context.Context, organization 
 	return &result, nil
 }
 
-// UpdateManagedClusterPermissions - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Updates access permissions for a managed cluster.
+// UpdateManagedClusterPermissions - Update Managed Cluster Permissions
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates access permissions for a managed cluster.
 func (c *Client) UpdateManagedClusterPermissions(ctx context.Context, organization string, cluster string, body UpdateManagedClusterPermissionsInputBody) error {
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}/permissions"
 	path = pathReplace(path, "organization", organization)
@@ -2827,10 +3659,15 @@ func (c *Client) UpdateManagedClusterPermissions(ctx context.Context, organizati
 
 // GetOrganizationMauParams contains optional parameters for the GetOrganizationMau operation.
 type GetOrganizationMauParams struct {
+	// End date in YYYY-MM-DD format. Defaults to current date
 	EndDate *string `json:"endDate,omitempty"`
 }
 
-// GetOrganizationMau - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns monthly active user statistics for a specific organization, including daily breakdown.
+// GetOrganizationMau - Get organization MAU statistics
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns monthly active user statistics for a specific organization, including daily breakdown.
 func (c *Client) GetOrganizationMau(ctx context.Context, organization string, opts ...GetOrganizationMauParams) (*OrgMauResponse, error) {
 	path := "/api/organizations/{organization}/mau"
 	path = pathReplace(path, "organization", organization)
@@ -2850,7 +3687,11 @@ func (c *Client) GetOrganizationMau(ctx context.Context, organization string, op
 	return &result, nil
 }
 
-// GetUserClusterMetrics - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns metrics for all nodes in the user's cluster.
+// GetUserClusterMetrics - Get user cluster metrics
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns metrics for all nodes in the user's cluster.
 func (c *Client) GetUserClusterMetrics(ctx context.Context, organization string, namespace string, clusterName string) (*[]MetricEntry, error) {
 	path := "/api/organizations/{organization}/namespaces/{namespace}/clusters/{clusterName}/metrics"
 	path = pathReplace(path, "organization", organization)
@@ -2864,7 +3705,11 @@ func (c *Client) GetUserClusterMetrics(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// GetSingleNetworkByName - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the specified network
+// GetSingleNetworkByName - Get a single network by name
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the specified network
 func (c *Client) GetSingleNetworkByName(ctx context.Context, organization string, networkName string) (*Network, error) {
 	path := "/api/organizations/{organization}/networks/{networkName}"
 	path = pathReplace(path, "organization", organization)
@@ -2877,7 +3722,11 @@ func (c *Client) GetSingleNetworkByName(ctx context.Context, organization string
 	return &result, nil
 }
 
-// GetOrganizationPolicies - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the organization policies for the specified organization.
+// GetOrganizationPolicies - Get organization policies
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the organization policies for the specified organization.
 func (c *Client) GetOrganizationPolicies(ctx context.Context, organization string) (*map[string]any, error) {
 	path := "/api/organizations/{organization}/policies"
 	path = pathReplace(path, "organization", organization)
@@ -2889,7 +3738,11 @@ func (c *Client) GetOrganizationPolicies(ctx context.Context, organization strin
 	return &result, nil
 }
 
-// SetOrganizationArchiveCostDataPolicy - > This is a system-level route, so the response will be independent of the currently authenticated user.  Sets archive-cost-data policy for the organization.
+// SetOrganizationArchiveCostDataPolicy - Set organization policy: archive-cost-data
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets archive-cost-data policy for the organization.
 func (c *Client) SetOrganizationArchiveCostDataPolicy(ctx context.Context, organization string, body int64) (*map[string]any, error) {
 	path := "/api/organizations/{organization}/policies/archive-cost-data"
 	path = pathReplace(path, "organization", organization)
@@ -2901,7 +3754,11 @@ func (c *Client) SetOrganizationArchiveCostDataPolicy(ctx context.Context, organ
 	return &result, nil
 }
 
-// SetOrganizationNitroInstancesOnlyPolicy - > This is a system-level route, so the response will be independent of the currently authenticated user.  Sets nitro-instances-only policy for the organization.
+// SetOrganizationNitroInstancesOnlyPolicy - Set organization policy: nitro-instances-only
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets nitro-instances-only policy for the organization.
 func (c *Client) SetOrganizationNitroInstancesOnlyPolicy(ctx context.Context, organization string, body bool) (*map[string]any, error) {
 	path := "/api/organizations/{organization}/policies/nitro-instances-only"
 	path = pathReplace(path, "organization", organization)
@@ -2913,7 +3770,11 @@ func (c *Client) SetOrganizationNitroInstancesOnlyPolicy(ctx context.Context, or
 	return &result, nil
 }
 
-// SetOrganizationNoRootAccessPolicy - > This is a system-level route, so the response will be independent of the currently authenticated user.  Sets no-root-access policy for the organization.
+// SetOrganizationNoRootAccessPolicy - Set organization policy: no-root-access
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets no-root-access policy for the organization.
 func (c *Client) SetOrganizationNoRootAccessPolicy(ctx context.Context, organization string, body bool) (*map[string]any, error) {
 	path := "/api/organizations/{organization}/policies/no-root-access"
 	path = pathReplace(path, "organization", organization)
@@ -2925,7 +3786,11 @@ func (c *Client) SetOrganizationNoRootAccessPolicy(ctx context.Context, organiza
 	return &result, nil
 }
 
-// DeleteOrganizationPolicy - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes the specified policy from the organization.
+// DeleteOrganizationPolicy - Delete organization policy
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes the specified policy from the organization.
 func (c *Client) DeleteOrganizationPolicy(ctx context.Context, organization string, policyname string) error {
 	path := "/api/organizations/{organization}/policies/{policyname}"
 	path = pathReplace(path, "organization", organization)
@@ -2937,7 +3802,11 @@ func (c *Client) DeleteOrganizationPolicy(ctx context.Context, organization stri
 	return nil
 }
 
-// GetOrganizationProvisionStatusByInfraID - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the provision status of an infrastructure by infraId.
+// GetOrganizationProvisionStatusByInfraID - Get provision status
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the provision status of an infrastructure by infraId.
 func (c *Client) GetOrganizationProvisionStatusByInfraID(ctx context.Context, organization string, infraID string) (*[]ProvisionStatusResponseRecord, error) {
 	path := "/api/organizations/{organization}/provision-status/by-infra-id/{infraId}"
 	path = pathReplace(path, "organization", organization)
@@ -2952,15 +3821,25 @@ func (c *Client) GetOrganizationProvisionStatusByInfraID(ctx context.Context, or
 
 // GetAllocationUsageEventsSummaryParams contains optional parameters for the GetAllocationUsageEventsSummary operation.
 type GetAllocationUsageEventsSummaryParams struct {
-	EndDate  *string `json:"endDate,omitempty"`
-	GroupBy  *string `json:"groupBy,omitempty"`
-	Type     *string `json:"type,omitempty"`
-	Subtype  *string `json:"subtype,omitempty"`
-	User     *string `json:"user,omitempty"`
+	// End date (YYYY-MM-DD). Defaults to current date when omitted.
+	EndDate *string `json:"endDate,omitempty"`
+	// Field to group costs by (type, subtype)
+	GroupBy *string `json:"groupBy,omitempty"`
+	// Filter: type matches exactly
+	Type *string `json:"type,omitempty"`
+	// Filter: subtype matches exactly
+	Subtype *string `json:"subtype,omitempty"`
+	// Filter: username matches exactly
+	User *string `json:"user,omitempty"`
+	// Filter: metadata contains this string (case-insensitive search in JSON)
 	Metadata *string `json:"metadata,omitempty"`
 }
 
-// GetAllocationUsageEventsSummary - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns usage events grouped by day and type for charting and reporting.
+// GetAllocationUsageEventsSummary - Get summarized usage events for an allocation
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns usage events grouped by day and type for charting and reporting.
 func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organization string, allocation string, opts ...GetAllocationUsageEventsSummaryParams) (*[]map[string]any, error) {
 	path := "/api/organizations/{organization}/reports/allocations/{allocation}/usage/by-day"
 	path = pathReplace(path, "organization", organization)
@@ -2986,7 +3865,11 @@ func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organizati
 	return &result, nil
 }
 
-// GetAllocationUsageEventsFilterOptions - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns distinct values for type, subtype, and user filters.
+// GetAllocationUsageEventsFilterOptions - Get filter options for usage events
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns distinct values for type, subtype, and user filters.
 func (c *Client) GetAllocationUsageEventsFilterOptions(ctx context.Context, organization string, allocation string) (*RatedCostsFilterOptions, error) {
 	path := "/api/organizations/{organization}/reports/allocations/{allocation}/usage/filter-options"
 	path = pathReplace(path, "organization", organization)
@@ -2999,7 +3882,11 @@ func (c *Client) GetAllocationUsageEventsFilterOptions(ctx context.Context, orga
 	return &result, nil
 }
 
-// GetOrganizationReservations - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the capacity reservations for an organization.
+// GetOrganizationReservations - List organization reservations
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the capacity reservations for an organization.
 func (c *Client) GetOrganizationReservations(ctx context.Context, organization string) (*[]ReservationItem, error) {
 	path := "/api/organizations/{organization}/reservations"
 	path = pathReplace(path, "organization", organization)
@@ -3013,14 +3900,23 @@ func (c *Client) GetOrganizationReservations(ctx context.Context, organization s
 
 // ListResourceGroupsParams contains optional parameters for the ListResourceGroups operation.
 type ListResourceGroupsParams struct {
-	Limit      *int64  `json:"limit,omitempty"`
-	Skip       *int64  `json:"skip,omitempty"`
-	Name       *string `json:"name,omitempty"`
+	// Maximum number of resource groups to return
+	Limit *int64 `json:"limit,omitempty"`
+	// Number of resource groups to skip
+	Skip *int64 `json:"skip,omitempty"`
+	// Filter by resource group name (case-insensitive contains)
+	Name *string `json:"name,omitempty"`
+	// Filter by allocation name
 	Allocation *string `json:"allocation,omitempty"`
-	Sort       *string `json:"sort,omitempty"`
+	// Sort field and direction
+	Sort *string `json:"sort,omitempty"`
 }
 
-// ListResourceGroups - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns resource groups in the organization.
+// ListResourceGroups - List all resource groups
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns resource groups in the organization.
 func (c *Client) ListResourceGroups(ctx context.Context, organization string, opts ...ListResourceGroupsParams) (*[]ResourceGroup, error) {
 	path := "/api/organizations/{organization}/resource-groups"
 	path = pathReplace(path, "organization", organization)
@@ -3044,7 +3940,11 @@ func (c *Client) ListResourceGroups(ctx context.Context, organization string, op
 	return &result, nil
 }
 
-// GetOrganizationTheme - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the current theme that is set for the organization. This endpoint is public to support org-specific login pages.
+// GetOrganizationTheme - Get current organization theme
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the current theme that is set for the organization. This endpoint is public to support org-specific login pages.
 func (c *Client) GetOrganizationTheme(ctx context.Context, organization string) (*Theme, error) {
 	path := "/api/organizations/{organization}/theme"
 	path = pathReplace(path, "organization", organization)
@@ -3056,7 +3956,11 @@ func (c *Client) GetOrganizationTheme(ctx context.Context, organization string) 
 	return &result, nil
 }
 
-// PatchOrganizationTheme - > This is a system-level route, so the response will be independent of the currently authenticated user.  Sets a theme for the organization.
+// PatchOrganizationTheme - Set current organization theme
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets a theme for the organization.
 func (c *Client) PatchOrganizationTheme(ctx context.Context, organization string, body *Theme) (*Theme, error) {
 	path := "/api/organizations/{organization}/theme"
 	path = pathReplace(path, "organization", organization)
@@ -3068,7 +3972,11 @@ func (c *Client) PatchOrganizationTheme(ctx context.Context, organization string
 	return &result, nil
 }
 
-// ListUnits - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns all billing units for the organization.
+// ListUnits - List units
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns all billing units for the organization.
 func (c *Client) ListUnits(ctx context.Context, organization string) (*[]Unit, error) {
 	path := "/api/organizations/{organization}/units"
 	path = pathReplace(path, "organization", organization)
@@ -3080,7 +3988,11 @@ func (c *Client) ListUnits(ctx context.Context, organization string) (*[]Unit, e
 	return &result, nil
 }
 
-// CreateUnit - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a unit.
+// CreateUnit - Create a unit
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a unit.
 func (c *Client) CreateUnit(ctx context.Context, organization string, body *PostUnitInput) (*Unit, error) {
 	path := "/api/organizations/{organization}/units"
 	path = pathReplace(path, "organization", organization)
@@ -3092,7 +4004,11 @@ func (c *Client) CreateUnit(ctx context.Context, organization string, body *Post
 	return &result, nil
 }
 
-// GetUnit - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a single billing unit with its pricing rules.
+// GetUnit - Get unit details
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a single billing unit with its pricing rules.
 func (c *Client) GetUnit(ctx context.Context, organization string, unit string) (*Unit, error) {
 	path := "/api/organizations/{organization}/units/{unit}"
 	path = pathReplace(path, "organization", organization)
@@ -3105,7 +4021,11 @@ func (c *Client) GetUnit(ctx context.Context, organization string, unit string) 
 	return &result, nil
 }
 
-// CreateUnitRule - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new pricing rule for a billing unit.
+// CreateUnitRule - Create a new unit pricing rule
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new pricing rule for a billing unit.
 func (c *Client) CreateUnitRule(ctx context.Context, organization string, unit string, body *CreateUnitRuleBody) (*UnitRule, error) {
 	path := "/api/organizations/{organization}/units/{unit}/rules"
 	path = pathReplace(path, "organization", organization)
@@ -3118,7 +4038,11 @@ func (c *Client) CreateUnitRule(ctx context.Context, organization string, unit s
 	return &result, nil
 }
 
-// ListUnitSkus - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns all SKUs associated with a billing unit.
+// ListUnitSkus - List SKUs for a unit
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns all SKUs associated with a billing unit.
 func (c *Client) ListUnitSkus(ctx context.Context, organization string, unit string) (*[]CustomSku, error) {
 	path := "/api/organizations/{organization}/units/{unit}/skus"
 	path = pathReplace(path, "organization", organization)
@@ -3131,7 +4055,11 @@ func (c *Client) ListUnitSkus(ctx context.Context, organization string, unit str
 	return &result, nil
 }
 
-// CreateUnitSku - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new SKU associated with a billing unit.
+// CreateUnitSku - Create a SKU for a unit
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new SKU associated with a billing unit.
 func (c *Client) CreateUnitSku(ctx context.Context, organization string, unit string, body *PostSkuBody) (*CustomSku, error) {
 	path := "/api/organizations/{organization}/units/{unit}/skus"
 	path = pathReplace(path, "organization", organization)
@@ -3144,7 +4072,11 @@ func (c *Client) CreateUnitSku(ctx context.Context, organization string, unit st
 	return &result, nil
 }
 
-// DeleteUnitSku - > This is a system-level route, so the response will be independent of the currently authenticated user.  Archives a SKU associated with a billing unit by soft-deleting it.
+// DeleteUnitSku - Archive a SKU from a unit
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Archives a SKU associated with a billing unit by soft-deleting it.
 func (c *Client) DeleteUnitSku(ctx context.Context, organization string, unit string, sku string) error {
 	path := "/api/organizations/{organization}/units/{unit}/skus/{sku}"
 	path = pathReplace(path, "organization", organization)
@@ -3159,15 +4091,25 @@ func (c *Client) DeleteUnitSku(ctx context.Context, organization string, unit st
 
 // ListOrganizationUsersParams contains optional parameters for the ListOrganizationUsers operation.
 type ListOrganizationUsersParams struct {
-	Limit   *int64  `json:"limit,omitempty"`
-	Skip    *int64  `json:"skip,omitempty"`
-	Search  *string `json:"search,omitempty"`
-	Active  *string `json:"active,omitempty"`
-	SortBy  *string `json:"sortBy,omitempty"`
+	// Maximum number of users to return (1-500)
+	Limit *int64 `json:"limit,omitempty"`
+	// Number of users to skip for pagination
+	Skip *int64 `json:"skip,omitempty"`
+	// Search string to filter by username, email, or name (case-insensitive)
+	Search *string `json:"search,omitempty"`
+	// Filter by active status: 'all' for all users, 'true' for active only, 'false' for inactive only
+	Active *string `json:"active,omitempty"`
+	// Field to sort by: username, email, lastLogin, or createdAt (omit for default ordering)
+	SortBy *string `json:"sortBy,omitempty"`
+	// Sort direction (only applies when sortBy is specified)
 	SortDir *string `json:"sortDir,omitempty"`
 }
 
-// ListOrganizationUsers - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a paginated list of users in the organization with optional filtering and sorting.
+// ListOrganizationUsers - List organization users
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a paginated list of users in the organization with optional filtering and sorting.
 func (c *Client) ListOrganizationUsers(ctx context.Context, organization string, opts ...ListOrganizationUsersParams) (*ListOrgUsersOutputBody, error) {
 	path := "/api/organizations/{organization}/users"
 	path = pathReplace(path, "organization", organization)
@@ -3192,7 +4134,11 @@ func (c *Client) ListOrganizationUsers(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// DeleteUserMfa - > This is a system-level route, so the response will be independent of the currently authenticated user.  Removes all MFA settings for the specified user.
+// DeleteUserMfa - Remove user MFA settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Removes all MFA settings for the specified user.
 func (c *Client) DeleteUserMfa(ctx context.Context, organization string, username string) error {
 	path := "/api/organizations/{organization}/users/{username}/mfa"
 	path = pathReplace(path, "organization", organization)
@@ -3204,7 +4150,11 @@ func (c *Client) DeleteUserMfa(ctx context.Context, organization string, usernam
 	return nil
 }
 
-// ListAichatProviders - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a list of AI Chat providers available to the user
+// ListAichatProviders - List AI Chat providers
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a list of AI Chat providers available to the user
 func (c *Client) ListAichatProviders(ctx context.Context, organization string, user string) (*[]AiChatProvidersResponse, error) {
 	path := "/api/organizations/{organization}/users/{user}/aichat-providers"
 	path = pathReplace(path, "organization", organization)
@@ -3217,7 +4167,11 @@ func (c *Client) ListAichatProviders(ctx context.Context, organization string, u
 	return &result, nil
 }
 
-// CreateAichatProvider - > This is a system-level route, so the response will be independent of the currently authenticated user.  Provision or connect a new AI Chat provider
+// CreateAichatProvider - Create AI Chat provider
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Provision or connect a new AI Chat provider
 func (c *Client) CreateAichatProvider(ctx context.Context, organization string, user string, body CreateAiChatProviderBody) (*AiChatProvidersResponse, error) {
 	path := "/api/organizations/{organization}/users/{user}/aichat-providers"
 	path = pathReplace(path, "organization", organization)
@@ -3230,7 +4184,11 @@ func (c *Client) CreateAichatProvider(ctx context.Context, organization string, 
 	return &result, nil
 }
 
-// GetSingleAichatProvider - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns a specific AI Chat provider by name.
+// GetSingleAichatProvider - Get AI Chat provider
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns a specific AI Chat provider by name.
 func (c *Client) GetSingleAichatProvider(ctx context.Context, organization string, user string, name string) (*AiChatProviderResponse, error) {
 	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3244,7 +4202,11 @@ func (c *Client) GetSingleAichatProvider(ctx context.Context, organization strin
 	return &result, nil
 }
 
-// DeleteSingleAichatProvider - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Deletes an AI Chat provider by name.
+// DeleteSingleAichatProvider - Delete AI Chat provider
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes an AI Chat provider by name.
 func (c *Client) DeleteSingleAichatProvider(ctx context.Context, organization string, user string, name string) error {
 	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3257,7 +4219,11 @@ func (c *Client) DeleteSingleAichatProvider(ctx context.Context, organization st
 	return nil
 }
 
-// PatchSingleAichatProvider - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Update a custom AI Chat provider's configuration (endpoint, API key, model).
+// PatchSingleAichatProvider - Update AI Chat provider
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Update a custom AI Chat provider's configuration (endpoint, API key, model).
 func (c *Client) PatchSingleAichatProvider(ctx context.Context, organization string, user string, name string, body UpdateAiChatInputBody) (*AiChatProviderResponse, error) {
 	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3271,7 +4237,11 @@ func (c *Client) PatchSingleAichatProvider(ctx context.Context, organization str
 	return &result, nil
 }
 
-// ListAichatProviderModels - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Lists available models from a custom AI Chat provider.
+// ListAichatProviderModels - List AI Chat provider models
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists available models from a custom AI Chat provider.
 func (c *Client) ListAichatProviderModels(ctx context.Context, organization string, user string, name string) (*ListModelsResponse, error) {
 	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}/models"
 	path = pathReplace(path, "organization", organization)
@@ -3285,7 +4255,11 @@ func (c *Client) ListAichatProviderModels(ctx context.Context, organization stri
 	return &result, nil
 }
 
-// GetAiproviderPermissions - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Get permissions for an AI provider.
+// GetAiproviderPermissions - Get AI provider permissions
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Get permissions for an AI provider.
 func (c *Client) GetAiproviderPermissions(ctx context.Context, organization string, user string, name string) (*SubjectPermissions, error) {
 	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}/permissions"
 	path = pathReplace(path, "organization", organization)
@@ -3299,7 +4273,11 @@ func (c *Client) GetAiproviderPermissions(ctx context.Context, organization stri
 	return &result, nil
 }
 
-// UpdateAiproviderPermissions - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Update permissions for an AI provider.
+// UpdateAiproviderPermissions - Update AI provider permissions
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Update permissions for an AI provider.
 func (c *Client) UpdateAiproviderPermissions(ctx context.Context, organization string, user string, name string, body UpdateAiProviderPermissionsInputBody) error {
 	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}/permissions"
 	path = pathReplace(path, "organization", organization)
@@ -3312,7 +4290,11 @@ func (c *Client) UpdateAiproviderPermissions(ctx context.Context, organization s
 	return nil
 }
 
-// ReindexAichatProvider - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Reindex attached buckets to refresh the data AI Chat can reference.
+// ReindexAichatProvider - Reindex AI Chat provider
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Reindex attached buckets to refresh the data AI Chat can reference.
 func (c *Client) ReindexAichatProvider(ctx context.Context, organization string, user string, name string) (*AiChatProviderResponse, error) {
 	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}/reindex"
 	path = pathReplace(path, "organization", organization)
@@ -3326,7 +4308,11 @@ func (c *Client) ReindexAichatProvider(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// GetStorageAwsBucket - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns an AWS bucket
+// GetStorageAwsBucket - Get Storage: AWS bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an AWS bucket
 func (c *Client) GetStorageAwsBucket(ctx context.Context, organization string, user string, name string) (*AwsBucket, error) {
 	path := "/api/organizations/{organization}/users/{user}/aws-bucket/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3340,7 +4326,11 @@ func (c *Client) GetStorageAwsBucket(ctx context.Context, organization string, u
 	return &result, nil
 }
 
-// ProvisionAwsBucket - > This is a system-level route, so the response will be independent of the currently authenticated user.  Provisions an AWS S3 bucket.
+// ProvisionAwsBucket - Provision Storage: AWS Bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Provisions an AWS S3 bucket.
 func (c *Client) ProvisionAwsBucket(ctx context.Context, organization string, user string, name string, body BucketResource) (*BucketOutput, error) {
 	path := "/api/organizations/{organization}/users/{user}/aws-bucket/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3354,7 +4344,11 @@ func (c *Client) ProvisionAwsBucket(ctx context.Context, organization string, us
 	return &result, nil
 }
 
-// AddCorsRulesAwsBucket - > This is a system-level route, so the response will be independent of the currently authenticated user.  Adds CORS rules to an AWS S3 bucket.
+// AddCorsRulesAwsBucket - Add CORS rules to AWS bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds CORS rules to an AWS S3 bucket.
 func (c *Client) AddCorsRulesAwsBucket(ctx context.Context, organization string, user string, name string) error {
 	path := "/api/organizations/{organization}/users/{user}/aws-bucket/{name}/cors-rules"
 	path = pathReplace(path, "organization", organization)
@@ -3367,7 +4361,11 @@ func (c *Client) AddCorsRulesAwsBucket(ctx context.Context, organization string,
 	return nil
 }
 
-// GetAwsDisk - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns an AWS disk
+// GetAwsDisk - Get Storage: AWS disk
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an AWS disk
 func (c *Client) GetAwsDisk(ctx context.Context, organization string, user string, name string) (*AwsDisk, error) {
 	path := "/api/organizations/{organization}/users/{user}/aws-disk/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3381,7 +4379,11 @@ func (c *Client) GetAwsDisk(ctx context.Context, organization string, user strin
 	return &result, nil
 }
 
-// GetStorageAwsEfs - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns an AWS EFS (Elastic File System)
+// GetStorageAwsEfs - Get Storage: AWS EFS
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an AWS EFS (Elastic File System)
 func (c *Client) GetStorageAwsEfs(ctx context.Context, organization string, user string, name string) (*AwsEfs, error) {
 	path := "/api/organizations/{organization}/users/{user}/aws-efs/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3395,7 +4397,11 @@ func (c *Client) GetStorageAwsEfs(ctx context.Context, organization string, user
 	return &result, nil
 }
 
-// GetStorageAwsManagedlustre - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns an AWS Managed Lustre (FSx for Lustre)
+// GetStorageAwsManagedlustre - Get Storage: AWS Managed Lustre
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an AWS Managed Lustre (FSx for Lustre)
 func (c *Client) GetStorageAwsManagedlustre(ctx context.Context, organization string, user string, name string) (*AwsLustre, error) {
 	path := "/api/organizations/{organization}/users/{user}/aws-managedlustre/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3409,7 +4415,11 @@ func (c *Client) GetStorageAwsManagedlustre(ctx context.Context, organization st
 	return &result, nil
 }
 
-// GetAzureFiles - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns an Azure Files
+// GetAzureFiles - Get Storage: Azure Files
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an Azure Files
 func (c *Client) GetAzureFiles(ctx context.Context, organization string, user string, name string) (*AzureFiles, error) {
 	path := "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3423,7 +4433,11 @@ func (c *Client) GetAzureFiles(ctx context.Context, organization string, user st
 	return &result, nil
 }
 
-// GetAzureBucket - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns an Azure Blob storage
+// GetAzureBucket - Get Storage: Azure Blob Storage
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an Azure Blob storage
 func (c *Client) GetAzureBucket(ctx context.Context, organization string, user string, name string) (*AzureBlobStorage, error) {
 	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3437,7 +4451,11 @@ func (c *Client) GetAzureBucket(ctx context.Context, organization string, user s
 	return &result, nil
 }
 
-// ProvisionAzureBucket - > This is a system-level route, so the response will be independent of the currently authenticated user.  Provisions an Azure bucket.
+// ProvisionAzureBucket - Provision Storage: Azure Bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Provisions an Azure bucket.
 func (c *Client) ProvisionAzureBucket(ctx context.Context, organization string, user string, name string, body BucketResource) (*BucketOutput, error) {
 	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3451,7 +4469,11 @@ func (c *Client) ProvisionAzureBucket(ctx context.Context, organization string, 
 	return &result, nil
 }
 
-// AddCorsRulesAzureBucket - > This is a system-level route, so the response will be independent of the currently authenticated user.  Adds CORS rules to an Azure storage bucket.
+// AddCorsRulesAzureBucket - Add CORS rules to Azure bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds CORS rules to an Azure storage bucket.
 func (c *Client) AddCorsRulesAzureBucket(ctx context.Context, organization string, user string, name string) error {
 	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/cors-rules"
 	path = pathReplace(path, "organization", organization)
@@ -3466,11 +4488,17 @@ func (c *Client) AddCorsRulesAzureBucket(ctx context.Context, organization strin
 
 // GetPresignedURLAzureBucketObjectParams contains optional parameters for the GetPresignedURLAzureBucketObject operation.
 type GetPresignedURLAzureBucketObjectParams struct {
-	ExpiresIn   *int64  `json:"expiresIn,omitempty"`
+	// The expiration time in seconds for the pre-signed URL. Default is 12 hours.
+	ExpiresIn *int64 `json:"expiresIn,omitempty"`
+	// The permissions for the pre-signed URL. Default is read (r). Other permissions include write (w), delete (d), list (l), add (a), create (c). Combine multiple permissions as needed.
 	Permissions *string `json:"permissions,omitempty"`
 }
 
-// GetPresignedURLAzureBucketObject - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a pre-signed URL for an object inside an Azure bucket.
+// GetPresignedURLAzureBucketObject - Get presigned URL for Azure bucket object
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a pre-signed URL for an object inside an Azure bucket.
 func (c *Client) GetPresignedURLAzureBucketObject(ctx context.Context, organization string, user string, name string, opts ...GetPresignedURLAzureBucketObjectParams) (*string, error) {
 	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/presigned-url"
 	path = pathReplace(path, "organization", organization)
@@ -3493,7 +4521,11 @@ func (c *Client) GetPresignedURLAzureBucketObject(ctx context.Context, organizat
 	return &result, nil
 }
 
-// GetSasTokenAzureBucket - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a SAS token for an Azure storage bucket.
+// GetSasTokenAzureBucket - Get SAS token for Azure bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a SAS token for an Azure storage bucket.
 func (c *Client) GetSasTokenAzureBucket(ctx context.Context, organization string, user string, name string) (*AzureSasToken, error) {
 	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/sas-token"
 	path = pathReplace(path, "organization", organization)
@@ -3507,7 +4539,11 @@ func (c *Client) GetSasTokenAzureBucket(ctx context.Context, organization string
 	return &result, nil
 }
 
-// GetAzureDisk - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns an Azure Disk
+// GetAzureDisk - Get Storage: Azure Disk
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an Azure Disk
 func (c *Client) GetAzureDisk(ctx context.Context, organization string, user string, name string) (*AzureDisk, error) {
 	path := "/api/organizations/{organization}/users/{user}/azure-disk/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3521,7 +4557,11 @@ func (c *Client) GetAzureDisk(ctx context.Context, organization string, user str
 	return &result, nil
 }
 
-// GetHammerspace - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a Hammerspace
+// GetHammerspace - Get Storage: Hammerspace (Azure)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a Hammerspace
 func (c *Client) GetHammerspace(ctx context.Context, organization string, user string, name string) (*Hammerspace, error) {
 	path := "/api/organizations/{organization}/users/{user}/azure-hammerspace/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3535,7 +4575,11 @@ func (c *Client) GetHammerspace(ctx context.Context, organization string, user s
 	return &result, nil
 }
 
-// GetAzureManagedlustre - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns an Azure Managed Lustre
+// GetAzureManagedlustre - Get Storage: Azure Managed Lustre
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an Azure Managed Lustre
 func (c *Client) GetAzureManagedlustre(ctx context.Context, organization string, user string, name string) (*AzureManagedLustre, error) {
 	path := "/api/organizations/{organization}/users/{user}/azure-managedlustre/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3549,7 +4593,11 @@ func (c *Client) GetAzureManagedlustre(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// GetAzureNetappfiles - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns an Azure NetApp Files
+// GetAzureNetappfiles - Get Storage: Azure NetApp Files
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an Azure NetApp Files
 func (c *Client) GetAzureNetappfiles(ctx context.Context, organization string, user string, name string) (*AzureNetAppFiles, error) {
 	path := "/api/organizations/{organization}/users/{user}/azure-netappfiles/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3565,10 +4613,15 @@ func (c *Client) GetAzureNetappfiles(ctx context.Context, organization string, u
 
 // GetClusterNodesParams contains optional parameters for the GetClusterNodes operation.
 type GetClusterNodesParams struct {
+	// Optional filter by node type
 	Type *string `json:"type,omitempty"`
 }
 
-// GetClusterNodes - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the list of nodes for a compute cluster.
+// GetClusterNodes - Get cluster nodes
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the list of nodes for a compute cluster.
 func (c *Client) GetClusterNodes(ctx context.Context, organization string, user string, clusterName string, opts ...GetClusterNodesParams) (*[]ClusterNodeResponse, error) {
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/nodes"
 	path = pathReplace(path, "organization", organization)
@@ -3590,7 +4643,11 @@ func (c *Client) GetClusterNodes(ctx context.Context, organization string, user 
 	return &result, nil
 }
 
-// GetClusterNodeMetrics - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns metrics for a specific node in a cluster.
+// GetClusterNodeMetrics - Get a single node's metrics
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns metrics for a specific node in a cluster.
 func (c *Client) GetClusterNodeMetrics(ctx context.Context, organization string, user string, clusterName string, hostname string) (*[]MetricEntry, error) {
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/nodes/{hostname}/metrics"
 	path = pathReplace(path, "organization", organization)
@@ -3605,7 +4662,11 @@ func (c *Client) GetClusterNodeMetrics(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// UpdateClusterSession - > This is a system-level route, so the response will be independent of the currently authenticated user.  Updates the provision status of a cluster session.
+// UpdateClusterSession - Update cluster session
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates the provision status of a cluster session.
 func (c *Client) UpdateClusterSession(ctx context.Context, organization string, user string, clusterName string, sessionNumber string, body UpdateSessionInputBody) (*SessionResponse, error) {
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/sessions/{sessionNumber}"
 	path = pathReplace(path, "organization", organization)
@@ -3620,7 +4681,11 @@ func (c *Client) UpdateClusterSession(ctx context.Context, organization string, 
 	return &result, nil
 }
 
-// CreateClusterSnapshot - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a root disk snapshot from a cluster
+// CreateClusterSnapshot - Create Cluster Snapshot
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a root disk snapshot from a cluster
 func (c *Client) CreateClusterSnapshot(ctx context.Context, organization string, user string, clusterName string, body CreateSnapshotBody) (*CreateSnapshotOutputBody, error) {
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/snapshot"
 	path = pathReplace(path, "organization", organization)
@@ -3634,7 +4699,11 @@ func (c *Client) CreateClusterSnapshot(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// MountClusterDirToUserWorkspace - > This is a system-level route, so the response will be independent of the currently authenticated user.  Mounts a cluster directory to the cluster owner's user workspace.
+// MountClusterDirToUserWorkspace - Mount additional cluster directory to the user workspace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Mounts a cluster directory to the cluster owner's user workspace.
 func (c *Client) MountClusterDirToUserWorkspace(ctx context.Context, organization string, user string, clusterName string, body MountWorkspaceDirectoryBody) error {
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/workspace-mount"
 	path = pathReplace(path, "organization", organization)
@@ -3647,7 +4716,11 @@ func (c *Client) MountClusterDirToUserWorkspace(ctx context.Context, organizatio
 	return nil
 }
 
-// UnmountClusterDirFromUserWorkspace - > This is a system-level route, so the response will be independent of the currently authenticated user.  Removes a cluster mount from the cluster owner's user workspace.
+// UnmountClusterDirFromUserWorkspace - Remove cluster mount from user workspace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Removes a cluster mount from the cluster owner's user workspace.
 func (c *Client) UnmountClusterDirFromUserWorkspace(ctx context.Context, organization string, user string, clusterName string, body UnmountWorkspaceDirectoryBody) error {
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/workspace-mount"
 	path = pathReplace(path, "organization", organization)
@@ -3660,7 +4733,11 @@ func (c *Client) UnmountClusterDirFromUserWorkspace(ctx context.Context, organiz
 	return nil
 }
 
-// CreateDiskSnapshot - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a snapshot from a standalone disk
+// CreateDiskSnapshot - Create Disk Snapshot
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a snapshot from a standalone disk
 func (c *Client) CreateDiskSnapshot(ctx context.Context, organization string, user string, diskName string, body CreateDiskSnapshotBody) (*CreateSnapshotOutputBody, error) {
 	path := "/api/organizations/{organization}/users/{user}/disks/{diskName}/snapshot"
 	path = pathReplace(path, "organization", organization)
@@ -3674,7 +4751,11 @@ func (c *Client) CreateDiskSnapshot(ctx context.Context, organization string, us
 	return &result, nil
 }
 
-// GetGoogleBucket - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a Google bucket
+// GetGoogleBucket - Get Storage: Google bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a Google bucket
 func (c *Client) GetGoogleBucket(ctx context.Context, organization string, user string, name string) (*GoogleBucket, error) {
 	path := "/api/organizations/{organization}/users/{user}/google-bucket/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3688,7 +4769,11 @@ func (c *Client) GetGoogleBucket(ctx context.Context, organization string, user 
 	return &result, nil
 }
 
-// ProvisionGoogleBucket - > This is a system-level route, so the response will be independent of the currently authenticated user.  Provisions a Google bucket.
+// ProvisionGoogleBucket - Provision Storage: Google Bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Provisions a Google bucket.
 func (c *Client) ProvisionGoogleBucket(ctx context.Context, organization string, user string, name string, body BucketResource) (*BucketOutput, error) {
 	path := "/api/organizations/{organization}/users/{user}/google-bucket/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3704,10 +4789,15 @@ func (c *Client) ProvisionGoogleBucket(ctx context.Context, organization string,
 
 // GetPresignedURLGoogleBucketObjectParams contains optional parameters for the GetPresignedURLGoogleBucketObject operation.
 type GetPresignedURLGoogleBucketObjectParams struct {
+	// The expiration time in seconds for the pre-signed URL. Default is 12 hours.
 	ExpiresIn *int64 `json:"expiresIn,omitempty"`
 }
 
-// GetPresignedURLGoogleBucketObject - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a pre-signed URL for an object inside a Google bucket.
+// GetPresignedURLGoogleBucketObject - Get presigned URL for Google bucket object
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a pre-signed URL for an object inside a Google bucket.
 func (c *Client) GetPresignedURLGoogleBucketObject(ctx context.Context, organization string, user string, name string, opts ...GetPresignedURLGoogleBucketObjectParams) (*string, error) {
 	path := "/api/organizations/{organization}/users/{user}/google-bucket/{name}/presigned-url"
 	path = pathReplace(path, "organization", organization)
@@ -3729,7 +4819,11 @@ func (c *Client) GetPresignedURLGoogleBucketObject(ctx context.Context, organiza
 	return &result, nil
 }
 
-// GetGoogleDisk - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a Google Disk
+// GetGoogleDisk - Get Storage: Google Disk
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a Google Disk
 func (c *Client) GetGoogleDisk(ctx context.Context, organization string, user string, name string) (*GoogleDisk, error) {
 	path := "/api/organizations/{organization}/users/{user}/google-disk/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3743,7 +4837,11 @@ func (c *Client) GetGoogleDisk(ctx context.Context, organization string, user st
 	return &result, nil
 }
 
-// GetGoogleFilestore - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a Google Filestore
+// GetGoogleFilestore - Get Storage: Google Filestore
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a Google Filestore
 func (c *Client) GetGoogleFilestore(ctx context.Context, organization string, user string, name string) (*GoogleFilestore, error) {
 	path := "/api/organizations/{organization}/users/{user}/google-filestore/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3757,7 +4855,11 @@ func (c *Client) GetGoogleFilestore(ctx context.Context, organization string, us
 	return &result, nil
 }
 
-// CreateGoogleManagedLustre - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new google managed lustre instance
+// CreateGoogleManagedLustre - Create Google managed lustre
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new google managed lustre instance
 func (c *Client) CreateGoogleManagedLustre(ctx context.Context, organization string, user string, body GoogleManagedLustre) (*GoogleManagedLustre, error) {
 	path := "/api/organizations/{organization}/users/{user}/google-managed-lustre"
 	path = pathReplace(path, "organization", organization)
@@ -3770,7 +4872,11 @@ func (c *Client) CreateGoogleManagedLustre(ctx context.Context, organization str
 	return &result, nil
 }
 
-// DeleteGoogleManagedLustre - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes a google managed lustre instance
+// DeleteGoogleManagedLustre - Delete Google managed lustre
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a google managed lustre instance
 func (c *Client) DeleteGoogleManagedLustre(ctx context.Context, organization string, user string, managedLustreName string) error {
 	path := "/api/organizations/{organization}/users/{user}/google-managed-lustre/{managedLustreName}"
 	path = pathReplace(path, "organization", organization)
@@ -3783,7 +4889,11 @@ func (c *Client) DeleteGoogleManagedLustre(ctx context.Context, organization str
 	return nil
 }
 
-// GetInstances - > This is a system-level route, so the response will be independent of the currently authenticated user.  Return a list of instances owned by a user
+// GetInstances - List Instances
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Return a list of instances owned by a user
 func (c *Client) GetInstances(ctx context.Context, organization string, user string) (*[]Instance, error) {
 	path := "/api/organizations/{organization}/users/{user}/instances"
 	path = pathReplace(path, "organization", organization)
@@ -3796,7 +4906,11 @@ func (c *Client) GetInstances(ctx context.Context, organization string, user str
 	return &result, nil
 }
 
-// CreateInstance - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new Instance
+// CreateInstance - Create Instance
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new Instance
 func (c *Client) CreateInstance(ctx context.Context, organization string, user string, body Instance) (*Instance, error) {
 	path := "/api/organizations/{organization}/users/{user}/instances"
 	path = pathReplace(path, "organization", organization)
@@ -3809,7 +4923,11 @@ func (c *Client) CreateInstance(ctx context.Context, organization string, user s
 	return &result, nil
 }
 
-// GetInstance - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a single instance by name
+// GetInstance - Get Instance
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a single instance by name
 func (c *Client) GetInstance(ctx context.Context, organization string, user string, instanceName string) (*Instance, error) {
 	path := "/api/organizations/{organization}/users/{user}/instances/{instanceName}"
 	path = pathReplace(path, "organization", organization)
@@ -3823,7 +4941,11 @@ func (c *Client) GetInstance(ctx context.Context, organization string, user stri
 	return &result, nil
 }
 
-// DeleteInstance - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes an instance, deprovisioning it from the cloud
+// DeleteInstance - Delete Instance
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes an instance, deprovisioning it from the cloud
 func (c *Client) DeleteInstance(ctx context.Context, organization string, user string, instanceName string) error {
 	path := "/api/organizations/{organization}/users/{user}/instances/{instanceName}"
 	path = pathReplace(path, "organization", organization)
@@ -3836,7 +4958,11 @@ func (c *Client) DeleteInstance(ctx context.Context, organization string, user s
 	return nil
 }
 
-// CreateInstanceSnapshot - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a root disk snapshot from an instance
+// CreateInstanceSnapshot - Create Instance Snapshot
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a root disk snapshot from an instance
 func (c *Client) CreateInstanceSnapshot(ctx context.Context, organization string, user string, instanceName string, body CreateInstanceSnapshotBody) (*CreateSnapshotOutputBody, error) {
 	path := "/api/organizations/{organization}/users/{user}/instances/{instanceName}/snapshot"
 	path = pathReplace(path, "organization", organization)
@@ -3850,7 +4976,11 @@ func (c *Client) CreateInstanceSnapshot(ctx context.Context, organization string
 	return &result, nil
 }
 
-// CreateIP - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new IP Address
+// CreateIP - Create IP Address
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new IP Address
 func (c *Client) CreateIP(ctx context.Context, organization string, user string, body IP) (*IP, error) {
 	path := "/api/organizations/{organization}/users/{user}/ips"
 	path = pathReplace(path, "organization", organization)
@@ -3863,7 +4993,11 @@ func (c *Client) CreateIP(ctx context.Context, organization string, user string,
 	return &result, nil
 }
 
-// DeleteIP - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes the specified IP Address, releasing it and making it available for others to use.
+// DeleteIP - Delete IP Address
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes the specified IP Address, releasing it and making it available for others to use.
 func (c *Client) DeleteIP(ctx context.Context, organization string, user string, name string) error {
 	path := "/api/organizations/{organization}/users/{user}/ips/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3876,7 +5010,11 @@ func (c *Client) DeleteIP(ctx context.Context, organization string, user string,
 	return nil
 }
 
-// GetUserLanguage - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Retrieves the current language setting for the specified user.
+// GetUserLanguage - Get user language setting
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Retrieves the current language setting for the specified user.
 func (c *Client) GetUserLanguage(ctx context.Context, organization string, user string) (*string, error) {
 	path := "/api/organizations/{organization}/users/{user}/language"
 	path = pathReplace(path, "organization", organization)
@@ -3889,7 +5027,11 @@ func (c *Client) GetUserLanguage(ctx context.Context, organization string, user 
 	return &result, nil
 }
 
-// SetUserLanguage - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Sets the language setting for the specified user.
+// SetUserLanguage - Set user language
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Sets the language setting for the specified user.
 func (c *Client) SetUserLanguage(ctx context.Context, organization string, user string, body LanguageInputBody) (*string, error) {
 	path := "/api/organizations/{organization}/users/{user}/language"
 	path = pathReplace(path, "organization", organization)
@@ -3902,7 +5044,11 @@ func (c *Client) SetUserLanguage(ctx context.Context, organization string, user 
 	return &result, nil
 }
 
-// RevokeUserLoginSessions - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Revokes all login sessions for the specified user.
+// RevokeUserLoginSessions - Revoke user login sessions
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Revokes all login sessions for the specified user.
 func (c *Client) RevokeUserLoginSessions(ctx context.Context, organization string, user string, body *RevokeLoginSessionOption) error {
 	path := "/api/organizations/{organization}/users/{user}/login-sessions"
 	path = pathReplace(path, "organization", organization)
@@ -3914,7 +5060,11 @@ func (c *Client) RevokeUserLoginSessions(ctx context.Context, organization strin
 	return nil
 }
 
-// CreateMachineLearningWorkspaces - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new Machine Learning Workspace
+// CreateMachineLearningWorkspaces - Create Machine Learning Workspaces
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new Machine Learning Workspace
 func (c *Client) CreateMachineLearningWorkspaces(ctx context.Context, organization string, user string, body MachineLearningWorkspace) (*MachineLearningWorkspace, error) {
 	path := "/api/organizations/{organization}/users/{user}/mlworkspaces"
 	path = pathReplace(path, "organization", organization)
@@ -3927,7 +5077,11 @@ func (c *Client) CreateMachineLearningWorkspaces(ctx context.Context, organizati
 	return &result, nil
 }
 
-// GetAwsMachineLearningWorkspace - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns an AWS ML Workspace
+// GetAwsMachineLearningWorkspace - Get AWS ML workspace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an AWS ML Workspace
 func (c *Client) GetAwsMachineLearningWorkspace(ctx context.Context, organization string, user string, name string) (*AwsSagemakerDetail, error) {
 	path := "/api/organizations/{organization}/users/{user}/mlworkspaces/aws/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3941,7 +5095,11 @@ func (c *Client) GetAwsMachineLearningWorkspace(ctx context.Context, organizatio
 	return &result, nil
 }
 
-// GetAzureMachineLearningWorkspace - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns an Azure ML Workspace
+// GetAzureMachineLearningWorkspace - Get Azure ML workspace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an Azure ML Workspace
 func (c *Client) GetAzureMachineLearningWorkspace(ctx context.Context, organization string, user string, name string) (*AzureMachineLearningDetail, error) {
 	path := "/api/organizations/{organization}/users/{user}/mlworkspaces/azure/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3955,7 +5113,11 @@ func (c *Client) GetAzureMachineLearningWorkspace(ctx context.Context, organizat
 	return &result, nil
 }
 
-// DeleteMachineLearningWorkspacesByName - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes a single Machine Learning Workspace by name
+// DeleteMachineLearningWorkspacesByName - Delete Machine Learning Workspaces
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a single Machine Learning Workspace by name
 func (c *Client) DeleteMachineLearningWorkspacesByName(ctx context.Context, organization string, user string, name string) error {
 	path := "/api/organizations/{organization}/users/{user}/mlworkspaces/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -3968,7 +5130,11 @@ func (c *Client) DeleteMachineLearningWorkspacesByName(ctx context.Context, orga
 	return nil
 }
 
-// GetPresignedURLMachineLearningWorkspace - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the URL for accessing the Machine Learning Workspace
+// GetPresignedURLMachineLearningWorkspace - Get presigned URL for Machine Learning Workspace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the URL for accessing the Machine Learning Workspace
 func (c *Client) GetPresignedURLMachineLearningWorkspace(ctx context.Context, organization string, user string, name string) (*URLResponse, error) {
 	path := "/api/organizations/{organization}/users/{user}/mlworkspaces/{name}/presigned-url"
 	path = pathReplace(path, "organization", organization)
@@ -3982,7 +5148,11 @@ func (c *Client) GetPresignedURLMachineLearningWorkspace(ctx context.Context, or
 	return &result, nil
 }
 
-// ListNetappontap - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns all NetApp ONTAP storage systems for a user
+// ListNetappontap - List Storage: NetApp ONTAPs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns all NetApp ONTAP storage systems for a user
 func (c *Client) ListNetappontap(ctx context.Context, organization string, user string) (*[]NetAppOntapResponse, error) {
 	path := "/api/organizations/{organization}/users/{user}/netappontap"
 	path = pathReplace(path, "organization", organization)
@@ -3995,7 +5165,11 @@ func (c *Client) ListNetappontap(ctx context.Context, organization string, user 
 	return &result, nil
 }
 
-// CreateNetappontap - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new NetApp ONTAP storage
+// CreateNetappontap - Create Storage: NetApp ONTAP
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new NetApp ONTAP storage
 func (c *Client) CreateNetappontap(ctx context.Context, organization string, user string, body CreateNetAppOntapInputBody) (*NetAppOntapResponse, error) {
 	path := "/api/organizations/{organization}/users/{user}/netappontap"
 	path = pathReplace(path, "organization", organization)
@@ -4008,7 +5182,11 @@ func (c *Client) CreateNetappontap(ctx context.Context, organization string, use
 	return &result, nil
 }
 
-// GetNetappontap - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a NetApp ONTAP
+// GetNetappontap - Get Storage: NetApp ONTAP
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a NetApp ONTAP
 func (c *Client) GetNetappontap(ctx context.Context, organization string, user string, name string) (*NetAppOntap, error) {
 	path := "/api/organizations/{organization}/users/{user}/netappontap/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -4022,7 +5200,11 @@ func (c *Client) GetNetappontap(ctx context.Context, organization string, user s
 	return &result, nil
 }
 
-// GetNetappOntapVolumes - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a list of volumes from NetApp ONTAP storage.
+// GetNetappOntapVolumes - Get NetApp ONTAP volumes
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a list of volumes from NetApp ONTAP storage.
 func (c *Client) GetNetappOntapVolumes(ctx context.Context, organization string, user string, ontapName string) (*[]SingleVolume, error) {
 	path := "/api/organizations/{organization}/users/{user}/netappontap/{ontapName}/volumes"
 	path = pathReplace(path, "organization", organization)
@@ -4036,7 +5218,11 @@ func (c *Client) GetNetappOntapVolumes(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// CreateNetappOntapVolume - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new volume on NetApp ONTAP storage.
+// CreateNetappOntapVolume - Create NetApp ONTAP volume
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new volume on NetApp ONTAP storage.
 func (c *Client) CreateNetappOntapVolume(ctx context.Context, organization string, user string, ontapName string, body CreateVolumeRequestBody) (*SingleVolume, error) {
 	path := "/api/organizations/{organization}/users/{user}/netappontap/{ontapName}/volumes"
 	path = pathReplace(path, "organization", organization)
@@ -4050,7 +5236,11 @@ func (c *Client) CreateNetappOntapVolume(ctx context.Context, organization strin
 	return &result, nil
 }
 
-// DeleteNetappOntapVolume - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes a volume from NetApp ONTAP storage.
+// DeleteNetappOntapVolume - Delete NetApp ONTAP volume
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a volume from NetApp ONTAP storage.
 func (c *Client) DeleteNetappOntapVolume(ctx context.Context, organization string, user string, ontapName string, volumeID string) error {
 	path := "/api/organizations/{organization}/users/{user}/netappontap/{ontapName}/volumes/{volumeId}"
 	path = pathReplace(path, "organization", organization)
@@ -4064,7 +5254,11 @@ func (c *Client) DeleteNetappOntapVolume(ctx context.Context, organization strin
 	return nil
 }
 
-// CreateResourceGroup - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new resource group.
+// CreateResourceGroup - Create a resource group
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new resource group.
 func (c *Client) CreateResourceGroup(ctx context.Context, organization string, user string, body *ResourceGroup) (*ResourceGroup, error) {
 	path := "/api/organizations/{organization}/users/{user}/resource-groups"
 	path = pathReplace(path, "organization", organization)
@@ -4077,7 +5271,11 @@ func (c *Client) CreateResourceGroup(ctx context.Context, organization string, u
 	return &result, nil
 }
 
-// GetResourceGroup - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a specific resource group.
+// GetResourceGroup - Get a resource group
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a specific resource group.
 func (c *Client) GetResourceGroup(ctx context.Context, organization string, user string, name string) (*ResourceGroup, error) {
 	path := "/api/organizations/{organization}/users/{user}/resource-groups/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -4091,7 +5289,11 @@ func (c *Client) GetResourceGroup(ctx context.Context, organization string, user
 	return &result, nil
 }
 
-// GetResourceGroupPermissions - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the groups with access to a resource group.
+// GetResourceGroupPermissions - Get resource group permissions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the groups with access to a resource group.
 func (c *Client) GetResourceGroupPermissions(ctx context.Context, organization string, user string, name string) (*SubjectPermissions, error) {
 	path := "/api/organizations/{organization}/users/{user}/resource-groups/{name}/permissions"
 	path = pathReplace(path, "organization", organization)
@@ -4105,7 +5307,11 @@ func (c *Client) GetResourceGroupPermissions(ctx context.Context, organization s
 	return &result, nil
 }
 
-// UpdateResourceGroupPermissions - > This is a system-level route, so the response will be independent of the currently authenticated user.  Updates which groups have access to a resource group.
+// UpdateResourceGroupPermissions - Update resource group permissions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates which groups have access to a resource group.
 func (c *Client) UpdateResourceGroupPermissions(ctx context.Context, organization string, user string, name string, body UpdateResourceGroupPermissionsInputBody) error {
 	path := "/api/organizations/{organization}/users/{user}/resource-groups/{name}/permissions"
 	path = pathReplace(path, "organization", organization)
@@ -4118,7 +5324,11 @@ func (c *Client) UpdateResourceGroupPermissions(ctx context.Context, organizatio
 	return nil
 }
 
-// GetUserResources - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns currently running resources for the specified user.
+// GetUserResources - Get user resources
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns currently running resources for the specified user.
 func (c *Client) GetUserResources(ctx context.Context, organization string, user string) (*GetUserResourcesOutputBody, error) {
 	path := "/api/organizations/{organization}/users/{user}/resources"
 	path = pathReplace(path, "organization", organization)
@@ -4131,7 +5341,11 @@ func (c *Client) GetUserResources(ctx context.Context, organization string, user
 	return &result, nil
 }
 
-// GetUserSession - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns a given session by name and user.
+// GetUserSession - Get session
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a given session by name and user.
 func (c *Client) GetUserSession(ctx context.Context, organization string, user string, name string) (*Session, error) {
 	path := "/api/organizations/{organization}/users/{user}/sessions/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -4145,7 +5359,11 @@ func (c *Client) GetUserSession(ctx context.Context, organization string, user s
 	return &result, nil
 }
 
-// DeleteUserSession - > This is a system-level route, so the response will be independent of the currently authenticated user.  Delete the session with the provided name for the specified user.
+// DeleteUserSession - Delete session
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Delete the session with the provided name for the specified user.
 func (c *Client) DeleteUserSession(ctx context.Context, organization string, user string, name string) error {
 	path := "/api/organizations/{organization}/users/{user}/sessions/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -4158,7 +5376,11 @@ func (c *Client) DeleteUserSession(ctx context.Context, organization string, use
 	return nil
 }
 
-// UpdateUserSession - > This is a system-level route, so the response will be independent of the currently authenticated user.  Update the session with the provided name for the specified user.
+// UpdateUserSession - Update session
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update the session with the provided name for the specified user.
 func (c *Client) UpdateUserSession(ctx context.Context, organization string, user string, name string, body PatchSessionBody) (*Session, error) {
 	path := "/api/organizations/{organization}/users/{user}/sessions/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -4172,7 +5394,11 @@ func (c *Client) UpdateUserSession(ctx context.Context, organization string, use
 	return &result, nil
 }
 
-// UpdateUserSessionAccess - > This is a system-level route, so the response will be independent of the currently authenticated user.  Update session access by name and user, allowing access to specific groups.
+// UpdateUserSessionAccess - Update session access
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update session access by name and user, allowing access to specific groups.
 func (c *Client) UpdateUserSessionAccess(ctx context.Context, organization string, user string, name string, body PostSessionAccessBody) error {
 	path := "/api/organizations/{organization}/users/{user}/sessions/{name}/access"
 	path = pathReplace(path, "organization", organization)
@@ -4185,7 +5411,11 @@ func (c *Client) UpdateUserSessionAccess(ctx context.Context, organization strin
 	return nil
 }
 
-// RestartUserSession - > This is a system-level route, so the response will be independent of the currently authenticated user.  Restarts the process for a session.
+// RestartUserSession - Restart session
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Restarts the process for a session.
 func (c *Client) RestartUserSession(ctx context.Context, organization string, user string, name string) (*Session, error) {
 	path := "/api/organizations/{organization}/users/{user}/sessions/{name}/restart"
 	path = pathReplace(path, "organization", organization)
@@ -4199,7 +5429,11 @@ func (c *Client) RestartUserSession(ctx context.Context, organization string, us
 	return &result, nil
 }
 
-// GetUserSettings - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Retrieves the current settings for the specified user.
+// GetUserSettings - Get user settings
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Retrieves the current settings for the specified user.
 func (c *Client) GetUserSettings(ctx context.Context, organization string, user string) (*UserSettings, error) {
 	path := "/api/organizations/{organization}/users/{user}/settings"
 	path = pathReplace(path, "organization", organization)
@@ -4212,7 +5446,11 @@ func (c *Client) GetUserSettings(ctx context.Context, organization string, user 
 	return &result, nil
 }
 
-// DeleteUserSettings - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Resets all settings for the specified user to defaults.
+// DeleteUserSettings - Reset user settings
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Resets all settings for the specified user to defaults.
 func (c *Client) DeleteUserSettings(ctx context.Context, organization string, user string) error {
 	path := "/api/organizations/{organization}/users/{user}/settings"
 	path = pathReplace(path, "organization", organization)
@@ -4224,7 +5462,11 @@ func (c *Client) DeleteUserSettings(ctx context.Context, organization string, us
 	return nil
 }
 
-// UpdateUserSettings - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Updates the settings for the specified user.
+// UpdateUserSettings - Update user settings
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates the settings for the specified user.
 func (c *Client) UpdateUserSettings(ctx context.Context, organization string, user string, body *UserSettings) (*UserSettings, error) {
 	path := "/api/organizations/{organization}/users/{user}/settings"
 	path = pathReplace(path, "organization", organization)
@@ -4237,7 +5479,11 @@ func (c *Client) UpdateUserSettings(ctx context.Context, organization string, us
 	return &result, nil
 }
 
-// CopySnapshot - > This is a system-level route, so the response will be independent of the currently authenticated user.  Copies a snapshot to a different region
+// CopySnapshot - Copy Snapshot to Another Region
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Copies a snapshot to a different region
 func (c *Client) CopySnapshot(ctx context.Context, organization string, user string, snapshotName string, body CopySnapshotInputBody) (*CopySnapshotOutputBody, error) {
 	path := "/api/organizations/{organization}/users/{user}/snapshots/{snapshotName}/copy"
 	path = pathReplace(path, "organization", organization)
@@ -4251,7 +5497,11 @@ func (c *Client) CopySnapshot(ctx context.Context, organization string, user str
 	return &result, nil
 }
 
-// CreateSSHPrivateKey - > This is a system-level route, so the response will be independent of the currently authenticated user.  Add an SSH Private Key, allowing it to be used for connecting to existing clusters
+// CreateSSHPrivateKey - Create SSH Private Key
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Add an SSH Private Key, allowing it to be used for connecting to existing clusters
 func (c *Client) CreateSSHPrivateKey(ctx context.Context, organization string, user string, body SSHPrivateKey) error {
 	path := "/api/organizations/{organization}/users/{user}/ssh-private-keys"
 	path = pathReplace(path, "organization", organization)
@@ -4263,7 +5513,11 @@ func (c *Client) CreateSSHPrivateKey(ctx context.Context, organization string, u
 	return nil
 }
 
-// GetUserWorkspace - > This is a system-level route, so the response will be independent of the currently authenticated user.  Retrieves the user workspace details for the specified user.
+// GetUserWorkspace - Get User Workspace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Retrieves the user workspace details for the specified user.
 func (c *Client) GetUserWorkspace(ctx context.Context, organization string, user string) (*WorkspaceSettings, error) {
 	path := "/api/organizations/{organization}/users/{user}/user-workspace"
 	path = pathReplace(path, "organization", organization)
@@ -4276,7 +5530,11 @@ func (c *Client) GetUserWorkspace(ctx context.Context, organization string, user
 	return &result, nil
 }
 
-// UpdateUserWorkspace - > This is a system-level route, so the response will be independent of the currently authenticated user.  Updates the user workspace for the specified user.
+// UpdateUserWorkspace - Update User Workspace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates the user workspace for the specified user.
 func (c *Client) UpdateUserWorkspace(ctx context.Context, organization string, user string, body *WorkspaceSettings) (*WorkspaceSettings, error) {
 	path := "/api/organizations/{organization}/users/{user}/user-workspace"
 	path = pathReplace(path, "organization", organization)
@@ -4289,7 +5547,11 @@ func (c *Client) UpdateUserWorkspace(ctx context.Context, organization string, u
 	return &result, nil
 }
 
-// RestartUserWorkspace - > This is a system-level route, so the response will be independent of the currently authenticated user.  Restarts a user workspace for the specified user.
+// RestartUserWorkspace - Restart User Workspace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Restarts a user workspace for the specified user.
 func (c *Client) RestartUserWorkspace(ctx context.Context, organization string, user string, body RestartOption) error {
 	path := "/api/organizations/{organization}/users/{user}/user-workspace/restart"
 	path = pathReplace(path, "organization", organization)
@@ -4301,7 +5563,11 @@ func (c *Client) RestartUserWorkspace(ctx context.Context, organization string, 
 	return nil
 }
 
-// GetUserWorkspaceStatusForUser - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the status for the specified user's user workspace.
+// GetUserWorkspaceStatusForUser - Get user workspace status for user
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the status for the specified user's user workspace.
 func (c *Client) GetUserWorkspaceStatusForUser(ctx context.Context, organization string, user string) (*WorkspaceStatus, error) {
 	path := "/api/organizations/{organization}/users/{user}/user-workspace/status"
 	path = pathReplace(path, "organization", organization)
@@ -4314,7 +5580,11 @@ func (c *Client) GetUserWorkspaceStatusForUser(ctx context.Context, organization
 	return &result, nil
 }
 
-// DeleteStorage - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes a storage configuration. This will also detach the storage from all clusters.
+// DeleteStorage - Delete a storage
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a storage configuration. This will also detach the storage from all clusters.
 func (c *Client) DeleteStorage(ctx context.Context, organization string, user string, name string, type_ string) error {
 	path := "/api/organizations/{organization}/users/{user}/{type}/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -4328,7 +5598,11 @@ func (c *Client) DeleteStorage(ctx context.Context, organization string, user st
 	return nil
 }
 
-// GetOrganizationVariables - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the variables for the specified organization.
+// GetOrganizationVariables - List workflow variables
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the variables for the specified organization.
 func (c *Client) GetOrganizationVariables(ctx context.Context, organization string) (*map[string]any, error) {
 	path := "/api/organizations/{organization}/variables"
 	path = pathReplace(path, "organization", organization)
@@ -4340,7 +5614,11 @@ func (c *Client) GetOrganizationVariables(ctx context.Context, organization stri
 	return &result, nil
 }
 
-// CreateOrganizationVariable - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates a new variable for the organization.
+// CreateOrganizationVariable - Create workflow variable
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new variable for the organization.
 func (c *Client) CreateOrganizationVariable(ctx context.Context, organization string, body OrganizationVariable) (*map[string]any, error) {
 	path := "/api/organizations/{organization}/variables"
 	path = pathReplace(path, "organization", organization)
@@ -4352,7 +5630,11 @@ func (c *Client) CreateOrganizationVariable(ctx context.Context, organization st
 	return &result, nil
 }
 
-// DeleteOrganizationVariable - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes the specified variable for the organization.
+// DeleteOrganizationVariable - Delete workflow variable
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes the specified variable for the organization.
 func (c *Client) DeleteOrganizationVariable(ctx context.Context, organization string, key string) error {
 	path := "/api/organizations/{organization}/variables/{key}"
 	path = pathReplace(path, "organization", organization)
@@ -4364,7 +5646,11 @@ func (c *Client) DeleteOrganizationVariable(ctx context.Context, organization st
 	return nil
 }
 
-// SetOrganizationVariable - > This is a system-level route, so the response will be independent of the currently authenticated user.  Sets the specified variable for the organization.
+// SetOrganizationVariable - Set workflow variable
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the specified variable for the organization.
 func (c *Client) SetOrganizationVariable(ctx context.Context, organization string, key string, body string) (*map[string]any, error) {
 	path := "/api/organizations/{organization}/variables/{key}"
 	path = pathReplace(path, "organization", organization)
@@ -4377,7 +5663,11 @@ func (c *Client) SetOrganizationVariable(ctx context.Context, organization strin
 	return &result, nil
 }
 
-// ListOrganizationWebhooks - > This is a system-level route, so the response will be independent of the currently authenticated user.  List all webhooks for the organization.
+// ListOrganizationWebhooks - List Organization Webhooks
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// List all webhooks for the organization.
 func (c *Client) ListOrganizationWebhooks(ctx context.Context, organization string) (*[]Webhook, error) {
 	path := "/api/organizations/{organization}/webhooks"
 	path = pathReplace(path, "organization", organization)
@@ -4389,7 +5679,11 @@ func (c *Client) ListOrganizationWebhooks(ctx context.Context, organization stri
 	return &result, nil
 }
 
-// CreateOrganizationWebhook - > This is a system-level route, so the response will be independent of the currently authenticated user.  Create a new webhook for the organization.
+// CreateOrganizationWebhook - Create Organization Webhook
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Create a new webhook for the organization.
 func (c *Client) CreateOrganizationWebhook(ctx context.Context, organization string, body CreateWebhookBody) (*Webhook, error) {
 	path := "/api/organizations/{organization}/webhooks"
 	path = pathReplace(path, "organization", organization)
@@ -4401,7 +5695,11 @@ func (c *Client) CreateOrganizationWebhook(ctx context.Context, organization str
 	return &result, nil
 }
 
-// DeleteOrganizationWebhook - > This is a system-level route, so the response will be independent of the currently authenticated user.  Delete an organization webhook.
+// DeleteOrganizationWebhook - Delete Organization Webhook
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Delete an organization webhook.
 func (c *Client) DeleteOrganizationWebhook(ctx context.Context, organization string, webhook string) error {
 	path := "/api/organizations/{organization}/webhooks/{webhook}"
 	path = pathReplace(path, "organization", organization)
@@ -4413,7 +5711,11 @@ func (c *Client) DeleteOrganizationWebhook(ctx context.Context, organization str
 	return nil
 }
 
-// ToggleOrganizationWebhook - > This is a system-level route, so the response will be independent of the currently authenticated user.  Toggle the enabled status of an organization webhook.
+// ToggleOrganizationWebhook - Toggle Organization Webhook
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Toggle the enabled status of an organization webhook.
 func (c *Client) ToggleOrganizationWebhook(ctx context.Context, organization string, webhook string, body PatchWebhookBody) (*Webhook, error) {
 	path := "/api/organizations/{organization}/webhooks/{webhook}"
 	path = pathReplace(path, "organization", organization)
@@ -4426,7 +5728,11 @@ func (c *Client) ToggleOrganizationWebhook(ctx context.Context, organization str
 	return &result, nil
 }
 
-// PingHandler - > This is a system-level route, so the response will be independent of the currently authenticated user.  Ping the platform, indicating that the user is on the web page.
+// PingHandler - Ping platform
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Ping the platform, indicating that the user is on the web page.
 func (c *Client) PingHandler(ctx context.Context) error {
 	path := "/api/ping"
 
@@ -4436,7 +5742,13 @@ func (c *Client) PingHandler(ctx context.Context) error {
 	return nil
 }
 
-// GetPlatformImage - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Returns a single machine image by CSP, region, name, and architecture
+// GetPlatformImage - Get machine image
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns a single machine image by CSP, region, name, and architecture
 func (c *Client) GetPlatformImage(ctx context.Context, csp string, region string, name string, arch string) (*Image, error) {
 	path := "/api/platform/clouds/{csp}/regions/{region}/images/{name}/arch/{arch}"
 	path = pathReplace(path, "csp", csp)
@@ -4451,7 +5763,13 @@ func (c *Client) GetPlatformImage(ctx context.Context, csp string, region string
 	return &result, nil
 }
 
-// PutPlatformImage - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Replaces a machine image's editable fields
+// PutPlatformImage - Replace machine image
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Replaces a machine image's editable fields
 func (c *Client) PutPlatformImage(ctx context.Context, csp string, region string, name string, arch string, body PutImageInputBody) (*Image, error) {
 	path := "/api/platform/clouds/{csp}/regions/{region}/images/{name}/arch/{arch}"
 	path = pathReplace(path, "csp", csp)
@@ -4466,7 +5784,11 @@ func (c *Client) PutPlatformImage(ctx context.Context, csp string, region string
 	return &result, nil
 }
 
-// DeletePlatformImage - > This is a system-level route, so the response will be independent of the currently authenticated user.  Delete image by name, csp, and region.
+// DeletePlatformImage - Delete image
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Delete image by name, csp, and region.
 func (c *Client) DeletePlatformImage(ctx context.Context, csp string, region string, name string, arch string) error {
 	path := "/api/platform/clouds/{csp}/regions/{region}/images/{name}/arch/{arch}"
 	path = pathReplace(path, "csp", csp)
@@ -4480,7 +5802,11 @@ func (c *Client) DeletePlatformImage(ctx context.Context, csp string, region str
 	return nil
 }
 
-// UpdatePlatformImage - > This is a system-level route, so the response will be independent of the currently authenticated user.  Updates image properties such as published status or marks it as the latest image.
+// UpdatePlatformImage - Update image
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates image properties such as published status or marks it as the latest image.
 func (c *Client) UpdatePlatformImage(ctx context.Context, csp string, region string, name string, arch string, body PatchImageInputBody) error {
 	path := "/api/platform/clouds/{csp}/regions/{region}/images/{name}/arch/{arch}"
 	path = pathReplace(path, "csp", csp)
@@ -4496,11 +5822,19 @@ func (c *Client) UpdatePlatformImage(ctx context.Context, csp string, region str
 
 // GetAllPlatformGroupsParams contains optional parameters for the GetAllPlatformGroups operation.
 type GetAllPlatformGroupsParams struct {
+	// Maximum number of groups to return
 	Limit *int64 `json:"limit,omitempty"`
-	Skip  *int64 `json:"skip,omitempty"`
+	// Number of groups to skip
+	Skip *int64 `json:"skip,omitempty"`
 }
 
-// GetAllPlatformGroups - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Returns a list of all groups on the platform
+// GetAllPlatformGroups - Get all platform groups
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns a list of all groups on the platform
 func (c *Client) GetAllPlatformGroups(ctx context.Context, opts ...GetAllPlatformGroupsParams) (*[]Group, error) {
 	path := "/api/platform/groups"
 
@@ -4522,13 +5856,21 @@ func (c *Client) GetAllPlatformGroups(ctx context.Context, opts ...GetAllPlatfor
 
 // GetPlatformImagesParams contains optional parameters for the GetPlatformImages operation.
 type GetPlatformImagesParams struct {
-	Csp          *string `json:"csp,omitempty"`
+	// Cloud service provider
+	Csp *string `json:"csp,omitempty"`
+	// Architecture filter
 	Architecture *string `json:"architecture,omitempty"`
-	Type         *string `json:"type,omitempty"`
-	Region       *string `json:"region,omitempty"`
+	// Image type filter
+	Type *string `json:"type,omitempty"`
+	// Region filter
+	Region *string `json:"region,omitempty"`
 }
 
-// GetPlatformImages - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the list of machine images
+// GetPlatformImages - List machine images
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the list of machine images
 func (c *Client) GetPlatformImages(ctx context.Context, opts ...GetPlatformImagesParams) (*[]Image, error) {
 	path := "/api/platform/images"
 
@@ -4550,7 +5892,13 @@ func (c *Client) GetPlatformImages(ctx context.Context, opts ...GetPlatformImage
 	return &result, nil
 }
 
-// CreatePlatformImage - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Creates a new machine image
+// CreatePlatformImage - Create machine image
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Creates a new machine image
 func (c *Client) CreatePlatformImage(ctx context.Context, body *Image) (*Image, error) {
 	path := "/api/platform/images"
 
@@ -4561,7 +5909,11 @@ func (c *Client) CreatePlatformImage(ctx context.Context, body *Image) (*Image, 
 	return &result, nil
 }
 
-// GetKeys - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the list of JWKS, these are public keys used for verifying JWTs
+// GetKeys - List JWKs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the list of JWKS, these are public keys used for verifying JWTs
 func (c *Client) GetKeys(ctx context.Context) (*Jwks, error) {
 	path := "/api/platform/keys"
 
@@ -4572,7 +5924,11 @@ func (c *Client) GetKeys(ctx context.Context) (*Jwks, error) {
 	return &result, nil
 }
 
-// SetPlatformLicense - > This is a system-level route, so the response will be independent of the currently authenticated user.  Set platform license.
+// SetPlatformLicense - Set platform license
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Set platform license.
 func (c *Client) SetPlatformLicense(ctx context.Context, body LicenseData) error {
 	path := "/api/platform/license"
 
@@ -4582,7 +5938,11 @@ func (c *Client) SetPlatformLicense(ctx context.Context, body LicenseData) error
 	return nil
 }
 
-// GetPlatformPolicies - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the platform policies
+// GetPlatformPolicies - Get platform policies
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the platform policies
 func (c *Client) GetPlatformPolicies(ctx context.Context) (*map[string]any, error) {
 	path := "/api/platform/policies"
 
@@ -4593,7 +5953,11 @@ func (c *Client) GetPlatformPolicies(ctx context.Context) (*map[string]any, erro
 	return &result, nil
 }
 
-// SetPlatformArchiveCostDataPolicy - > This is a system-level route, so the response will be independent of the currently authenticated user.  Sets the archive-cost-data policy for the platform.
+// SetPlatformArchiveCostDataPolicy - Set platform policy: archive-cost-data
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the archive-cost-data policy for the platform.
 func (c *Client) SetPlatformArchiveCostDataPolicy(ctx context.Context, body int64) (*map[string]any, error) {
 	path := "/api/platform/policies/archive-cost-data"
 
@@ -4604,7 +5968,11 @@ func (c *Client) SetPlatformArchiveCostDataPolicy(ctx context.Context, body int6
 	return &result, nil
 }
 
-// SetPlatformNitroInstancesOnlyPolicy - > This is a system-level route, so the response will be independent of the currently authenticated user.  Sets the nitro-instances-only policy for the platform.
+// SetPlatformNitroInstancesOnlyPolicy - Set platform policy: nitro-instances-only
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the nitro-instances-only policy for the platform.
 func (c *Client) SetPlatformNitroInstancesOnlyPolicy(ctx context.Context, body bool) (*map[string]any, error) {
 	path := "/api/platform/policies/nitro-instances-only"
 
@@ -4615,7 +5983,11 @@ func (c *Client) SetPlatformNitroInstancesOnlyPolicy(ctx context.Context, body b
 	return &result, nil
 }
 
-// SetPlatformNoRootAccessPolicy - > This is a system-level route, so the response will be independent of the currently authenticated user.  Sets the no-root-access policy for the platform.
+// SetPlatformNoRootAccessPolicy - Set platform policy: no-root-access
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the no-root-access policy for the platform.
 func (c *Client) SetPlatformNoRootAccessPolicy(ctx context.Context, body bool) (*map[string]any, error) {
 	path := "/api/platform/policies/no-root-access"
 
@@ -4626,7 +5998,11 @@ func (c *Client) SetPlatformNoRootAccessPolicy(ctx context.Context, body bool) (
 	return &result, nil
 }
 
-// DeletePlatformPolicy - > This is a system-level route, so the response will be independent of the currently authenticated user.  Deletes the specified policy from the platform.
+// DeletePlatformPolicy - Delete platform policy
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes the specified policy from the platform.
 func (c *Client) DeletePlatformPolicy(ctx context.Context, policyname string) error {
 	path := "/api/platform/policies/{policyname}"
 	path = pathReplace(path, "policyname", policyname)
@@ -4637,7 +6013,11 @@ func (c *Client) DeletePlatformPolicy(ctx context.Context, policyname string) er
 	return nil
 }
 
-// PostPlatformSetup - > This is a system-level route, so the response will be independent of the currently authenticated user.  Creates the first user and organization. Only available when the platform needs setup (after license is set).
+// PostPlatformSetup - Complete initial platform setup
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates the first user and organization. Only available when the platform needs setup (after license is set).
 func (c *Client) PostPlatformSetup(ctx context.Context, body SetupData) error {
 	path := "/api/platform/setup"
 
@@ -4647,7 +6027,13 @@ func (c *Client) PostPlatformSetup(ctx context.Context, body SetupData) error {
 	return nil
 }
 
-// ListPlatformWebhooks - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  List all platform-level webhooks.
+// ListPlatformWebhooks - List Platform Webhooks
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// List all platform-level webhooks.
 func (c *Client) ListPlatformWebhooks(ctx context.Context) (*[]Webhook, error) {
 	path := "/api/platform/webhooks"
 
@@ -4658,7 +6044,13 @@ func (c *Client) ListPlatformWebhooks(ctx context.Context) (*[]Webhook, error) {
 	return &result, nil
 }
 
-// CreatePlatformWebhook - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Create a new platform-level webhook.
+// CreatePlatformWebhook - Create Platform Webhook
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Create a new platform-level webhook.
 func (c *Client) CreatePlatformWebhook(ctx context.Context, body CreateWebhookBody) (*Webhook, error) {
 	path := "/api/platform/webhooks"
 
@@ -4669,7 +6061,13 @@ func (c *Client) CreatePlatformWebhook(ctx context.Context, body CreateWebhookBo
 	return &result, nil
 }
 
-// DeletePlatformWebhook - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Delete a platform webhook.
+// DeletePlatformWebhook - Delete Platform Webhook
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Delete a platform webhook.
 func (c *Client) DeletePlatformWebhook(ctx context.Context, webhook string) error {
 	path := "/api/platform/webhooks/{webhook}"
 	path = pathReplace(path, "webhook", webhook)
@@ -4680,7 +6078,13 @@ func (c *Client) DeletePlatformWebhook(ctx context.Context, webhook string) erro
 	return nil
 }
 
-// TogglePlatformWebhook - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Toggle the enabled status of a platform webhook.
+// TogglePlatformWebhook - Toggle Platform Webhook
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Toggle the enabled status of a platform webhook.
 func (c *Client) TogglePlatformWebhook(ctx context.Context, webhook string, body PatchWebhookBody) (*Webhook, error) {
 	path := "/api/platform/webhooks/{webhook}"
 	path = pathReplace(path, "webhook", webhook)
@@ -4692,7 +6096,11 @@ func (c *Client) TogglePlatformWebhook(ctx context.Context, webhook string, body
 	return &result, nil
 }
 
-// PostProvisionStatus - > This is a system-level route, so the response will be independent of the currently authenticated user.  Add a new provision status step for infrastructure. Use 'instance' as infraId to update the current instance from JWT.
+// PostProvisionStatus - Add Provision Status
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Add a new provision status step for infrastructure. Use 'instance' as infraId to update the current instance from JWT.
 func (c *Client) PostProvisionStatus(ctx context.Context, infraID string, body PostProvisionStatusBody) error {
 	path := "/api/provisionstatus/{infraId}"
 	path = pathReplace(path, "infraId", infraID)
@@ -4703,7 +6111,11 @@ func (c *Client) PostProvisionStatus(ctx context.Context, infraID string, body P
 	return nil
 }
 
-// PatchProvisionStatus - > This is a system-level route, so the response will be independent of the currently authenticated user.  Update the status of a provision step. Use 'instance' as infraId to update the current instance from JWT.
+// PatchProvisionStatus - Update Provision Status
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update the status of a provision step. Use 'instance' as infraId to update the current instance from JWT.
 func (c *Client) PatchProvisionStatus(ctx context.Context, infraID string, body PatchProvisionStatusBody) error {
 	path := "/api/provisionstatus/{infraId}"
 	path = pathReplace(path, "infraId", infraID)
@@ -4716,14 +6128,23 @@ func (c *Client) PatchProvisionStatus(ctx context.Context, infraID string, body 
 
 // GetReportsLegacyQueryParams contains optional parameters for the GetReportsLegacyQuery operation.
 type GetReportsLegacyQueryParams struct {
-	User     *[]string `json:"user,omitempty"`
-	Group    *[]string `json:"group,omitempty"`
+	// Filter by users
+	User *[]string `json:"user,omitempty"`
+	// Filter by groups
+	Group *[]string `json:"group,omitempty"`
+	// Filter by resource names
 	Resource *[]string `json:"resource,omitempty"`
-	Session  *[]string `json:"session,omitempty"`
-	EndDate  *string   `json:"endDate,omitempty"`
+	// Filter by sessions
+	Session *[]string `json:"session,omitempty"`
+	// End date, specified in UTC Optional; defaults to current UTC time
+	EndDate *string `json:"endDate,omitempty"`
 }
 
-// GetReportsLegacyQuery - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns daily cost data grouped by type with support for various filters. This is a legacy endpoint.
+// GetReportsLegacyQuery - Get daily cost report data (legacy)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns daily cost data grouped by type with support for various filters. This is a legacy endpoint.
 func (c *Client) GetReportsLegacyQuery(ctx context.Context, opts ...GetReportsLegacyQueryParams) (*[]map[string]any, error) {
 	path := "/api/reports/legacy-query"
 
@@ -4748,14 +6169,23 @@ func (c *Client) GetReportsLegacyQuery(ctx context.Context, opts ...GetReportsLe
 
 // ListUserResourceGroupsParams contains optional parameters for the ListUserResourceGroups operation.
 type ListUserResourceGroupsParams struct {
-	Limit      *int64  `json:"limit,omitempty"`
-	Skip       *int64  `json:"skip,omitempty"`
-	Name       *string `json:"name,omitempty"`
+	// Maximum number of resource groups to return
+	Limit *int64 `json:"limit,omitempty"`
+	// Number of resource groups to skip
+	Skip *int64 `json:"skip,omitempty"`
+	// Filter by resource group name (case-insensitive contains)
+	Name *string `json:"name,omitempty"`
+	// Filter by allocation name
 	Allocation *string `json:"allocation,omitempty"`
-	Sort       *string `json:"sort,omitempty"`
+	// Sort field and direction
+	Sort *string `json:"sort,omitempty"`
 }
 
-// ListUserResourceGroups - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns resource groups the user has access to.
+// ListUserResourceGroups - List user resource groups
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns resource groups the user has access to.
 func (c *Client) ListUserResourceGroups(ctx context.Context, opts ...ListUserResourceGroupsParams) (*[]ResourceGroup, error) {
 	path := "/api/resource-groups"
 
@@ -4780,10 +6210,15 @@ func (c *Client) ListUserResourceGroups(ctx context.Context, opts ...ListUserRes
 
 // GetSchedulerJobsParams contains optional parameters for the GetSchedulerJobs operation.
 type GetSchedulerJobsParams struct {
+	// Optional cluster filter to limit results
 	Cluster *string `json:"cluster,omitempty"`
 }
 
-// GetSchedulerJobs - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns scheduler jobs from clusters the user can access.
+// GetSchedulerJobs - List scheduler jobs
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns scheduler jobs from clusters the user can access.
 func (c *Client) GetSchedulerJobs(ctx context.Context, opts ...GetSchedulerJobsParams) (*[]SchedulerJob, error) {
 	path := "/api/scheduler-jobs"
 
@@ -4804,11 +6239,17 @@ func (c *Client) GetSchedulerJobs(ctx context.Context, opts ...GetSchedulerJobsP
 
 // GetSessionsParams contains optional parameters for the GetSessions operation.
 type GetSessionsParams struct {
-	Type      *string `json:"type,omitempty"`
+	// Filter by session type.
+	Type *string `json:"type,omitempty"`
+	// Filter by subdomain/domain name.
 	Subdomain *string `json:"subdomain,omitempty"`
 }
 
-// GetSessions - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the sessions for the currently authenticated user.
+// GetSessions - Get sessions
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the sessions for the currently authenticated user.
 func (c *Client) GetSessions(ctx context.Context, opts ...GetSessionsParams) (*[]Session, error) {
 	path := "/api/sessions"
 
@@ -4828,7 +6269,11 @@ func (c *Client) GetSessions(ctx context.Context, opts ...GetSessionsParams) (*[
 	return &result, nil
 }
 
-// CreateSession - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Creates a new session for the authenticated user.
+// CreateSession - Create session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Creates a new session for the authenticated user.
 func (c *Client) CreateSession(ctx context.Context, body PostSessionBody) (*Session, error) {
 	path := "/api/sessions"
 
@@ -4839,7 +6284,13 @@ func (c *Client) CreateSession(ctx context.Context, body PostSessionBody) (*Sess
 	return &result, nil
 }
 
-// UpdateSessionDeprecated - > This is a system-level route, so the response will be independent of the currently authenticated user.  Update the session with the provided name in the provided namespace. Use /api/organizations/{organization}/users/{user}/sessions/{name} instead.
+// UpdateSessionDeprecated - Update session (deprecated)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update the session with the provided name in the provided namespace. Use /api/organizations/{organization}/users/{user}/sessions/{name} instead.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) UpdateSessionDeprecated(ctx context.Context, namespace string, name string, body PatchSessionBody) (*Session, error) {
 	path := "/api/sessions/{namespace}/{name}"
 	path = pathReplace(path, "namespace", namespace)
@@ -4852,7 +6303,9 @@ func (c *Client) UpdateSessionDeprecated(ctx context.Context, namespace string, 
 	return &result, nil
 }
 
-// GetPlatformSettings - Returns the platform settings, such as version, features, and theme.
+// GetPlatformSettings - Get platform settings
+//
+// Returns the platform settings, such as version, features, and theme.
 func (c *Client) GetPlatformSettings(ctx context.Context) (*PlatformSettings, error) {
 	path := "/api/settings"
 
@@ -4863,7 +6316,9 @@ func (c *Client) GetPlatformSettings(ctx context.Context) (*PlatformSettings, er
 	return &result, nil
 }
 
-// GetAdminPlatformSettings - Returns admin-only platform settings.
+// GetAdminPlatformSettings - Get admin platform settings
+//
+// Returns admin-only platform settings.
 func (c *Client) GetAdminPlatformSettings(ctx context.Context) (*PlatformSettingsAdmin, error) {
 	path := "/api/settings/admin"
 
@@ -4874,7 +6329,11 @@ func (c *Client) GetAdminPlatformSettings(ctx context.Context) (*PlatformSetting
 	return &result, nil
 }
 
-// CompleteOnboarding - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Marks the user's onboarding as complete and applies selected preferences.
+// CompleteOnboarding - Complete onboarding
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Marks the user's onboarding as complete and applies selected preferences.
 func (c *Client) CompleteOnboarding(ctx context.Context) (*CompleteOnboardingBody, error) {
 	path := "/api/settings/complete-onboarding"
 
@@ -4885,7 +6344,11 @@ func (c *Client) CompleteOnboarding(ctx context.Context) (*CompleteOnboardingBod
 	return &result, nil
 }
 
-// GetSnapshots - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns snapshots the user can access.
+// GetSnapshots - List snapshots
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns snapshots the user can access.
 func (c *Client) GetSnapshots(ctx context.Context) (*[]Snapshot, error) {
 	path := "/api/snapshots"
 
@@ -4896,7 +6359,11 @@ func (c *Client) GetSnapshots(ctx context.Context) (*[]Snapshot, error) {
 	return &result, nil
 }
 
-// GetSSHPrivateKeys - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns a list of the user's SSH Private Keys
+// GetSSHPrivateKeys - Get SSH Private Keys
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns a list of the user's SSH Private Keys
 func (c *Client) GetSSHPrivateKeys(ctx context.Context) (*[]SSHPrivateKey, error) {
 	path := "/api/ssh-private-keys"
 
@@ -4907,7 +6374,11 @@ func (c *Client) GetSSHPrivateKeys(ctx context.Context) (*[]SSHPrivateKey, error
 	return &result, nil
 }
 
-// DeleteSSHPrivateKey - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Delete an SSH Private Key
+// DeleteSSHPrivateKey - Delete SSH Private Key
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Delete an SSH Private Key
 func (c *Client) DeleteSSHPrivateKey(ctx context.Context, name string) error {
 	path := "/api/ssh-private-keys/{name}"
 	path = pathReplace(path, "name", name)
@@ -4918,7 +6389,13 @@ func (c *Client) DeleteSSHPrivateKey(ctx context.Context, name string) error {
 	return nil
 }
 
-// PostImpersonate - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Allows a platform administrator to impersonate another user. The admin's session will be updated to act as the target user.
+// PostImpersonate - Impersonate a user
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Allows a platform administrator to impersonate another user. The admin's session will be updated to act as the target user.
 func (c *Client) PostImpersonate(ctx context.Context, body PostImpersonateInputBody) error {
 	path := "/api/sso/impersonate"
 
@@ -4928,7 +6405,11 @@ func (c *Client) PostImpersonate(ctx context.Context, body PostImpersonateInputB
 	return nil
 }
 
-// DeleteImpersonate - > This is a system-level route, so the response will be independent of the currently authenticated user.  Cancels the current impersonation session and returns to the original admin user.
+// DeleteImpersonate - Cancel impersonation
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Cancels the current impersonation session and returns to the original admin user.
 func (c *Client) DeleteImpersonate(ctx context.Context) error {
 	path := "/api/sso/impersonate"
 
@@ -4938,7 +6419,11 @@ func (c *Client) DeleteImpersonate(ctx context.Context) error {
 	return nil
 }
 
-// PostLogout - > This is a system-level route, so the response will be independent of the currently authenticated user.  End the current session.
+// PostLogout - Logout
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// End the current session.
 func (c *Client) PostLogout(ctx context.Context) (*PostLogoutOutputBody, error) {
 	path := "/api/sso/logout"
 
@@ -4949,7 +6434,11 @@ func (c *Client) PostLogout(ctx context.Context) (*PostLogoutOutputBody, error) 
 	return &result, nil
 }
 
-// GetMfaSettings - > This is a system-level route, so the response will be independent of the currently authenticated user.  Retrieve current MFA settings for the authenticated user.
+// GetMfaSettings - Get MFA settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Retrieve current MFA settings for the authenticated user.
 func (c *Client) GetMfaSettings(ctx context.Context) (*GetMfaSettingsOutputBody, error) {
 	path := "/api/sso/mfa"
 
@@ -4960,7 +6449,11 @@ func (c *Client) GetMfaSettings(ctx context.Context) (*GetMfaSettingsOutputBody,
 	return &result, nil
 }
 
-// DeleteMfa - > This is a system-level route, so the response will be independent of the currently authenticated user.  Remove MFA settings for the authenticated user.
+// DeleteMfa - Delete MFA method
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Remove MFA settings for the authenticated user.
 func (c *Client) DeleteMfa(ctx context.Context, body DeleteMfaInputBody) error {
 	path := "/api/sso/mfa"
 
@@ -4970,7 +6463,11 @@ func (c *Client) DeleteMfa(ctx context.Context, body DeleteMfaInputBody) error {
 	return nil
 }
 
-// PostMfaLogin - > This is a system-level route, so the response will be independent of the currently authenticated user.  Complete MFA verification after password login.
+// PostMfaLogin - MFA login
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Complete MFA verification after password login.
 func (c *Client) PostMfaLogin(ctx context.Context, body MfaLoginInputBody) error {
 	path := "/api/sso/mfa/login"
 
@@ -4980,7 +6477,11 @@ func (c *Client) PostMfaLogin(ctx context.Context, body MfaLoginInputBody) error
 	return nil
 }
 
-// PostAddMfaOtp - > This is a system-level route, so the response will be independent of the currently authenticated user.  Initialize OTP (Time-based One-Time Password) MFA setup and get QR code for authenticator apps like Google Authenticator or Authy.
+// PostAddMfaOtp - Add MFA method: OTP
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Initialize OTP (Time-based One-Time Password) MFA setup and get QR code for authenticator apps like Google Authenticator or Authy.
 func (c *Client) PostAddMfaOtp(ctx context.Context) (*AddOtpMfaOutputBody, error) {
 	path := "/api/sso/mfa/otp"
 
@@ -4991,7 +6492,11 @@ func (c *Client) PostAddMfaOtp(ctx context.Context) (*AddOtpMfaOutputBody, error
 	return &result, nil
 }
 
-// PostVerifyOtp - > This is a system-level route, so the response will be independent of the currently authenticated user.  Verify OTP code to complete MFA setup.
+// PostVerifyOtp - Verify OTP code
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Verify OTP code to complete MFA setup.
 func (c *Client) PostVerifyOtp(ctx context.Context, body VerifyOtpInputBody) (*VerifyOtpOutputBody, error) {
 	path := "/api/sso/mfa/otp/verify"
 
@@ -5002,7 +6507,11 @@ func (c *Client) PostVerifyOtp(ctx context.Context, body VerifyOtpInputBody) (*V
 	return &result, nil
 }
 
-// PatchPassword - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Change the authenticated user's password. Requires current password verification.
+// PatchPassword - Change password
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Change the authenticated user's password. Requires current password verification.
 func (c *Client) PatchPassword(ctx context.Context, body PasswordChangeInputBody) error {
 	path := "/api/sso/password"
 
@@ -5012,7 +6521,11 @@ func (c *Client) PatchPassword(ctx context.Context, body PasswordChangeInputBody
 	return nil
 }
 
-// PostPasswordLogin - > This is a system-level route, so the response will be independent of the currently authenticated user.  Authenticate with username/email and password.
+// PostPasswordLogin - Password login
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Authenticate with username/email and password.
 func (c *Client) PostPasswordLogin(ctx context.Context, body PasswordLoginInputBody) error {
 	path := "/api/sso/password/login"
 
@@ -5022,7 +6535,11 @@ func (c *Client) PostPasswordLogin(ctx context.Context, body PasswordLoginInputB
 	return nil
 }
 
-// PostPasswordResetEmail - > This is a system-level route, so the response will be independent of the currently authenticated user.  Request a password reset email. If the username/email exists, a reset link will be sent.
+// PostPasswordResetEmail - Request password reset email
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Request a password reset email. If the username/email exists, a reset link will be sent.
 func (c *Client) PostPasswordResetEmail(ctx context.Context, body PasswordResetEmailInputBody) error {
 	path := "/api/sso/password/reset"
 
@@ -5032,7 +6549,11 @@ func (c *Client) PostPasswordResetEmail(ctx context.Context, body PasswordResetE
 	return nil
 }
 
-// PostPasswordResetVerify - > This is a system-level route, so the response will be independent of the currently authenticated user.  Verify password reset token and change password.
+// PostPasswordResetVerify - Verify password reset token
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Verify password reset token and change password.
 func (c *Client) PostPasswordResetVerify(ctx context.Context, body PasswordResetVerifyInputBody) error {
 	path := "/api/sso/password/reset/verify"
 
@@ -5042,7 +6563,11 @@ func (c *Client) PostPasswordResetVerify(ctx context.Context, body PasswordReset
 	return nil
 }
 
-// GetUserWorkspaceStatus - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the status for the currently authenticated user's user workspace.
+// GetUserWorkspaceStatus - Get user workspace status
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the status for the currently authenticated user's user workspace.
 func (c *Client) GetUserWorkspaceStatus(ctx context.Context) (*WorkspaceStatus, error) {
 	path := "/api/user-workspace/status"
 
@@ -5053,7 +6578,13 @@ func (c *Client) GetUserWorkspaceStatus(ctx context.Context) (*WorkspaceStatus, 
 	return &result, nil
 }
 
-// GetUserWorkspaces - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Returns all user workspaces.
+// GetUserWorkspaces - Get all user workspaces
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns all user workspaces.
 func (c *Client) GetUserWorkspaces(ctx context.Context) (*GetUserContainersResponse, error) {
 	path := "/api/user-workspaces"
 
@@ -5064,7 +6595,13 @@ func (c *Client) GetUserWorkspaces(ctx context.Context) (*GetUserContainersRespo
 	return &result, nil
 }
 
-// ScaleDownUserWorkspaces - > This is a system-level route, so the response will be independent of the currently authenticated user.  > This is a platform-admin only route.  Scales down user workspaces which are considered 'safe to kill'. Safe to kill is determined by the user not having any 'existing' cluster type clusters currently connected, not being online within the last 15 minutes, and not having any running workflows.
+// ScaleDownUserWorkspaces - Scale down user workspaces
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Scales down user workspaces which are considered 'safe to kill'. Safe to kill is determined by the user not having any 'existing' cluster type clusters currently connected, not being online within the last 15 minutes, and not having any running workflows.
 func (c *Client) ScaleDownUserWorkspaces(ctx context.Context) error {
 	path := "/api/user-workspaces/scale-down"
 
@@ -5074,7 +6611,11 @@ func (c *Client) ScaleDownUserWorkspaces(ctx context.Context) error {
 	return nil
 }
 
-// UpdateUserProfile - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Updates the current user's profile information.
+// UpdateUserProfile - Update user profile
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates the current user's profile information.
 func (c *Client) UpdateUserProfile(ctx context.Context, body UpdateUserProfileInputBody) (*UpdateUserProfileOutputBody, error) {
 	path := "/api/user/profile"
 
@@ -5085,7 +6626,11 @@ func (c *Client) UpdateUserProfile(ctx context.Context, body UpdateUserProfileIn
 	return &result, nil
 }
 
-// UpdateUserSidebar - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Updates the current user's sidebar visibility preferences. Send null to reset to defaults.
+// UpdateUserSidebar - Update user sidebar options
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates the current user's sidebar visibility preferences. Send null to reset to defaults.
 func (c *Client) UpdateUserSidebar(ctx context.Context, body UpdateUserSidebarInputBody) error {
 	path := "/api/user/sidebar"
 
@@ -5097,10 +6642,15 @@ func (c *Client) UpdateUserSidebar(ctx context.Context, body UpdateUserSidebarIn
 
 // GetUserActivityParams contains optional parameters for the GetUserActivity operation.
 type GetUserActivityParams struct {
+	// Number of days to look back
 	Days *int64 `json:"days,omitempty"`
 }
 
-// GetUserActivity - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns a list of dates when the user was active, suitable for displaying a GitHub-style activity graph. Users can view their own activity.
+// GetUserActivity - Get user activity data
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns a list of dates when the user was active, suitable for displaying a GitHub-style activity graph. Users can view their own activity.
 func (c *Client) GetUserActivity(ctx context.Context, username string, opts ...GetUserActivityParams) (*UserActivityResponse, error) {
 	path := "/api/users/{username}/activity"
 	path = pathReplace(path, "username", username)
@@ -5120,7 +6670,11 @@ func (c *Client) GetUserActivity(ctx context.Context, username string, opts ...G
 	return &result, nil
 }
 
-// GetUserSSHPublicKeys - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns SSH public keys for a user. Used by sshd AuthorizedKeysCommand.
+// GetUserSSHPublicKeys - Get user SSH public keys
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns SSH public keys for a user. Used by sshd AuthorizedKeysCommand.
 func (c *Client) GetUserSSHPublicKeys(ctx context.Context, username string) (*string, error) {
 	path := "/api/users/{username}/ssh-public-keys"
 	path = pathReplace(path, "username", username)
@@ -5132,7 +6686,13 @@ func (c *Client) GetUserSSHPublicKeys(ctx context.Context, username string) (*st
 	return &result, nil
 }
 
-// GetAuthSessionDeprecated - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the current session for the authenticated subject.
+// GetAuthSessionDeprecated - Get current session (deprecated)
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the current session for the authenticated subject.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetAuthSessionDeprecated(ctx context.Context) (*AuthSession, error) {
 	path := "/api/v2/auth/session"
 
@@ -5145,14 +6705,23 @@ func (c *Client) GetAuthSessionDeprecated(ctx context.Context) (*AuthSession, er
 
 // ListWorkflowRunsParams contains optional parameters for the ListWorkflowRuns operation.
 type ListWorkflowRunsParams struct {
-	Workflow *string   `json:"workflow,omitempty"`
-	Status   *[]string `json:"status,omitempty"`
-	Search   *string   `json:"search,omitempty"`
-	Limit    *int64    `json:"limit,omitempty"`
-	Offset   *int64    `json:"offset,omitempty"`
+	// Filter by workflow name
+	Workflow *string `json:"workflow,omitempty"`
+	// Filter by status
+	Status *[]string `json:"status,omitempty"`
+	// Search runs by name or slug
+	Search *string `json:"search,omitempty"`
+	// Maximum number of runs to return
+	Limit *int64 `json:"limit,omitempty"`
+	// Number of runs to skip
+	Offset *int64 `json:"offset,omitempty"`
 }
 
-// ListWorkflowRuns - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Lists all workflow runs for the authenticated user. Can filter by status.
+// ListWorkflowRuns - List Workflow Runs
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists all workflow runs for the authenticated user. Can filter by status.
 func (c *Client) ListWorkflowRuns(ctx context.Context, opts ...ListWorkflowRunsParams) (*ListWorkflowRunsBody, error) {
 	path := "/api/workflow-runs"
 
@@ -5175,7 +6744,11 @@ func (c *Client) ListWorkflowRuns(ctx context.Context, opts ...ListWorkflowRunsP
 	return &result, nil
 }
 
-// CreateWorkflowRun - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Creates and runs a workflow. Accepts exactly one of: workflow (saved workflow name), yaml (inline YAML content), or marketplace (marketplace item slug).
+// CreateWorkflowRun - Create Workflow Run
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Creates and runs a workflow. Accepts exactly one of: workflow (saved workflow name), yaml (inline YAML content), or marketplace (marketplace item slug).
 func (c *Client) CreateWorkflowRun(ctx context.Context, body CreateWorkflowRunInputBody) (*CreateWorkflowRunOutputBody, error) {
 	path := "/api/workflow-runs"
 
@@ -5188,13 +6761,21 @@ func (c *Client) CreateWorkflowRun(ctx context.Context, body CreateWorkflowRunIn
 
 // DeleteWorkflowRunsParams contains optional parameters for the DeleteWorkflowRuns operation.
 type DeleteWorkflowRunsParams struct {
-	Slugs         *string `json:"slugs,omitempty"`
-	Ids           *string `json:"ids,omitempty"`
-	OlderThanDays *int64  `json:"olderThanDays,omitempty"`
-	Status        *string `json:"status,omitempty"`
+	// Comma-separated list of run slugs to delete
+	Slugs *string `json:"slugs,omitempty"`
+	// Comma-separated list of run object IDs to delete
+	Ids *string `json:"ids,omitempty"`
+	// Delete runs older than N days
+	OlderThanDays *int64 `json:"olderThanDays,omitempty"`
+	// Delete runs with this status
+	Status *string `json:"status,omitempty"`
 }
 
-// DeleteWorkflowRuns - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Deletes one or more workflow runs by their slug identifiers.
+// DeleteWorkflowRuns - Delete Workflow Runs
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes one or more workflow runs by their slug identifiers.
 func (c *Client) DeleteWorkflowRuns(ctx context.Context, opts ...DeleteWorkflowRunsParams) error {
 	path := "/api/workflow-runs"
 
@@ -5215,7 +6796,11 @@ func (c *Client) DeleteWorkflowRuns(ctx context.Context, opts ...DeleteWorkflowR
 	return nil
 }
 
-// GetWorkflowRun - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Gets a single workflow run by its slug identifier.
+// GetWorkflowRun - Get Workflow Run
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Gets a single workflow run by its slug identifier.
 func (c *Client) GetWorkflowRun(ctx context.Context, slug string) (*WorkflowRunDetailResponse, error) {
 	path := "/api/workflow-runs/{slug}"
 	path = pathReplace(path, "slug", slug)
@@ -5227,7 +6812,11 @@ func (c *Client) GetWorkflowRun(ctx context.Context, slug string) (*WorkflowRunD
 	return &result, nil
 }
 
-// DeleteWorkflowRun - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Deletes a workflow run and its associated files.
+// DeleteWorkflowRun - Delete Workflow Run
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes a workflow run and its associated files.
 func (c *Client) DeleteWorkflowRun(ctx context.Context, slug string) error {
 	path := "/api/workflow-runs/{slug}"
 	path = pathReplace(path, "slug", slug)
@@ -5238,7 +6827,11 @@ func (c *Client) DeleteWorkflowRun(ctx context.Context, slug string) error {
 	return nil
 }
 
-// UpdateWorkflowRun - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Updates a workflow run's mutable fields such as display name and status.
+// UpdateWorkflowRun - Update Workflow Run
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates a workflow run's mutable fields such as display name and status.
 func (c *Client) UpdateWorkflowRun(ctx context.Context, slug string, body UpdateWorkflowRunInputBody) (*WorkflowRunDetailResponse, error) {
 	path := "/api/workflow-runs/{slug}"
 	path = pathReplace(path, "slug", slug)
@@ -5250,7 +6843,11 @@ func (c *Client) UpdateWorkflowRun(ctx context.Context, slug string, body Update
 	return &result, nil
 }
 
-// CancelWorkflowRun - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Cancels a running workflow run.
+// CancelWorkflowRun - Cancel Workflow Run
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Cancels a running workflow run.
 func (c *Client) CancelWorkflowRun(ctx context.Context, slug string) error {
 	path := "/api/workflow-runs/{slug}/cancel"
 	path = pathReplace(path, "slug", slug)
@@ -5261,7 +6858,11 @@ func (c *Client) CancelWorkflowRun(ctx context.Context, slug string) error {
 	return nil
 }
 
-// GetWorkflowRunFile - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Retrieves a file from a workflow run's output directory.
+// GetWorkflowRunFile - Get Workflow Run File
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Retrieves a file from a workflow run's output directory.
 func (c *Client) GetWorkflowRunFile(ctx context.Context, slug string) (*string, error) {
 	path := "/api/workflow-runs/{slug}/files"
 	path = pathReplace(path, "slug", slug)
@@ -5275,10 +6876,15 @@ func (c *Client) GetWorkflowRunFile(ctx context.Context, slug string) (*string, 
 
 // ListWorkflowsParams contains optional parameters for the ListWorkflows operation.
 type ListWorkflowsParams struct {
+	// Get only favorite workflows
 	FavoriteOnly *bool `json:"favoriteOnly,omitempty"`
 }
 
-// ListWorkflows - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Lists all workflows for the authenticated user.
+// ListWorkflows - List Workflows
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists all workflows for the authenticated user.
 func (c *Client) ListWorkflows(ctx context.Context, opts ...ListWorkflowsParams) (*[]WorkflowItem, error) {
 	path := "/api/workflows"
 
@@ -5297,7 +6903,11 @@ func (c *Client) ListWorkflows(ctx context.Context, opts ...ListWorkflowsParams)
 	return &result, nil
 }
 
-// CreateWorkflow - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Creates a new workflow. Supports 'local' and 'remote' types. Remote workflows must have subtype 'github'.
+// CreateWorkflow - Create Workflow
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Creates a new workflow. Supports 'local' and 'remote' types. Remote workflows must have subtype 'github'.
 func (c *Client) CreateWorkflow(ctx context.Context, body CreateWorkflowBody) (*WorkflowItem, error) {
 	path := "/api/workflows"
 
@@ -5308,7 +6918,11 @@ func (c *Client) CreateWorkflow(ctx context.Context, body CreateWorkflowBody) (*
 	return &result, nil
 }
 
-// GetWorkflow - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Gets a single workflow by name for the authenticated user.
+// GetWorkflow - Get Workflow
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Gets a single workflow by name for the authenticated user.
 func (c *Client) GetWorkflow(ctx context.Context, workflow string) (*WorkflowItem, error) {
 	path := "/api/workflows/{workflow}"
 	path = pathReplace(path, "workflow", workflow)
@@ -5320,7 +6934,11 @@ func (c *Client) GetWorkflow(ctx context.Context, workflow string) (*WorkflowIte
 	return &result, nil
 }
 
-// DeleteWorkflow - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Deletes a workflow and marks all associated runs as deleted.
+// DeleteWorkflow - Delete Workflow
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes a workflow and marks all associated runs as deleted.
 func (c *Client) DeleteWorkflow(ctx context.Context, workflow string) error {
 	path := "/api/workflows/{workflow}"
 	path = pathReplace(path, "workflow", workflow)
@@ -5331,7 +6949,11 @@ func (c *Client) DeleteWorkflow(ctx context.Context, workflow string) error {
 	return nil
 }
 
-// UpdateWorkflow - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Updates a workflow's properties such as display name, description, remote settings, etc.
+// UpdateWorkflow - Update Workflow
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates a workflow's properties such as display name, description, remote settings, etc.
 func (c *Client) UpdateWorkflow(ctx context.Context, workflow string, body UpdateWorkflowBody) (*WorkflowItem, error) {
 	path := "/api/workflows/{workflow}"
 	path = pathReplace(path, "workflow", workflow)
@@ -5343,7 +6965,11 @@ func (c *Client) UpdateWorkflow(ctx context.Context, workflow string, body Updat
 	return &result, nil
 }
 
-// DuplicateWorkflow - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Creates a copy of an existing workflow with a new name.
+// DuplicateWorkflow - Duplicate Workflow
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Creates a copy of an existing workflow with a new name.
 func (c *Client) DuplicateWorkflow(ctx context.Context, workflow string, body DuplicateWorkflowBody) (*WorkflowItem, error) {
 	path := "/api/workflows/{workflow}/duplicate"
 	path = pathReplace(path, "workflow", workflow)
@@ -5355,7 +6981,11 @@ func (c *Client) DuplicateWorkflow(ctx context.Context, workflow string, body Du
 	return &result, nil
 }
 
-// ForkWorkflow - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Converts a remote or marketplace workflow to a local workflow by fetching and storing its YAML configuration.
+// ForkWorkflow - Fork Workflow to Local
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Converts a remote or marketplace workflow to a local workflow by fetching and storing its YAML configuration.
 func (c *Client) ForkWorkflow(ctx context.Context, workflow string, body ForkWorkflowBody) (*WorkflowItem, error) {
 	path := "/api/workflows/{workflow}/fork"
 	path = pathReplace(path, "workflow", workflow)
@@ -5367,7 +6997,11 @@ func (c *Client) ForkWorkflow(ctx context.Context, workflow string, body ForkWor
 	return &result, nil
 }
 
-// GetWorkflowJSON - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the JSON representation of the workflow YAML.
+// GetWorkflowJSON - Get Workflow JSON
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the JSON representation of the workflow YAML.
 func (c *Client) GetWorkflowJSON(ctx context.Context, workflow string) (*map[string]any, error) {
 	path := "/api/workflows/{workflow}/json"
 	path = pathReplace(path, "workflow", workflow)
@@ -5379,7 +7013,11 @@ func (c *Client) GetWorkflowJSON(ctx context.Context, workflow string) (*map[str
 	return &result, nil
 }
 
-// GetWorkflowMarkdown - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the raw markdown description of a workflow. For remote workflows, fetches the README from GitHub. For local workflows, returns the stored markdown.
+// GetWorkflowMarkdown - Get Workflow Markdown
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the raw markdown description of a workflow. For remote workflows, fetches the README from GitHub. For local workflows, returns the stored markdown.
 func (c *Client) GetWorkflowMarkdown(ctx context.Context, workflow string) (*string, error) {
 	path := "/api/workflows/{workflow}/markdown"
 	path = pathReplace(path, "workflow", workflow)
@@ -5391,7 +7029,11 @@ func (c *Client) GetWorkflowMarkdown(ctx context.Context, workflow string) (*str
 	return &result, nil
 }
 
-// GetWorkflowYaml - > This is a user-centric route, so the response will always be in the context of the currently authenticated user.  Returns the raw YAML content of a workflow.
+// GetWorkflowYaml - Get Workflow YAML
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the raw YAML content of a workflow.
 func (c *Client) GetWorkflowYaml(ctx context.Context, workflow string) (*string, error) {
 	path := "/api/workflows/{workflow}/yaml"
 	path = pathReplace(path, "workflow", workflow)
@@ -5403,7 +7045,11 @@ func (c *Client) GetWorkflowYaml(ctx context.Context, workflow string) (*string,
 	return &result, nil
 }
 
-// GetHealthCheck - > This is a system-level route, so the response will be independent of the currently authenticated user.  Returns the health status of the service, useful for platform health monitoring.
+// GetHealthCheck - Check current service health
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the health status of the service, useful for platform health monitoring.
 func (c *Client) GetHealthCheck(ctx context.Context) (*string, error) {
 	path := "/healthzz"
 
@@ -5414,7 +7060,9 @@ func (c *Client) GetHealthCheck(ctx context.Context) (*string, error) {
 	return &result, nil
 }
 
-// GetWorkflowSchema - Returns the JSON schema for workflow definitions.
+// GetWorkflowSchema - Get Workflow Schema
+//
+// Returns the JSON schema for workflow definitions.
 func (c *Client) GetWorkflowSchema(ctx context.Context) (*map[string]any, error) {
 	path := "/workflow.schema.json"
 

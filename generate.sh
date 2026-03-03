@@ -46,12 +46,22 @@ echo ""
 echo "Generating Python SDK..."
 cd "$SCRIPT_DIR"
 
+# Save hand-written files before generation overwrites them
+PY_BACKUP="$(mktemp -d)"
+trap 'rm -rf "$PY_BACKUP"' EXIT
+cp ./python/parallelworks_client/__init__.py "$PY_BACKUP/__init__.py"
+cp ./python/parallelworks_client/auth.py "$PY_BACKUP/auth.py"
+
 # Use uv to run openapi-python-client
 uvx openapi-python-client generate \
     --path ./openapi.json \
     --output-path ./python/parallelworks_client \
     --meta none \
     --overwrite
+
+# Restore hand-written files that the generator overwrites
+mv "$PY_BACKUP/__init__.py" ./python/parallelworks_client/__init__.py
+mv "$PY_BACKUP/auth.py" ./python/parallelworks_client/auth.py
 
 echo "Python SDK generated"
 echo ""
