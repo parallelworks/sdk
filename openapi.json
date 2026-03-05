@@ -16075,7 +16075,8 @@
           "status": {
             "description": "The status of the workflow run",
             "enum": [
-              "canceled"
+              "canceled",
+              "canceling"
             ],
             "type": "string"
           }
