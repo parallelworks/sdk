@@ -4739,6 +4739,24 @@ func (c *Client) UnmountClusterDirFromUserWorkspace(ctx context.Context, organiz
 	return nil
 }
 
+// ConnectClusterAsync - Connect to cluster (async)
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Initiates a background connection to an existing cluster.
+func (c *Client) ConnectClusterAsync(ctx context.Context, organization string, user string, name string, body PostClusterConnectInputBody) (*PostClusterConnectOutputBody, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{name}/connect"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	var result PostClusterConnectOutputBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // CreateDiskSnapshot - Create Disk Snapshot
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.

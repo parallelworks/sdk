@@ -1523,6 +1523,8 @@ type CreateNetAppOntapInputBody struct {
 type CreateNetworkBody struct {
 	// Name of the network
 	Name string `json:"name"`
+	// Whether to provision a NAT gateway for outbound internet access (only applies when provisioning mode is private and not peered to platform)
+	NatGateway bool `json:"natGateway"`
 	// Whether the private network should be peered to the platform via transit gateway (AWS only)
 	PeeredToPlatform bool `json:"peeredToPlatform"`
 	// Provisioning mode for the network
@@ -4147,6 +4149,16 @@ type Policy struct {
 	Name *string `json:"name,omitempty"`
 	// Value of the policy
 	Value                any            `json:"value,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PostClusterConnectInputBody = map[string]any
+
+type PostClusterConnectOutputBody struct {
+	// Status message
+	Message *string `json:"message,omitempty"`
+	// Connection status
+	Status               string         `json:"status"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

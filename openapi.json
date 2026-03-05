@@ -4294,6 +4294,10 @@
             "minLength": 1,
             "type": "string"
           },
+          "natGateway": {
+            "description": "Whether to provision a NAT gateway for outbound internet access (only applies when provisioning mode is private and not peered to platform)",
+            "type": "boolean"
+          },
           "peeredToPlatform": {
             "description": "Whether the private network should be peered to the platform via transit gateway (AWS only)",
             "type": "boolean"
@@ -4322,7 +4326,8 @@
           "provisioningMode",
           "regions",
           "transitGatewayId",
-          "peeredToPlatform"
+          "peeredToPlatform",
+          "natGateway"
         ],
         "type": "object"
       },
@@ -12117,6 +12122,32 @@
         },
         "required": [
           "level"
+        ],
+        "type": "object"
+      },
+      "PostClusterConnectInputBody": {
+        "additionalProperties": false,
+        "type": "object"
+      },
+      "PostClusterConnectOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "description": "Status message",
+            "type": "string"
+          },
+          "status": {
+            "description": "Connection status",
+            "enum": [
+              "accepted",
+              "already_connected",
+              "connecting"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
         ],
         "type": "object"
       },
@@ -32171,6 +32202,80 @@
           }
         },
         "summary": "Mount additional cluster directory to the user workspace",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{name}/connect": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nInitiates a background connection to an existing cluster.",
+        "operationId": "connect-cluster-async",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "example": "parallelworks",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostClusterConnectInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostClusterConnectOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Connect to cluster (async)",
         "tags": [
           "Clusters"
         ]
