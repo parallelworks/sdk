@@ -1,5 +1,6 @@
 import createClient, {
   type ClientOptions as OpenAPIClientOptions,
+  type Middleware,
 } from 'openapi-fetch'
 import type { paths } from './types/api'
 
@@ -272,7 +273,7 @@ export class Client {
    * @returns Configured openapi-fetch client instance
    */
   build(): OpenAPIFetchClient {
-    return createClient<paths>({
+    const client = createClient<paths>({
       baseUrl: this.baseUrl,
       ...this.options,
       headers: {
@@ -280,6 +281,30 @@ export class Client {
         ...(this.authHeader && { Authorization: this.authHeader }),
       },
     })
+
+    // Attach HTTP status code to error response bodies so consumers
+    // (e.g. SWR hooks) can distinguish 404s from other errors.
+    // openapi-fetch parses the body after middleware, so we replace the
+    // response with one whose body includes the status field.
+    const statusMiddleware: Middleware = {
+      async onResponse({ response }) {
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}))
+          if (body && typeof body === 'object') {
+            ;(body as Record<string, unknown>).status = response.status
+          }
+          return new Response(JSON.stringify(body), {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers,
+          })
+        }
+        return response
+      },
+    }
+    client.use(statusMiddleware)
+
+    return client
   }
 }
 

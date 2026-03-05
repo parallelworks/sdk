@@ -1823,6 +1823,8 @@ type Fact struct {
 	ID string `json:"id"`
 	// The instance name.
 	Name string `json:"name"`
+	// Whether the no-root-access policy is enabled for this instance's organization.
+	NoRootAccess bool `json:"no_root_access"`
 	// The type of node - for example, compute, controller or instance.
 	NodeType string `json:"node_type"`
 	// Private IP address of instance.
@@ -2546,6 +2548,8 @@ type Image struct {
 	Latest *bool `json:"latest,omitempty"`
 	// Image name
 	Name string `json:"name"`
+	// Operating system family
+	OsFamily *string `json:"osFamily,omitempty"`
 	// Whether the image is selectable on image dropdowns
 	Published bool `json:"published"`
 	// Region where the image is located

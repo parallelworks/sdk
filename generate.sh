@@ -14,7 +14,6 @@ echo "Generating OpenAPI spec from Go ingress..."
 cd "$ROOT_DIR/packages/go/ingress"
 go run ./internal/routes/generate/generate-openapi.go
 cd "$ROOT_DIR"
-pnpm biome format --write sdk/openapi.json
 echo "OpenAPI spec generated"
 echo ""
 

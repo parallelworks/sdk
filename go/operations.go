@@ -2355,6 +2355,10 @@ func (c *Client) PostOpenstackSync(ctx context.Context, organization string, nam
 type GetCloudImagesParams struct {
 	// Network name to use for cloud account credentials
 	Network *string `json:"network,omitempty"`
+	// Filter by CPU architecture (amd64, arm64)
+	Architecture *string `json:"architecture,omitempty"`
+	// Filter by image name pattern
+	Name *string `json:"name,omitempty"`
 }
 
 // GetCloudImages - List public cloud images
@@ -2372,6 +2376,8 @@ func (c *Client) GetCloudImages(ctx context.Context, organization string, csp st
 		params := opts[0]
 		queryValues := url.Values{}
 		addQueryParam(queryValues, "network", params.Network)
+		addQueryParam(queryValues, "architecture", params.Architecture)
+		addQueryParam(queryValues, "name", params.Name)
 		if len(queryValues) > 0 {
 			path += "?" + queryValues.Encode()
 		}

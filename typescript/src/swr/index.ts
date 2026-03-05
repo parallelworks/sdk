@@ -11,6 +11,25 @@ export interface SwrHooksOptions {
   prefix?: string
 }
 
+/**
+ * HTTP status code injected by the client middleware into error responses.
+ * Use this to check the status code of API errors from SWR hooks.
+ *
+ * @example
+ * ```tsx
+ * const { error } = useQuery('/api/resource')
+ * if (error && hasStatus(error, 404)) {
+ *   return <NotFound />
+ * }
+ * ```
+ */
+export function hasStatus(
+  error: Record<string, unknown>,
+  status: number
+): boolean {
+  return (error as { status?: number }).status === status
+}
+
 type AuthenticatedClient = ReturnType<Client['withApiKey']>
 
 /**
