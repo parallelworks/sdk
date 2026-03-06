@@ -5815,6 +5815,7 @@ type WorkspaceMount struct {
 type WorkspaceSettings struct {
 	CpuLimit              *float64       `json:"cpuLimit,omitempty"`
 	CpuRequest            *float64       `json:"cpuRequest,omitempty"`
+	DebugMode             *bool          `json:"debugMode,omitempty"`
 	EphemeralStorageLimit *float64       `json:"ephemeralStorageLimit,omitempty"`
 	MemoryLimit           *float64       `json:"memoryLimit,omitempty"`
 	MemoryRequest         *float64       `json:"memoryRequest,omitempty"`

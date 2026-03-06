@@ -17067,6 +17067,9 @@
             "format": "double",
             "type": "number"
           },
+          "debugMode": {
+            "type": "boolean"
+          },
           "ephemeralStorageLimit": {
             "format": "double",
             "type": "number"
