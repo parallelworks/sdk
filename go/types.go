@@ -4821,7 +4821,7 @@ type Session struct {
 	TargetInfo     *KubernetesTunnelInfo `json:"targetInfo,omitempty"`
 	// Target name.
 	TargetName *string `json:"targetName,omitempty"`
-	// Target type (pool, cluster, managed-cluster).
+	// Target resource type.
 	TargetType *string `json:"targetType,omitempty"`
 	// Session type.
 	Type *string `json:"type"`

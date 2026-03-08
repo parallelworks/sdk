@@ -14179,7 +14179,7 @@
             "type": "string"
           },
           "targetType": {
-            "description": "Target type (pool, cluster, managed-cluster).",
+            "description": "Target resource type.",
             "readOnly": true,
             "type": "string"
           },
