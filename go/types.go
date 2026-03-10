@@ -957,6 +957,8 @@ type ChatCompletionChunk struct {
 	Created int64 `json:"created"`
 	// Unique completion ID
 	ID string `json:"id"`
+	// Backend-generated message ID for persistence
+	MessageID *string `json:"messageId,omitempty"`
 	// Model used
 	Model string `json:"model"`
 	// Object type (chat.completion.chunk)
@@ -3188,6 +3190,8 @@ type MessageResponse struct {
 	ReasoningDuration *float64 `json:"reasoningDuration,omitempty"`
 	// Message role
 	Role string `json:"role"`
+	// Whether the message was stopped early by user
+	Stopped *bool `json:"stopped,omitempty"`
 	// Message timestamp
 	Timestamp  time.Time `json:"timestamp"`
 	TokensUsed *Usage    `json:"tokensUsed,omitempty"`
@@ -5163,6 +5167,10 @@ type Theme struct {
 	Element *string `json:"element,omitempty"`
 	// Text color for elements
 	ElementText *string `json:"elementText,omitempty"`
+	// Whether the organization has a logo uploaded.
+	HasLogo *bool `json:"hasLogo,omitempty"`
+	// Whether the organization has a dark mode logo uploaded.
+	HasLogoDark *bool `json:"hasLogoDark,omitempty"`
 	// Color for hover states
 	HoverColor *string `json:"hoverColor,omitempty"`
 	// Text color for hover states
@@ -5175,12 +5183,8 @@ type Theme struct {
 	InputDisabledText *string `json:"inputDisabledText,omitempty"`
 	// If true, applies CSS invert filter to the light logo when displayed on dark themes. Only used if logoDark is not set.
 	InvertLogoOnDark *bool `json:"invertLogoOnDark,omitempty"`
-	// Whether this is a dark theme
-	IsDark *bool `json:"isDark,omitempty"`
 	// Color for links
 	LinkColor *string `json:"linkColor,omitempty"`
-	// URL or path to the dark mode variant of the organization logo
-	LogoDark *string `json:"logoDark,omitempty"`
 	// Background color for muted panels
 	MutedPanelBg *string `json:"mutedPanelBg,omitempty"`
 	// Text color for muted panels
@@ -5208,9 +5212,7 @@ type Theme struct {
 	// The message to show in the top banner
 	TopBannerMessage *string `json:"topBannerMessage,omitempty"`
 	// Text color for the top banner
-	TopBannerTextColor *string `json:"topBannerTextColor,omitempty"`
-	// Whether to show the organization logo on the sidebar
-	UseLogo              *bool          `json:"useLogo,omitempty"`
+	TopBannerTextColor   *string        `json:"topBannerTextColor,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

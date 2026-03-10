@@ -2652,6 +2652,10 @@
             "description": "Unique completion ID",
             "type": "string"
           },
+          "messageId": {
+            "description": "Backend-generated message ID for persistence",
+            "type": "string"
+          },
           "model": {
             "description": "Model used",
             "type": "string"
@@ -9212,6 +9216,10 @@
             "description": "Message role",
             "type": "string"
           },
+          "stopped": {
+            "description": "Whether the message was stopped early by user",
+            "type": "boolean"
+          },
           "timestamp": {
             "description": "Message timestamp",
             "format": "date-time",
@@ -11851,7 +11859,7 @@
           },
           "orgTheme": {
             "$ref": "#/components/schemas/Theme",
-            "description": "The theme settings for the organization, if applicable. Only returned if the user is authenticated, and they are using the organization theme."
+            "description": "The theme settings for the organization, if applicable. Only returned if the user is authenticated."
           },
           "platformName": {
             "description": "The display name of the platform.",
@@ -15197,6 +15205,20 @@
             ],
             "type": "string"
           },
+          "hasLogo": {
+            "description": "Whether the organization has a logo uploaded.",
+            "examples": [
+              true
+            ],
+            "type": "boolean"
+          },
+          "hasLogoDark": {
+            "description": "Whether the organization has a dark mode logo uploaded.",
+            "examples": [
+              false
+            ],
+            "type": "boolean"
+          },
           "hoverColor": {
             "description": "Color for hover states",
             "examples": [
@@ -15239,24 +15261,10 @@
             ],
             "type": "boolean"
           },
-          "isDark": {
-            "description": "Whether this is a dark theme",
-            "examples": [
-              false
-            ],
-            "type": "boolean"
-          },
           "linkColor": {
             "description": "Color for links",
             "examples": [
               "#3b82f6"
-            ],
-            "type": "string"
-          },
-          "logoDark": {
-            "description": "URL or path to the dark mode variant of the organization logo",
-            "examples": [
-              "/logos/org-dark.svg"
             ],
             "type": "string"
           },
@@ -15357,13 +15365,6 @@
               "#000"
             ],
             "type": "string"
-          },
-          "useLogo": {
-            "description": "Whether to show the organization logo on the sidebar",
-            "examples": [
-              true
-            ],
-            "type": "boolean"
           }
         },
         "type": [
@@ -20927,6 +20928,15 @@
             "name": "X-Persist",
             "schema": {
               "description": "Whether to persist the conversation (true/false)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-provided user message ID",
+            "in": "header",
+            "name": "X-User-Message-Id",
+            "schema": {
+              "description": "Client-provided user message ID",
               "type": "string"
             }
           }

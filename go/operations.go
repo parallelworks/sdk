@@ -1523,6 +1523,8 @@ type StreamChatCompletionParams struct {
 	XParentMessageID *string `json:"X-Parent-Message-Id,omitempty"`
 	// Whether to persist the conversation (true/false)
 	XPersist *string `json:"X-Persist,omitempty"`
+	// Client-provided user message ID
+	XUserMessageID *string `json:"X-User-Message-Id,omitempty"`
 }
 
 // StreamChatCompletion - Create chat completion (streaming)
@@ -1545,6 +1547,9 @@ func (c *Client) StreamChatCompletion(ctx context.Context, body ChatCompletionRe
 		}
 		if params.XPersist != nil {
 			headers.Set("X-Persist", fmt.Sprintf("%v", *params.XPersist))
+		}
+		if params.XUserMessageID != nil {
+			headers.Set("X-User-Message-Id", fmt.Sprintf("%v", *params.XUserMessageID))
 		}
 	}
 	var result []any
