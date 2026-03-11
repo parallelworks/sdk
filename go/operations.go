@@ -1160,6 +1160,144 @@ func (c *Client) UpdateInstanceStatus(ctx context.Context, body PatchInstanceSta
 	return nil
 }
 
+// GithubInstallations - List GitHub App installations
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists GitHub App installations accessible to the current user.
+func (c *Client) GithubInstallations(ctx context.Context) (*ListInstallationsOutputBody, error) {
+	path := "/api/integrations/github/installations"
+
+	var result ListInstallationsOutputBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GithubOauthUnlink - Unlink GitHub account
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Unlinks the current user's GitHub account and removes the stored token.
+func (c *Client) GithubOauthUnlink(ctx context.Context) error {
+	path := "/api/integrations/github/oauth"
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// GithubOauthAuthorize - Initiate GitHub OAuth flow
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Redirects the user to GitHub to install the app and authorize.
+func (c *Client) GithubOauthAuthorize(ctx context.Context) error {
+	path := "/api/integrations/github/oauth/authorize"
+
+	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// GithubOauthCallbackParams contains optional parameters for the GithubOauthCallback operation.
+type GithubOauthCallbackParams struct {
+	// Authorization code from GitHub
+	Code *string `json:"code,omitempty"`
+	// State parameter for CSRF validation
+	State *string `json:"state,omitempty"`
+}
+
+// GithubOauthCallback - Handle GitHub OAuth callback
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Handles the OAuth callback from GitHub, exchanges the code for a token, and stores the connection.
+func (c *Client) GithubOauthCallback(ctx context.Context, opts ...GithubOauthCallbackParams) error {
+	path := "/api/integrations/github/oauth/callback"
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "code", params.Code)
+		addQueryParam(queryValues, "state", params.State)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// GithubOauthStatus - Get user GitHub connection status
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the current user's GitHub connection status.
+func (c *Client) GithubOauthStatus(ctx context.Context) (*OauthStatusResponse, error) {
+	path := "/api/integrations/github/oauth/status"
+
+	var result OauthStatusResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GithubReposParams contains optional parameters for the GithubRepos operation.
+type GithubReposParams struct {
+	// Page number
+	Page *int64 `json:"page,omitempty"`
+	// Results per page
+	PerPage *int64 `json:"per_page,omitempty"`
+	// Filter repositories by name
+	Q *string `json:"q,omitempty"`
+}
+
+// GithubRepos - List accessible GitHub repositories
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists repositories accessible via the user's GitHub App installation.
+func (c *Client) GithubRepos(ctx context.Context, opts ...GithubReposParams) (*ListReposOutputBody, error) {
+	path := "/api/integrations/github/repos"
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "page", params.Page)
+		addQueryParam(queryValues, "per_page", params.PerPage)
+		addQueryParam(queryValues, "q", params.Q)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result ListReposOutputBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GithubWebhook - GitHub App webhook endpoint
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Receives webhook events from GitHub for installation and authorization lifecycle management.
+func (c *Client) GithubWebhook(ctx context.Context, body []byte) error {
+	path := "/api/integrations/github/webhook"
+
+	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // GetExistingClusters - Get existing clusters
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -5936,6 +6074,56 @@ func (c *Client) CreatePlatformImage(ctx context.Context, body *Image) (*Image, 
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// GetGithubAppConfig - Get GitHub App configuration
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns the platform-level GitHub App configuration.
+func (c *Client) GetGithubAppConfig(ctx context.Context) (*GitHubAppConfigResponse, error) {
+	path := "/api/platform/integrations/github"
+
+	var result GitHubAppConfigResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PutGithubAppConfig - Configure GitHub App
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Creates or updates the platform-level GitHub App configuration.
+func (c *Client) PutGithubAppConfig(ctx context.Context, body PutGitHubAppConfigInputBody) (*GitHubAppConfigResponse, error) {
+	path := "/api/platform/integrations/github"
+
+	var result GitHubAppConfigResponse
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteGithubAppConfig - Remove GitHub App configuration
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Removes the platform-level GitHub App configuration.
+func (c *Client) DeleteGithubAppConfig(ctx context.Context) error {
+	path := "/api/platform/integrations/github"
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // GetKeys - List JWKs

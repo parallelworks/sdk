@@ -5837,6 +5837,43 @@
         ],
         "type": "object"
       },
+      "GitHubAppConfigResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "appId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "appSlug": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "clientSecretConfigured": {
+            "type": "boolean"
+          },
+          "privateKeyConfigured": {
+            "type": "boolean"
+          },
+          "webhookSecretConfigured": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "appName",
+          "appSlug",
+          "appId",
+          "clientId",
+          "clientSecretConfigured",
+          "privateKeyConfigured",
+          "webhookSecretConfigured"
+        ],
+        "type": "object"
+      },
       "GoogleBucket": {
         "additionalProperties": false,
         "properties": {
@@ -7410,6 +7447,36 @@
         ],
         "type": "object"
       },
+      "InstallationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "accountLogin": {
+            "type": "string"
+          },
+          "accountType": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "installationId": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "installationId",
+          "accountLogin",
+          "accountType",
+          "avatarUrl",
+          "createdAt"
+        ],
+        "type": "object"
+      },
       "Instance": {
         "additionalProperties": false,
         "properties": {
@@ -8237,6 +8304,24 @@
         ],
         "type": "object"
       },
+      "ListInstallationsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "installations": {
+            "items": {
+              "$ref": "#/components/schemas/InstallationResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "installations"
+        ],
+        "type": "object"
+      },
       "ListModelsResponse": {
         "additionalProperties": false,
         "properties": {
@@ -8296,6 +8381,29 @@
         },
         "required": [
           "permissions"
+        ],
+        "type": "object"
+      },
+      "ListReposOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "repos": {
+            "items": {
+              "$ref": "#/components/schemas/RepoResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "repos",
+          "totalCount"
         ],
         "type": "object"
       },
@@ -10604,6 +10712,28 @@
         ],
         "type": "object"
       },
+      "OauthStatusResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "appConfigured": {
+            "type": "boolean"
+          },
+          "appSlug": {
+            "type": "string"
+          },
+          "connectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "appConfigured"
+        ],
+        "type": "object"
+      },
       "Oidc": {
         "additionalProperties": false,
         "properties": {
@@ -12647,6 +12777,39 @@
         ],
         "type": "object"
       },
+      "PutGitHubAppConfigInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "appId": {
+            "description": "GitHub App ID",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "clientId": {
+            "description": "OAuth Client ID for user authentication",
+            "minLength": 1,
+            "type": "string"
+          },
+          "clientSecret": {
+            "description": "OAuth Client Secret (only sent when updating)",
+            "type": "string"
+          },
+          "privateKeyPEM": {
+            "description": "Private key in PEM format (only sent when updating)",
+            "type": "string"
+          },
+          "webhookSecret": {
+            "description": "Webhook secret for verifying GitHub webhook payloads (only sent when updating)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "appId",
+          "clientId"
+        ],
+        "type": "object"
+      },
       "PutImageInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -13295,6 +13458,48 @@
           "current",
           "ready",
           "createdAt"
+        ],
+        "type": "object"
+      },
+      "RepoResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "defaultBranch": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "htmlUrl": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "private": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "fullName",
+          "name",
+          "private",
+          "htmlUrl",
+          "description",
+          "defaultBranch",
+          "updatedAt"
         ],
         "type": "object"
       },
@@ -20038,6 +20243,314 @@
         "tags": [
           "Instances"
         ]
+      }
+    },
+    "/api/integrations/github/installations": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists GitHub App installations accessible to the current user.",
+        "operationId": "github-installations",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListInstallationsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List GitHub App installations",
+        "tags": [
+          "GitHub"
+        ]
+      }
+    },
+    "/api/integrations/github/oauth": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUnlinks the current user's GitHub account and removes the stored token.",
+        "operationId": "github-oauth-unlink",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Unlink GitHub account",
+        "tags": [
+          "GitHub"
+        ]
+      }
+    },
+    "/api/integrations/github/oauth/authorize": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRedirects the user to GitHub to install the app and authorize.",
+        "operationId": "github-oauth-authorize",
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Initiate GitHub OAuth flow",
+        "tags": [
+          "GitHub"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/integrations/github/oauth/callback": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nHandles the OAuth callback from GitHub, exchanges the code for a token, and stores the connection.",
+        "operationId": "github-oauth-callback",
+        "parameters": [
+          {
+            "description": "Authorization code from GitHub",
+            "explode": false,
+            "in": "query",
+            "name": "code",
+            "schema": {
+              "description": "Authorization code from GitHub",
+              "type": "string"
+            }
+          },
+          {
+            "description": "State parameter for CSRF validation",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "State parameter for CSRF validation",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Handle GitHub OAuth callback",
+        "tags": [
+          "GitHub"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/integrations/github/oauth/status": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the current user's GitHub connection status.",
+        "operationId": "github-oauth-status",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthStatusResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get user GitHub connection status",
+        "tags": [
+          "GitHub"
+        ]
+      }
+    },
+    "/api/integrations/github/repos": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists repositories accessible via the user's GitHub App installation.",
+        "operationId": "github-repos",
+        "parameters": [
+          {
+            "description": "Installation ID to list repos for",
+            "explode": false,
+            "in": "query",
+            "name": "installation_id",
+            "required": true,
+            "schema": {
+              "description": "Installation ID to list repos for",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "Page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Results per page",
+            "explode": false,
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "default": 30,
+              "description": "Results per page",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filter repositories by name",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Filter repositories by name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListReposOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List accessible GitHub repositories",
+        "tags": [
+          "GitHub"
+        ]
+      }
+    },
+    "/api/integrations/github/webhook": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReceives webhook events from GitHub for installation and authorization lifecycle management.",
+        "operationId": "github-webhook",
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "contentMediaType": "application/octet-stream",
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "GitHub App webhook endpoint",
+        "tags": [
+          "GitHub"
+        ],
+        "x-internal": true
       }
     },
     "/api/internal/usercontainer/existing": {
@@ -36882,6 +37395,101 @@
         ]
       }
     },
+    "/api/platform/integrations/github": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nRemoves the platform-level GitHub App configuration.",
+        "operationId": "delete-github-app-config",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Remove GitHub App configuration",
+        "tags": [
+          "GitHub"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns the platform-level GitHub App configuration.",
+        "operationId": "get-github-app-config",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitHubAppConfigResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get GitHub App configuration",
+        "tags": [
+          "GitHub"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nCreates or updates the platform-level GitHub App configuration.",
+        "operationId": "put-github-app-config",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutGitHubAppConfigInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitHubAppConfigResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Configure GitHub App",
+        "tags": [
+          "GitHub"
+        ]
+      }
+    },
     "/api/platform/keys": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the list of JWKS, these are public keys used for verifying JWTs",
@@ -40053,6 +40661,10 @@
     {
       "description": "Endpoints related to feature preview management",
       "name": "Feature Previews"
+    },
+    {
+      "description": "Endpoints related to GitHub App integration",
+      "name": "GitHub"
     },
     {
       "description": "Endpoints related to user and organization groups",

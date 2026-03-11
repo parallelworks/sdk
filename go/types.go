@@ -2045,6 +2045,17 @@ type GetUserResourcesOutputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type GitHubAppConfigResponse struct {
+	AppID                   int64          `json:"appId"`
+	AppName                 string         `json:"appName"`
+	AppSlug                 string         `json:"appSlug"`
+	ClientID                string         `json:"clientId"`
+	ClientSecretConfigured  bool           `json:"clientSecretConfigured"`
+	PrivateKeyConfigured    bool           `json:"privateKeyConfigured"`
+	WebhookSecretConfigured bool           `json:"webhookSecretConfigured"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
+}
+
 type GoogleBucket struct {
 	// Resources the storage is attached to.
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
@@ -2609,6 +2620,15 @@ type Infrastructure struct {
 	AdditionalProperties  map[string]any      `json:"-,omitempty"`
 }
 
+type InstallationResponse struct {
+	AccountLogin         string         `json:"accountLogin"`
+	AccountType          string         `json:"accountType"`
+	AvatarURL            string         `json:"avatarUrl"`
+	CreatedAt            time.Time      `json:"createdAt"`
+	InstallationID       int64          `json:"installationId"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type Instance struct {
 	// The architecture of the Instance.
 	Architecture *string `json:"architecture,omitempty"`
@@ -2863,6 +2883,11 @@ type ListConversationsBody struct {
 	AdditionalProperties map[string]any        `json:"-,omitempty"`
 }
 
+type ListInstallationsOutputBody struct {
+	Installations        []InstallationResponse `json:"installations"`
+	AdditionalProperties map[string]any         `json:"-,omitempty"`
+}
+
 type ListModelsResponse struct {
 	// List of available model IDs
 	Models               []string       `json:"models"`
@@ -2880,6 +2905,12 @@ type ListOrgUsersOutputBody struct {
 type ListPermissionsBody struct {
 	Permissions          []PermissionEntry `json:"permissions"`
 	AdditionalProperties map[string]any    `json:"-,omitempty"`
+}
+
+type ListReposOutputBody struct {
+	Repos                []RepoResponse `json:"repos"`
+	TotalCount           int64          `json:"totalCount"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ListUserAttachmentsBody struct {
@@ -3651,6 +3682,14 @@ type NotificationSettings struct {
 	AdditionalProperties map[string]any                `json:"-,omitempty"`
 }
 
+type OauthStatusResponse struct {
+	AppConfigured        bool           `json:"appConfigured"`
+	AppSlug              *string        `json:"appSlug,omitempty"`
+	ConnectedAt          *time.Time     `json:"connectedAt,omitempty"`
+	Username             *string        `json:"username,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type Oidc struct {
 	// Whether to allow new user creation
 	AllowNewUserCreation *bool `json:"allowNewUserCreation,omitempty"`
@@ -4335,6 +4374,20 @@ type ProvisionStatusStruct struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type PutGitHubAppConfigInputBody struct {
+	// GitHub App ID
+	AppID int64 `json:"appId"`
+	// OAuth Client ID for user authentication
+	ClientID string `json:"clientId"`
+	// OAuth Client Secret (only sent when updating)
+	ClientSecret *string `json:"clientSecret,omitempty"`
+	// Private key in PEM format (only sent when updating)
+	PrivateKeyPem *string `json:"privateKeyPEM,omitempty"`
+	// Webhook secret for verifying GitHub webhook payloads (only sent when updating)
+	WebhookSecret        *string        `json:"webhookSecret,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type PutImageInputBody struct {
 	// Image architecture
 	Architecture string `json:"architecture"`
@@ -4532,6 +4585,18 @@ type ReplicaSetInfo struct {
 	Ready int32 `json:"ready"`
 	// Deployment revision number
 	Revision             string         `json:"revision"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type RepoResponse struct {
+	DefaultBranch        string         `json:"defaultBranch"`
+	Description          string         `json:"description"`
+	FullName             string         `json:"fullName"`
+	HTMLURL              string         `json:"htmlUrl"`
+	ID                   int64          `json:"id"`
+	Name                 string         `json:"name"`
+	Private              bool           `json:"private"`
+	UpdatedAt            time.Time      `json:"updatedAt"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
