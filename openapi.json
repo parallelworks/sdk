@@ -19541,6 +19541,93 @@
         ]
       }
     },
+    "/api/auth/token/cluster-session": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGenerates a JWT token for cluster session authentication.",
+        "operationId": "get-cluster-session-token",
+        "parameters": [
+          {
+            "description": "The session ID",
+            "explode": false,
+            "in": "query",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "description": "The session ID",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The cloud provider",
+            "explode": false,
+            "in": "query",
+            "name": "provider",
+            "required": true,
+            "schema": {
+              "description": "The cloud provider",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The cluster name",
+            "explode": false,
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The session number",
+            "explode": false,
+            "in": "query",
+            "name": "session_number",
+            "required": true,
+            "schema": {
+              "description": "The session number",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get cluster session JWT token",
+        "tags": [
+          "Authentication"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/auth/token/oidc": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGet an OIDC token for the logged in user to access a Kubernetes cluster.",
@@ -38830,6 +38917,39 @@
         ]
       }
     },
+    "/api/sso/cac/redirect": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRedirects the user to the CAC certificate verification endpoint on port 8443.",
+        "operationId": "get-cac-redirect",
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Redirect to CAC verification",
+        "tags": [
+          "Authentication"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/sso/impersonate": {
       "delete": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCancels the current impersonation session and returns to the original admin user.",
@@ -40589,7 +40709,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {

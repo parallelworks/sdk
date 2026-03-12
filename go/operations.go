@@ -879,6 +879,21 @@ func (c *Client) GetAuthSsoOidcRedirect(ctx context.Context, authID string) erro
 	return nil
 }
 
+// GetClusterSessionToken - Get cluster session JWT token
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Generates a JWT token for cluster session authentication.
+func (c *Client) GetClusterSessionToken(ctx context.Context) (*string, error) {
+	path := "/api/auth/token/cluster-session"
+
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetAuthTokenOidcParams contains optional parameters for the GetAuthTokenOidc operation.
 type GetAuthTokenOidcParams struct {
 	// Name of the Kubernetes cluster
@@ -6601,6 +6616,20 @@ func (c *Client) DeleteSSHPrivateKey(ctx context.Context, name string) error {
 	path = pathReplace(path, "name", name)
 
 	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// GetCacRedirect - Redirect to CAC verification
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Redirects the user to the CAC certificate verification endpoint on port 8443.
+func (c *Client) GetCacRedirect(ctx context.Context) error {
+	path := "/api/sso/cac/redirect"
+
+	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
 		return parseErrorError(err)
 	}
 	return nil
