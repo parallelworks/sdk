@@ -2820,6 +2820,58 @@
         ],
         "type": "object"
       },
+      "ChatCompletionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "choices": {
+            "description": "Completion choices",
+            "items": {
+              "$ref": "#/components/schemas/Choice"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "created": {
+            "description": "Unix timestamp",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": "Unique completion ID",
+            "type": "string"
+          },
+          "messageId": {
+            "description": "Backend-generated message ID for persistence",
+            "type": "string"
+          },
+          "model": {
+            "description": "Model used",
+            "type": "string"
+          },
+          "object": {
+            "description": "Object type (chat.completion)",
+            "type": "string"
+          },
+          "system_fingerprint": {
+            "description": "System fingerprint",
+            "type": "string"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/Usage",
+            "description": "Token usage statistics"
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "created",
+          "model",
+          "choices"
+        ],
+        "type": "object"
+      },
       "ChatMessage": {
         "additionalProperties": true,
         "properties": {
@@ -7492,7 +7544,8 @@
             "enum": [
               "aws",
               "google",
-              "azure"
+              "azure",
+              "oracle"
             ],
             "examples": [
               "aws"
@@ -13905,37 +13958,6 @@
         ],
         "type": "object"
       },
-      "SSEError": {
-        "additionalProperties": false,
-        "properties": {
-          "error": {
-            "$ref": "#/components/schemas/SSEErrorDetail",
-            "description": "Error details"
-          }
-        },
-        "required": [
-          "error"
-        ],
-        "type": "object"
-      },
-      "SSEErrorDetail": {
-        "additionalProperties": false,
-        "properties": {
-          "message": {
-            "description": "Error message",
-            "type": "string"
-          },
-          "type": {
-            "description": "Error type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "message",
-          "type"
-        ],
-        "type": "object"
-      },
       "SchedulerInfo": {
         "additionalProperties": false,
         "properties": {
@@ -20049,26 +20071,6 @@
         "operationId": "get-groups",
         "parameters": [
           {
-            "description": "Filters groups that cannot use this provider. This is a legacy query parameter. Prefer the 'network' parameter instead to filter by network access.",
-            "example": "aws-slurm",
-            "explode": false,
-            "in": "query",
-            "name": "provider",
-            "schema": {
-              "description": "Filters groups that cannot use this provider. This is a legacy query parameter. Prefer the 'network' parameter instead to filter by network access.",
-              "enum": [
-                "aws-slurm",
-                "google-slurm",
-                "azure-slurm",
-                "existing"
-              ],
-              "examples": [
-                "aws-slurm"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "Only return groups that have access to this network.",
             "example": "mynetwork",
             "explode": false,
@@ -20265,7 +20267,8 @@
                     "aws",
                     "azure",
                     "google",
-                    "openstack"
+                    "openstack",
+                    "oracle"
                   ],
                   "examples": [
                     "aws"
@@ -21501,8 +21504,8 @@
     },
     "/api/openai/v1/chat/completions": {
       "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nOpenAI-compatible streaming chat completions endpoint. Model format: 'provider-id/model-name'",
-        "operationId": "streamChatCompletion",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nOpenAI-compatible chat completions endpoint. Set stream=true for SSE streaming or stream=false (default) for a single JSON response. Model format: 'provider-id/model-name'",
+        "operationId": "chatCompletion",
         "parameters": [
           {
             "description": "Persist to existing conversation",
@@ -21554,95 +21557,18 @@
         "responses": {
           "200": {
             "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatCompletionResponse"
+                }
+              },
               "text/event-stream": {
                 "schema": {
-                  "description": "Each oneOf object in the array represents one possible Server Sent Events (SSE) message, serialized as UTF-8 text according to the SSE specification.",
-                  "items": {
-                    "oneOf": [
-                      {
-                        "properties": {
-                          "data": {
-                            "type": "string"
-                          },
-                          "event": {
-                            "const": "",
-                            "description": "The event name.",
-                            "type": "string"
-                          },
-                          "id": {
-                            "description": "The event ID.",
-                            "type": "integer"
-                          },
-                          "retry": {
-                            "description": "The retry time in milliseconds.",
-                            "type": "integer"
-                          }
-                        },
-                        "required": [
-                          "data"
-                        ],
-                        "title": "Event ",
-                        "type": "object"
-                      },
-                      {
-                        "properties": {
-                          "data": {
-                            "$ref": "#/components/schemas/SSEError"
-                          },
-                          "event": {
-                            "const": "error",
-                            "description": "The event name.",
-                            "type": "string"
-                          },
-                          "id": {
-                            "description": "The event ID.",
-                            "type": "integer"
-                          },
-                          "retry": {
-                            "description": "The retry time in milliseconds.",
-                            "type": "integer"
-                          }
-                        },
-                        "required": [
-                          "data",
-                          "event"
-                        ],
-                        "title": "Event error",
-                        "type": "object"
-                      },
-                      {
-                        "properties": {
-                          "data": {
-                            "$ref": "#/components/schemas/ChatCompletionChunk"
-                          },
-                          "event": {
-                            "const": "message",
-                            "description": "The event name.",
-                            "type": "string"
-                          },
-                          "id": {
-                            "description": "The event ID.",
-                            "type": "integer"
-                          },
-                          "retry": {
-                            "description": "The retry time in milliseconds.",
-                            "type": "integer"
-                          }
-                        },
-                        "required": [
-                          "data"
-                        ],
-                        "title": "Event message",
-                        "type": "object"
-                      }
-                    ]
-                  },
-                  "title": "Server Sent Events",
-                  "type": "array"
+                  "$ref": "#/components/schemas/ChatCompletionChunk"
                 }
               }
             },
-            "description": "OK"
+            "description": "Successful response. Returns SSE stream when stream=true, or JSON when stream=false."
           },
           "default": {
             "content": {
@@ -21655,7 +21581,7 @@
             "description": "Error"
           }
         },
-        "summary": "Create chat completion (streaming)",
+        "summary": "Create chat completion",
         "tags": [
           "AI Chat"
         ]

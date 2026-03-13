@@ -1078,8 +1078,6 @@ func (c *Client) GetFeaturePreviewMarkdown(ctx context.Context, flag string) (*s
 
 // GetGroupsParams contains optional parameters for the GetGroups operation.
 type GetGroupsParams struct {
-	// Filters groups that cannot use this provider. This is a legacy query parameter. Prefer the 'network' parameter instead to filter by network access.
-	Provider *string `json:"provider,omitempty"`
 	// Only return groups that have access to this network.
 	Network *string `json:"network,omitempty"`
 }
@@ -1095,7 +1093,6 @@ func (c *Client) GetGroups(ctx context.Context, opts ...GetGroupsParams) (*[]Gro
 	if len(opts) > 0 {
 		params := opts[0]
 		queryValues := url.Values{}
-		addQueryParam(queryValues, "provider", params.Provider)
 		addQueryParam(queryValues, "network", params.Network)
 		if len(queryValues) > 0 {
 			path += "?" + queryValues.Encode()
@@ -1668,8 +1665,8 @@ func (c *Client) GetRecommendedResources(ctx context.Context) (*RecommendedResou
 	return &result, nil
 }
 
-// StreamChatCompletionParams contains optional parameters for the StreamChatCompletion operation.
-type StreamChatCompletionParams struct {
+// ChatCompletionParams contains optional parameters for the ChatCompletion operation.
+type ChatCompletionParams struct {
 	// Persist to existing conversation
 	XConversationID *string `json:"X-Conversation-Id,omitempty"`
 	// Branch from specific message
@@ -1680,12 +1677,12 @@ type StreamChatCompletionParams struct {
 	XUserMessageID *string `json:"X-User-Message-Id,omitempty"`
 }
 
-// StreamChatCompletion - Create chat completion (streaming)
+// ChatCompletion - Create chat completion
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// OpenAI-compatible streaming chat completions endpoint. Model format: 'provider-id/model-name'
-func (c *Client) StreamChatCompletion(ctx context.Context, body ChatCompletionRequest, opts ...StreamChatCompletionParams) (*[]any, error) {
+// OpenAI-compatible chat completions endpoint. Set stream=true for SSE streaming or stream=false (default) for a single JSON response. Model format: 'provider-id/model-name'
+func (c *Client) ChatCompletion(ctx context.Context, body ChatCompletionRequest, opts ...ChatCompletionParams) (*ChatCompletionResponse, error) {
 	path := "/api/openai/v1/chat/completions"
 
 	var headers http.Header
@@ -1705,8 +1702,8 @@ func (c *Client) StreamChatCompletion(ctx context.Context, body ChatCompletionRe
 			headers.Set("X-User-Message-Id", fmt.Sprintf("%v", *params.XUserMessageID))
 		}
 	}
-	var result []any
-	if err := c.do(ctx, "POST", path, body, &result, "text/event-stream", headers); err != nil {
+	var result ChatCompletionResponse
+	if err := c.do(ctx, "POST", path, body, &result, "application/json", headers); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil

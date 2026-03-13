@@ -1022,6 +1022,25 @@ type ChatCompletionRequest struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ChatCompletionResponse struct {
+	// Completion choices
+	Choices []Choice `json:"choices"`
+	// Unix timestamp
+	Created int64 `json:"created"`
+	// Unique completion ID
+	ID string `json:"id"`
+	// Backend-generated message ID for persistence
+	MessageID *string `json:"messageId,omitempty"`
+	// Model used
+	Model string `json:"model"`
+	// Object type (chat.completion)
+	Object string `json:"object"`
+	// System fingerprint
+	SystemFingerprint    *string        `json:"system_fingerprint,omitempty"`
+	Usage                *Usage         `json:"usage,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ChatMessage struct {
 	// IDs of attachments to include with this message
 	AttachmentIds []string `json:"attachment_ids,omitempty"`
@@ -4732,19 +4751,6 @@ type RuntimeAlertInput struct {
 	Enabled bool `json:"enabled"`
 	// Runtime alert interval in hours (1-168).
 	IntervalHours        *int64         `json:"intervalHours,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type SseError struct {
-	Error                SseErrorDetail `json:"error"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type SseErrorDetail struct {
-	// Error message
-	Message string `json:"message"`
-	// Error type
-	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
