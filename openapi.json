@@ -12655,12 +12655,104 @@
         ],
         "type": "object"
       },
+      "ProvisionStatusChild": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "id",
+          "label",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "ProvisionStatusChildResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "description": "The creation timestamp.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "description": "Error message if the child provision step failed.",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier of the child provision status record.",
+            "type": "string"
+          },
+          "index": {
+            "description": "The index of the child record.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "description": "The label or title of the child provision step.",
+            "type": "string"
+          },
+          "status": {
+            "description": "The current status of the child provision step.",
+            "type": "string"
+          },
+          "updatedAt": {
+            "description": "The last update timestamp.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "id",
+          "label",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
       "ProvisionStatusRecord": {
         "additionalProperties": false,
         "properties": {
           "attributes": {
             "items": {
               "$ref": "#/components/schemas/ProvisionStatusRecordAttribute"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/ProvisionStatusChild"
             },
             "type": [
               "array",
@@ -12738,6 +12830,16 @@
             "description": "Additional attributes associated with the provision step.",
             "items": {
               "$ref": "#/components/schemas/ProvisionStatusAttribute"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "children": {
+            "description": "Child provision status records for expandable steps.",
+            "items": {
+              "$ref": "#/components/schemas/ProvisionStatusChildResponse"
             },
             "type": [
               "array",

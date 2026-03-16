@@ -4338,8 +4338,38 @@ type ProvisionStatusAttribute struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ProvisionStatusChild struct {
+	CreatedAt            time.Time      `json:"createdAt"`
+	Error                *string        `json:"error,omitempty"`
+	ID                   string         `json:"id"`
+	Index                int64          `json:"index"`
+	Label                string         `json:"label"`
+	Status               string         `json:"status"`
+	UpdatedAt            time.Time      `json:"updatedAt"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ProvisionStatusChildResponse struct {
+	// The creation timestamp.
+	CreatedAt time.Time `json:"createdAt"`
+	// Error message if the child provision step failed.
+	Error *string `json:"error,omitempty"`
+	// The unique identifier of the child provision status record.
+	ID string `json:"id"`
+	// The index of the child record.
+	Index int64 `json:"index"`
+	// The label or title of the child provision step.
+	Label string `json:"label"`
+	// The current status of the child provision step.
+	Status string `json:"status"`
+	// The last update timestamp.
+	UpdatedAt            time.Time      `json:"updatedAt"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ProvisionStatusRecord struct {
 	Attributes           []ProvisionStatusRecordAttribute `json:"attributes"`
+	Children             []ProvisionStatusChild           `json:"children,omitempty"`
 	CreatedAt            time.Time                        `json:"createdAt"`
 	Error                string                           `json:"error"`
 	ID                   string                           `json:"id"`
@@ -4362,6 +4392,8 @@ type ProvisionStatusRecordAttribute struct {
 type ProvisionStatusResponseRecord struct {
 	// Additional attributes associated with the provision step.
 	Attributes []ProvisionStatusAttribute `json:"attributes"`
+	// Child provision status records for expandable steps.
+	Children []ProvisionStatusChildResponse `json:"children,omitempty"`
 	// The creation timestamp in RFC3339 format.
 	CreatedAt string `json:"createdAt"`
 	// Error message if the provision step failed.
