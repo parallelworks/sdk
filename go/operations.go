@@ -879,6 +879,35 @@ func (c *Client) GetAuthSsoOidcRedirect(ctx context.Context, authID string) erro
 	return nil
 }
 
+// GetAuthTokenParams contains optional parameters for the GetAuthToken operation.
+type GetAuthTokenParams struct {
+	// Token time-to-live in hours (1-24).
+	Ttl *int64 `json:"ttl,omitempty"`
+}
+
+// GetAuthToken - Generate a user token
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Generates a token for the authenticated user. The token can be used for API authentication.
+func (c *Client) GetAuthToken(ctx context.Context, opts ...GetAuthTokenParams) (*string, error) {
+	path := "/api/auth/token"
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "ttl", params.Ttl)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetClusterSessionToken - Get cluster session JWT token
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.

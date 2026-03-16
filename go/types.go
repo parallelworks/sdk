@@ -3537,6 +3537,8 @@ type Nfs struct {
 	Name string `json:"name"`
 	// User who created the NFS
 	Namespace string `json:"namespace"`
+	// Region of the NFS
+	Region *string `json:"region,omitempty"`
 	// List of groups with whom the NFS is shared
 	Shared []Shared `json:"shared"`
 	// Size of the NFS in GiB
@@ -5732,9 +5734,7 @@ type WorkflowConfiguration struct {
 	// Input values to load when selected.
 	Inputs map[string]any `json:"inputs,omitempty"`
 	// Configuration name.
-	Name string `json:"name"`
-	// Target tags for this configuration.
-	TargetTags           []string       `json:"targetTags,omitempty"`
+	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

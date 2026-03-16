@@ -10297,6 +10297,10 @@
             "description": "User who created the NFS",
             "type": "string"
           },
+          "region": {
+            "description": "Region of the NFS",
+            "type": "string"
+          },
           "shared": {
             "description": "List of groups with whom the NFS is shared",
             "items": {
@@ -16830,16 +16834,6 @@
           "name": {
             "description": "Configuration name.",
             "type": "string"
-          },
-          "targetTags": {
-            "description": "Target tags for this configuration.",
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
           }
         },
         "required": [
@@ -19558,6 +19552,54 @@
           }
         },
         "summary": "Redirect to OIDC auth",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/auth/token": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGenerates a token for the authenticated user. The token can be used for API authentication.",
+        "operationId": "get-auth-token",
+        "parameters": [
+          {
+            "description": "Token time-to-live in hours (1-24).",
+            "explode": false,
+            "in": "query",
+            "name": "ttl",
+            "schema": {
+              "default": 24,
+              "description": "Token time-to-live in hours (1-24).",
+              "format": "int64",
+              "maximum": 24,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Generate a user token",
         "tags": [
           "Authentication"
         ]
