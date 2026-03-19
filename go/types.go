@@ -785,12 +785,11 @@ type AzureSasToken struct {
 }
 
 type BillingResponse struct {
-	ID                   *string                            `json:"id,omitempty"`
-	ProvisionOutput      CloudAccountBillingProvisionOutput `json:"provisionOutput"`
-	ProvisionedByOrg     *bool                              `json:"provisionedByOrg"`
-	Status               *string                            `json:"status"`
-	UpdatedAt            *time.Time                         `json:"updatedAt"`
-	AdditionalProperties map[string]any                     `json:"-,omitempty"`
+	ID                   *string        `json:"id,omitempty"`
+	ProvisionedByOrg     *bool          `json:"provisionedByOrg"`
+	Status               *string        `json:"status"`
+	UpdatedAt            *time.Time     `json:"updatedAt"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type BooleanPolicyOutput struct {
@@ -1069,50 +1068,19 @@ type Choice struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type CloudAccount struct {
-	Billing              CloudAccountBilling     `json:"billing"`
-	CreatedAt            time.Time               `json:"createdAt"`
-	Credentials          CloudAccountCredentials `json:"credentials"`
-	Csp                  *string                 `json:"csp"`
-	CspID                *string                 `json:"cspId"`
-	EncryptKey           *string                 `json:"encryptKey,omitempty"`
-	GovCloud             *bool                   `json:"govCloud,omitempty"`
-	ID                   string                  `json:"id"`
-	Name                 *string                 `json:"name"`
-	OpenstackMetadata    *OpenStackMetadata      `json:"openstackMetadata,omitempty"`
-	Organization         string                  `json:"organization"`
-	Permissions          map[string]any          `json:"permissions"`
-	UpdatedAt            time.Time               `json:"updatedAt"`
-	AdditionalProperties map[string]any          `json:"-,omitempty"`
+type CloudAccountBillingResponse struct {
+	ProvisionedByOrg     bool           `json:"provisionedByOrg"`
+	Status               string         `json:"status"`
+	UpdatedAt            *time.Time     `json:"updatedAt"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type CloudAccountBilling struct {
-	ProvisionOutput      CloudAccountBillingProvisionOutput `json:"provisionOutput"`
-	ProvisionedByOrg     *bool                              `json:"provisionedByOrg"`
-	Status               *string                            `json:"status"`
-	UpdatedAt            *time.Time                         `json:"updatedAt"`
-	AdditionalProperties map[string]any                     `json:"-,omitempty"`
-}
-
-type CloudAccountBillingProvisionOutput struct {
-	AwsS3Bucket                  *string        `json:"awsS3Bucket,omitempty"`
-	AwsS3BucketRegion            *string        `json:"awsS3BucketRegion,omitempty"`
-	AzureBlobContainerName       *string        `json:"azureBlobContainerName,omitempty"`
-	AzureStorageAccount          *string        `json:"azureStorageAccount,omitempty"`
-	GoogleBigQueryDataset        *string        `json:"googleBigQueryDataset,omitempty"`
-	GoogleBigQueryDatasetProject *string        `json:"googleBigQueryDatasetProject,omitempty"`
-	AdditionalProperties         map[string]any `json:"-,omitempty"`
-}
-
-type CloudAccountCredentials struct {
-	AwsAccessKeyID                  *string        `json:"awsAccessKeyId,omitempty"`
-	AzureClientID                   *string        `json:"azureClientId,omitempty"`
-	GoogleServiceAccount            *string        `json:"googleServiceAccount,omitempty"`
-	OpenstackServiceAccountUsername *string        `json:"openstackServiceAccountUsername,omitempty"`
-	OracleUserOcid                  *string        `json:"oracleUserOcid,omitempty"`
-	SufficientPermissions           *string        `json:"sufficientPermissions"`
-	UpdatedAt                       *time.Time     `json:"updatedAt"`
-	AdditionalProperties            map[string]any `json:"-,omitempty"`
+type CloudAccountCreateResponse struct {
+	Csp                  string         `json:"csp"`
+	CspID                string         `json:"cspId"`
+	GovCloud             bool           `json:"govCloud"`
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CloudAccountCredentialsInput struct {
@@ -1165,9 +1133,66 @@ type CloudAccountCredentialsInput struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type CloudAccountPermissions struct {
+type CloudAccountCredentialsResponse struct {
+	AwsAccessKeyID                  *string        `json:"awsAccessKeyId,omitempty"`
+	AzureClientID                   *string        `json:"azureClientId,omitempty"`
+	GoogleServiceAccount            *string        `json:"googleServiceAccount,omitempty"`
+	OpenstackServiceAccountUsername *string        `json:"openstackServiceAccountUsername,omitempty"`
+	OracleUserOcid                  *string        `json:"oracleUserOcid,omitempty"`
+	SufficientPermissions           string         `json:"sufficientPermissions"`
+	UpdatedAt                       *time.Time     `json:"updatedAt"`
+	AdditionalProperties            map[string]any `json:"-,omitempty"`
+}
+
+type CloudAccountDetail struct {
+	Billing              CloudAccountBillingResponse     `json:"billing"`
+	Credentials          CloudAccountCredentialsResponse `json:"credentials"`
+	Csp                  string                          `json:"csp"`
+	CspID                string                          `json:"cspId"`
+	EncryptKey           *string                         `json:"encryptKey,omitempty"`
+	GovCloud             bool                            `json:"govCloud"`
+	Name                 string                          `json:"name"`
+	Networks             []CloudAccountNetworkSummary    `json:"networks"`
+	OpenstackMetadata    *OpenstackMetadata              `json:"openstackMetadata,omitempty"`
+	Permissions          map[string]any                  `json:"permissions"`
+	AdditionalProperties map[string]any                  `json:"-,omitempty"`
+}
+
+type CloudAccountListItem struct {
+	Csp                  string         `json:"csp"`
+	CspID                string         `json:"cspId"`
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CloudAccountNetwork struct {
+	CloudAccount         string           `json:"cloudAccount"`
+	CloudResources       []RegionResource `json:"cloudResources"`
+	CreatedAt            time.Time        `json:"createdAt"`
+	Csp                  string           `json:"csp"`
+	DnsZoneID            *string          `json:"dnsZoneId,omitempty"`
+	DnsZoneName          *string          `json:"dnsZoneName,omitempty"`
+	ID                   string           `json:"id"`
+	Name                 string           `json:"name"`
+	Organization         string           `json:"organization"`
+	ProvisioningMode     *string          `json:"provisioningMode,omitempty"`
+	Regions              []ConfigRegion   `json:"regions"`
+	Status               string           `json:"status"`
+	UpdatedAt            time.Time        `json:"updatedAt"`
+	AdditionalProperties map[string]any   `json:"-,omitempty"`
+}
+
+type CloudAccountNetworkSummary struct {
+	Name                 string         `json:"name"`
+	ProvisioningMode     *string        `json:"provisioningMode,omitempty"`
+	Regions              []ConfigRegion `json:"regions"`
+	Status               string         `json:"status"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CloudAccountPermissionsEntry struct {
 	Groups               []string       `json:"groups"`
-	Organization         *bool          `json:"organization"`
+	Organization         bool           `json:"organization"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -1290,6 +1315,12 @@ type Config struct {
 	Type string `json:"type"`
 	// Resources using this config
 	UsedBy               []string       `json:"usedBy,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ConfigRegion struct {
+	Cidr                 string         `json:"cidr"`
+	Region               string         `json:"region"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -1766,6 +1797,20 @@ type DeltaMessage struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type DockerWorkspaceSettings struct {
+	// A list of hosts to add to the DNS search path for workspaces.
+	Dns []string `json:"dns"`
+	// A list of environment variables to set in workspaces.
+	Envs []string `json:"envs"`
+	// The prefix for the home directory in workspaces.
+	HomeDirPrefix string `json:"homeDirPrefix"`
+	// A list of mounts to be used in Kubernetes workspaces.
+	K8sMounts []string `json:"k8sMounts"`
+	// A list of mounts to be used in docker workspaces.
+	Mounts               []string       `json:"mounts"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type DuplicateWorkflowBody struct {
 	// Display name for the duplicated workflow
 	NewName              string         `json:"newName"`
@@ -1927,6 +1972,14 @@ type ForkWorkflowBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type FormFile struct {
+	ContentType          string         `json:"ContentType"`
+	Filename             string         `json:"Filename"`
+	IsSet                bool           `json:"IsSet"`
+	Size                 int64          `json:"Size"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type Function struct {
 	// Function description
 	Description *string `json:"description,omitempty"`
@@ -2006,24 +2059,6 @@ type GetAccessResponse struct {
 	// Access permissions by permission type
 	Permissions          map[string]any `json:"permissions"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type GetCloudAccountResponse struct {
-	Billing              CloudAccountBilling     `json:"billing"`
-	CreatedAt            time.Time               `json:"createdAt"`
-	Credentials          CloudAccountCredentials `json:"credentials"`
-	Csp                  *string                 `json:"csp"`
-	CspID                *string                 `json:"cspId"`
-	EncryptKey           *string                 `json:"encryptKey,omitempty"`
-	GovCloud             *bool                   `json:"govCloud,omitempty"`
-	ID                   string                  `json:"id"`
-	Name                 *string                 `json:"name"`
-	Networks             []Infrastructure        `json:"networks"`
-	OpenstackMetadata    *OpenStackMetadata      `json:"openstackMetadata,omitempty"`
-	Organization         string                  `json:"organization"`
-	Permissions          map[string]any          `json:"permissions"`
-	UpdatedAt            time.Time               `json:"updatedAt"`
-	AdditionalProperties map[string]any          `json:"-,omitempty"`
 }
 
 type GetClusterMetricsOutputBody struct {
@@ -2597,48 +2632,6 @@ type Image struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type Infrastructure struct {
-	Attached              any                 `json:"attached,omitempty"`
-	AttachedStorages      []Item              `json:"attachedStorages,omitempty"`
-	CloudAccount          *string             `json:"cloudAccount,omitempty"`
-	CostLastUpdated       *time.Time          `json:"costLastUpdated,omitempty"`
-	CostTrackingStatus    *string             `json:"costTrackingStatus,omitempty"`
-	CreatedAt             time.Time           `json:"createdAt"`
-	Csp                   *string             `json:"csp"`
-	CurrentlyProvisioning *bool               `json:"currentlyProvisioning,omitempty"`
-	Description           *string             `json:"description,omitempty"`
-	DisplayName           *string             `json:"displayName,omitempty"`
-	Ephemeral             *bool               `json:"ephemeral,omitempty"`
-	ExpiresAt             *int64              `json:"expiresAt,omitempty"`
-	ID                    string              `json:"id"`
-	ImageURL              *string             `json:"imageUrl,omitempty"`
-	Ingested              *bool               `json:"ingested"`
-	Key                   *string             `json:"key,omitempty"`
-	Name                  *string             `json:"name"`
-	Network               *string             `json:"network,omitempty"`
-	Organization          *string             `json:"organization,omitempty"`
-	Prices                *Prices             `json:"prices,omitempty"`
-	ProvisionOutput       map[string]any      `json:"provisionOutput,omitempty"`
-	ProvisionStatus       map[string]any      `json:"provisionStatus,omitempty"`
-	Provisioned           *bool               `json:"provisioned,omitempty"`
-	Region                *string             `json:"region,omitempty"`
-	Root                  *bool               `json:"root,omitempty"`
-	RuntimeAlert          *RuntimeAlert       `json:"runtimeAlert,omitempty"`
-	SessionCostLimit      *SessionCostAlert   `json:"sessionCostLimit,omitempty"`
-	SessionNumber         *int64              `json:"sessionNumber,omitempty"`
-	Sessionless           *bool               `json:"sessionless"`
-	Shared                []SharedPermissions `json:"shared,omitempty"`
-	Status                *string             `json:"status,omitempty"`
-	Tags                  []string            `json:"tags,omitempty"`
-	Team                  *string             `json:"team,omitempty"`
-	TimeProvisioned       *int64              `json:"timeProvisioned,omitempty"`
-	Type                  *string             `json:"type"`
-	UpdatedAt             time.Time           `json:"updatedAt"`
-	User                  string              `json:"user"`
-	Variables             map[string]any      `json:"variables,omitempty"`
-	AdditionalProperties  map[string]any      `json:"-,omitempty"`
-}
-
 type InstallationResponse struct {
 	AccountLogin         string         `json:"accountLogin"`
 	AccountType          string         `json:"accountType"`
@@ -2745,14 +2738,6 @@ type IP struct {
 	Tags []string `json:"tags"`
 	// The username of the user that owns this resource.
 	User                 *string        `json:"user,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type Item struct {
-	Export               *string        `json:"export,omitempty"`
-	MountPoint           *string        `json:"mountPoint"`
-	Storage              any            `json:"storage"`
-	Volume               *string        `json:"volume,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -3202,6 +3187,30 @@ type ManagedSystemInfo struct {
 	DiskTotal int64 `json:"diskTotal"`
 	// Total memory in bytes
 	MemoryTotal          int64          `json:"memoryTotal"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type MarketplaceListItem struct {
+	// Item description
+	Description *string `json:"description,omitempty"`
+	// Whether the item is featured
+	Featured bool `json:"featured"`
+	// Icon URL for the item
+	Icon *string `json:"icon,omitempty"`
+	// Published name of the item
+	Name string `json:"name"`
+	// Name of the publisher (username or org display name)
+	Publisher string `json:"publisher"`
+	// URL-friendly identifier
+	Slug string `json:"slug"`
+	// Subtype of the item
+	Subtype string `json:"subtype"`
+	// Type of the item (workflow, storage, compute)
+	Type string `json:"type"`
+	// Whether the item is verified
+	Verified bool `json:"verified"`
+	// Available versions of the item
+	Versions             []string       `json:"versions"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -3793,7 +3802,7 @@ type OpenIDConfiguration struct {
 	AdditionalProperties  map[string]any `json:"-,omitempty"`
 }
 
-type OpenStackFlavor struct {
+type OpenstackFlavor struct {
 	CostPerHour          float64        `json:"costPerHour"`
 	DiskGb               int64          `json:"diskGb"`
 	ID                   string         `json:"id"`
@@ -3805,16 +3814,16 @@ type OpenStackFlavor struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type OpenStackMetadata struct {
-	Flavors              []OpenStackFlavor  `json:"flavors"`
-	LastSyncedAt         *time.Time         `json:"lastSyncedAt"`
-	Networks             []OpenStackNetwork `json:"networks"`
-	Regions              []string           `json:"regions"`
-	SyncStatus           *string            `json:"syncStatus"`
-	AdditionalProperties map[string]any     `json:"-,omitempty"`
+type OpenstackMetadata struct {
+	Flavors              []OpenstackFlavor `json:"flavors"`
+	LastSyncedAt         *time.Time        `json:"lastSyncedAt"`
+	Networks             []OpenstackNet    `json:"networks"`
+	Regions              []string          `json:"regions"`
+	SyncStatus           *string           `json:"syncStatus,omitempty"`
+	AdditionalProperties map[string]any    `json:"-,omitempty"`
 }
 
-type OpenStackNetwork struct {
+type OpenstackNet struct {
 	DnsDomain            string         `json:"dnsDomain"`
 	DnsNameservers       []string       `json:"dnsNameservers"`
 	ID                   string         `json:"id"`
@@ -4162,21 +4171,12 @@ type PlatformSettingsAdmin struct {
 	// Default image for user workspaces.
 	DefaultWorkspaceImage *string `json:"defaultWorkspaceImage,omitempty"`
 	// Default type for workspaces.
-	DefaultWorkspaceType *string `json:"defaultWorkspaceType,omitempty"`
-	// A list of hosts to add to the DNS search path for workspaces.
-	Dns []string `json:"dns"`
-	// A list of environment variables to set in workspaces.
-	Envs []string `json:"envs"`
-	// The prefix for the home directory in workspaces.
-	HomeDirPrefix string `json:"homeDirPrefix"`
-	// A list of mounts to be used in Kubernetes workspaces.
-	K8sMounts []string `json:"k8sMounts"`
+	DefaultWorkspaceType    *string                  `json:"defaultWorkspaceType,omitempty"`
+	DockerWorkspaceSettings *DockerWorkspaceSettings `json:"dockerWorkspaceSettings,omitempty"`
 	// The expiration date of the platform license, if valid.
 	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
 	// Indicates if the license is in the grace period.
 	LicenseGracePeriod *bool `json:"licenseGracePeriod,omitempty"`
-	// A list of mounts to be used in docker workspaces.
-	Mounts []string `json:"mounts"`
 	// Indicates if the platform license is valid.
 	ValidLicense         *bool          `json:"validLicense,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -4322,12 +4322,6 @@ type PostUsageEventInput struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type Prices struct {
-	CpuPrice             *float64       `json:"cpuPrice"`
-	MemoryPrice          *float64       `json:"memoryPrice"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
 type ProvisionStatusAttribute struct {
 	// The attribute key.
 	Key string `json:"key"`
@@ -4335,17 +4329,6 @@ type ProvisionStatusAttribute struct {
 	Type *string `json:"type,omitempty"`
 	// The attribute value.
 	Value                string         `json:"value"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type ProvisionStatusChild struct {
-	CreatedAt            time.Time      `json:"createdAt"`
-	Error                *string        `json:"error,omitempty"`
-	ID                   string         `json:"id"`
-	Index                int64          `json:"index"`
-	Label                string         `json:"label"`
-	Status               string         `json:"status"`
-	UpdatedAt            time.Time      `json:"updatedAt"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4364,28 +4347,6 @@ type ProvisionStatusChildResponse struct {
 	Status string `json:"status"`
 	// The last update timestamp.
 	UpdatedAt            time.Time      `json:"updatedAt"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type ProvisionStatusRecord struct {
-	Attributes           []ProvisionStatusRecordAttribute `json:"attributes"`
-	Children             []ProvisionStatusChild           `json:"children,omitempty"`
-	CreatedAt            time.Time                        `json:"createdAt"`
-	Error                string                           `json:"error"`
-	ID                   string                           `json:"id"`
-	Index                int64                            `json:"index"`
-	Label                string                           `json:"label"`
-	Logs                 string                           `json:"logs"`
-	Name                 string                           `json:"name"`
-	Status               string                           `json:"status"`
-	UpdatedAt            time.Time                        `json:"updatedAt"`
-	AdditionalProperties map[string]any                   `json:"-,omitempty"`
-}
-
-type ProvisionStatusRecordAttribute struct {
-	Key                  string         `json:"key"`
-	Type                 *string        `json:"type,omitempty"`
-	Value                string         `json:"value"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4583,6 +4544,24 @@ type RecommendedResourcesResponse struct {
 	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
+type RegionResource struct {
+	Cidr                 *string        `json:"cidr,omitempty"`
+	CspID                *string        `json:"cspId,omitempty"`
+	NetworkName          *string        `json:"networkName,omitempty"`
+	NodeSecurityGroupID  *string        `json:"nodeSecurityGroupId,omitempty"`
+	Region               *string        `json:"region,omitempty"`
+	SecurityGroupID      *string        `json:"securityGroupId,omitempty"`
+	Subnets              RegionSubnets  `json:"subnets"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type RegionSubnets struct {
+	Netapp               []SubnetInfo   `json:"netapp"`
+	Private              []SubnetInfo   `json:"private"`
+	Public               []SubnetInfo   `json:"public"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type RegisterNodeByTokenInputBody struct {
 	// Architecture
 	Arch string `json:"arch"`
@@ -4773,13 +4752,6 @@ type RunInBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type RuntimeAlert struct {
-	Enabled              bool           `json:"enabled"`
-	IntervalHours        int64          `json:"intervalHours"`
-	NextAlertTime        time.Time      `json:"nextAlertTime"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
 type RuntimeAlertInput struct {
 	// Whether to enable runtime alerts.
 	Enabled bool `json:"enabled"`
@@ -4962,15 +4934,6 @@ type SessionAlert struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type SessionCostAlert struct {
-	AutoTerminate        bool           `json:"autoTerminate"`
-	Enabled              bool           `json:"enabled"`
-	Limit                float64        `json:"limit"`
-	NextAlertTime        time.Time      `json:"nextAlertTime"`
-	UseRealtime          bool           `json:"useRealtime"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
 type SessionCostLimitInput struct {
 	// Auto-terminate when cost limit is reached.
 	AutoTerminate *bool `json:"autoTerminate,omitempty"`
@@ -5048,13 +5011,6 @@ type SharedPermission struct {
 	Organization *bool `json:"organization,omitempty"`
 	// Permissions granted
 	Permissions          any            `json:"permissions,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type SharedPermissions struct {
-	Organization         *bool          `json:"organization,omitempty"`
-	Permissions          any            `json:"permissions,omitempty"`
-	Team                 *string        `json:"team,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -5232,6 +5188,13 @@ type SubjectPermissions struct {
 	Groups map[string]any `json:"groups"`
 	// Map of permission names to whether entire organization has that access
 	Organization         map[string]any `json:"organization"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type SubnetInfo struct {
+	Cidr                 string         `json:"cidr"`
+	CspID                string         `json:"cspId"`
+	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

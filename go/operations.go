@@ -1452,6 +1452,44 @@ func (c *Client) GetLustre(ctx context.Context, opts ...GetLustreParams) (*[]Lus
 	return &result, nil
 }
 
+// ListMarketplaceItemsParams contains optional parameters for the ListMarketplaceItems operation.
+type ListMarketplaceItemsParams struct {
+	// If true, return only items modifiable by the user
+	Modifiable *bool `json:"modifiable,omitempty"`
+	// Only items published by the current user
+	Mine *bool `json:"mine,omitempty"`
+	// Only items published as the user's organization
+	Organization *bool `json:"organization,omitempty"`
+	// Only items the user has favorited
+	Favorited *bool `json:"favorited,omitempty"`
+}
+
+// ListMarketplaceItems - List Marketplace Items
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns all marketplace items accessible to the user.
+func (c *Client) ListMarketplaceItems(ctx context.Context, opts ...ListMarketplaceItemsParams) (*[]MarketplaceListItem, error) {
+	path := "/api/market"
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "modifiable", params.Modifiable)
+		addQueryParam(queryValues, "mine", params.Mine)
+		addQueryParam(queryValues, "organization", params.Organization)
+		addQueryParam(queryValues, "favorited", params.Favorited)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result []MarketplaceListItem
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // ForkMarketplaceItem - Fork Marketplace Item
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -2189,11 +2227,11 @@ func (c *Client) GetOrganizationBootstrapScripts(ctx context.Context, organizati
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns all cloud accounts for an organization
-func (c *Client) GetOrganizationCloudAccounts(ctx context.Context, organization string) (*[]CloudAccount, error) {
+func (c *Client) GetOrganizationCloudAccounts(ctx context.Context, organization string) (*[]CloudAccountListItem, error) {
 	path := "/api/organizations/{organization}/cloud-accounts"
 	path = pathReplace(path, "organization", organization)
 
-	var result []CloudAccount
+	var result []CloudAccountListItem
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -2205,11 +2243,11 @@ func (c *Client) GetOrganizationCloudAccounts(ctx context.Context, organization 
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Creates a new cloud account for an organization with the given cloud credentials
-func (c *Client) CreateOrganizationCloudAccount(ctx context.Context, organization string, body CreateCloudAccountBody) (*CloudAccount, error) {
+func (c *Client) CreateOrganizationCloudAccount(ctx context.Context, organization string, body CreateCloudAccountBody) (*CloudAccountCreateResponse, error) {
 	path := "/api/organizations/{organization}/cloud-accounts"
 	path = pathReplace(path, "organization", organization)
 
-	var result CloudAccount
+	var result CloudAccountCreateResponse
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -2221,12 +2259,12 @@ func (c *Client) CreateOrganizationCloudAccount(ctx context.Context, organizatio
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns a specific cloud account by name.
-func (c *Client) GetOrganizationCloudAccount(ctx context.Context, organization string, name string) (*GetCloudAccountResponse, error) {
+func (c *Client) GetOrganizationCloudAccount(ctx context.Context, organization string, name string) (*CloudAccountDetail, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "name", name)
 
-	var result GetCloudAccountResponse
+	var result CloudAccountDetail
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -2353,12 +2391,12 @@ func (c *Client) UpdateOrganizationCloudAccountCredentials(ctx context.Context, 
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns all networks associated with a cloud account.
-func (c *Client) GetOrganizationCloudAccountNetworks(ctx context.Context, organization string, name string) (*[]Infrastructure, error) {
+func (c *Client) GetOrganizationCloudAccountNetworks(ctx context.Context, organization string, name string) (*[]CloudAccountNetworkSummary, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/networks"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "name", name)
 
-	var result []Infrastructure
+	var result []CloudAccountNetworkSummary
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -2370,12 +2408,12 @@ func (c *Client) GetOrganizationCloudAccountNetworks(ctx context.Context, organi
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Creates a new network for the specified cloud account.
-func (c *Client) CreateOrganizationCloudAccountNetwork(ctx context.Context, organization string, name string, body CreateNetworkBody) (*Infrastructure, error) {
+func (c *Client) CreateOrganizationCloudAccountNetwork(ctx context.Context, organization string, name string, body CreateNetworkBody) (*CloudAccountNetwork, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/networks"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "name", name)
 
-	var result Infrastructure
+	var result CloudAccountNetwork
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -2387,13 +2425,13 @@ func (c *Client) CreateOrganizationCloudAccountNetwork(ctx context.Context, orga
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Get information about a network associated with a cloud account.
-func (c *Client) GetOrganizationCloudAccountNetwork(ctx context.Context, organization string, name string, networkName string) (*Infrastructure, error) {
+func (c *Client) GetOrganizationCloudAccountNetwork(ctx context.Context, organization string, name string, networkName string) (*CloudAccountNetwork, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/networks/{networkName}"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "name", name)
 	path = pathReplace(path, "networkName", networkName)
 
-	var result Infrastructure
+	var result CloudAccountNetwork
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -2439,12 +2477,12 @@ func (c *Client) UpdateOrganizationCloudAccountNetwork(ctx context.Context, orga
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns the list of available OpenStack flavors (instance types).
-func (c *Client) GetOpenstackFlavors(ctx context.Context, organization string, name string) (*[]OpenStackFlavor, error) {
+func (c *Client) GetOpenstackFlavors(ctx context.Context, organization string, name string) (*[]OpenstackFlavor, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/openstack/flavors"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "name", name)
 
-	var result []OpenStackFlavor
+	var result []OpenstackFlavor
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -2472,12 +2510,12 @@ func (c *Client) PatchOpenstackFlavors(ctx context.Context, organization string,
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns cached OpenStack metadata including regions, flavors, and networks.
-func (c *Client) GetOpenstackMetadata(ctx context.Context, organization string, name string) (*OpenStackMetadata, error) {
+func (c *Client) GetOpenstackMetadata(ctx context.Context, organization string, name string) (*OpenstackMetadata, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/openstack/metadata"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "name", name)
 
-	var result OpenStackMetadata
+	var result OpenstackMetadata
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -2489,12 +2527,12 @@ func (c *Client) GetOpenstackMetadata(ctx context.Context, organization string, 
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns the list of available OpenStack networks.
-func (c *Client) GetOpenstackNetworks(ctx context.Context, organization string, name string) (*[]OpenStackNetwork, error) {
+func (c *Client) GetOpenstackNetworks(ctx context.Context, organization string, name string) (*[]OpenstackNet, error) {
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/openstack/networks"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "name", name)
 
-	var result []OpenStackNetwork
+	var result []OpenstackNet
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}

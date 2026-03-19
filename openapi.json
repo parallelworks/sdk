@@ -2139,9 +2139,6 @@
           "id": {
             "type": "string"
           },
-          "provisionOutput": {
-            "$ref": "#/components/schemas/CloudAccountBillingProvisionOutput"
-          },
           "provisionedByOrg": {
             "type": [
               "boolean",
@@ -2165,8 +2162,7 @@
         "required": [
           "updatedAt",
           "status",
-          "provisionedByOrg",
-          "provisionOutput"
+          "provisionedByOrg"
         ],
         "type": "object"
       },
@@ -2951,94 +2947,14 @@
         ],
         "type": "object"
       },
-      "CloudAccount": {
+      "CloudAccountBillingResponse": {
         "additionalProperties": false,
         "properties": {
-          "billing": {
-            "$ref": "#/components/schemas/CloudAccountBilling"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "credentials": {
-            "$ref": "#/components/schemas/CloudAccountCredentials"
-          },
-          "csp": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "cspId": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "encryptKey": {
-            "type": "string"
-          },
-          "govCloud": {
+          "provisionedByOrg": {
             "type": "boolean"
           },
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "openstackMetadata": {
-            "$ref": "#/components/schemas/OpenStackMetadata"
-          },
-          "organization": {
-            "type": "string"
-          },
-          "permissions": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/CloudAccountPermissions"
-            },
-            "type": "object"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "organization",
-          "csp",
-          "cspId",
-          "credentials",
-          "billing",
-          "permissions",
-          "id",
-          "createdAt",
-          "updatedAt"
-        ],
-        "type": "object"
-      },
-      "CloudAccountBilling": {
-        "additionalProperties": false,
-        "properties": {
-          "provisionOutput": {
-            "$ref": "#/components/schemas/CloudAccountBillingProvisionOutput"
-          },
-          "provisionedByOrg": {
-            "type": [
-              "boolean",
-              "null"
-            ]
-          },
           "status": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
           "updatedAt": {
             "format": "date-time",
@@ -3051,70 +2967,31 @@
         "required": [
           "updatedAt",
           "status",
-          "provisionOutput",
           "provisionedByOrg"
         ],
         "type": "object"
       },
-      "CloudAccountBillingProvisionOutput": {
+      "CloudAccountCreateResponse": {
         "additionalProperties": false,
         "properties": {
-          "awsS3Bucket": {
+          "csp": {
             "type": "string"
           },
-          "awsS3BucketRegion": {
+          "cspId": {
             "type": "string"
           },
-          "azureBlobContainerName": {
-            "type": "string"
+          "govCloud": {
+            "type": "boolean"
           },
-          "azureStorageAccount": {
+          "name": {
             "type": "string"
-          },
-          "googleBigQueryDataset": {
-            "type": "string"
-          },
-          "googleBigQueryDatasetProject": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "CloudAccountCredentials": {
-        "additionalProperties": false,
-        "properties": {
-          "awsAccessKeyId": {
-            "type": "string"
-          },
-          "azureClientId": {
-            "type": "string"
-          },
-          "googleServiceAccount": {
-            "type": "string"
-          },
-          "openstackServiceAccountUsername": {
-            "type": "string"
-          },
-          "oracleUserOcid": {
-            "type": "string"
-          },
-          "sufficientPermissions": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": [
-              "string",
-              "null"
-            ]
           }
         },
         "required": [
-          "updatedAt",
-          "sufficientPermissions"
+          "name",
+          "csp",
+          "cspId",
+          "govCloud"
         ],
         "type": "object"
       },
@@ -3219,7 +3096,217 @@
         ],
         "type": "object"
       },
-      "CloudAccountPermissions": {
+      "CloudAccountCredentialsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "awsAccessKeyId": {
+            "type": "string"
+          },
+          "azureClientId": {
+            "type": "string"
+          },
+          "googleServiceAccount": {
+            "type": "string"
+          },
+          "openstackServiceAccountUsername": {
+            "type": "string"
+          },
+          "oracleUserOcid": {
+            "type": "string"
+          },
+          "sufficientPermissions": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "updatedAt",
+          "sufficientPermissions"
+        ],
+        "type": "object"
+      },
+      "CloudAccountDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "billing": {
+            "$ref": "#/components/schemas/CloudAccountBillingResponse"
+          },
+          "credentials": {
+            "$ref": "#/components/schemas/CloudAccountCredentialsResponse"
+          },
+          "csp": {
+            "type": "string"
+          },
+          "cspId": {
+            "type": "string"
+          },
+          "encryptKey": {
+            "type": "string"
+          },
+          "govCloud": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "networks": {
+            "items": {
+              "$ref": "#/components/schemas/CloudAccountNetworkSummary"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "openstackMetadata": {
+            "$ref": "#/components/schemas/OpenstackMetadata"
+          },
+          "permissions": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CloudAccountPermissionsEntry"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "csp",
+          "cspId",
+          "govCloud",
+          "credentials",
+          "billing",
+          "permissions",
+          "networks"
+        ],
+        "type": "object"
+      },
+      "CloudAccountListItem": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "type": "string"
+          },
+          "cspId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "csp",
+          "cspId"
+        ],
+        "type": "object"
+      },
+      "CloudAccountNetwork": {
+        "additionalProperties": false,
+        "properties": {
+          "cloudAccount": {
+            "type": "string"
+          },
+          "cloudResources": {
+            "items": {
+              "$ref": "#/components/schemas/RegionResource"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "csp": {
+            "type": "string"
+          },
+          "dnsZoneId": {
+            "type": "string"
+          },
+          "dnsZoneName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "organization": {
+            "type": "string"
+          },
+          "provisioningMode": {
+            "type": "string"
+          },
+          "regions": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigRegion"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "csp",
+          "organization",
+          "cloudAccount",
+          "createdAt",
+          "updatedAt",
+          "cloudResources",
+          "name",
+          "status",
+          "regions"
+        ],
+        "type": "object"
+      },
+      "CloudAccountNetworkSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "provisioningMode": {
+            "type": "string"
+          },
+          "regions": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigRegion"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "status",
+          "regions"
+        ],
+        "type": "object"
+      },
+      "CloudAccountPermissionsEntry": {
         "additionalProperties": false,
         "properties": {
           "groups": {
@@ -3232,10 +3319,7 @@
             ]
           },
           "organization": {
-            "type": [
-              "boolean",
-              "null"
-            ]
+            "type": "boolean"
           }
         },
         "required": [
@@ -3645,6 +3729,22 @@
           "dataCount",
           "keys",
           "createdAt"
+        ],
+        "type": "object"
+      },
+      "ConfigRegion": {
+        "additionalProperties": false,
+        "properties": {
+          "cidr": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "region",
+          "cidr"
         ],
         "type": "object"
       },
@@ -4957,6 +5057,63 @@
         },
         "type": "object"
       },
+      "DockerWorkspaceSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "dns": {
+            "description": "A list of hosts to add to the DNS search path for workspaces.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "envs": {
+            "description": "A list of environment variables to set in workspaces.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "homeDirPrefix": {
+            "description": "The prefix for the home directory in workspaces.",
+            "type": "string"
+          },
+          "k8sMounts": {
+            "description": "A list of mounts to be used in Kubernetes workspaces.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "mounts": {
+            "description": "A list of mounts to be used in docker workspaces.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "k8sMounts",
+          "homeDirPrefix",
+          "mounts",
+          "envs",
+          "dns"
+        ],
+        "type": "object"
+      },
       "DuplicateWorkflowBody": {
         "additionalProperties": false,
         "properties": {
@@ -5374,6 +5531,31 @@
         ],
         "type": "object"
       },
+      "FormFile": {
+        "additionalProperties": false,
+        "properties": {
+          "ContentType": {
+            "type": "string"
+          },
+          "Filename": {
+            "type": "string"
+          },
+          "IsSet": {
+            "type": "boolean"
+          },
+          "Size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ContentType",
+          "IsSet",
+          "Size",
+          "Filename"
+        ],
+        "type": "object"
+      },
       "Function": {
         "additionalProperties": true,
         "properties": {
@@ -5670,87 +5852,6 @@
         },
         "required": [
           "permissions"
-        ],
-        "type": "object"
-      },
-      "GetCloudAccountResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "billing": {
-            "$ref": "#/components/schemas/CloudAccountBilling"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "credentials": {
-            "$ref": "#/components/schemas/CloudAccountCredentials"
-          },
-          "csp": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "cspId": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "encryptKey": {
-            "type": "string"
-          },
-          "govCloud": {
-            "type": "boolean"
-          },
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "networks": {
-            "items": {
-              "$ref": "#/components/schemas/Infrastructure"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "openstackMetadata": {
-            "$ref": "#/components/schemas/OpenStackMetadata"
-          },
-          "organization": {
-            "type": "string"
-          },
-          "permissions": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/CloudAccountPermissions"
-            },
-            "type": "object"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "networks",
-          "name",
-          "organization",
-          "csp",
-          "cspId",
-          "credentials",
-          "billing",
-          "permissions",
-          "id",
-          "createdAt",
-          "updatedAt"
         ],
         "type": "object"
       },
@@ -7335,170 +7436,6 @@
         ],
         "type": "object"
       },
-      "Infrastructure": {
-        "additionalProperties": false,
-        "properties": {
-          "attached": {},
-          "attachedStorages": {
-            "items": {
-              "$ref": "#/components/schemas/Item"
-            },
-            "type": "array"
-          },
-          "cloudAccount": {
-            "type": "string"
-          },
-          "costLastUpdated": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "costTrackingStatus": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "csp": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "currentlyProvisioning": {
-            "type": "boolean"
-          },
-          "description": {
-            "type": "string"
-          },
-          "displayName": {
-            "type": "string"
-          },
-          "ephemeral": {
-            "type": "boolean"
-          },
-          "expiresAt": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "id": {
-            "type": "string"
-          },
-          "imageUrl": {
-            "type": "string"
-          },
-          "ingested": {
-            "type": [
-              "boolean",
-              "null"
-            ]
-          },
-          "key": {
-            "type": "string"
-          },
-          "name": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "network": {
-            "type": "string"
-          },
-          "organization": {
-            "type": "string"
-          },
-          "prices": {
-            "$ref": "#/components/schemas/Prices"
-          },
-          "provisionOutput": {
-            "additionalProperties": {},
-            "type": "object"
-          },
-          "provisionStatus": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/ProvisionStatusRecord"
-            },
-            "type": "object"
-          },
-          "provisioned": {
-            "type": "boolean"
-          },
-          "region": {
-            "type": "string"
-          },
-          "root": {
-            "type": "boolean"
-          },
-          "runtimeAlert": {
-            "$ref": "#/components/schemas/RuntimeAlert"
-          },
-          "sessionCostLimit": {
-            "$ref": "#/components/schemas/SessionCostAlert"
-          },
-          "sessionNumber": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "sessionless": {
-            "type": [
-              "boolean",
-              "null"
-            ]
-          },
-          "shared": {
-            "items": {
-              "$ref": "#/components/schemas/SharedPermissions"
-            },
-            "type": "array"
-          },
-          "status": {
-            "type": "string"
-          },
-          "tags": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "team": {
-            "type": "string"
-          },
-          "timeProvisioned": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "type": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "user": {
-            "type": "string"
-          },
-          "variables": {
-            "additionalProperties": {},
-            "type": "object"
-          }
-        },
-        "required": [
-          "name",
-          "user",
-          "type",
-          "csp",
-          "ingested",
-          "sessionless",
-          "id",
-          "createdAt",
-          "updatedAt"
-        ],
-        "type": "object"
-      },
       "InstallationResponse": {
         "additionalProperties": false,
         "properties": {
@@ -7922,29 +7859,6 @@
           "description",
           "group",
           "network"
-        ],
-        "type": "object"
-      },
-      "Item": {
-        "additionalProperties": false,
-        "properties": {
-          "export": {
-            "type": "string"
-          },
-          "mountPoint": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "storage": {},
-          "volume": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "storage",
-          "mountPoint"
         ],
         "type": "object"
       },
@@ -9279,6 +9193,68 @@
           "cpuCores",
           "memoryTotal",
           "diskTotal"
+        ],
+        "type": "object"
+      },
+      "MarketplaceListItem": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "Item description",
+            "type": "string"
+          },
+          "featured": {
+            "description": "Whether the item is featured",
+            "type": "boolean"
+          },
+          "icon": {
+            "description": "Icon URL for the item",
+            "type": "string"
+          },
+          "name": {
+            "description": "Published name of the item",
+            "type": "string"
+          },
+          "publisher": {
+            "description": "Name of the publisher (username or org display name)",
+            "type": "string"
+          },
+          "slug": {
+            "description": "URL-friendly identifier",
+            "type": "string"
+          },
+          "subtype": {
+            "description": "Subtype of the item",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of the item (workflow, storage, compute)",
+            "type": "string"
+          },
+          "verified": {
+            "description": "Whether the item is verified",
+            "type": "boolean"
+          },
+          "versions": {
+            "description": "Available versions of the item",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "slug",
+          "publisher",
+          "subtype",
+          "type",
+          "verified",
+          "featured",
+          "versions"
         ],
         "type": "object"
       },
@@ -11019,7 +10995,7 @@
         ],
         "type": "object"
       },
-      "OpenStackFlavor": {
+      "OpenstackFlavor": {
         "additionalProperties": false,
         "properties": {
           "costPerHour": {
@@ -11067,12 +11043,12 @@
         ],
         "type": "object"
       },
-      "OpenStackMetadata": {
+      "OpenstackMetadata": {
         "additionalProperties": false,
         "properties": {
           "flavors": {
             "items": {
-              "$ref": "#/components/schemas/OpenStackFlavor"
+              "$ref": "#/components/schemas/OpenstackFlavor"
             },
             "type": [
               "array",
@@ -11088,7 +11064,7 @@
           },
           "networks": {
             "items": {
-              "$ref": "#/components/schemas/OpenStackNetwork"
+              "$ref": "#/components/schemas/OpenstackNet"
             },
             "type": [
               "array",
@@ -11105,22 +11081,18 @@
             ]
           },
           "syncStatus": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           }
         },
         "required": [
           "regions",
           "flavors",
           "networks",
-          "lastSyncedAt",
-          "syncStatus"
+          "lastSyncedAt"
         ],
         "type": "object"
       },
-      "OpenStackNetwork": {
+      "OpenstackNet": {
         "additionalProperties": false,
         "properties": {
           "dnsDomain": {
@@ -12153,39 +12125,8 @@
             ],
             "type": "string"
           },
-          "dns": {
-            "description": "A list of hosts to add to the DNS search path for workspaces.",
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "envs": {
-            "description": "A list of environment variables to set in workspaces.",
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "homeDirPrefix": {
-            "description": "The prefix for the home directory in workspaces.",
-            "type": "string"
-          },
-          "k8sMounts": {
-            "description": "A list of mounts to be used in Kubernetes workspaces.",
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
+          "dockerWorkspaceSettings": {
+            "$ref": "#/components/schemas/DockerWorkspaceSettings"
           },
           "licenseExpiresAt": {
             "description": "The expiration date of the platform license, if valid.",
@@ -12196,28 +12137,11 @@
             "description": "Indicates if the license is in the grace period.",
             "type": "boolean"
           },
-          "mounts": {
-            "description": "A list of mounts to be used in docker workspaces.",
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
           "validLicense": {
             "description": "Indicates if the platform license is valid.",
             "type": "boolean"
           }
         },
-        "required": [
-          "k8sMounts",
-          "homeDirPrefix",
-          "mounts",
-          "envs",
-          "dns"
-        ],
         "type": "object"
       },
       "PodInfo": {
@@ -12609,30 +12533,6 @@
         ],
         "type": "object"
       },
-      "Prices": {
-        "additionalProperties": false,
-        "properties": {
-          "cpuPrice": {
-            "format": "double",
-            "type": [
-              "number",
-              "null"
-            ]
-          },
-          "memoryPrice": {
-            "format": "double",
-            "type": [
-              "number",
-              "null"
-            ]
-          }
-        },
-        "required": [
-          "cpuPrice",
-          "memoryPrice"
-        ],
-        "type": "object"
-      },
       "ProvisionStatusAttribute": {
         "additionalProperties": false,
         "properties": {
@@ -12652,44 +12552,6 @@
         "required": [
           "key",
           "value"
-        ],
-        "type": "object"
-      },
-      "ProvisionStatusChild": {
-        "additionalProperties": false,
-        "properties": {
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "error": {
-            "type": "string"
-          },
-          "id": {
-            "type": "string"
-          },
-          "index": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "label": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "index",
-          "id",
-          "label",
-          "status",
-          "createdAt",
-          "updatedAt"
         ],
         "type": "object"
       },
@@ -12735,91 +12597,6 @@
           "status",
           "createdAt",
           "updatedAt"
-        ],
-        "type": "object"
-      },
-      "ProvisionStatusRecord": {
-        "additionalProperties": false,
-        "properties": {
-          "attributes": {
-            "items": {
-              "$ref": "#/components/schemas/ProvisionStatusRecordAttribute"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "children": {
-            "items": {
-              "$ref": "#/components/schemas/ProvisionStatusChild"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "error": {
-            "type": "string"
-          },
-          "id": {
-            "type": "string"
-          },
-          "index": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "label": {
-            "type": "string"
-          },
-          "logs": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "index",
-          "id",
-          "name",
-          "status",
-          "logs",
-          "error",
-          "createdAt",
-          "updatedAt",
-          "attributes",
-          "label"
-        ],
-        "type": "object"
-      },
-      "ProvisionStatusRecordAttribute": {
-        "additionalProperties": false,
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "key",
-          "value"
         ],
         "type": "object"
       },
@@ -13460,6 +13237,74 @@
         ],
         "type": "object"
       },
+      "RegionResource": {
+        "additionalProperties": false,
+        "properties": {
+          "cidr": {
+            "type": "string"
+          },
+          "cspId": {
+            "type": "string"
+          },
+          "networkName": {
+            "type": "string"
+          },
+          "nodeSecurityGroupId": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "securityGroupId": {
+            "type": "string"
+          },
+          "subnets": {
+            "$ref": "#/components/schemas/RegionSubnets"
+          }
+        },
+        "required": [
+          "subnets"
+        ],
+        "type": "object"
+      },
+      "RegionSubnets": {
+        "additionalProperties": false,
+        "properties": {
+          "netapp": {
+            "items": {
+              "$ref": "#/components/schemas/SubnetInfo"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "private": {
+            "items": {
+              "$ref": "#/components/schemas/SubnetInfo"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "public": {
+            "items": {
+              "$ref": "#/components/schemas/SubnetInfo"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "private",
+          "public",
+          "netapp"
+        ],
+        "type": "object"
+      },
       "RegisterNodeByTokenInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -14019,28 +13864,6 @@
         },
         "required": [
           "kind"
-        ],
-        "type": "object"
-      },
-      "RuntimeAlert": {
-        "additionalProperties": false,
-        "properties": {
-          "enabled": {
-            "type": "boolean"
-          },
-          "intervalHours": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "nextAlertTime": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "enabled",
-          "intervalHours",
-          "nextAlertTime"
         ],
         "type": "object"
       },
@@ -14621,36 +14444,6 @@
         ],
         "type": "object"
       },
-      "SessionCostAlert": {
-        "additionalProperties": false,
-        "properties": {
-          "autoTerminate": {
-            "type": "boolean"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "limit": {
-            "format": "double",
-            "type": "number"
-          },
-          "nextAlertTime": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "useRealtime": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "enabled",
-          "useRealtime",
-          "autoTerminate",
-          "limit",
-          "nextAlertTime"
-        ],
-        "type": "object"
-      },
       "SessionCostLimitInput": {
         "additionalProperties": false,
         "properties": {
@@ -14836,19 +14629,6 @@
           },
           "permissions": {
             "description": "Permissions granted"
-          }
-        },
-        "type": "object"
-      },
-      "SharedPermissions": {
-        "additionalProperties": false,
-        "properties": {
-          "organization": {
-            "type": "boolean"
-          },
-          "permissions": {},
-          "team": {
-            "type": "string"
           }
         },
         "type": "object"
@@ -15426,6 +15206,26 @@
         "required": [
           "organization",
           "groups"
+        ],
+        "type": "object"
+      },
+      "SubnetInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "cidr": {
+            "type": "string"
+          },
+          "cspId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "cspId",
+          "cidr"
         ],
         "type": "object"
       },
@@ -17579,7 +17379,6 @@
         "parameters": [
           {
             "description": "Alert ID to delete.",
-            "example": "64c0d3b8f0a2c9a1b3d4e5f6",
             "in": "path",
             "name": "id",
             "required": true,
@@ -17774,7 +17573,6 @@
         "parameters": [
           {
             "description": "Start date in YYYY-MM-DD format",
-            "example": "2025-01-01",
             "explode": false,
             "in": "query",
             "name": "startDate",
@@ -17790,7 +17588,6 @@
           },
           {
             "description": "End date in YYYY-MM-DD format. Defaults to current date",
-            "example": "2025-01-31",
             "explode": false,
             "in": "query",
             "name": "endDate",
@@ -18174,7 +17971,6 @@
         "parameters": [
           {
             "description": "Report ID to delete.",
-            "example": "64c0d3b8f0a2c9a1b3d4e5f6",
             "in": "path",
             "name": "id",
             "required": true,
@@ -18216,7 +18012,6 @@
         "parameters": [
           {
             "description": "Report ID to delete.",
-            "example": "64c0d3b8f0a2c9a1b3d4e5f6",
             "in": "path",
             "name": "id",
             "required": true,
@@ -18265,7 +18060,6 @@
         "parameters": [
           {
             "description": "Report ID to update.",
-            "example": "64c0d3b8f0a2c9a1b3d4e5f6",
             "in": "path",
             "name": "id",
             "required": true,
@@ -18579,6 +18373,9 @@
                     "type": "string"
                   }
                 },
+                "required": [
+                  "file"
+                ],
                 "type": "object"
               }
             }
@@ -18906,6 +18703,9 @@
                     "type": "string"
                   }
                 },
+                "required": [
+                  "file"
+                ],
                 "type": "object"
               }
             }
@@ -20216,7 +20016,6 @@
         "parameters": [
           {
             "description": "Only return groups that have access to this network.",
-            "example": "mynetwork",
             "explode": false,
             "in": "query",
             "name": "network",
@@ -20271,7 +20070,6 @@
         "parameters": [
           {
             "description": "The URL of the Helm repository.",
-            "example": "https://charts.bitnami.com/bitnami",
             "explode": false,
             "in": "query",
             "name": "repoURL",
@@ -20285,7 +20083,6 @@
           },
           {
             "description": "The version of the Helm chart.",
-            "example": "1.2.3",
             "explode": false,
             "in": "query",
             "name": "version",
@@ -20299,7 +20096,6 @@
           },
           {
             "description": "The name of the Helm chart.",
-            "example": "nginx",
             "explode": false,
             "in": "query",
             "name": "chartName",
@@ -20313,7 +20109,6 @@
           },
           {
             "description": "The name of the Helm repository.",
-            "example": "bitnami",
             "explode": false,
             "in": "query",
             "name": "repoName",
@@ -20898,7 +20693,6 @@
           },
           {
             "description": "The region where the IP is provisioned.",
-            "example": "us-west-2",
             "explode": false,
             "in": "query",
             "name": "region",
@@ -21051,6 +20845,90 @@
         "summary": "List Lustre",
         "tags": [
           "Lustre"
+        ]
+      }
+    },
+    "/api/market": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns all marketplace items accessible to the user.",
+        "operationId": "list-marketplace-items",
+        "parameters": [
+          {
+            "description": "If true, return only items modifiable by the user",
+            "explode": false,
+            "in": "query",
+            "name": "modifiable",
+            "schema": {
+              "default": false,
+              "description": "If true, return only items modifiable by the user",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Only items published by the current user",
+            "explode": false,
+            "in": "query",
+            "name": "mine",
+            "schema": {
+              "default": false,
+              "description": "Only items published by the current user",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Only items published as the user's organization",
+            "explode": false,
+            "in": "query",
+            "name": "organization",
+            "schema": {
+              "default": false,
+              "description": "Only items published as the user's organization",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Only items the user has favorited",
+            "explode": false,
+            "in": "query",
+            "name": "favorited",
+            "schema": {
+              "default": false,
+              "description": "Only items the user has favorited",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MarketplaceListItem"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Marketplace Items",
+        "tags": [
+          "Marketplace"
         ]
       }
     },
@@ -21241,7 +21119,6 @@
           },
           {
             "description": "The region where the MACHINELEARNING WORKSPACE is provisioned.",
-            "example": "us-west-2",
             "explode": false,
             "in": "query",
             "name": "region",
@@ -21809,7 +21686,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -21919,7 +21795,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -21976,7 +21851,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -22027,7 +21901,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -22083,7 +21956,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -22144,7 +22016,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -22210,7 +22081,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -22446,7 +22316,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -22513,7 +22382,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -22727,7 +22595,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -22781,7 +22648,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -22839,7 +22705,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -22897,7 +22762,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -22953,7 +22817,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23021,7 +22884,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23069,7 +22931,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23083,7 +22944,6 @@
           },
           {
             "description": "The type of the bootstrap script.",
-            "example": "cloudclusters",
             "explode": false,
             "in": "query",
             "name": "type",
@@ -23137,7 +22997,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23156,7 +23015,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CloudAccount"
+                    "$ref": "#/components/schemas/CloudAccountListItem"
                   },
                   "type": [
                     "array",
@@ -23189,7 +23048,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23217,7 +23075,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CloudAccount"
+                  "$ref": "#/components/schemas/CloudAccountCreateResponse"
                 }
               }
             },
@@ -23247,7 +23105,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23296,7 +23153,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23324,7 +23180,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetCloudAccountResponse"
+                  "$ref": "#/components/schemas/CloudAccountDetail"
                 }
               }
             },
@@ -23465,7 +23321,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23514,7 +23369,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23570,7 +23424,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23628,7 +23481,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23689,7 +23541,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23718,7 +23569,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Infrastructure"
+                    "$ref": "#/components/schemas/CloudAccountNetworkSummary"
                   },
                   "type": [
                     "array",
@@ -23751,7 +23602,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23789,7 +23639,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Infrastructure"
+                  "$ref": "#/components/schemas/CloudAccountNetwork"
                 }
               }
             },
@@ -23819,7 +23669,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23878,7 +23727,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -23916,7 +23764,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Infrastructure"
+                  "$ref": "#/components/schemas/CloudAccountNetwork"
                 }
               }
             },
@@ -23944,7 +23792,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24015,7 +23862,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24044,7 +23890,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/OpenStackFlavor"
+                    "$ref": "#/components/schemas/OpenstackFlavor"
                   },
                   "type": [
                     "array",
@@ -24077,7 +23923,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24138,7 +23983,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24166,7 +24010,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OpenStackMetadata"
+                  "$ref": "#/components/schemas/OpenstackMetadata"
                 }
               }
             },
@@ -24196,7 +24040,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24225,7 +24068,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/OpenStackNetwork"
+                    "$ref": "#/components/schemas/OpenstackNet"
                   },
                   "type": [
                     "array",
@@ -24260,7 +24103,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24324,7 +24166,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24382,7 +24223,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24492,7 +24332,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24566,7 +24405,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24624,7 +24462,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24673,7 +24510,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24729,7 +24565,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24797,7 +24632,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24865,7 +24699,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24924,7 +24757,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -24986,7 +24818,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -25054,7 +24885,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -25128,7 +24958,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -25196,7 +25025,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -25304,7 +25132,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -25395,7 +25222,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -25460,7 +25286,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -25535,7 +25360,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -25616,7 +25440,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -25707,7 +25530,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -25814,7 +25636,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -25922,7 +25743,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -25995,7 +25815,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -26064,7 +25883,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -26135,7 +25953,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -26204,7 +26021,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -26281,7 +26097,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -26362,7 +26177,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -26506,7 +26320,6 @@
           },
           {
             "description": "Whether to delete dependent resources. Default is true.",
-            "example": true,
             "explode": false,
             "in": "query",
             "name": "cascade",
@@ -26521,7 +26334,6 @@
           },
           {
             "description": "Grace period in seconds for pod termination. Default is 30.",
-            "example": 30,
             "explode": false,
             "in": "query",
             "name": "gracePeriod",
@@ -26564,7 +26376,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -26578,7 +26389,6 @@
           },
           {
             "description": "Kubernetes cluster name",
-            "example": "prod-cluster",
             "in": "path",
             "name": "infraName",
             "required": true,
@@ -26626,7 +26436,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -26694,7 +26503,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -26762,7 +26570,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -26827,7 +26634,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -26885,7 +26691,6 @@
           },
           {
             "description": "Only return logs newer than this timestamp (RFC3339 format)",
-            "example": "2024-01-01T00:00:00Z",
             "explode": false,
             "in": "query",
             "name": "sinceTime",
@@ -26944,7 +26749,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27043,7 +26847,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27154,7 +26957,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27248,7 +27050,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27312,7 +27113,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27336,7 +27136,6 @@
           },
           {
             "description": "The name of the Kubernetes node",
-            "example": "node-1",
             "in": "path",
             "name": "nodeName",
             "required": true,
@@ -27394,7 +27193,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27458,7 +27256,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27527,7 +27324,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27589,7 +27385,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27658,7 +27453,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27738,7 +27532,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27784,7 +27577,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27841,7 +27633,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27880,7 +27671,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27931,7 +27721,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -27998,7 +27787,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28037,7 +27825,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28088,7 +27875,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28155,7 +27941,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28213,7 +27998,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28262,7 +28046,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28318,7 +28101,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28386,7 +28168,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28456,7 +28237,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28514,7 +28294,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28573,7 +28352,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28651,7 +28429,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28731,7 +28508,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28787,7 +28563,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28848,7 +28623,6 @@
         "parameters": [
           {
             "description": "Organization name",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -28862,7 +28636,6 @@
           },
           {
             "description": "Start date in YYYY-MM-DD format",
-            "example": "2025-01-01",
             "explode": false,
             "in": "query",
             "name": "startDate",
@@ -28878,7 +28651,6 @@
           },
           {
             "description": "End date in YYYY-MM-DD format. Defaults to current date",
-            "example": "2025-01-31",
             "explode": false,
             "in": "query",
             "name": "endDate",
@@ -28927,7 +28699,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29001,7 +28772,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29015,7 +28785,6 @@
           },
           {
             "description": "The name of the network to retrieve.",
-            "example": "example-network",
             "in": "path",
             "name": "networkName",
             "required": true,
@@ -29063,7 +28832,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29115,7 +28883,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29182,7 +28949,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29248,7 +29014,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29314,7 +29079,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29328,7 +29092,6 @@
           },
           {
             "description": "Name of the policy",
-            "example": "no-root-access",
             "in": "path",
             "name": "policyname",
             "required": true,
@@ -29369,7 +29132,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29429,11 +29191,10 @@
     "/api/organizations/{organization}/reports/allocations/{allocation}/usage/by-day": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns usage events grouped by day and type for charting and reporting.",
-        "operationId": "get-allocation-usage events-summary",
+        "operationId": "get-allocation-usage-events-summary",
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29572,7 +29333,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29630,7 +29390,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29684,7 +29443,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29794,7 +29552,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29840,7 +29597,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29897,7 +29653,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -29949,7 +29704,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30006,7 +29760,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30064,7 +29817,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30131,7 +29883,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30193,7 +29944,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30260,7 +30010,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30321,7 +30070,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30457,7 +30205,6 @@
           },
           {
             "description": "Username of the user to remove MFA for",
-            "example": "jake.thayne",
             "in": "path",
             "name": "username",
             "required": true,
@@ -30498,7 +30245,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30512,7 +30258,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -30564,7 +30309,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30578,7 +30322,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -30636,7 +30379,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30650,7 +30392,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -30699,7 +30440,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30713,7 +30453,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -30769,7 +30508,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30783,7 +30521,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -30851,7 +30588,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30865,7 +30601,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -30923,7 +30658,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -30937,7 +30671,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -30993,7 +30726,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31007,7 +30739,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31068,7 +30799,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31082,7 +30812,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31140,7 +30869,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31154,7 +30882,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31168,7 +30895,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -31215,7 +30941,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31229,7 +30954,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31243,7 +30967,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -31302,7 +31025,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31316,7 +31038,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31330,7 +31051,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -31372,7 +31092,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31386,7 +31105,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31400,7 +31118,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -31449,7 +31166,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31463,7 +31179,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31477,7 +31192,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -31526,7 +31240,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31540,7 +31253,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31554,7 +31266,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -31603,7 +31314,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31617,7 +31327,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31631,7 +31340,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -31680,7 +31388,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31694,7 +31401,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31708,7 +31414,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -31755,7 +31460,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31769,7 +31473,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31783,7 +31486,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -31842,7 +31544,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31856,7 +31557,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31870,7 +31570,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -31912,7 +31611,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -31926,7 +31624,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -31940,7 +31637,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -31954,7 +31650,6 @@
           },
           {
             "description": "The name of the Azure object to get pre-signed URL.",
-            "example": "path/to/file",
             "explode": false,
             "in": "query",
             "name": "objectName",
@@ -31969,7 +31664,6 @@
           },
           {
             "description": "The expiration time in seconds for the pre-signed URL. Default is 12 hours.",
-            "example": 43200,
             "explode": false,
             "in": "query",
             "name": "expiresIn",
@@ -31985,7 +31679,6 @@
           },
           {
             "description": "The permissions for the pre-signed URL. Default is read (r). Other permissions include write (w), delete (d), list (l), add (a), create (c). Combine multiple permissions as needed.",
-            "example": "rwdlac",
             "explode": false,
             "in": "query",
             "name": "permissions",
@@ -32038,7 +31731,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -32052,7 +31744,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -32066,7 +31757,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -32114,7 +31804,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -32128,7 +31817,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -32142,7 +31830,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -32191,7 +31878,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -32205,7 +31891,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -32219,7 +31904,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -32268,7 +31952,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -32282,7 +31965,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -32296,7 +31978,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -32345,7 +32026,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -32359,7 +32039,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -32373,7 +32052,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -32422,7 +32100,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -32510,7 +32187,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -32594,7 +32270,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -32683,7 +32358,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -32697,7 +32371,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -32898,7 +32571,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -32972,7 +32644,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -32986,7 +32657,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -33055,7 +32725,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33069,7 +32738,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -33083,7 +32751,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -33129,7 +32796,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33143,7 +32809,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -33157,7 +32822,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -33216,7 +32880,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33230,7 +32893,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -33244,7 +32906,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -33258,7 +32919,6 @@
           },
           {
             "description": "The name of the Google object to get pre-signed URL.",
-            "example": "path/to/file",
             "explode": false,
             "in": "query",
             "name": "objectName",
@@ -33273,7 +32933,6 @@
           },
           {
             "description": "The expiration time in seconds for the pre-signed URL. Default is 12 hours.",
-            "example": 43200,
             "explode": false,
             "in": "query",
             "name": "expiresIn",
@@ -33327,7 +32986,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33341,7 +32999,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -33355,7 +33012,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -33403,7 +33059,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33417,7 +33072,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -33431,7 +33085,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -33479,7 +33132,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33546,7 +33198,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33604,7 +33255,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33618,7 +33268,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -33670,7 +33319,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33684,7 +33332,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -33742,7 +33389,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33756,7 +33402,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -33805,7 +33450,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33819,7 +33463,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -33877,7 +33520,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33891,7 +33533,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -33960,7 +33601,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -33974,7 +33614,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34033,7 +33672,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34047,7 +33685,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34061,7 +33698,6 @@
           },
           {
             "description": "The name of the IP resource to delete.",
-            "example": "myIP",
             "in": "path",
             "name": "name",
             "required": true,
@@ -34102,7 +33738,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34116,7 +33751,6 @@
           },
           {
             "description": "The username of the user",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34166,7 +33800,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34180,7 +33813,6 @@
           },
           {
             "description": "The username of the user",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34242,7 +33874,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34256,7 +33887,6 @@
           },
           {
             "description": "The username of the user",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34306,7 +33936,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34320,7 +33949,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34378,7 +34006,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34392,7 +34019,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34406,7 +34032,6 @@
           },
           {
             "description": "The name of the Machine Learning Workspace resource.",
-            "example": "mymlworkspace",
             "in": "path",
             "name": "name",
             "required": true,
@@ -34454,7 +34079,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34468,7 +34092,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34482,7 +34105,6 @@
           },
           {
             "description": "The name of the Machine Learning Workspace resource.",
-            "example": "mymlworkspace",
             "in": "path",
             "name": "name",
             "required": true,
@@ -34530,7 +34152,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34544,7 +34165,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34558,7 +34178,6 @@
           },
           {
             "description": "The name of the Machine Learning Workspace resource.",
-            "example": "mymlworkspace",
             "in": "path",
             "name": "name",
             "required": true,
@@ -34599,7 +34218,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34613,7 +34231,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34627,7 +34244,6 @@
           },
           {
             "description": "The name of the Machine Learning Workspace resource.",
-            "example": "mymlworkspace",
             "in": "path",
             "name": "name",
             "required": true,
@@ -34675,7 +34291,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34689,7 +34304,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34742,7 +34356,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34756,7 +34369,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34815,7 +34427,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34829,7 +34440,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34843,7 +34453,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -34891,7 +34500,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34905,7 +34513,6 @@
           },
           {
             "description": "The user that owns this NetApp ONTAP storage.",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -34967,7 +34574,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -34981,7 +34587,6 @@
           },
           {
             "description": "The user that owns this NetApp ONTAP storage.",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35049,7 +34654,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35063,7 +34667,6 @@
           },
           {
             "description": "The username of the user that owns this NetApp ONTAP storage.",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35124,7 +34727,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35138,7 +34740,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35195,7 +34796,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35209,7 +34809,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35267,7 +34866,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35281,7 +34879,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35337,7 +34934,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35351,7 +34947,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35412,7 +35007,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35426,7 +35020,6 @@
           },
           {
             "description": "The username of the user",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35474,7 +35067,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35488,7 +35080,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35502,7 +35093,6 @@
           },
           {
             "description": "Session name.",
-            "example": "my-session",
             "in": "path",
             "name": "name",
             "required": true,
@@ -35541,7 +35131,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35555,7 +35144,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35569,7 +35157,6 @@
           },
           {
             "description": "Session name.",
-            "example": "my-session",
             "in": "path",
             "name": "name",
             "required": true,
@@ -35615,7 +35202,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35629,7 +35215,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35643,7 +35228,6 @@
           },
           {
             "description": "Session name.",
-            "example": "my-session",
             "in": "path",
             "name": "name",
             "required": true,
@@ -35701,7 +35285,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35715,7 +35298,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35729,7 +35311,6 @@
           },
           {
             "description": "Session name.",
-            "example": "my-session",
             "in": "path",
             "name": "name",
             "required": true,
@@ -35780,7 +35361,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35794,7 +35374,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35808,7 +35387,6 @@
           },
           {
             "description": "Session name.",
-            "example": "my-session",
             "in": "path",
             "name": "name",
             "required": true,
@@ -35856,7 +35434,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35870,7 +35447,6 @@
           },
           {
             "description": "The username of the user",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35909,7 +35485,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35923,7 +35498,6 @@
           },
           {
             "description": "The username of the user",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -35969,7 +35543,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -35983,7 +35556,6 @@
           },
           {
             "description": "The username of the user",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -36040,7 +35612,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36054,7 +35625,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -36122,7 +35692,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36240,7 +35809,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36296,7 +35864,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36363,7 +35930,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36474,7 +36040,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36488,7 +36053,6 @@
           },
           {
             "description": "Username of the resource owner",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "user",
             "required": true,
@@ -36502,7 +36066,6 @@
           },
           {
             "description": "The name of the storage resource.",
-            "example": "mystorage",
             "in": "path",
             "name": "name",
             "required": true,
@@ -36516,7 +36079,6 @@
           },
           {
             "description": "The type of storage to delete.",
-            "example": "aws-lustre",
             "in": "path",
             "name": "type",
             "required": true,
@@ -36577,7 +36139,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36626,7 +36187,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36687,7 +36247,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36700,7 +36259,6 @@
             }
           },
           {
-            "example": "myvariable",
             "in": "path",
             "name": "key",
             "required": true,
@@ -36738,7 +36296,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36751,7 +36308,6 @@
             }
           },
           {
-            "example": "myvariable",
             "in": "path",
             "name": "key",
             "required": true,
@@ -36815,7 +36371,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36867,7 +36422,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36925,7 +36479,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -36974,7 +36527,6 @@
         "parameters": [
           {
             "description": "The name of the organization.",
-            "example": "parallelworks",
             "in": "path",
             "name": "organization",
             "required": true,
@@ -37909,7 +37461,6 @@
         "parameters": [
           {
             "description": "Name of the policy",
-            "example": "no-root-access",
             "in": "path",
             "name": "policyname",
             "required": true,
@@ -38267,7 +37818,6 @@
         "parameters": [
           {
             "description": "Filter by organization",
-            "example": "parallelworks",
             "explode": false,
             "in": "query",
             "name": "organization",
@@ -38282,9 +37832,6 @@
           },
           {
             "description": "Filter by users",
-            "example": [
-              "Jake.Thayne"
-            ],
             "explode": true,
             "in": "query",
             "name": "user",
@@ -38306,9 +37853,6 @@
           },
           {
             "description": "Filter by groups",
-            "example": [
-              "group1"
-            ],
             "explode": true,
             "in": "query",
             "name": "group",
@@ -38330,9 +37874,6 @@
           },
           {
             "description": "Filter by resource names",
-            "example": [
-              "mycluster"
-            ],
             "explode": true,
             "in": "query",
             "name": "resource",
@@ -38354,9 +37895,6 @@
           },
           {
             "description": "Filter by sessions",
-            "example": [
-              "123"
-            ],
             "explode": true,
             "in": "query",
             "name": "session",
@@ -38378,7 +37916,6 @@
           },
           {
             "description": "Start date, specified in UTC",
-            "example": "2025-01-01",
             "explode": false,
             "in": "query",
             "name": "startDate",
@@ -38394,7 +37931,6 @@
           },
           {
             "description": "End date, specified in UTC Optional; defaults to current UTC time",
-            "example": "2025-01-31",
             "explode": false,
             "in": "query",
             "name": "endDate",
@@ -38706,7 +38242,6 @@
         "parameters": [
           {
             "description": "Username of the session owner (deprecated, use user)",
-            "example": "Jake.Thayne",
             "in": "path",
             "name": "namespace",
             "required": true,
@@ -38720,7 +38255,6 @@
           },
           {
             "description": "Session name.",
-            "example": "my-session",
             "in": "path",
             "name": "name",
             "required": true,
@@ -39679,7 +39213,6 @@
         "parameters": [
           {
             "description": "Username to query",
-            "example": "john.doe",
             "in": "path",
             "name": "username",
             "required": true,
