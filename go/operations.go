@@ -1044,67 +1044,6 @@ func (c *Client) GetClusters(ctx context.Context) (*[]GeneralCluster, error) {
 	return &result, nil
 }
 
-// GetFeaturePreviews - Get feature previews
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Returns the enabled feature previews for the current user.
-func (c *Client) GetFeaturePreviews(ctx context.Context) (*[]Feature, error) {
-	path := "/api/features"
-
-	var result []Feature
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
-		return nil, parseErrorError(err)
-	}
-	return &result, nil
-}
-
-// EnableFeaturePreview - Enable a feature preview for the current user
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Enables a feature preview for the authenticated user. The feature must exist in the platform's available features list. Features are stored per user and can be enabled or disabled individually.
-func (c *Client) EnableFeaturePreview(ctx context.Context, flag string) error {
-	path := "/api/features/{flag}"
-	path = pathReplace(path, "flag", flag)
-
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
-		return parseErrorError(err)
-	}
-	return nil
-}
-
-// DisableFeaturePreview - Disable a feature preview for the current user
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Disables a feature preview for the authenticated user. The feature must exist in the platform's available features list. Features are stored per user and can be enabled or disabled individually.
-func (c *Client) DisableFeaturePreview(ctx context.Context, flag string) error {
-	path := "/api/features/{flag}"
-	path = pathReplace(path, "flag", flag)
-
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
-		return parseErrorError(err)
-	}
-	return nil
-}
-
-// GetFeaturePreviewMarkdown - Get feature preview markdown description
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns the markdown description for a feature preview. This is used to display feature previews in the UI. The feature must exist in the platform's available features list.
-func (c *Client) GetFeaturePreviewMarkdown(ctx context.Context, flag string) (*string, error) {
-	path := "/api/features/{flag}/markdown"
-	path = pathReplace(path, "flag", flag)
-
-	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
-		return nil, parseErrorError(err)
-	}
-	return &result, nil
-}
-
 // GetGroupsParams contains optional parameters for the GetGroups operation.
 type GetGroupsParams struct {
 	// Only return groups that have access to this network.
@@ -4378,6 +4317,22 @@ func (c *Client) DeleteUserMfa(ctx context.Context, organization string, usernam
 	return nil
 }
 
+// DeleteUser - Delete user
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes the specified user from the organization. Cleans up all resources (deprovisions running resources, deletes non-provisioned resources) and removes the user account.
+func (c *Client) DeleteUser(ctx context.Context, organization string, user string) error {
+	path := "/api/organizations/{organization}/users/{user}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // ListAichatProviders - List AI Chat providers
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6392,6 +6347,67 @@ func (c *Client) TogglePlatformWebhook(ctx context.Context, webhook string, body
 	return &result, nil
 }
 
+// GetPreviews - Get previews
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the enabled previews for the current user.
+func (c *Client) GetPreviews(ctx context.Context) (*[]Preview, error) {
+	path := "/api/previews"
+
+	var result []Preview
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// EnablePreview - Enable a preview for the current user
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Enables a preview for the authenticated user. The preview must exist in the platform's available previews list. Previews are stored per user and can be enabled or disabled individually.
+func (c *Client) EnablePreview(ctx context.Context, flag string) error {
+	path := "/api/previews/{flag}"
+	path = pathReplace(path, "flag", flag)
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// DisablePreview - Disable a preview for the current user
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Disables a preview for the authenticated user. The preview must exist in the platform's available previews list. Previews are stored per user and can be enabled or disabled individually.
+func (c *Client) DisablePreview(ctx context.Context, flag string) error {
+	path := "/api/previews/{flag}"
+	path = pathReplace(path, "flag", flag)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// GetPreviewMarkdown - Get preview markdown description
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the markdown description for a preview. This is used to display previews in the UI. The preview must exist in the platform's available previews list.
+func (c *Client) GetPreviewMarkdown(ctx context.Context, flag string) (*string, error) {
+	path := "/api/previews/{flag}/markdown"
+	path = pathReplace(path, "flag", flag)
+
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // PostProvisionStatus - Add Provision Status
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6601,7 +6617,7 @@ func (c *Client) UpdateSessionDeprecated(ctx context.Context, namespace string, 
 
 // GetPlatformSettings - Get platform settings
 //
-// Returns the platform settings, such as version, features, and theme.
+// Returns the platform settings, such as version, previews, and theme.
 func (c *Client) GetPlatformSettings(ctx context.Context) (*PlatformSettings, error) {
 	path := "/api/settings"
 

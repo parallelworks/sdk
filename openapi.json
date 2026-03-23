@@ -497,16 +497,6 @@
             ],
             "type": "string"
           },
-          "features": {
-            "description": "List of enabled feature previews.",
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
           "impersonatedBy": {
             "description": "Original user who is impersonating this user, if any.",
             "type": "string"
@@ -544,6 +534,16 @@
             "description": "Timestamp of when the password was last updated.",
             "format": "date-time",
             "type": "string"
+          },
+          "previews": {
+            "description": "List of enabled previews.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "safeUsername": {
             "description": "Safe username of the user, used when names have stricter rules.",
@@ -585,7 +585,7 @@
           "organizationRoles",
           "email",
           "vscode",
-          "features"
+          "previews"
         ],
         "type": "object"
       },
@@ -5380,24 +5380,6 @@
           "dns_zone",
           "debug",
           "no_root_access"
-        ],
-        "type": "object"
-      },
-      "Feature": {
-        "additionalProperties": false,
-        "properties": {
-          "feature": {
-            "description": "Name of the feature.",
-            "type": "string"
-          },
-          "platform": {
-            "description": "Indicates if the feature was enabled at a platform-wide level.",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "feature",
-          "platform"
         ],
         "type": "object"
       },
@@ -11246,6 +11228,10 @@
             "description": "User email address",
             "type": "string"
           },
+          "hasResourceRemaining": {
+            "description": "Whether the user has any remaining resources that need cleanup before deletion",
+            "type": "boolean"
+          },
           "id": {
             "description": "User ID",
             "readOnly": true,
@@ -11281,7 +11267,8 @@
         "required": [
           "id",
           "username",
-          "active"
+          "active",
+          "hasResourceRemaining"
         ],
         "type": "object"
       },
@@ -11947,16 +11934,6 @@
             "format": "int64",
             "type": "integer"
           },
-          "features": {
-            "description": "Platform-wide enabled feature previews.",
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
           "forgotPasswordEnabled": {
             "description": "Indicates if the forgot password feature is enabled on the platform.",
             "type": "boolean"
@@ -12023,6 +12000,16 @@
           "platformName": {
             "description": "The display name of the platform.",
             "type": "string"
+          },
+          "previews": {
+            "description": "Platform-wide enabled previews.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "singleOrgName": {
             "description": "The name of the single organization, if applicable.",
@@ -12093,7 +12080,7 @@
           }
         },
         "required": [
-          "features",
+          "previews",
           "version",
           "availableAuthMethods",
           "forgotPasswordEnabled"
@@ -12124,6 +12111,10 @@
               "docker"
             ],
             "type": "string"
+          },
+          "deleteUserFilesOnDelete": {
+            "description": "Indicates if user files should be deleted when their account is deleted.",
+            "type": "boolean"
           },
           "dockerWorkspaceSettings": {
             "$ref": "#/components/schemas/DockerWorkspaceSettings"
@@ -12530,6 +12521,24 @@
           "quantity",
           "startedAt",
           "endedAt"
+        ],
+        "type": "object"
+      },
+      "Preview": {
+        "additionalProperties": false,
+        "properties": {
+          "platform": {
+            "description": "Indicates if the preview was enabled at a platform-wide level.",
+            "type": "boolean"
+          },
+          "preview": {
+            "description": "Name of the preview.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "preview",
+          "platform"
         ],
         "type": "object"
       },
@@ -19852,160 +19861,6 @@
         "summary": "Get Clusters",
         "tags": [
           "Clusters"
-        ]
-      }
-    },
-    "/api/features": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the enabled feature previews for the current user.",
-        "operationId": "get-feature-previews",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/Feature"
-                  },
-                  "type": [
-                    "array",
-                    "null"
-                  ]
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Get feature previews",
-        "tags": [
-          "Feature Previews"
-        ]
-      }
-    },
-    "/api/features/{flag}": {
-      "delete": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDisables a feature preview for the authenticated user. The feature must exist in the platform's available features list. Features are stored per user and can be enabled or disabled individually.",
-        "operationId": "disable-feature-preview",
-        "parameters": [
-          {
-            "description": "Name of the feature flag.",
-            "in": "path",
-            "name": "flag",
-            "required": true,
-            "schema": {
-              "description": "Name of the feature flag.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Disable a feature preview for the current user",
-        "tags": [
-          "Feature Previews"
-        ]
-      },
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nEnables a feature preview for the authenticated user. The feature must exist in the platform's available features list. Features are stored per user and can be enabled or disabled individually.",
-        "operationId": "enable-feature-preview",
-        "parameters": [
-          {
-            "description": "Name of the feature flag.",
-            "in": "path",
-            "name": "flag",
-            "required": true,
-            "schema": {
-              "description": "Name of the feature flag.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Enable a feature preview for the current user",
-        "tags": [
-          "Feature Previews"
-        ]
-      }
-    },
-    "/api/features/{flag}/markdown": {
-      "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the markdown description for a feature preview. This is used to display feature previews in the UI. The feature must exist in the platform's available features list.",
-        "operationId": "get-feature-preview-markdown",
-        "parameters": [
-          {
-            "description": "Name of the feature flag.",
-            "in": "path",
-            "name": "flag",
-            "required": true,
-            "schema": {
-              "description": "Name of the feature flag.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Get feature preview markdown description",
-        "tags": [
-          "Feature Previews"
         ]
       }
     },
@@ -30238,6 +30093,59 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDeletes the specified user from the organization. Cleans up all resources (deprovisions running resources, deletes non-provisioned resources) and removes the user account.",
+        "operationId": "delete-user",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The username of the user",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "The username of the user",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/aichat-providers": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a list of AI Chat providers available to the user",
@@ -37703,6 +37611,160 @@
         ]
       }
     },
+    "/api/previews": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the enabled previews for the current user.",
+        "operationId": "get-previews",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Preview"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get previews",
+        "tags": [
+          "Previews"
+        ]
+      }
+    },
+    "/api/previews/{flag}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDisables a preview for the authenticated user. The preview must exist in the platform's available previews list. Previews are stored per user and can be enabled or disabled individually.",
+        "operationId": "disable-preview",
+        "parameters": [
+          {
+            "description": "Name of the preview flag.",
+            "in": "path",
+            "name": "flag",
+            "required": true,
+            "schema": {
+              "description": "Name of the preview flag.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Disable a preview for the current user",
+        "tags": [
+          "Previews"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nEnables a preview for the authenticated user. The preview must exist in the platform's available previews list. Previews are stored per user and can be enabled or disabled individually.",
+        "operationId": "enable-preview",
+        "parameters": [
+          {
+            "description": "Name of the preview flag.",
+            "in": "path",
+            "name": "flag",
+            "required": true,
+            "schema": {
+              "description": "Name of the preview flag.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Enable a preview for the current user",
+        "tags": [
+          "Previews"
+        ]
+      }
+    },
+    "/api/previews/{flag}/markdown": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the markdown description for a preview. This is used to display previews in the UI. The preview must exist in the platform's available previews list.",
+        "operationId": "get-preview-markdown",
+        "parameters": [
+          {
+            "description": "Name of the preview flag.",
+            "in": "path",
+            "name": "flag",
+            "required": true,
+            "schema": {
+              "description": "Name of the preview flag.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get preview markdown description",
+        "tags": [
+          "Previews"
+        ]
+      }
+    },
     "/api/provisionstatus/{infraId}": {
       "patch": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdate the status of a provision step. Use 'instance' as infraId to update the current instance from JWT.",
@@ -38307,7 +38369,7 @@
     },
     "/api/settings": {
       "get": {
-        "description": "Returns the platform settings, such as version, features, and theme.",
+        "description": "Returns the platform settings, such as version, previews, and theme.",
         "operationId": "get-platform-settings",
         "responses": {
           "200": {
@@ -40389,10 +40451,6 @@
       "name": "Disks"
     },
     {
-      "description": "Endpoints related to feature preview management",
-      "name": "Feature Previews"
-    },
-    {
       "description": "Endpoints related to GitHub App integration",
       "name": "GitHub"
     },
@@ -40473,6 +40531,10 @@
       "name": "Policies"
     },
     {
+      "description": "Endpoints related to preview management",
+      "name": "Previews"
+    },
+    {
       "description": "Endpoints related to infrastructure provision status",
       "name": "Provision Status"
     },
@@ -40527,6 +40589,10 @@
     {
       "description": "Endpoints related to workflow variables",
       "name": "Workflow Variables"
+    },
+    {
+      "description": "Endpoints related to user management",
+      "name": "Users"
     }
   ]
 }

@@ -193,8 +193,6 @@ type AuthSession struct {
 	Admin bool `json:"admin"`
 	// Email address of the user.
 	Email string `json:"email"`
-	// List of enabled feature previews.
-	Features []string `json:"features"`
 	// Original user who is impersonating this user, if any.
 	ImpersonatedBy *string `json:"impersonatedBy,omitempty"`
 	// Full name of the user.
@@ -209,6 +207,8 @@ type AuthSession struct {
 	Partner bool `json:"partner"`
 	// Timestamp of when the password was last updated.
 	PasswordUpdatedAt *time.Time `json:"passwordUpdatedAt,omitempty"`
+	// List of enabled previews.
+	Previews []string `json:"previews"`
 	// Safe username of the user, used when names have stricter rules.
 	SafeUsername string `json:"safeUsername"`
 	// Options for the sidebar.
@@ -1909,14 +1909,6 @@ type Fact struct {
 	WorkspaceMounts []string `json:"workspace_mounts"`
 	// The zone of the instance, if applicable.
 	Zone                 string         `json:"zone"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type Feature struct {
-	// Name of the feature.
-	Feature string `json:"feature"`
-	// Indicates if the feature was enabled at a platform-wide level.
-	Platform             bool           `json:"platform"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -3872,6 +3864,8 @@ type OrgUser struct {
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// User email address
 	Email *string `json:"email,omitempty"`
+	// Whether the user has any remaining resources that need cleanup before deletion
+	HasResourceRemaining bool `json:"hasResourceRemaining"`
 	// User ID
 	ID string `json:"id"`
 	// Last login timestamp
@@ -4116,8 +4110,6 @@ type PlatformSettings struct {
 	EnforceMaxTtl *bool `json:"enforceMaxTTL,omitempty"`
 	// The maximum number of days after which API Keys expire. Only returned if the user is authenticated.
 	ExpirationDays *int64 `json:"expirationDays,omitempty"`
-	// Platform-wide enabled feature previews.
-	Features []string `json:"features"`
 	// Indicates if the forgot password feature is enabled on the platform.
 	ForgotPasswordEnabled bool `json:"forgotPasswordEnabled"`
 	// User's preferred language
@@ -4143,6 +4135,8 @@ type PlatformSettings struct {
 	OrgTheme           *Theme  `json:"orgTheme,omitempty"`
 	// The display name of the platform.
 	PlatformName *string `json:"platformName,omitempty"`
+	// Platform-wide enabled previews.
+	Previews []string `json:"previews"`
 	// The name of the single organization, if applicable.
 	SingleOrgName *string `json:"singleOrgName,omitempty"`
 	// Indicates if the platform is a single organization platform.
@@ -4171,7 +4165,9 @@ type PlatformSettingsAdmin struct {
 	// Default image for user workspaces.
 	DefaultWorkspaceImage *string `json:"defaultWorkspaceImage,omitempty"`
 	// Default type for workspaces.
-	DefaultWorkspaceType    *string                  `json:"defaultWorkspaceType,omitempty"`
+	DefaultWorkspaceType *string `json:"defaultWorkspaceType,omitempty"`
+	// Indicates if user files should be deleted when their account is deleted.
+	DeleteUserFilesOnDelete *bool                    `json:"deleteUserFilesOnDelete,omitempty"`
 	DockerWorkspaceSettings *DockerWorkspaceSettings `json:"dockerWorkspaceSettings,omitempty"`
 	// The expiration date of the platform license, if valid.
 	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
@@ -4319,6 +4315,14 @@ type PostUsageEventInput struct {
 	StartedAt time.Time `json:"startedAt"`
 	// The user who this usage event will be associated with.
 	User                 *string        `json:"user,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type Preview struct {
+	// Indicates if the preview was enabled at a platform-wide level.
+	Platform bool `json:"platform"`
+	// Name of the preview.
+	Preview              string         `json:"preview"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
