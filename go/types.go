@@ -4106,6 +4106,8 @@ type PlatformNotificationSettings struct {
 type PlatformSettings struct {
 	// The platform-wide authentication methods available.
 	AvailableAuthMethods []string `json:"availableAuthMethods"`
+	// Indicates if the onboarding flow is enabled for new users.
+	EnableOnboarding *bool `json:"enableOnboarding"`
 	// Indicates if the platform requires a maximum TTL for API Keys. Only returned if the user is authenticated.
 	EnforceMaxTtl *bool `json:"enforceMaxTTL,omitempty"`
 	// The maximum number of days after which API Keys expire. Only returned if the user is authenticated.
@@ -4169,6 +4171,8 @@ type PlatformSettingsAdmin struct {
 	// Indicates if user files should be deleted when their account is deleted.
 	DeleteUserFilesOnDelete *bool                    `json:"deleteUserFilesOnDelete,omitempty"`
 	DockerWorkspaceSettings *DockerWorkspaceSettings `json:"dockerWorkspaceSettings,omitempty"`
+	// Indicates if the onboarding flow is enabled for new users.
+	EnableOnboarding bool `json:"enableOnboarding"`
 	// The expiration date of the platform license, if valid.
 	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
 	// Indicates if the license is in the grace period.

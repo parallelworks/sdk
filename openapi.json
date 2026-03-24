@@ -9543,7 +9543,8 @@
           "type": {
             "description": "MFA method type (e.g., otp)",
             "enum": [
-              "otp"
+              "otp",
+              "webauthn"
             ],
             "type": "string"
           },
@@ -11925,6 +11926,13 @@
               "null"
             ]
           },
+          "enableOnboarding": {
+            "description": "Indicates if the onboarding flow is enabled for new users.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
           "enforceMaxTTL": {
             "description": "Indicates if the platform requires a maximum TTL for API Keys. Only returned if the user is authenticated.",
             "type": "boolean"
@@ -12083,7 +12091,8 @@
           "previews",
           "version",
           "availableAuthMethods",
-          "forgotPasswordEnabled"
+          "forgotPasswordEnabled",
+          "enableOnboarding"
         ],
         "type": "object"
       },
@@ -12119,6 +12128,10 @@
           "dockerWorkspaceSettings": {
             "$ref": "#/components/schemas/DockerWorkspaceSettings"
           },
+          "enableOnboarding": {
+            "description": "Indicates if the onboarding flow is enabled for new users.",
+            "type": "boolean"
+          },
           "licenseExpiresAt": {
             "description": "The expiration date of the platform license, if valid.",
             "format": "date-time",
@@ -12133,6 +12146,9 @@
             "type": "boolean"
           }
         },
+        "required": [
+          "enableOnboarding"
+        ],
         "type": "object"
       },
       "PodInfo": {
