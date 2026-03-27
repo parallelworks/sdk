@@ -1763,6 +1763,12 @@ type DeleteOldWorkflowRunsResultBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type DeleteOrphanedInfraResultBody struct {
+	// Number of orphaned infrastructures deleted
+	DeletedCount         int64          `json:"deletedCount"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type DeleteOrphanedWorkflowRunsResultBody struct {
 	// Number of orphaned workflow runs deleted
 	DeletedCount         int64          `json:"deletedCount"`
@@ -3910,6 +3916,30 @@ type OrganizationVariable struct {
 	Secret *bool `json:"secret,omitempty"`
 	// The value of the variable
 	Value                *string        `json:"value"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OrphanedInfraItem struct {
+	// Infrastructure ID
+	ID string `json:"id"`
+	// Infrastructure name
+	Name string `json:"name"`
+	// Provision status (e.g. provisioned, provisioning, deleting, failed)
+	Status string `json:"status"`
+	// Infrastructure type (e.g. network, cluster, efs, lustre)
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OrphanedInfraPreviewBody struct {
+	// List of orphaned infrastructures
+	Items []OrphanedInfraItem `json:"items"`
+	// List of user IDs that don't exist but are referenced by infrastructures
+	MissingUserIds []string `json:"missingUserIds"`
+	// Count of orphaned infrastructures by provision status
+	StatusCounts map[string]any `json:"statusCounts"`
+	// Total number of orphaned infrastructures
+	TotalCount           int64          `json:"totalCount"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

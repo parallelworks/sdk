@@ -78,6 +78,40 @@ func (c *Client) DeletePlatformAlert(ctx context.Context, id string) error {
 	return nil
 }
 
+// CleanupOrphanedInfrastructures - Delete orphaned infrastructures
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Permanently deletes infrastructures with non-existent user references
+func (c *Client) CleanupOrphanedInfrastructures(ctx context.Context) (*DeleteOrphanedInfraResultBody, error) {
+	path := "/api/admin/maintenance/infrastructures/orphaned/cleanup"
+
+	var result DeleteOrphanedInfraResultBody
+	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PreviewOrphanedInfrastructuresCleanup - Preview orphaned infrastructures cleanup
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns infrastructures with non-existent user references
+func (c *Client) PreviewOrphanedInfrastructuresCleanup(ctx context.Context) (*OrphanedInfraPreviewBody, error) {
+	path := "/api/admin/maintenance/infrastructures/orphaned/preview"
+
+	var result OrphanedInfraPreviewBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // CleanupOldWorkflowRuns - Delete old workflow runs
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -1743,6 +1777,21 @@ func (c *Client) GetOrganizations(ctx context.Context) (*[]Organization, error) 
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// DeleteOrganization - Delete organization
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes the organization and all its users, groups, and settings.
+func (c *Client) DeleteOrganization(ctx context.Context, organization string) error {
+	path := "/api/organizations/{organization}"
+	path = pathReplace(path, "organization", organization)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // ListOrgAllocationsParams contains optional parameters for the ListOrgAllocations operation.
@@ -3854,17 +3903,31 @@ func (c *Client) GetOrganizationMau(ctx context.Context, organization string, op
 	return &result, nil
 }
 
+// GetUserClusterMetricsParams contains optional parameters for the GetUserClusterMetrics operation.
+type GetUserClusterMetricsParams struct {
+	// Number of hours of history to retrieve (1, 3, or 8). Default: 1
+	Hours *int64 `json:"hours,omitempty"`
+}
+
 // GetUserClusterMetrics - Get user cluster metrics
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Returns metrics for all nodes in the user's cluster.
-func (c *Client) GetUserClusterMetrics(ctx context.Context, organization string, namespace string, clusterName string) (*[]MetricEntry, error) {
+func (c *Client) GetUserClusterMetrics(ctx context.Context, organization string, namespace string, clusterName string, opts ...GetUserClusterMetricsParams) (*[]MetricEntry, error) {
 	path := "/api/organizations/{organization}/namespaces/{namespace}/clusters/{clusterName}/metrics"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "namespace", namespace)
 	path = pathReplace(path, "clusterName", clusterName)
 
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "hours", params.Hours)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
 	var result []MetricEntry
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
@@ -4826,18 +4889,32 @@ func (c *Client) GetClusterNodes(ctx context.Context, organization string, user 
 	return &result, nil
 }
 
+// GetClusterNodeMetricsParams contains optional parameters for the GetClusterNodeMetrics operation.
+type GetClusterNodeMetricsParams struct {
+	// Number of hours of history to retrieve (1, 3, or 8). Default: 1
+	Hours *int64 `json:"hours,omitempty"`
+}
+
 // GetClusterNodeMetrics - Get a single node's metrics
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns metrics for a specific node in a cluster.
-func (c *Client) GetClusterNodeMetrics(ctx context.Context, organization string, user string, clusterName string, hostname string) (*[]MetricEntry, error) {
+func (c *Client) GetClusterNodeMetrics(ctx context.Context, organization string, user string, clusterName string, hostname string, opts ...GetClusterNodeMetricsParams) (*[]MetricEntry, error) {
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/nodes/{hostname}/metrics"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "clusterName", clusterName)
 	path = pathReplace(path, "hostname", hostname)
 
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "hours", params.Hours)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
 	var result []MetricEntry
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)

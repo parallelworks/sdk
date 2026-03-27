@@ -4975,6 +4975,20 @@
         ],
         "type": "object"
       },
+      "DeleteOrphanedInfraResultBody": {
+        "additionalProperties": false,
+        "properties": {
+          "deletedCount": {
+            "description": "Number of orphaned infrastructures deleted",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "deletedCount"
+        ],
+        "type": "object"
+      },
       "DeleteOrphanedWorkflowRunsResultBody": {
         "additionalProperties": false,
         "properties": {
@@ -11357,6 +11371,79 @@
         ],
         "type": "object"
       },
+      "OrphanedInfraItem": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Infrastructure ID",
+            "type": "string"
+          },
+          "name": {
+            "description": "Infrastructure name",
+            "type": "string"
+          },
+          "status": {
+            "description": "Provision status (e.g. provisioned, provisioning, deleting, failed)",
+            "type": "string"
+          },
+          "type": {
+            "description": "Infrastructure type (e.g. network, cluster, efs, lustre)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "status"
+        ],
+        "type": "object"
+      },
+      "OrphanedInfraPreviewBody": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "description": "List of orphaned infrastructures",
+            "items": {
+              "$ref": "#/components/schemas/OrphanedInfraItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "missingUserIds": {
+            "description": "List of user IDs that don't exist but are referenced by infrastructures",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "statusCounts": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "description": "Count of orphaned infrastructures by provision status",
+            "type": "object"
+          },
+          "totalCount": {
+            "description": "Total number of orphaned infrastructures",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalCount",
+          "missingUserIds",
+          "statusCounts",
+          "items"
+        ],
+        "type": "object"
+      },
       "OrphanedWorkflowRunsPreviewBody": {
         "additionalProperties": false,
         "properties": {
@@ -17438,6 +17525,70 @@
         ]
       }
     },
+    "/api/admin/maintenance/infrastructures/orphaned/cleanup": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nPermanently deletes infrastructures with non-existent user references",
+        "operationId": "cleanup-orphaned-infrastructures",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteOrphanedInfraResultBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete orphaned infrastructures",
+        "tags": [
+          "Maintenance"
+        ]
+      }
+    },
+    "/api/admin/maintenance/infrastructures/orphaned/preview": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns infrastructures with non-existent user references",
+        "operationId": "preview-orphaned-infrastructures-cleanup",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrphanedInfraPreviewBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Preview orphaned infrastructures cleanup",
+        "tags": [
+          "Maintenance"
+        ]
+      }
+    },
     "/api/admin/maintenance/workflow-runs/old/cleanup": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nPermanently deletes workflow runs older than the specified number of months",
@@ -21545,6 +21696,43 @@
           }
         },
         "summary": "List organizations",
+        "tags": [
+          "Organization"
+        ]
+      }
+    },
+    "/api/organizations/{organization}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDeletes the organization and all its users, groups, and settings.",
+        "operationId": "delete-organization",
+        "parameters": [
+          {
+            "description": "The name of the organization to delete",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization to delete",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete organization",
         "tags": [
           "Organization"
         ]
@@ -28600,6 +28788,18 @@
               "description": "The cluster name",
               "type": "string"
             }
+          },
+          {
+            "description": "Number of hours of history to retrieve (1, 3, or 8). Default: 1",
+            "explode": false,
+            "in": "query",
+            "name": "hours",
+            "schema": {
+              "default": 1,
+              "description": "Number of hours of history to retrieve (1, 3, or 8). Default: 1",
+              "format": "int64",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -32150,6 +32350,18 @@
             "schema": {
               "description": "The node hostname",
               "type": "string"
+            }
+          },
+          {
+            "description": "Number of hours of history to retrieve (1, 3, or 8). Default: 1",
+            "explode": false,
+            "in": "query",
+            "name": "hours",
+            "schema": {
+              "default": 1,
+              "description": "Number of hours of history to retrieve (1, 3, or 8). Default: 1",
+              "format": "int64",
+              "type": "integer"
             }
           }
         ],
