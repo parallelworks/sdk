@@ -4798,6 +4798,19 @@ type RuntimeAlertInput struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type SchedulerCommandBody struct {
+	// Command action: cancel, hold, or release
+	Action               string         `json:"action"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type SchedulerCommandResponse struct {
+	Error                *string        `json:"error,omitempty"`
+	Message              *string        `json:"message,omitempty"`
+	Success              bool           `json:"success"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type SchedulerInfo struct {
 	// Whether this node is the scheduler controller
 	IsController bool `json:"isController"`
@@ -4835,6 +4848,13 @@ type SchedulerJob struct {
 	Time int64 `json:"time"`
 	// Username who submitted the job
 	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type SchedulerJobDetailResponse struct {
+	Error                *string        `json:"error,omitempty"`
+	Job                  map[string]any `json:"job"`
+	SchedulerType        string         `json:"schedulerType"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

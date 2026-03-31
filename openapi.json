@@ -13999,6 +13999,45 @@
         ],
         "type": "object"
       },
+      "SchedulerCommandBody": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "Command action: cancel, hold, or release",
+            "enum": [
+              "cancel",
+              "hold",
+              "release"
+            ],
+            "examples": [
+              "cancel"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "type": "object"
+      },
+      "SchedulerCommandResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ],
+        "type": "object"
+      },
       "SchedulerInfo": {
         "additionalProperties": false,
         "properties": {
@@ -14109,6 +14148,26 @@
           "createdAt",
           "imageUrl",
           "clusterType"
+        ],
+        "type": "object"
+      },
+      "SchedulerJobDetailResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "job": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "schedulerType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schedulerType",
+          "job"
         ],
         "type": "object"
       },
@@ -20916,6 +20975,28 @@
             "schema": {
               "default": false,
               "description": "Only items the user has favorited",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Only verified items",
+            "explode": false,
+            "in": "query",
+            "name": "verified",
+            "schema": {
+              "default": false,
+              "description": "Only verified items",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Only featured items",
+            "explode": false,
+            "in": "query",
+            "name": "featured",
+            "schema": {
+              "default": false,
+              "description": "Only featured items",
               "type": "boolean"
             }
           }
@@ -28675,6 +28756,150 @@
         ]
       }
     },
+    "/api/organizations/{organization}/managed-clusters/{cluster}/scheduler-jobs/{jobId}": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns full details for a scheduler job in a managed cluster.",
+        "operationId": "get-managed-cluster-scheduler-job-detail",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Managed cluster name",
+            "in": "path",
+            "name": "cluster",
+            "required": true,
+            "schema": {
+              "description": "Managed cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Scheduler job ID",
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "description": "Scheduler job ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchedulerJobDetailResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Managed Cluster Scheduler Job Detail",
+        "tags": [
+          "Scheduler Jobs"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/managed-clusters/{cluster}/scheduler-jobs/{jobId}/command": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nExecutes a scheduler command (cancel, hold, release) on a job in a managed cluster.",
+        "operationId": "post-managed-cluster-scheduler-job-command",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Managed cluster name",
+            "in": "path",
+            "name": "cluster",
+            "required": true,
+            "schema": {
+              "description": "Managed cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Scheduler job ID",
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "description": "Scheduler job ID",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulerCommandBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchedulerCommandResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Execute Managed Cluster Scheduler Job Command",
+        "tags": [
+          "Scheduler Jobs"
+        ]
+      }
+    },
     "/api/organizations/{organization}/mau": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns monthly active user statistics for a specific organization, including daily breakdown.",
@@ -32396,6 +32621,170 @@
         "summary": "Get a single node's metrics",
         "tags": [
           "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/scheduler-jobs/{jobId}": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns full details for a scheduler job in a cloud or existing cluster.",
+        "operationId": "get-scheduler-job-detail",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster owner username",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Cluster owner username",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Scheduler job ID",
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "description": "Scheduler job ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchedulerJobDetailResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Scheduler Job Detail",
+        "tags": [
+          "Scheduler Jobs"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/scheduler-jobs/{jobId}/command": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nExecutes a scheduler command (cancel, hold, release) on a job in a cloud or existing cluster.",
+        "operationId": "post-scheduler-job-command",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster owner username",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Cluster owner username",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Scheduler job ID",
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "description": "Scheduler job ID",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulerCommandBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchedulerCommandResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Execute Scheduler Job Command",
+        "tags": [
+          "Scheduler Jobs"
         ]
       }
     },
@@ -40785,6 +41174,10 @@
     {
       "description": "Endpoints related to snapshot management",
       "name": "Snapshots"
+    },
+    {
+      "description": "Endpoints related to scheduler job management",
+      "name": "Scheduler Jobs"
     },
     {
       "description": "Endpoints related to SSH private key management",

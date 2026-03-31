@@ -1435,6 +1435,10 @@ type ListMarketplaceItemsParams struct {
 	Organization *bool `json:"organization,omitempty"`
 	// Only items the user has favorited
 	Favorited *bool `json:"favorited,omitempty"`
+	// Only verified items
+	Verified *bool `json:"verified,omitempty"`
+	// Only featured items
+	Featured *bool `json:"featured,omitempty"`
 }
 
 // ListMarketplaceItems - List Marketplace Items
@@ -1452,6 +1456,8 @@ func (c *Client) ListMarketplaceItems(ctx context.Context, opts ...ListMarketpla
 		addQueryParam(queryValues, "mine", params.Mine)
 		addQueryParam(queryValues, "organization", params.Organization)
 		addQueryParam(queryValues, "favorited", params.Favorited)
+		addQueryParam(queryValues, "verified", params.Verified)
+		addQueryParam(queryValues, "featured", params.Featured)
 		if len(queryValues) > 0 {
 			path += "?" + queryValues.Encode()
 		}
@@ -3873,6 +3879,42 @@ func (c *Client) UpdateManagedClusterPermissions(ctx context.Context, organizati
 	return nil
 }
 
+// GetManagedClusterSchedulerJobDetail - Get Managed Cluster Scheduler Job Detail
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns full details for a scheduler job in a managed cluster.
+func (c *Client) GetManagedClusterSchedulerJobDetail(ctx context.Context, organization string, cluster string, jobID string) (*SchedulerJobDetailResponse, error) {
+	path := "/api/organizations/{organization}/managed-clusters/{cluster}/scheduler-jobs/{jobId}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "cluster", cluster)
+	path = pathReplace(path, "jobId", jobID)
+
+	var result SchedulerJobDetailResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PostManagedClusterSchedulerJobCommand - Execute Managed Cluster Scheduler Job Command
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Executes a scheduler command (cancel, hold, release) on a job in a managed cluster.
+func (c *Client) PostManagedClusterSchedulerJobCommand(ctx context.Context, organization string, cluster string, jobID string, body SchedulerCommandBody) (*SchedulerCommandResponse, error) {
+	path := "/api/organizations/{organization}/managed-clusters/{cluster}/scheduler-jobs/{jobId}/command"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "cluster", cluster)
+	path = pathReplace(path, "jobId", jobID)
+
+	var result SchedulerCommandResponse
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetOrganizationMauParams contains optional parameters for the GetOrganizationMau operation.
 type GetOrganizationMauParams struct {
 	// End date in YYYY-MM-DD format. Defaults to current date
@@ -4917,6 +4959,44 @@ func (c *Client) GetClusterNodeMetrics(ctx context.Context, organization string,
 	}
 	var result []MetricEntry
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetSchedulerJobDetail - Get Scheduler Job Detail
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns full details for a scheduler job in a cloud or existing cluster.
+func (c *Client) GetSchedulerJobDetail(ctx context.Context, organization string, user string, clusterName string, jobID string) (*SchedulerJobDetailResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/scheduler-jobs/{jobId}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+	path = pathReplace(path, "jobId", jobID)
+
+	var result SchedulerJobDetailResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PostSchedulerJobCommand - Execute Scheduler Job Command
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Executes a scheduler command (cancel, hold, release) on a job in a cloud or existing cluster.
+func (c *Client) PostSchedulerJobCommand(ctx context.Context, organization string, user string, clusterName string, jobID string, body SchedulerCommandBody) (*SchedulerCommandResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/scheduler-jobs/{jobId}/command"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+	path = pathReplace(path, "jobId", jobID)
+
+	var result SchedulerCommandResponse
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
