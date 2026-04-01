@@ -59,8 +59,6 @@ type AiChatProviderResponse struct {
 	RefreshInterval *string `json:"refreshInterval,omitempty"`
 	// AI provider region (for managed providers)
 	Region *string `json:"region,omitempty"`
-	// Groups this AI Chat provider is shared with
-	Shared []SharedPermission `json:"shared"`
 	// Current status of the AI Chat provider
 	Status string `json:"status"`
 	// The username of the user that owns this resource
@@ -81,8 +79,6 @@ type AiChatProvidersResponse struct {
 	Name string `json:"name"`
 	// AI provider region
 	Region *string `json:"region"`
-	// Groups this AI Chat provider is shared with
-	Shared []SharedPermission `json:"shared"`
 	// Current status of the AI Chat provider
 	Status string `json:"status"`
 	// The username of the user that owns this resource.
@@ -5100,16 +5096,6 @@ type Shared struct {
 	Group string `json:"group"`
 	// Permissions granted to the group for this storage.
 	Permissions          any            `json:"permissions"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type SharedPermission struct {
-	// Group ID
-	Group *string `json:"group,omitempty"`
-	// Whether shared with organization
-	Organization *bool `json:"organization,omitempty"`
-	// Permissions granted
-	Permissions          any            `json:"permissions,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

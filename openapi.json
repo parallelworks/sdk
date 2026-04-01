@@ -131,16 +131,6 @@
             "description": "AI provider region (for managed providers)",
             "type": "string"
           },
-          "shared": {
-            "description": "Groups this AI Chat provider is shared with",
-            "items": {
-              "$ref": "#/components/schemas/SharedPermission"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
           "status": {
             "description": "Current status of the AI Chat provider",
             "type": "string"
@@ -156,7 +146,6 @@
           "user",
           "csp",
           "status",
-          "shared",
           "ingested"
         ],
         "type": "object"
@@ -194,16 +183,6 @@
               "null"
             ]
           },
-          "shared": {
-            "description": "Groups this AI Chat provider is shared with",
-            "items": {
-              "$ref": "#/components/schemas/SharedPermission"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
           "status": {
             "description": "Current status of the AI Chat provider",
             "type": "string"
@@ -222,7 +201,6 @@
           "user",
           "csp",
           "status",
-          "shared",
           "region",
           "model"
         ],
@@ -14932,23 +14910,6 @@
           "group",
           "permissions"
         ],
-        "type": "object"
-      },
-      "SharedPermission": {
-        "additionalProperties": false,
-        "properties": {
-          "group": {
-            "description": "Group ID",
-            "type": "string"
-          },
-          "organization": {
-            "description": "Whether shared with organization",
-            "type": "boolean"
-          },
-          "permissions": {
-            "description": "Permissions granted"
-          }
-        },
         "type": "object"
       },
       "SingleClusterResponse": {
