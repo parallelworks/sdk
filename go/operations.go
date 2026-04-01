@@ -3879,6 +3879,37 @@ func (c *Client) UpdateManagedClusterPermissions(ctx context.Context, organizati
 	return nil
 }
 
+// GetManagedClusterLiveSchedulerJobsParams contains optional parameters for the GetManagedClusterLiveSchedulerJobs operation.
+type GetManagedClusterLiveSchedulerJobsParams struct {
+	// Optional username to filter jobs by
+	FilterUser *string `json:"filterUser,omitempty"`
+}
+
+// GetManagedClusterLiveSchedulerJobs - Get Managed Cluster Live Scheduler Jobs
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns live scheduler jobs from a managed cluster.
+func (c *Client) GetManagedClusterLiveSchedulerJobs(ctx context.Context, organization string, cluster string, opts ...GetManagedClusterLiveSchedulerJobsParams) (*SchedulerJobsResponse, error) {
+	path := "/api/organizations/{organization}/managed-clusters/{cluster}/scheduler-jobs/live"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "cluster", cluster)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "filterUser", params.FilterUser)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result SchedulerJobsResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetManagedClusterSchedulerJobDetail - Get Managed Cluster Scheduler Job Detail
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -4958,6 +4989,38 @@ func (c *Client) GetClusterNodeMetrics(ctx context.Context, organization string,
 		}
 	}
 	var result []MetricEntry
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetClusterLiveSchedulerJobsParams contains optional parameters for the GetClusterLiveSchedulerJobs operation.
+type GetClusterLiveSchedulerJobsParams struct {
+	// Optional username to filter jobs by
+	FilterUser *string `json:"filterUser,omitempty"`
+}
+
+// GetClusterLiveSchedulerJobs - Get Live Scheduler Jobs
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns live scheduler jobs from a cluster.
+func (c *Client) GetClusterLiveSchedulerJobs(ctx context.Context, organization string, user string, clusterName string, opts ...GetClusterLiveSchedulerJobsParams) (*SchedulerJobsResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/scheduler-jobs/live"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "filterUser", params.FilterUser)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result SchedulerJobsResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}

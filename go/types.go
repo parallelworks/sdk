@@ -4851,6 +4851,18 @@ type SchedulerJob struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type SchedulerJobData struct {
+	ID                   string         `json:"id"`
+	Name                 string         `json:"name"`
+	Nodes                string         `json:"nodes"`
+	Queue                string         `json:"queue"`
+	StartTime            *string        `json:"startTime,omitempty"`
+	State                string         `json:"state"`
+	TimeLimit            *string        `json:"timeLimit,omitempty"`
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type SchedulerJobDetailResponse struct {
 	Error                *string        `json:"error,omitempty"`
 	Job                  map[string]any `json:"job"`
@@ -4858,10 +4870,39 @@ type SchedulerJobDetailResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type SchedulerJobsResponse struct {
+	Error                *string                  `json:"error,omitempty"`
+	Jobs                 []SchedulerJobData       `json:"jobs"`
+	NodeSummary          *SchedulerNodeSummary    `json:"nodeSummary,omitempty"`
+	Partitions           []SchedulerPartitionData `json:"partitions,omitempty"`
+	SchedulerType        string                   `json:"schedulerType"`
+	AdditionalProperties map[string]any           `json:"-,omitempty"`
+}
+
+type SchedulerNodeSummary struct {
+	Allocated            int64          `json:"allocated"`
+	Down                 int64          `json:"down"`
+	Idle                 int64          `json:"idle"`
+	Mixed                int64          `json:"mixed"`
+	Total                int64          `json:"total"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type SchedulerNotificationSettings struct {
 	SlurmJobStartFinish  NotificationChannelSettings `json:"slurm_job_start_finish"`
 	SlurmMailType        NotificationChannelSettings `json:"slurm_mail_type"`
 	AdditionalProperties map[string]any              `json:"-,omitempty"`
+}
+
+type SchedulerPartitionData struct {
+	AllocNodes           int64          `json:"allocNodes"`
+	IdleNodes            int64          `json:"idleNodes"`
+	MaxTime              *string        `json:"maxTime,omitempty"`
+	Name                 string         `json:"name"`
+	OtherNodes           int64          `json:"otherNodes"`
+	State                string         `json:"state"`
+	TotalNodes           int64          `json:"totalNodes"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ServiceResponse struct {
