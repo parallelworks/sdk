@@ -1800,6 +1800,88 @@ func (c *Client) DeleteOrganization(ctx context.Context, organization string) er
 	return nil
 }
 
+// ListOrgAiProviders - List org AI providers
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// List all organization-level AI providers.
+func (c *Client) ListOrgAiProviders(ctx context.Context, organization string) (*[]OrgAiProviderResponse, error) {
+	path := "/api/organizations/{organization}/ai-providers"
+	path = pathReplace(path, "organization", organization)
+
+	var result []OrgAiProviderResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CreateOrgAiProvider - Create org AI provider
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Create an organization-level AI provider.
+func (c *Client) CreateOrgAiProvider(ctx context.Context, organization string, body CreateOrgAiProviderBody) (*OrgAiProviderResponse, error) {
+	path := "/api/organizations/{organization}/ai-providers"
+	path = pathReplace(path, "organization", organization)
+
+	var result OrgAiProviderResponse
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetOrgAiProvider - Get org AI provider
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Get a specific organization-level AI provider by name.
+func (c *Client) GetOrgAiProvider(ctx context.Context, organization string, name string) (*OrgAiProviderResponse, error) {
+	path := "/api/organizations/{organization}/ai-providers/{name}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "name", name)
+
+	var result OrgAiProviderResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteOrgAiProvider - Delete org AI provider
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Delete an organization-level AI provider.
+func (c *Client) DeleteOrgAiProvider(ctx context.Context, organization string, name string) error {
+	path := "/api/organizations/{organization}/ai-providers/{name}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "name", name)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// UpdateOrgAiProvider - Update org AI provider
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update an organization-level AI provider's configuration.
+func (c *Client) UpdateOrgAiProvider(ctx context.Context, organization string, name string, body UpdateOrgAiProviderInputBody) (*OrgAiProviderResponse, error) {
+	path := "/api/organizations/{organization}/ai-providers/{name}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "name", name)
+
+	var result OrgAiProviderResponse
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // ListOrgAllocationsParams contains optional parameters for the ListOrgAllocations operation.
 type ListOrgAllocationsParams struct {
 	// Maximum number of allocations to return
@@ -4126,7 +4208,7 @@ func (c *Client) GetOrganizationProvisionStatusByInfraID(ctx context.Context, or
 type GetAllocationUsageEventsSummaryParams struct {
 	// End date (YYYY-MM-DD). Defaults to current date when omitted.
 	EndDate *string `json:"endDate,omitempty"`
-	// Field to group costs by (type, subtype)
+	// Field to group costs by (type, subtype, user)
 	GroupBy *string `json:"groupBy,omitempty"`
 	// Filter: type matches exactly
 	Type *string `json:"type,omitempty"`
@@ -4469,65 +4551,65 @@ func (c *Client) DeleteUser(ctx context.Context, organization string, user strin
 	return nil
 }
 
-// ListAichatProviders - List AI Chat providers
+// ListAiProviders - List AI providers
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns a list of AI Chat providers available to the user
-func (c *Client) ListAichatProviders(ctx context.Context, organization string, user string) (*[]AiChatProvidersResponse, error) {
-	path := "/api/organizations/{organization}/users/{user}/aichat-providers"
+// Returns a list of AI providers available to the user
+func (c *Client) ListAiProviders(ctx context.Context, organization string, user string) (*[]AiProvidersResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/ai-providers"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 
-	var result []AiChatProvidersResponse
+	var result []AiProvidersResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
 }
 
-// CreateAichatProvider - Create AI Chat provider
+// CreateAiProvider - Create AI provider
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Provision or connect a new AI Chat provider
-func (c *Client) CreateAichatProvider(ctx context.Context, organization string, user string, body CreateAiChatProviderBody) (*AiChatProvidersResponse, error) {
-	path := "/api/organizations/{organization}/users/{user}/aichat-providers"
+// Provision or connect a new AI provider
+func (c *Client) CreateAiProvider(ctx context.Context, organization string, user string, body CreateAiProviderBody) (*AiProvidersResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/ai-providers"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 
-	var result AiChatProvidersResponse
+	var result AiProvidersResponse
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
 }
 
-// GetSingleAichatProvider - Get AI Chat provider
+// GetSingleAiProvider - Get AI provider
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Returns a specific AI Chat provider by name.
-func (c *Client) GetSingleAichatProvider(ctx context.Context, organization string, user string, name string) (*AiChatProviderResponse, error) {
-	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}"
+// Returns a specific AI provider by name.
+func (c *Client) GetSingleAiProvider(ctx context.Context, organization string, user string, name string) (*AiProviderResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/ai-providers/{name}"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "name", name)
 
-	var result AiChatProviderResponse
+	var result AiProviderResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
 }
 
-// DeleteSingleAichatProvider - Delete AI Chat provider
+// DeleteSingleAiProvider - Delete AI provider
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Deletes an AI Chat provider by name.
-func (c *Client) DeleteSingleAichatProvider(ctx context.Context, organization string, user string, name string) error {
-	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}"
+// Deletes an AI provider by name.
+func (c *Client) DeleteSingleAiProvider(ctx context.Context, organization string, user string, name string) error {
+	path := "/api/organizations/{organization}/users/{user}/ai-providers/{name}"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "name", name)
@@ -4538,31 +4620,31 @@ func (c *Client) DeleteSingleAichatProvider(ctx context.Context, organization st
 	return nil
 }
 
-// PatchSingleAichatProvider - Update AI Chat provider
+// PatchSingleAiProvider - Update AI provider
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Update a custom AI Chat provider's configuration (endpoint, API key, model).
-func (c *Client) PatchSingleAichatProvider(ctx context.Context, organization string, user string, name string, body UpdateAiChatInputBody) (*AiChatProviderResponse, error) {
-	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}"
+// Update a custom AI provider's configuration (endpoint, API key, model).
+func (c *Client) PatchSingleAiProvider(ctx context.Context, organization string, user string, name string, body UpdateAiProviderInputBody) (*AiProviderResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/ai-providers/{name}"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "name", name)
 
-	var result AiChatProviderResponse
+	var result AiProviderResponse
 	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
 }
 
-// ListAichatProviderModels - List AI Chat provider models
+// ListAiProviderModels - List AI provider models
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Lists available models from a custom AI Chat provider.
-func (c *Client) ListAichatProviderModels(ctx context.Context, organization string, user string, name string) (*ListModelsResponse, error) {
-	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}/models"
+// Lists available models from a custom AI provider.
+func (c *Client) ListAiProviderModels(ctx context.Context, organization string, user string, name string) (*ListModelsResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/ai-providers/{name}/models"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "name", name)
@@ -4580,7 +4662,7 @@ func (c *Client) ListAichatProviderModels(ctx context.Context, organization stri
 //
 // Get permissions for an AI provider.
 func (c *Client) GetAiproviderPermissions(ctx context.Context, organization string, user string, name string) (*SubjectPermissions, error) {
-	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}/permissions"
+	path := "/api/organizations/{organization}/users/{user}/ai-providers/{name}/permissions"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "name", name)
@@ -4598,7 +4680,7 @@ func (c *Client) GetAiproviderPermissions(ctx context.Context, organization stri
 //
 // Update permissions for an AI provider.
 func (c *Client) UpdateAiproviderPermissions(ctx context.Context, organization string, user string, name string, body UpdateAiProviderPermissionsInputBody) error {
-	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}/permissions"
+	path := "/api/organizations/{organization}/users/{user}/ai-providers/{name}/permissions"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "name", name)
@@ -4609,18 +4691,18 @@ func (c *Client) UpdateAiproviderPermissions(ctx context.Context, organization s
 	return nil
 }
 
-// ReindexAichatProvider - Reindex AI Chat provider
+// ReindexAiProvider - Reindex AI provider
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Reindex attached buckets to refresh the data AI Chat can reference.
-func (c *Client) ReindexAichatProvider(ctx context.Context, organization string, user string, name string) (*AiChatProviderResponse, error) {
-	path := "/api/organizations/{organization}/users/{user}/aichat-providers/{name}/reindex"
+// Reindex attached buckets to refresh the data AI can reference.
+func (c *Client) ReindexAiProvider(ctx context.Context, organization string, user string, name string) (*AiProviderResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/ai-providers/{name}/reindex"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "name", name)
 
-	var result AiChatProviderResponse
+	var result AiProviderResponse
 	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}

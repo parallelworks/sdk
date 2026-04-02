@@ -36,7 +36,7 @@ type AddPermissionInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type AiChatProviderResponse struct {
+type AiProviderResponse struct {
 	// Attached storage bucket name
 	BucketName *string `json:"bucketName,omitempty"`
 	// Cloud service provider
@@ -53,33 +53,33 @@ type AiChatProviderResponse struct {
 	Ingested bool `json:"ingested"`
 	// AI model name
 	Model *string `json:"model,omitempty"`
-	// Name of the AI Chat provider
+	// Name of the AI provider
 	Name string `json:"name"`
 	// Refresh interval for the AI provider
 	RefreshInterval *string `json:"refreshInterval,omitempty"`
 	// AI provider region (for managed providers)
 	Region *string `json:"region,omitempty"`
-	// Current status of the AI Chat provider
+	// Current status of the AI provider
 	Status string `json:"status"`
 	// The username of the user that owns this resource
 	User                 string         `json:"user"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type AiChatProvidersResponse struct {
+type AiProvidersResponse struct {
 	// Cloud service provider
 	Csp string `json:"csp"`
 	// Whether the tunnel's remote destination is reachable (tunnel providers only).
 	Healthy *bool `json:"healthy,omitempty"`
-	// Unique identifier for the AI Chat provider
+	// Unique identifier for the AI provider
 	ID string `json:"id"`
 	// AI model name
 	Model *string `json:"model"`
-	// Name of the AI Chat provider
+	// Name of the AI provider
 	Name string `json:"name"`
 	// AI provider region
 	Region *string `json:"region"`
-	// Current status of the AI Chat provider
+	// Current status of the AI provider
 	Status string `json:"status"`
 	// The username of the user that owns this resource.
 	User                 string         `json:"user"`
@@ -1434,18 +1434,18 @@ type CpuMetrics struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type CreateAiChatProviderBody struct {
+type CreateAiProviderBody struct {
 	// Cloud service provider (azure, custom)
 	Csp string `json:"csp"`
-	// Description of the AI Chat provider
+	// Description of the AI provider
 	Description *string `json:"description"`
-	// Billing group name for the AI Chat provider (required for managed providers, not used for custom)
+	// Billing group name for the AI provider (required for managed providers, not used for custom)
 	Group *string `json:"group,omitempty"`
-	// Name of the AI Chat provider
+	// Name of the AI provider
 	Name string `json:"name"`
 	// Network name
 	Network *string `json:"network,omitempty"`
-	// Tags for the AI Chat provider
+	// Tags for the AI provider
 	Tags                 *string          `json:"tags"`
 	Variables            VariablesRequest `json:"variables"`
 	AdditionalProperties map[string]any   `json:"-,omitempty"`
@@ -1581,6 +1581,18 @@ type CreateNetworkBody struct {
 	Regions []NetworkRegion `json:"regions"`
 	// Transit Gateway ID (required for private mode on AWS when peered to platform)
 	TransitGatewayID     string         `json:"transitGatewayId"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreateOrgAiProviderBody struct {
+	// Provider API key
+	APIKey *string `json:"apiKey,omitempty"`
+	// Provider endpoint URL
+	Endpoint *string `json:"endpoint,omitempty"`
+	// Name of the AI provider
+	Name string `json:"name"`
+	// AI provider type
+	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -3835,6 +3847,18 @@ type OpenstackSyncResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type OrgAiProviderResponse struct {
+	// Provider endpoint URL
+	Endpoint *string `json:"endpoint,omitempty"`
+	// Unique identifier
+	ID string `json:"id"`
+	// Provider name
+	Name string `json:"name"`
+	// AI provider type
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type OrgMauBreakdown struct {
 	// Monthly active users count
 	Mau int64 `json:"mau"`
@@ -5434,7 +5458,7 @@ type UnreachableSession struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type UpdateAiChatInputBody struct {
+type UpdateAiProviderInputBody struct {
 	// Custom provider API key
 	APIKey *string `json:"apiKey,omitempty"`
 	// List of model IDs enabled for the chat interface
@@ -5547,6 +5571,14 @@ type UpdateManagedNodeInputBody struct {
 type UpdateManagedNodeOutputBody struct {
 	// Hostname of the updated node
 	Hostname             string         `json:"hostname"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UpdateOrgAiProviderInputBody struct {
+	// Provider API key
+	APIKey *string `json:"apiKey,omitempty"`
+	// Provider endpoint URL
+	Endpoint             *string        `json:"endpoint,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

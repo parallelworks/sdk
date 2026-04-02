@@ -72,7 +72,7 @@
         ],
         "type": "object"
       },
-      "AiChatProviderResponse": {
+      "AiProviderResponse": {
         "additionalProperties": false,
         "properties": {
           "bucketName": {
@@ -120,7 +120,7 @@
             "type": "string"
           },
           "name": {
-            "description": "Name of the AI Chat provider",
+            "description": "Name of the AI provider",
             "type": "string"
           },
           "refreshInterval": {
@@ -132,7 +132,7 @@
             "type": "string"
           },
           "status": {
-            "description": "Current status of the AI Chat provider",
+            "description": "Current status of the AI provider",
             "type": "string"
           },
           "user": {
@@ -150,7 +150,7 @@
         ],
         "type": "object"
       },
-      "AiChatProvidersResponse": {
+      "AiProvidersResponse": {
         "additionalProperties": false,
         "properties": {
           "csp": {
@@ -162,7 +162,7 @@
             "type": "boolean"
           },
           "id": {
-            "description": "Unique identifier for the AI Chat provider",
+            "description": "Unique identifier for the AI provider",
             "type": "string"
           },
           "model": {
@@ -173,7 +173,7 @@
             ]
           },
           "name": {
-            "description": "Name of the AI Chat provider",
+            "description": "Name of the AI provider",
             "type": "string"
           },
           "region": {
@@ -184,7 +184,7 @@
             ]
           },
           "status": {
-            "description": "Current status of the AI Chat provider",
+            "description": "Current status of the AI provider",
             "type": "string"
           },
           "user": {
@@ -4077,7 +4077,7 @@
         ],
         "type": "object"
       },
-      "CreateAIChatProviderBody": {
+      "CreateAIProviderBody": {
         "additionalProperties": false,
         "properties": {
           "csp": {
@@ -4085,18 +4085,18 @@
             "type": "string"
           },
           "description": {
-            "description": "Description of the AI Chat provider",
+            "description": "Description of the AI provider",
             "type": [
               "string",
               "null"
             ]
           },
           "group": {
-            "description": "Billing group name for the AI Chat provider (required for managed providers, not used for custom)",
+            "description": "Billing group name for the AI provider (required for managed providers, not used for custom)",
             "type": "string"
           },
           "name": {
-            "description": "Name of the AI Chat provider",
+            "description": "Name of the AI provider",
             "maxLength": 255,
             "minLength": 1,
             "type": "string"
@@ -4106,7 +4106,7 @@
             "type": "string"
           },
           "tags": {
-            "description": "Tags for the AI Chat provider",
+            "description": "Tags for the AI provider",
             "type": [
               "string",
               "null"
@@ -4114,7 +4114,7 @@
           },
           "variables": {
             "$ref": "#/components/schemas/VariablesRequest",
-            "description": "AI Chat configuration variables"
+            "description": "AI provider configuration variables"
           }
         },
         "required": [
@@ -4462,6 +4462,38 @@
           "transitGatewayId",
           "peeredToPlatform",
           "natGateway"
+        ],
+        "type": "object"
+      },
+      "CreateOrgAIProviderBody": {
+        "additionalProperties": false,
+        "properties": {
+          "apiKey": {
+            "description": "Provider API key",
+            "type": "string"
+          },
+          "endpoint": {
+            "description": "Provider endpoint URL",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the AI provider",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "description": "AI provider type",
+            "enum": [
+              "custom",
+              "azure"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
         ],
         "type": "object"
       },
@@ -11141,6 +11173,33 @@
         ],
         "type": "object"
       },
+      "OrgAIProviderResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "endpoint": {
+            "description": "Provider endpoint URL",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier",
+            "type": "string"
+          },
+          "name": {
+            "description": "Provider name",
+            "type": "string"
+          },
+          "type": {
+            "description": "AI provider type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
       "OrgMAUBreakdown": {
         "additionalProperties": false,
         "properties": {
@@ -15947,7 +16006,7 @@
         ],
         "type": "object"
       },
-      "UpdateAIChatInputBody": {
+      "UpdateAIProviderInputBody": {
         "additionalProperties": false,
         "properties": {
           "apiKey": {
@@ -16269,6 +16328,20 @@
         "required": [
           "hostname"
         ],
+        "type": "object"
+      },
+      "UpdateOrgAIProviderInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "apiKey": {
+            "description": "Provider API key",
+            "type": "string"
+          },
+          "endpoint": {
+            "description": "Provider endpoint URL",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UpdatePermissionInputBody": {
@@ -21924,6 +21997,284 @@
         "summary": "Delete organization",
         "tags": [
           "Organization"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/ai-providers": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nList all organization-level AI providers.",
+        "operationId": "list-org-ai-providers",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OrgAIProviderResponse"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List org AI providers",
+        "tags": [
+          "AI Providers"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreate an organization-level AI provider.",
+        "operationId": "create-org-ai-provider",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrgAIProviderBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgAIProviderResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create org AI provider",
+        "tags": [
+          "AI Providers"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/ai-providers/{name}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDelete an organization-level AI provider.",
+        "operationId": "delete-org-ai-provider",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete org AI provider",
+        "tags": [
+          "AI Providers"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nGet a specific organization-level AI provider by name.",
+        "operationId": "get-org-ai-provider",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgAIProviderResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get org AI provider",
+        "tags": [
+          "AI Providers"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdate an organization-level AI provider's configuration.",
+        "operationId": "update-org-ai-provider",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrgAIProviderInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgAIProviderResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update org AI provider",
+        "tags": [
+          "AI Providers"
         ]
       }
     },
@@ -29711,13 +30062,13 @@
             }
           },
           {
-            "description": "Field to group costs by (type, subtype)",
+            "description": "Field to group costs by (type, subtype, user)",
             "explode": false,
             "in": "query",
             "name": "groupBy",
             "schema": {
               "default": "type",
-              "description": "Field to group costs by (type, subtype)",
+              "description": "Field to group costs by (type, subtype, user)",
               "type": "string"
             }
           },
@@ -30762,10 +31113,10 @@
         ]
       }
     },
-    "/api/organizations/{organization}/users/{user}/aichat-providers": {
+    "/api/organizations/{organization}/users/{user}/ai-providers": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a list of AI Chat providers available to the user",
-        "operationId": "list-aichat-providers",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a list of AI providers available to the user",
+        "operationId": "list-ai-providers",
         "parameters": [
           {
             "description": "The name of the organization.",
@@ -30800,7 +31151,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/AiChatProvidersResponse"
+                    "$ref": "#/components/schemas/AiProvidersResponse"
                   },
                   "type": [
                     "array",
@@ -30822,14 +31173,14 @@
             "description": "Error"
           }
         },
-        "summary": "List AI Chat providers",
+        "summary": "List AI providers",
         "tags": [
-          "AI Chat Providers"
+          "AI Providers"
         ]
       },
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nProvision or connect a new AI Chat provider",
-        "operationId": "create-aichat-provider",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nProvision or connect a new AI provider",
+        "operationId": "create-ai-provider",
         "parameters": [
           {
             "description": "The name of the organization.",
@@ -30862,7 +31213,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateAIChatProviderBody"
+                "$ref": "#/components/schemas/CreateAIProviderBody"
               }
             }
           },
@@ -30873,7 +31224,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiChatProvidersResponse"
+                  "$ref": "#/components/schemas/AiProvidersResponse"
                 }
               }
             },
@@ -30890,16 +31241,16 @@
             "description": "Error"
           }
         },
-        "summary": "Create AI Chat provider",
+        "summary": "Create AI provider",
         "tags": [
-          "AI Chat Providers"
+          "AI Providers"
         ]
       }
     },
-    "/api/organizations/{organization}/users/{user}/aichat-providers/{name}": {
+    "/api/organizations/{organization}/users/{user}/ai-providers/{name}": {
       "delete": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDeletes an AI Chat provider by name.",
-        "operationId": "delete-single-aichat-provider",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDeletes an AI provider by name.",
+        "operationId": "delete-single-ai-provider",
         "parameters": [
           {
             "description": "The name of the organization.",
@@ -30928,12 +31279,12 @@
             }
           },
           {
-            "description": "AI Chat provider name",
+            "description": "AI provider name",
             "in": "path",
             "name": "name",
             "required": true,
             "schema": {
-              "description": "AI Chat provider name",
+              "description": "AI provider name",
               "type": "string"
             }
           }
@@ -30953,14 +31304,14 @@
             "description": "Error"
           }
         },
-        "summary": "Delete AI Chat provider",
+        "summary": "Delete AI provider",
         "tags": [
-          "AI Chat Providers"
+          "AI Providers"
         ]
       },
       "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns a specific AI Chat provider by name.",
-        "operationId": "get-single-aichat-provider",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns a specific AI provider by name.",
+        "operationId": "get-single-ai-provider",
         "parameters": [
           {
             "description": "The name of the organization.",
@@ -30989,12 +31340,12 @@
             }
           },
           {
-            "description": "AI Chat provider name",
+            "description": "AI provider name",
             "in": "path",
             "name": "name",
             "required": true,
             "schema": {
-              "description": "AI Chat provider name",
+              "description": "AI provider name",
               "type": "string"
             }
           }
@@ -31004,7 +31355,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiChatProviderResponse"
+                  "$ref": "#/components/schemas/AiProviderResponse"
                 }
               }
             },
@@ -31021,14 +31372,14 @@
             "description": "Error"
           }
         },
-        "summary": "Get AI Chat provider",
+        "summary": "Get AI provider",
         "tags": [
-          "AI Chat Providers"
+          "AI Providers"
         ]
       },
       "patch": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUpdate a custom AI Chat provider's configuration (endpoint, API key, model).",
-        "operationId": "patch-single-aichat-provider",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUpdate a custom AI provider's configuration (endpoint, API key, model).",
+        "operationId": "patch-single-ai-provider",
         "parameters": [
           {
             "description": "The name of the organization.",
@@ -31057,12 +31408,12 @@
             }
           },
           {
-            "description": "AI Chat provider name",
+            "description": "AI provider name",
             "in": "path",
             "name": "name",
             "required": true,
             "schema": {
-              "description": "AI Chat provider name",
+              "description": "AI provider name",
               "type": "string"
             }
           }
@@ -31071,7 +31422,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateAIChatInputBody"
+                "$ref": "#/components/schemas/UpdateAIProviderInputBody"
               }
             }
           },
@@ -31082,7 +31433,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiChatProviderResponse"
+                  "$ref": "#/components/schemas/AiProviderResponse"
                 }
               }
             },
@@ -31099,16 +31450,16 @@
             "description": "Error"
           }
         },
-        "summary": "Update AI Chat provider",
+        "summary": "Update AI provider",
         "tags": [
-          "AI Chat Providers"
+          "AI Providers"
         ]
       }
     },
-    "/api/organizations/{organization}/users/{user}/aichat-providers/{name}/models": {
+    "/api/organizations/{organization}/users/{user}/ai-providers/{name}/models": {
       "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists available models from a custom AI Chat provider.",
-        "operationId": "list-aichat-provider-models",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists available models from a custom AI provider.",
+        "operationId": "list-ai-provider-models",
         "parameters": [
           {
             "description": "The name of the organization.",
@@ -31137,12 +31488,12 @@
             }
           },
           {
-            "description": "AI Chat provider name",
+            "description": "AI provider name",
             "in": "path",
             "name": "name",
             "required": true,
             "schema": {
-              "description": "AI Chat provider name",
+              "description": "AI provider name",
               "type": "string"
             }
           }
@@ -31169,13 +31520,13 @@
             "description": "Error"
           }
         },
-        "summary": "List AI Chat provider models",
+        "summary": "List AI provider models",
         "tags": [
-          "AI Chat Providers"
+          "AI Providers"
         ]
       }
     },
-    "/api/organizations/{organization}/users/{user}/aichat-providers/{name}/permissions": {
+    "/api/organizations/{organization}/users/{user}/ai-providers/{name}/permissions": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGet permissions for an AI provider.",
         "operationId": "get-aiprovider-permissions",
@@ -31241,7 +31592,7 @@
         },
         "summary": "Get AI provider permissions",
         "tags": [
-          "AI Chat Providers"
+          "AI Providers"
         ]
       },
       "patch": {
@@ -31312,14 +31663,14 @@
         },
         "summary": "Update AI provider permissions",
         "tags": [
-          "AI Chat Providers"
+          "AI Providers"
         ]
       }
     },
-    "/api/organizations/{organization}/users/{user}/aichat-providers/{name}/reindex": {
+    "/api/organizations/{organization}/users/{user}/ai-providers/{name}/reindex": {
       "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReindex attached buckets to refresh the data AI Chat can reference.",
-        "operationId": "reindex-aichat-provider",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReindex attached buckets to refresh the data AI can reference.",
+        "operationId": "reindex-ai-provider",
         "parameters": [
           {
             "description": "The name of the organization.",
@@ -31348,12 +31699,12 @@
             }
           },
           {
-            "description": "AI Chat provider name",
+            "description": "AI provider name",
             "in": "path",
             "name": "name",
             "required": true,
             "schema": {
-              "description": "AI Chat provider name",
+              "description": "AI provider name",
               "type": "string"
             }
           }
@@ -31363,7 +31714,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiChatProviderResponse"
+                  "$ref": "#/components/schemas/AiProviderResponse"
                 }
               }
             },
@@ -31380,9 +31731,9 @@
             "description": "Error"
           }
         },
-        "summary": "Reindex AI Chat provider",
+        "summary": "Reindex AI provider",
         "tags": [
-          "AI Chat Providers"
+          "AI Providers"
         ]
       }
     },
@@ -41280,8 +41631,12 @@
       "name": "AI Chat"
     },
     {
-      "description": "Endpoints related to AI chat providers",
-      "name": "AI Chat Providers"
+      "description": "AI gateway management: keys, policies, usage, and audit logs",
+      "name": "AI Gateway"
+    },
+    {
+      "description": "AI provider management for both user-owned and organization-level providers",
+      "name": "AI Providers"
     },
     {
       "description": "Endpoints related to budget allocations",
