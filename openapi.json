@@ -5978,10 +5978,21 @@
         ],
         "type": "object"
       },
-      "GetUserResourcesOutputBody": {
+      "GetUserResourcesBody": {
         "additionalProperties": false,
         "properties": {
-          "resources": {
+          "active": {
+            "description": "Resources that are provisioned, provisioning, or failed and need cleanup via delete/deprovision tasks (includes stopped clusters that still have cloud resources)",
+            "items": {
+              "$ref": "#/components/schemas/UserResource"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "inactive": {
+            "description": "Resources that are unprovisioned, stopped, off, or deleted and do not need deprovisioning",
             "items": {
               "$ref": "#/components/schemas/UserResource"
             },
@@ -5992,7 +6003,8 @@
           }
         },
         "required": [
-          "resources"
+          "active",
+          "inactive"
         ],
         "type": "object"
       },
@@ -36165,7 +36177,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetUserResourcesOutputBody"
+                  "$ref": "#/components/schemas/GetUserResourcesBody"
                 }
               }
             },

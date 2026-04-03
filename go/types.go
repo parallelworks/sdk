@@ -2100,8 +2100,11 @@ type GetUserContainersResponse struct {
 	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
-type GetUserResourcesOutputBody struct {
-	Resources            []UserResource `json:"resources"`
+type GetUserResourcesBody struct {
+	// Resources that are provisioned, provisioning, or failed and need cleanup via delete/deprovision tasks (includes stopped clusters that still have cloud resources)
+	Active []UserResource `json:"active"`
+	// Resources that are unprovisioned, stopped, off, or deleted and do not need deprovisioning
+	Inactive             []UserResource `json:"inactive"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

@@ -5832,12 +5832,12 @@ func (c *Client) UpdateResourceGroupPermissions(ctx context.Context, organizatio
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns currently running resources for the specified user.
-func (c *Client) GetUserResources(ctx context.Context, organization string, user string) (*GetUserResourcesOutputBody, error) {
+func (c *Client) GetUserResources(ctx context.Context, organization string, user string) (*GetUserResourcesBody, error) {
 	path := "/api/organizations/{organization}/users/{user}/resources"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 
-	var result GetUserResourcesOutputBody
+	var result GetUserResourcesBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
