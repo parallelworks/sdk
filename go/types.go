@@ -189,6 +189,8 @@ type AuthSession struct {
 	Admin bool `json:"admin"`
 	// Email address of the user.
 	Email string `json:"email"`
+	// User ID.
+	ID string `json:"id"`
 	// Original user who is impersonating this user, if any.
 	ImpersonatedBy *string `json:"impersonatedBy,omitempty"`
 	// Full name of the user.
@@ -1040,7 +1042,7 @@ type ChatMessage struct {
 	// IDs of attachments to include with this message
 	AttachmentIds []string `json:"attachment_ids,omitempty"`
 	// Message content (string or array for multimodal)
-	Content any `json:"content"`
+	Content any `json:"content,omitempty"`
 	// Optional name for the participant
 	Name *string `json:"name,omitempty"`
 	// Reasoning content for assistant messages (required by DeepSeek)
@@ -3239,9 +3241,22 @@ type MemberDetail struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type MessageAuthor struct {
+	// Avatar image URL
+	AvatarURL *string `json:"avatarUrl,omitempty"`
+	// User ID
+	ID string `json:"id"`
+	// Display name
+	Name *string `json:"name,omitempty"`
+	// Username
+	Username             string         `json:"username"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type MessageResponse struct {
 	// Attachment details
 	Attachments []AttachmentResponse `json:"attachments,omitempty"`
+	Author      *MessageAuthor       `json:"author,omitempty"`
 	// Message content
 	Content *string `json:"content"`
 	// Message UUID

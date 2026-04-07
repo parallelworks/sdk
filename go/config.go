@@ -109,6 +109,12 @@ func LoadCredentialConfigFrom(path string) (*CredentialConfig, error) {
 		return nil, err
 	}
 
+	// Treat empty file same as non-existent — return empty config
+	if len(data) == 0 {
+		cfg.Identities = make(map[string]Identity)
+		return cfg, nil
+	}
+
 	if err := json.Unmarshal(data, cfg); err != nil {
 		return nil, fmt.Errorf("failed to parse credentials file (%s): %w\nThis may indicate a corrupted credentials file. Try deleting the file and re-authenticating with 'pw auth apikey' or 'pw auth token'.", path, err)
 	}

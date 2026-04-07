@@ -57,6 +57,20 @@ func TestLoadCredentialConfigFrom_NotFound(t *testing.T) {
 	}
 }
 
+func TestLoadCredentialConfigFrom_EmptyFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".credentials")
+	os.WriteFile(path, []byte(""), 0600)
+
+	cfg, err := LoadCredentialConfigFrom(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(cfg.Identities) != 0 {
+		t.Errorf("expected empty identities, got %d", len(cfg.Identities))
+	}
+}
+
 func TestLoadCredentialConfigFrom_Valid(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, ".credentials")

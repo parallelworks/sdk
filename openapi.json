@@ -475,6 +475,10 @@
             ],
             "type": "string"
           },
+          "id": {
+            "description": "User ID.",
+            "type": "string"
+          },
           "impersonatedBy": {
             "description": "Original user who is impersonating this user, if any.",
             "type": "string"
@@ -553,6 +557,7 @@
           }
         },
         "required": [
+          "id",
           "username",
           "safeUsername",
           "name",
@@ -2890,8 +2895,7 @@
           }
         },
         "required": [
-          "role",
-          "content"
+          "role"
         ],
         "type": "object"
       },
@@ -9313,6 +9317,32 @@
         ],
         "type": "object"
       },
+      "MessageAuthor": {
+        "additionalProperties": false,
+        "properties": {
+          "avatarUrl": {
+            "description": "Avatar image URL",
+            "type": "string"
+          },
+          "id": {
+            "description": "User ID",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name",
+            "type": "string"
+          },
+          "username": {
+            "description": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username"
+        ],
+        "type": "object"
+      },
       "MessageResponse": {
         "additionalProperties": false,
         "properties": {
@@ -9325,6 +9355,10 @@
               "array",
               "null"
             ]
+          },
+          "author": {
+            "$ref": "#/components/schemas/MessageAuthor",
+            "description": "Message author info"
           },
           "content": {
             "description": "Message content",
