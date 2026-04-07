@@ -873,14 +873,46 @@ func (c *Client) ListUserAllocations(ctx context.Context, opts ...ListUserAlloca
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Returns the API keys for the currently authenticated user.
-func (c *Client) GetApikeys(ctx context.Context) (*[]APIKey, error) {
+func (c *Client) GetApikeys(ctx context.Context) (*[]APIKeyResponse, error) {
 	path := "/api/apikeys"
 
-	var result []APIKey
+	var result []APIKeyResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// CreateApikey - Create API key
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// > This route requires browser session authentication and cannot be accessed via API keys.
+//
+// Create a new API key for the currently authenticated user.
+func (c *Client) CreateApikey(ctx context.Context, body CreateAPIKeyInputBody) (*CreateAPIKeyOutputBody, error) {
+	path := "/api/apikeys"
+
+	var result CreateAPIKeyOutputBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteApikey - Delete API key
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Delete an API key belonging to the currently authenticated user.
+func (c *Client) DeleteApikey(ctx context.Context, name string) error {
+	path := "/api/apikeys/{name}"
+	path = pathReplace(path, "name", name)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // GetAuthSession - Get current session

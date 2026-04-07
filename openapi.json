@@ -1,6 +1,57 @@
 {
   "components": {
     "schemas": {
+      "APIKeyResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "description": "Budget allocation name (AI keys only).",
+            "type": "string"
+          },
+          "created": {
+            "description": "The timestamp the API key was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiration": {
+            "description": "When the key expires, if applicable.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the API key.",
+            "type": "string"
+          },
+          "keyHint": {
+            "description": "Truncated preview of the key for identification.",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "description": "When the key was last used.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "title": {
+            "description": "The display name of the API key.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The key type: platform or ai.",
+            "enum": [
+              "platform",
+              "ai"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "type",
+          "created"
+        ],
+        "type": "object"
+      },
       "AccessManagementBody": {
         "additionalProperties": false,
         "properties": {
@@ -83,6 +134,10 @@
             "description": "Cloud service provider",
             "type": "string"
           },
+          "displayName": {
+            "description": "Display name of the AI provider",
+            "type": "string"
+          },
           "documents": {
             "description": "List of ingested documents",
             "items": {
@@ -155,6 +210,10 @@
         "properties": {
           "csp": {
             "description": "Cloud service provider",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "Display name of the AI provider",
             "type": "string"
           },
           "healthy": {
@@ -354,41 +413,6 @@
             "type": "number"
           }
         },
-        "type": "object"
-      },
-      "ApiKey": {
-        "additionalProperties": false,
-        "properties": {
-          "created": {
-            "description": "The timestamp the API key was created.",
-            "format": "date-time",
-            "readOnly": true,
-            "type": "string"
-          },
-          "expiration": {
-            "description": "The timestamp when the API key will expire. Not present or null if the key does not expire.",
-            "format": "date-time",
-            "readOnly": true,
-            "type": "string"
-          },
-          "id": {
-            "description": "The unique identifier for the API key.",
-            "readOnly": true,
-            "type": "string"
-          },
-          "title": {
-            "description": "The title of the API key.",
-            "examples": [
-              "My API Key"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "title",
-          "created"
-        ],
         "type": "object"
       },
       "AttachmentResponse": {
@@ -4095,6 +4119,11 @@
               "null"
             ]
           },
+          "displayName": {
+            "description": "Display name of the AI provider",
+            "maxLength": 100,
+            "type": "string"
+          },
           "group": {
             "description": "Billing group name for the AI provider (required for managed providers, not used for custom)",
             "type": "string"
@@ -4127,6 +4156,93 @@
           "tags",
           "csp",
           "variables"
+        ],
+        "type": "object"
+      },
+      "CreateAPIKeyInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "description": "Budget allocation name (required for AI keys)",
+            "type": "string"
+          },
+          "duration": {
+            "description": "Duration in days before the key expires (platform keys)",
+            "type": "string"
+          },
+          "title": {
+            "description": "Display name for the API key",
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "default": "platform",
+            "description": "Key type",
+            "enum": [
+              "platform",
+              "ai"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "type": "object"
+      },
+      "CreateAPIKeyOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "description": "Budget allocation name (AI keys only).",
+            "type": "string"
+          },
+          "created": {
+            "description": "The timestamp the API key was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiration": {
+            "description": "When the key expires, if applicable.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the API key.",
+            "type": "string"
+          },
+          "key": {
+            "description": "The full API key (only shown once)",
+            "type": "string"
+          },
+          "keyHint": {
+            "description": "Truncated preview of the key for identification.",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "description": "When the key was last used.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "title": {
+            "description": "The display name of the API key.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The key type: platform or ai.",
+            "enum": [
+              "platform",
+              "ai"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "id",
+          "title",
+          "type",
+          "created"
         ],
         "type": "object"
       },
@@ -4474,6 +4590,11 @@
         "properties": {
           "apiKey": {
             "description": "Provider API key",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "Display name of the AI provider",
+            "maxLength": 100,
             "type": "string"
           },
           "endpoint": {
@@ -11222,6 +11343,10 @@
       "OrgAIProviderResponse": {
         "additionalProperties": false,
         "properties": {
+          "displayName": {
+            "description": "Display name of the AI provider",
+            "type": "string"
+          },
           "endpoint": {
             "description": "Provider endpoint URL",
             "type": "string"
@@ -11860,7 +11985,8 @@
             "enum": [
               "provisioning",
               "provisioned",
-              "failed"
+              "failed",
+              "skipped"
             ],
             "examples": [
               "provisioned"
@@ -12753,6 +12879,16 @@
       "ProvisionStatusChildResponse": {
         "additionalProperties": false,
         "properties": {
+          "children": {
+            "description": "Nested child records grouped by role.",
+            "items": {
+              "$ref": "#/components/schemas/ProvisionStatusChildResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "createdAt": {
             "description": "The creation timestamp.",
             "format": "date-time",
@@ -12873,6 +13009,23 @@
       "ProvisionStatusStruct": {
         "additionalProperties": false,
         "properties": {
+          "childAction": {
+            "description": "Child action: add or update",
+            "enum": [
+              "add",
+              "update",
+              ""
+            ],
+            "type": "string"
+          },
+          "childId": {
+            "description": "The child provision status ID",
+            "type": "string"
+          },
+          "childLabel": {
+            "description": "The child provision status label",
+            "type": "string"
+          },
           "errorMessage": {
             "description": "Base64 encoded error message",
             "type": "string"
@@ -16057,6 +16210,11 @@
         "properties": {
           "apiKey": {
             "description": "Custom provider API key",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "Display name of the AI provider",
+            "maxLength": 100,
             "type": "string"
           },
           "enabledModels": {
@@ -19817,7 +19975,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/ApiKey"
+                    "$ref": "#/components/schemas/APIKeyResponse"
                   },
                   "type": [
                     "array",
@@ -19840,6 +19998,83 @@
           }
         },
         "summary": "List API keys",
+        "tags": [
+          "API Keys"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\n\u003e This route requires browser session authentication and cannot be accessed via API keys.\n\nCreate a new API key for the currently authenticated user.",
+        "operationId": "create-apikey",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAPIKeyInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAPIKeyOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create API key",
+        "tags": [
+          "API Keys"
+        ]
+      }
+    },
+    "/api/apikeys/{name}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDelete an API key belonging to the currently authenticated user.",
+        "operationId": "delete-apikey",
+        "parameters": [
+          {
+            "description": "The name of the API key to delete",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the API key to delete",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete API key",
         "tags": [
           "API Keys"
         ]

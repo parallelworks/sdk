@@ -6,6 +6,26 @@ import (
 	"time"
 )
 
+type APIKeyResponse struct {
+	// Budget allocation name (AI keys only).
+	Allocation *string `json:"allocation,omitempty"`
+	// The timestamp the API key was created.
+	Created time.Time `json:"created"`
+	// When the key expires, if applicable.
+	Expiration *time.Time `json:"expiration,omitempty"`
+	// The unique identifier for the API key.
+	ID string `json:"id"`
+	// Truncated preview of the key for identification.
+	KeyHint *string `json:"keyHint,omitempty"`
+	// When the key was last used.
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+	// The display name of the API key.
+	Title string `json:"title"`
+	// The key type: platform or ai.
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type AccessManagementBody struct {
 	// Enable pam_mkhomedir for automatic home directory creation
 	HomeDirectories bool `json:"homeDirectories"`
@@ -41,6 +61,8 @@ type AiProviderResponse struct {
 	BucketName *string `json:"bucketName,omitempty"`
 	// Cloud service provider
 	Csp string `json:"csp"`
+	// Display name of the AI provider
+	DisplayName *string `json:"displayName,omitempty"`
 	// List of ingested documents
 	Documents []string `json:"documents,omitempty"`
 	// List of model IDs enabled for the chat interface
@@ -69,6 +91,8 @@ type AiProviderResponse struct {
 type AiProvidersResponse struct {
 	// Cloud service provider
 	Csp string `json:"csp"`
+	// Display name of the AI provider
+	DisplayName *string `json:"displayName,omitempty"`
 	// Whether the tunnel's remote destination is reachable (tunnel providers only).
 	Healthy *bool `json:"healthy,omitempty"`
 	// Unique identifier for the AI provider
@@ -139,18 +163,6 @@ type Allocations struct {
 	Total *float64 `json:"total,omitempty"`
 	// Used allocation
 	Used                 *float64       `json:"used,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type APIKey struct {
-	// The timestamp the API key was created.
-	Created time.Time `json:"created"`
-	// The timestamp when the API key will expire. Not present or null if the key does not expire.
-	Expiration *time.Time `json:"expiration,omitempty"`
-	// The unique identifier for the API key.
-	ID string `json:"id"`
-	// The title of the API key.
-	Title                string         `json:"title"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -1441,6 +1453,8 @@ type CreateAiProviderBody struct {
 	Csp string `json:"csp"`
 	// Description of the AI provider
 	Description *string `json:"description"`
+	// Display name of the AI provider
+	DisplayName *string `json:"displayName,omitempty"`
 	// Billing group name for the AI provider (required for managed providers, not used for custom)
 	Group *string `json:"group,omitempty"`
 	// Name of the AI provider
@@ -1451,6 +1465,40 @@ type CreateAiProviderBody struct {
 	Tags                 *string          `json:"tags"`
 	Variables            VariablesRequest `json:"variables"`
 	AdditionalProperties map[string]any   `json:"-,omitempty"`
+}
+
+type CreateAPIKeyInputBody struct {
+	// Budget allocation name (required for AI keys)
+	Allocation *string `json:"allocation,omitempty"`
+	// Duration in days before the key expires (platform keys)
+	Duration *string `json:"duration,omitempty"`
+	// Display name for the API key
+	Title string `json:"title"`
+	// Key type
+	Type                 *string        `json:"type,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreateAPIKeyOutputBody struct {
+	// Budget allocation name (AI keys only).
+	Allocation *string `json:"allocation,omitempty"`
+	// The timestamp the API key was created.
+	Created time.Time `json:"created"`
+	// When the key expires, if applicable.
+	Expiration *time.Time `json:"expiration,omitempty"`
+	// The unique identifier for the API key.
+	ID string `json:"id"`
+	// The full API key (only shown once)
+	Key string `json:"key"`
+	// Truncated preview of the key for identification.
+	KeyHint *string `json:"keyHint,omitempty"`
+	// When the key was last used.
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+	// The display name of the API key.
+	Title string `json:"title"`
+	// The key type: platform or ai.
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateAlertBody struct {
@@ -1589,6 +1637,8 @@ type CreateNetworkBody struct {
 type CreateOrgAiProviderBody struct {
 	// Provider API key
 	APIKey *string `json:"apiKey,omitempty"`
+	// Display name of the AI provider
+	DisplayName *string `json:"displayName,omitempty"`
 	// Provider endpoint URL
 	Endpoint *string `json:"endpoint,omitempty"`
 	// Name of the AI provider
@@ -3866,6 +3916,8 @@ type OpenstackSyncResponse struct {
 }
 
 type OrgAiProviderResponse struct {
+	// Display name of the AI provider
+	DisplayName *string `json:"displayName,omitempty"`
 	// Provider endpoint URL
 	Endpoint *string `json:"endpoint,omitempty"`
 	// Unique identifier
@@ -4409,6 +4461,8 @@ type ProvisionStatusAttribute struct {
 }
 
 type ProvisionStatusChildResponse struct {
+	// Nested child records grouped by role.
+	Children []ProvisionStatusChildResponse `json:"children,omitempty"`
 	// The creation timestamp.
 	CreatedAt time.Time `json:"createdAt"`
 	// Error message if the child provision step failed.
@@ -4453,6 +4507,12 @@ type ProvisionStatusResponseRecord struct {
 }
 
 type ProvisionStatusStruct struct {
+	// Child action: add or update
+	ChildAction *string `json:"childAction,omitempty"`
+	// The child provision status ID
+	ChildID *string `json:"childId,omitempty"`
+	// The child provision status label
+	ChildLabel *string `json:"childLabel,omitempty"`
 	// Base64 encoded error message
 	ErrorMessage string `json:"errorMessage"`
 	// The provision status ID
@@ -5479,6 +5539,8 @@ type UnreachableSession struct {
 type UpdateAiProviderInputBody struct {
 	// Custom provider API key
 	APIKey *string `json:"apiKey,omitempty"`
+	// Display name of the AI provider
+	DisplayName *string `json:"displayName,omitempty"`
 	// List of model IDs enabled for the chat interface
 	EnabledModels []string `json:"enabledModels,omitempty"`
 	// Custom provider endpoint URL
