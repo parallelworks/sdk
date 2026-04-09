@@ -1,6 +1,35 @@
 {
   "components": {
     "schemas": {
+      "AIModelConfig": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "inputRate": {
+            "format": "double",
+            "type": "number"
+          },
+          "modelName": {
+            "type": "string"
+          },
+          "outputRate": {
+            "format": "double",
+            "type": "number"
+          },
+          "usageNotSupported": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "modelName",
+          "enabled",
+          "inputRate",
+          "outputRate"
+        ],
+        "type": "object"
+      },
       "APIKeyResponse": {
         "additionalProperties": false,
         "properties": {
@@ -350,6 +379,32 @@
           "name",
           "unit",
           "total"
+        ],
+        "type": "object"
+      },
+      "AllocationSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "total": {
+            "format": "double",
+            "type": "number"
+          },
+          "used": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "total",
+          "used"
         ],
         "type": "object"
       },
@@ -2247,6 +2302,38 @@
           "type",
           "createdAt",
           "updatedAt"
+        ],
+        "type": "object"
+      },
+      "BreakdownItem": {
+        "additionalProperties": false,
+        "properties": {
+          "cost": {
+            "format": "double",
+            "type": "number"
+          },
+          "inputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "outputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "percentage": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "label",
+          "cost",
+          "inputTokens",
+          "outputTokens",
+          "percentage"
         ],
         "type": "object"
       },
@@ -4611,7 +4698,8 @@
             "description": "AI provider type",
             "enum": [
               "custom",
-              "azure"
+              "azure",
+              "anthropic"
             ],
             "type": "string"
           }
@@ -8451,6 +8539,25 @@
         ],
         "type": "object"
       },
+      "ListOrgProviderModelsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "models": {
+            "description": "Available model IDs from the upstream provider",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "models"
+        ],
+        "type": "object"
+      },
       "ListOrgUsersOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -11435,6 +11542,74 @@
         ],
         "type": "object"
       },
+      "OrgModelEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether the model is enabled",
+            "type": "boolean"
+          },
+          "inputRate": {
+            "description": "USD per input token",
+            "format": "double",
+            "type": "number"
+          },
+          "model": {
+            "description": "Fully qualified model identifier",
+            "type": "string"
+          },
+          "modelName": {
+            "description": "Raw model name",
+            "type": "string"
+          },
+          "outputRate": {
+            "description": "USD per output token",
+            "format": "double",
+            "type": "number"
+          },
+          "provider": {
+            "description": "Provider name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model",
+          "provider",
+          "modelName",
+          "enabled",
+          "inputRate",
+          "outputRate"
+        ],
+        "type": "object"
+      },
+      "OrgUsageSummaryResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "activeUsers": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCost": {
+            "format": "double",
+            "type": "number"
+          },
+          "totalInputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalOutputTokens": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalCost",
+          "totalInputTokens",
+          "totalOutputTokens",
+          "activeUsers"
+        ],
+        "type": "object"
+      },
       "OrgUser": {
         "additionalProperties": false,
         "properties": {
@@ -11927,6 +12102,26 @@
         "required": [
           "hostname"
         ],
+        "type": "object"
+      },
+      "PatchModelConfigInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether the model is enabled",
+            "type": "boolean"
+          },
+          "inputRate": {
+            "description": "USD per input token",
+            "format": "double",
+            "type": "number"
+          },
+          "outputRate": {
+            "description": "USD per output token",
+            "format": "double",
+            "type": "number"
+          }
+        },
         "type": "object"
       },
       "PatchNetworkBody": {
@@ -12576,6 +12771,14 @@
       "PostImpersonateInputBody": {
         "additionalProperties": false,
         "properties": {
+          "reason": {
+            "description": "Reason for impersonating this user",
+            "examples": [
+              "Investigating support ticket #1234"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
           "username": {
             "description": "Username of the user to impersonate",
             "examples": [
@@ -12586,7 +12789,8 @@
           }
         },
         "required": [
-          "username"
+          "username",
+          "reason"
         ],
         "type": "object"
       },
@@ -13153,6 +13357,25 @@
           "type",
           "architecture",
           "published"
+        ],
+        "type": "object"
+      },
+      "PutModelConfigsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "modelConfigs": {
+            "description": "Model configurations",
+            "items": {
+              "$ref": "#/components/schemas/AIModelConfig"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "modelConfigs"
         ],
         "type": "object"
       },
@@ -16042,6 +16265,37 @@
           "null"
         ]
       },
+      "TimeSeriesPoint": {
+        "additionalProperties": false,
+        "properties": {
+          "groupKey": {
+            "type": "string"
+          },
+          "inputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "outputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "totalCost": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "timestamp",
+          "totalCost",
+          "inputTokens",
+          "outputTokens"
+        ],
+        "type": "object"
+      },
       "Tool": {
         "additionalProperties": true,
         "properties": {
@@ -16826,6 +17080,29 @@
         ],
         "type": "object"
       },
+      "UsageBreakdownResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BreakdownItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "totalCost": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "totalCost"
+        ],
+        "type": "object"
+      },
       "UsageEventOutput": {
         "additionalProperties": false,
         "properties": {
@@ -16902,6 +17179,39 @@
           "used",
           "free",
           "usedPercent"
+        ],
+        "type": "object"
+      },
+      "UsageSummaryResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/AllocationSummary"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "totalCost": {
+            "format": "double",
+            "type": "number"
+          },
+          "totalInputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalOutputTokens": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalCost",
+          "totalInputTokens",
+          "totalOutputTokens",
+          "allocations"
         ],
         "type": "object"
       },
@@ -18902,6 +19212,229 @@
         "summary": "Register Node",
         "tags": [
           "Clusters"
+        ]
+      }
+    },
+    "/api/ai-usage/breakdown": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGet AI usage breakdown for the current user.",
+        "operationId": "get-user-ai-usage-breakdown",
+        "parameters": [
+          {
+            "description": "Start date filter (RFC3339)",
+            "explode": false,
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "description": "Start date filter (RFC3339)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date filter (RFC3339)",
+            "explode": false,
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "description": "End date filter (RFC3339)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Group by field",
+            "explode": false,
+            "in": "query",
+            "name": "groupBy",
+            "schema": {
+              "description": "Group by field",
+              "enum": [
+                "model",
+                "apiKey"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Max items to return",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "description": "Max items to return",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageBreakdownResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get AI usage breakdown",
+        "tags": [
+          "AI Gateway"
+        ]
+      }
+    },
+    "/api/ai-usage/over-time": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGet AI usage over time for the current user.",
+        "operationId": "get-user-ai-usage-over-time",
+        "parameters": [
+          {
+            "description": "Start date filter (RFC3339)",
+            "explode": false,
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "description": "Start date filter (RFC3339)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date filter (RFC3339)",
+            "explode": false,
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "description": "End date filter (RFC3339)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Time granularity",
+            "explode": false,
+            "in": "query",
+            "name": "granularity",
+            "schema": {
+              "description": "Time granularity",
+              "enum": [
+                "hour",
+                "day",
+                "week",
+                "month"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Group by field",
+            "explode": false,
+            "in": "query",
+            "name": "groupBy",
+            "schema": {
+              "description": "Group by field",
+              "enum": [
+                "model",
+                "apiKey"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TimeSeriesPoint"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get AI usage over time",
+        "tags": [
+          "AI Gateway"
+        ]
+      }
+    },
+    "/api/ai-usage/summary": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGet AI usage summary for the current user.",
+        "operationId": "get-user-ai-usage-summary",
+        "parameters": [
+          {
+            "description": "Start date filter (RFC3339)",
+            "explode": false,
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "description": "Start date filter (RFC3339)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date filter (RFC3339)",
+            "explode": false,
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "description": "End date filter (RFC3339)",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageSummaryResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get AI usage summary",
+        "tags": [
+          "AI Gateway"
         ]
       }
     },
@@ -22128,6 +22661,15 @@
               "description": "Client-provided user message ID",
               "type": "string"
             }
+          },
+          {
+            "description": "Budget allocation name for org provider requests",
+            "in": "header",
+            "name": "X-Allocation",
+            "schema": {
+              "description": "Budget allocation name for org provider requests",
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -22278,6 +22820,59 @@
         "summary": "Delete organization",
         "tags": [
           "Organization"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/ai-models": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nList all model configurations across all organization AI providers.",
+        "operationId": "list-org-ai-models",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OrgModelEntry"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List all org AI models",
+        "tags": [
+          "AI Providers"
         ]
       }
     },
@@ -22556,6 +23151,596 @@
         "summary": "Update org AI provider",
         "tags": [
           "AI Providers"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/ai-providers/{name}/model-configs": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nList model configurations for an AI provider.",
+        "operationId": "list-model-configs",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AIModelConfig"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List model configs",
+        "tags": [
+          "AI Providers"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplace all model configurations for an AI provider.",
+        "operationId": "put-model-configs",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutModelConfigsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AIModelConfig"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Replace model configs",
+        "tags": [
+          "AI Providers"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/ai-providers/{name}/model-configs/{model}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDelete a specific model configuration.",
+        "operationId": "delete-model-config",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Model name",
+            "in": "path",
+            "name": "model",
+            "required": true,
+            "schema": {
+              "description": "Model name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete model config",
+        "tags": [
+          "AI Providers"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdate a specific model configuration.",
+        "operationId": "patch-model-config",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Model name",
+            "in": "path",
+            "name": "model",
+            "required": true,
+            "schema": {
+              "description": "Model name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchModelConfigInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIModelConfig"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update model config",
+        "tags": [
+          "AI Providers"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/ai-providers/{name}/models": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nQuery the upstream provider API to list all available models.",
+        "operationId": "list-org-provider-models",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOrgProviderModelsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List available models from provider",
+        "tags": [
+          "AI Providers"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/ai-usage/breakdown": {
+      "get": {
+        "description": "\u003e This is a platform-admin only route.\n\nGet organization-wide AI usage breakdown.",
+        "operationId": "get-org-usage-breakdown",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Start date filter (RFC3339)",
+            "explode": false,
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "description": "Start date filter (RFC3339)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date filter (RFC3339)",
+            "explode": false,
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "description": "End date filter (RFC3339)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Group by field",
+            "explode": false,
+            "in": "query",
+            "name": "groupBy",
+            "schema": {
+              "description": "Group by field",
+              "enum": [
+                "user",
+                "allocation",
+                "model"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Max items to return",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "description": "Max items to return",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageBreakdownResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get org AI usage breakdown",
+        "tags": [
+          "AI Gateway"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/ai-usage/over-time": {
+      "get": {
+        "description": "\u003e This is a platform-admin only route.\n\nGet organization-wide AI usage over time.",
+        "operationId": "get-org-usage-over-time",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Start date filter (RFC3339)",
+            "explode": false,
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "description": "Start date filter (RFC3339)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date filter (RFC3339)",
+            "explode": false,
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "description": "End date filter (RFC3339)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Time granularity",
+            "explode": false,
+            "in": "query",
+            "name": "granularity",
+            "schema": {
+              "description": "Time granularity",
+              "enum": [
+                "hour",
+                "day",
+                "week",
+                "month"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Group by field",
+            "explode": false,
+            "in": "query",
+            "name": "groupBy",
+            "schema": {
+              "description": "Group by field",
+              "enum": [
+                "model",
+                "user",
+                "allocation"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TimeSeriesPoint"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get org AI usage over time",
+        "tags": [
+          "AI Gateway"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/ai-usage/summary": {
+      "get": {
+        "description": "\u003e This is a platform-admin only route.\n\nGet organization-wide AI usage summary.",
+        "operationId": "get-org-usage-summary",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Start date filter (RFC3339)",
+            "explode": false,
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "description": "Start date filter (RFC3339)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date filter (RFC3339)",
+            "explode": false,
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "description": "End date filter (RFC3339)",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgUsageSummaryResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get org AI usage summary",
+        "tags": [
+          "AI Gateway"
         ]
       }
     },

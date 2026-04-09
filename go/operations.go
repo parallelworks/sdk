@@ -466,6 +466,114 @@ func (c *Client) RegisterNode(ctx context.Context, body RegisterNodeByTokenInput
 	return &result, nil
 }
 
+// GetUserAiUsageBreakdownParams contains optional parameters for the GetUserAiUsageBreakdown operation.
+type GetUserAiUsageBreakdownParams struct {
+	// Start date filter (RFC3339)
+	StartDate *string `json:"startDate,omitempty"`
+	// End date filter (RFC3339)
+	EndDate *string `json:"endDate,omitempty"`
+	// Group by field
+	GroupBy *string `json:"groupBy,omitempty"`
+	// Max items to return
+	Limit *int64 `json:"limit,omitempty"`
+}
+
+// GetUserAiUsageBreakdown - Get AI usage breakdown
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Get AI usage breakdown for the current user.
+func (c *Client) GetUserAiUsageBreakdown(ctx context.Context, opts ...GetUserAiUsageBreakdownParams) (*UsageBreakdownResponse, error) {
+	path := "/api/ai-usage/breakdown"
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "startDate", params.StartDate)
+		addQueryParam(queryValues, "endDate", params.EndDate)
+		addQueryParam(queryValues, "groupBy", params.GroupBy)
+		addQueryParam(queryValues, "limit", params.Limit)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result UsageBreakdownResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetUserAiUsageOverTimeParams contains optional parameters for the GetUserAiUsageOverTime operation.
+type GetUserAiUsageOverTimeParams struct {
+	// Start date filter (RFC3339)
+	StartDate *string `json:"startDate,omitempty"`
+	// End date filter (RFC3339)
+	EndDate *string `json:"endDate,omitempty"`
+	// Time granularity
+	Granularity *string `json:"granularity,omitempty"`
+	// Group by field
+	GroupBy *string `json:"groupBy,omitempty"`
+}
+
+// GetUserAiUsageOverTime - Get AI usage over time
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Get AI usage over time for the current user.
+func (c *Client) GetUserAiUsageOverTime(ctx context.Context, opts ...GetUserAiUsageOverTimeParams) (*[]TimeSeriesPoint, error) {
+	path := "/api/ai-usage/over-time"
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "startDate", params.StartDate)
+		addQueryParam(queryValues, "endDate", params.EndDate)
+		addQueryParam(queryValues, "granularity", params.Granularity)
+		addQueryParam(queryValues, "groupBy", params.GroupBy)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result []TimeSeriesPoint
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetUserAiUsageSummaryParams contains optional parameters for the GetUserAiUsageSummary operation.
+type GetUserAiUsageSummaryParams struct {
+	// Start date filter (RFC3339)
+	StartDate *string `json:"startDate,omitempty"`
+	// End date filter (RFC3339)
+	EndDate *string `json:"endDate,omitempty"`
+}
+
+// GetUserAiUsageSummary - Get AI usage summary
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Get AI usage summary for the current user.
+func (c *Client) GetUserAiUsageSummary(ctx context.Context, opts ...GetUserAiUsageSummaryParams) (*UsageSummaryResponse, error) {
+	path := "/api/ai-usage/summary"
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "startDate", params.StartDate)
+		addQueryParam(queryValues, "endDate", params.EndDate)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result UsageSummaryResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // ListUserAiChatAttachmentsParams contains optional parameters for the ListUserAiChatAttachments operation.
 type ListUserAiChatAttachmentsParams struct {
 	// Max attachments to return
@@ -1753,6 +1861,8 @@ type ChatCompletionParams struct {
 	XPersist *string `json:"X-Persist,omitempty"`
 	// Client-provided user message ID
 	XUserMessageID *string `json:"X-User-Message-Id,omitempty"`
+	// Budget allocation name for org provider requests
+	XAllocation *string `json:"X-Allocation,omitempty"`
 }
 
 // ChatCompletion - Create chat completion
@@ -1778,6 +1888,9 @@ func (c *Client) ChatCompletion(ctx context.Context, body ChatCompletionRequest,
 		}
 		if params.XUserMessageID != nil {
 			headers.Set("X-User-Message-Id", fmt.Sprintf("%v", *params.XUserMessageID))
+		}
+		if params.XAllocation != nil {
+			headers.Set("X-Allocation", fmt.Sprintf("%v", *params.XAllocation))
 		}
 	}
 	var result ChatCompletionResponse
@@ -1830,6 +1943,22 @@ func (c *Client) DeleteOrganization(ctx context.Context, organization string) er
 		return parseErrorError(err)
 	}
 	return nil
+}
+
+// ListOrgAiModels - List all org AI models
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// List all model configurations across all organization AI providers.
+func (c *Client) ListOrgAiModels(ctx context.Context, organization string) (*[]OrgModelEntry, error) {
+	path := "/api/organizations/{organization}/ai-models"
+	path = pathReplace(path, "organization", organization)
+
+	var result []OrgModelEntry
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
 }
 
 // ListOrgAiProviders - List org AI providers
@@ -1909,6 +2038,203 @@ func (c *Client) UpdateOrgAiProvider(ctx context.Context, organization string, n
 
 	var result OrgAiProviderResponse
 	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ListModelConfigs - List model configs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// List model configurations for an AI provider.
+func (c *Client) ListModelConfigs(ctx context.Context, organization string, name string) (*[]AiModelConfig, error) {
+	path := "/api/organizations/{organization}/ai-providers/{name}/model-configs"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "name", name)
+
+	var result []AiModelConfig
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PutModelConfigs - Replace model configs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replace all model configurations for an AI provider.
+func (c *Client) PutModelConfigs(ctx context.Context, organization string, name string, body PutModelConfigsInputBody) (*[]AiModelConfig, error) {
+	path := "/api/organizations/{organization}/ai-providers/{name}/model-configs"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "name", name)
+
+	var result []AiModelConfig
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteModelConfig - Delete model config
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Delete a specific model configuration.
+func (c *Client) DeleteModelConfig(ctx context.Context, organization string, name string, model string) error {
+	path := "/api/organizations/{organization}/ai-providers/{name}/model-configs/{model}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "name", name)
+	path = pathReplace(path, "model", model)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// PatchModelConfig - Update model config
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Update a specific model configuration.
+func (c *Client) PatchModelConfig(ctx context.Context, organization string, name string, model string, body PatchModelConfigInputBody) (*AiModelConfig, error) {
+	path := "/api/organizations/{organization}/ai-providers/{name}/model-configs/{model}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "name", name)
+	path = pathReplace(path, "model", model)
+
+	var result AiModelConfig
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ListOrgProviderModels - List available models from provider
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Query the upstream provider API to list all available models.
+func (c *Client) ListOrgProviderModels(ctx context.Context, organization string, name string) (*ListOrgProviderModelsOutputBody, error) {
+	path := "/api/organizations/{organization}/ai-providers/{name}/models"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "name", name)
+
+	var result ListOrgProviderModelsOutputBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetOrgUsageBreakdownParams contains optional parameters for the GetOrgUsageBreakdown operation.
+type GetOrgUsageBreakdownParams struct {
+	// Start date filter (RFC3339)
+	StartDate *string `json:"startDate,omitempty"`
+	// End date filter (RFC3339)
+	EndDate *string `json:"endDate,omitempty"`
+	// Group by field
+	GroupBy *string `json:"groupBy,omitempty"`
+	// Max items to return
+	Limit *int64 `json:"limit,omitempty"`
+}
+
+// GetOrgUsageBreakdown - Get org AI usage breakdown
+//
+// > This is a platform-admin only route.
+//
+// Get organization-wide AI usage breakdown.
+func (c *Client) GetOrgUsageBreakdown(ctx context.Context, organization string, opts ...GetOrgUsageBreakdownParams) (*UsageBreakdownResponse, error) {
+	path := "/api/organizations/{organization}/ai-usage/breakdown"
+	path = pathReplace(path, "organization", organization)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "startDate", params.StartDate)
+		addQueryParam(queryValues, "endDate", params.EndDate)
+		addQueryParam(queryValues, "groupBy", params.GroupBy)
+		addQueryParam(queryValues, "limit", params.Limit)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result UsageBreakdownResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetOrgUsageOverTimeParams contains optional parameters for the GetOrgUsageOverTime operation.
+type GetOrgUsageOverTimeParams struct {
+	// Start date filter (RFC3339)
+	StartDate *string `json:"startDate,omitempty"`
+	// End date filter (RFC3339)
+	EndDate *string `json:"endDate,omitempty"`
+	// Time granularity
+	Granularity *string `json:"granularity,omitempty"`
+	// Group by field
+	GroupBy *string `json:"groupBy,omitempty"`
+}
+
+// GetOrgUsageOverTime - Get org AI usage over time
+//
+// > This is a platform-admin only route.
+//
+// Get organization-wide AI usage over time.
+func (c *Client) GetOrgUsageOverTime(ctx context.Context, organization string, opts ...GetOrgUsageOverTimeParams) (*[]TimeSeriesPoint, error) {
+	path := "/api/organizations/{organization}/ai-usage/over-time"
+	path = pathReplace(path, "organization", organization)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "startDate", params.StartDate)
+		addQueryParam(queryValues, "endDate", params.EndDate)
+		addQueryParam(queryValues, "granularity", params.Granularity)
+		addQueryParam(queryValues, "groupBy", params.GroupBy)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result []TimeSeriesPoint
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetOrgUsageSummaryParams contains optional parameters for the GetOrgUsageSummary operation.
+type GetOrgUsageSummaryParams struct {
+	// Start date filter (RFC3339)
+	StartDate *string `json:"startDate,omitempty"`
+	// End date filter (RFC3339)
+	EndDate *string `json:"endDate,omitempty"`
+}
+
+// GetOrgUsageSummary - Get org AI usage summary
+//
+// > This is a platform-admin only route.
+//
+// Get organization-wide AI usage summary.
+func (c *Client) GetOrgUsageSummary(ctx context.Context, organization string, opts ...GetOrgUsageSummaryParams) (*OrgUsageSummaryResponse, error) {
+	path := "/api/organizations/{organization}/ai-usage/summary"
+	path = pathReplace(path, "organization", organization)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "startDate", params.StartDate)
+		addQueryParam(queryValues, "endDate", params.EndDate)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result OrgUsageSummaryResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil

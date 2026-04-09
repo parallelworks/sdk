@@ -6,6 +6,15 @@ import (
 	"time"
 )
 
+type AiModelConfig struct {
+	Enabled              bool           `json:"enabled"`
+	InputRate            float64        `json:"inputRate"`
+	ModelName            string         `json:"modelName"`
+	OutputRate           float64        `json:"outputRate"`
+	UsageNotSupported    *bool          `json:"usageNotSupported,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type APIKeyResponse struct {
 	// Budget allocation name (AI keys only).
 	Allocation *string `json:"allocation,omitempty"`
@@ -141,6 +150,14 @@ type Allocation struct {
 	Unit string `json:"unit"`
 	// Amount used
 	Used                 *float64       `json:"used,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AllocationSummary struct {
+	ID                   string         `json:"id"`
+	Name                 string         `json:"name"`
+	Total                float64        `json:"total"`
+	Used                 float64        `json:"used"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -821,6 +838,15 @@ type BootstrapScript struct {
 	Type string `json:"type"`
 	// The last update timestamp of the bootstrap script.
 	UpdatedAt            time.Time      `json:"updatedAt"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type BreakdownItem struct {
+	Cost                 float64        `json:"cost"`
+	InputTokens          int64          `json:"inputTokens"`
+	Label                string         `json:"label"`
+	OutputTokens         int64          `json:"outputTokens"`
+	Percentage           float64        `json:"percentage"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2959,6 +2985,12 @@ type ListModelsResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ListOrgProviderModelsOutputBody struct {
+	// Available model IDs from the upstream provider
+	Models               []string       `json:"models"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ListOrgUsersOutputBody struct {
 	// Total count of users matching filters (before pagination)
 	Total int64 `json:"total"`
@@ -3953,6 +3985,30 @@ type OrgMauResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type OrgModelEntry struct {
+	// Whether the model is enabled
+	Enabled bool `json:"enabled"`
+	// USD per input token
+	InputRate float64 `json:"inputRate"`
+	// Fully qualified model identifier
+	Model string `json:"model"`
+	// Raw model name
+	ModelName string `json:"modelName"`
+	// USD per output token
+	OutputRate float64 `json:"outputRate"`
+	// Provider name
+	Provider             string         `json:"provider"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OrgUsageSummaryResponse struct {
+	ActiveUsers          int64          `json:"activeUsers"`
+	TotalCost            float64        `json:"totalCost"`
+	TotalInputTokens     int64          `json:"totalInputTokens"`
+	TotalOutputTokens    int64          `json:"totalOutputTokens"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type OrgUser struct {
 	// Whether the user is active
 	Active bool `json:"active"`
@@ -4126,6 +4182,16 @@ type PatchInstanceStatusBody struct {
 	Hostname string `json:"hostname"`
 	// Desired status to set for the instance.
 	Status               *string        `json:"status,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PatchModelConfigInputBody struct {
+	// Whether the model is enabled
+	Enabled *bool `json:"enabled,omitempty"`
+	// USD per input token
+	InputRate *float64 `json:"inputRate,omitempty"`
+	// USD per output token
+	OutputRate           *float64       `json:"outputRate,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4347,6 +4413,8 @@ type PostClusterConnectOutputBody struct {
 }
 
 type PostImpersonateInputBody struct {
+	// Reason for impersonating this user
+	Reason string `json:"reason"`
 	// Username of the user to impersonate
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -4556,6 +4624,12 @@ type PutImageInputBody struct {
 	// Image type
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PutModelConfigsInputBody struct {
+	// Model configurations
+	ModelConfigs         []AiModelConfig `json:"modelConfigs"`
+	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
 type PvResponse struct {
@@ -5471,6 +5545,15 @@ type Theme struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type TimeSeriesPoint struct {
+	GroupKey             *string        `json:"groupKey,omitempty"`
+	InputTokens          int64          `json:"inputTokens"`
+	OutputTokens         int64          `json:"outputTokens"`
+	Timestamp            time.Time      `json:"timestamp"`
+	TotalCost            float64        `json:"totalCost"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type Tool struct {
 	Function Function `json:"function"`
 	// Tool type (currently only 'function')
@@ -5768,6 +5851,12 @@ type Usage struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type UsageBreakdownResponse struct {
+	Items                []BreakdownItem `json:"items"`
+	TotalCost            float64         `json:"totalCost"`
+	AdditionalProperties map[string]any  `json:"-,omitempty"`
+}
+
 type UsageEventOutput struct {
 	// The allocation associated with this usage event.
 	Allocation string `json:"allocation"`
@@ -5796,6 +5885,14 @@ type UsageMetrics struct {
 	// Used percentage
 	UsedPercent          float64        `json:"usedPercent"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UsageSummaryResponse struct {
+	Allocations          []AllocationSummary `json:"allocations"`
+	TotalCost            float64             `json:"totalCost"`
+	TotalInputTokens     int64               `json:"totalInputTokens"`
+	TotalOutputTokens    int64               `json:"totalOutputTokens"`
+	AdditionalProperties map[string]any      `json:"-,omitempty"`
 }
 
 type UserActivityResponse struct {
