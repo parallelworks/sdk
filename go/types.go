@@ -1919,6 +1919,24 @@ type Error struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ErrorLogItem struct {
+	// When the error occurred
+	CreatedAt time.Time `json:"createdAt"`
+	// Error log ID
+	ID string `json:"id"`
+	// Error message
+	Message string `json:"message"`
+	// HTTP method
+	Method string `json:"method"`
+	// Request path
+	Path string `json:"path"`
+	// Request ID
+	RequestID string `json:"requestId"`
+	// Username if available
+	User                 *string        `json:"user,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ExistingCluster struct {
 	// Auto-reconnect enabled
 	AutoReconnect bool `json:"autoReconnect"`
@@ -2972,6 +2990,11 @@ type ListConversationsBody struct {
 	Conversations        []ConversationSummary `json:"conversations"`
 	Total                int64                 `json:"total"`
 	AdditionalProperties map[string]any        `json:"-,omitempty"`
+}
+
+type ListErrorLogsBody struct {
+	ErrorLogs            []ErrorLogItem `json:"errorLogs"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ListInstallationsOutputBody struct {

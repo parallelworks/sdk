@@ -78,6 +78,56 @@ func (c *Client) DeletePlatformAlert(ctx context.Context, id string) error {
 	return nil
 }
 
+// GetErrorLogsParams contains optional parameters for the GetErrorLogs operation.
+type GetErrorLogsParams struct {
+	// Maximum number of error logs to return
+	Limit *int64 `json:"limit,omitempty"`
+	// Number of error logs to skip
+	Skip *int64 `json:"skip,omitempty"`
+}
+
+// GetErrorLogs - Get recent error logs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns recent unknown error logs (auto-expire after 1 hour)
+func (c *Client) GetErrorLogs(ctx context.Context, opts ...GetErrorLogsParams) (*ListErrorLogsBody, error) {
+	path := "/api/admin/errors"
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "limit", params.Limit)
+		addQueryParam(queryValues, "skip", params.Skip)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result ListErrorLogsBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// TriggerTestError - Trigger a test unknown error
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns a plain error to test the unknown error logging pipeline
+func (c *Client) TriggerTestError(ctx context.Context) error {
+	path := "/api/admin/errors/test"
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // CleanupOrphanedInfrastructures - Delete orphaned infrastructures
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.

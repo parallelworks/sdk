@@ -5394,6 +5394,49 @@
         ],
         "type": "object"
       },
+      "ErrorLogItem": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "description": "When the error occurred",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Error log ID",
+            "type": "string"
+          },
+          "message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "method": {
+            "description": "HTTP method",
+            "type": "string"
+          },
+          "path": {
+            "description": "Request path",
+            "type": "string"
+          },
+          "requestId": {
+            "description": "Request ID",
+            "type": "string"
+          },
+          "user": {
+            "description": "Username if available",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "message",
+          "path",
+          "method",
+          "requestId",
+          "createdAt"
+        ],
+        "type": "object"
+      },
       "ExistingCluster": {
         "additionalProperties": false,
         "properties": {
@@ -8499,6 +8542,24 @@
         "required": [
           "conversations",
           "total"
+        ],
+        "type": "object"
+      },
+      "ListErrorLogsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "errorLogs": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorLogItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "errorLogs"
         ],
         "type": "object"
       },
@@ -18277,6 +18338,90 @@
         "tags": [
           "Platform Alerts"
         ]
+      }
+    },
+    "/api/admin/errors": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns recent unknown error logs (auto-expire after 1 hour)",
+        "operationId": "get-error-logs",
+        "parameters": [
+          {
+            "description": "Maximum number of error logs to return",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100,
+              "description": "Maximum number of error logs to return",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Number of error logs to skip",
+            "explode": false,
+            "in": "query",
+            "name": "skip",
+            "schema": {
+              "description": "Number of error logs to skip",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListErrorLogsBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get recent error logs",
+        "tags": [
+          "Error Logs"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/errors/test": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns a plain error to test the unknown error logging pipeline",
+        "operationId": "trigger-test-error",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Trigger a test unknown error",
+        "tags": [
+          "Error Logs"
+        ],
+        "x-internal": true
       }
     },
     "/api/admin/maintenance/infrastructures/orphaned/cleanup": {
@@ -43139,6 +43284,10 @@
     {
       "description": "Endpoints related to disk storage",
       "name": "Disks"
+    },
+    {
+      "description": "Endpoints related to error log viewing",
+      "name": "Error Logs"
     },
     {
       "description": "Endpoints related to GitHub App integration",
