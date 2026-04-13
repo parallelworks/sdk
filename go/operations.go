@@ -339,6 +339,40 @@ func (c *Client) RunSpecificMongoMigration(ctx context.Context, id string) (*Mig
 	return &result, nil
 }
 
+// EnablePlatformPreview - Enable a platform-wide preview
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Enables a preview at the platform level, making it active for all users. Platform-level previews cannot be individually disabled by users.
+func (c *Client) EnablePlatformPreview(ctx context.Context, flag string) error {
+	path := "/api/admin/previews/{flag}"
+	path = pathReplace(path, "flag", flag)
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// DisablePlatformPreview - Disable a platform-wide preview
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Disables a preview at the platform level. Users who had the preview enabled individually will retain their user-level setting.
+func (c *Client) DisablePlatformPreview(ctx context.Context, flag string) error {
+	path := "/api/admin/previews/{flag}"
+	path = pathReplace(path, "flag", flag)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // GetPlatformReportsParams contains optional parameters for the GetPlatformReports operation.
 type GetPlatformReportsParams struct {
 	// Maximum number of reports to return

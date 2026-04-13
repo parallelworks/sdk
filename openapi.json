@@ -10962,8 +10962,16 @@
             "description": "Delivery status of the notification.",
             "type": "boolean"
           },
+          "href": {
+            "description": "Link associated with the notification.",
+            "type": "string"
+          },
           "id": {
             "description": "ID of the notification.",
+            "type": "string"
+          },
+          "level": {
+            "description": "Urgency level of the notification (info or alert).",
             "type": "string"
           },
           "message": {
@@ -10973,6 +10981,10 @@
           "read": {
             "description": "Read status of the notification.",
             "type": "boolean"
+          },
+          "subtype": {
+            "description": "Subtype of the notification.",
+            "type": "string"
           },
           "title": {
             "description": "Title of the notification.",
@@ -10993,8 +11005,11 @@
           "title",
           "message",
           "type",
+          "subtype",
+          "level",
           "read",
           "delivered",
+          "href",
           "createdAt"
         ],
         "type": "object"
@@ -18931,6 +18946,78 @@
           "Migrations"
         ],
         "x-internal": true
+      }
+    },
+    "/api/admin/previews/{flag}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nDisables a preview at the platform level. Users who had the preview enabled individually will retain their user-level setting.",
+        "operationId": "disable-platform-preview",
+        "parameters": [
+          {
+            "description": "Name of the preview flag.",
+            "in": "path",
+            "name": "flag",
+            "required": true,
+            "schema": {
+              "description": "Name of the preview flag.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Disable a platform-wide preview",
+        "tags": [
+          "Previews"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nEnables a preview at the platform level, making it active for all users. Platform-level previews cannot be individually disabled by users.",
+        "operationId": "enable-platform-preview",
+        "parameters": [
+          {
+            "description": "Name of the preview flag.",
+            "in": "path",
+            "name": "flag",
+            "required": true,
+            "schema": {
+              "description": "Name of the preview flag.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Enable a platform-wide preview",
+        "tags": [
+          "Previews"
+        ]
       }
     },
     "/api/admin/reports": {

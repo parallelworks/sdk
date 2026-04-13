@@ -3793,12 +3793,18 @@ type Notification struct {
 	CreatedAt string `json:"createdAt"`
 	// Delivery status of the notification.
 	Delivered bool `json:"delivered"`
+	// Link associated with the notification.
+	Href string `json:"href"`
 	// ID of the notification.
 	ID string `json:"id"`
+	// Urgency level of the notification (info or alert).
+	Level string `json:"level"`
 	// Message content of the notification.
 	Message string `json:"message"`
 	// Read status of the notification.
 	Read bool `json:"read"`
+	// Subtype of the notification.
+	Subtype string `json:"subtype"`
 	// Title of the notification.
 	Title string `json:"title"`
 	// Type/category of the notification.
