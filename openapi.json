@@ -4195,6 +4195,10 @@
       "CreateAIProviderBody": {
         "additionalProperties": false,
         "properties": {
+          "apiKey": {
+            "description": "Custom provider API key",
+            "type": "string"
+          },
           "csp": {
             "description": "Cloud service provider (azure, custom)",
             "type": "string"
@@ -4211,8 +4215,16 @@
             "maxLength": 100,
             "type": "string"
           },
+          "endpoint": {
+            "description": "Custom provider endpoint",
+            "type": "string"
+          },
           "group": {
             "description": "Billing group name for the AI provider (required for managed providers, not used for custom)",
+            "type": "string"
+          },
+          "model": {
+            "description": "AI model name",
             "type": "string"
           },
           "name": {
@@ -4225,24 +4237,27 @@
             "description": "Network name",
             "type": "string"
           },
+          "refreshInterval": {
+            "description": "Refresh interval for the AI provider",
+            "type": "string"
+          },
+          "region": {
+            "description": "AI provider region",
+            "type": "string"
+          },
           "tags": {
             "description": "Tags for the AI provider",
             "type": [
               "string",
               "null"
             ]
-          },
-          "variables": {
-            "$ref": "#/components/schemas/VariablesRequest",
-            "description": "AI provider configuration variables"
           }
         },
         "required": [
           "name",
           "description",
           "tags",
-          "csp",
-          "variables"
+          "csp"
         ],
         "type": "object"
       },
@@ -4587,6 +4602,24 @@
         ],
         "type": "object"
       },
+      "CreateNamespaceInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "description": "Allocation name to assign",
+            "type": "string"
+          },
+          "name": {
+            "description": "Namespace name",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
       "CreateNetAppOntapInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -4787,6 +4820,51 @@
           "email",
           "type",
           "frequency"
+        ],
+        "type": "object"
+      },
+      "CreateRoleBindingInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "RoleBinding name",
+            "minLength": 1,
+            "type": "string"
+          },
+          "roleKind": {
+            "description": "Kind of role reference",
+            "enum": [
+              "ClusterRole",
+              "Role"
+            ],
+            "type": "string"
+          },
+          "roleRef": {
+            "description": "ClusterRole or Role name to bind",
+            "enum": [
+              "admin",
+              "edit",
+              "view"
+            ],
+            "type": "string"
+          },
+          "subjects": {
+            "description": "Subjects to bind",
+            "items": {
+              "$ref": "#/components/schemas/RbacSubject"
+            },
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "subjects",
+          "roleRef",
+          "roleKind"
         ],
         "type": "object"
       },
@@ -5363,6 +5441,44 @@
         },
         "required": [
           "newName"
+        ],
+        "type": "object"
+      },
+      "EnrichedNamespaceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "description": "Allocation name from annotation",
+            "type": "string"
+          },
+          "cluster": {
+            "description": "Cluster name",
+            "type": "string"
+          },
+          "name": {
+            "description": "Kubernetes namespace name",
+            "type": "string"
+          },
+          "sharedGroups": {
+            "description": "Groups with access via platform-managed RoleBindings",
+            "items": {
+              "$ref": "#/components/schemas/SharedGroup"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "status": {
+            "description": "Namespace phase (Active, Terminating)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "cluster",
+          "status",
+          "sharedGroups"
         ],
         "type": "object"
       },
@@ -8545,6 +8661,35 @@
         ],
         "type": "object"
       },
+      "ListEnrichedNamespacesOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "errors": {
+            "description": "Per-cluster errors",
+            "items": {
+              "$ref": "#/components/schemas/ClusterError"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "namespaces": {
+            "description": "List of enriched namespaces",
+            "items": {
+              "$ref": "#/components/schemas/EnrichedNamespaceResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "namespaces"
+        ],
+        "type": "object"
+      },
       "ListErrorLogsBody": {
         "additionalProperties": false,
         "properties": {
@@ -8682,6 +8827,25 @@
         "required": [
           "repos",
           "totalCount"
+        ],
+        "type": "object"
+      },
+      "ListRoleBindingsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "roleBindings": {
+            "description": "List of RoleBindings in the namespace",
+            "items": {
+              "$ref": "#/components/schemas/RoleBindingEntry"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "roleBindings"
         ],
         "type": "object"
       },
@@ -13803,6 +13967,28 @@
         ],
         "type": "object"
       },
+      "RbacSubject": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "description": "Group, User, or ServiceAccount",
+            "type": "string"
+          },
+          "name": {
+            "description": "Subject name",
+            "type": "string"
+          },
+          "namespace": {
+            "description": "Namespace for ServiceAccount subjects",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "name"
+        ],
+        "type": "object"
+      },
       "RecommendedResource": {
         "additionalProperties": false,
         "properties": {
@@ -14456,6 +14642,40 @@
         },
         "required": [
           "includeResources"
+        ],
+        "type": "object"
+      },
+      "RoleBindingEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "RoleBinding name",
+            "type": "string"
+          },
+          "roleKind": {
+            "description": "ClusterRole or Role",
+            "type": "string"
+          },
+          "roleRef": {
+            "description": "ClusterRole or Role name",
+            "type": "string"
+          },
+          "subjects": {
+            "description": "Subjects with access",
+            "items": {
+              "$ref": "#/components/schemas/RbacSubject"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "subjects",
+          "roleRef",
+          "roleKind"
         ],
         "type": "object"
       },
@@ -15466,6 +15686,24 @@
         "required": [
           "group",
           "permissions"
+        ],
+        "type": "object"
+      },
+      "SharedGroup": {
+        "additionalProperties": false,
+        "properties": {
+          "group": {
+            "description": "Group name (without parallelworks: prefix)",
+            "type": "string"
+          },
+          "role": {
+            "description": "K8s role (admin, edit, view)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "group",
+          "role"
         ],
         "type": "object"
       },
@@ -16864,6 +17102,22 @@
         ],
         "type": "object"
       },
+      "UpdateNamespaceInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "description": "Allocation name to assign (null to clear)",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "allocation"
+        ],
+        "type": "object"
+      },
       "UpdateOrgAIProviderInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -17500,32 +17754,6 @@
           "active",
           "safeToKill"
         ],
-        "type": "object"
-      },
-      "VariablesRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "apiKey": {
-            "description": "Custom provider API key",
-            "type": "string"
-          },
-          "endpoint": {
-            "description": "Custom provider endpoint",
-            "type": "string"
-          },
-          "model": {
-            "description": "AI model name",
-            "type": "string"
-          },
-          "refreshInterval": {
-            "description": "Refresh interval for the AI provider",
-            "type": "string"
-          },
-          "region": {
-            "description": "AI provider region",
-            "type": "string"
-          }
-        },
         "type": "object"
       },
       "VerifyOtpInputBody": {
@@ -26661,6 +26889,16 @@
               "format": "int64",
               "type": "integer"
             }
+          },
+          {
+            "description": "Filter groups by cloud service provider access (e.g., aws, google, azure)",
+            "explode": false,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Filter groups by cloud service provider access (e.g., aws, google, azure)",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -27576,6 +27814,69 @@
         ]
       }
     },
+    "/api/organizations/{organization}/kubernetes/namespaces/enriched": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nLists Kubernetes namespaces across all accessible clusters with allocation and status data.",
+        "operationId": "list-enriched-kubernetes-namespaces",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by cluster names",
+            "explode": false,
+            "in": "query",
+            "name": "clusters",
+            "schema": {
+              "description": "Filter by cluster names",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListEnrichedNamespacesOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List enriched Kubernetes namespaces",
+        "tags": [
+          "Kubernetes Namespaces"
+        ]
+      }
+    },
     "/api/organizations/{organization}/kubernetes/nodes": {
       "get": {
         "description": "Lists Kubernetes nodes across multiple clusters with filtering support.",
@@ -28030,6 +28331,420 @@
         "tags": [
           "Kubernetes",
           "Workloads"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates a new Kubernetes namespace on the specified cluster.",
+        "operationId": "create-kubernetes-namespace",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes cluster name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNamespaceInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrichedNamespaceResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create a Kubernetes namespace",
+        "tags": [
+          "Kubernetes Namespaces"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespaceName}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDeletes a Kubernetes namespace from the specified cluster.",
+        "operationId": "delete-kubernetes-namespace",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes namespace name",
+            "in": "path",
+            "name": "namespaceName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes namespace name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a Kubernetes namespace",
+        "tags": [
+          "Kubernetes Namespaces"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates the allocation annotation on a Kubernetes namespace.",
+        "operationId": "update-kubernetes-namespace",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes namespace name",
+            "in": "path",
+            "name": "namespaceName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes namespace name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNamespaceInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrichedNamespaceResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update a Kubernetes namespace",
+        "tags": [
+          "Kubernetes Namespaces"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespaceName}/rolebindings": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nLists all RoleBindings in a Kubernetes namespace.",
+        "operationId": "list-namespace-rolebindings",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes namespace name",
+            "in": "path",
+            "name": "namespaceName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes namespace name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListRoleBindingsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List namespace RoleBindings",
+        "tags": [
+          "Kubernetes Namespaces"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates a RoleBinding in a Kubernetes namespace.",
+        "operationId": "create-namespace-rolebinding",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes namespace name",
+            "in": "path",
+            "name": "namespaceName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes namespace name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleBindingInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleBindingEntry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create a namespace RoleBinding",
+        "tags": [
+          "Kubernetes Namespaces"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespaceName}/rolebindings/{roleBindingName}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDeletes a RoleBinding from a Kubernetes namespace.",
+        "operationId": "delete-namespace-rolebinding",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes namespace name",
+            "in": "path",
+            "name": "namespaceName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes namespace name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "RoleBinding name",
+            "in": "path",
+            "name": "roleBindingName",
+            "required": true,
+            "schema": {
+              "description": "RoleBinding name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a namespace RoleBinding",
+        "tags": [
+          "Kubernetes Namespaces"
         ]
       }
     },
@@ -37546,6 +38261,130 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/previews/{flag}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDisables a preview for a specific user within an organization. Requires the org:users role. Platform-level previews cannot be disabled.",
+        "operationId": "disable-org-user-preview",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the resource owner",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the resource owner",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the preview flag.",
+            "in": "path",
+            "name": "flag",
+            "required": true,
+            "schema": {
+              "description": "Name of the preview flag.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Disable a preview for an organization user",
+        "tags": [
+          "Previews"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nEnables a preview for a specific user within an organization. Requires the org:users role. Non-public previews require platform admin.",
+        "operationId": "enable-org-user-preview",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the resource owner",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the resource owner",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the preview flag.",
+            "in": "path",
+            "name": "flag",
+            "required": true,
+            "schema": {
+              "description": "Name of the preview flag.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Enable a preview for an organization user",
+        "tags": [
+          "Previews"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/resource-groups": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates a new resource group.",
@@ -39760,6 +40599,16 @@
               "description": "Number of groups to skip",
               "format": "int64",
               "type": "integer"
+            }
+          },
+          {
+            "description": "Filter groups by cloud service provider access (e.g., aws, google, azure)",
+            "explode": false,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Filter groups by cloud service provider access (e.g., aws, google, azure)",
+              "type": "string"
             }
           }
         ],
@@ -43395,6 +44244,10 @@
     {
       "description": "Endpoints related to Kubernetes cluster management",
       "name": "Kubernetes"
+    },
+    {
+      "description": "Endpoints related to Kubernetes namespace management",
+      "name": "Kubernetes Namespaces"
     },
     {
       "description": "Endpoints related to Lustre storage systems",

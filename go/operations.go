@@ -3135,6 +3135,8 @@ type GetOrganizationGroupsParams struct {
 	Limit *int64 `json:"limit,omitempty"`
 	// Number of groups to skip
 	Skip *int64 `json:"skip,omitempty"`
+	// Filter groups by cloud service provider access (e.g., aws, google, azure)
+	Csp *string `json:"csp,omitempty"`
 }
 
 // GetOrganizationGroups - Get organization groups
@@ -3151,6 +3153,7 @@ func (c *Client) GetOrganizationGroups(ctx context.Context, organization string,
 		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
+		addQueryParam(queryValues, "csp", params.Csp)
 		if len(queryValues) > 0 {
 			path += "?" + queryValues.Encode()
 		}
@@ -3444,6 +3447,36 @@ func (c *Client) GetAllKubernetesNamespaces(ctx context.Context, organization st
 	return &result, nil
 }
 
+// ListEnrichedKubernetesNamespacesParams contains optional parameters for the ListEnrichedKubernetesNamespaces operation.
+type ListEnrichedKubernetesNamespacesParams struct {
+	// Filter by cluster names
+	Clusters *[]string `json:"clusters,omitempty"`
+}
+
+// ListEnrichedKubernetesNamespaces - List enriched Kubernetes namespaces
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Lists Kubernetes namespaces across all accessible clusters with allocation and status data.
+func (c *Client) ListEnrichedKubernetesNamespaces(ctx context.Context, organization string, opts ...ListEnrichedKubernetesNamespacesParams) (*ListEnrichedNamespacesOutputBody, error) {
+	path := "/api/organizations/{organization}/kubernetes/namespaces/enriched"
+	path = pathReplace(path, "organization", organization)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "clusters", params.Clusters)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result ListEnrichedNamespacesOutputBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // ListKubernetesNodesParams contains optional parameters for the ListKubernetesNodes operation.
 type ListKubernetesNodesParams struct {
 	// Filter by cluster names
@@ -3614,6 +3647,112 @@ func (c *Client) ListKubernetesWorkloads(ctx context.Context, organization strin
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// CreateKubernetesNamespace - Create a Kubernetes namespace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new Kubernetes namespace on the specified cluster.
+func (c *Client) CreateKubernetesNamespace(ctx context.Context, organization string, clusterName string, body CreateNamespaceInputBody) (*EnrichedNamespaceResponse, error) {
+	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "clusterName", clusterName)
+
+	var result EnrichedNamespaceResponse
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteKubernetesNamespace - Delete a Kubernetes namespace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a Kubernetes namespace from the specified cluster.
+func (c *Client) DeleteKubernetesNamespace(ctx context.Context, organization string, clusterName string, namespaceName string) error {
+	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespaceName}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "clusterName", clusterName)
+	path = pathReplace(path, "namespaceName", namespaceName)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// UpdateKubernetesNamespace - Update a Kubernetes namespace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates the allocation annotation on a Kubernetes namespace.
+func (c *Client) UpdateKubernetesNamespace(ctx context.Context, organization string, clusterName string, namespaceName string, body UpdateNamespaceInputBody) (*EnrichedNamespaceResponse, error) {
+	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespaceName}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "clusterName", clusterName)
+	path = pathReplace(path, "namespaceName", namespaceName)
+
+	var result EnrichedNamespaceResponse
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ListNamespaceRolebindings - List namespace RoleBindings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Lists all RoleBindings in a Kubernetes namespace.
+func (c *Client) ListNamespaceRolebindings(ctx context.Context, organization string, clusterName string, namespaceName string) (*ListRoleBindingsOutputBody, error) {
+	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespaceName}/rolebindings"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "clusterName", clusterName)
+	path = pathReplace(path, "namespaceName", namespaceName)
+
+	var result ListRoleBindingsOutputBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CreateNamespaceRolebinding - Create a namespace RoleBinding
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a RoleBinding in a Kubernetes namespace.
+func (c *Client) CreateNamespaceRolebinding(ctx context.Context, organization string, clusterName string, namespaceName string, body CreateRoleBindingInputBody) (*RoleBindingEntry, error) {
+	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespaceName}/rolebindings"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "clusterName", clusterName)
+	path = pathReplace(path, "namespaceName", namespaceName)
+
+	var result RoleBindingEntry
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteNamespaceRolebinding - Delete a namespace RoleBinding
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a RoleBinding from a Kubernetes namespace.
+func (c *Client) DeleteNamespaceRolebinding(ctx context.Context, organization string, clusterName string, namespaceName string, roleBindingName string) error {
+	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespaceName}/rolebindings/{roleBindingName}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "clusterName", clusterName)
+	path = pathReplace(path, "namespaceName", namespaceName)
+	path = pathReplace(path, "roleBindingName", roleBindingName)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // ListHelmReleases - List Helm releases in namespace
@@ -6199,6 +6338,40 @@ func (c *Client) DeleteNetappOntapVolume(ctx context.Context, organization strin
 	return nil
 }
 
+// EnableOrgUserPreview - Enable a preview for an organization user
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Enables a preview for a specific user within an organization. Requires the org:users role. Non-public previews require platform admin.
+func (c *Client) EnableOrgUserPreview(ctx context.Context, organization string, user string, flag string) error {
+	path := "/api/organizations/{organization}/users/{user}/previews/{flag}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "flag", flag)
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// DisableOrgUserPreview - Disable a preview for an organization user
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Disables a preview for a specific user within an organization. Requires the org:users role. Platform-level previews cannot be disabled.
+func (c *Client) DisableOrgUserPreview(ctx context.Context, organization string, user string, flag string) error {
+	path := "/api/organizations/{organization}/users/{user}/previews/{flag}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "flag", flag)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // CreateResourceGroup - Create a resource group
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6771,6 +6944,8 @@ type GetAllPlatformGroupsParams struct {
 	Limit *int64 `json:"limit,omitempty"`
 	// Number of groups to skip
 	Skip *int64 `json:"skip,omitempty"`
+	// Filter groups by cloud service provider access (e.g., aws, google, azure)
+	Csp *string `json:"csp,omitempty"`
 }
 
 // GetAllPlatformGroups - Get all platform groups
@@ -6788,6 +6963,7 @@ func (c *Client) GetAllPlatformGroups(ctx context.Context, opts ...GetAllPlatfor
 		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
+		addQueryParam(queryValues, "csp", params.Csp)
 		if len(queryValues) > 0 {
 			path += "?" + queryValues.Encode()
 		}

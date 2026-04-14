@@ -1475,22 +1475,31 @@ type CpuMetrics struct {
 }
 
 type CreateAiProviderBody struct {
+	// Custom provider API key
+	APIKey *string `json:"apiKey,omitempty"`
 	// Cloud service provider (azure, custom)
 	Csp string `json:"csp"`
 	// Description of the AI provider
 	Description *string `json:"description"`
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
+	// Custom provider endpoint
+	Endpoint *string `json:"endpoint,omitempty"`
 	// Billing group name for the AI provider (required for managed providers, not used for custom)
 	Group *string `json:"group,omitempty"`
+	// AI model name
+	Model *string `json:"model,omitempty"`
 	// Name of the AI provider
 	Name string `json:"name"`
 	// Network name
 	Network *string `json:"network,omitempty"`
+	// Refresh interval for the AI provider
+	RefreshInterval *string `json:"refreshInterval,omitempty"`
+	// AI provider region
+	Region *string `json:"region,omitempty"`
 	// Tags for the AI provider
-	Tags                 *string          `json:"tags"`
-	Variables            VariablesRequest `json:"variables"`
-	AdditionalProperties map[string]any   `json:"-,omitempty"`
+	Tags                 *string        `json:"tags"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type CreateAPIKeyInputBody struct {
@@ -1628,6 +1637,14 @@ type CreateManagedClusterOutputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type CreateNamespaceInputBody struct {
+	// Allocation name to assign
+	Allocation *string `json:"allocation,omitempty"`
+	// Namespace name
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type CreateNetAppOntapInputBody struct {
 	// Admin account username
 	AdminAccount string `json:"adminAccount"`
@@ -1697,6 +1714,18 @@ type CreateReportBody struct {
 	Type string `json:"type"`
 	// Specific user or group for the report.
 	Who                  *string        `json:"who,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreateRoleBindingInputBody struct {
+	// RoleBinding name
+	Name string `json:"name"`
+	// Kind of role reference
+	RoleKind string `json:"roleKind"`
+	// ClusterRole or Role name to bind
+	RoleRef string `json:"roleRef"`
+	// Subjects to bind
+	Subjects             []RbacSubject  `json:"subjects"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -1906,6 +1935,20 @@ type DockerWorkspaceSettings struct {
 type DuplicateWorkflowBody struct {
 	// Display name for the duplicated workflow
 	NewName              string         `json:"newName"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type EnrichedNamespaceResponse struct {
+	// Allocation name from annotation
+	Allocation *string `json:"allocation,omitempty"`
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// Kubernetes namespace name
+	Name string `json:"name"`
+	// Groups with access via platform-managed RoleBindings
+	SharedGroups []SharedGroup `json:"sharedGroups"`
+	// Namespace phase (Active, Terminating)
+	Status               string         `json:"status"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2992,6 +3035,14 @@ type ListConversationsBody struct {
 	AdditionalProperties map[string]any        `json:"-,omitempty"`
 }
 
+type ListEnrichedNamespacesOutputBody struct {
+	// Per-cluster errors
+	Errors []ClusterError `json:"errors,omitempty"`
+	// List of enriched namespaces
+	Namespaces           []EnrichedNamespaceResponse `json:"namespaces"`
+	AdditionalProperties map[string]any              `json:"-,omitempty"`
+}
+
 type ListErrorLogsBody struct {
 	ErrorLogs            []ErrorLogItem `json:"errorLogs"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -3031,6 +3082,12 @@ type ListReposOutputBody struct {
 	Repos                []RepoResponse `json:"repos"`
 	TotalCount           int64          `json:"totalCount"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ListRoleBindingsOutputBody struct {
+	// List of RoleBindings in the namespace
+	RoleBindings         []RoleBindingEntry `json:"roleBindings"`
+	AdditionalProperties map[string]any     `json:"-,omitempty"`
 }
 
 type ListUserAttachmentsBody struct {
@@ -4752,6 +4809,16 @@ type RatedCostsPaginatedResponse struct {
 	AdditionalProperties map[string]any          `json:"-,omitempty"`
 }
 
+type RbacSubject struct {
+	// Group, User, or ServiceAccount
+	Kind string `json:"kind"`
+	// Subject name
+	Name string `json:"name"`
+	// Namespace for ServiceAccount subjects
+	Namespace            *string        `json:"namespace,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type RecommendedResource struct {
 	// Cloud provider (aws, google, azure)
 	Csp *string `json:"csp,omitempty"`
@@ -4968,6 +5035,18 @@ type RestartOption struct {
 type RevokeLoginSessionOption struct {
 	// Whether to also revoke login sessions for all platform-managed cloud resources.
 	IncludeResources     *bool          `json:"includeResources"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type RoleBindingEntry struct {
+	// RoleBinding name
+	Name string `json:"name"`
+	// ClusterRole or Role
+	RoleKind string `json:"roleKind"`
+	// ClusterRole or Role name
+	RoleRef string `json:"roleRef"`
+	// Subjects with access
+	Subjects             []RbacSubject  `json:"subjects"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -5301,6 +5380,14 @@ type Shared struct {
 	Group string `json:"group"`
 	// Permissions granted to the group for this storage.
 	Permissions          any            `json:"permissions"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type SharedGroup struct {
+	// Group name (without parallelworks: prefix)
+	Group string `json:"group"`
+	// K8s role (admin, edit, view)
+	Role                 string         `json:"role"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -5766,6 +5853,12 @@ type UpdateManagedNodeOutputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type UpdateNamespaceInputBody struct {
+	// Allocation name to assign (null to clear)
+	Allocation           *string        `json:"allocation"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type UpdateOrgAiProviderInputBody struct {
 	// Provider API key
 	APIKey *string `json:"apiKey,omitempty"`
@@ -5977,20 +6070,6 @@ type UserWorkspace struct {
 	Userhost *string `json:"userhost,omitempty"`
 	// unique identifier for the user workspace, same as name for docker workspaces
 	WorkspaceID          *string        `json:"workspaceId,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type VariablesRequest struct {
-	// Custom provider API key
-	APIKey *string `json:"apiKey,omitempty"`
-	// Custom provider endpoint
-	Endpoint *string `json:"endpoint,omitempty"`
-	// AI model name
-	Model *string `json:"model,omitempty"`
-	// Refresh interval for the AI provider
-	RefreshInterval *string `json:"refreshInterval,omitempty"`
-	// AI provider region
-	Region               *string        `json:"region,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
