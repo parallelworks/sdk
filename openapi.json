@@ -13113,6 +13113,10 @@
             "type": "string",
             "writeOnly": true
           },
+          "directory": {
+            "description": "Directory to open in VS Code. Use ~ for the user's home directory.",
+            "type": "string"
+          },
           "localPort": {
             "description": "Local port (0 = random).",
             "format": "int64",
@@ -15258,6 +15262,11 @@
           "createdAt": {
             "description": "Session creation time.",
             "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "directory": {
+            "description": "Directory to open in VS Code.",
             "readOnly": true,
             "type": "string"
           },
@@ -18065,6 +18074,9 @@
             "type": "object"
           },
           "marketplace": {
+            "type": "boolean"
+          },
+          "newExecutor": {
             "type": "boolean"
           },
           "number": {

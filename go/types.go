@@ -4532,6 +4532,8 @@ type PostSessionAccessBody struct {
 type PostSessionBody struct {
 	// API key for the session.
 	APIKey *string `json:"apiKey,omitempty"`
+	// Directory to open in VS Code. Use ~ for the user's home directory.
+	Directory *string `json:"directory,omitempty"`
 	// Local port (0 = random).
 	LocalPort *int64 `json:"localPort,omitempty"`
 	// Session name (alphanumeric and underscores only). Auto-generated if omitted.
@@ -5229,6 +5231,8 @@ type ServicesMetadata struct {
 type Session struct {
 	// Session creation time.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// Directory to open in VS Code.
+	Directory *string `json:"directory,omitempty"`
 	// Domain name for the session.
 	DomainName *string `json:"domainName,omitempty"`
 	// Error message if session failed.
@@ -6192,6 +6196,7 @@ type WorkflowRunDetailResponse struct {
 	InlineRun            bool           `json:"inlineRun"`
 	Inputs               map[string]any `json:"inputs,omitempty"`
 	Marketplace          bool           `json:"marketplace"`
+	NewExecutor          *bool          `json:"newExecutor,omitempty"`
 	Number               *int64         `json:"number,omitempty"`
 	ResolvedYaml         map[string]any `json:"resolvedYaml,omitempty"`
 	Slug                 *string        `json:"slug,omitempty"`
