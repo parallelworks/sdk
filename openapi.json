@@ -191,12 +191,20 @@
             "description": "Custom provider endpoint URL",
             "type": "string"
           },
+          "hasCaCertificate": {
+            "description": "Whether a custom CA certificate is configured",
+            "type": "boolean"
+          },
           "id": {
             "description": "Unique identifier for the resource",
             "type": "string"
           },
           "ingested": {
             "description": "Whether documents have been ingested",
+            "type": "boolean"
+          },
+          "insecureSkipTlsVerify": {
+            "description": "Whether TLS certificate verification is skipped",
             "type": "boolean"
           },
           "model": {
@@ -4199,6 +4207,10 @@
             "description": "Custom provider API key",
             "type": "string"
           },
+          "caCertificate": {
+            "description": "PEM-encoded CA certificate for TLS verification",
+            "type": "string"
+          },
           "csp": {
             "description": "Cloud service provider (azure, custom)",
             "type": "string"
@@ -4222,6 +4234,10 @@
           "group": {
             "description": "Billing group name for the AI provider (required for managed providers, not used for custom)",
             "type": "string"
+          },
+          "insecureSkipTlsVerify": {
+            "description": "Skip TLS certificate verification",
+            "type": "boolean"
           },
           "model": {
             "description": "AI model name",
@@ -4712,6 +4728,10 @@
             "description": "Provider API key",
             "type": "string"
           },
+          "caCertificate": {
+            "description": "PEM-encoded CA certificate for TLS verification",
+            "type": "string"
+          },
           "displayName": {
             "description": "Display name of the AI provider",
             "maxLength": 100,
@@ -4720,6 +4740,10 @@
           "endpoint": {
             "description": "Provider endpoint URL",
             "type": "string"
+          },
+          "insecureSkipTlsVerify": {
+            "description": "Skip TLS certificate verification",
+            "type": "boolean"
           },
           "name": {
             "description": "Name of the AI provider",
@@ -11698,9 +11722,17 @@
             "description": "Provider endpoint URL",
             "type": "string"
           },
+          "hasCaCertificate": {
+            "description": "Whether a custom CA certificate is configured",
+            "type": "boolean"
+          },
           "id": {
             "description": "Unique identifier",
             "type": "string"
+          },
+          "insecureSkipTlsVerify": {
+            "description": "Whether TLS certificate verification is skipped",
+            "type": "boolean"
           },
           "name": {
             "description": "Provider name",
@@ -16789,6 +16821,10 @@
             "description": "Custom provider API key",
             "type": "string"
           },
+          "caCertificate": {
+            "description": "PEM-encoded CA certificate for TLS verification",
+            "type": "string"
+          },
           "displayName": {
             "description": "Display name of the AI provider",
             "maxLength": 100,
@@ -16804,6 +16840,10 @@
           "endpoint": {
             "description": "Custom provider endpoint URL",
             "type": "string"
+          },
+          "insecureSkipTlsVerify": {
+            "description": "Skip TLS certificate verification",
+            "type": "boolean"
           },
           "model": {
             "description": "AI model name",
@@ -17134,9 +17174,22 @@
             "description": "Provider API key",
             "type": "string"
           },
+          "caCertificate": {
+            "description": "PEM-encoded CA certificate for TLS verification",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "Display name of the AI provider",
+            "maxLength": 100,
+            "type": "string"
+          },
           "endpoint": {
             "description": "Provider endpoint URL",
             "type": "string"
+          },
+          "insecureSkipTlsVerify": {
+            "description": "Skip TLS certificate verification",
+            "type": "boolean"
           }
         },
         "type": "object"

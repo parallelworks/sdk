@@ -78,10 +78,14 @@ type AiProviderResponse struct {
 	EnabledModels []string `json:"enabledModels,omitempty"`
 	// Custom provider endpoint URL
 	Endpoint *string `json:"endpoint,omitempty"`
+	// Whether a custom CA certificate is configured
+	HasCaCertificate *bool `json:"hasCaCertificate,omitempty"`
 	// Unique identifier for the resource
 	ID string `json:"id"`
 	// Whether documents have been ingested
 	Ingested bool `json:"ingested"`
+	// Whether TLS certificate verification is skipped
+	InsecureSkipTLSVerify *bool `json:"insecureSkipTlsVerify,omitempty"`
 	// AI model name
 	Model *string `json:"model,omitempty"`
 	// Name of the AI provider
@@ -1477,6 +1481,8 @@ type CpuMetrics struct {
 type CreateAiProviderBody struct {
 	// Custom provider API key
 	APIKey *string `json:"apiKey,omitempty"`
+	// PEM-encoded CA certificate for TLS verification
+	CaCertificate *string `json:"caCertificate,omitempty"`
 	// Cloud service provider (azure, custom)
 	Csp string `json:"csp"`
 	// Description of the AI provider
@@ -1487,6 +1493,8 @@ type CreateAiProviderBody struct {
 	Endpoint *string `json:"endpoint,omitempty"`
 	// Billing group name for the AI provider (required for managed providers, not used for custom)
 	Group *string `json:"group,omitempty"`
+	// Skip TLS certificate verification
+	InsecureSkipTLSVerify *bool `json:"insecureSkipTlsVerify,omitempty"`
 	// AI model name
 	Model *string `json:"model,omitempty"`
 	// Name of the AI provider
@@ -1680,10 +1688,14 @@ type CreateNetworkBody struct {
 type CreateOrgAiProviderBody struct {
 	// Provider API key
 	APIKey *string `json:"apiKey,omitempty"`
+	// PEM-encoded CA certificate for TLS verification
+	CaCertificate *string `json:"caCertificate,omitempty"`
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
 	// Provider endpoint URL
 	Endpoint *string `json:"endpoint,omitempty"`
+	// Skip TLS certificate verification
+	InsecureSkipTLSVerify *bool `json:"insecureSkipTlsVerify,omitempty"`
 	// Name of the AI provider
 	Name string `json:"name"`
 	// AI provider type
@@ -4038,8 +4050,12 @@ type OrgAiProviderResponse struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// Provider endpoint URL
 	Endpoint *string `json:"endpoint,omitempty"`
+	// Whether a custom CA certificate is configured
+	HasCaCertificate *bool `json:"hasCaCertificate,omitempty"`
 	// Unique identifier
 	ID string `json:"id"`
+	// Whether TLS certificate verification is skipped
+	InsecureSkipTLSVerify *bool `json:"insecureSkipTlsVerify,omitempty"`
 	// Provider name
 	Name string `json:"name"`
 	// AI provider type
@@ -5742,12 +5758,16 @@ type UnreachableSession struct {
 type UpdateAiProviderInputBody struct {
 	// Custom provider API key
 	APIKey *string `json:"apiKey,omitempty"`
+	// PEM-encoded CA certificate for TLS verification
+	CaCertificate *string `json:"caCertificate,omitempty"`
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
 	// List of model IDs enabled for the chat interface
 	EnabledModels []string `json:"enabledModels,omitempty"`
 	// Custom provider endpoint URL
 	Endpoint *string `json:"endpoint,omitempty"`
+	// Skip TLS certificate verification
+	InsecureSkipTLSVerify *bool `json:"insecureSkipTlsVerify,omitempty"`
 	// AI model name
 	Model                *string        `json:"model,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -5866,9 +5886,15 @@ type UpdateNamespaceInputBody struct {
 type UpdateOrgAiProviderInputBody struct {
 	// Provider API key
 	APIKey *string `json:"apiKey,omitempty"`
+	// PEM-encoded CA certificate for TLS verification
+	CaCertificate *string `json:"caCertificate,omitempty"`
+	// Display name of the AI provider
+	DisplayName *string `json:"displayName,omitempty"`
 	// Provider endpoint URL
-	Endpoint             *string        `json:"endpoint,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
+	Endpoint *string `json:"endpoint,omitempty"`
+	// Skip TLS certificate verification
+	InsecureSkipTLSVerify *bool          `json:"insecureSkipTlsVerify,omitempty"`
+	AdditionalProperties  map[string]any `json:"-,omitempty"`
 }
 
 type UpdatePermissionInputBody struct {
