@@ -3056,7 +3056,9 @@ type ListEnrichedNamespacesOutputBody struct {
 }
 
 type ListErrorLogsBody struct {
-	ErrorLogs            []ErrorLogItem `json:"errorLogs"`
+	ErrorLogs []ErrorLogItem `json:"errorLogs"`
+	// Total number of error logs
+	Total                int64          `json:"total"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -6244,6 +6246,8 @@ type WorkflowRunInfo struct {
 	Number *int64 `json:"number,omitempty"`
 	// Workflow run slug.
 	Slug *string `json:"slug,omitempty"`
+	// Workflow run status.
+	Status *string `json:"status,omitempty"`
 	// Workflow type.
 	Type                 *string        `json:"type,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`

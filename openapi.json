@@ -8725,10 +8725,16 @@
               "array",
               "null"
             ]
+          },
+          "total": {
+            "description": "Total number of error logs",
+            "format": "int64",
+            "type": "integer"
           }
         },
         "required": [
-          "errorLogs"
+          "errorLogs",
+          "total"
         ],
         "type": "object"
       },
@@ -18193,6 +18199,11 @@
             "readOnly": true,
             "type": "string"
           },
+          "status": {
+            "description": "Workflow run status.",
+            "readOnly": true,
+            "type": "string"
+          },
           "type": {
             "description": "Workflow type.",
             "readOnly": true,
@@ -18674,6 +18685,16 @@
               "description": "Number of error logs to skip",
               "format": "int64",
               "type": "integer"
+            }
+          },
+          {
+            "description": "Case-insensitive search across message, path, user, and request ID",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Case-insensitive search across message, path, user, and request ID",
+              "type": "string"
             }
           }
         ],

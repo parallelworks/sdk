@@ -84,6 +84,8 @@ type GetErrorLogsParams struct {
 	Limit *int64 `json:"limit,omitempty"`
 	// Number of error logs to skip
 	Skip *int64 `json:"skip,omitempty"`
+	// Case-insensitive search across message, path, user, and request ID
+	Search *string `json:"search,omitempty"`
 }
 
 // GetErrorLogs - Get recent error logs
@@ -101,6 +103,7 @@ func (c *Client) GetErrorLogs(ctx context.Context, opts ...GetErrorLogsParams) (
 		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
+		addQueryParam(queryValues, "search", params.Search)
 		if len(queryValues) > 0 {
 			path += "?" + queryValues.Encode()
 		}
