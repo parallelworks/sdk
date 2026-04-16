@@ -138,6 +138,8 @@ type Alert struct {
 }
 
 type Allocation struct {
+	// Whether the current user can edit the allocation amount
+	CanEditTotal *bool `json:"canEditTotal,omitempty"`
 	// Current organization threshold level
 	CurrentOrgThreshold *int64 `json:"currentOrgThreshold,omitempty"`
 	// Estimated amount used
@@ -4263,6 +4265,12 @@ type PatchAccessBodyType struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type PatchAllocationInputBody struct {
+	// New total allocation amount
+	Total                float64        `json:"total"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type PatchExistingClusterBody struct {
 	// Auto-reconnect enabled
 	AutoReconnect        bool           `json:"autoReconnect"`
@@ -4840,6 +4848,7 @@ type RatedCostWithMetadata struct {
 }
 
 type RatedCostsFilterOptions struct {
+	Skus                 []string       `json:"skus"`
 	Subtypes             []string       `json:"subtypes"`
 	Types                []string       `json:"types"`
 	Users                []string       `json:"users"`

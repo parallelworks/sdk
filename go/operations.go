@@ -2401,6 +2401,23 @@ func (c *Client) DeleteAllocation(ctx context.Context, organization string, name
 	return nil
 }
 
+// UpdateAllocation - Update a budget allocation
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates a budget allocation. Requires org admin access or allocation:admin permission.
+func (c *Client) UpdateAllocation(ctx context.Context, organization string, name string, body PatchAllocationInputBody) (*Allocation, error) {
+	path := "/api/organizations/{organization}/allocations/{name}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "name", name)
+
+	var result Allocation
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetAllocationPermissions - Get allocation permissions
 //
 // Get permissions for an allocation
@@ -4792,7 +4809,7 @@ func (c *Client) GetOrganizationProvisionStatusByInfraID(ctx context.Context, or
 type GetAllocationUsageEventsSummaryParams struct {
 	// End date (YYYY-MM-DD). Defaults to current date when omitted.
 	EndDate *string `json:"endDate,omitempty"`
-	// Field to group costs by (type, subtype, user)
+	// Field to group costs by (type, subtype, user, sku)
 	GroupBy *string `json:"groupBy,omitempty"`
 	// Filter: type matches exactly
 	Type *string `json:"type,omitempty"`
@@ -4800,6 +4817,8 @@ type GetAllocationUsageEventsSummaryParams struct {
 	Subtype *string `json:"subtype,omitempty"`
 	// Filter: username matches exactly
 	User *string `json:"user,omitempty"`
+	// Filter: comma-separated SKU codes
+	Sku *string `json:"sku,omitempty"`
 	// Filter: metadata contains this string (case-insensitive search in JSON)
 	Metadata *string `json:"metadata,omitempty"`
 }
@@ -4822,6 +4841,7 @@ func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organizati
 		addQueryParam(queryValues, "type", params.Type)
 		addQueryParam(queryValues, "subtype", params.Subtype)
 		addQueryParam(queryValues, "user", params.User)
+		addQueryParam(queryValues, "sku", params.Sku)
 		addQueryParam(queryValues, "metadata", params.Metadata)
 		if len(queryValues) > 0 {
 			path += "?" + queryValues.Encode()
@@ -7997,6 +8017,22 @@ func (c *Client) GetAuthSessionDeprecated(ctx context.Context) (*AuthSession, er
 	path := "/api/v2/auth/session"
 
 	var result AuthSession
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetUserSSHPublicKeysLegacy - Get user SSH public keys (legacy path)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Legacy path for SSH public keys. Use /api/users/{username}/ssh-public-keys.
+func (c *Client) GetUserSSHPublicKeysLegacy(ctx context.Context, username string) (*string, error) {
+	path := "/api/v2/users/{username}/sshpublickeys"
+	path = pathReplace(path, "username", username)
+
+	var result string
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}

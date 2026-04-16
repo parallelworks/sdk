@@ -28,7 +28,7 @@ echo ""
 
 # ============ Generate OpenAPI spec ============
 echo "Generating OpenAPI spec from Go ingress..."
-cd "$ROOT_DIR/packages/go/ingress"
+cd "$ROOT_DIR/cmd/ingress"
 go run ./internal/routes/generate/generate-openapi.go
 cd "$ROOT_DIR"
 echo "OpenAPI spec generated"

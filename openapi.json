@@ -340,6 +340,11 @@
       "Allocation": {
         "additionalProperties": false,
         "properties": {
+          "canEditTotal": {
+            "description": "Whether the current user can edit the allocation amount",
+            "readOnly": true,
+            "type": "boolean"
+          },
           "currentOrgThreshold": {
             "description": "Current organization threshold level",
             "format": "int64",
@@ -12321,6 +12326,21 @@
         ],
         "type": "object"
       },
+      "PatchAllocationInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "total": {
+            "description": "New total allocation amount",
+            "format": "double",
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "type": "object"
+      },
       "PatchExistingClusterBody": {
         "additionalProperties": false,
         "properties": {
@@ -13996,6 +14016,15 @@
       "RatedCostsFilterOptions": {
         "additionalProperties": false,
         "properties": {
+          "skus": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "subtypes": {
             "items": {
               "type": "string"
@@ -14027,7 +14056,8 @@
         "required": [
           "types",
           "subtypes",
-          "users"
+          "users",
+          "skus"
         ],
         "type": "object"
       },
@@ -24753,6 +24783,71 @@
         "tags": [
           "Allocations"
         ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates a budget allocation. Requires org admin access or allocation:admin permission.",
+        "operationId": "update-allocation",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Allocation name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Allocation name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchAllocationInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Allocation"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update a budget allocation",
+        "tags": [
+          "Allocations"
+        ]
       }
     },
     "/api/organizations/{organization}/allocations/{name}/permissions": {
@@ -32811,13 +32906,13 @@
             }
           },
           {
-            "description": "Field to group costs by (type, subtype, user)",
+            "description": "Field to group costs by (type, subtype, user, sku)",
             "explode": false,
             "in": "query",
             "name": "groupBy",
             "schema": {
               "default": "type",
-              "description": "Field to group costs by (type, subtype, user)",
+              "description": "Field to group costs by (type, subtype, user, sku)",
               "type": "string"
             }
           },
@@ -32848,6 +32943,16 @@
             "name": "user",
             "schema": {
               "description": "Filter: username matches exactly",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter: comma-separated SKU codes",
+            "explode": false,
+            "in": "query",
+            "name": "sku",
+            "schema": {
+              "description": "Filter: comma-separated SKU codes",
               "type": "string"
             }
           },
@@ -43627,6 +43732,59 @@
         "tags": [
           "Authentication"
         ]
+      }
+    },
+    "/api/v2/users/{username}/sshpublickeys": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nLegacy path for SSH public keys. Use /api/users/{username}/ssh-public-keys.",
+        "operationId": "get-user-ssh-public-keys-legacy",
+        "parameters": [
+          {
+            "description": "Username to get SSH public keys for",
+            "in": "path",
+            "name": "username",
+            "required": true,
+            "schema": {
+              "description": "Username to get SSH public keys for",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get user SSH public keys (legacy path)",
+        "tags": [
+          "User Settings"
+        ],
+        "x-internal": true
       }
     },
     "/api/workflow-runs": {
