@@ -7083,6 +7083,40 @@ func (c *Client) DeleteGithubAppConfig(ctx context.Context) error {
 	return nil
 }
 
+// GetSentrySettings - Get Sentry settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns Sentry error tracking configuration.
+func (c *Client) GetSentrySettings(ctx context.Context) (*SentrySettings, error) {
+	path := "/api/platform/integrations/sentry"
+
+	var result SentrySettings
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateSentrySettings - Update Sentry settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Updates Sentry error tracking configuration.
+func (c *Client) UpdateSentrySettings(ctx context.Context, body UpdateSentrySettingsBody) (*SentrySettings, error) {
+	path := "/api/platform/integrations/sentry"
+
+	var result SentrySettings
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetKeys - List JWKs
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -7559,6 +7593,23 @@ func (c *Client) GetAdminPlatformSettings(ctx context.Context) (*PlatformSetting
 
 	var result PlatformSettingsAdmin
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateAdminPlatformSettings - Update admin platform settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Updates platform settings. Only fields provided in the request body are updated.
+func (c *Client) UpdateAdminPlatformSettings(ctx context.Context, body UpdateAdminPlatformSettingsInputBody) (*PlatformSettingsAdmin, error) {
+	path := "/api/settings/admin"
+
+	var result PlatformSettingsAdmin
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil

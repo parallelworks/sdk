@@ -1575,7 +1575,7 @@ type CreateCloudAccountBody struct {
 	GoogleServiceAccountKey *string `json:"googleServiceAccountKey,omitempty"`
 	// When true, API calls will use gov-cloud specific endpoints
 	GovCloud *bool `json:"govCloud,omitempty"`
-	// Cloud account name (lowercase letters and numbers only)
+	// Cloud account name (lowercase letters, numbers, hyphens, and underscores)
 	Name string `json:"name"`
 	// OpenStack compute endpoint URL
 	OpenstackComputeEndpoint *string `json:"openstackComputeEndpoint,omitempty"`
@@ -4429,6 +4429,18 @@ type PlatformSettings struct {
 	PlatformName *string `json:"platformName,omitempty"`
 	// Platform-wide enabled previews.
 	Previews []string `json:"previews"`
+	// Whether Sentry error tracking is enabled.
+	SentryEnabled *bool `json:"sentryEnabled,omitempty"`
+	// Sentry environment name.
+	SentryEnvironment *string `json:"sentryEnvironment,omitempty"`
+	// Sentry DSN for the frontend.
+	SentryFrontendDsn *string `json:"sentryFrontendDsn,omitempty"`
+	// Whether Sentry replays should show unmasked content.
+	SentryReplayUnmask *bool `json:"sentryReplayUnmask,omitempty"`
+	// Sentry replays sample rate (0.0-1.0).
+	SentryReplaysSampleRate *float64 `json:"sentryReplaysSampleRate,omitempty"`
+	// Sentry traces sample rate (0.0-1.0).
+	SentryTracesSampleRate *float64 `json:"sentryTracesSampleRate,omitempty"`
 	// The name of the single organization, if applicable.
 	SingleOrgName *string `json:"singleOrgName,omitempty"`
 	// Indicates if the platform is a single organization platform.
@@ -4467,6 +4479,20 @@ type PlatformSettingsAdmin struct {
 	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
 	// Indicates if the license is in the grace period.
 	LicenseGracePeriod *bool `json:"licenseGracePeriod,omitempty"`
+	// Sentry DSN for backend services.
+	SentryDsn *string `json:"sentryDsn,omitempty"`
+	// Whether Sentry error tracking is enabled.
+	SentryEnabled bool `json:"sentryEnabled"`
+	// Sentry environment name.
+	SentryEnvironment *string `json:"sentryEnvironment,omitempty"`
+	// Sentry DSN for the frontend.
+	SentryFrontendDsn *string `json:"sentryFrontendDsn,omitempty"`
+	// Whether Sentry replays should show unmasked content.
+	SentryReplayUnmask bool `json:"sentryReplayUnmask"`
+	// Sentry replays sample rate (0.0-1.0).
+	SentryReplaysSampleRate float64 `json:"sentryReplaysSampleRate"`
+	// Sentry traces sample rate (0.0-1.0).
+	SentryTracesSampleRate float64 `json:"sentryTracesSampleRate"`
 	// Indicates if the platform license is valid.
 	ValidLicense         *bool          `json:"validLicense,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -5205,6 +5231,28 @@ type SchedulerPartitionData struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type SentrySettings struct {
+	// Whether custom DSNs are configured (false means using Parallel Works defaults).
+	CustomDsn bool `json:"customDsn"`
+	// Suggested environment name derived from the platform license.
+	DefaultEnvironment *string `json:"defaultEnvironment,omitempty"`
+	// Sentry DSN for backend services.
+	Dsn *string `json:"dsn,omitempty"`
+	// Whether Sentry error tracking is enabled.
+	Enabled bool `json:"enabled"`
+	// Sentry environment name.
+	Environment *string `json:"environment,omitempty"`
+	// Sentry DSN for the frontend.
+	FrontendDsn *string `json:"frontendDsn,omitempty"`
+	// Whether Sentry replays should show unmasked content.
+	ReplayUnmask bool `json:"replayUnmask"`
+	// Sentry replays sample rate (0.0-1.0).
+	ReplaysSampleRate float64 `json:"replaysSampleRate"`
+	// Sentry traces sample rate (0.0-1.0).
+	TracesSampleRate     float64        `json:"tracesSampleRate"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ServiceResponse struct {
 	// Cluster name
 	Cluster string `json:"cluster"`
@@ -5795,6 +5843,53 @@ type UpdateAccessManagementBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type UpdateAdminPlatformSettingsInputBody struct {
+	// Whether to create a PVC for k8s workspaces.
+	Createk8sPvc *bool `json:"createk8sPVC,omitempty"`
+	// The default user host for SSH connections.
+	DefaultUserHost *string `json:"defaultUserHost,omitempty"`
+	// The default workspace image.
+	DefaultWorkspaceImage *string `json:"defaultWorkspaceImage,omitempty"`
+	// The default workspace type.
+	DefaultWorkspaceType *string `json:"defaultWorkspaceType,omitempty"`
+	// Whether to delete user files on account deletion.
+	DeleteUserFilesOnDelete *bool                    `json:"deleteUserFilesOnDelete,omitempty"`
+	DockerWorkspaceSettings *DockerWorkspaceSettings `json:"dockerWorkspaceSettings,omitempty"`
+	// Whether to enable the onboarding flow.
+	EnableOnboarding *bool `json:"enableOnboarding,omitempty"`
+	// Whether to enforce max TTL for API keys.
+	EnforceMaxTtl *bool `json:"enforceMaxTTL,omitempty"`
+	// Default expiration days for API keys.
+	ExpirationDays *int64 `json:"expirationDays,omitempty"`
+	// Whether to enable the forgot password feature.
+	ForgotPasswordEnabled *bool `json:"forgotPasswordEnabled,omitempty"`
+	// The maintenance message to show.
+	MaintenanceMessage *string `json:"maintenanceMessage,omitempty"`
+	// Whether to enable maintenance mode.
+	MaintenanceMode *bool `json:"maintenanceMode,omitempty"`
+	// The display name of the platform.
+	PlatformName *string `json:"platformName,omitempty"`
+	// Sentry DSN for backend services.
+	SentryDsn *string `json:"sentryDsn,omitempty"`
+	// Whether Sentry error tracking is enabled.
+	SentryEnabled *bool `json:"sentryEnabled,omitempty"`
+	// Sentry environment name.
+	SentryEnvironment *string `json:"sentryEnvironment,omitempty"`
+	// Sentry DSN for the frontend.
+	SentryFrontendDsn *string `json:"sentryFrontendDsn,omitempty"`
+	// Whether Sentry replays show unmasked content.
+	SentryReplayUnmask *bool `json:"sentryReplayUnmask,omitempty"`
+	// Sentry replays sample rate (0.0-1.0).
+	SentryReplaysSampleRate *float64 `json:"sentryReplaysSampleRate,omitempty"`
+	// Sentry traces sample rate (0.0-1.0).
+	SentryTracesSampleRate *float64 `json:"sentryTracesSampleRate,omitempty"`
+	// The name of the single org.
+	SingleOrgName *string `json:"singleOrgName,omitempty"`
+	// Whether to enable single org platform.
+	SingleOrgPlatform    *bool          `json:"singleOrgPlatform,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type UpdateAllocationPermissionsInputBody struct {
 	// Map of group names to permission
 	Groups map[string]any `json:"groups"`
@@ -5934,6 +6029,22 @@ type UpdateResourceGroupPermissionsInputBody struct {
 	Groups map[string]any `json:"groups"`
 	// Map of permission names to whether to share with entire organization
 	Organization         map[string]any `json:"organization"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UpdateSentrySettingsBody struct {
+	// Sentry DSN for backend services. Leave empty for Parallel Works default.
+	Dsn *string `json:"dsn,omitempty"`
+	// Whether Sentry error tracking is enabled.
+	Enabled bool `json:"enabled"`
+	// Sentry DSN for the frontend. Leave empty for Parallel Works default.
+	FrontendDsn *string `json:"frontendDsn,omitempty"`
+	// Whether Sentry replays should show unmasked content.
+	ReplayUnmask bool `json:"replayUnmask"`
+	// Sentry replays sample rate (0.0-1.0).
+	ReplaysSampleRate float64 `json:"replaysSampleRate"`
+	// Sentry traces sample rate (0.0-1.0).
+	TracesSampleRate     float64        `json:"tracesSampleRate"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

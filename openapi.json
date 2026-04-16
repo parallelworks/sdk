@@ -4441,7 +4441,7 @@
             "type": "boolean"
           },
           "name": {
-            "description": "Cloud account name (lowercase letters and numbers only)",
+            "description": "Cloud account name (lowercase letters, numbers, hyphens, and underscores)",
             "maxLength": 255,
             "minLength": 1,
             "type": "string"
@@ -12788,6 +12788,32 @@
               "null"
             ]
           },
+          "sentryEnabled": {
+            "description": "Whether Sentry error tracking is enabled.",
+            "type": "boolean"
+          },
+          "sentryEnvironment": {
+            "description": "Sentry environment name.",
+            "type": "string"
+          },
+          "sentryFrontendDsn": {
+            "description": "Sentry DSN for the frontend.",
+            "type": "string"
+          },
+          "sentryReplayUnmask": {
+            "description": "Whether Sentry replays should show unmasked content.",
+            "type": "boolean"
+          },
+          "sentryReplaysSampleRate": {
+            "description": "Sentry replays sample rate (0.0-1.0).",
+            "format": "double",
+            "type": "number"
+          },
+          "sentryTracesSampleRate": {
+            "description": "Sentry traces sample rate (0.0-1.0).",
+            "format": "double",
+            "type": "number"
+          },
           "singleOrgName": {
             "description": "The name of the single organization, if applicable.",
             "type": "string"
@@ -12910,13 +12936,47 @@
             "description": "Indicates if the license is in the grace period.",
             "type": "boolean"
           },
+          "sentryDsn": {
+            "description": "Sentry DSN for backend services.",
+            "type": "string"
+          },
+          "sentryEnabled": {
+            "description": "Whether Sentry error tracking is enabled.",
+            "type": "boolean"
+          },
+          "sentryEnvironment": {
+            "description": "Sentry environment name.",
+            "type": "string"
+          },
+          "sentryFrontendDsn": {
+            "description": "Sentry DSN for the frontend.",
+            "type": "string"
+          },
+          "sentryReplayUnmask": {
+            "description": "Whether Sentry replays should show unmasked content.",
+            "type": "boolean"
+          },
+          "sentryReplaysSampleRate": {
+            "description": "Sentry replays sample rate (0.0-1.0).",
+            "format": "double",
+            "type": "number"
+          },
+          "sentryTracesSampleRate": {
+            "description": "Sentry traces sample rate (0.0-1.0).",
+            "format": "double",
+            "type": "number"
+          },
           "validLicense": {
             "description": "Indicates if the platform license is valid.",
             "type": "boolean"
           }
         },
         "required": [
-          "enableOnboarding"
+          "enableOnboarding",
+          "sentryEnabled",
+          "sentryReplayUnmask",
+          "sentryTracesSampleRate",
+          "sentryReplaysSampleRate"
         ],
         "type": "object"
       },
@@ -15133,6 +15193,57 @@
         ],
         "type": "object"
       },
+      "SentrySettings": {
+        "additionalProperties": false,
+        "properties": {
+          "customDsn": {
+            "description": "Whether custom DSNs are configured (false means using Parallel Works defaults).",
+            "type": "boolean"
+          },
+          "defaultEnvironment": {
+            "description": "Suggested environment name derived from the platform license.",
+            "type": "string"
+          },
+          "dsn": {
+            "description": "Sentry DSN for backend services.",
+            "type": "string"
+          },
+          "enabled": {
+            "description": "Whether Sentry error tracking is enabled.",
+            "type": "boolean"
+          },
+          "environment": {
+            "description": "Sentry environment name.",
+            "type": "string"
+          },
+          "frontendDsn": {
+            "description": "Sentry DSN for the frontend.",
+            "type": "string"
+          },
+          "replayUnmask": {
+            "description": "Whether Sentry replays should show unmasked content.",
+            "type": "boolean"
+          },
+          "replaysSampleRate": {
+            "description": "Sentry replays sample rate (0.0-1.0).",
+            "format": "double",
+            "type": "number"
+          },
+          "tracesSampleRate": {
+            "description": "Sentry traces sample rate (0.0-1.0).",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "enabled",
+          "replayUnmask",
+          "tracesSampleRate",
+          "replaysSampleRate",
+          "customDsn"
+        ],
+        "type": "object"
+      },
       "ServiceResponse": {
         "additionalProperties": false,
         "properties": {
@@ -16907,6 +17018,107 @@
         },
         "type": "object"
       },
+      "UpdateAdminPlatformSettingsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "createk8sPVC": {
+            "description": "Whether to create a PVC for k8s workspaces.",
+            "type": "boolean"
+          },
+          "defaultUserHost": {
+            "description": "The default user host for SSH connections.",
+            "type": "string"
+          },
+          "defaultWorkspaceImage": {
+            "description": "The default workspace image.",
+            "type": "string"
+          },
+          "defaultWorkspaceType": {
+            "description": "The default workspace type.",
+            "enum": [
+              "k8s",
+              "docker"
+            ],
+            "type": "string"
+          },
+          "deleteUserFilesOnDelete": {
+            "description": "Whether to delete user files on account deletion.",
+            "type": "boolean"
+          },
+          "dockerWorkspaceSettings": {
+            "$ref": "#/components/schemas/DockerWorkspaceSettings",
+            "description": "Docker workspace settings."
+          },
+          "enableOnboarding": {
+            "description": "Whether to enable the onboarding flow.",
+            "type": "boolean"
+          },
+          "enforceMaxTTL": {
+            "description": "Whether to enforce max TTL for API keys.",
+            "type": "boolean"
+          },
+          "expirationDays": {
+            "description": "Default expiration days for API keys.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "forgotPasswordEnabled": {
+            "description": "Whether to enable the forgot password feature.",
+            "type": "boolean"
+          },
+          "maintenanceMessage": {
+            "description": "The maintenance message to show.",
+            "type": "string"
+          },
+          "maintenanceMode": {
+            "description": "Whether to enable maintenance mode.",
+            "type": "boolean"
+          },
+          "platformName": {
+            "description": "The display name of the platform.",
+            "type": "string"
+          },
+          "sentryDsn": {
+            "description": "Sentry DSN for backend services.",
+            "type": "string"
+          },
+          "sentryEnabled": {
+            "description": "Whether Sentry error tracking is enabled.",
+            "type": "boolean"
+          },
+          "sentryEnvironment": {
+            "description": "Sentry environment name.",
+            "type": "string"
+          },
+          "sentryFrontendDsn": {
+            "description": "Sentry DSN for the frontend.",
+            "type": "string"
+          },
+          "sentryReplayUnmask": {
+            "description": "Whether Sentry replays show unmasked content.",
+            "type": "boolean"
+          },
+          "sentryReplaysSampleRate": {
+            "description": "Sentry replays sample rate (0.0-1.0).",
+            "format": "double",
+            "type": "number"
+          },
+          "sentryTracesSampleRate": {
+            "description": "Sentry traces sample rate (0.0-1.0).",
+            "format": "double",
+            "type": "number"
+          },
+          "singleOrgName": {
+            "description": "The name of the single org.",
+            "type": "string"
+          },
+          "singleOrgPlatform": {
+            "description": "Whether to enable single org platform.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "UpdateAllocationPermissionsInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -17311,6 +17523,44 @@
         "required": [
           "organization",
           "groups"
+        ],
+        "type": "object"
+      },
+      "UpdateSentrySettingsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "dsn": {
+            "description": "Sentry DSN for backend services. Leave empty for Parallel Works default.",
+            "type": "string"
+          },
+          "enabled": {
+            "description": "Whether Sentry error tracking is enabled.",
+            "type": "boolean"
+          },
+          "frontendDsn": {
+            "description": "Sentry DSN for the frontend. Leave empty for Parallel Works default.",
+            "type": "string"
+          },
+          "replayUnmask": {
+            "description": "Whether Sentry replays should show unmasked content.",
+            "type": "boolean"
+          },
+          "replaysSampleRate": {
+            "description": "Sentry replays sample rate (0.0-1.0).",
+            "format": "double",
+            "type": "number"
+          },
+          "tracesSampleRate": {
+            "description": "Sentry traces sample rate (0.0-1.0).",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "enabled",
+          "replayUnmask",
+          "tracesSampleRate",
+          "replaysSampleRate"
         ],
         "type": "object"
       },
@@ -40960,6 +41210,78 @@
         ]
       }
     },
+    "/api/platform/integrations/sentry": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns Sentry error tracking configuration.",
+        "operationId": "get-sentry-settings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SentrySettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Sentry settings",
+        "tags": [
+          "Platform"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nUpdates Sentry error tracking configuration.",
+        "operationId": "update-sentry-settings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSentrySettingsBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SentrySettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update Sentry settings",
+        "tags": [
+          "Platform"
+        ]
+      }
+    },
     "/api/platform/keys": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the list of JWKS, these are public keys used for verifying JWTs",
@@ -42286,6 +42608,46 @@
           }
         },
         "summary": "Get admin platform settings",
+        "tags": [
+          "Platform"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nUpdates platform settings. Only fields provided in the request body are updated.",
+        "operationId": "update-admin-platform-settings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAdminPlatformSettingsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformSettingsAdmin"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update admin platform settings",
         "tags": [
           "Platform"
         ]
