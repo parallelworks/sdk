@@ -286,17 +286,33 @@ export class Client {
     // (e.g. SWR hooks) can distinguish 404s from other errors.
     // openapi-fetch parses the body after middleware, so we replace the
     // response with one whose body includes the status field.
+    // Also guarantee `message` is populated — upstream infrastructure (WAFs,
+    // proxies) can return non-2xx with an empty body, which would otherwise
+    // short-circuit openapi-fetch (it returns `error: undefined` when
+    // Content-Length is 0) and leave consumers with no error to react to.
     const statusMiddleware: Middleware = {
       async onResponse({ response }) {
         if (!response.ok) {
           const body = await response.json().catch(() => ({}))
-          if (body && typeof body === 'object') {
-            ;(body as Record<string, unknown>).status = response.status
+          const record =
+            body && typeof body === 'object'
+              ? (body as Record<string, unknown>)
+              : {}
+          record.status = response.status
+          if (typeof record.message !== 'string' || !record.message) {
+            record.message =
+              response.statusText ||
+              `Request failed with status ${response.status}`
           }
-          return new Response(JSON.stringify(body), {
+          // Strip Content-Length from the original headers — we're replacing
+          // the body, and a stale `Content-Length: 0` from an empty upstream
+          // response causes openapi-fetch to skip body parsing entirely.
+          const headers = new Headers(response.headers)
+          headers.delete('content-length')
+          return new Response(JSON.stringify(record), {
             status: response.status,
             statusText: response.statusText,
-            headers: response.headers,
+            headers,
           })
         }
         return response

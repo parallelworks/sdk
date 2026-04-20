@@ -6721,6 +6721,55 @@ func (c *Client) GetUserWorkspaceStatusForUser(ctx context.Context, organization
 	return &result, nil
 }
 
+// ListWorkspaceMounts - List workspace mounts
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns all workspace mount configurations for the specified user.
+func (c *Client) ListWorkspaceMounts(ctx context.Context, organization string, user string) (*ListWorkspaceMountsBody, error) {
+	path := "/api/organizations/{organization}/users/{user}/workspace-mounts"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+
+	var result ListWorkspaceMountsBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddWorkspaceMount - Add workspace mount
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Adds a workspace mount mapping for the specified user. Workspace paths must be unique.
+func (c *Client) AddWorkspaceMount(ctx context.Context, organization string, user string, body AddWorkspaceMountBody) error {
+	path := "/api/organizations/{organization}/users/{user}/workspace-mounts"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+
+	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// RemoveWorkspaceMount - Remove workspace mount
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes a workspace mount mapping for the specified user.
+func (c *Client) RemoveWorkspaceMount(ctx context.Context, organization string, user string, body RemoveWorkspaceMountBody) error {
+	path := "/api/organizations/{organization}/users/{user}/workspace-mounts"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+
+	if err := c.do(ctx, "DELETE", path, body, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // DeleteStorage - Delete a storage
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -7008,6 +7057,8 @@ type GetPlatformImagesParams struct {
 	Type *string `json:"type,omitempty"`
 	// Region filter
 	Region *string `json:"region,omitempty"`
+	// Include disabled images (admin only)
+	IncludeDisabled *bool `json:"includeDisabled,omitempty"`
 }
 
 // GetPlatformImages - List machine images
@@ -7025,6 +7076,7 @@ func (c *Client) GetPlatformImages(ctx context.Context, opts ...GetPlatformImage
 		addQueryParam(queryValues, "architecture", params.Architecture)
 		addQueryParam(queryValues, "type", params.Type)
 		addQueryParam(queryValues, "region", params.Region)
+		addQueryParam(queryValues, "includeDisabled", params.IncludeDisabled)
 		if len(queryValues) > 0 {
 			path += "?" + queryValues.Encode()
 		}

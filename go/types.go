@@ -65,6 +65,16 @@ type AddPermissionInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type AddWorkspaceMountBody struct {
+	// The path on the cluster to map to the workspace path.
+	ClusterPath string `json:"clusterPath"`
+	// The ID of the resource (cluster or instance) for this mount.
+	ResourceID string `json:"resourceId"`
+	// The path inside the user workspace to mount.
+	WorkspacePath        string         `json:"workspacePath"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type AiProviderResponse struct {
 	// Attached storage bucket name
 	BucketName *string `json:"bucketName,omitempty"`
@@ -1285,6 +1295,12 @@ type ClusterMetricsDataPoint struct {
 	NetworkTxBytes       int64          `json:"networkTxBytes"`
 	Processes            int64          `json:"processes"`
 	Timestamp            time.Time      `json:"timestamp"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ClusterMountInfoResponse struct {
+	ClusterPath          string         `json:"clusterPath"`
+	ResourceID           *string        `json:"resourceId,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2773,6 +2789,8 @@ type Image struct {
 	Csp string `json:"csp"`
 	// Cloud provider specific image ID
 	CspID string `json:"cspId"`
+	// Whether the image is disabled and hidden from users
+	Disabled bool `json:"disabled"`
 	// Unique identifier
 	ID *string `json:"id,omitempty"`
 	// Whether this is the image that gets used when using Latest on compute resources
@@ -3116,6 +3134,11 @@ type ListWorkflowRunsBody struct {
 	Runs                 []WorkflowRunResponse `json:"runs"`
 	Total                int64                 `json:"total"`
 	AdditionalProperties map[string]any        `json:"-,omitempty"`
+}
+
+type ListWorkspaceMountsBody struct {
+	Mounts               map[string]any `json:"mounts"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type LoginBannerResponse struct {
@@ -4278,6 +4301,8 @@ type PatchExistingClusterBody struct {
 }
 
 type PatchImageInputBody struct {
+	// Set the image as disabled
+	Disabled *bool `json:"disabled,omitempty"`
 	// Set the image as latest
 	Latest *bool `json:"latest,omitempty"`
 	// Set the image as published
@@ -4962,6 +4987,12 @@ type RemoteWorkflowSettings struct {
 	Thumbnail *string `json:"thumbnail,omitempty"`
 	// Path to the YAML file in the repository.
 	Yaml                 *string        `json:"yaml,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type RemoveWorkspaceMountBody struct {
+	// The workspace path to remove from mounts.
+	WorkspacePath        string         `json:"workspacePath"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

@@ -152,6 +152,31 @@
         ],
         "type": "object"
       },
+      "AddWorkspaceMountBody": {
+        "additionalProperties": false,
+        "properties": {
+          "clusterPath": {
+            "description": "The path on the cluster to map to the workspace path.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "resourceId": {
+            "description": "The ID of the resource (cluster or instance) for this mount.",
+            "type": "string"
+          },
+          "workspacePath": {
+            "description": "The path inside the user workspace to mount.",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspacePath",
+          "clusterPath",
+          "resourceId"
+        ],
+        "type": "object"
+      },
       "AiProviderResponse": {
         "additionalProperties": false,
         "properties": {
@@ -3598,6 +3623,21 @@
           "processes",
           "networkRxBytes",
           "networkTxBytes"
+        ],
+        "type": "object"
+      },
+      "ClusterMountInfoResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "clusterPath": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "clusterPath"
         ],
         "type": "object"
       },
@@ -7790,6 +7830,10 @@
             "description": "Cloud provider specific image ID",
             "type": "string"
           },
+          "disabled": {
+            "description": "Whether the image is disabled and hidden from users",
+            "type": "boolean"
+          },
           "id": {
             "description": "Unique identifier",
             "readOnly": true,
@@ -7851,7 +7895,8 @@
           "region",
           "type",
           "architecture",
-          "published"
+          "published",
+          "disabled"
         ],
         "type": "object"
       },
@@ -8927,6 +8972,21 @@
         "required": [
           "runs",
           "total"
+        ],
+        "type": "object"
+      },
+      "ListWorkspaceMountsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "mounts": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ClusterMountInfoResponse"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "mounts"
         ],
         "type": "object"
       },
@@ -12357,6 +12417,10 @@
       "PatchImageInputBody": {
         "additionalProperties": false,
         "properties": {
+          "disabled": {
+            "description": "Set the image as disabled",
+            "type": "boolean"
+          },
           "latest": {
             "description": "Set the image as latest",
             "type": "boolean"
@@ -14373,6 +14437,20 @@
         },
         "type": "object"
       },
+      "RemoveWorkspaceMountBody": {
+        "additionalProperties": false,
+        "properties": {
+          "workspacePath": {
+            "description": "The workspace path to remove from mounts.",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspacePath"
+        ],
+        "type": "object"
+      },
       "ReplicaSetInfo": {
         "additionalProperties": false,
         "properties": {
@@ -14581,6 +14659,10 @@
           },
           "name": {
             "description": "Resource group name",
+            "maxLength": 63,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9-_]+$",
+            "patternDescription": "resource group name can only contain alphanumeric characters, hyphens, and underscores.",
             "type": [
               "string",
               "null"
@@ -40139,6 +40221,188 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/workspace-mounts": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves a workspace mount mapping for the specified user.",
+        "operationId": "remove-workspace-mount",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the resource owner",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the resource owner",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveWorkspaceMountBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Remove workspace mount",
+        "tags": [
+          "User Settings"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns all workspace mount configurations for the specified user.",
+        "operationId": "list-workspace-mounts",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the resource owner",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the resource owner",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListWorkspaceMountsBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List workspace mounts",
+        "tags": [
+          "User Settings"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nAdds a workspace mount mapping for the specified user. Workspace paths must be unique.",
+        "operationId": "add-workspace-mount",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the resource owner",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the resource owner",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddWorkspaceMountBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add workspace mount",
+        "tags": [
+          "User Settings"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/{type}/{name}": {
       "delete": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDeletes a storage configuration. This will also detach the storage from all clusters.",
@@ -41144,6 +41408,16 @@
             "schema": {
               "description": "Region filter",
               "type": "string"
+            }
+          },
+          {
+            "description": "Include disabled images (admin only)",
+            "explode": false,
+            "in": "query",
+            "name": "includeDisabled",
+            "schema": {
+              "description": "Include disabled images (admin only)",
+              "type": "boolean"
             }
           }
         ],
