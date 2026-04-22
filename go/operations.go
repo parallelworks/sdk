@@ -5438,6 +5438,76 @@ func (c *Client) GetAzureFiles(ctx context.Context, organization string, user st
 	return &result, nil
 }
 
+// AddCorsRulesAzureAzfiles - Add CORS rules to Azure Files share
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds CORS rules to the storage account hosting an Azure Files share so it can be accessed from the browser.
+func (c *Client) AddCorsRulesAzureAzfiles(ctx context.Context, organization string, user string, name string) error {
+	path := "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/cors-rules"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// GetPresignedURLAzureAzfilesObjectParams contains optional parameters for the GetPresignedURLAzureAzfilesObject operation.
+type GetPresignedURLAzureAzfilesObjectParams struct {
+	// The expiration time in seconds for the pre-signed URL. Default is 12 hours.
+	ExpiresIn *int64 `json:"expiresIn,omitempty"`
+	// The permissions for the pre-signed URL. Default is read (r). Combine: r,w,d,c.
+	Permissions *string `json:"permissions,omitempty"`
+}
+
+// GetPresignedURLAzureAzfilesObject - Get presigned URL for Azure Files object
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a pre-signed URL for a file inside an Azure Files share.
+func (c *Client) GetPresignedURLAzureAzfilesObject(ctx context.Context, organization string, user string, name string, opts ...GetPresignedURLAzureAzfilesObjectParams) (*string, error) {
+	path := "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/presigned-url"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "expiresIn", params.ExpiresIn)
+		addQueryParam(queryValues, "permissions", params.Permissions)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetSasTokenAzureAzfiles - Get SAS token for Azure Files share
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a SAS token for an Azure Files share.
+func (c *Client) GetSasTokenAzureAzfiles(ctx context.Context, organization string, user string, name string) (*AzureFilesSas, error) {
+	path := "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/sas-token"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	var result AzureFilesSas
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetAzureBucket - Get Storage: Azure Blob Storage
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6390,6 +6460,22 @@ func (c *Client) DisableOrgUserPreview(ctx context.Context, organization string,
 	path = pathReplace(path, "flag", flag)
 
 	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// ResetOnboarding - Reset user onboarding
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Resets an organization user's onboarding so they go through it again. Users may reset their own; resetting another user's requires the org:users role.
+func (c *Client) ResetOnboarding(ctx context.Context, organization string, user string) error {
+	path := "/api/organizations/{organization}/users/{user}/reset-onboarding"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
 		return parseErrorError(err)
 	}
 	return nil

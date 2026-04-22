@@ -618,8 +618,10 @@ type AzureDisk struct {
 type AzureFiles struct {
 	// Resources the storage is attached to.
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Name of the Azure Files
+	// Name of the Azure Files share
 	AzfilesName *string `json:"azfilesName,omitempty"`
+	// Name of the Azure resource group holding the storage account
+	AzureResourceGroup *string `json:"azureResourceGroup,omitempty"`
 	// Cloud service provider of the storage.
 	Csp string `json:"csp"`
 	// Indicates if the storage is currently being provisioned.
@@ -656,12 +658,24 @@ type AzureFiles struct {
 	Size *int32 `json:"size,omitempty"`
 	// Current status of the storage.
 	Status *string `json:"status,omitempty"`
+	// Name of the Azure storage account backing the share
+	StorageAccountName *string `json:"storageAccountName,omitempty"`
 	// Tags associated with the storage.
 	Tags []string `json:"tags,omitempty"`
 	// Type of storage.
 	Type string `json:"type"`
 	// User associated with the storage.
 	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AzureFilesSas struct {
+	// The expiration time of the SAS token.
+	Expiry time.Time `json:"expiry"`
+	// The name of the Azure file share.
+	StorageName string `json:"storageName"`
+	// The URL of the Azure file share with the SAS token appended in the query parameters.
+	URL                  string         `json:"url"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -1235,6 +1249,7 @@ type CloudAccountNetwork struct {
 }
 
 type CloudAccountNetworkSummary struct {
+	ID                   string         `json:"id"`
 	Name                 string         `json:"name"`
 	ProvisioningMode     *string        `json:"provisioningMode,omitempty"`
 	Regions              []ConfigRegion `json:"regions"`
@@ -1253,6 +1268,8 @@ type CloudImage struct {
 	Architecture string `json:"architecture"`
 	// Image category (quick-start, community)
 	Category string `json:"category"`
+	// Image creation time
+	CreationDate time.Time `json:"creationDate"`
 	// Image description
 	Description string `json:"description"`
 	// Icon identifier for the OS (amazon-linux, ubuntu, windows, rhel, debian, suse)
@@ -1266,7 +1283,9 @@ type CloudImage struct {
 	// Operating system type (linux, windows)
 	OsType string `json:"osType"`
 	// Operating system version
-	OsVersion            string         `json:"osVersion"`
+	OsVersion string `json:"osVersion"`
+	// Sub-variant identifier
+	Variant              *string        `json:"variant,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4439,8 +4458,6 @@ type PlatformSettings struct {
 	ForgotPasswordEnabled bool `json:"forgotPasswordEnabled"`
 	// User's preferred language
 	Language *string `json:"language,omitempty"`
-	// The theme to use for the platform, determined by the hostname.
-	LegacyTheme *string `json:"legacyTheme,omitempty"`
 	// The expiration date of the platform license. Only returned when needsLicense is true.
 	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
 	// Indicates if the license is in the grace period. Only returned when needsLicense is true.

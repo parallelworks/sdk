@@ -1640,7 +1640,11 @@
             "type": "array"
           },
           "azfilesName": {
-            "description": "Name of the Azure Files",
+            "description": "Name of the Azure Files share",
+            "type": "string"
+          },
+          "azureResourceGroup": {
+            "description": "Name of the Azure resource group holding the storage account",
             "type": "string"
           },
           "csp": {
@@ -1727,6 +1731,10 @@
             "description": "Current status of the storage.",
             "type": "string"
           },
+          "storageAccountName": {
+            "description": "Name of the Azure storage account backing the share",
+            "type": "string"
+          },
           "tags": {
             "description": "Tags associated with the storage.",
             "items": {
@@ -1752,6 +1760,39 @@
           "shared",
           "currentlyProvisioning",
           "provisioned"
+        ],
+        "type": "object"
+      },
+      "AzureFilesSAS": {
+        "additionalProperties": false,
+        "properties": {
+          "expiry": {
+            "description": "The expiration time of the SAS token.",
+            "examples": [
+              "2026-04-17T18:00:00Z"
+            ],
+            "format": "date-time",
+            "type": "string"
+          },
+          "storageName": {
+            "description": "The name of the Azure file share.",
+            "examples": [
+              "my-share"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "description": "The URL of the Azure file share with the SAS token appended in the query parameters.",
+            "examples": [
+              "https://account.file.core.windows.net/share?sv=2025-05-05\u0026st=...\u0026se=...\u0026sr=s\u0026sp=rwdl\u0026sig=..."
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "storageName",
+          "expiry"
         ],
         "type": "object"
       },
@@ -3395,13 +3436,13 @@
           }
         },
         "required": [
-          "id",
           "csp",
           "organization",
           "cloudAccount",
           "createdAt",
           "updatedAt",
           "cloudResources",
+          "id",
           "name",
           "status",
           "regions"
@@ -3411,6 +3452,9 @@
       "CloudAccountNetworkSummary": {
         "additionalProperties": false,
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -3431,6 +3475,7 @@
           }
         },
         "required": [
+          "id",
           "name",
           "status",
           "regions"
@@ -3470,6 +3515,11 @@
             "description": "Image category (quick-start, community)",
             "type": "string"
           },
+          "creationDate": {
+            "description": "Image creation time",
+            "format": "date-time",
+            "type": "string"
+          },
           "description": {
             "description": "Image description",
             "type": "string"
@@ -3497,6 +3547,10 @@
           "osVersion": {
             "description": "Operating system version",
             "type": "string"
+          },
+          "variant": {
+            "description": "Sub-variant identifier",
+            "type": "string"
           }
         },
         "required": [
@@ -3508,7 +3562,8 @@
           "osVersion",
           "architecture",
           "iconName",
-          "category"
+          "category",
+          "creationDate"
         ],
         "type": "object"
       },
@@ -12812,10 +12867,6 @@
             "examples": [
               "en"
             ],
-            "type": "string"
-          },
-          "legacyTheme": {
-            "description": "The theme to use for the platform, determined by the hostname.",
             "type": "string"
           },
           "licenseExpiresAt": {
@@ -34068,12 +34119,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34132,12 +34183,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34202,12 +34253,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34263,12 +34314,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34331,12 +34382,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34411,12 +34462,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34481,12 +34532,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34549,12 +34600,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34622,12 +34673,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34692,12 +34743,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34764,12 +34815,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34848,12 +34899,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34915,12 +34966,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -34989,12 +35040,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -35063,12 +35114,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -35137,12 +35188,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -35192,6 +35243,268 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/cors-rules": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds CORS rules to the storage account hosting an Azure Files share so it can be accessed from the browser.",
+        "operationId": "add-cors-rules-azure-azfiles",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add CORS rules to Azure Files share",
+        "tags": [
+          "NFS",
+          "Storage"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/presigned-url": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a pre-signed URL for a file inside an Azure Files share.",
+        "operationId": "get-presigned-url-azure-azfiles-object",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The path of the file inside the share.",
+            "explode": false,
+            "in": "query",
+            "name": "objectName",
+            "required": true,
+            "schema": {
+              "description": "The path of the file inside the share.",
+              "examples": [
+                "path/to/file"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The expiration time in seconds for the pre-signed URL. Default is 12 hours.",
+            "explode": false,
+            "in": "query",
+            "name": "expiresIn",
+            "schema": {
+              "default": 43200,
+              "description": "The expiration time in seconds for the pre-signed URL. Default is 12 hours.",
+              "examples": [
+                43200
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The permissions for the pre-signed URL. Default is read (r). Combine: r,w,d,c.",
+            "explode": false,
+            "in": "query",
+            "name": "permissions",
+            "schema": {
+              "default": "r",
+              "description": "The permissions for the pre-signed URL. Default is read (r). Combine: r,w,d,c.",
+              "examples": [
+                "rwdc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "The pre-signed URL for the Azure file.",
+                  "examples": [
+                    "https://account.file.core.windows.net/share/path/to/file?..."
+                  ],
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get presigned URL for Azure Files object",
+        "tags": [
+          "NFS",
+          "Storage"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/sas-token": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a SAS token for an Azure Files share.",
+        "operationId": "get-sas-token-azure-azfiles",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AzureFilesSAS"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get SAS token for Azure Files share",
+        "tags": [
+          "NFS",
+          "Storage"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/azure-bucket/{name}": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns an Azure Blob storage",
@@ -35211,12 +35524,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -35283,12 +35596,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -35367,12 +35680,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -35434,12 +35747,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -35554,12 +35867,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -35627,12 +35940,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -35701,12 +36014,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -35775,12 +36088,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -35849,12 +36162,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -36434,12 +36747,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -36720,12 +37033,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -36801,12 +37114,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -36872,12 +37185,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -36956,12 +37269,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -37062,12 +37375,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -37135,12 +37448,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -37331,12 +37644,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -37395,12 +37708,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -37465,12 +37778,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -37526,12 +37839,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -37596,12 +37909,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -37677,12 +37990,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -37748,12 +38061,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -38012,12 +38325,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -38082,12 +38395,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -38155,12 +38468,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -38228,12 +38541,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -38294,12 +38607,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -38367,12 +38680,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -38432,12 +38745,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -38503,12 +38816,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -38803,12 +39116,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -38864,12 +39177,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -38908,6 +39221,59 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/reset-onboarding": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nResets an organization user's onboarding so they go through it again. Users may reset their own; resetting another user's requires the org:users role.",
+        "operationId": "reset-onboarding",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Reset user onboarding",
+        "tags": [
+          "User Settings"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/resource-groups": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates a new resource group.",
@@ -38927,12 +39293,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -38996,12 +39362,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -39066,12 +39432,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -39134,12 +39500,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -39267,12 +39633,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -39331,12 +39697,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -39402,12 +39768,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -39485,12 +39851,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -39561,12 +39927,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -39812,12 +40178,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -40240,12 +40606,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -40301,12 +40667,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -40359,12 +40725,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
@@ -40422,12 +40788,12 @@
             }
           },
           {
-            "description": "Username of the resource owner",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Username of the resource owner",
+              "description": "Username of the target user.",
               "examples": [
                 "Jake.Thayne"
               ],
