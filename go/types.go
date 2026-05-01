@@ -3471,13 +3471,50 @@ type ManagedSystemInfo struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type MarketplaceItemBody struct {
+	// Whether the requesting user can edit or delete this item
+	CanEdit bool `json:"canEdit"`
+	// Item description
+	Description *string `json:"description,omitempty"`
+	// Whether the item is featured
+	Featured bool `json:"featured"`
+	// Marketplace item ID
+	ID string `json:"id"`
+	// Image URL for the item
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Published name of the item
+	Name            string              `json:"name"`
+	PrivacySettings PrivacySettingsBody `json:"privacySettings"`
+	// Whether the item is published under the organization's display name
+	PublishedAsOrg bool `json:"publishedAsOrg"`
+	// Resolved publisher name (username or org display name)
+	Publisher string `json:"publisher"`
+	// URL-friendly identifier
+	Slug string `json:"slug"`
+	// Subtype of the item (raw, e.g. remote-github)
+	Subtype string `json:"subtype"`
+	// Type of the item (workflow, storage, compute)
+	Type string `json:"type"`
+	// Whether the item is verified
+	Verified bool `json:"verified"`
+	// Versions in semver-ascending order
+	VersionOrder []string `json:"versionOrder"`
+	// Moveable tags pointing at version keys
+	VersionTags map[string]any `json:"versionTags"`
+	// Per-version settings, keyed by version string
+	Versions             map[string]any `json:"versions"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type MarketplaceListItem struct {
 	// Item description
 	Description *string `json:"description,omitempty"`
 	// Whether the item is featured
 	Featured bool `json:"featured"`
-	// Icon URL for the item
-	Icon *string `json:"icon,omitempty"`
+	// Marketplace item ID
+	ID string `json:"id"`
+	// Image URL for the item
+	ImageURL *string `json:"imageUrl,omitempty"`
 	// Published name of the item
 	Name string `json:"name"`
 	// Name of the publisher (username or org display name)
@@ -4800,6 +4837,18 @@ type Preview struct {
 	Platform bool `json:"platform"`
 	// Name of the preview.
 	Preview              string         `json:"preview"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PrivacySettingsBody struct {
+	// Visible to these group ids (hex)
+	Group []string `json:"group"`
+	// Visible to the publisher's organization
+	Organization bool `json:"organization"`
+	// Visible to partner organizations
+	Partner bool `json:"partner"`
+	// Visible to all platform users
+	Platform             bool           `json:"platform"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

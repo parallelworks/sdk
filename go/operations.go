@@ -1712,6 +1712,22 @@ func (c *Client) ListMarketplaceItems(ctx context.Context, opts ...ListMarketpla
 	return &result, nil
 }
 
+// GetMarketplaceItem - Get Marketplace Item
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a single marketplace item by slug, subject to privacy filtering.
+func (c *Client) GetMarketplaceItem(ctx context.Context, slug string) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/{slug}"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // ForkMarketplaceItem - Fork Marketplace Item
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.

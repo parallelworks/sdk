@@ -9956,6 +9956,105 @@
         ],
         "type": "object"
       },
+      "MarketplaceItemBody": {
+        "additionalProperties": false,
+        "properties": {
+          "canEdit": {
+            "description": "Whether the requesting user can edit or delete this item",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "Item description",
+            "type": "string"
+          },
+          "featured": {
+            "description": "Whether the item is featured",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "Marketplace item ID",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "Image URL for the item",
+            "type": "string"
+          },
+          "name": {
+            "description": "Published name of the item",
+            "type": "string"
+          },
+          "privacySettings": {
+            "$ref": "#/components/schemas/PrivacySettingsBody",
+            "description": "Visibility settings for the item"
+          },
+          "publishedAsOrg": {
+            "description": "Whether the item is published under the organization's display name",
+            "type": "boolean"
+          },
+          "publisher": {
+            "description": "Resolved publisher name (username or org display name)",
+            "type": "string"
+          },
+          "slug": {
+            "description": "URL-friendly identifier",
+            "type": "string"
+          },
+          "subtype": {
+            "description": "Subtype of the item (raw, e.g. remote-github)",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of the item (workflow, storage, compute)",
+            "type": "string"
+          },
+          "verified": {
+            "description": "Whether the item is verified",
+            "type": "boolean"
+          },
+          "versionOrder": {
+            "description": "Versions in semver-ascending order",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "versionTags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Moveable tags pointing at version keys",
+            "type": "object"
+          },
+          "versions": {
+            "additionalProperties": {
+              "additionalProperties": {},
+              "type": "object"
+            },
+            "description": "Per-version settings, keyed by version string",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "publisher",
+          "subtype",
+          "type",
+          "verified",
+          "featured",
+          "versions",
+          "versionOrder",
+          "versionTags",
+          "canEdit",
+          "publishedAsOrg",
+          "privacySettings"
+        ],
+        "type": "object"
+      },
       "MarketplaceListItem": {
         "additionalProperties": false,
         "properties": {
@@ -9967,8 +10066,12 @@
             "description": "Whether the item is featured",
             "type": "boolean"
           },
-          "icon": {
-            "description": "Icon URL for the item",
+          "id": {
+            "description": "Marketplace item ID",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "Image URL for the item",
             "type": "string"
           },
           "name": {
@@ -10007,6 +10110,7 @@
           }
         },
         "required": [
+          "id",
           "name",
           "slug",
           "publisher",
@@ -13820,6 +13924,40 @@
         "required": [
           "preview",
           "platform"
+        ],
+        "type": "object"
+      },
+      "PrivacySettingsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "group": {
+            "description": "Visible to these group ids (hex)",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "organization": {
+            "description": "Visible to the publisher's organization",
+            "type": "boolean"
+          },
+          "partner": {
+            "description": "Visible to partner organizations",
+            "type": "boolean"
+          },
+          "platform": {
+            "description": "Visible to all platform users",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "platform",
+          "partner",
+          "organization",
+          "group"
         ],
         "type": "object"
       },
@@ -23651,6 +23789,52 @@
           }
         },
         "summary": "List Marketplace Items",
+        "tags": [
+          "Marketplace"
+        ]
+      }
+    },
+    "/api/marketplace/{slug}": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a single marketplace item by slug, subject to privacy filtering.",
+        "operationId": "get-marketplace-item",
+        "parameters": [
+          {
+            "description": "Slug of the marketplace item to fetch.",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Slug of the marketplace item to fetch.",
+              "maxLength": 100,
+              "minLength": 2,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceItemBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Marketplace Item",
         "tags": [
           "Marketplace"
         ]
