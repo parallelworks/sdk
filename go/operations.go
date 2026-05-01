@@ -10,6 +10,22 @@ import (
 	"time"
 )
 
+// GetPkiValidationFile - Serve PKI domain control validation file
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Serves the configured PKI validation file for HTTP-based domain control validation. Returns 404 if no file is configured or the requested filename does not match the configured one.
+func (c *Client) GetPkiValidationFile(ctx context.Context, filename string) (*string, error) {
+	path := "/.well-known/pki-validation/{filename}"
+	path = pathReplace(path, "filename", filename)
+
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetPlatformAlertsParams contains optional parameters for the GetPlatformAlerts operation.
 type GetPlatformAlertsParams struct {
 	// Maximum number of alerts to return
@@ -1923,6 +1939,22 @@ func (c *Client) GetOidcConfiguration(ctx context.Context) (*OpenIDConfiguration
 	return &result, nil
 }
 
+// GetOidcSectorIdentifier - Get OIDC sector_identifier_uri document
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the JSON array of redirect URIs that an upstream OIDC provider fetches when this URL is registered as `sector_identifier_uri` (OIDC Core 1.0 § 5).
+func (c *Client) GetOidcSectorIdentifier(ctx context.Context, authMethodID string) (*[]string, error) {
+	path := "/api/oidc/sso/{authMethodId}/sector-identifier"
+	path = pathReplace(path, "authMethodId", authMethodID)
+
+	var result []string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetRecommendedResources - Get recommended resources
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -2642,6 +2674,22 @@ func (c *Client) GetOrganizationAuthMethods(ctx context.Context, organization st
 
 	var result []AuthMethod
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddOrganizationAuthMethodCac - Add organization auth method: CAC
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds a CAC auth method to the organization. CAC enrollment is then driven by the platform's mTLS verify endpoint.
+func (c *Client) AddOrganizationAuthMethodCac(ctx context.Context, organization string) (*AuthMethod, error) {
+	path := "/api/organizations/{organization}/auth-methods/cac"
+	path = pathReplace(path, "organization", organization)
+
+	var result AuthMethod
+	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -5123,6 +5171,22 @@ func (c *Client) ListOrganizationUsers(ctx context.Context, organization string,
 	return &result, nil
 }
 
+// CreateOrganizationUser - Create user
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new user in the organization.
+func (c *Client) CreateOrganizationUser(ctx context.Context, organization string, body CreateUserBody) (*CreateUserResponse, error) {
+	path := "/api/organizations/{organization}/users"
+	path = pathReplace(path, "organization", organization)
+
+	var result CreateUserResponse
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // DeleteUserMfa - Remove user MFA settings
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -5684,6 +5748,40 @@ func (c *Client) GetAzureNetappfiles(ctx context.Context, organization string, u
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// DestroyCluster - Destroy cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Destroys the latest session of a cloud cluster, releasing all provisioned resources.
+func (c *Client) DestroyCluster(ctx context.Context, organization string, user string, clusterName string) error {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/destroy"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// DisconnectCluster - Disconnect cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Disconnects an existing cluster: sets the disconnect flag, tells any live agent tunnel to exit, and deletes manual sessions. Only valid for existing-type clusters.
+func (c *Client) DisconnectCluster(ctx context.Context, organization string, user string, clusterName string) error {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/disconnect"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // GetClusterNodesParams contains optional parameters for the GetClusterNodes operation.
@@ -6706,6 +6804,23 @@ func (c *Client) UpdateUserSettings(ctx context.Context, organization string, us
 	return &result, nil
 }
 
+// DeleteSnapshot - Delete a snapshot
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a disk snapshot. Deletion is performed asynchronously.
+func (c *Client) DeleteSnapshot(ctx context.Context, organization string, user string, snapshotName string) error {
+	path := "/api/organizations/{organization}/users/{user}/snapshots/{snapshotName}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "snapshotName", snapshotName)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // CopySnapshot - Copy Snapshot to Another Region
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6762,7 +6877,7 @@ func (c *Client) GetUserWorkspace(ctx context.Context, organization string, user
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Updates the user workspace for the specified user.
-func (c *Client) UpdateUserWorkspace(ctx context.Context, organization string, user string, body *WorkspaceSettings) (*WorkspaceSettings, error) {
+func (c *Client) UpdateUserWorkspace(ctx context.Context, organization string, user string, body *UserWorkspacePatchBody) (*WorkspaceSettings, error) {
 	path := "/api/organizations/{organization}/users/{user}/user-workspace"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
@@ -6998,6 +7113,38 @@ func (c *Client) ToggleOrganizationWebhook(ctx context.Context, organization str
 	path = pathReplace(path, "webhook", webhook)
 
 	var result Webhook
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetOrgWorkspaceDefaults - Get org workspace defaults
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the organization's workspace defaults applied to its users, plus the platform and built-in tiers above for cascade context.
+func (c *Client) GetOrgWorkspaceDefaults(ctx context.Context, organization string) (*OrgWorkspaceDefaults, error) {
+	path := "/api/organizations/{organization}/workspace-defaults"
+	path = pathReplace(path, "organization", organization)
+
+	var result OrgWorkspaceDefaults
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateOrgWorkspaceDefaults - Update org workspace defaults
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates the organization's workspace defaults.
+func (c *Client) UpdateOrgWorkspaceDefaults(ctx context.Context, organization string, body WorkspaceDefaultsPatchBody) (*OrgWorkspaceDefaults, error) {
+	path := "/api/organizations/{organization}/workspace-defaults"
+	path = pathReplace(path, "organization", organization)
+
+	var result OrgWorkspaceDefaults
 	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -7456,6 +7603,38 @@ func (c *Client) TogglePlatformWebhook(ctx context.Context, webhook string, body
 	path = pathReplace(path, "webhook", webhook)
 
 	var result Webhook
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetWorkspaceDefaults - Get workspace defaults
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the platform-wide workspace defaults applied to user workspaces, plus the built-in fallback values used when no platform value is configured.
+func (c *Client) GetWorkspaceDefaults(ctx context.Context) (*PlatformWorkspaceDefaults, error) {
+	path := "/api/platform/workspace-defaults"
+
+	var result PlatformWorkspaceDefaults
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateWorkspaceDefaults - Update workspace defaults
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Updates the platform-wide workspace defaults.
+func (c *Client) UpdateWorkspaceDefaults(ctx context.Context, body PlatformWorkspaceDefaultsPatchBody) (*PlatformWorkspaceDefaults, error) {
+	path := "/api/platform/workspace-defaults"
+
+	var result PlatformWorkspaceDefaults
 	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}

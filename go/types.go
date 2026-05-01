@@ -257,9 +257,7 @@ type AuthSession struct {
 	// Options for the sidebar.
 	SidebarOptions []string `json:"sidebarOptions,omitempty"`
 	// Username of the user.
-	Username string `json:"username"`
-	// Whether the user workspace is using VS Code
-	Vscode               bool           `json:"vscode"`
+	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -295,7 +293,7 @@ type AwsBucket struct {
 	// Region the AWS bucket is in
 	Region           *string       `json:"region,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -347,7 +345,7 @@ type AwsDisk struct {
 	// Indicates if the disk is restored from a snapshot
 	RestoreSnapshot  *bool         `json:"restoreSnapshot,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -401,7 +399,7 @@ type AwsEfs struct {
 	// Region the AWS bucket is in
 	Region           *string       `json:"region,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -469,7 +467,7 @@ type AwsLustre struct {
 	// Region the AWS bucket is in
 	Region           *string       `json:"region,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -555,7 +553,7 @@ type AzureBlobStorage struct {
 	// Region the Azure blob storage is in
 	Region           *string       `json:"region,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -599,7 +597,7 @@ type AzureDisk struct {
 	// Indicates if the storage has been provisioned.
 	Provisioned      bool          `json:"provisioned"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -649,7 +647,7 @@ type AzureFiles struct {
 	// Region the Azure files is in
 	Region           *string       `json:"region,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -757,7 +755,7 @@ type AzureManagedLustre struct {
 	// Region the Azure Managed Lustre is in
 	Region           *string       `json:"region,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -813,7 +811,7 @@ type AzureNetAppFiles struct {
 	RuntimeAlert *RunAlert `json:"runtimeAlert,omitempty"`
 	// Service level of the Azure NetApp Files
 	Service          *string       `json:"service,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -958,7 +956,7 @@ type BucketOutput struct {
 	// Region the bucket is in
 	Region           *string       `json:"region,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -993,6 +991,22 @@ type BucketResource struct {
 	Region string `json:"region"`
 	// The tags associated with the storage.
 	Tags                 []string       `json:"tags,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type BuiltInWorkspaceDefaults struct {
+	// Built-in CPU limit fallback (cores).
+	CpuLimit float64 `json:"cpuLimit"`
+	// Built-in CPU request fallback (cores).
+	CpuRequest float64 `json:"cpuRequest"`
+	// Built-in ephemeral storage limit fallback (GiB).
+	EphemeralStorageLimit float64 `json:"ephemeralStorageLimit"`
+	// Built-in memory limit fallback (GB).
+	MemoryLimit float64 `json:"memoryLimit"`
+	// Built-in memory request fallback (GB).
+	MemoryRequest float64 `json:"memoryRequest"`
+	// Built-in workspace type fallback (docker).
+	WorkspaceType        string         `json:"workspaceType"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -1802,6 +1816,32 @@ type CreateUnitRuleBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type CreateUserBody struct {
+	// Whether the user is active (default: true)
+	Active *bool `json:"active,omitempty"`
+	// User email address
+	Email string `json:"email"`
+	// User's display name
+	Name string `json:"name"`
+	// User password. Leave blank to disable password login; the user can still sign in later via password reset if that feature is enabled on the platform.
+	Password *string `json:"password,omitempty"`
+	// Linux UID (auto-generated if not provided, must be a platform admin to use a number below 1000)
+	Uid *int64 `json:"uid,omitempty"`
+	// Username (4+ chars, alphanumeric with - and .)
+	Username string `json:"username"`
+	// Workspace container type
+	WorkspaceType        *string        `json:"workspaceType,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreateUserResponse struct {
+	Email                string         `json:"email"`
+	Name                 string         `json:"name"`
+	Organization         string         `json:"organization"`
+	Username             string         `json:"username"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type CreateVolumeRequestBody struct {
 	// Aggregate name where the volume will be created
 	Aggregate string `json:"aggregate"`
@@ -2032,6 +2072,8 @@ type ErrorLogItem struct {
 type ExistingCluster struct {
 	// Auto-reconnect enabled
 	AutoReconnect bool `json:"autoReconnect"`
+	// Set when the user explicitly disconnected this cluster; reconcilers use this to skip auto-reconnect
+	DisconnectedAt *time.Time `json:"disconnectedAt,omitempty"`
 	// Group name
 	Group *string `json:"group,omitempty"`
 	// Cluster ID
@@ -2040,8 +2082,12 @@ type ExistingCluster struct {
 	Key string `json:"key"`
 	// Cluster name
 	Name string `json:"name"`
+	// Controller/login host the live agent is reporting; falls back to the first configured login node when the agent has not reported yet
+	RemoteHost string `json:"remoteHost"`
 	// Cluster status
 	Status string `json:"status"`
+	// Whether the cluster's agent tunnel is currently registered on any ingress pod, with the user-disconnect veto applied
+	TunnelConnected bool `json:"tunnelConnected"`
 	// Provider type
 	Type string `json:"type"`
 	// Username of the cluster owner
@@ -2194,8 +2240,12 @@ type FunctionCall struct {
 
 type GeneralCluster struct {
 	// The number of active nodes in the cluster.
-	ActiveNodes         int64                `json:"activeNodes"`
+	ActiveNodes int64 `json:"activeNodes"`
+	// Existing-cluster only: the agent version currently registered for this cluster's tunnel. Empty when no agent is reporting.
+	AgentVersion        *string              `json:"agentVersion,omitempty"`
 	AllocationThreshold *AllocationThreshold `json:"allocationThreshold,omitempty"`
+	// Existing-cluster only: whether the workspace can SSH to this cluster. True if the tunnel is registered (and not user-disconnected) AND the workspace finished reconciling. Internal field, not covered by API guarantees.
+	CanConnectFromWorkspace bool `json:"canConnectFromWorkspace"`
 	// The SSH connection string for the resource.
 	ConnectionString *string `json:"connectionString,omitempty"`
 	// The cloud service provider for the resource.
@@ -2339,7 +2389,7 @@ type GoogleBucket struct {
 	// Region the Google bucket is in
 	Region           *string       `json:"region,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -2383,7 +2433,7 @@ type GoogleDisk struct {
 	// Indicates if the storage has been provisioned.
 	Provisioned      bool          `json:"provisioned"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -2437,7 +2487,7 @@ type GoogleFilestore struct {
 	// Filesystem type to format the export disk with
 	RegionFsType     *string       `json:"regionFsType,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -2601,7 +2651,7 @@ type Hammerspace struct {
 	// Region the Hammerspace storage is in
 	Region           *string       `json:"region,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -3690,7 +3740,7 @@ type NetAppOntap struct {
 	RuntimeAlert *RunAlert `json:"runtimeAlert,omitempty"`
 	// IP address of the NetApp ONTAP management host
 	ServerAddress    *string       `json:"serverAddress,omitempty"`
-	SessionCostAlert *SessionAlert `json:"sessionCostAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
 	// Sharing permissions of the storage.
@@ -3989,6 +4039,8 @@ type Oidc struct {
 	ID *string `json:"id,omitempty"`
 	// Issuer of the OIDC authentication method
 	Issuer *string `json:"issuer,omitempty"`
+	// JWKS URI of the OIDC authentication method
+	JwksURI *string `json:"jwksUri,omitempty"`
 	// Level of the OIDC authentication method, e.g., organization or user
 	Level *string `json:"level,omitempty"`
 	// Name of the OIDC authentication method
@@ -3997,6 +4049,8 @@ type Oidc struct {
 	PrivateKeyPem *string `json:"privateKeyPEM,omitempty"`
 	// Scopes of the OIDC authentication method
 	Scopes string `json:"scopes"`
+	// Platform hostnames (no scheme/path) published at the sector_identifier_uri endpoint, expanded to redirect URIs by the server
+	SectorIdentifierHostnames []string `json:"sectorIdentifierHostnames,omitempty"`
 	// Whether to skip Platform MFA verification for this OIDC authentication method
 	SkipMfaVerification *bool `json:"skipMfaVerification,omitempty"`
 	// Whether to convert the username to title case
@@ -4164,8 +4218,6 @@ type OrgUser struct {
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// User email address
 	Email *string `json:"email,omitempty"`
-	// Whether the user has any remaining resources that need cleanup before deletion
-	HasResourceRemaining bool `json:"hasResourceRemaining"`
 	// User ID
 	ID string `json:"id"`
 	// Last login timestamp
@@ -4179,6 +4231,13 @@ type OrgUser struct {
 	// Username
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OrgWorkspaceDefaults struct {
+	BuiltIn              BuiltInWorkspaceDefaults `json:"builtIn"`
+	Org                  WorkspaceDefaultValues   `json:"org"`
+	Platform             WorkspaceDefaultValues   `json:"platform"`
+	AdditionalProperties map[string]any           `json:"-,omitempty"`
 }
 
 type Organization struct {
@@ -4514,12 +4573,6 @@ type PlatformSettings struct {
 type PlatformSettingsAdmin struct {
 	// Indicates if k8s PVC should be created for workspaces.
 	Createk8sPvc *bool `json:"createk8sPVC,omitempty"`
-	// The default host pattern for users.
-	DefaultUserHost *string `json:"defaultUserHost,omitempty"`
-	// Default image for user workspaces.
-	DefaultWorkspaceImage *string `json:"defaultWorkspaceImage,omitempty"`
-	// Default type for workspaces.
-	DefaultWorkspaceType *string `json:"defaultWorkspaceType,omitempty"`
 	// Indicates if user files should be deleted when their account is deleted.
 	DeleteUserFilesOnDelete *bool                    `json:"deleteUserFilesOnDelete,omitempty"`
 	DockerWorkspaceSettings *DockerWorkspaceSettings `json:"dockerWorkspaceSettings,omitempty"`
@@ -4529,6 +4582,10 @@ type PlatformSettingsAdmin struct {
 	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
 	// Indicates if the license is in the grace period.
 	LicenseGracePeriod *bool `json:"licenseGracePeriod,omitempty"`
+	// Body served at /.well-known/pki-validation/{filename}.
+	PkiValidationContent *string `json:"pkiValidationContent,omitempty"`
+	// Filename served at /.well-known/pki-validation/. Empty disables the endpoint.
+	PkiValidationFilename *string `json:"pkiValidationFilename,omitempty"`
 	// Sentry DSN for backend services.
 	SentryDsn *string `json:"sentryDsn,omitempty"`
 	// Whether Sentry error tracking is enabled.
@@ -4545,6 +4602,52 @@ type PlatformSettingsAdmin struct {
 	SentryTracesSampleRate float64 `json:"sentryTracesSampleRate"`
 	// Indicates if the platform license is valid.
 	ValidLicense         *bool          `json:"validLicense,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PlatformWorkspaceDefaultValues struct {
+	// CPU limit (cores) for user workspaces.
+	CpuLimit *float64 `json:"cpuLimit,omitempty"`
+	// CPU request (cores) for user workspaces.
+	CpuRequest *float64 `json:"cpuRequest,omitempty"`
+	// Ephemeral storage limit (GiB) for user workspaces.
+	EphemeralStorageLimit *float64 `json:"ephemeralStorageLimit,omitempty"`
+	// Memory limit (GB) for user workspaces.
+	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
+	// Memory request (GB) for user workspaces.
+	MemoryRequest *float64 `json:"memoryRequest,omitempty"`
+	// Host for user workspaces (e.g., user-1.example.com).
+	UserHost *string `json:"userHost,omitempty"`
+	// Container image for user workspaces.
+	WorkspaceImage *string `json:"workspaceImage,omitempty"`
+	// Workspace type for new users.
+	WorkspaceType        *string        `json:"workspaceType,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PlatformWorkspaceDefaults struct {
+	BuiltIn              BuiltInWorkspaceDefaults       `json:"builtIn"`
+	Platform             PlatformWorkspaceDefaultValues `json:"platform"`
+	AdditionalProperties map[string]any                 `json:"-,omitempty"`
+}
+
+type PlatformWorkspaceDefaultsPatchBody struct {
+	// CPU limit (cores). Send null to clear.
+	CpuLimit *float64 `json:"cpuLimit,omitempty"`
+	// CPU request (cores). Send null to clear.
+	CpuRequest *float64 `json:"cpuRequest,omitempty"`
+	// Ephemeral storage limit (GiB). Send null to clear.
+	EphemeralStorageLimit *float64 `json:"ephemeralStorageLimit,omitempty"`
+	// Memory limit (GB). Send null to clear.
+	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
+	// Memory request (GB). Send null to clear.
+	MemoryRequest *float64 `json:"memoryRequest,omitempty"`
+	// Host for user workspaces. Send null to clear.
+	UserHost *string `json:"userHost,omitempty"`
+	// Container image for user workspaces. Send null to clear.
+	WorkspaceImage *string `json:"workspaceImage,omitempty"`
+	// Workspace type for new users. Send null to clear.
+	WorkspaceType        *string        `json:"workspaceType,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -5071,6 +5174,44 @@ type ReservationItem struct {
 	// Cloud service provider reservation identifier
 	ID                   string         `json:"id"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ResolvedWorkspaceSettings struct {
+	CpuLimit                             float64        `json:"cpuLimit"`
+	CpuLimitSource                       string         `json:"cpuLimitSource"`
+	CpuRequest                           float64        `json:"cpuRequest"`
+	CpuRequestSource                     string         `json:"cpuRequestSource"`
+	DebugMode                            bool           `json:"debugMode"`
+	DebugModeSource                      string         `json:"debugModeSource"`
+	EphemeralStorageLimit                float64        `json:"ephemeralStorageLimit"`
+	EphemeralStorageLimitSource          string         `json:"ephemeralStorageLimitSource"`
+	InheritedCpuLimit                    float64        `json:"inheritedCpuLimit"`
+	InheritedCpuLimitSource              string         `json:"inheritedCpuLimitSource"`
+	InheritedCpuRequest                  float64        `json:"inheritedCpuRequest"`
+	InheritedCpuRequestSource            string         `json:"inheritedCpuRequestSource"`
+	InheritedEphemeralStorageLimit       float64        `json:"inheritedEphemeralStorageLimit"`
+	InheritedEphemeralStorageLimitSource string         `json:"inheritedEphemeralStorageLimitSource"`
+	InheritedMemoryLimit                 float64        `json:"inheritedMemoryLimit"`
+	InheritedMemoryLimitSource           string         `json:"inheritedMemoryLimitSource"`
+	InheritedMemoryRequest               float64        `json:"inheritedMemoryRequest"`
+	InheritedMemoryRequestSource         string         `json:"inheritedMemoryRequestSource"`
+	InheritedUserWorkspaceImage          string         `json:"inheritedUserWorkspaceImage"`
+	InheritedUserWorkspaceImageSource    string         `json:"inheritedUserWorkspaceImageSource"`
+	InheritedUserWorkspaceType           string         `json:"inheritedUserWorkspaceType"`
+	InheritedUserWorkspaceTypeSource     string         `json:"inheritedUserWorkspaceTypeSource"`
+	InheritedUserhost                    string         `json:"inheritedUserhost"`
+	InheritedUserhostSource              string         `json:"inheritedUserhostSource"`
+	MemoryLimit                          float64        `json:"memoryLimit"`
+	MemoryLimitSource                    string         `json:"memoryLimitSource"`
+	MemoryRequest                        float64        `json:"memoryRequest"`
+	MemoryRequestSource                  string         `json:"memoryRequestSource"`
+	UserWorkspaceImage                   string         `json:"userWorkspaceImage"`
+	UserWorkspaceImageSource             string         `json:"userWorkspaceImageSource"`
+	UserWorkspaceType                    string         `json:"userWorkspaceType"`
+	UserWorkspaceTypeSource              string         `json:"userWorkspaceTypeSource"`
+	Userhost                             string         `json:"userhost"`
+	UserhostSource                       string         `json:"userhostSource"`
+	AdditionalProperties                 map[string]any `json:"-,omitempty"`
 }
 
 type ResourceGroup struct {
@@ -5903,12 +6044,6 @@ type UpdateAccessManagementBody struct {
 type UpdateAdminPlatformSettingsInputBody struct {
 	// Whether to create a PVC for k8s workspaces.
 	Createk8sPvc *bool `json:"createk8sPVC,omitempty"`
-	// The default user host for SSH connections.
-	DefaultUserHost *string `json:"defaultUserHost,omitempty"`
-	// The default workspace image.
-	DefaultWorkspaceImage *string `json:"defaultWorkspaceImage,omitempty"`
-	// The default workspace type.
-	DefaultWorkspaceType *string `json:"defaultWorkspaceType,omitempty"`
 	// Whether to delete user files on account deletion.
 	DeleteUserFilesOnDelete *bool                    `json:"deleteUserFilesOnDelete,omitempty"`
 	DockerWorkspaceSettings *DockerWorkspaceSettings `json:"dockerWorkspaceSettings,omitempty"`
@@ -5924,6 +6059,10 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	MaintenanceMessage *string `json:"maintenanceMessage,omitempty"`
 	// Whether to enable maintenance mode.
 	MaintenanceMode *bool `json:"maintenanceMode,omitempty"`
+	// Body served at /.well-known/pki-validation/{filename}.
+	PkiValidationContent *string `json:"pkiValidationContent,omitempty"`
+	// Filename served at /.well-known/pki-validation/. Empty disables the endpoint.
+	PkiValidationFilename *string `json:"pkiValidationFilename,omitempty"`
 	// The display name of the platform.
 	PlatformName *string `json:"platformName,omitempty"`
 	// Sentry DSN for backend services.
@@ -6273,6 +6412,28 @@ type UserWorkspace struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type UserWorkspacePatchBody struct {
+	// User CPU limit override (cores). Send null to revert to inherited.
+	CpuLimit *float64 `json:"cpuLimit,omitempty"`
+	// User CPU request override (cores). Send null to revert to inherited.
+	CpuRequest *float64 `json:"cpuRequest,omitempty"`
+	// User debug mode override. Send null to revert to inherited.
+	DebugMode *bool `json:"debugMode,omitempty"`
+	// User ephemeral storage limit override (GiB). Send null to revert to inherited.
+	EphemeralStorageLimit *float64 `json:"ephemeralStorageLimit,omitempty"`
+	// User memory limit override (GB). Send null to revert to inherited.
+	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
+	// User memory request override (GB). Send null to revert to inherited.
+	MemoryRequest *float64 `json:"memoryRequest,omitempty"`
+	// User workspace image override. Send null to revert to inherited.
+	UserWorkspaceImage *string `json:"userWorkspaceImage,omitempty"`
+	// User workspace type override. Send null to revert to inherited.
+	UserWorkspaceType *string `json:"userWorkspaceType,omitempty"`
+	// User host. Send null to revert to inherited.
+	Userhost             *string        `json:"userhost,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type VerifyOtpInputBody struct {
 	// 6-digit OTP code from authenticator app
 	Code                 string         `json:"code"`
@@ -6479,6 +6640,42 @@ type WorkloadsBody struct {
 	AdditionalProperties map[string]any     `json:"-,omitempty"`
 }
 
+type WorkspaceDefaultValues struct {
+	// CPU limit (cores) for user workspaces.
+	CpuLimit *float64 `json:"cpuLimit,omitempty"`
+	// CPU request (cores) for user workspaces.
+	CpuRequest *float64 `json:"cpuRequest,omitempty"`
+	// Ephemeral storage limit (GiB) for user workspaces.
+	EphemeralStorageLimit *float64 `json:"ephemeralStorageLimit,omitempty"`
+	// Memory limit (GB) for user workspaces.
+	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
+	// Memory request (GB) for user workspaces.
+	MemoryRequest *float64 `json:"memoryRequest,omitempty"`
+	// Host for user workspaces (e.g., user-1.example.com).
+	UserHost *string `json:"userHost,omitempty"`
+	// Container image for user workspaces.
+	WorkspaceImage       *string        `json:"workspaceImage,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WorkspaceDefaultsPatchBody struct {
+	// CPU limit (cores). Send null to clear.
+	CpuLimit *float64 `json:"cpuLimit,omitempty"`
+	// CPU request (cores). Send null to clear.
+	CpuRequest *float64 `json:"cpuRequest,omitempty"`
+	// Ephemeral storage limit (GiB). Send null to clear.
+	EphemeralStorageLimit *float64 `json:"ephemeralStorageLimit,omitempty"`
+	// Memory limit (GB). Send null to clear.
+	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
+	// Memory request (GB). Send null to clear.
+	MemoryRequest *float64 `json:"memoryRequest,omitempty"`
+	// Host for user workspaces. Send null to clear.
+	UserHost *string `json:"userHost,omitempty"`
+	// Container image for user workspaces. Send null to clear.
+	WorkspaceImage       *string        `json:"workspaceImage,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type WorkspaceMount struct {
 	ClusterPath          string         `json:"clusterPath"`
 	WorkspacePath        string         `json:"workspacePath"`
@@ -6486,16 +6683,17 @@ type WorkspaceMount struct {
 }
 
 type WorkspaceSettings struct {
-	CpuLimit              *float64       `json:"cpuLimit,omitempty"`
-	CpuRequest            *float64       `json:"cpuRequest,omitempty"`
-	DebugMode             *bool          `json:"debugMode,omitempty"`
-	EphemeralStorageLimit *float64       `json:"ephemeralStorageLimit,omitempty"`
-	MemoryLimit           *float64       `json:"memoryLimit,omitempty"`
-	MemoryRequest         *float64       `json:"memoryRequest,omitempty"`
-	UserWorkspaceImage    *string        `json:"userWorkspaceImage,omitempty"`
-	Usercontainer         *string        `json:"usercontainer,omitempty"`
-	Userhost              *string        `json:"userhost,omitempty"`
-	AdditionalProperties  map[string]any `json:"-,omitempty"`
+	CpuLimit              *float64                   `json:"cpuLimit,omitempty"`
+	CpuRequest            *float64                   `json:"cpuRequest,omitempty"`
+	DebugMode             *bool                      `json:"debugMode,omitempty"`
+	EphemeralStorageLimit *float64                   `json:"ephemeralStorageLimit,omitempty"`
+	MemoryLimit           *float64                   `json:"memoryLimit,omitempty"`
+	MemoryRequest         *float64                   `json:"memoryRequest,omitempty"`
+	Resolved              *ResolvedWorkspaceSettings `json:"resolved,omitempty"`
+	UserWorkspaceImage    *string                    `json:"userWorkspaceImage,omitempty"`
+	UserWorkspaceType     *string                    `json:"userWorkspaceType,omitempty"`
+	Userhost              *string                    `json:"userhost,omitempty"`
+	AdditionalProperties  map[string]any             `json:"-,omitempty"`
 }
 
 type WorkspaceStatus struct {

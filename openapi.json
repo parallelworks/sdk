@@ -667,10 +667,6 @@
               "Jake.Thayne"
             ],
             "type": "string"
-          },
-          "vscode": {
-            "description": "Whether the user workspace is using VS Code",
-            "type": "boolean"
           }
         },
         "required": [
@@ -684,7 +680,6 @@
           "organizationAdmin",
           "organizationRoles",
           "email",
-          "vscode",
           "previews"
         ],
         "type": "object"
@@ -759,9 +754,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -888,9 +883,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -1024,9 +1019,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -1185,9 +1180,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -1465,9 +1460,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -1578,9 +1573,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -1703,9 +1698,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -2048,9 +2043,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -2185,9 +2180,9 @@
             "description": "Service level of the Azure NetApp Files",
             "type": "string"
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -2605,9 +2600,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -2727,6 +2722,49 @@
           "network",
           "group",
           "region"
+        ],
+        "type": "object"
+      },
+      "BuiltInWorkspaceDefaults": {
+        "additionalProperties": false,
+        "properties": {
+          "cpuLimit": {
+            "description": "Built-in CPU limit fallback (cores).",
+            "format": "double",
+            "type": "number"
+          },
+          "cpuRequest": {
+            "description": "Built-in CPU request fallback (cores).",
+            "format": "double",
+            "type": "number"
+          },
+          "ephemeralStorageLimit": {
+            "description": "Built-in ephemeral storage limit fallback (GiB).",
+            "format": "double",
+            "type": "number"
+          },
+          "memoryLimit": {
+            "description": "Built-in memory limit fallback (GB).",
+            "format": "double",
+            "type": "number"
+          },
+          "memoryRequest": {
+            "description": "Built-in memory request fallback (GB).",
+            "format": "double",
+            "type": "number"
+          },
+          "workspaceType": {
+            "description": "Built-in workspace type fallback (docker).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspaceType",
+          "cpuRequest",
+          "cpuLimit",
+          "memoryRequest",
+          "memoryLimit",
+          "ephemeralStorageLimit"
         ],
         "type": "object"
       },
@@ -4623,6 +4661,7 @@
             "maxLength": 51,
             "minLength": 5,
             "pattern": "^[a-z]([-a-z0-9]{3,50}[a-z0-9])?$",
+            "patternDescription": "made up of lowercase letters, numbers, and hyphens, starting with a letter and ending with a letter or number",
             "type": "string"
           }
         },
@@ -4639,6 +4678,7 @@
             "maxLength": 51,
             "minLength": 5,
             "pattern": "^[a-z]([-a-z0-9]{3,50}[a-z0-9])?$",
+            "patternDescription": "made up of lowercase letters, numbers, and hyphens, starting with a letter and ending with a letter or number",
             "type": "string"
           }
         },
@@ -5000,6 +5040,7 @@
             "maxLength": 51,
             "minLength": 5,
             "pattern": "^[a-z]([-a-z0-9]{3,50}[a-z0-9])?$",
+            "patternDescription": "made up of lowercase letters, numbers, and hyphens, starting with a letter and ending with a letter or number",
             "type": "string"
           }
         },
@@ -5048,6 +5089,74 @@
         },
         "required": [
           "rate"
+        ],
+        "type": "object"
+      },
+      "CreateUserBody": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "description": "Whether the user is active (default: true)",
+            "type": "boolean"
+          },
+          "email": {
+            "description": "User email address",
+            "type": "string"
+          },
+          "name": {
+            "description": "User's display name",
+            "type": "string"
+          },
+          "password": {
+            "description": "User password. Leave blank to disable password login; the user can still sign in later via password reset if that feature is enabled on the platform.",
+            "type": "string"
+          },
+          "uid": {
+            "description": "Linux UID (auto-generated if not provided, must be a platform admin to use a number below 1000)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "username": {
+            "description": "Username (4+ chars, alphanumeric with - and .)",
+            "type": "string"
+          },
+          "workspaceType": {
+            "description": "Workspace container type",
+            "enum": [
+              "docker",
+              "k8s"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "email",
+          "name"
+        ],
+        "type": "object"
+      },
+      "CreateUserResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "organization": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "email",
+          "name",
+          "organization"
         ],
         "type": "object"
       },
@@ -5684,6 +5793,11 @@
             "description": "Auto-reconnect enabled",
             "type": "boolean"
           },
+          "disconnectedAt": {
+            "description": "Set when the user explicitly disconnected this cluster; reconcilers use this to skip auto-reconnect",
+            "format": "date-time",
+            "type": "string"
+          },
           "group": {
             "description": "Group name",
             "type": "string"
@@ -5701,9 +5815,17 @@
             "description": "Cluster name",
             "type": "string"
           },
+          "remoteHost": {
+            "description": "Controller/login host the live agent is reporting; falls back to the first configured login node when the agent has not reported yet",
+            "type": "string"
+          },
           "status": {
             "description": "Cluster status",
             "type": "string"
+          },
+          "tunnelConnected": {
+            "description": "Whether the cluster's agent tunnel is currently registered on any ingress pod, with the user-disconnect veto applied",
+            "type": "boolean"
           },
           "type": {
             "description": "Provider type",
@@ -5727,8 +5849,10 @@
           "user",
           "type",
           "status",
+          "remoteHost",
           "key",
           "autoReconnect",
+          "tunnelConnected",
           "variables"
         ],
         "type": "object"
@@ -6109,9 +6233,17 @@
             "format": "int64",
             "type": "integer"
           },
+          "agentVersion": {
+            "description": "Existing-cluster only: the agent version currently registered for this cluster's tunnel. Empty when no agent is reporting.",
+            "type": "string"
+          },
           "allocationThreshold": {
             "$ref": "#/components/schemas/AllocationThreshold",
             "description": "The allocation threshold for the cluster's team (only for cloud clusters)."
+          },
+          "canConnectFromWorkspace": {
+            "description": "Existing-cluster only: whether the workspace can SSH to this cluster. True if the tunnel is registered (and not user-disconnected) AND the workspace finished reconciling. Internal field, not covered by API guarantees.",
+            "type": "boolean"
           },
           "connectionString": {
             "description": "The SSH connection string for the resource.",
@@ -6308,7 +6440,8 @@
           "maxNodes",
           "tags",
           "favorite",
-          "workspaceMounts"
+          "workspaceMounts",
+          "canConnectFromWorkspace"
         ],
         "type": "object"
       },
@@ -6611,9 +6744,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -6724,9 +6857,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -6857,9 +6990,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -7298,9 +7431,9 @@
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -8058,6 +8191,7 @@
             "examples": [
               "myGroup"
             ],
+            "minLength": 1,
             "type": "string"
           },
           "hostname": {
@@ -8116,6 +8250,7 @@
             "examples": [
               "us-west-2"
             ],
+            "minLength": 1,
             "type": "string"
           },
           "runtimeAlert": {
@@ -10654,9 +10789,9 @@
             "description": "IP address of the NetApp ONTAP management host",
             "type": "string"
           },
-          "sessionCostAlert": {
+          "sessionCostLimit": {
             "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost alert information for the storage."
+            "description": "Session cost limit information for the storage."
           },
           "sessionNumber": {
             "description": "Session number of the storage.",
@@ -11485,6 +11620,10 @@
             "description": "Issuer of the OIDC authentication method",
             "type": "string"
           },
+          "jwksUri": {
+            "description": "JWKS URI of the OIDC authentication method",
+            "type": "string"
+          },
           "level": {
             "description": "Level of the OIDC authentication method, e.g., organization or user",
             "readOnly": true,
@@ -11504,6 +11643,16 @@
           "scopes": {
             "description": "Scopes of the OIDC authentication method",
             "type": "string"
+          },
+          "sectorIdentifierHostnames": {
+            "description": "Platform hostnames (no scheme/path) published at the sector_identifier_uri endpoint, expanded to redirect URIs by the server",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "skipMfaVerification": {
             "description": "Whether to skip Platform MFA verification for this OIDC authentication method",
@@ -12024,10 +12173,6 @@
             "description": "User email address",
             "type": "string"
           },
-          "hasResourceRemaining": {
-            "description": "Whether the user has any remaining resources that need cleanup before deletion",
-            "type": "boolean"
-          },
           "id": {
             "description": "User ID",
             "readOnly": true,
@@ -12063,8 +12208,27 @@
         "required": [
           "id",
           "username",
-          "active",
-          "hasResourceRemaining"
+          "active"
+        ],
+        "type": "object"
+      },
+      "OrgWorkspaceDefaults": {
+        "additionalProperties": false,
+        "properties": {
+          "builtIn": {
+            "$ref": "#/components/schemas/BuiltInWorkspaceDefaults"
+          },
+          "org": {
+            "$ref": "#/components/schemas/WorkspaceDefaultValues"
+          },
+          "platform": {
+            "$ref": "#/components/schemas/WorkspaceDefaultValues"
+          }
+        },
+        "required": [
+          "org",
+          "platform",
+          "builtIn"
         ],
         "type": "object"
       },
@@ -13033,24 +13197,6 @@
             "description": "Indicates if k8s PVC should be created for workspaces.",
             "type": "boolean"
           },
-          "defaultUserHost": {
-            "description": "The default host pattern for users.",
-            "examples": [
-              "user-1.example.com"
-            ],
-            "type": "string"
-          },
-          "defaultWorkspaceImage": {
-            "description": "Default image for user workspaces.",
-            "type": "string"
-          },
-          "defaultWorkspaceType": {
-            "description": "Default type for workspaces.",
-            "examples": [
-              "docker"
-            ],
-            "type": "string"
-          },
           "deleteUserFilesOnDelete": {
             "description": "Indicates if user files should be deleted when their account is deleted.",
             "type": "boolean"
@@ -13070,6 +13216,14 @@
           "licenseGracePeriod": {
             "description": "Indicates if the license is in the grace period.",
             "type": "boolean"
+          },
+          "pkiValidationContent": {
+            "description": "Body served at /.well-known/pki-validation/{filename}.",
+            "type": "string"
+          },
+          "pkiValidationFilename": {
+            "description": "Filename served at /.well-known/pki-validation/. Empty disables the endpoint.",
+            "type": "string"
           },
           "sentryDsn": {
             "description": "Sentry DSN for backend services.",
@@ -13113,6 +13267,140 @@
           "sentryTracesSampleRate",
           "sentryReplaysSampleRate"
         ],
+        "type": "object"
+      },
+      "PlatformWorkspaceDefaultValues": {
+        "additionalProperties": false,
+        "properties": {
+          "cpuLimit": {
+            "description": "CPU limit (cores) for user workspaces.",
+            "format": "double",
+            "type": "number"
+          },
+          "cpuRequest": {
+            "description": "CPU request (cores) for user workspaces.",
+            "format": "double",
+            "type": "number"
+          },
+          "ephemeralStorageLimit": {
+            "description": "Ephemeral storage limit (GiB) for user workspaces.",
+            "format": "double",
+            "type": "number"
+          },
+          "memoryLimit": {
+            "description": "Memory limit (GB) for user workspaces.",
+            "format": "double",
+            "type": "number"
+          },
+          "memoryRequest": {
+            "description": "Memory request (GB) for user workspaces.",
+            "format": "double",
+            "type": "number"
+          },
+          "userHost": {
+            "description": "Host for user workspaces (e.g., user-1.example.com).",
+            "type": "string"
+          },
+          "workspaceImage": {
+            "description": "Container image for user workspaces.",
+            "type": "string"
+          },
+          "workspaceType": {
+            "description": "Workspace type for new users.",
+            "enum": [
+              "k8s",
+              "docker"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformWorkspaceDefaults": {
+        "additionalProperties": false,
+        "properties": {
+          "builtIn": {
+            "$ref": "#/components/schemas/BuiltInWorkspaceDefaults"
+          },
+          "platform": {
+            "$ref": "#/components/schemas/PlatformWorkspaceDefaultValues"
+          }
+        },
+        "required": [
+          "platform",
+          "builtIn"
+        ],
+        "type": "object"
+      },
+      "PlatformWorkspaceDefaultsPatchBody": {
+        "additionalProperties": false,
+        "properties": {
+          "cpuLimit": {
+            "description": "CPU limit (cores). Send null to clear.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "cpuRequest": {
+            "description": "CPU request (cores). Send null to clear.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "ephemeralStorageLimit": {
+            "description": "Ephemeral storage limit (GiB). Send null to clear.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "memoryLimit": {
+            "description": "Memory limit (GB). Send null to clear.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "memoryRequest": {
+            "description": "Memory request (GB). Send null to clear.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "userHost": {
+            "description": "Host for user workspaces. Send null to clear.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "workspaceImage": {
+            "description": "Container image for user workspaces. Send null to clear.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "workspaceType": {
+            "description": "Workspace type for new users. Send null to clear.",
+            "enum": [
+              "k8s",
+              "docker"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
         "type": "object"
       },
       "PodInfo": {
@@ -14695,6 +14983,160 @@
           "csp",
           "group",
           "id"
+        ],
+        "type": "object"
+      },
+      "ResolvedWorkspaceSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "cpuLimit": {
+            "format": "double",
+            "type": "number"
+          },
+          "cpuLimitSource": {
+            "type": "string"
+          },
+          "cpuRequest": {
+            "format": "double",
+            "type": "number"
+          },
+          "cpuRequestSource": {
+            "type": "string"
+          },
+          "debugMode": {
+            "type": "boolean"
+          },
+          "debugModeSource": {
+            "type": "string"
+          },
+          "ephemeralStorageLimit": {
+            "format": "double",
+            "type": "number"
+          },
+          "ephemeralStorageLimitSource": {
+            "type": "string"
+          },
+          "inheritedCpuLimit": {
+            "format": "double",
+            "type": "number"
+          },
+          "inheritedCpuLimitSource": {
+            "type": "string"
+          },
+          "inheritedCpuRequest": {
+            "format": "double",
+            "type": "number"
+          },
+          "inheritedCpuRequestSource": {
+            "type": "string"
+          },
+          "inheritedEphemeralStorageLimit": {
+            "format": "double",
+            "type": "number"
+          },
+          "inheritedEphemeralStorageLimitSource": {
+            "type": "string"
+          },
+          "inheritedMemoryLimit": {
+            "format": "double",
+            "type": "number"
+          },
+          "inheritedMemoryLimitSource": {
+            "type": "string"
+          },
+          "inheritedMemoryRequest": {
+            "format": "double",
+            "type": "number"
+          },
+          "inheritedMemoryRequestSource": {
+            "type": "string"
+          },
+          "inheritedUserWorkspaceImage": {
+            "type": "string"
+          },
+          "inheritedUserWorkspaceImageSource": {
+            "type": "string"
+          },
+          "inheritedUserWorkspaceType": {
+            "type": "string"
+          },
+          "inheritedUserWorkspaceTypeSource": {
+            "type": "string"
+          },
+          "inheritedUserhost": {
+            "type": "string"
+          },
+          "inheritedUserhostSource": {
+            "type": "string"
+          },
+          "memoryLimit": {
+            "format": "double",
+            "type": "number"
+          },
+          "memoryLimitSource": {
+            "type": "string"
+          },
+          "memoryRequest": {
+            "format": "double",
+            "type": "number"
+          },
+          "memoryRequestSource": {
+            "type": "string"
+          },
+          "userWorkspaceImage": {
+            "type": "string"
+          },
+          "userWorkspaceImageSource": {
+            "type": "string"
+          },
+          "userWorkspaceType": {
+            "type": "string"
+          },
+          "userWorkspaceTypeSource": {
+            "type": "string"
+          },
+          "userhost": {
+            "type": "string"
+          },
+          "userhostSource": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cpuRequest",
+          "cpuRequestSource",
+          "cpuLimit",
+          "cpuLimitSource",
+          "memoryRequest",
+          "memoryRequestSource",
+          "memoryLimit",
+          "memoryLimitSource",
+          "ephemeralStorageLimit",
+          "ephemeralStorageLimitSource",
+          "userWorkspaceType",
+          "userWorkspaceTypeSource",
+          "userWorkspaceImage",
+          "userWorkspaceImageSource",
+          "userhost",
+          "userhostSource",
+          "debugMode",
+          "debugModeSource",
+          "inheritedCpuRequest",
+          "inheritedCpuRequestSource",
+          "inheritedCpuLimit",
+          "inheritedCpuLimitSource",
+          "inheritedMemoryRequest",
+          "inheritedMemoryRequestSource",
+          "inheritedMemoryLimit",
+          "inheritedMemoryLimitSource",
+          "inheritedEphemeralStorageLimit",
+          "inheritedEphemeralStorageLimitSource",
+          "inheritedUserWorkspaceType",
+          "inheritedUserWorkspaceTypeSource",
+          "inheritedUserWorkspaceImage",
+          "inheritedUserWorkspaceImageSource",
+          "inheritedUserhost",
+          "inheritedUserhostSource"
         ],
         "type": "object"
       },
@@ -17188,22 +17630,6 @@
             "description": "Whether to create a PVC for k8s workspaces.",
             "type": "boolean"
           },
-          "defaultUserHost": {
-            "description": "The default user host for SSH connections.",
-            "type": "string"
-          },
-          "defaultWorkspaceImage": {
-            "description": "The default workspace image.",
-            "type": "string"
-          },
-          "defaultWorkspaceType": {
-            "description": "The default workspace type.",
-            "enum": [
-              "k8s",
-              "docker"
-            ],
-            "type": "string"
-          },
           "deleteUserFilesOnDelete": {
             "description": "Whether to delete user files on account deletion.",
             "type": "boolean"
@@ -17236,6 +17662,14 @@
           "maintenanceMode": {
             "description": "Whether to enable maintenance mode.",
             "type": "boolean"
+          },
+          "pkiValidationContent": {
+            "description": "Body served at /.well-known/pki-validation/{filename}.",
+            "type": "string"
+          },
+          "pkiValidationFilename": {
+            "description": "Filename served at /.well-known/pki-validation/. Empty disables the endpoint.",
+            "type": "string"
           },
           "platformName": {
             "description": "The display name of the platform.",
@@ -18237,6 +18671,84 @@
         ],
         "type": "object"
       },
+      "UserWorkspacePatchBody": {
+        "additionalProperties": false,
+        "properties": {
+          "cpuLimit": {
+            "description": "User CPU limit override (cores). Send null to revert to inherited.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "cpuRequest": {
+            "description": "User CPU request override (cores). Send null to revert to inherited.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "debugMode": {
+            "description": "User debug mode override. Send null to revert to inherited.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "ephemeralStorageLimit": {
+            "description": "User ephemeral storage limit override (GiB). Send null to revert to inherited.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "memoryLimit": {
+            "description": "User memory limit override (GB). Send null to revert to inherited.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "memoryRequest": {
+            "description": "User memory request override (GB). Send null to revert to inherited.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "userWorkspaceImage": {
+            "description": "User workspace image override. Send null to revert to inherited.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "userWorkspaceType": {
+            "description": "User workspace type override. Send null to revert to inherited.",
+            "enum": [
+              "docker",
+              "k8s"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "userhost": {
+            "description": "User host. Send null to revert to inherited.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
       "VerifyOtpInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -18823,6 +19335,105 @@
         ],
         "type": "object"
       },
+      "WorkspaceDefaultValues": {
+        "additionalProperties": false,
+        "properties": {
+          "cpuLimit": {
+            "description": "CPU limit (cores) for user workspaces.",
+            "format": "double",
+            "type": "number"
+          },
+          "cpuRequest": {
+            "description": "CPU request (cores) for user workspaces.",
+            "format": "double",
+            "type": "number"
+          },
+          "ephemeralStorageLimit": {
+            "description": "Ephemeral storage limit (GiB) for user workspaces.",
+            "format": "double",
+            "type": "number"
+          },
+          "memoryLimit": {
+            "description": "Memory limit (GB) for user workspaces.",
+            "format": "double",
+            "type": "number"
+          },
+          "memoryRequest": {
+            "description": "Memory request (GB) for user workspaces.",
+            "format": "double",
+            "type": "number"
+          },
+          "userHost": {
+            "description": "Host for user workspaces (e.g., user-1.example.com).",
+            "type": "string"
+          },
+          "workspaceImage": {
+            "description": "Container image for user workspaces.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkspaceDefaultsPatchBody": {
+        "additionalProperties": false,
+        "properties": {
+          "cpuLimit": {
+            "description": "CPU limit (cores). Send null to clear.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "cpuRequest": {
+            "description": "CPU request (cores). Send null to clear.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "ephemeralStorageLimit": {
+            "description": "Ephemeral storage limit (GiB). Send null to clear.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "memoryLimit": {
+            "description": "Memory limit (GB). Send null to clear.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "memoryRequest": {
+            "description": "Memory request (GB). Send null to clear.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "userHost": {
+            "description": "Host for user workspaces. Send null to clear.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "workspaceImage": {
+            "description": "Container image for user workspaces. Send null to clear.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
       "WorkspaceMount": {
         "additionalProperties": false,
         "properties": {
@@ -18865,10 +19476,13 @@
             "format": "double",
             "type": "number"
           },
+          "resolved": {
+            "$ref": "#/components/schemas/ResolvedWorkspaceSettings"
+          },
           "userWorkspaceImage": {
             "type": "string"
           },
-          "usercontainer": {
+          "userWorkspaceType": {
             "type": "string"
           },
           "userhost": {
@@ -18930,6 +19544,59 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/.well-known/pki-validation/{filename}": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nServes the configured PKI validation file for HTTP-based domain control validation. Returns 404 if no file is configured or the requested filename does not match the configured one.",
+        "operationId": "get-pki-validation-file",
+        "parameters": [
+          {
+            "description": "Validation filename including extension.",
+            "in": "path",
+            "name": "filename",
+            "required": true,
+            "schema": {
+              "description": "Validation filename including extension.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Serve PKI domain control validation file",
+        "tags": [
+          "Platform"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/admin/alerts": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns a list of all platform alerts",
@@ -23548,6 +24215,56 @@
         ]
       }
     },
+    "/api/oidc/sso/{authMethodId}/sector-identifier": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the JSON array of redirect URIs that an upstream OIDC provider fetches when this URL is registered as `sector_identifier_uri` (OIDC Core 1.0 § 5).",
+        "operationId": "get-oidc-sector-identifier",
+        "parameters": [
+          {
+            "description": "ID of the OIDC authentication method",
+            "in": "path",
+            "name": "authMethodId",
+            "required": true,
+            "schema": {
+              "description": "ID of the OIDC authentication method",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get OIDC sector_identifier_uri document",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
     "/api/onboarding/recommended-resources": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns marketplace items recommended for new user onboarding.",
@@ -25725,6 +26442,53 @@
           }
         },
         "summary": "List organization auth methods",
+        "tags": [
+          "Auth Methods"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/auth-methods/cac": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds a CAC auth method to the organization. CAC enrollment is then driven by the platform's mTLS verify endpoint.",
+        "operationId": "add-organization-auth-method-cac",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthMethod"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add organization auth method: CAC",
         "tags": [
           "Auth Methods"
         ]
@@ -33995,6 +34759,61 @@
         "tags": [
           "Organization"
         ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates a new user in the organization.",
+        "operationId": "create-organization-user",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create user",
+        "tags": [
+          "Users"
+        ]
       }
     },
     "/api/organizations/{organization}/users/{username}/mfa": {
@@ -36214,6 +37033,125 @@
         "tags": [
           "NFS",
           "Storage"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/destroy": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDestroys the latest session of a cloud cluster, releasing all provisioned resources.",
+        "operationId": "destroy-cluster",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the cluster to destroy",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "The name of the cluster to destroy",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Destroy cluster",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/disconnect": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDisconnects an existing cluster: sets the disconnect flag, tells any live agent tunnel to exit, and deletes manual sessions. Only valid for existing-type clusters.",
+        "operationId": "disconnect-cluster",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Disconnect cluster",
+        "tags": [
+          "Clusters"
         ]
       }
     },
@@ -40159,6 +41097,70 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/snapshots/{snapshotName}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDeletes a disk snapshot. Deletion is performed asynchronously.",
+        "operationId": "delete-snapshot",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the snapshot to delete",
+            "in": "path",
+            "name": "snapshotName",
+            "required": true,
+            "schema": {
+              "description": "Name of the snapshot to delete",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a snapshot",
+        "tags": [
+          "Snapshots",
+          "Storage"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/snapshots/{snapshotName}/copy": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCopies a snapshot to a different region",
@@ -40444,7 +41446,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/WorkspaceSettings"
+                "$ref": "#/components/schemas/UserWorkspacePatchBody"
               }
             }
           }
@@ -41320,6 +42322,108 @@
         "summary": "Toggle Organization Webhook",
         "tags": [
           "Webhooks"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/workspace-defaults": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the organization's workspace defaults applied to its users, plus the platform and built-in tiers above for cascade context.",
+        "operationId": "get-org-workspace-defaults",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgWorkspaceDefaults"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get org workspace defaults",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates the organization's workspace defaults.",
+        "operationId": "update-org-workspace-defaults",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkspaceDefaultsPatchBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgWorkspaceDefaults"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update org workspace defaults",
+        "tags": [
+          "Organization"
         ]
       }
     },
@@ -42528,6 +43632,78 @@
         "summary": "Toggle Platform Webhook",
         "tags": [
           "Webhooks"
+        ]
+      }
+    },
+    "/api/platform/workspace-defaults": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the platform-wide workspace defaults applied to user workspaces, plus the built-in fallback values used when no platform value is configured.",
+        "operationId": "get-workspace-defaults",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformWorkspaceDefaults"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get workspace defaults",
+        "tags": [
+          "Platform"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nUpdates the platform-wide workspace defaults.",
+        "operationId": "update-workspace-defaults",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformWorkspaceDefaultsPatchBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformWorkspaceDefaults"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update workspace defaults",
+        "tags": [
+          "Platform"
         ]
       }
     },
