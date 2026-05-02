@@ -13321,6 +13321,10 @@
             "description": "Indicates if the license is in the grace period.",
             "type": "boolean"
           },
+          "minimumAgentVersion": {
+            "description": "Minimum agent semantic version. Agents below this version are rejected at handshake and disconnected when already connected. Empty disables enforcement.",
+            "type": "string"
+          },
           "pkiValidationContent": {
             "description": "Body served at /.well-known/pki-validation/{filename}.",
             "type": "string"
@@ -17800,6 +17804,10 @@
           "maintenanceMode": {
             "description": "Whether to enable maintenance mode.",
             "type": "boolean"
+          },
+          "minimumAgentVersion": {
+            "description": "Minimum agent semantic version. Empty disables enforcement.",
+            "type": "string"
           },
           "pkiValidationContent": {
             "description": "Body served at /.well-known/pki-validation/{filename}.",

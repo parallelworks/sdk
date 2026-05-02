@@ -4619,6 +4619,8 @@ type PlatformSettingsAdmin struct {
 	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
 	// Indicates if the license is in the grace period.
 	LicenseGracePeriod *bool `json:"licenseGracePeriod,omitempty"`
+	// Minimum agent semantic version. Agents below this version are rejected at handshake and disconnected when already connected. Empty disables enforcement.
+	MinimumAgentVersion *string `json:"minimumAgentVersion,omitempty"`
 	// Body served at /.well-known/pki-validation/{filename}.
 	PkiValidationContent *string `json:"pkiValidationContent,omitempty"`
 	// Filename served at /.well-known/pki-validation/. Empty disables the endpoint.
@@ -6108,6 +6110,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	MaintenanceMessage *string `json:"maintenanceMessage,omitempty"`
 	// Whether to enable maintenance mode.
 	MaintenanceMode *bool `json:"maintenanceMode,omitempty"`
+	// Minimum agent semantic version. Empty disables enforcement.
+	MinimumAgentVersion *string `json:"minimumAgentVersion,omitempty"`
 	// Body served at /.well-known/pki-validation/{filename}.
 	PkiValidationContent *string `json:"pkiValidationContent,omitempty"`
 	// Filename served at /.well-known/pki-validation/. Empty disables the endpoint.
