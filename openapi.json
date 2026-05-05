@@ -7157,6 +7157,11 @@
             "description": "The group description.",
             "type": "string"
           },
+          "gid": {
+            "description": "POSIX group ID, used by user workspaces to create matching system groups.",
+            "format": "int64",
+            "type": "integer"
+          },
           "id": {
             "description": "The group ID.",
             "readOnly": true,

@@ -2545,6 +2545,8 @@ type Group struct {
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// The group description.
 	Description *string `json:"description,omitempty"`
+	// POSIX group ID, used by user workspaces to create matching system groups.
+	Gid *int64 `json:"gid,omitempty"`
 	// The group ID.
 	ID *string `json:"id,omitempty"`
 	// Number of group members
