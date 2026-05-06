@@ -77,8 +77,14 @@ type ContextInfo struct {
 	IsCurrent    bool   `json:"isCurrent"`
 }
 
-// DefaultCredentialConfigPath returns the default credentials file path: ~/pw/.credentials
+// DefaultCredentialConfigPath returns the default credentials file path: ~/pw/.credentials.
+// PW_CREDENTIALS_DIR overrides the directory containing .credentials; lets dev
+// workflows isolate credentials without redirecting $HOME (which would also
+// break software cache / ssh keys when /tmp is mounted noexec).
 func DefaultCredentialConfigPath() (string, error) {
+	if override := os.Getenv("PW_CREDENTIALS_DIR"); override != "" {
+		return filepath.Join(override, credentialsFileName), nil
+	}
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("unable to get home directory: %w", err)
