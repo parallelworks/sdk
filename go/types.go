@@ -4546,6 +4546,8 @@ type PlatformNotificationSettings struct {
 type PlatformSettings struct {
 	// The platform-wide authentication methods available.
 	AvailableAuthMethods []string `json:"availableAuthMethods"`
+	// Indicates if custom session domains are configured on the platform.
+	CustomDomainsEnabled bool `json:"customDomainsEnabled"`
 	// Indicates if the onboarding flow is enabled for new users.
 	EnableOnboarding *bool `json:"enableOnboarding"`
 	// Indicates if the platform requires a maximum TTL for API Keys. Only returned if the user is authenticated.

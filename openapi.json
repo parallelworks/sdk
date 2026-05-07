@@ -13107,6 +13107,10 @@
               "null"
             ]
           },
+          "customDomainsEnabled": {
+            "description": "Indicates if custom session domains are configured on the platform.",
+            "type": "boolean"
+          },
           "enableOnboarding": {
             "description": "Indicates if the onboarding flow is enabled for new users.",
             "type": [
@@ -13295,6 +13299,7 @@
           "version",
           "availableAuthMethods",
           "forgotPasswordEnabled",
+          "customDomainsEnabled",
           "enableOnboarding"
         ],
         "type": "object"
