@@ -1827,7 +1827,7 @@ type CreateUserBody struct {
 	Password *string `json:"password,omitempty"`
 	// Linux UID (auto-generated if not provided, must be a platform admin to use a number below 1000)
 	Uid *int64 `json:"uid,omitempty"`
-	// Username (4+ chars, alphanumeric with - and .)
+	// Username (3+ chars, alphanumeric with - and .)
 	Username string `json:"username"`
 	// Workspace container type
 	WorkspaceType        *string        `json:"workspaceType,omitempty"`

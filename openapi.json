@@ -4796,6 +4796,8 @@
             "examples": [
               "my-ontap"
             ],
+            "maxLength": 255,
+            "minLength": 2,
             "type": "string"
           },
           "serverAddress": {
@@ -5117,7 +5119,7 @@
             "type": "integer"
           },
           "username": {
-            "description": "Username (4+ chars, alphanumeric with - and .)",
+            "description": "Username (3+ chars, alphanumeric with - and .)",
             "type": "string"
           },
           "workspaceType": {
@@ -8453,6 +8455,10 @@
             "examples": [
               "myIP"
             ],
+            "maxLength": 255,
+            "minLength": 2,
+            "pattern": "^[a-z0-9_-]+$",
+            "patternDescription": "name can only contain lowercase letters, numbers, hyphens, and underscores",
             "type": "string"
           },
           "network": {
@@ -35786,6 +35792,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -35858,6 +35866,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -35942,6 +35952,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -36009,6 +36021,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -36083,6 +36097,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -36157,6 +36173,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -36231,6 +36249,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -36305,6 +36325,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -36372,6 +36394,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           },
@@ -36493,6 +36517,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -36567,6 +36593,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -36639,6 +36667,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -36723,6 +36753,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -36790,6 +36822,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           },
@@ -36910,6 +36944,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -36983,6 +37019,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -37057,6 +37095,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -37131,6 +37171,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -37205,6 +37247,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -38276,6 +38320,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -38347,6 +38393,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -38431,6 +38479,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           },
@@ -38537,6 +38587,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -38610,6 +38662,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -39978,6 +40032,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -42014,6 +42070,8 @@
               "examples": [
                 "mystorage"
               ],
+              "maxLength": 255,
+              "minLength": 1,
               "type": "string"
             }
           },
