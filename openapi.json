@@ -2485,6 +2485,10 @@
             "description": "Current provision status of the bucket",
             "type": "string"
           },
+          "statusDescription": {
+            "description": "User-facing message describing the current status (e.g., why a create job was skipped).",
+            "type": "string"
+          },
           "tags": {
             "description": "Tags associated with the bucket",
             "items": {
@@ -8288,6 +8292,11 @@
             "examples": [
               "running"
             ],
+            "type": "string"
+          },
+          "statusDescription": {
+            "description": "User-facing message describing the current status (e.g., why a create job was skipped).",
+            "readOnly": true,
             "type": "string"
           },
           "tags": {

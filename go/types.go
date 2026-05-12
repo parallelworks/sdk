@@ -913,6 +913,8 @@ type Bucket struct {
 	Shared []Shared `json:"shared"`
 	// Current provision status of the bucket
 	Status string `json:"status"`
+	// User-facing message describing the current status (e.g., why a create job was skipped).
+	StatusDescription *string `json:"statusDescription,omitempty"`
 	// Tags associated with the bucket
 	Tags []string `json:"tags"`
 	// Type of storage, should be 'bucket'
@@ -2935,6 +2937,8 @@ type Instance struct {
 	SizeGb int64 `json:"sizeGb"`
 	// The status of the Instance.
 	Status *string `json:"status,omitempty"`
+	// User-facing message describing the current status (e.g., why a create job was skipped).
+	StatusDescription *string `json:"statusDescription,omitempty"`
 	// The tags associated with the Instance.
 	Tags []string `json:"tags"`
 	// The type of the compute resource.
