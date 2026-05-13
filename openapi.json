@@ -109,6 +109,20 @@
         ],
         "type": "object"
       },
+      "AddDeploymentInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "model": {
+            "description": "Model name to deploy on the existing Azure OpenAI account",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "model"
+        ],
+        "type": "object"
+      },
       "AddOtpMfaOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -35670,6 +35684,166 @@
           }
         },
         "summary": "Update AI provider",
+        "tags": [
+          "AI Providers"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/ai-providers/{name}/deployments": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nProvision an additional model deployment on an existing Azure AI provider.",
+        "operationId": "add-ai-provider-deployment",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDeploymentInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProviderResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add AI provider deployment",
+        "tags": [
+          "AI Providers"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/ai-providers/{name}/deployments/{model}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemove a single model deployment from an existing Azure AI provider.",
+        "operationId": "delete-ai-provider-deployment",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Deployment name to remove",
+            "in": "path",
+            "name": "model",
+            "required": true,
+            "schema": {
+              "description": "Deployment name to remove",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProviderResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Remove AI provider deployment",
         "tags": [
           "AI Providers"
         ]

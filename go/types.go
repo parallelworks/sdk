@@ -47,6 +47,12 @@ type AccessManagementBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type AddDeploymentInputBody struct {
+	// Model name to deploy on the existing Azure OpenAI account
+	Model                string         `json:"model"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type AddOtpMfaOutputBody struct {
 	// Base64 encoded QR code image for authenticator apps
 	QrImage string `json:"qrImage"`

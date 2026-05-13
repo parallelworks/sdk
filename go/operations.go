@@ -5383,6 +5383,43 @@ func (c *Client) PatchSingleAiProvider(ctx context.Context, organization string,
 	return &result, nil
 }
 
+// AddAiProviderDeployment - Add AI provider deployment
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Provision an additional model deployment on an existing Azure AI provider.
+func (c *Client) AddAiProviderDeployment(ctx context.Context, organization string, user string, name string, body AddDeploymentInputBody) (*AiProviderResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/ai-providers/{name}/deployments"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	var result AiProviderResponse
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteAiProviderDeployment - Remove AI provider deployment
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Remove a single model deployment from an existing Azure AI provider.
+func (c *Client) DeleteAiProviderDeployment(ctx context.Context, organization string, user string, name string, model string) (*AiProviderResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/ai-providers/{name}/deployments/{model}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+	path = pathReplace(path, "model", model)
+
+	var result AiProviderResponse
+	if err := c.do(ctx, "DELETE", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // ListAiProviderModels - List AI provider models
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
