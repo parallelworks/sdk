@@ -1321,6 +1321,21 @@ func (c *Client) GetClusters(ctx context.Context) (*[]GeneralCluster, error) {
 	return &result, nil
 }
 
+// GetDefaultDesktopWallpaper - Get default desktop session wallpaper
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the platform default desktop session wallpaper used when no organization-specific wallpaper is set.
+func (c *Client) GetDefaultDesktopWallpaper(ctx context.Context) (*string, error) {
+	path := "/api/desktop-wallpaper/default"
+
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetGroupsParams contains optional parameters for the GetGroups operation.
 type GetGroupsParams struct {
 	// Only return groups that have access to this network.
@@ -3211,6 +3226,52 @@ func (c *Client) GetCloudImages(ctx context.Context, organization string, csp st
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// GetOrganizationDesktopWallpaper - Get organization desktop session wallpaper
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the desktop session wallpaper for the organization. Restricted to members of the org. Empty body when no wallpaper is set; callers should fall back to /api/desktop-wallpaper/default.
+func (c *Client) GetOrganizationDesktopWallpaper(ctx context.Context, organization string) (*string, error) {
+	path := "/api/organizations/{organization}/desktop-wallpaper"
+	path = pathReplace(path, "organization", organization)
+
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PutOrganizationDesktopWallpaper - Upload organization desktop session wallpaper
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Uploads a desktop session wallpaper for the organization. Applied to new desktop sessions started under the organization.
+func (c *Client) PutOrganizationDesktopWallpaper(ctx context.Context, organization string, body *any) error {
+	path := "/api/organizations/{organization}/desktop-wallpaper"
+	path = pathReplace(path, "organization", organization)
+
+	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// DeleteOrganizationDesktopWallpaper - Delete organization desktop session wallpaper
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes the desktop session wallpaper for the organization; sessions fall back to the platform default.
+func (c *Client) DeleteOrganizationDesktopWallpaper(ctx context.Context, organization string) error {
+	path := "/api/organizations/{organization}/desktop-wallpaper"
+	path = pathReplace(path, "organization", organization)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // GetOrganizationGroupsParams contains optional parameters for the GetOrganizationGroups operation.
@@ -8254,7 +8315,7 @@ func (c *Client) GetUserWorkspaces(ctx context.Context) (*GetUserContainersRespo
 //
 // > This is a platform-admin only route.
 //
-// Scales down user workspaces which are considered 'safe to kill'. Safe to kill is determined by the user not having any 'existing' cluster type clusters currently connected, not being online within the last 15 minutes, and not having any running workflows.
+// Scales down user workspaces which are considered 'safe to kill'. Safe to kill is determined by the user not being online within the last 15 minutes and not having any running workflows.
 func (c *Client) ScaleDownUserWorkspaces(ctx context.Context) error {
 	path := "/api/user-workspaces/scale-down"
 

@@ -22466,6 +22466,11 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -22879,6 +22884,43 @@
         "summary": "Get Clusters",
         "tags": [
           "Clusters"
+        ]
+      }
+    },
+    "/api/desktop-wallpaper/default": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the platform default desktop session wallpaper used when no organization-specific wallpaper is set.",
+        "operationId": "get-default-desktop-wallpaper",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "description": "The organization's desktop session wallpaper.",
+                  "examples": [
+                    "image"
+                  ],
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get default desktop session wallpaper",
+        "tags": [
+          "Organization Theme"
         ]
       }
     },
@@ -28392,6 +28434,160 @@
         "summary": "List public cloud images",
         "tags": [
           "Cloud Images"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/desktop-wallpaper": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDeletes the desktop session wallpaper for the organization; sessions fall back to the platform default.",
+        "operationId": "delete-organization-desktop-wallpaper",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete organization desktop session wallpaper",
+        "tags": [
+          "Organization Theme"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the desktop session wallpaper for the organization. Restricted to members of the org. Empty body when no wallpaper is set; callers should fall back to /api/desktop-wallpaper/default.",
+        "operationId": "get-organization-desktop-wallpaper",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "description": "The organization's desktop session wallpaper.",
+                  "examples": [
+                    "image"
+                  ],
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get organization desktop session wallpaper",
+        "tags": [
+          "Organization Theme"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUploads a desktop session wallpaper for the organization. Applied to new desktop sessions started under the organization.",
+        "operationId": "put-organization-desktop-wallpaper",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "wallpaper": {
+                  "contentType": "image/*"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "wallpaper": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "description": "The desktop session wallpaper file to upload.",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "wallpaper"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Upload organization desktop session wallpaper",
+        "tags": [
+          "Organization Theme"
         ]
       }
     },
@@ -38530,7 +38726,7 @@
                 "schema": {
                   "description": "The pre-signed URL for the Google object.",
                   "examples": [
-                    "https://storage.googleapis.com/example-bucket/cat.jpeg?X-Goog-Algorithm=GOOG4-RSA-SHA256\u0026X-Goog-Credential=serviceaccountemail\u0026X-Goog-SignedHeaders=host\u0026X-Goog-Signature=signature"
+                    "https://storage.googleapis.com/example-bucket/cat.jpeg?X-Goog-Algorithm=GOOG4-HMAC-SHA256\u0026X-Goog-Credential=accessid\u0026X-Goog-SignedHeaders=host\u0026X-Goog-Signature=signature"
                   ],
                   "type": "string"
                 }
@@ -45573,7 +45769,7 @@
     },
     "/api/user-workspaces/scale-down": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nScales down user workspaces which are considered 'safe to kill'. Safe to kill is determined by the user not having any 'existing' cluster type clusters currently connected, not being online within the last 15 minutes, and not having any running workflows.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nScales down user workspaces which are considered 'safe to kill'. Safe to kill is determined by the user not being online within the last 15 minutes and not having any running workflows.",
         "operationId": "scale-down-user-workspaces",
         "responses": {
           "204": {

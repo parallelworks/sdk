@@ -71,6 +71,75 @@ func TestLoadCredentialConfigFrom_EmptyFile(t *testing.T) {
 	}
 }
 
+func TestLoadCredentialConfigFrom_WhitespaceFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".credentials")
+	os.WriteFile(path, []byte("   \n\t\n  "), 0600)
+
+	cfg, err := LoadCredentialConfigFrom(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(cfg.Identities) != 0 {
+		t.Errorf("expected empty identities, got %d", len(cfg.Identities))
+	}
+}
+
+func TestLoadCredentialConfigFrom_Unparseable(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".credentials")
+
+	for _, payload := range []string{
+		"not valid json{{{",
+		`{"identi`,
+		`{"identities":{"user:foo":{"token":"eyJhbG`,
+	} {
+		if err := os.WriteFile(path, []byte(payload), 0600); err != nil {
+			t.Fatalf("WriteFile: %v", err)
+		}
+		cfg, err := LoadCredentialConfigFrom(path)
+		if err != nil {
+			t.Fatalf("payload %q: unexpected error: %v", payload, err)
+		}
+		if len(cfg.Identities) != 0 {
+			t.Errorf("payload %q: expected empty identities, got %d", payload, len(cfg.Identities))
+		}
+	}
+}
+
+func TestSaveTo_Atomic(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".credentials")
+
+	cfg := &CredentialConfig{
+		Identities: map[string]Identity{
+			"dev": {Server: "cloud.parallel.works", Name: "dev", ApiKey: "pwt_abc.def"},
+		},
+		CurrentIdentity: "dev",
+	}
+	if err := cfg.SaveTo(path); err != nil {
+		t.Fatalf("SaveTo: %v", err)
+	}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatalf("ReadDir: %v", err)
+	}
+	for _, e := range entries {
+		if e.Name() != ".credentials" {
+			t.Errorf("leftover file in dir: %q", e.Name())
+		}
+	}
+
+	loaded, err := LoadCredentialConfigFrom(path)
+	if err != nil {
+		t.Fatalf("LoadCredentialConfigFrom: %v", err)
+	}
+	if loaded.CurrentIdentity != "dev" || loaded.Identities["dev"].ApiKey != "pwt_abc.def" {
+		t.Errorf("round-trip mismatch: %+v", loaded)
+	}
+}
+
 func TestLoadCredentialConfigFrom_Valid(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, ".credentials")

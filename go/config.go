@@ -1,6 +1,7 @@
 package parallelworks
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -115,14 +116,20 @@ func LoadCredentialConfigFrom(path string) (*CredentialConfig, error) {
 		return nil, err
 	}
 
-	// Treat empty file same as non-existent — return empty config
-	if len(data) == 0 {
+	// Treat empty, whitespace-only, or unparseable files the same as a missing
+	// file. A partial write from a crashed `pw auth ...` (pre-atomic-write) can
+	// leave the file in an invalid state; rather than forcing the caller to
+	// delete it manually, return an empty config so the next save overwrites it
+	// via the atomic write path.
+	if len(bytes.TrimSpace(data)) == 0 {
 		cfg.Identities = make(map[string]Identity)
 		return cfg, nil
 	}
 
 	if err := json.Unmarshal(data, cfg); err != nil {
-		return nil, fmt.Errorf("failed to parse credentials file (%s): %w\nThis may indicate a corrupted credentials file. Try deleting the file and re-authenticating with 'pw auth apikey' or 'pw auth token'.", path, err)
+		fmt.Fprintf(os.Stderr, "warning: credentials file (%s) is unparseable, treating as missing; re-authenticate with 'pw auth apikey' or 'pw auth token' to recover\n", path)
+		cfg.Identities = make(map[string]Identity)
+		return cfg, nil
 	}
 	if cfg.Identities == nil {
 		cfg.Identities = make(map[string]Identity)
@@ -154,7 +161,32 @@ func (c *CredentialConfig) SaveTo(path string) error {
 		return err
 	}
 
-	return os.WriteFile(path, data, 0600)
+	// Write atomically: write to a temp file in the same dir, fsync, then rename.
+	// A crash mid-write would otherwise leave the credentials file truncated or
+	// partially written, which fails json.Unmarshal on the next read.
+	tmp, err := os.CreateTemp(dir, filepath.Base(path)+".tmp.*")
+	if err != nil {
+		return err
+	}
+	tmpPath := tmp.Name()
+	defer os.Remove(tmpPath)
+
+	if err := tmp.Chmod(0600); err != nil {
+		tmp.Close()
+		return err
+	}
+	if _, err := tmp.Write(data); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	return os.Rename(tmpPath, path)
 }
 
 // resolveOptions holds options for identity resolution.
