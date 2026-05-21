@@ -8215,6 +8215,51 @@ func (c *Client) DeleteSSHPrivateKey(ctx context.Context, name string) error {
 	return nil
 }
 
+// ListSSHPublicKeys - List SSH public keys
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the user's stored SSH public keys plus the workspace-generated entry.
+func (c *Client) ListSSHPublicKeys(ctx context.Context) (*[]SSHPublicKey, error) {
+	path := "/api/ssh-public-keys"
+
+	var result []SSHPublicKey
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CreateSSHPublicKey - Add an SSH public key
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Adds an SSH public key for the user.
+func (c *Client) CreateSSHPublicKey(ctx context.Context, body CreateSSHPublicKeyInputBody) (*SSHPublicKey, error) {
+	path := "/api/ssh-public-keys"
+
+	var result SSHPublicKey
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteSSHPublicKey - Delete an SSH public key
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes an SSH public key. The workspace-generated entry cannot be deleted.
+func (c *Client) DeleteSSHPublicKey(ctx context.Context, id string) error {
+	path := "/api/ssh-public-keys/{id}"
+	path = pathReplace(path, "id", id)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // GetCacRedirect - Redirect to CAC verification
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.

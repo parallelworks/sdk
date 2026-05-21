@@ -1800,6 +1800,14 @@ type CreateRoleBindingInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type CreateSSHPublicKeyInputBody struct {
+	// SSH public key in OpenSSH authorized_keys format.
+	Key string `json:"key"`
+	// Display name for the key.
+	Title                string         `json:"title"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type CreateSnapshotBody struct {
 	// Name of the snapshot
 	SnapshotName         string         `json:"snapshotName"`
@@ -5454,6 +5462,14 @@ type RuntimeAlertInput struct {
 	Enabled bool `json:"enabled"`
 	// Runtime alert interval in hours (1-168).
 	IntervalHours        *int64         `json:"intervalHours,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type SSHPublicKey struct {
+	CreatedAt            time.Time      `json:"createdAt"`
+	ID                   string         `json:"id"`
+	Key                  string         `json:"key"`
+	Title                string         `json:"title"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

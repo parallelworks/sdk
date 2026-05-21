@@ -5052,6 +5052,26 @@
         ],
         "type": "object"
       },
+      "CreateSSHPublicKeyInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "description": "SSH public key in OpenSSH authorized_keys format.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": {
+            "description": "Display name for the key.",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "key"
+        ],
+        "type": "object"
+      },
       "CreateSnapshotBody": {
         "additionalProperties": false,
         "properties": {
@@ -15832,6 +15852,31 @@
         },
         "required": [
           "enabled"
+        ],
+        "type": "object"
+      },
+      "SSHPublicKey": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "key",
+          "createdAt"
         ],
         "type": "object"
       },
@@ -45965,6 +46010,121 @@
         "summary": "Delete SSH Private Key",
         "tags": [
           "SSH Private Keys"
+        ]
+      }
+    },
+    "/api/ssh-public-keys": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the user's stored SSH public keys plus the workspace-generated entry.",
+        "operationId": "list-ssh-public-keys",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SSHPublicKey"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List SSH public keys",
+        "tags": [
+          "User Settings"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nAdds an SSH public key for the user.",
+        "operationId": "create-ssh-public-key",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSSHPublicKeyInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SSHPublicKey"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add an SSH public key",
+        "tags": [
+          "User Settings"
+        ]
+      }
+    },
+    "/api/ssh-public-keys/{id}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDeletes an SSH public key. The workspace-generated entry cannot be deleted.",
+        "operationId": "delete-ssh-public-key",
+        "parameters": [
+          {
+            "description": "SSH public key id.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "SSH public key id.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete an SSH public key",
+        "tags": [
+          "User Settings"
         ]
       }
     },
