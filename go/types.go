@@ -1850,6 +1850,16 @@ type CreateUserResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type CreateVariableInput struct {
+	// The key of the variable
+	Key string `json:"key"`
+	// Whether the variable is secret
+	Secret *bool `json:"secret,omitempty"`
+	// The value of the variable
+	Value                string         `json:"value"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type CreateVolumeRequestBody struct {
 	// Aggregate name where the volume will be created
 	Aggregate string `json:"aggregate"`
@@ -2516,30 +2526,32 @@ type GoogleFilestore struct {
 }
 
 type GoogleManagedLustre struct {
-	// Can be ephemeral or persistent
-	DeploymentType bool `json:"deploymentType"`
+	// Can be ephemeral or persistent.
+	DeploymentType *bool `json:"deploymentType,omitempty"`
 	// The description of the instance.
-	Description string `json:"description"`
+	Description *string `json:"description,omitempty"`
 	// The display name of the instance.
-	DisplayName string `json:"displayName"`
+	DisplayName *string `json:"displayName,omitempty"`
 	// The group the instance bills to.
-	Group string `json:"group"`
+	Group *string `json:"group,omitempty"`
 	// Identifier. The name of the instance.
 	Name string `json:"name"`
-	// The full name of the VPC network to which the instance is connected.
-	Performance int64 `json:"performance"`
-	// The gcp region of the instance
-	Region           string                 `json:"region"`
+	// The throughput in MBps/TiB of the instance.
+	Performance *int64 `json:"performance,omitempty"`
+	// The gcp region of the instance.
+	Region           *string                `json:"region,omitempty"`
 	RuntimeAlert     *RuntimeAlertInput     `json:"runtimeAlert,omitempty"`
 	SessionCostLimit *SessionCostLimitInput `json:"sessionCostLimit,omitempty"`
-	// The storage capacity of the instance in gibibytes (GiB)
-	Size int64 `json:"size"`
+	// When true, create and delete the cloud filesystem in one shot (legacy behavior). When false (default), the resource supports start/stop like AWS/Azure managed Lustre.
+	Sessionless *bool `json:"sessionless,omitempty"`
+	// The storage capacity of the instance in gibibytes (GiB).
+	Size *int64 `json:"size,omitempty"`
 	// The tags associated with the instance.
-	Tags string `json:"tags"`
+	Tags *string `json:"tags,omitempty"`
 	// The full name of the VPC network to which the instance is connected.
-	VpcNetwork string `json:"vpcNetwork"`
-	// The gcp location of the instance
-	Zone                 string         `json:"zone"`
+	VpcNetwork *string `json:"vpcNetwork,omitempty"`
+	// The gcp location of the instance.
+	Zone                 *string        `json:"zone,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2933,6 +2945,8 @@ type Instance struct {
 	Name string `json:"name"`
 	// The network name to which the Instance is attached.
 	Network string `json:"network"`
+	// Optional. When set for a raw CSP image, selects the startup script family (linux vs windows).
+	OsType *string `json:"osType,omitempty"`
 	// The region where the Instance will be provisioned.
 	Region           string                 `json:"region"`
 	RuntimeAlert     *RuntimeAlertInput     `json:"runtimeAlert,omitempty"`
@@ -4194,6 +4208,68 @@ type OpenstackSyncResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type OracleBucket struct {
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Name of the Oracle bucket
+	BucketName *string `json:"bucketName,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the Oracle bucket is in
+	Region           *string       `json:"region,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OracleBucketPar struct {
+	// Name of the Oracle bucket.
+	BucketName string `json:"bucketName"`
+	// The expiration time of the PAR URL.
+	Expiry time.Time `json:"expiry"`
+	// Object Storage namespace of the tenancy.
+	Namespace string `json:"namespace"`
+	// Region the Oracle bucket is in.
+	Region string `json:"region"`
+	// The Pre-Authenticated Request URL granting HTTP read/write access to the bucket.
+	URL                  string         `json:"url"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type OrgAiProviderResponse struct {
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
@@ -4308,16 +4384,6 @@ type Organization struct {
 	Name string `json:"name"`
 	// Whether the organization is a partner organization.
 	Partner              bool           `json:"partner"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type OrganizationVariable struct {
-	// The key of the variable
-	Key string `json:"key"`
-	// Whether the variable is secret or not
-	Secret *bool `json:"secret,omitempty"`
-	// The value of the variable
-	Value                *string        `json:"value"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4535,6 +4601,8 @@ type PermissionEntry struct {
 type PlatformMauResponse struct {
 	// MAU breakdown by organization
 	ByOrganization []OrgMauBreakdown `json:"byOrganization"`
+	// Daily active users across the platform
+	Daily []DailyActiveUsers `json:"daily"`
 	// End date of the query period
 	EndDate string `json:"endDate"`
 	// Start date of the query period
@@ -4631,6 +4699,8 @@ type PlatformSettingsAdmin struct {
 	EnableOnboarding bool `json:"enableOnboarding"`
 	// The expiration date of the platform license, if valid.
 	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
+	// License-level feature flags (e.g. selfService) extracted from the license JWT.
+	LicenseFeatures []string `json:"licenseFeatures"`
 	// Indicates if the license is in the grace period.
 	LicenseGracePeriod *bool `json:"licenseGracePeriod,omitempty"`
 	// Minimum agent semantic version. Agents below this version are rejected at handshake and disconnected when already connected. Empty disables enforcement.
@@ -5789,8 +5859,6 @@ type Snapshot struct {
 	Region string `json:"region"`
 	// Indicates if the snapshot is a root snapshot
 	Root bool `json:"root"`
-	// Lists the groups the snapshot is shared with, if any
-	Shared []Shared `json:"shared"`
 	// Size of the snapshot in bytes
 	Size int32 `json:"size"`
 	// Current provision status of the snapshot
@@ -6334,6 +6402,14 @@ type UpdateUserSidebarInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type UpdateVariableInput struct {
+	// Whether the variable is secret
+	Secret *bool `json:"secret,omitempty"`
+	// New variable value
+	Value                *string        `json:"value,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type UpdateWorkflowBody struct {
 	// Description of the workflow.
 	Description *string `json:"description,omitempty"`
@@ -6671,6 +6747,16 @@ type WorkflowRunsCleanupPreviewBody struct {
 	Count int64 `json:"count"`
 	// Workflow runs created before this date would be deleted
 	CutoffDate           time.Time      `json:"cutoffDate"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WorkflowVariable struct {
+	// The key of the variable
+	Key string `json:"key"`
+	// Whether the variable is secret
+	Secret bool `json:"secret"`
+	// The value of the variable (empty when secret)
+	Value                *string        `json:"value"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

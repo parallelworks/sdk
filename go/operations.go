@@ -6643,6 +6643,60 @@ func (c *Client) DeleteNetappOntapVolume(ctx context.Context, organization strin
 	return nil
 }
 
+// GetOracleBucket - Get Storage: Oracle bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an Oracle Object Storage bucket
+func (c *Client) GetOracleBucket(ctx context.Context, organization string, user string, name string) (*OracleBucket, error) {
+	path := "/api/organizations/{organization}/users/{user}/oracle-bucket/{name}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	var result OracleBucket
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ProvisionOracleBucket - Provision Storage: Oracle Bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Provisions an Oracle Object Storage bucket.
+func (c *Client) ProvisionOracleBucket(ctx context.Context, organization string, user string, name string, body BucketResource) (*BucketOutput, error) {
+	path := "/api/organizations/{organization}/users/{user}/oracle-bucket/{name}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	var result BucketOutput
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetParOracleBucket - Get Pre-Authenticated Request URL for Oracle bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a Pre-Authenticated Request (PAR) URL for an Oracle Object Storage bucket. The URL grants HTTP read/write access to the bucket for 12 hours.
+func (c *Client) GetParOracleBucket(ctx context.Context, organization string, user string, name string) (*OracleBucketPar, error) {
+	path := "/api/organizations/{organization}/users/{user}/oracle-bucket/{name}/par"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	var result OracleBucketPar
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // EnableOrgUserPreview - Enable a preview for an organization user
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6953,6 +7007,41 @@ func (c *Client) CopySnapshot(ctx context.Context, organization string, user str
 	return &result, nil
 }
 
+// GetSnapshotPermissions - Get snapshot permissions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the set of permissions granted on a snapshot.
+func (c *Client) GetSnapshotPermissions(ctx context.Context, organization string, user string, snapshotName string) (*SubjectPermissions, error) {
+	path := "/api/organizations/{organization}/users/{user}/snapshots/{snapshotName}/permissions"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "snapshotName", snapshotName)
+
+	var result SubjectPermissions
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateSnapshotPermissions - Update snapshot permissions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces the set of permissions granted on a snapshot.
+func (c *Client) UpdateSnapshotPermissions(ctx context.Context, organization string, user string, snapshotName string, body SubjectPermissions) error {
+	path := "/api/organizations/{organization}/users/{user}/snapshots/{snapshotName}/permissions"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "snapshotName", snapshotName)
+
+	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // CreateSSHPrivateKey - Create SSH Private Key
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -7124,7 +7213,7 @@ func (c *Client) GetOrganizationVariables(ctx context.Context, organization stri
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Creates a new variable for the organization.
-func (c *Client) CreateOrganizationVariable(ctx context.Context, organization string, body OrganizationVariable) (*map[string]any, error) {
+func (c *Client) CreateOrganizationVariable(ctx context.Context, organization string, body CreateVariableInput) (*map[string]any, error) {
 	path := "/api/organizations/{organization}/variables"
 	path = pathReplace(path, "organization", organization)
 
@@ -7156,7 +7245,7 @@ func (c *Client) DeleteOrganizationVariable(ctx context.Context, organization st
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Sets the specified variable for the organization.
-func (c *Client) SetOrganizationVariable(ctx context.Context, organization string, key string, body string) (*map[string]any, error) {
+func (c *Client) SetOrganizationVariable(ctx context.Context, organization string, key string, body UpdateVariableInput) (*map[string]any, error) {
 	path := "/api/organizations/{organization}/variables/{key}"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "key", key)
@@ -8636,6 +8725,67 @@ func (c *Client) GetWorkflowRunFile(ctx context.Context, slug string) (*string, 
 
 	var result string
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ListUserVariables - List workflow variables
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns all workflow variables for the current user.
+func (c *Client) ListUserVariables(ctx context.Context) (*map[string]any, error) {
+	path := "/api/workflow-variables"
+
+	var result map[string]any
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CreateUserVariable - Create workflow variable
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Creates a new workflow variable for the current user.
+func (c *Client) CreateUserVariable(ctx context.Context, body CreateVariableInput) (*WorkflowVariable, error) {
+	path := "/api/workflow-variables"
+
+	var result WorkflowVariable
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteUserVariable - Delete workflow variable
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes a workflow variable for the current user.
+func (c *Client) DeleteUserVariable(ctx context.Context, key string) error {
+	path := "/api/workflow-variables/{key}"
+	path = pathReplace(path, "key", key)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// UpdateUserVariable - Update workflow variable
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates an existing workflow variable for the current user.
+func (c *Client) UpdateUserVariable(ctx context.Context, key string, body UpdateVariableInput) (*WorkflowVariable, error) {
+	path := "/api/workflow-variables/{key}"
+	path = pathReplace(path, "key", key)
+
+	var result WorkflowVariable
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil

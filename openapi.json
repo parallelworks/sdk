@@ -5180,6 +5180,42 @@
         ],
         "type": "object"
       },
+      "CreateVariableInput": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "description": "The key of the variable",
+            "examples": [
+              "myvariable"
+            ],
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "type": "string"
+          },
+          "secret": {
+            "description": "Whether the variable is secret",
+            "examples": [
+              false
+            ],
+            "type": "boolean"
+          },
+          "value": {
+            "description": "The value of the variable",
+            "examples": [
+              "myvalue"
+            ],
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
       "CreateVolumeRequestBody": {
         "additionalProperties": false,
         "properties": {
@@ -7074,7 +7110,7 @@
         "additionalProperties": false,
         "properties": {
           "deploymentType": {
-            "description": "Can be ephemeral or persistent",
+            "description": "Can be ephemeral or persistent.",
             "type": "boolean"
           },
           "description": {
@@ -7096,7 +7132,7 @@
             "type": "string"
           },
           "performance": {
-            "description": "The full name of the VPC network to which the instance is connected.",
+            "description": "The throughput in MBps/TiB of the instance.",
             "enum": [
               125,
               250,
@@ -7107,7 +7143,7 @@
             "type": "integer"
           },
           "region": {
-            "description": "The gcp region of the instance",
+            "description": "The gcp region of the instance.",
             "type": "string"
           },
           "runtimeAlert": {
@@ -7118,8 +7154,12 @@
             "$ref": "#/components/schemas/SessionCostLimitInput",
             "description": "Session cost limit configuration."
           },
+          "sessionless": {
+            "description": "When true, create and delete the cloud filesystem in one shot (legacy behavior). When false (default), the resource supports start/stop like AWS/Azure managed Lustre.",
+            "type": "boolean"
+          },
           "size": {
-            "description": "The storage capacity of the instance in gibibytes (GiB)",
+            "description": "The storage capacity of the instance in gibibytes (GiB).",
             "format": "int64",
             "type": "integer"
           },
@@ -7132,22 +7172,12 @@
             "type": "string"
           },
           "zone": {
-            "description": "The gcp location of the instance",
+            "description": "The gcp location of the instance.",
             "type": "string"
           }
         },
         "required": [
-          "name",
-          "displayName",
-          "description",
-          "tags",
-          "group",
-          "performance",
-          "size",
-          "vpcNetwork",
-          "region",
-          "zone",
-          "deploymentType"
+          "name"
         ],
         "type": "object"
       },
@@ -8268,6 +8298,14 @@
               "my-network"
             ],
             "minLength": 1,
+            "type": "string"
+          },
+          "osType": {
+            "description": "Optional. When set for a raw CSP image, selects the startup script family (linux vs windows).",
+            "enum": [
+              "linux",
+              "windows"
+            ],
             "type": "string"
           },
           "region": {
@@ -12124,6 +12162,173 @@
         ],
         "type": "object"
       },
+      "OracleBucket": {
+        "additionalProperties": false,
+        "properties": {
+          "attachedTo": {
+            "description": "Resources the storage is attached to.",
+            "items": {
+              "$ref": "#/components/schemas/StorageAttachment"
+            },
+            "type": "array"
+          },
+          "bucketName": {
+            "description": "Name of the Oracle bucket",
+            "type": "string"
+          },
+          "csp": {
+            "description": "Cloud service provider of the storage.",
+            "type": "string"
+          },
+          "currentlyProvisioning": {
+            "description": "Indicates if the storage is currently being provisioned.",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "Description of the storage.",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "Display name of the storage.",
+            "type": "string"
+          },
+          "govCloud": {
+            "description": "Indicates if the storage is in a GovCloud environment.",
+            "type": "boolean"
+          },
+          "group": {
+            "description": "Group the storage bills to.",
+            "type": "string"
+          },
+          "id": {
+            "description": "ID of the storage.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL of the icon used for the storage. This will be empty if the default image is used.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the storage.",
+            "type": "string"
+          },
+          "network": {
+            "description": "Network the storage uses to provision.",
+            "type": "string"
+          },
+          "provisionError": {
+            "description": "Error message if the storage provisioning failed.",
+            "type": "string"
+          },
+          "provisioned": {
+            "description": "Indicates if the storage has been provisioned.",
+            "type": "boolean"
+          },
+          "region": {
+            "description": "Region the Oracle bucket is in",
+            "type": "string"
+          },
+          "runtimeAlert": {
+            "$ref": "#/components/schemas/RunAlert",
+            "description": "Runtime alert information for the storage."
+          },
+          "sessionCostLimit": {
+            "$ref": "#/components/schemas/SessionAlert",
+            "description": "Session cost limit information for the storage."
+          },
+          "sessionNumber": {
+            "description": "Session number of the storage.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "shared": {
+            "description": "Sharing permissions of the storage.",
+            "items": {
+              "$ref": "#/components/schemas/Shared"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "status": {
+            "description": "Current status of the storage.",
+            "type": "string"
+          },
+          "tags": {
+            "description": "Tags associated with the storage.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": {
+            "description": "Type of storage.",
+            "type": "string"
+          },
+          "user": {
+            "description": "User associated with the storage.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "user",
+          "name",
+          "csp",
+          "type",
+          "shared",
+          "currentlyProvisioning",
+          "provisioned"
+        ],
+        "type": "object"
+      },
+      "OracleBucketPAR": {
+        "additionalProperties": false,
+        "properties": {
+          "bucketName": {
+            "description": "Name of the Oracle bucket.",
+            "examples": [
+              "my-bucket"
+            ],
+            "type": "string"
+          },
+          "expiry": {
+            "description": "The expiration time of the PAR URL.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "namespace": {
+            "description": "Object Storage namespace of the tenancy.",
+            "examples": [
+              "myns"
+            ],
+            "type": "string"
+          },
+          "region": {
+            "description": "Region the Oracle bucket is in.",
+            "examples": [
+              "us-ashburn-1"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "description": "The Pre-Authenticated Request URL granting HTTP read/write access to the bucket.",
+            "examples": [
+              "https://objectstorage.us-ashburn-1.oraclecloud.com/p/abc123/n/myns/b/mybucket/o/"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "bucketName",
+          "namespace",
+          "region",
+          "expiry"
+        ],
+        "type": "object"
+      },
       "OrgAIProviderResponse": {
         "additionalProperties": false,
         "properties": {
@@ -12417,40 +12622,6 @@
           "displayName",
           "members",
           "partner"
-        ],
-        "type": "object"
-      },
-      "OrganizationVariable": {
-        "additionalProperties": false,
-        "properties": {
-          "key": {
-            "description": "The key of the variable",
-            "examples": [
-              "myvariable"
-            ],
-            "type": "string"
-          },
-          "secret": {
-            "description": "Whether the variable is secret or not",
-            "examples": [
-              false
-            ],
-            "type": "boolean"
-          },
-          "value": {
-            "description": "The value of the variable",
-            "examples": [
-              "myvalue"
-            ],
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        },
-        "required": [
-          "key",
-          "value"
         ],
         "type": "object"
       },
@@ -13070,6 +13241,16 @@
               "null"
             ]
           },
+          "daily": {
+            "description": "Daily active users across the platform",
+            "items": {
+              "$ref": "#/components/schemas/DailyActiveUsers"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "endDate": {
             "description": "End date of the query period",
             "type": "string"
@@ -13088,7 +13269,8 @@
           "totalMAU",
           "startDate",
           "endDate",
-          "byOrganization"
+          "byOrganization",
+          "daily"
         ],
         "type": "object"
       },
@@ -13356,6 +13538,16 @@
             "format": "date-time",
             "type": "string"
           },
+          "licenseFeatures": {
+            "description": "License-level feature flags (e.g. selfService) extracted from the license JWT.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "licenseGracePeriod": {
             "description": "Indicates if the license is in the grace period.",
             "type": "boolean"
@@ -13408,6 +13600,7 @@
           }
         },
         "required": [
+          "licenseFeatures",
           "enableOnboarding",
           "sentryEnabled",
           "sentryReplayUnmask",
@@ -16870,16 +17063,6 @@
             "description": "Indicates if the snapshot is a root snapshot",
             "type": "boolean"
           },
-          "shared": {
-            "description": "Lists the groups the snapshot is shared with, if any",
-            "items": {
-              "$ref": "#/components/schemas/Shared"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
           "size": {
             "description": "Size of the snapshot in bytes",
             "format": "int32",
@@ -16898,8 +17081,7 @@
           "status",
           "size",
           "region",
-          "root",
-          "shared"
+          "root"
         ],
         "type": "object"
       },
@@ -18404,6 +18586,22 @@
         ],
         "type": "object"
       },
+      "UpdateVariableInput": {
+        "additionalProperties": false,
+        "properties": {
+          "secret": {
+            "description": "Whether the variable is secret",
+            "type": "boolean"
+          },
+          "value": {
+            "description": "New variable value",
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "UpdateWorkflowBody": {
         "additionalProperties": false,
         "properties": {
@@ -19393,6 +19591,41 @@
         "required": [
           "count",
           "cutoffDate"
+        ],
+        "type": "object"
+      },
+      "WorkflowVariable": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "description": "The key of the variable",
+            "examples": [
+              "myvariable"
+            ],
+            "type": "string"
+          },
+          "secret": {
+            "description": "Whether the variable is secret",
+            "examples": [
+              false
+            ],
+            "type": "boolean"
+          },
+          "value": {
+            "description": "The value of the variable (empty when secret)",
+            "examples": [
+              "myvalue"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "value",
+          "secret"
         ],
         "type": "object"
       },
@@ -40672,6 +40905,241 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/oracle-bucket/{name}": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns an Oracle Object Storage bucket",
+        "operationId": "get-oracle-bucket",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OracleBucket"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Storage: Oracle bucket",
+        "tags": [
+          "Buckets",
+          "Storage"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nProvisions an Oracle Object Storage bucket.",
+        "operationId": "provision-oracle-bucket",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BucketResource"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BucketOutput"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Provision Storage: Oracle Bucket",
+        "tags": [
+          "Buckets",
+          "Storage"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/oracle-bucket/{name}/par": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a Pre-Authenticated Request (PAR) URL for an Oracle Object Storage bucket. The URL grants HTTP read/write access to the bucket for 12 hours.",
+        "operationId": "get-par-oracle-bucket",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OracleBucketPAR"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Pre-Authenticated Request URL for Oracle bucket",
+        "tags": [
+          "Buckets"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/previews/{flag}": {
       "delete": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDisables a preview for a specific user within an organization. Requires the org:users role. Platform-level previews cannot be disabled.",
@@ -41878,6 +42346,147 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/snapshots/{snapshotName}/permissions": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the set of permissions granted on a snapshot.",
+        "operationId": "get-snapshot-permissions",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the snapshot to read permissions for",
+            "in": "path",
+            "name": "snapshotName",
+            "required": true,
+            "schema": {
+              "description": "Name of the snapshot to read permissions for",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectPermissions"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get snapshot permissions",
+        "tags": [
+          "Snapshots"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces the set of permissions granted on a snapshot.",
+        "operationId": "update-snapshot-permissions",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the snapshot to update permissions for",
+            "in": "path",
+            "name": "snapshotName",
+            "required": true,
+            "schema": {
+              "description": "Name of the snapshot to update permissions for",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubjectPermissions"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update snapshot permissions",
+        "tags": [
+          "Snapshots"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/ssh-private-keys": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdd an SSH Private Key, allowing it to be used for connecting to existing clusters",
@@ -42475,7 +43084,8 @@
                 "google-disk",
                 "google-bucket",
                 "google-filestore",
-                "google-managedlustre"
+                "google-managedlustre",
+                "oracle-bucket"
               ],
               "examples": [
                 "aws-lustre"
@@ -42534,7 +43144,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": {
-                    "$ref": "#/components/schemas/OrganizationVariable"
+                    "$ref": "#/components/schemas/WorkflowVariable"
                   },
                   "type": "object"
                 }
@@ -42580,7 +43190,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OrganizationVariable"
+                "$ref": "#/components/schemas/CreateVariableInput"
               }
             }
           },
@@ -42592,7 +43202,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": {
-                    "$ref": "#/components/schemas/OrganizationVariable"
+                    "$ref": "#/components/schemas/WorkflowVariable"
                   },
                   "type": "object"
                 }
@@ -42636,13 +43246,15 @@
             }
           },
           {
+            "description": "Variable key",
             "in": "path",
             "name": "key",
             "required": true,
             "schema": {
-              "examples": [
-                "myvariable"
-              ],
+              "description": "Variable key",
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_-]+$",
               "type": "string"
             }
           }
@@ -42685,13 +43297,15 @@
             }
           },
           {
+            "description": "Variable key",
             "in": "path",
             "name": "key",
             "required": true,
             "schema": {
-              "examples": [
-                "myvariable"
-              ],
+              "description": "Variable key",
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_-]+$",
               "type": "string"
             }
           }
@@ -42700,11 +43314,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "description": "The new value for the variable",
-                "examples": [
-                  "myvalue"
-                ],
-                "type": "string"
+                "$ref": "#/components/schemas/UpdateVariableInput"
               }
             }
           },
@@ -42716,7 +43326,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": {
-                    "$ref": "#/components/schemas/OrganizationVariable"
+                    "$ref": "#/components/schemas/WorkflowVariable"
                   },
                   "type": "object"
                 }
@@ -46673,6 +47283,176 @@
         "summary": "Get Workflow Run File",
         "tags": [
           "Workflow Runs"
+        ]
+      }
+    },
+    "/api/workflow-variables": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns all workflow variables for the current user.",
+        "operationId": "list-user-variables",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/WorkflowVariable"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List workflow variables",
+        "tags": [
+          "Workflow Variables"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nCreates a new workflow variable for the current user.",
+        "operationId": "create-user-variable",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVariableInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowVariable"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create workflow variable",
+        "tags": [
+          "Workflow Variables"
+        ]
+      }
+    },
+    "/api/workflow-variables/{key}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDeletes a workflow variable for the current user.",
+        "operationId": "delete-user-variable",
+        "parameters": [
+          {
+            "description": "Variable key",
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "description": "Variable key",
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_-]+$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete workflow variable",
+        "tags": [
+          "Workflow Variables"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUpdates an existing workflow variable for the current user.",
+        "operationId": "update-user-variable",
+        "parameters": [
+          {
+            "description": "Variable key",
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "description": "Variable key",
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_-]+$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVariableInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowVariable"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update workflow variable",
+        "tags": [
+          "Workflow Variables"
         ]
       }
     },
