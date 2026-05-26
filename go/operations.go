@@ -3491,6 +3491,22 @@ func (c *Client) PatchGroupRoles(ctx context.Context, organization string, group
 	return &result, nil
 }
 
+// DiscoverKubernetesCaCert - Discover Kubernetes CA certificate
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Automatically resolves the CA certificate for the provided Kubernetes API endpoint.
+func (c *Client) DiscoverKubernetesCaCert(ctx context.Context, organization string, body DiscoverCaCertInputBody) (*DiscoverCaCertOutputBody, error) {
+	path := "/api/organizations/{organization}/kubernetes/ca-cert"
+	path = pathReplace(path, "organization", organization)
+
+	var result DiscoverCaCertOutputBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // ListKubernetesConfigsParams contains optional parameters for the ListKubernetesConfigs operation.
 type ListKubernetesConfigsParams struct {
 	// Filter by cluster names

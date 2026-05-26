@@ -3756,7 +3756,7 @@
         "additionalProperties": false,
         "properties": {
           "createdAt": {
-            "description": "The node creation timestamp in milliseconds",
+            "description": "The node creation timestamp",
             "format": "date-time",
             "type": "string"
           },
@@ -3791,8 +3791,7 @@
           "status",
           "publicIp",
           "privateIp",
-          "type",
-          "createdAt"
+          "type"
         ],
         "type": "object"
       },
@@ -5679,6 +5678,35 @@
             ]
           }
         },
+        "type": "object"
+      },
+      "DiscoverCACertInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "endpoint": {
+            "description": "Kubernetes API endpoint to dial",
+            "examples": [
+              "https://k8s.example.com:6443"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "endpoint"
+        ],
+        "type": "object"
+      },
+      "DiscoverCACertOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "caCert": {
+            "description": "PEM-encoded CA certificate served by the endpoint",
+            "type": "string"
+          }
+        },
+        "required": [
+          "caCert"
+        ],
         "type": "object"
       },
       "DockerWorkspaceSettings": {
@@ -13559,7 +13587,7 @@
             "type": "string"
           },
           "licenseFeatures": {
-            "description": "License-level feature flags (e.g. selfService) extracted from the license JWT.",
+            "description": "License-level feature previews (e.g. selfService).",
             "items": {
               "type": "string"
             },
@@ -17096,10 +17124,6 @@
             "description": "Name of the snapshot",
             "type": "string"
           },
-          "namespace": {
-            "description": "User who created the snapshot",
-            "type": "string"
-          },
           "region": {
             "description": "Region where the snapshot is stored",
             "type": "string"
@@ -17116,12 +17140,16 @@
           "status": {
             "description": "Current provision status of the snapshot",
             "type": "string"
+          },
+          "user": {
+            "description": "Username of the snapshot owner",
+            "type": "string"
           }
         },
         "required": [
           "id",
           "name",
-          "namespace",
+          "user",
           "csp",
           "status",
           "size",
@@ -29583,6 +29611,63 @@
         "summary": "Update Group Roles",
         "tags": [
           "Groups"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/kubernetes/ca-cert": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAutomatically resolves the CA certificate for the provided Kubernetes API endpoint.",
+        "operationId": "discover-kubernetes-ca-cert",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscoverCACertInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoverCACertOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Discover Kubernetes CA certificate",
+        "tags": [
+          "Kubernetes"
         ]
       }
     },

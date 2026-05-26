@@ -1346,8 +1346,8 @@ type ClusterMountInfoResponse struct {
 }
 
 type ClusterNodeResponse struct {
-	// The node creation timestamp in milliseconds
-	CreatedAt time.Time `json:"createdAt"`
+	// The node creation timestamp
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// The node ID
 	ID string `json:"id"`
 	// The node hostname
@@ -2030,6 +2030,18 @@ type DeltaMessage struct {
 	ToolCallID *string `json:"tool_call_id,omitempty"`
 	// Tool calls made by the assistant
 	ToolCalls            []ToolCall     `json:"tool_calls,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type DiscoverCaCertInputBody struct {
+	// Kubernetes API endpoint to dial
+	Endpoint             string         `json:"endpoint"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type DiscoverCaCertOutputBody struct {
+	// PEM-encoded CA certificate served by the endpoint
+	CaCert               string         `json:"caCert"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4707,7 +4719,7 @@ type PlatformSettingsAdmin struct {
 	EnableOnboarding bool `json:"enableOnboarding"`
 	// The expiration date of the platform license, if valid.
 	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
-	// License-level feature flags (e.g. selfService) extracted from the license JWT.
+	// License-level feature previews (e.g. selfService).
 	LicenseFeatures []string `json:"licenseFeatures"`
 	// Indicates if the license is in the grace period.
 	LicenseGracePeriod *bool `json:"licenseGracePeriod,omitempty"`
@@ -5869,8 +5881,6 @@ type Snapshot struct {
 	ID string `json:"id"`
 	// Name of the snapshot
 	Name string `json:"name"`
-	// User who created the snapshot
-	Namespace string `json:"namespace"`
 	// Region where the snapshot is stored
 	Region string `json:"region"`
 	// Indicates if the snapshot is a root snapshot
@@ -5878,7 +5888,9 @@ type Snapshot struct {
 	// Size of the snapshot in bytes
 	Size int32 `json:"size"`
 	// Current provision status of the snapshot
-	Status               string         `json:"status"`
+	Status string `json:"status"`
+	// Username of the snapshot owner
+	User                 string         `json:"user"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
