@@ -666,7 +666,7 @@
             "type": "string"
           },
           "sidebarOptions": {
-            "description": "Options for the sidebar.",
+            "description": "Resolved sidebar options. User customization wins; otherwise the org's defaultSidebarItems; otherwise null so the frontend can apply built-in defaults.",
             "items": {
               "type": "string"
             },
@@ -694,7 +694,8 @@
           "organizationAdmin",
           "organizationRoles",
           "email",
-          "previews"
+          "previews",
+          "sidebarOptions"
         ],
         "type": "object"
       },
@@ -4262,6 +4263,32 @@
         ],
         "type": "object"
       },
+      "CoreWeaveUserExt": {
+        "additionalProperties": false,
+        "properties": {
+          "sunkPosixGroupId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sunkPosixUserId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sunkPosixUsername": {
+            "type": "string"
+          },
+          "sunkSshKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
       "CostTrackingPricesBody": {
         "additionalProperties": false,
         "properties": {
@@ -5051,6 +5078,68 @@
         ],
         "type": "object"
       },
+      "CreateSCIMTokenRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "duration": {
+            "description": "Days until the token expires; omit or 0 for no expiration",
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Display name for the SCIM token (unique per organization)",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "CreateSCIMTokenResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "description": "When the token was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiration": {
+            "description": "When the token expires, if applicable.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the SCIM token.",
+            "type": "string"
+          },
+          "keyHint": {
+            "description": "Truncated preview for identification.",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "description": "When the token was last used.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name for the SCIM token.",
+            "type": "string"
+          },
+          "token": {
+            "description": "The full SCIM bearer token (only shown once; store it now).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "id",
+          "name",
+          "created"
+        ],
+        "type": "object"
+      },
       "CreateSSHPublicKeyInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -5778,6 +5867,24 @@
         },
         "required": [
           "newName"
+        ],
+        "type": "object"
+      },
+      "Email": {
+        "additionalProperties": false,
+        "properties": {
+          "primary": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
         ],
         "type": "object"
       },
@@ -7335,6 +7442,27 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "GroupMember": {
+        "additionalProperties": false,
+        "properties": {
+          "$ref": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
         "type": "object"
       },
       "GroupRolesBody": {
@@ -9220,6 +9348,47 @@
         ],
         "type": "object"
       },
+      "ListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "Resources": {
+            "items": {},
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "itemsPerPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "schemas": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "startIndex": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalResults": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "schemas",
+          "totalResults",
+          "startIndex",
+          "itemsPerPage",
+          "Resources"
+        ],
+        "type": "object"
+      },
       "ListRoleBindingsOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -10406,6 +10575,31 @@
         ],
         "type": "object"
       },
+      "Meta": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastModified": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "resourceType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "resourceType",
+          "created",
+          "lastModified"
+        ],
+        "type": "object"
+      },
       "MetricEntry": {
         "additionalProperties": false,
         "properties": {
@@ -10832,6 +11026,21 @@
           "clusterPath",
           "workspacePath"
         ],
+        "type": "object"
+      },
+      "Name": {
+        "additionalProperties": false,
+        "properties": {
+          "familyName": {
+            "type": "string"
+          },
+          "formatted": {
+            "type": "string"
+          },
+          "givenName": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "NamespaceResponse": {
@@ -15883,6 +16092,167 @@
         ],
         "type": "object"
       },
+      "SCIMGroup": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/GroupMember"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "schemas": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "schemas",
+          "id",
+          "meta",
+          "displayName"
+        ],
+        "type": "object"
+      },
+      "SCIMSettingsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether SCIM is enabled for this organization.",
+            "type": "boolean"
+          },
+          "enforceMaxTTL": {
+            "description": "Whether the platform enforces a maximum token expiration.",
+            "type": "boolean"
+          },
+          "maxExpirationDays": {
+            "description": "Maximum allowed token expiration in days, if enforced.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "enabled",
+          "enforceMaxTTL"
+        ],
+        "type": "object"
+      },
+      "SCIMTokenResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "description": "When the token was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiration": {
+            "description": "When the token expires, if applicable.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the SCIM token.",
+            "type": "string"
+          },
+          "keyHint": {
+            "description": "Truncated preview for identification.",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "description": "When the token was last used.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name for the SCIM token.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "created"
+        ],
+        "type": "object"
+      },
+      "SCIMUser": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "emails": {
+            "items": {
+              "$ref": "#/components/schemas/Email"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/UserGroupRef"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "name": {
+            "$ref": "#/components/schemas/Name"
+          },
+          "schemas": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "urn:coreweave:params:scim:schemas:extension:coreweave:2.0:CoreWeaveUser": {
+            "$ref": "#/components/schemas/CoreWeaveUserExt"
+          },
+          "userName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemas",
+          "id",
+          "meta",
+          "userName",
+          "active"
+        ],
+        "type": "object"
+      },
       "SSHPublicKey": {
         "additionalProperties": false,
         "properties": {
@@ -18449,6 +18819,25 @@
         },
         "type": "object"
       },
+      "UpdateOrgSidebarInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "defaultSidebar": {
+            "description": "The full list of sidebar option IDs that should be enabled by default for users in this organization. Pass an empty array to show only unhideable items.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "defaultSidebar"
+        ],
+        "type": "object"
+      },
       "UpdatePermissionInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -18563,6 +18952,19 @@
         ],
         "type": "object"
       },
+      "UpdateSCIMSettingsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether to enable SCIM for this organization.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
       "UpdateSentrySettingsBody": {
         "additionalProperties": false,
         "properties": {
@@ -18643,19 +19045,18 @@
       "UpdateUserSidebarInputBody": {
         "additionalProperties": false,
         "properties": {
-          "sidebarOptions": {
-            "description": "Array of sidebar option IDs to display. Send null to reset to defaults.",
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
+          "enabled": {
+            "description": "Whether to enable (true) or disable (false) the option.",
+            "type": "boolean"
+          },
+          "option": {
+            "description": "Sidebar option ID to add or remove.",
+            "type": "string"
           }
         },
         "required": [
-          "sidebarOptions"
+          "option",
+          "enabled"
         ],
         "type": "object"
       },
@@ -18937,6 +19338,24 @@
         "required": [
           "username",
           "activeDays"
+        ],
+        "type": "object"
+      },
+      "UserGroupRef": {
+        "additionalProperties": false,
+        "properties": {
+          "display": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
         ],
         "type": "object"
       },
@@ -34908,6 +35327,1072 @@
         ]
       }
     },
+    "/api/organizations/{organization}/scim": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nGet SCIM provisioning settings for an organization.",
+        "operationId": "get-scim-settings",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SCIMSettingsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get SCIM settings",
+        "tags": [
+          "SCIM"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nEnable or disable SCIM provisioning for an organization.",
+        "operationId": "update-scim-settings",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSCIMSettingsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SCIMSettingsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update SCIM settings",
+        "tags": [
+          "SCIM"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/scim-tokens": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nList SCIM bearer tokens for an organization. Requires org-admin.",
+        "operationId": "list-scim-tokens",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SCIMTokenResponse"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List SCIM tokens",
+        "tags": [
+          "SCIM"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This route requires browser session authentication and cannot be accessed via API keys.\n\nMint a new SCIM bearer token. The plaintext token is returned once and never again.",
+        "operationId": "create-scim-token",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSCIMTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSCIMTokenResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create SCIM token",
+        "tags": [
+          "SCIM"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/scim-tokens/{id}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRevoke a SCIM bearer token.",
+        "operationId": "delete-scim-token",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "SCIM token id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "SCIM token id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Revoke SCIM token",
+        "tags": [
+          "SCIM"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/scim/v2/Groups": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nList SCIM groups for an organization.",
+        "operationId": "scim-groups-list",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "startIndex",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM list groups",
+        "tags": [
+          "SCIM"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRead-only SCIM: writes are not supported.",
+        "operationId": "scim-groups-create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM create group (not supported)",
+        "tags": [
+          "SCIM"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/scim/v2/Groups/{id}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRead-only SCIM: writes are not supported.",
+        "operationId": "scim-group-delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM delete group (not supported)",
+        "tags": [
+          "SCIM"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nFetch a single SCIM group by id.",
+        "operationId": "scim-group-get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SCIMGroup"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM get group",
+        "tags": [
+          "SCIM"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRead-only SCIM: writes are not supported.",
+        "operationId": "scim-group-patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM patch group (not supported)",
+        "tags": [
+          "SCIM"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRead-only SCIM: writes are not supported.",
+        "operationId": "scim-group-replace",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM replace group (not supported)",
+        "tags": [
+          "SCIM"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/scim/v2/ResourceTypes": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSCIM 2.0 ResourceTypes discovery.",
+        "operationId": "scim-resource-types",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM ResourceTypes",
+        "tags": [
+          "SCIM"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/scim/v2/Schemas": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSCIM 2.0 Schemas discovery (core User/Group + CoreWeave extension).",
+        "operationId": "scim-schemas",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM Schemas",
+        "tags": [
+          "SCIM"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/scim/v2/ServiceProviderConfig": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSCIM 2.0 ServiceProviderConfig (capabilities discovery).",
+        "operationId": "scim-service-provider-config",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM ServiceProviderConfig",
+        "tags": [
+          "SCIM"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/scim/v2/Users": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nList SCIM users for an organization.",
+        "operationId": "scim-users-list",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "SCIM filter expression (userName/externalId/displayName eq)",
+            "explode": false,
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "description": "SCIM filter expression (userName/externalId/displayName eq)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated attribute paths to include",
+            "explode": false,
+            "in": "query",
+            "name": "attributes",
+            "schema": {
+              "description": "Comma-separated attribute paths to include",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated attribute paths to exclude",
+            "explode": false,
+            "in": "query",
+            "name": "excludedAttributes",
+            "schema": {
+              "description": "Comma-separated attribute paths to exclude",
+              "type": "string"
+            }
+          },
+          {
+            "description": "1-based start index for pagination",
+            "explode": false,
+            "in": "query",
+            "name": "startIndex",
+            "schema": {
+              "description": "1-based start index for pagination",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page size (max 200)",
+            "explode": false,
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "description": "Page size (max 200)",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM list users",
+        "tags": [
+          "SCIM"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRead-only SCIM: writes are not supported.",
+        "operationId": "scim-users-create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM create user (not supported)",
+        "tags": [
+          "SCIM"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/scim/v2/Users/{id}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRead-only SCIM: writes are not supported.",
+        "operationId": "scim-user-delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM delete user (not supported)",
+        "tags": [
+          "SCIM"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nFetch a single SCIM user by id.",
+        "operationId": "scim-user-get",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "User id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "User id",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "attributes",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "excludedAttributes",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SCIMUser"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM get user",
+        "tags": [
+          "SCIM"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRead-only SCIM: writes are not supported.",
+        "operationId": "scim-user-patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM patch user (not supported)",
+        "tags": [
+          "SCIM"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRead-only SCIM: writes are not supported.",
+        "operationId": "scim-user-replace",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "SCIM replace user (not supported)",
+        "tags": [
+          "SCIM"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/sidebar": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nClears the organization's default sidebar items so users fall back to platform defaults.",
+        "operationId": "reset-organization-sidebar",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Reset organization default sidebar",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces the organization's default sidebar items.",
+        "operationId": "update-organization-sidebar",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrgSidebarInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update organization default sidebar",
+        "tags": [
+          "Organization"
+        ]
+      }
+    },
     "/api/organizations/{organization}/theme": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the current theme that is set for the organization. This endpoint is public to support org-specific login pages.",
@@ -46864,8 +48349,31 @@
       }
     },
     "/api/user/sidebar": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nClears the current user's stored sidebar preferences and reverts to defaults.",
+        "operationId": "reset-user-sidebar",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Reset user sidebar options",
+        "tags": [
+          "User Settings"
+        ]
+      },
       "patch": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUpdates the current user's sidebar visibility preferences. Send null to reset to defaults.",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUpdates the current user's sidebar visibility preferences.",
         "operationId": "update-user-sidebar",
         "requestBody": {
           "content": {
@@ -47042,6 +48550,49 @@
         "tags": [
           "Authentication"
         ]
+      }
+    },
+    "/api/v2/sshpublickeys": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDeprecated route. Use /api/ssh-public-keys.",
+        "operationId": "create-ssh-public-key-legacy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSSHPublicKeyInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SSHPublicKey"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add an SSH public key (legacy path)",
+        "tags": [
+          "User Settings"
+        ],
+        "x-internal": true
       }
     },
     "/api/v2/users/{username}/sshpublickeys": {
@@ -48414,6 +49965,10 @@
     {
       "description": "Endpoints related to resource group management",
       "name": "Resource Groups"
+    },
+    {
+      "description": "SCIM 2.0 read-only provisioning endpoints (users, groups, SSH keys)",
+      "name": "SCIM"
     },
     {
       "description": "Endpoints related to sessions",

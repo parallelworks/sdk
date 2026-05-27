@@ -5070,6 +5070,416 @@ func (c *Client) ListResourceGroups(ctx context.Context, organization string, op
 	return &result, nil
 }
 
+// GetScimSettings - Get SCIM settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Get SCIM provisioning settings for an organization.
+func (c *Client) GetScimSettings(ctx context.Context, organization string) (*ScimSettingsResponse, error) {
+	path := "/api/organizations/{organization}/scim"
+	path = pathReplace(path, "organization", organization)
+
+	var result ScimSettingsResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateScimSettings - Update SCIM settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Enable or disable SCIM provisioning for an organization.
+func (c *Client) UpdateScimSettings(ctx context.Context, organization string, body UpdateScimSettingsInputBody) (*ScimSettingsResponse, error) {
+	path := "/api/organizations/{organization}/scim"
+	path = pathReplace(path, "organization", organization)
+
+	var result ScimSettingsResponse
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ListScimTokens - List SCIM tokens
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// List SCIM bearer tokens for an organization. Requires org-admin.
+func (c *Client) ListScimTokens(ctx context.Context, organization string) (*[]ScimTokenResponse, error) {
+	path := "/api/organizations/{organization}/scim-tokens"
+	path = pathReplace(path, "organization", organization)
+
+	var result []ScimTokenResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CreateScimToken - Create SCIM token
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This route requires browser session authentication and cannot be accessed via API keys.
+//
+// Mint a new SCIM bearer token. The plaintext token is returned once and never again.
+func (c *Client) CreateScimToken(ctx context.Context, organization string, body CreateScimTokenRequest) (*CreateScimTokenResponseBody, error) {
+	path := "/api/organizations/{organization}/scim-tokens"
+	path = pathReplace(path, "organization", organization)
+
+	var result CreateScimTokenResponseBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteScimToken - Revoke SCIM token
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Revoke a SCIM bearer token.
+func (c *Client) DeleteScimToken(ctx context.Context, organization string, id string) error {
+	path := "/api/organizations/{organization}/scim-tokens/{id}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "id", id)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// ScimGroupsListParams contains optional parameters for the ScimGroupsList operation.
+type ScimGroupsListParams struct {
+	Filter     *string `json:"filter,omitempty"`
+	StartIndex *int64  `json:"startIndex,omitempty"`
+	Count      *int64  `json:"count,omitempty"`
+}
+
+// ScimGroupsList - SCIM list groups
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// List SCIM groups for an organization.
+func (c *Client) ScimGroupsList(ctx context.Context, organization string, opts ...ScimGroupsListParams) (*ListResponse, error) {
+	path := "/api/organizations/{organization}/scim/v2/Groups"
+	path = pathReplace(path, "organization", organization)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "filter", params.Filter)
+		addQueryParam(queryValues, "startIndex", params.StartIndex)
+		addQueryParam(queryValues, "count", params.Count)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result ListResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ScimGroupsCreate - SCIM create group (not supported)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Read-only SCIM: writes are not supported.
+func (c *Client) ScimGroupsCreate(ctx context.Context, organization string) error {
+	path := "/api/organizations/{organization}/scim/v2/Groups"
+	path = pathReplace(path, "organization", organization)
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// ScimGroupGet - SCIM get group
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Fetch a single SCIM group by id.
+func (c *Client) ScimGroupGet(ctx context.Context, organization string, id string) (*ScimGroup, error) {
+	path := "/api/organizations/{organization}/scim/v2/Groups/{id}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "id", id)
+
+	var result ScimGroup
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ScimGroupReplace - SCIM replace group (not supported)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Read-only SCIM: writes are not supported.
+func (c *Client) ScimGroupReplace(ctx context.Context, organization string, id string) error {
+	path := "/api/organizations/{organization}/scim/v2/Groups/{id}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "id", id)
+
+	if err := c.do(ctx, "PUT", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// ScimGroupDelete - SCIM delete group (not supported)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Read-only SCIM: writes are not supported.
+func (c *Client) ScimGroupDelete(ctx context.Context, organization string, id string) error {
+	path := "/api/organizations/{organization}/scim/v2/Groups/{id}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "id", id)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// ScimGroupPatch - SCIM patch group (not supported)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Read-only SCIM: writes are not supported.
+func (c *Client) ScimGroupPatch(ctx context.Context, organization string, id string) error {
+	path := "/api/organizations/{organization}/scim/v2/Groups/{id}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "id", id)
+
+	if err := c.do(ctx, "PATCH", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// ScimResourceTypes - SCIM ResourceTypes
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// SCIM 2.0 ResourceTypes discovery.
+func (c *Client) ScimResourceTypes(ctx context.Context, organization string) (*map[string]any, error) {
+	path := "/api/organizations/{organization}/scim/v2/ResourceTypes"
+	path = pathReplace(path, "organization", organization)
+
+	var result map[string]any
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ScimSchemas - SCIM Schemas
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// SCIM 2.0 Schemas discovery (core User/Group + CoreWeave extension).
+func (c *Client) ScimSchemas(ctx context.Context, organization string) (*map[string]any, error) {
+	path := "/api/organizations/{organization}/scim/v2/Schemas"
+	path = pathReplace(path, "organization", organization)
+
+	var result map[string]any
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ScimServiceProviderConfig - SCIM ServiceProviderConfig
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// SCIM 2.0 ServiceProviderConfig (capabilities discovery).
+func (c *Client) ScimServiceProviderConfig(ctx context.Context, organization string) (*map[string]any, error) {
+	path := "/api/organizations/{organization}/scim/v2/ServiceProviderConfig"
+	path = pathReplace(path, "organization", organization)
+
+	var result map[string]any
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ScimUsersListParams contains optional parameters for the ScimUsersList operation.
+type ScimUsersListParams struct {
+	// SCIM filter expression (userName/externalId/displayName eq)
+	Filter *string `json:"filter,omitempty"`
+	// Comma-separated attribute paths to include
+	Attributes *string `json:"attributes,omitempty"`
+	// Comma-separated attribute paths to exclude
+	ExcludedAttributes *string `json:"excludedAttributes,omitempty"`
+	// 1-based start index for pagination
+	StartIndex *int64 `json:"startIndex,omitempty"`
+	// Page size (max 200)
+	Count *int64 `json:"count,omitempty"`
+}
+
+// ScimUsersList - SCIM list users
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// List SCIM users for an organization.
+func (c *Client) ScimUsersList(ctx context.Context, organization string, opts ...ScimUsersListParams) (*ListResponse, error) {
+	path := "/api/organizations/{organization}/scim/v2/Users"
+	path = pathReplace(path, "organization", organization)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "filter", params.Filter)
+		addQueryParam(queryValues, "attributes", params.Attributes)
+		addQueryParam(queryValues, "excludedAttributes", params.ExcludedAttributes)
+		addQueryParam(queryValues, "startIndex", params.StartIndex)
+		addQueryParam(queryValues, "count", params.Count)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result ListResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ScimUsersCreate - SCIM create user (not supported)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Read-only SCIM: writes are not supported.
+func (c *Client) ScimUsersCreate(ctx context.Context, organization string) error {
+	path := "/api/organizations/{organization}/scim/v2/Users"
+	path = pathReplace(path, "organization", organization)
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// ScimUserGetParams contains optional parameters for the ScimUserGet operation.
+type ScimUserGetParams struct {
+	Attributes         *string `json:"attributes,omitempty"`
+	ExcludedAttributes *string `json:"excludedAttributes,omitempty"`
+}
+
+// ScimUserGet - SCIM get user
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Fetch a single SCIM user by id.
+func (c *Client) ScimUserGet(ctx context.Context, organization string, id string, opts ...ScimUserGetParams) (*ScimUser, error) {
+	path := "/api/organizations/{organization}/scim/v2/Users/{id}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "id", id)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "attributes", params.Attributes)
+		addQueryParam(queryValues, "excludedAttributes", params.ExcludedAttributes)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result ScimUser
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ScimUserReplace - SCIM replace user (not supported)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Read-only SCIM: writes are not supported.
+func (c *Client) ScimUserReplace(ctx context.Context, organization string, id string) error {
+	path := "/api/organizations/{organization}/scim/v2/Users/{id}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "id", id)
+
+	if err := c.do(ctx, "PUT", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// ScimUserDelete - SCIM delete user (not supported)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Read-only SCIM: writes are not supported.
+func (c *Client) ScimUserDelete(ctx context.Context, organization string, id string) error {
+	path := "/api/organizations/{organization}/scim/v2/Users/{id}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "id", id)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// ScimUserPatch - SCIM patch user (not supported)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Read-only SCIM: writes are not supported.
+func (c *Client) ScimUserPatch(ctx context.Context, organization string, id string) error {
+	path := "/api/organizations/{organization}/scim/v2/Users/{id}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "id", id)
+
+	if err := c.do(ctx, "PATCH", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// UpdateOrganizationSidebar - Update organization default sidebar
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces the organization's default sidebar items.
+func (c *Client) UpdateOrganizationSidebar(ctx context.Context, organization string, body UpdateOrgSidebarInputBody) error {
+	path := "/api/organizations/{organization}/sidebar"
+	path = pathReplace(path, "organization", organization)
+
+	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// ResetOrganizationSidebar - Reset organization default sidebar
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Clears the organization's default sidebar items so users fall back to platform defaults.
+func (c *Client) ResetOrganizationSidebar(ctx context.Context, organization string) error {
+	path := "/api/organizations/{organization}/sidebar"
+	path = pathReplace(path, "organization", organization)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // GetOrganizationTheme - Get current organization theme
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -8527,11 +8937,25 @@ func (c *Client) UpdateUserProfile(ctx context.Context, body UpdateUserProfileIn
 	return &result, nil
 }
 
+// ResetUserSidebar - Reset user sidebar options
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Clears the current user's stored sidebar preferences and reverts to defaults.
+func (c *Client) ResetUserSidebar(ctx context.Context) error {
+	path := "/api/user/sidebar"
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // UpdateUserSidebar - Update user sidebar options
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Updates the current user's sidebar visibility preferences. Send null to reset to defaults.
+// Updates the current user's sidebar visibility preferences.
 func (c *Client) UpdateUserSidebar(ctx context.Context, body UpdateUserSidebarInputBody) error {
 	path := "/api/user/sidebar"
 
@@ -8599,6 +9023,21 @@ func (c *Client) GetAuthSessionDeprecated(ctx context.Context) (*AuthSession, er
 
 	var result AuthSession
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CreateSSHPublicKeyLegacy - Add an SSH public key (legacy path)
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deprecated route. Use /api/ssh-public-keys.
+func (c *Client) CreateSSHPublicKeyLegacy(ctx context.Context, body CreateSSHPublicKeyInputBody) (*SSHPublicKey, error) {
+	path := "/api/v2/sshpublickeys"
+
+	var result SSHPublicKey
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil

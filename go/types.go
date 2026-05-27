@@ -260,8 +260,8 @@ type AuthSession struct {
 	Previews []string `json:"previews"`
 	// Safe username of the user, used when names have stricter rules.
 	SafeUsername string `json:"safeUsername"`
-	// Options for the sidebar.
-	SidebarOptions []string `json:"sidebarOptions,omitempty"`
+	// Resolved sidebar options. User customization wins; otherwise the org's defaultSidebarItems; otherwise null so the frontend can apply built-in defaults.
+	SidebarOptions []string `json:"sidebarOptions"`
 	// Username of the user.
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -1503,6 +1503,14 @@ type CopySnapshotOutputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type CoreWeaveUserExt struct {
+	SunkPosixGroupID     *int64         `json:"sunkPosixGroupId,omitempty"`
+	SunkPosixUserID      *int64         `json:"sunkPosixUserId,omitempty"`
+	SunkPosixUsername    *string        `json:"sunkPosixUsername,omitempty"`
+	SunkSSHKeys          []string       `json:"sunkSshKeys,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type CostTrackingPricesBody struct {
 	// The price per CPU unit
 	CpuPrice float64 `json:"cpuPrice"`
@@ -1800,6 +1808,32 @@ type CreateRoleBindingInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type CreateScimTokenRequest struct {
+	// Days until the token expires; omit or 0 for no expiration
+	Duration *int64 `json:"duration,omitempty"`
+	// Display name for the SCIM token (unique per organization)
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreateScimTokenResponseBody struct {
+	// When the token was created.
+	Created time.Time `json:"created"`
+	// When the token expires, if applicable.
+	Expiration *time.Time `json:"expiration,omitempty"`
+	// The unique identifier for the SCIM token.
+	ID string `json:"id"`
+	// Truncated preview for identification.
+	KeyHint *string `json:"keyHint,omitempty"`
+	// When the token was last used.
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+	// Display name for the SCIM token.
+	Name string `json:"name"`
+	// The full SCIM bearer token (only shown once; store it now).
+	Token                string         `json:"token"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type CreateSSHPublicKeyInputBody struct {
 	// SSH public key in OpenSSH authorized_keys format.
 	Key string `json:"key"`
@@ -2062,6 +2096,13 @@ type DockerWorkspaceSettings struct {
 type DuplicateWorkflowBody struct {
 	// Display name for the duplicated workflow
 	NewName              string         `json:"newName"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type Email struct {
+	Primary              *bool          `json:"primary,omitempty"`
+	Type                 *string        `json:"type,omitempty"`
+	Value                string         `json:"value"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2611,6 +2652,14 @@ type GroupAllocationBody struct {
 type GroupDescriptionBody struct {
 	// The description for the group.
 	Description          *string        `json:"description,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type GroupMember struct {
+	Ref                  *string        `json:"$ref,omitempty"`
+	Display              *string        `json:"display,omitempty"`
+	Type                 *string        `json:"type,omitempty"`
+	Value                string         `json:"value"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -3233,6 +3282,15 @@ type ListReposOutputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ListResponse struct {
+	Resources            []any          `json:"Resources"`
+	ItemsPerPage         int64          `json:"itemsPerPage"`
+	Schemas              []string       `json:"schemas"`
+	StartIndex           int64          `json:"startIndex"`
+	TotalResults         int64          `json:"totalResults"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ListRoleBindingsOutputBody struct {
 	// List of RoleBindings in the namespace
 	RoleBindings         []RoleBindingEntry `json:"roleBindings"`
@@ -3638,6 +3696,14 @@ type MessageResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type Meta struct {
+	Created              time.Time      `json:"created"`
+	LastModified         time.Time      `json:"lastModified"`
+	Location             *string        `json:"location,omitempty"`
+	ResourceType         string         `json:"resourceType"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type MetricEntry struct {
 	Cpu CpuMetrics `json:"cpu"`
 	// Hostname of the node
@@ -3761,6 +3827,13 @@ type MountWorkspaceDirectoryBody struct {
 	ClusterPath string `json:"clusterPath"`
 	// The folder in the workspace to mount to the cluster.
 	WorkspacePath        string         `json:"workspacePath"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type Name struct {
+	FamilyName           *string        `json:"familyName,omitempty"`
+	Formatted            *string        `json:"formatted,omitempty"`
+	GivenName            *string        `json:"givenName,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -5477,6 +5550,55 @@ type RuntimeAlertInput struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ScimGroup struct {
+	DisplayName          string         `json:"displayName"`
+	ID                   string         `json:"id"`
+	Members              []GroupMember  `json:"members,omitempty"`
+	Meta                 Meta           `json:"meta"`
+	Schemas              []string       `json:"schemas"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ScimSettingsResponse struct {
+	// Whether SCIM is enabled for this organization.
+	Enabled bool `json:"enabled"`
+	// Whether the platform enforces a maximum token expiration.
+	EnforceMaxTtl bool `json:"enforceMaxTTL"`
+	// Maximum allowed token expiration in days, if enforced.
+	MaxExpirationDays    *int64         `json:"maxExpirationDays,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ScimTokenResponse struct {
+	// When the token was created.
+	Created time.Time `json:"created"`
+	// When the token expires, if applicable.
+	Expiration *time.Time `json:"expiration,omitempty"`
+	// The unique identifier for the SCIM token.
+	ID string `json:"id"`
+	// Truncated preview for identification.
+	KeyHint *string `json:"keyHint,omitempty"`
+	// When the token was last used.
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+	// Display name for the SCIM token.
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ScimUser struct {
+	Active                                                         bool              `json:"active"`
+	DisplayName                                                    *string           `json:"displayName,omitempty"`
+	Emails                                                         []Email           `json:"emails,omitempty"`
+	Groups                                                         []UserGroupRef    `json:"groups,omitempty"`
+	ID                                                             string            `json:"id"`
+	Meta                                                           Meta              `json:"meta"`
+	Name                                                           *Name             `json:"name,omitempty"`
+	Schemas                                                        []string          `json:"schemas"`
+	UrnCoreweaveParamsScimSchemasExtensionCoreweave20CoreWeaveUser *CoreWeaveUserExt `json:"urn:coreweave:params:scim:schemas:extension:coreweave:2.0:CoreWeaveUser,omitempty"`
+	UserName                                                       string            `json:"userName"`
+	AdditionalProperties                                           map[string]any    `json:"-,omitempty"`
+}
+
 type SSHPublicKey struct {
 	CreatedAt            time.Time      `json:"createdAt"`
 	ID                   string         `json:"id"`
@@ -6353,6 +6475,12 @@ type UpdateOrgAiProviderInputBody struct {
 	AdditionalProperties  map[string]any `json:"-,omitempty"`
 }
 
+type UpdateOrgSidebarInputBody struct {
+	// The full list of sidebar option IDs that should be enabled by default for users in this organization. Pass an empty array to show only unhideable items.
+	DefaultSidebar       []string       `json:"defaultSidebar"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type UpdatePermissionInputBody struct {
 	// New permission level
 	Permission           string         `json:"permission"`
@@ -6391,6 +6519,12 @@ type UpdateResourceGroupPermissionsInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type UpdateScimSettingsInputBody struct {
+	// Whether to enable SCIM for this organization.
+	Enabled              bool           `json:"enabled"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type UpdateSentrySettingsBody struct {
 	// Sentry DSN for backend services. Leave empty for Parallel Works default.
 	Dsn *string `json:"dsn,omitempty"`
@@ -6425,8 +6559,10 @@ type UpdateUserProfileOutputBody struct {
 }
 
 type UpdateUserSidebarInputBody struct {
-	// Array of sidebar option IDs to display. Send null to reset to defaults.
-	SidebarOptions       []string       `json:"sidebarOptions"`
+	// Whether to enable (true) or disable (false) the option.
+	Enabled bool `json:"enabled"`
+	// Sidebar option ID to add or remove.
+	Option               string         `json:"option"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -6532,6 +6668,13 @@ type UserActivityResponse struct {
 	ActiveDays []string `json:"activeDays"`
 	// Username
 	Username             string         `json:"username"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UserGroupRef struct {
+	Display              *string        `json:"display,omitempty"`
+	Type                 *string        `json:"type,omitempty"`
+	Value                string         `json:"value"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
