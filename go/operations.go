@@ -1274,6 +1274,92 @@ func (c *Client) GetAvailableCsps(ctx context.Context) (*[]string, error) {
 	return &result, nil
 }
 
+// GetUserAvatarParams contains optional parameters for the GetUserAvatar operation.
+type GetUserAvatarParams struct {
+	IfNoneMatch *string `json:"If-None-Match,omitempty"`
+}
+
+// GetUserAvatar - Get user avatar
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the authenticated user's avatar image.
+func (c *Client) GetUserAvatar(ctx context.Context, opts ...GetUserAvatarParams) (*string, error) {
+	path := "/api/avatar"
+
+	var headers http.Header
+	if len(opts) > 0 {
+		params := opts[0]
+		headers = make(http.Header)
+		if params.IfNoneMatch != nil {
+			headers.Set("If-None-Match", fmt.Sprintf("%v", *params.IfNoneMatch))
+		}
+	}
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json", headers); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UploadUserAvatar - Upload user avatar
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Uploads an image as the authenticated user's avatar.
+func (c *Client) UploadUserAvatar(ctx context.Context, body *any) (*UploadUserAvatarOutputBody, error) {
+	path := "/api/avatar"
+
+	var result UploadUserAvatarOutputBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteUserAvatar - Delete user avatar
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes the authenticated user's avatar.
+func (c *Client) DeleteUserAvatar(ctx context.Context) error {
+	path := "/api/avatar"
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// ServeBlobParams contains optional parameters for the ServeBlob operation.
+type ServeBlobParams struct {
+	IfNoneMatch *string `json:"If-None-Match,omitempty"`
+}
+
+// ServeBlob - Serve a content-addressable image blob
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Serves the bytes for a content-addressable image blob.
+func (c *Client) ServeBlob(ctx context.Context, etag string, opts ...ServeBlobParams) (*string, error) {
+	path := "/api/blobs/{etag}"
+	path = pathReplace(path, "etag", etag)
+
+	var headers http.Header
+	if len(opts) > 0 {
+		params := opts[0]
+		headers = make(http.Header)
+		if params.IfNoneMatch != nil {
+			headers.Set("If-None-Match", fmt.Sprintf("%v", *params.IfNoneMatch))
+		}
+	}
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json", headers); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetBucketsParams contains optional parameters for the GetBuckets operation.
 type GetBucketsParams struct {
 	// Permission to filter the bucket by
@@ -1757,6 +1843,66 @@ func (c *Client) ForkMarketplaceItem(ctx context.Context, slug string, body Fork
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// GetMarketplaceIconParams contains optional parameters for the GetMarketplaceIcon operation.
+type GetMarketplaceIconParams struct {
+	IfNoneMatch *string `json:"If-None-Match,omitempty"`
+}
+
+// GetMarketplaceIcon - Get Marketplace Item Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the marketplace item's icon image.
+func (c *Client) GetMarketplaceIcon(ctx context.Context, slug string, opts ...GetMarketplaceIconParams) (*string, error) {
+	path := "/api/marketplace/{slug}/icon"
+	path = pathReplace(path, "slug", slug)
+
+	var headers http.Header
+	if len(opts) > 0 {
+		params := opts[0]
+		headers = make(http.Header)
+		if params.IfNoneMatch != nil {
+			headers.Set("If-None-Match", fmt.Sprintf("%v", *params.IfNoneMatch))
+		}
+	}
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json", headers); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UploadMarketplaceIcon - Upload Marketplace Item Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Uploads an image as the marketplace item's icon. Only the publisher (or org admin for org-published items) can upload.
+func (c *Client) UploadMarketplaceIcon(ctx context.Context, slug string, body *any) (*UploadMarketplaceIconOutputBody, error) {
+	path := "/api/marketplace/{slug}/icon"
+	path = pathReplace(path, "slug", slug)
+
+	var result UploadMarketplaceIconOutputBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteMarketplaceIcon - Delete Marketplace Item Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes the marketplace item's icon.
+func (c *Client) DeleteMarketplaceIcon(ctx context.Context, slug string) error {
+	path := "/api/marketplace/{slug}/icon"
+	path = pathReplace(path, "slug", slug)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // GetMarketplaceItemDescription - Get marketplace item description
@@ -2899,6 +3045,22 @@ func (c *Client) DeleteOrganizationCloudAccount(ctx context.Context, organizatio
 	path = pathReplace(path, "name", name)
 
 	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// RenameOrganizationCloudAccount - Rename organization cloud account
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Renames a cloud account. Metadata-only: vault credential paths and CSP-side resource names/tags continue to reflect the original name.
+func (c *Client) RenameOrganizationCloudAccount(ctx context.Context, organization string, name string, body RenameCloudAccountBody) error {
+	path := "/api/organizations/{organization}/cloud-accounts/{name}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "name", name)
+
+	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
 		return parseErrorError(err)
 	}
 	return nil
@@ -4076,6 +4238,23 @@ func (c *Client) DeleteKubernetesWorkload(ctx context.Context, organization stri
 	return nil
 }
 
+// RestartKubernetesWorkload - Restart Kubernetes workload
+//
+// Triggers a rolling restart of a Kubernetes workload (deployment, statefulset, or daemonset) by setting the restartedAt annotation on its pod template, equivalent to `kubectl rollout restart`.
+func (c *Client) RestartKubernetesWorkload(ctx context.Context, organization string, clusterName string, namespace string, workloadType string, workloadName string) error {
+	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespace}/workloads/{workloadType}/{workloadName}/restart"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "clusterName", clusterName)
+	path = pathReplace(path, "namespace", namespace)
+	path = pathReplace(path, "workloadType", workloadType)
+	path = pathReplace(path, "workloadName", workloadName)
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // GetSingleKubernetesCluster - Get Kubernetes cluster details
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -4553,6 +4732,69 @@ func (c *Client) UpdateManagedCluster(ctx context.Context, organization string, 
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// GetManagedClusterIconParams contains optional parameters for the GetManagedClusterIcon operation.
+type GetManagedClusterIconParams struct {
+	IfNoneMatch *string `json:"If-None-Match,omitempty"`
+}
+
+// GetManagedClusterIcon - Get managed cluster icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the managed cluster's icon image.
+func (c *Client) GetManagedClusterIcon(ctx context.Context, organization string, cluster string, opts ...GetManagedClusterIconParams) (*string, error) {
+	path := "/api/organizations/{organization}/managed-clusters/{cluster}/icon"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "cluster", cluster)
+
+	var headers http.Header
+	if len(opts) > 0 {
+		params := opts[0]
+		headers = make(http.Header)
+		if params.IfNoneMatch != nil {
+			headers.Set("If-None-Match", fmt.Sprintf("%v", *params.IfNoneMatch))
+		}
+	}
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json", headers); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UploadManagedClusterIcon - Upload Managed Cluster Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Uploads an image as the cluster's icon (org admins only).
+func (c *Client) UploadManagedClusterIcon(ctx context.Context, organization string, cluster string, body *any) (*UploadManagedClusterIconOutputBody, error) {
+	path := "/api/organizations/{organization}/managed-clusters/{cluster}/icon"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "cluster", cluster)
+
+	var result UploadManagedClusterIconOutputBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteManagedClusterIcon - Delete Managed Cluster Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes the cluster's icon (org admins only).
+func (c *Client) DeleteManagedClusterIcon(ctx context.Context, organization string, cluster string) error {
+	path := "/api/organizations/{organization}/managed-clusters/{cluster}/icon"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "cluster", cluster)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // GetManagedClusterMetricsParams contains optional parameters for the GetManagedClusterMetrics operation.
@@ -5157,6 +5399,8 @@ type ScimGroupsListParams struct {
 	Filter     *string `json:"filter,omitempty"`
 	StartIndex *int64  `json:"startIndex,omitempty"`
 	Count      *int64  `json:"count,omitempty"`
+	// Drop disabled users from the members list
+	ExcludeInactiveUsers *bool `json:"excludeInactiveUsers,omitempty"`
 }
 
 // ScimGroupsList - SCIM list groups
@@ -5174,6 +5418,7 @@ func (c *Client) ScimGroupsList(ctx context.Context, organization string, opts .
 		addQueryParam(queryValues, "filter", params.Filter)
 		addQueryParam(queryValues, "startIndex", params.StartIndex)
 		addQueryParam(queryValues, "count", params.Count)
+		addQueryParam(queryValues, "excludeInactiveUsers", params.ExcludeInactiveUsers)
 		if len(queryValues) > 0 {
 			path += "?" + queryValues.Encode()
 		}
@@ -5200,16 +5445,30 @@ func (c *Client) ScimGroupsCreate(ctx context.Context, organization string) erro
 	return nil
 }
 
+// ScimGroupGetParams contains optional parameters for the ScimGroupGet operation.
+type ScimGroupGetParams struct {
+	// Drop disabled users from the members list
+	ExcludeInactiveUsers *bool `json:"excludeInactiveUsers,omitempty"`
+}
+
 // ScimGroupGet - SCIM get group
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Fetch a single SCIM group by id.
-func (c *Client) ScimGroupGet(ctx context.Context, organization string, id string) (*ScimGroup, error) {
+func (c *Client) ScimGroupGet(ctx context.Context, organization string, id string, opts ...ScimGroupGetParams) (*ScimGroup, error) {
 	path := "/api/organizations/{organization}/scim/v2/Groups/{id}"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "id", id)
 
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "excludeInactiveUsers", params.ExcludeInactiveUsers)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
 	var result ScimGroup
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
@@ -5722,6 +5981,22 @@ func (c *Client) DeleteUser(ctx context.Context, organization string, user strin
 	return nil
 }
 
+// SetUserAdmin - Set user platform admin status
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Grants or revokes platform:admin access to a user.
+func (c *Client) SetUserAdmin(ctx context.Context, organization string, user string, body SetAdminInputBody) error {
+	path := "/api/organizations/{organization}/users/{user}/admin"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+
+	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // ListAiProviders - List AI providers
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -5912,6 +6187,36 @@ func (c *Client) ReindexAiProvider(ctx context.Context, organization string, use
 
 	var result AiProviderResponse
 	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetOrgUserAvatarParams contains optional parameters for the GetOrgUserAvatar operation.
+type GetOrgUserAvatarParams struct {
+	IfNoneMatch *string `json:"If-None-Match,omitempty"`
+}
+
+// GetOrgUserAvatar - Get user avatar
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the avatar image for a user in the organization.
+func (c *Client) GetOrgUserAvatar(ctx context.Context, organization string, user string, opts ...GetOrgUserAvatarParams) (*string, error) {
+	path := "/api/organizations/{organization}/users/{user}/avatar"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+
+	var headers http.Header
+	if len(opts) > 0 {
+		params := opts[0]
+		headers = make(http.Header)
+		if params.IfNoneMatch != nil {
+			headers.Set("If-None-Match", fmt.Sprintf("%v", *params.IfNoneMatch))
+		}
+	}
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json", headers); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -7117,6 +7422,24 @@ func (c *Client) GetParOracleBucket(ctx context.Context, organization string, us
 	path = pathReplace(path, "name", name)
 
 	var result OracleBucketPar
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetOracleOraclefs - Get Storage: Oracle File Storage
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an Oracle FSS file system
+func (c *Client) GetOracleOraclefs(ctx context.Context, organization string, user string, name string) (*OracleFs, error) {
+	path := "/api/organizations/{organization}/users/{user}/oracle-oraclefs/{name}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	var result OracleFs
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -9412,6 +9735,66 @@ func (c *Client) ForkWorkflow(ctx context.Context, workflow string, body ForkWor
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// GetWorkflowIconParams contains optional parameters for the GetWorkflowIcon operation.
+type GetWorkflowIconParams struct {
+	IfNoneMatch *string `json:"If-None-Match,omitempty"`
+}
+
+// GetWorkflowIcon - Get Workflow Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the workflow's icon image.
+func (c *Client) GetWorkflowIcon(ctx context.Context, workflow string, opts ...GetWorkflowIconParams) (*string, error) {
+	path := "/api/workflows/{workflow}/icon"
+	path = pathReplace(path, "workflow", workflow)
+
+	var headers http.Header
+	if len(opts) > 0 {
+		params := opts[0]
+		headers = make(http.Header)
+		if params.IfNoneMatch != nil {
+			headers.Set("If-None-Match", fmt.Sprintf("%v", *params.IfNoneMatch))
+		}
+	}
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json", headers); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UploadWorkflowIcon - Upload Workflow Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Uploads an image to use as the workflow's icon.
+func (c *Client) UploadWorkflowIcon(ctx context.Context, workflow string, body *any) (*UploadWorkflowIconOutputBody, error) {
+	path := "/api/workflows/{workflow}/icon"
+	path = pathReplace(path, "workflow", workflow)
+
+	var result UploadWorkflowIconOutputBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteWorkflowIcon - Delete Workflow Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes the icon from a workflow.
+func (c *Client) DeleteWorkflowIcon(ctx context.Context, workflow string) error {
+	path := "/api/workflows/{workflow}/icon"
+	path = pathReplace(path, "workflow", workflow)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // GetWorkflowJSON - Get Workflow JSON

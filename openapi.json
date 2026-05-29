@@ -729,6 +729,10 @@
             "description": "Display name of the storage.",
             "type": "string"
           },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
+          },
           "govCloud": {
             "description": "Indicates if the storage is in a GovCloud environment.",
             "type": "boolean"
@@ -778,6 +782,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -820,7 +828,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -852,6 +862,10 @@
           },
           "encrypted": {
             "description": "Indicates if the disk is encrypted",
+            "type": "boolean"
+          },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
             "type": "boolean"
           },
           "govCloud": {
@@ -907,6 +921,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -953,7 +971,9 @@
           "csp",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -982,6 +1002,10 @@
           "displayName": {
             "description": "Display name of the storage.",
             "type": "string"
+          },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
           },
           "fileSystemId": {
             "description": "ID of the AWS elastic filesystem",
@@ -1043,6 +1067,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -1085,7 +1113,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -1126,6 +1156,10 @@
           "exportPath": {
             "description": "Export path for the AWS Lustre file system",
             "type": "string"
+          },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
           },
           "fsName": {
             "description": "Name of the AWS Lustre file system",
@@ -1204,6 +1238,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -1247,7 +1285,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -1435,6 +1475,10 @@
             "description": "Display name of the storage.",
             "type": "string"
           },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
+          },
           "govCloud": {
             "description": "Indicates if the storage is in a GovCloud environment.",
             "type": "boolean"
@@ -1484,6 +1528,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -1522,7 +1570,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -1551,6 +1601,10 @@
           "displayName": {
             "description": "Display name of the storage.",
             "type": "string"
+          },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
           },
           "govCloud": {
             "description": "Indicates if the storage is in a GovCloud environment.",
@@ -1597,6 +1651,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -1635,7 +1693,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -1672,6 +1732,10 @@
           "displayName": {
             "description": "Display name of the storage.",
             "type": "string"
+          },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
           },
           "govCloud": {
             "description": "Indicates if the storage is in a GovCloud environment.",
@@ -1722,6 +1786,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -1769,7 +1837,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -2002,6 +2072,10 @@
             "description": "Display name of the storage.",
             "type": "string"
           },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
+          },
           "filesystemId": {
             "description": "ID of the Lustre filesystem",
             "type": "string"
@@ -2067,6 +2141,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -2113,7 +2191,9 @@
           "csp",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -2146,6 +2226,10 @@
           "exportPath": {
             "description": "Export path of the Azure NetApp Files",
             "type": "string"
+          },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
           },
           "govCloud": {
             "description": "Indicates if the storage is in a GovCloud environment.",
@@ -2204,6 +2288,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -2247,7 +2335,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -2579,6 +2669,10 @@
             "description": "Display name of the storage.",
             "type": "string"
           },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
+          },
           "govCloud": {
             "description": "Indicates if the storage is in a GovCloud environment.",
             "type": "boolean"
@@ -2628,6 +2722,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -2670,7 +2768,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -4263,9 +4363,25 @@
         ],
         "type": "object"
       },
+      "CoreWeaveGroupExt": {
+        "additionalProperties": false,
+        "properties": {
+          "sunkPosixGroupId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sunkPosixGroupName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CoreWeaveUserExt": {
         "additionalProperties": false,
         "properties": {
+          "sunkLoginShell": {
+            "type": "string"
+          },
           "sunkPosixGroupId": {
             "format": "int64",
             "type": "integer"
@@ -4275,6 +4391,9 @@
             "type": "integer"
           },
           "sunkPosixUsername": {
+            "type": "string"
+          },
+          "sunkPreferredHomeDirectory": {
             "type": "string"
           },
           "sunkSshKeys": {
@@ -6915,6 +7034,10 @@
             "description": "Display name of the storage.",
             "type": "string"
           },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
+          },
           "govCloud": {
             "description": "Indicates if the storage is in a GovCloud environment.",
             "type": "boolean"
@@ -6964,6 +7087,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -7002,7 +7129,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -7031,6 +7160,10 @@
           "displayName": {
             "description": "Display name of the storage.",
             "type": "string"
+          },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
           },
           "govCloud": {
             "description": "Indicates if the storage is in a GovCloud environment.",
@@ -7077,6 +7210,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -7115,7 +7252,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -7144,6 +7283,10 @@
           "displayName": {
             "description": "Display name of the storage.",
             "type": "string"
+          },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
           },
           "fileserverIp": {
             "description": "IP address of the Google Filestore file server",
@@ -7210,6 +7353,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -7257,7 +7404,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -7453,6 +7602,9 @@
           "display": {
             "type": "string"
           },
+          "sunkPosixUsername": {
+            "type": "string"
+          },
           "type": {
             "type": "string"
           },
@@ -7608,6 +7760,10 @@
             "description": "Instance type of the DSX nodes in the Hammerspace storage",
             "type": "string"
           },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
+          },
           "govCloud": {
             "description": "Indicates if the storage is in a GovCloud environment.",
             "type": "boolean"
@@ -7671,6 +7827,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -7721,7 +7881,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -11182,6 +11344,10 @@
             "description": "Display name of the storage.",
             "type": "string"
           },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
+          },
           "govCloud": {
             "description": "Indicates if the storage is in a GovCloud environment.",
             "type": "boolean"
@@ -11231,6 +11397,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -11279,7 +11449,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -12449,6 +12621,10 @@
             "description": "Display name of the storage.",
             "type": "string"
           },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
+          },
           "govCloud": {
             "description": "Indicates if the storage is in a GovCloud environment.",
             "type": "boolean"
@@ -12498,6 +12674,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
           "shared": {
             "description": "Sharing permissions of the storage.",
             "items": {
@@ -12536,7 +12716,9 @@
           "type",
           "shared",
           "currentlyProvisioning",
-          "provisioned"
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -12583,6 +12765,145 @@
           "namespace",
           "region",
           "expiry"
+        ],
+        "type": "object"
+      },
+      "OracleFs": {
+        "additionalProperties": false,
+        "properties": {
+          "attachedTo": {
+            "description": "Resources the storage is attached to.",
+            "items": {
+              "$ref": "#/components/schemas/StorageAttachment"
+            },
+            "type": "array"
+          },
+          "availabilityDomain": {
+            "description": "Availability domain the Oracle file storage is in",
+            "type": "string"
+          },
+          "csp": {
+            "description": "Cloud service provider of the storage.",
+            "type": "string"
+          },
+          "currentlyProvisioning": {
+            "description": "Indicates if the storage is currently being provisioned.",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "Description of the storage.",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "Display name of the storage.",
+            "type": "string"
+          },
+          "exportPath": {
+            "description": "Export path of the Oracle FSS",
+            "type": "string"
+          },
+          "favorite": {
+            "description": "Indicates if the storage is a favorite for the requesting user.",
+            "type": "boolean"
+          },
+          "govCloud": {
+            "description": "Indicates if the storage is in a GovCloud environment.",
+            "type": "boolean"
+          },
+          "group": {
+            "description": "Group the storage bills to.",
+            "type": "string"
+          },
+          "id": {
+            "description": "ID of the storage.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL of the icon used for the storage. This will be empty if the default image is used.",
+            "type": "string"
+          },
+          "mountTargetIp": {
+            "description": "IP address of the Oracle FSS mount target",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the storage.",
+            "type": "string"
+          },
+          "network": {
+            "description": "Network the storage uses to provision.",
+            "type": "string"
+          },
+          "provisionError": {
+            "description": "Error message if the storage provisioning failed.",
+            "type": "string"
+          },
+          "provisioned": {
+            "description": "Indicates if the storage has been provisioned.",
+            "type": "boolean"
+          },
+          "region": {
+            "description": "Region the Oracle file storage is in",
+            "type": "string"
+          },
+          "runtimeAlert": {
+            "$ref": "#/components/schemas/RunAlert",
+            "description": "Runtime alert information for the storage."
+          },
+          "sessionCostLimit": {
+            "$ref": "#/components/schemas/SessionAlert",
+            "description": "Session cost limit information for the storage."
+          },
+          "sessionNumber": {
+            "description": "Session number of the storage.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "sessionless": {
+            "description": "Indicates if the storage is sessionless.",
+            "type": "boolean"
+          },
+          "shared": {
+            "description": "Sharing permissions of the storage.",
+            "items": {
+              "$ref": "#/components/schemas/Shared"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "status": {
+            "description": "Current status of the storage.",
+            "type": "string"
+          },
+          "tags": {
+            "description": "Tags associated with the storage.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": {
+            "description": "Type of storage.",
+            "type": "string"
+          },
+          "user": {
+            "description": "User associated with the storage.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "user",
+          "name",
+          "csp",
+          "type",
+          "shared",
+          "currentlyProvisioning",
+          "provisioned",
+          "sessionless",
+          "favorite"
         ],
         "type": "object"
       },
@@ -12763,6 +13084,10 @@
           "active": {
             "description": "Whether the user is active",
             "type": "boolean"
+          },
+          "avatarEtag": {
+            "description": "Etag of the user's uploaded avatar, if any.",
+            "type": "string"
           },
           "createdAt": {
             "description": "Account creation time",
@@ -15421,6 +15746,21 @@
         ],
         "type": "object"
       },
+      "RenameCloudAccountBody": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "New cloud account name (lowercase letters, numbers, hyphens, and underscores)",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
       "ReplicaSetInfo": {
         "additionalProperties": false,
         "properties": {
@@ -16121,6 +16461,9 @@
               "array",
               "null"
             ]
+          },
+          "urn:coreweave:params:scim:schemas:extension:coreweave:2.0:CoreWeaveGroup": {
+            "$ref": "#/components/schemas/CoreWeaveGroupExt"
           }
         },
         "required": [
@@ -17203,6 +17546,19 @@
           "type",
           "version",
           "port"
+        ],
+        "type": "object"
+      },
+      "SetAdminInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "admin": {
+            "description": "Whether to grant or revoke platform admin",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "admin"
         ],
         "type": "object"
       },
@@ -19127,6 +19483,78 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "UploadManagedClusterIconOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "etag": {
+            "description": "SHA256 hex of the stored blob.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "Public URL where the icon is served.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "etag",
+          "imageUrl"
+        ],
+        "type": "object"
+      },
+      "UploadMarketplaceIconOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "etag": {
+            "description": "SHA256 hex of the stored blob.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "Public URL where the icon is served.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "etag",
+          "imageUrl"
+        ],
+        "type": "object"
+      },
+      "UploadUserAvatarOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "avatarUrl": {
+            "description": "Public URL where the avatar is served.",
+            "type": "string"
+          },
+          "etag": {
+            "description": "SHA256 hex of the stored blob.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "etag",
+          "avatarUrl"
+        ],
+        "type": "object"
+      },
+      "UploadWorkflowIconOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "etag": {
+            "description": "SHA256 hex of the stored blob.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "Public URL where the icon is served.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "etag",
+          "imageUrl"
+        ],
         "type": "object"
       },
       "UrlResponse": {
@@ -23528,6 +23956,233 @@
         ]
       }
     },
+    "/api/avatar": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves the authenticated user's avatar.",
+        "operationId": "delete-user-avatar",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete user avatar",
+        "tags": [
+          "User Settings"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the authenticated user's avatar image.",
+        "operationId": "get-user-avatar",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get user avatar",
+        "tags": [
+          "User Settings"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUploads an image as the authenticated user's avatar.",
+        "operationId": "upload-user-avatar",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "image/*"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "description": "Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadUserAvatarOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Upload user avatar",
+        "tags": [
+          "User Settings"
+        ]
+      }
+    },
+    "/api/blobs/{etag}": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nServes the bytes for a content-addressable image blob.",
+        "operationId": "serveBlob",
+        "parameters": [
+          {
+            "description": "SHA256 hex of the blob (64 hex chars)",
+            "in": "path",
+            "name": "etag",
+            "required": true,
+            "schema": {
+              "description": "SHA256 hex of the blob (64 hex chars)",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Serve a content-addressable image blob",
+        "tags": [
+          "Blobs"
+        ]
+      }
+    },
     "/api/buckets": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns buckets the user can access.",
@@ -24705,6 +25360,194 @@
           }
         },
         "summary": "Fork Marketplace Item",
+        "tags": [
+          "Marketplace"
+        ]
+      }
+    },
+    "/api/marketplace/{slug}/icon": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves the marketplace item's icon.",
+        "operationId": "delete-marketplace-icon",
+        "parameters": [
+          {
+            "description": "Slug of the marketplace item.",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Slug of the marketplace item.",
+              "maxLength": 100,
+              "minLength": 2,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete Marketplace Item Icon",
+        "tags": [
+          "Marketplace"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the marketplace item's icon image.",
+        "operationId": "get-marketplace-icon",
+        "parameters": [
+          {
+            "description": "Slug of the marketplace item.",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Slug of the marketplace item.",
+              "maxLength": 100,
+              "minLength": 2,
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Marketplace Item Icon",
+        "tags": [
+          "Marketplace"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUploads an image as the marketplace item's icon. Only the publisher (or org admin for org-published items) can upload.",
+        "operationId": "upload-marketplace-icon",
+        "parameters": [
+          {
+            "description": "Slug of the marketplace item.",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Slug of the marketplace item.",
+              "maxLength": 100,
+              "minLength": 2,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "image/*"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "description": "Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadMarketplaceIconOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Upload Marketplace Item Icon",
         "tags": [
           "Marketplace"
         ]
@@ -28049,6 +28892,64 @@
           }
         },
         "summary": "Get organization cloud account",
+        "tags": [
+          "Cloud Accounts"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRenames a cloud account. Metadata-only: vault credential paths and CSP-side resource names/tags continue to reflect the original name.",
+        "operationId": "rename-organization-cloud-account",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cloud account name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Cloud account name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameCloudAccountBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Rename organization cloud account",
         "tags": [
           "Cloud Accounts"
         ]
@@ -31918,6 +32819,88 @@
         ]
       }
     },
+    "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespace}/workloads/{workloadType}/{workloadName}/restart": {
+      "post": {
+        "description": "Triggers a rolling restart of a Kubernetes workload (deployment, statefulset, or daemonset) by setting the restartedAt annotation on its pod template, equivalent to `kubectl rollout restart`.",
+        "operationId": "restart-kubernetes-workload",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes namespace",
+            "in": "path",
+            "name": "namespace",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes namespace",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Type of workload (deployment, statefulset, daemonset)",
+            "in": "path",
+            "name": "workloadType",
+            "required": true,
+            "schema": {
+              "description": "Type of workload (deployment, statefulset, daemonset)",
+              "enum": [
+                "deployment",
+                "statefulset",
+                "daemonset"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the workload to restart",
+            "in": "path",
+            "name": "workloadName",
+            "required": true,
+            "schema": {
+              "description": "Name of the workload to restart",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Restart Kubernetes workload",
+        "tags": [
+          "Kubernetes"
+        ]
+      }
+    },
     "/api/organizations/{organization}/kubernetes/{infraName}": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRetrieves detailed information about a specific Kubernetes cluster including endpoint, CA certificate, access groups, and cost tracking status.",
@@ -33705,6 +34688,227 @@
           }
         },
         "summary": "Update Managed Cluster",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/managed-clusters/{cluster}/icon": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves the cluster's icon (org admins only).",
+        "operationId": "delete-managed-cluster-icon",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name",
+            "in": "path",
+            "name": "cluster",
+            "required": true,
+            "schema": {
+              "description": "Cluster name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete Managed Cluster Icon",
+        "tags": [
+          "Clusters"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the managed cluster's icon image.",
+        "operationId": "get-managed-cluster-icon",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name",
+            "in": "path",
+            "name": "cluster",
+            "required": true,
+            "schema": {
+              "description": "Cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get managed cluster icon",
+        "tags": [
+          "Clusters"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUploads an image as the cluster's icon (org admins only).",
+        "operationId": "upload-managed-cluster-icon",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name",
+            "in": "path",
+            "name": "cluster",
+            "required": true,
+            "schema": {
+              "description": "Cluster name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "image/*"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "description": "Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadManagedClusterIconOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Upload Managed Cluster Icon",
         "tags": [
           "Clusters"
         ]
@@ -35612,6 +36816,16 @@
               "format": "int64",
               "type": "integer"
             }
+          },
+          {
+            "description": "Drop disabled users from the members list",
+            "explode": false,
+            "in": "query",
+            "name": "excludeInactiveUsers",
+            "schema": {
+              "description": "Drop disabled users from the members list",
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -35735,6 +36949,16 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "description": "Drop disabled users from the members list",
+            "explode": false,
+            "in": "query",
+            "name": "excludeInactiveUsers",
+            "schema": {
+              "description": "Drop disabled users from the members list",
+              "type": "boolean"
             }
           }
         ],
@@ -37194,6 +38418,63 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/admin": {
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nGrants or revokes platform:admin access to a user.",
+        "operationId": "set-user-admin",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the user to promote or demote",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the user to promote or demote",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetAdminInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set user platform admin status",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/ai-providers": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a list of AI providers available to the user",
@@ -37975,6 +39256,101 @@
         "summary": "Reindex AI provider",
         "tags": [
           "AI Providers"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/avatar": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the avatar image for a user in the organization.",
+        "operationId": "get-org-user-avatar",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get user avatar",
+        "tags": [
+          "User Settings"
         ]
       }
     },
@@ -42755,6 +44131,81 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/oracle-oraclefs/{name}": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns an Oracle FSS file system",
+        "operationId": "get-oracle-oraclefs",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OracleFs"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Storage: Oracle File Storage",
+        "tags": [
+          "Storage"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/previews/{flag}": {
       "delete": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDisables a preview for a specific user within an organization. Requires the org:users role. Platform-level previews cannot be disabled.",
@@ -44700,7 +46151,8 @@
                 "google-bucket",
                 "google-filestore",
                 "google-managedlustre",
-                "oracle-bucket"
+                "oracle-bucket",
+                "oracle-oraclefs"
               ],
               "examples": [
                 "aws-lustre"
@@ -49581,6 +51033,188 @@
         ]
       }
     },
+    "/api/workflows/{workflow}/icon": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves the icon from a workflow.",
+        "operationId": "delete-workflow-icon",
+        "parameters": [
+          {
+            "description": "Name of the workflow.",
+            "in": "path",
+            "name": "workflow",
+            "required": true,
+            "schema": {
+              "description": "Name of the workflow.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete Workflow Icon",
+        "tags": [
+          "Workflows"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the workflow's icon image.",
+        "operationId": "get-workflow-icon",
+        "parameters": [
+          {
+            "description": "Name of the workflow.",
+            "in": "path",
+            "name": "workflow",
+            "required": true,
+            "schema": {
+              "description": "Name of the workflow.",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Workflow Icon",
+        "tags": [
+          "Workflows"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUploads an image to use as the workflow's icon.",
+        "operationId": "upload-workflow-icon",
+        "parameters": [
+          {
+            "description": "Name of the workflow.",
+            "in": "path",
+            "name": "workflow",
+            "required": true,
+            "schema": {
+              "description": "Name of the workflow.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "image/*"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "description": "Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadWorkflowIconOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Upload Workflow Icon",
+        "tags": [
+          "Workflows"
+        ]
+      }
+    },
     "/api/workflows/{workflow}/json": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the JSON representation of the workflow YAML.",
@@ -49837,6 +51471,10 @@
     {
       "description": "Endpoints related to user authentication",
       "name": "Authentication"
+    },
+    {
+      "description": "Content-addressable image blob serving",
+      "name": "Blobs"
     },
     {
       "description": "Endpoints related to cloud storage buckets",

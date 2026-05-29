@@ -280,6 +280,8 @@ type AwsBucket struct {
 	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Indicates if the storage is in a GovCloud environment.
 	GovCloud *bool `json:"govCloud,omitempty"`
 	// Group the storage bills to.
@@ -302,6 +304,8 @@ type AwsBucket struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Current status of the storage.
@@ -330,6 +334,8 @@ type AwsDisk struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// Indicates if the disk is encrypted
 	Encrypted *bool `json:"encrypted,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Indicates if the storage is in a GovCloud environment.
 	GovCloud *bool `json:"govCloud,omitempty"`
 	// Group the storage bills to.
@@ -354,6 +360,8 @@ type AwsDisk struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Size of the AWS disk in GB
@@ -382,6 +390,8 @@ type AwsEfs struct {
 	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// ID of the AWS elastic filesystem
 	FileSystemID *string `json:"fileSystemId,omitempty"`
 	// Indicates if the storage is in a GovCloud environment.
@@ -408,6 +418,8 @@ type AwsEfs struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Current status of the storage.
@@ -440,6 +452,8 @@ type AwsLustre struct {
 	Ephemeral *bool `json:"ephemeral,omitempty"`
 	// Export path for the AWS Lustre file system
 	ExportPath *string `json:"exportPath,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Name of the AWS Lustre file system
 	FsName *string `json:"fsName,omitempty"`
 	// Compression type of the AWS Lustre file system
@@ -476,6 +490,8 @@ type AwsLustre struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Current status of the storage.
@@ -540,6 +556,8 @@ type AzureBlobStorage struct {
 	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Indicates if the storage is in a GovCloud environment.
 	GovCloud *bool `json:"govCloud,omitempty"`
 	// Group the storage bills to.
@@ -562,6 +580,8 @@ type AzureBlobStorage struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Current status of the storage.
@@ -586,6 +606,8 @@ type AzureDisk struct {
 	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Indicates if the storage is in a GovCloud environment.
 	GovCloud *bool `json:"govCloud,omitempty"`
 	// Group the storage bills to.
@@ -606,6 +628,8 @@ type AzureDisk struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Current status of the storage.
@@ -634,6 +658,8 @@ type AzureFiles struct {
 	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Indicates if the storage is in a GovCloud environment.
 	GovCloud *bool `json:"govCloud,omitempty"`
 	// Group the storage bills to.
@@ -656,6 +682,8 @@ type AzureFiles struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Size of the Azure files in GB
@@ -734,6 +762,8 @@ type AzureManagedLustre struct {
 	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// ID of the Lustre filesystem
 	FilesystemID *string `json:"filesystemId,omitempty"`
 	// Indicates if the storage is in a GovCloud environment.
@@ -764,6 +794,8 @@ type AzureManagedLustre struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Current status of the storage.
@@ -794,6 +826,8 @@ type AzureNetAppFiles struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// Export path of the Azure NetApp Files
 	ExportPath *string `json:"exportPath,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Indicates if the storage is in a GovCloud environment.
 	GovCloud *bool `json:"govCloud,omitempty"`
 	// Group the storage bills to.
@@ -820,6 +854,8 @@ type AzureNetAppFiles struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Size of the Azure NetApp Files storage in TB
@@ -945,6 +981,8 @@ type BucketOutput struct {
 	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Indicates if the storage is in a GovCloud environment.
 	GovCloud *bool `json:"govCloud,omitempty"`
 	// Group the storage bills to.
@@ -967,6 +1005,8 @@ type BucketOutput struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Current status of the storage.
@@ -1503,12 +1543,20 @@ type CopySnapshotOutputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type CoreWeaveUserExt struct {
+type CoreWeaveGroupExt struct {
 	SunkPosixGroupID     *int64         `json:"sunkPosixGroupId,omitempty"`
-	SunkPosixUserID      *int64         `json:"sunkPosixUserId,omitempty"`
-	SunkPosixUsername    *string        `json:"sunkPosixUsername,omitempty"`
-	SunkSSHKeys          []string       `json:"sunkSshKeys,omitempty"`
+	SunkPosixGroupName   *string        `json:"sunkPosixGroupName,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CoreWeaveUserExt struct {
+	SunkLoginShell             *string        `json:"sunkLoginShell,omitempty"`
+	SunkPosixGroupID           *int64         `json:"sunkPosixGroupId,omitempty"`
+	SunkPosixUserID            *int64         `json:"sunkPosixUserId,omitempty"`
+	SunkPosixUsername          *string        `json:"sunkPosixUsername,omitempty"`
+	SunkPreferredHomeDirectory *string        `json:"sunkPreferredHomeDirectory,omitempty"`
+	SunkSSHKeys                []string       `json:"sunkSshKeys,omitempty"`
+	AdditionalProperties       map[string]any `json:"-,omitempty"`
 }
 
 type CostTrackingPricesBody struct {
@@ -2449,6 +2497,8 @@ type GoogleBucket struct {
 	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Indicates if the storage is in a GovCloud environment.
 	GovCloud *bool `json:"govCloud,omitempty"`
 	// Group the storage bills to.
@@ -2471,6 +2521,8 @@ type GoogleBucket struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Current status of the storage.
@@ -2495,6 +2547,8 @@ type GoogleDisk struct {
 	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Indicates if the storage is in a GovCloud environment.
 	GovCloud *bool `json:"govCloud,omitempty"`
 	// Group the storage bills to.
@@ -2515,6 +2569,8 @@ type GoogleDisk struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Current status of the storage.
@@ -2539,6 +2595,8 @@ type GoogleFilestore struct {
 	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// IP address of the Google Filestore file server
 	FileserverIP *string `json:"fileserverIp,omitempty"`
 	// Tier of the Google Filestore
@@ -2569,6 +2627,8 @@ type GoogleFilestore struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Size of the Google Filestore in TB
@@ -2658,6 +2718,7 @@ type GroupDescriptionBody struct {
 type GroupMember struct {
 	Ref                  *string        `json:"$ref,omitempty"`
 	Display              *string        `json:"display,omitempty"`
+	SunkPosixUsername    *string        `json:"sunkPosixUsername,omitempty"`
 	Type                 *string        `json:"type,omitempty"`
 	Value                string         `json:"value"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -2717,6 +2778,8 @@ type Hammerspace struct {
 	DsxInstanceCount *int32 `json:"dsxInstanceCount,omitempty"`
 	// Instance type of the DSX nodes in the Hammerspace storage
 	DsxInstanceType *string `json:"dsxInstanceType,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Indicates if the storage is in a GovCloud environment.
 	GovCloud *bool `json:"govCloud,omitempty"`
 	// Group the storage bills to.
@@ -2745,6 +2808,8 @@ type Hammerspace struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Current status of the storage.
@@ -3877,6 +3942,8 @@ type NetAppOntap struct {
 	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Indicates if the storage is in a GovCloud environment.
 	GovCloud *bool `json:"govCloud,omitempty"`
 	// Group the storage bills to.
@@ -3899,6 +3966,8 @@ type NetAppOntap struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Current status of the storage.
@@ -4314,6 +4383,8 @@ type OracleBucket struct {
 	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
 	// Indicates if the storage is in a GovCloud environment.
 	GovCloud *bool `json:"govCloud,omitempty"`
 	// Group the storage bills to.
@@ -4336,6 +4407,8 @@ type OracleBucket struct {
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
 	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
 	// Current status of the storage.
@@ -4360,6 +4433,62 @@ type OracleBucketPar struct {
 	Region string `json:"region"`
 	// The Pre-Authenticated Request URL granting HTTP read/write access to the bucket.
 	URL                  string         `json:"url"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OracleFs struct {
+	// Resources the storage is attached to.
+	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
+	// Availability domain the Oracle file storage is in
+	AvailabilityDomain *string `json:"availabilityDomain,omitempty"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Indicates if the storage is currently being provisioned.
+	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
+	// Display name of the storage.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Export path of the Oracle FSS
+	ExportPath *string `json:"exportPath,omitempty"`
+	// Indicates if the storage is a favorite for the requesting user.
+	Favorite bool `json:"favorite"`
+	// Indicates if the storage is in a GovCloud environment.
+	GovCloud *bool `json:"govCloud,omitempty"`
+	// Group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// ID of the storage.
+	ID string `json:"id"`
+	// URL of the icon used for the storage. This will be empty if the default image is used.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// IP address of the Oracle FSS mount target
+	MountTargetIP *string `json:"mountTargetIp,omitempty"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Network the storage uses to provision.
+	Network *string `json:"network,omitempty"`
+	// Error message if the storage provisioning failed.
+	ProvisionError *string `json:"provisionError,omitempty"`
+	// Indicates if the storage has been provisioned.
+	Provisioned bool `json:"provisioned"`
+	// Region the Oracle file storage is in
+	Region           *string       `json:"region,omitempty"`
+	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
+	// Session number of the storage.
+	SessionNumber *int64 `json:"sessionNumber,omitempty"`
+	// Indicates if the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
+	// Sharing permissions of the storage.
+	Shared []Shared `json:"shared"`
+	// Current status of the storage.
+	Status *string `json:"status,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags,omitempty"`
+	// Type of storage.
+	Type string `json:"type"`
+	// User associated with the storage.
+	User                 string         `json:"user"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4432,6 +4561,8 @@ type OrgUsageSummaryResponse struct {
 type OrgUser struct {
 	// Whether the user is active
 	Active bool `json:"active"`
+	// Etag of the user's uploaded avatar, if any.
+	AvatarEtag *string `json:"avatarEtag,omitempty"`
 	// Account creation time
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// User email address
@@ -5344,6 +5475,12 @@ type RemoveWorkspaceMountBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type RenameCloudAccountBody struct {
+	// New cloud account name (lowercase letters, numbers, hyphens, and underscores)
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ReplicaSetInfo struct {
 	// ReplicaSet creation timestamp
 	CreatedAt time.Time `json:"createdAt"`
@@ -5551,12 +5688,13 @@ type RuntimeAlertInput struct {
 }
 
 type ScimGroup struct {
-	DisplayName          string         `json:"displayName"`
-	ID                   string         `json:"id"`
-	Members              []GroupMember  `json:"members,omitempty"`
-	Meta                 Meta           `json:"meta"`
-	Schemas              []string       `json:"schemas"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
+	DisplayName                                                     string             `json:"displayName"`
+	ID                                                              string             `json:"id"`
+	Members                                                         []GroupMember      `json:"members,omitempty"`
+	Meta                                                            Meta               `json:"meta"`
+	Schemas                                                         []string           `json:"schemas"`
+	UrnCoreweaveParamsScimSchemasExtensionCoreweave20CoreWeaveGroup *CoreWeaveGroupExt `json:"urn:coreweave:params:scim:schemas:extension:coreweave:2.0:CoreWeaveGroup,omitempty"`
+	AdditionalProperties                                            map[string]any     `json:"-,omitempty"`
 }
 
 type ScimSettingsResponse struct {
@@ -5909,6 +6047,12 @@ type SessionSoftware struct {
 	Type string `json:"type"`
 	// Software version.
 	Version              string         `json:"version"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type SetAdminInputBody struct {
+	// Whether to grant or revoke platform admin
+	Admin                bool           `json:"admin"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -6596,6 +6740,38 @@ type UpdateWorkflowRunInputBody struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// The status of the workflow run
 	Status               *string        `json:"status,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UploadManagedClusterIconOutputBody struct {
+	// SHA256 hex of the stored blob.
+	Etag string `json:"etag"`
+	// Public URL where the icon is served.
+	ImageURL             string         `json:"imageUrl"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UploadMarketplaceIconOutputBody struct {
+	// SHA256 hex of the stored blob.
+	Etag string `json:"etag"`
+	// Public URL where the icon is served.
+	ImageURL             string         `json:"imageUrl"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UploadUserAvatarOutputBody struct {
+	// Public URL where the avatar is served.
+	AvatarURL string `json:"avatarUrl"`
+	// SHA256 hex of the stored blob.
+	Etag                 string         `json:"etag"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UploadWorkflowIconOutputBody struct {
+	// SHA256 hex of the stored blob.
+	Etag string `json:"etag"`
+	// Public URL where the icon is served.
+	ImageURL             string         `json:"imageUrl"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
