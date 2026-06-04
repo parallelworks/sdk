@@ -5668,6 +5668,27 @@
         ],
         "type": "object"
       },
+      "CreateWorkflowSavedInputsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "inputs": {
+            "additionalProperties": {},
+            "description": "Saved input values.",
+            "type": "object"
+          },
+          "name": {
+            "description": "Name for the saved inputs.",
+            "maxLength": 50,
+            "minLength": 2,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "inputs"
+        ],
+        "type": "object"
+      },
       "CustomSku": {
         "additionalProperties": false,
         "properties": {
@@ -6119,10 +6140,6 @@
       "ExistingCluster": {
         "additionalProperties": false,
         "properties": {
-          "autoReconnect": {
-            "description": "Auto-reconnect enabled",
-            "type": "boolean"
-          },
           "disconnectedAt": {
             "description": "Set when the user explicitly disconnected this cluster; reconcilers use this to skip auto-reconnect",
             "format": "date-time",
@@ -6181,7 +6198,6 @@
           "status",
           "remoteHost",
           "key",
-          "autoReconnect",
           "tunnelConnected",
           "variables"
         ],
@@ -13511,19 +13527,6 @@
         ],
         "type": "object"
       },
-      "PatchExistingClusterBody": {
-        "additionalProperties": false,
-        "properties": {
-          "autoReconnect": {
-            "description": "Auto-reconnect enabled",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "autoReconnect"
-        ],
-        "type": "object"
-      },
       "PatchImageInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -13735,6 +13738,16 @@
           },
           "status": {
             "description": "Session status.",
+            "enum": [
+              "creating",
+              "pending",
+              "running",
+              "installing",
+              "starting",
+              "stopping",
+              "stopped",
+              "error"
+            ],
             "type": "string"
           },
           "targetId": {
@@ -19485,6 +19498,27 @@
         },
         "type": "object"
       },
+      "UpdateWorkflowSavedInputsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "inputs": {
+            "additionalProperties": {},
+            "description": "Saved input values.",
+            "type": "object"
+          },
+          "name": {
+            "description": "Name for the saved inputs; pass a different value to rename.",
+            "maxLength": 50,
+            "minLength": 2,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "inputs"
+        ],
+        "type": "object"
+      },
       "UploadManagedClusterIconOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -20183,40 +20217,13 @@
         },
         "type": "object"
       },
-      "WorkflowConfiguration": {
-        "additionalProperties": false,
-        "properties": {
-          "builtin": {
-            "description": "Boolean to determine if the configuration is from the yaml or is user selected ",
-            "type": "boolean"
-          },
-          "id": {
-            "description": "Configuration ID.",
-            "type": "string"
-          },
-          "inputs": {
-            "additionalProperties": {},
-            "description": "Input values to load when selected.",
-            "type": "object"
-          },
-          "name": {
-            "description": "Configuration name.",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "name"
-        ],
-        "type": "object"
-      },
       "WorkflowItem": {
         "additionalProperties": false,
         "properties": {
           "configurations": {
-            "description": "Configurations for the workflow.",
+            "description": "Saved inputs for the workflow, including built-in entries defined in the workflow YAML.",
             "items": {
-              "$ref": "#/components/schemas/WorkflowConfiguration"
+              "$ref": "#/components/schemas/WorkflowSavedInputs"
             },
             "type": [
               "array",
@@ -20225,10 +20232,6 @@
           },
           "description": {
             "description": "Description of the workflow.",
-            "type": "string"
-          },
-          "directory": {
-            "description": "Directory of the workflow.",
             "type": "string"
           },
           "displayName": {
@@ -20299,7 +20302,7 @@
           },
           "yaml": {
             "additionalProperties": true,
-            "description": "YAML configuration of the workflow.",
+            "description": "YAML definition of the workflow.",
             "type": "object"
           }
         },
@@ -20511,6 +20514,51 @@
         "required": [
           "count",
           "cutoffDate"
+        ],
+        "type": "object"
+      },
+      "WorkflowSavedInputs": {
+        "additionalProperties": false,
+        "properties": {
+          "builtin": {
+            "description": "Whether the entry is built-in from the workflow YAML rather than user-saved.",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "ID of the saved inputs.",
+            "type": "string"
+          },
+          "inputs": {
+            "additionalProperties": {},
+            "description": "Input values to load when selected.",
+            "type": "object"
+          },
+          "name": {
+            "description": "Name of the saved inputs.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "WorkflowSavedInputsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "savedInputs": {
+            "items": {
+              "$ref": "#/components/schemas/WorkflowSavedInputs"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "savedInputs"
         ],
         "type": "object"
       },
@@ -24930,61 +24978,6 @@
         "x-internal": true
       }
     },
-    "/api/internal/usercontainer/existing/{name}": {
-      "patch": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUpdates an existing cluster's auto-reconnect status.",
-        "operationId": "update-existing-cluster-autoreconnect",
-        "parameters": [
-          {
-            "description": "Cluster name",
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "description": "Cluster name",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PatchExistingClusterBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExistingCluster"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Update existing cluster auto-reconnect",
-        "tags": [
-          "Clusters"
-        ],
-        "x-internal": true
-      }
-    },
     "/api/ips": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the list of IP Addresses",
@@ -25196,17 +25189,6 @@
             }
           },
           {
-            "description": "Only items the user has favorited",
-            "explode": false,
-            "in": "query",
-            "name": "favorited",
-            "schema": {
-              "default": false,
-              "description": "Only items the user has favorited",
-              "type": "boolean"
-            }
-          },
-          {
             "description": "Only verified items",
             "explode": false,
             "in": "query",
@@ -25309,9 +25291,154 @@
         ]
       }
     },
+    "/api/marketplace/{slug}/account-versions": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns which versions of a marketplace item the user has in their account, keyed by version.",
+        "operationId": "get-marketplace-account-versions",
+        "parameters": [
+          {
+            "description": "Slug of the marketplace item.",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Slug of the marketplace item.",
+              "maxLength": 100,
+              "minLength": 2,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Marketplace Account Versions",
+        "tags": [
+          "Marketplace"
+        ]
+      }
+    },
+    "/api/marketplace/{slug}/account-versions/{version}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves a marketplace workflow version reference from the user's account.",
+        "operationId": "remove-marketplace-account-version",
+        "parameters": [
+          {
+            "description": "Slug of the marketplace item.",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Slug of the marketplace item.",
+              "maxLength": 100,
+              "minLength": 2,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Version to remove from the account.",
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "description": "Version to remove from the account.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Remove Marketplace Account Version",
+        "tags": [
+          "Marketplace"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nAdds a marketplace workflow version to the user's account as a reference.",
+        "operationId": "add-marketplace-account-version",
+        "parameters": [
+          {
+            "description": "Slug of the marketplace item.",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Slug of the marketplace item.",
+              "maxLength": 100,
+              "minLength": 2,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Version to add to the account.",
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "description": "Version to add to the account.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add Marketplace Account Version",
+        "tags": [
+          "Marketplace"
+        ]
+      }
+    },
     "/api/marketplace/{slug}/fork": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates a new resource by forking a marketplace item. Supports workflows, apps, storage, and compute items.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates an owned resource from a marketplace item: an editable workflow copy, or a storage/compute resource.",
         "operationId": "fork-marketplace-item",
         "parameters": [
           {
@@ -26019,6 +26146,65 @@
           }
         },
         "summary": "Update user notification settings",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/api/notifications/{id}": {
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nMarks a notification's read or archived field as true for the currently authenticated subject.",
+        "operationId": "update-notification",
+        "parameters": [
+          {
+            "description": "ID of the notification to update.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "ID of the notification to update.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Notification field to mark as true.",
+            "explode": false,
+            "in": "query",
+            "name": "field",
+            "required": true,
+            "schema": {
+              "description": "Notification field to mark as true.",
+              "enum": [
+                "read",
+                "archived"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Notification"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update a notification",
         "tags": [
           "Notifications"
         ]
@@ -29968,10 +30154,10 @@
         ]
       }
     },
-    "/api/organizations/{organization}/clouds/{csp}/regions/{region}/cloudimages": {
+    "/api/organizations/{organization}/clouds/aws/regions/{region}/cloudimages": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns public cloud images (AWS AMIs, Azure VM images, GCP images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.",
-        "operationId": "get-cloud-images",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns public cloud images (AWS AMIs, Azure VM images, GCP images, Oracle images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.",
+        "operationId": "get-aws-cloud-images",
         "parameters": [
           {
             "description": "The name of the organization.",
@@ -29982,22 +30168,6 @@
               "description": "The name of the organization.",
               "examples": [
                 "parallelworks"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "Cloud service provider",
-            "in": "path",
-            "name": "csp",
-            "required": true,
-            "schema": {
-              "description": "Cloud service provider",
-              "enum": [
-                "aws",
-                "azure",
-                "google",
-                "oracle"
               ],
               "type": "string"
             }
@@ -30071,7 +30241,300 @@
             "description": "Error"
           }
         },
-        "summary": "List public cloud images",
+        "summary": "List AWS cloud images",
+        "tags": [
+          "Cloud Images"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/clouds/azure/regions/{region}/cloudimages": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns public cloud images (AWS AMIs, Azure VM images, GCP images, Oracle images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.",
+        "operationId": "get-azure-cloud-images",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cloud region to list images from",
+            "in": "path",
+            "name": "region",
+            "required": true,
+            "schema": {
+              "description": "Cloud region to list images from",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Network name to use for cloud account credentials",
+            "explode": false,
+            "in": "query",
+            "name": "network",
+            "schema": {
+              "description": "Network name to use for cloud account credentials",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by CPU architecture (amd64, arm64)",
+            "explode": false,
+            "in": "query",
+            "name": "architecture",
+            "schema": {
+              "description": "Filter by CPU architecture (amd64, arm64)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by image name pattern",
+            "explode": false,
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "description": "Filter by image name pattern",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by Hyper-V generation. Pass V2 to hide Gen1 images when the instance type is Gen2-only; pass V1 to hide Gen2 images when the instance type is Gen1-only.",
+            "explode": false,
+            "in": "query",
+            "name": "hyperVGeneration",
+            "schema": {
+              "description": "Filter by Hyper-V generation. Pass V2 to hide Gen1 images when the instance type is Gen2-only; pass V1 to hide Gen2 images when the instance type is Gen1-only.",
+              "enum": [
+                "V1",
+                "V2"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CloudImage"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Azure cloud images",
+        "tags": [
+          "Cloud Images"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/clouds/google/regions/{region}/cloudimages": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns public cloud images (AWS AMIs, Azure VM images, GCP images, Oracle images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.",
+        "operationId": "get-google-cloud-images",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cloud region to list images from",
+            "in": "path",
+            "name": "region",
+            "required": true,
+            "schema": {
+              "description": "Cloud region to list images from",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Network name to use for cloud account credentials",
+            "explode": false,
+            "in": "query",
+            "name": "network",
+            "schema": {
+              "description": "Network name to use for cloud account credentials",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by CPU architecture (amd64, arm64)",
+            "explode": false,
+            "in": "query",
+            "name": "architecture",
+            "schema": {
+              "description": "Filter by CPU architecture (amd64, arm64)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by image name pattern",
+            "explode": false,
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "description": "Filter by image name pattern",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CloudImage"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Google cloud images",
+        "tags": [
+          "Cloud Images"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/clouds/oracle/regions/{region}/cloudimages": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns public cloud images (AWS AMIs, Azure VM images, GCP images, Oracle images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.",
+        "operationId": "get-oracle-cloud-images",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cloud region to list images from",
+            "in": "path",
+            "name": "region",
+            "required": true,
+            "schema": {
+              "description": "Cloud region to list images from",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Network name to use for cloud account credentials",
+            "explode": false,
+            "in": "query",
+            "name": "network",
+            "schema": {
+              "description": "Network name to use for cloud account credentials",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by CPU architecture (amd64, arm64)",
+            "explode": false,
+            "in": "query",
+            "name": "architecture",
+            "schema": {
+              "description": "Filter by CPU architecture (amd64, arm64)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by image name pattern",
+            "explode": false,
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "description": "Filter by image name pattern",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CloudImage"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Oracle cloud images",
         "tags": [
           "Cloud Images"
         ]
@@ -50981,7 +51444,7 @@
     },
     "/api/workflows/{workflow}/fork": {
       "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nConverts a remote or marketplace workflow to a local workflow by fetching and storing its YAML configuration.",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nConverts a remote or marketplace workflow to a local workflow by fetching and storing its YAML definition.",
         "operationId": "fork-workflow",
         "parameters": [
           {
@@ -51304,6 +51767,176 @@
           }
         },
         "summary": "Get Workflow Markdown",
+        "tags": [
+          "Workflows"
+        ]
+      }
+    },
+    "/api/workflows/{workflow}/saved-inputs": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSaves a named preset of input values for the workflow.",
+        "operationId": "create-workflow-saved-inputs",
+        "parameters": [
+          {
+            "description": "Name of the workflow.",
+            "in": "path",
+            "name": "workflow",
+            "required": true,
+            "schema": {
+              "description": "Name of the workflow.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkflowSavedInputsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowSavedInputsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Save workflow inputs",
+        "tags": [
+          "Workflows"
+        ]
+      }
+    },
+    "/api/workflows/{workflow}/saved-inputs/{name}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDeletes saved workflow inputs.",
+        "operationId": "delete-workflow-saved-inputs",
+        "parameters": [
+          {
+            "description": "Name of the workflow.",
+            "in": "path",
+            "name": "workflow",
+            "required": true,
+            "schema": {
+              "description": "Name of the workflow.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the saved inputs to delete.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Name of the saved inputs to delete.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowSavedInputsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete saved workflow inputs",
+        "tags": [
+          "Workflows"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUpdates the values of saved workflow inputs.",
+        "operationId": "update-workflow-saved-inputs",
+        "parameters": [
+          {
+            "description": "Name of the workflow.",
+            "in": "path",
+            "name": "workflow",
+            "required": true,
+            "schema": {
+              "description": "Name of the workflow.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Current name of the saved inputs.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Current name of the saved inputs.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkflowSavedInputsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowSavedInputsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update saved workflow inputs",
         "tags": [
           "Workflows"
         ]

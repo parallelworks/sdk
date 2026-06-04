@@ -2023,6 +2023,14 @@ type CreateWorkflowRunOutputBody struct {
 	AdditionalProperties map[string]any      `json:"-,omitempty"`
 }
 
+type CreateWorkflowSavedInputsInputBody struct {
+	// Saved input values.
+	Inputs map[string]any `json:"inputs"`
+	// Name for the saved inputs.
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type CustomSku struct {
 	// SKU code (e.g., SLURM_NODE_HOUR)
 	Code string `json:"code"`
@@ -2197,8 +2205,6 @@ type ErrorLogItem struct {
 }
 
 type ExistingCluster struct {
-	// Auto-reconnect enabled
-	AutoReconnect bool `json:"autoReconnect"`
 	// Set when the user explicitly disconnected this cluster; reconcilers use this to skip auto-reconnect
 	DisconnectedAt *time.Time `json:"disconnectedAt,omitempty"`
 	// Group name
@@ -4711,12 +4717,6 @@ type PatchAllocationInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type PatchExistingClusterBody struct {
-	// Auto-reconnect enabled
-	AutoReconnect        bool           `json:"autoReconnect"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
 type PatchImageInputBody struct {
 	// Set the image as disabled
 	Disabled *bool `json:"disabled,omitempty"`
@@ -6743,6 +6743,14 @@ type UpdateWorkflowRunInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type UpdateWorkflowSavedInputsInputBody struct {
+	// Saved input values.
+	Inputs map[string]any `json:"inputs"`
+	// Name for the saved inputs; pass a different value to rename.
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type UploadManagedClusterIconOutputBody struct {
 	// SHA256 hex of the stored blob.
 	Etag string `json:"etag"`
@@ -6974,25 +6982,11 @@ type WorkflowAgentResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type WorkflowConfiguration struct {
-	// Boolean to determine if the configuration is from the yaml or is user selected
-	Builtin *bool `json:"builtin,omitempty"`
-	// Configuration ID.
-	ID string `json:"id"`
-	// Input values to load when selected.
-	Inputs map[string]any `json:"inputs,omitempty"`
-	// Configuration name.
-	Name                 string         `json:"name"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
 type WorkflowItem struct {
-	// Configurations for the workflow.
-	Configurations []WorkflowConfiguration `json:"configurations,omitempty"`
+	// Saved inputs for the workflow, including built-in entries defined in the workflow YAML.
+	Configurations []WorkflowSavedInputs `json:"configurations,omitempty"`
 	// Description of the workflow.
 	Description *string `json:"description,omitempty"`
-	// Directory of the workflow.
-	Directory *string `json:"directory,omitempty"`
 	// Display name of the workflow.
 	DisplayName *string `json:"displayName,omitempty"`
 	// Whether the workflow is favorited.
@@ -7022,7 +7016,7 @@ type WorkflowItem struct {
 	Type string `json:"type"`
 	// User which owns the workflow.
 	User *string `json:"user,omitempty"`
-	// YAML configuration of the workflow.
+	// YAML definition of the workflow.
 	Yaml                 map[string]any `json:"yaml,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -7095,6 +7089,23 @@ type WorkflowRunsCleanupPreviewBody struct {
 	// Workflow runs created before this date would be deleted
 	CutoffDate           time.Time      `json:"cutoffDate"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WorkflowSavedInputs struct {
+	// Whether the entry is built-in from the workflow YAML rather than user-saved.
+	Builtin *bool `json:"builtin,omitempty"`
+	// ID of the saved inputs.
+	ID string `json:"id"`
+	// Input values to load when selected.
+	Inputs map[string]any `json:"inputs,omitempty"`
+	// Name of the saved inputs.
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WorkflowSavedInputsOutputBody struct {
+	SavedInputs          []WorkflowSavedInputs `json:"savedInputs"`
+	AdditionalProperties map[string]any        `json:"-,omitempty"`
 }
 
 type WorkflowVariable struct {

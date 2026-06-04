@@ -1671,22 +1671,6 @@ func (c *Client) GetExistingClusters(ctx context.Context) (*[]ExistingCluster, e
 	return &result, nil
 }
 
-// UpdateExistingClusterAutoreconnect - Update existing cluster auto-reconnect
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Updates an existing cluster's auto-reconnect status.
-func (c *Client) UpdateExistingClusterAutoreconnect(ctx context.Context, name string, body PatchExistingClusterBody) (*ExistingCluster, error) {
-	path := "/api/internal/usercontainer/existing/{name}"
-	path = pathReplace(path, "name", name)
-
-	var result ExistingCluster
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
-		return nil, parseErrorError(err)
-	}
-	return &result, nil
-}
-
 // GetIpsParams contains optional parameters for the GetIps operation.
 type GetIpsParams struct {
 	// The cloud service provider for the IP.
@@ -1777,8 +1761,6 @@ type ListMarketplaceItemsParams struct {
 	Mine *bool `json:"mine,omitempty"`
 	// Only items published as the user's organization
 	Organization *bool `json:"organization,omitempty"`
-	// Only items the user has favorited
-	Favorited *bool `json:"favorited,omitempty"`
 	// Only verified items
 	Verified *bool `json:"verified,omitempty"`
 	// Only featured items
@@ -1799,7 +1781,6 @@ func (c *Client) ListMarketplaceItems(ctx context.Context, opts ...ListMarketpla
 		addQueryParam(queryValues, "modifiable", params.Modifiable)
 		addQueryParam(queryValues, "mine", params.Mine)
 		addQueryParam(queryValues, "organization", params.Organization)
-		addQueryParam(queryValues, "favorited", params.Favorited)
 		addQueryParam(queryValues, "verified", params.Verified)
 		addQueryParam(queryValues, "featured", params.Featured)
 		if len(queryValues) > 0 {
@@ -1829,11 +1810,59 @@ func (c *Client) GetMarketplaceItem(ctx context.Context, slug string) (*Marketpl
 	return &result, nil
 }
 
+// GetMarketplaceAccountVersions - List Marketplace Account Versions
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns which versions of a marketplace item the user has in their account, keyed by version.
+func (c *Client) GetMarketplaceAccountVersions(ctx context.Context, slug string) (*map[string]any, error) {
+	path := "/api/marketplace/{slug}/account-versions"
+	path = pathReplace(path, "slug", slug)
+
+	var result map[string]any
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddMarketplaceAccountVersion - Add Marketplace Account Version
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Adds a marketplace workflow version to the user's account as a reference.
+func (c *Client) AddMarketplaceAccountVersion(ctx context.Context, slug string, version string) error {
+	path := "/api/marketplace/{slug}/account-versions/{version}"
+	path = pathReplace(path, "slug", slug)
+	path = pathReplace(path, "version", version)
+
+	if err := c.do(ctx, "PUT", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// RemoveMarketplaceAccountVersion - Remove Marketplace Account Version
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes a marketplace workflow version reference from the user's account.
+func (c *Client) RemoveMarketplaceAccountVersion(ctx context.Context, slug string, version string) error {
+	path := "/api/marketplace/{slug}/account-versions/{version}"
+	path = pathReplace(path, "slug", slug)
+	path = pathReplace(path, "version", version)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // ForkMarketplaceItem - Fork Marketplace Item
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Creates a new resource by forking a marketplace item. Supports workflows, apps, storage, and compute items.
+// Creates an owned resource from a marketplace item: an editable workflow copy, or a storage/compute resource.
 func (c *Client) ForkMarketplaceItem(ctx context.Context, slug string, body ForkMarketplaceItemBody) (*ForkMarketplaceItemOutputBody, error) {
 	path := "/api/marketplace/{slug}/fork"
 	path = pathReplace(path, "slug", slug)
@@ -2096,6 +2125,22 @@ func (c *Client) SetNotificationsSettings(ctx context.Context, body *Notificatio
 
 	var result NotificationSettings
 	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateNotification - Update a notification
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Marks a notification's read or archived field as true for the currently authenticated subject.
+func (c *Client) UpdateNotification(ctx context.Context, id string) (*Notification, error) {
+	path := "/api/notifications/{id}"
+	path = pathReplace(path, "id", id)
+
+	var result Notification
+	if err := c.do(ctx, "PATCH", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -3352,8 +3397,8 @@ func (c *Client) PostOpenstackSync(ctx context.Context, organization string, nam
 	return &result, nil
 }
 
-// GetCloudImagesParams contains optional parameters for the GetCloudImages operation.
-type GetCloudImagesParams struct {
+// GetAwsCloudImagesParams contains optional parameters for the GetAwsCloudImages operation.
+type GetAwsCloudImagesParams struct {
 	// Network name to use for cloud account credentials
 	Network *string `json:"network,omitempty"`
 	// Filter by CPU architecture (amd64, arm64)
@@ -3362,15 +3407,128 @@ type GetCloudImagesParams struct {
 	Name *string `json:"name,omitempty"`
 }
 
-// GetCloudImages - List public cloud images
+// GetAwsCloudImages - List AWS cloud images
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns public cloud images (AWS AMIs, Azure VM images, GCP images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.
-func (c *Client) GetCloudImages(ctx context.Context, organization string, csp string, region string, opts ...GetCloudImagesParams) (*[]CloudImage, error) {
-	path := "/api/organizations/{organization}/clouds/{csp}/regions/{region}/cloudimages"
+// Returns public cloud images (AWS AMIs, Azure VM images, GCP images, Oracle images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.
+func (c *Client) GetAwsCloudImages(ctx context.Context, organization string, region string, opts ...GetAwsCloudImagesParams) (*[]CloudImage, error) {
+	path := "/api/organizations/{organization}/clouds/aws/regions/{region}/cloudimages"
 	path = pathReplace(path, "organization", organization)
-	path = pathReplace(path, "csp", csp)
+	path = pathReplace(path, "region", region)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "network", params.Network)
+		addQueryParam(queryValues, "architecture", params.Architecture)
+		addQueryParam(queryValues, "name", params.Name)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result []CloudImage
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetAzureCloudImagesParams contains optional parameters for the GetAzureCloudImages operation.
+type GetAzureCloudImagesParams struct {
+	// Network name to use for cloud account credentials
+	Network *string `json:"network,omitempty"`
+	// Filter by CPU architecture (amd64, arm64)
+	Architecture *string `json:"architecture,omitempty"`
+	// Filter by image name pattern
+	Name *string `json:"name,omitempty"`
+	// Filter by Hyper-V generation. Pass V2 to hide Gen1 images when the instance type is Gen2-only; pass V1 to hide Gen2 images when the instance type is Gen1-only.
+	HyperVGeneration *string `json:"hyperVGeneration,omitempty"`
+}
+
+// GetAzureCloudImages - List Azure cloud images
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns public cloud images (AWS AMIs, Azure VM images, GCP images, Oracle images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.
+func (c *Client) GetAzureCloudImages(ctx context.Context, organization string, region string, opts ...GetAzureCloudImagesParams) (*[]CloudImage, error) {
+	path := "/api/organizations/{organization}/clouds/azure/regions/{region}/cloudimages"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "region", region)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "network", params.Network)
+		addQueryParam(queryValues, "architecture", params.Architecture)
+		addQueryParam(queryValues, "name", params.Name)
+		addQueryParam(queryValues, "hyperVGeneration", params.HyperVGeneration)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result []CloudImage
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetGoogleCloudImagesParams contains optional parameters for the GetGoogleCloudImages operation.
+type GetGoogleCloudImagesParams struct {
+	// Network name to use for cloud account credentials
+	Network *string `json:"network,omitempty"`
+	// Filter by CPU architecture (amd64, arm64)
+	Architecture *string `json:"architecture,omitempty"`
+	// Filter by image name pattern
+	Name *string `json:"name,omitempty"`
+}
+
+// GetGoogleCloudImages - List Google cloud images
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns public cloud images (AWS AMIs, Azure VM images, GCP images, Oracle images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.
+func (c *Client) GetGoogleCloudImages(ctx context.Context, organization string, region string, opts ...GetGoogleCloudImagesParams) (*[]CloudImage, error) {
+	path := "/api/organizations/{organization}/clouds/google/regions/{region}/cloudimages"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "region", region)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "network", params.Network)
+		addQueryParam(queryValues, "architecture", params.Architecture)
+		addQueryParam(queryValues, "name", params.Name)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result []CloudImage
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetOracleCloudImagesParams contains optional parameters for the GetOracleCloudImages operation.
+type GetOracleCloudImagesParams struct {
+	// Network name to use for cloud account credentials
+	Network *string `json:"network,omitempty"`
+	// Filter by CPU architecture (amd64, arm64)
+	Architecture *string `json:"architecture,omitempty"`
+	// Filter by image name pattern
+	Name *string `json:"name,omitempty"`
+}
+
+// GetOracleCloudImages - List Oracle cloud images
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns public cloud images (AWS AMIs, Azure VM images, GCP images, Oracle images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.
+func (c *Client) GetOracleCloudImages(ctx context.Context, organization string, region string, opts ...GetOracleCloudImagesParams) (*[]CloudImage, error) {
+	path := "/api/organizations/{organization}/clouds/oracle/regions/{region}/cloudimages"
+	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "region", region)
 
 	if len(opts) > 0 {
@@ -9725,7 +9883,7 @@ func (c *Client) DuplicateWorkflow(ctx context.Context, workflow string, body Du
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Converts a remote or marketplace workflow to a local workflow by fetching and storing its YAML configuration.
+// Converts a remote or marketplace workflow to a local workflow by fetching and storing its YAML definition.
 func (c *Client) ForkWorkflow(ctx context.Context, workflow string, body ForkWorkflowBody) (*WorkflowItem, error) {
 	path := "/api/workflows/{workflow}/fork"
 	path = pathReplace(path, "workflow", workflow)
@@ -9824,6 +9982,56 @@ func (c *Client) GetWorkflowMarkdown(ctx context.Context, workflow string) (*str
 
 	var result string
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CreateWorkflowSavedInputs - Save workflow inputs
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Saves a named preset of input values for the workflow.
+func (c *Client) CreateWorkflowSavedInputs(ctx context.Context, workflow string, body CreateWorkflowSavedInputsInputBody) (*WorkflowSavedInputsOutputBody, error) {
+	path := "/api/workflows/{workflow}/saved-inputs"
+	path = pathReplace(path, "workflow", workflow)
+
+	var result WorkflowSavedInputsOutputBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteWorkflowSavedInputs - Delete saved workflow inputs
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes saved workflow inputs.
+func (c *Client) DeleteWorkflowSavedInputs(ctx context.Context, workflow string, name string) (*WorkflowSavedInputsOutputBody, error) {
+	path := "/api/workflows/{workflow}/saved-inputs/{name}"
+	path = pathReplace(path, "workflow", workflow)
+	path = pathReplace(path, "name", name)
+
+	var result WorkflowSavedInputsOutputBody
+	if err := c.do(ctx, "DELETE", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateWorkflowSavedInputs - Update saved workflow inputs
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates the values of saved workflow inputs.
+func (c *Client) UpdateWorkflowSavedInputs(ctx context.Context, workflow string, name string, body UpdateWorkflowSavedInputsInputBody) (*WorkflowSavedInputsOutputBody, error) {
+	path := "/api/workflows/{workflow}/saved-inputs/{name}"
+	path = pathReplace(path, "workflow", workflow)
+	path = pathReplace(path, "name", name)
+
+	var result WorkflowSavedInputsOutputBody
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
