@@ -3,6 +3,8 @@
 package parallelworks
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -47,9 +49,391 @@ type AccessManagementBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type AddAwsBucketVersionInputBody struct {
+	Region *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace *bool `json:"replace,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Versioning           *bool          `json:"versioning,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddAwsDiskVersionInputBody struct {
+	Encrypted *bool   `json:"encrypted,omitempty"`
+	Iops      *int64  `json:"iops,omitempty"`
+	Region    *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace         *bool   `json:"replace,omitempty"`
+	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
+	SizeGb          *int64  `json:"size_gb,omitempty"`
+	Snapshot        *string `json:"snapshot,omitempty"`
+	Throughput      *int64  `json:"throughput,omitempty"`
+	Type            *string `json:"type,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddAwsEfsVersionInputBody struct {
+	EfsEncrypted                 *bool   `json:"efs_encrypted,omitempty"`
+	EfsPerformanceMode           *string `json:"efs_performance_mode,omitempty"`
+	ExportFsType                 *string `json:"export_fs_type,omitempty"`
+	ProvisionedThroughputInMibps *int64  `json:"provisioned_throughput_in_mibps,omitempty"`
+	Region                       *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace        *bool   `json:"replace,omitempty"`
+	ThroughputMode *string `json:"throughput_mode,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddAwsLustreVersionInputBody struct {
+	ExportPath     *string `json:"export_path,omitempty"`
+	Fsxcompression *string `json:"fsxcompression,omitempty"`
+	Fsxdeployment  *string `json:"fsxdeployment,omitempty"`
+	Fsxthroughput  *string `json:"fsxthroughput,omitempty"`
+	ImportPath     *string `json:"import_path,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace         *bool  `json:"replace,omitempty"`
+	StorageCapacity *int64 `json:"storage_capacity,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddAwsSlurmVersionInputBody struct {
+	Architecture           *string             `json:"architecture,omitempty"`
+	ControllerImage        *string             `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string             `json:"controllerInstanceType,omitempty"`
+	Disks                  []ClusterDisk       `json:"disks,omitempty"`
+	HealthCheck            *string             `json:"healthCheck,omitempty"`
+	Partitions             []AwsSlurmPartition `json:"partitions,omitempty"`
+	Region                 *string             `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace                 *bool                    `json:"replace,omitempty"`
+	RootSize                *int64                   `json:"rootSize,omitempty"`
+	RuntimeAlert            *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit        *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	SlurmResumeTimeout      any                      `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService    any                      `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime        any                      `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout     any                      `json:"slurmSuspendTimeout,omitempty"`
+	UserBootstrap           *string                  `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool                    `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool                    `json:"userBootstrapController,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddAzureAzfilesVersionInputBody struct {
+	Region *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace *bool  `json:"replace,omitempty"`
+	SizeGb  *int64 `json:"sizeGb,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddAzureBucketVersionInputBody struct {
+	Region *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace *bool `json:"replace,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddAzureDiskVersionInputBody struct {
+	Region *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace         *bool   `json:"replace,omitempty"`
+	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
+	SizeGb          *int64  `json:"size_gb,omitempty"`
+	Snapshot        *string `json:"snapshot,omitempty"`
+	Type            *string `json:"type,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddAzureHammerspaceVersionInputBody struct {
+	AnvilInstanceType *string `json:"anvil_instance_type,omitempty"`
+	DataDiskSize      *int64  `json:"data_disk_size,omitempty"`
+	DataNodeCount     *int64  `json:"data_node_count,omitempty"`
+	DataNodeDiskCount *int64  `json:"data_node_disk_count,omitempty"`
+	DataNodeDiskSize  *int64  `json:"data_node_disk_size,omitempty"`
+	DataNodeType      *string `json:"data_node_type,omitempty"`
+	DsxInstanceCount  *int64  `json:"dsx_instance_count,omitempty"`
+	DsxInstanceType   *string `json:"dsx_instance_type,omitempty"`
+	MetadataDiskCount *int64  `json:"metadata_disk_count,omitempty"`
+	MetadataDiskSize  *int64  `json:"metadata_disk_size,omitempty"`
+	Region            *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace             *bool   `json:"replace,omitempty"`
+	StorageBackend      *string `json:"storage_backend,omitempty"`
+	StorageType         *string `json:"storage_type,omitempty"`
+	UltraDiskIops       *int64  `json:"ultra_disk_iops,omitempty"`
+	UltraDiskMbps       *int64  `json:"ultra_disk_mbps,omitempty"`
+	UseHighAvailability *bool   `json:"use_high_availability,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddAzureManagedLustreVersionInputBody struct {
+	MaintenanceWindowDay     *string `json:"maintenance-window-day,omitempty"`
+	MaintenanceWindowTimeUtc *string `json:"maintenance-window-time-UTC,omitempty"`
+	Region                   *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace            *bool   `json:"replace,omitempty"`
+	StorageSizeInTb125 *int64  `json:"storage-size-in-tb-125,omitempty"`
+	StorageSizeInTb250 *int64  `json:"storage-size-in-tb-250,omitempty"`
+	StorageSizeInTb40  *int64  `json:"storage-size-in-tb-40,omitempty"`
+	StorageSizeInTb500 *int64  `json:"storage-size-in-tb-500,omitempty"`
+	Type               *string `json:"type,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddAzureNetappFilesVersionInputBody struct {
+	Region *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace *bool          `json:"replace,omitempty"`
+	Service *string        `json:"service,omitempty"`
+	Size    *int64         `json:"size,omitempty"`
+	Tags    map[string]any `json:"tags,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddAzureSlurmVersionInputBody struct {
+	Architecture           *string               `json:"architecture,omitempty"`
+	ControllerImage        *string               `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string               `json:"controllerInstanceType,omitempty"`
+	Disks                  []ClusterDisk         `json:"disks,omitempty"`
+	HealthCheck            *string               `json:"healthCheck,omitempty"`
+	LocalDiskMountPoint    *string               `json:"localDiskMountPoint,omitempty"`
+	LocalDiskNfs           *bool                 `json:"localDiskNFS,omitempty"`
+	LocaldiskLabel         map[string]any        `json:"localdiskLabel,omitempty"`
+	Partitions             []AzureSlurmPartition `json:"partitions,omitempty"`
+	Region                 *string               `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace                 *bool                    `json:"replace,omitempty"`
+	RootSize                *int64                   `json:"rootSize,omitempty"`
+	RuntimeAlert            *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit        *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	SlurmResumeTimeout      any                      `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService    any                      `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime        any                      `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout     any                      `json:"slurmSuspendTimeout,omitempty"`
+	UserBootstrap           *string                  `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool                    `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool                    `json:"userBootstrapController,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type AddDeploymentInputBody struct {
 	// Model name to deploy on the existing Azure OpenAI account
 	Model                string         `json:"model"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddExistingVersionInputBody struct {
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Jump (bastion) host.
+	Jumpnodehost *string `json:"jumpnodehost,omitempty"`
+	// Jump (bastion) user.
+	Jumpnodeuser *string `json:"jumpnodeuser,omitempty"`
+	// Shared key reference (proxycerts or the default workspace key).
+	Key *string `json:"key,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace *bool `json:"replace,omitempty"`
+	// Scheduler type, e.g. slurm.
+	SchedulerType *string `json:"schedulerType,omitempty"`
+	// Login nodes.
+	SlurmLoginNodes []ExistingLoginNode `json:"slurmLoginNodes,omitempty"`
+	// SLURM username (supports __USER__).
+	SlurmUsername *string `json:"slurmUsername,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddGoogleBucketVersionInputBody struct {
+	Region *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace *bool `json:"replace,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddGoogleDiskVersionInputBody struct {
+	Region *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace         *bool   `json:"replace,omitempty"`
+	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
+	SizeGb          *int64  `json:"size_gb,omitempty"`
+	Snapshot        *string `json:"snapshot,omitempty"`
+	Type            *string `json:"type,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddGoogleFilestoreVersionInputBody struct {
+	FilestoreTier *string `json:"filestore_tier,omitempty"`
+	Region        *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace *bool    `json:"replace,omitempty"`
+	SizeTib *float64 `json:"size_tib,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddGoogleManagedLustreVersionInputBody struct {
+	Performance *int64  `json:"performance,omitempty"`
+	Region      *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace  *bool  `json:"replace,omitempty"`
+	Size1000 *int64 `json:"size_1000,omitempty"`
+	Size125  *int64 `json:"size_125,omitempty"`
+	Size250  *int64 `json:"size_250,omitempty"`
+	Size500  *int64 `json:"size_500,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddGoogleSlurmVersionInputBody struct {
+	Architecture           *string                `json:"architecture,omitempty"`
+	ControllerImage        *string                `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                `json:"controllerInstanceType,omitempty"`
+	ControllerTier1        *bool                  `json:"controllerTier1,omitempty"`
+	Disks                  []ClusterDisk          `json:"disks,omitempty"`
+	GoogleLabel            map[string]any         `json:"googleLabel,omitempty"`
+	HealthCheck            *string                `json:"healthCheck,omitempty"`
+	Partitions             []GoogleSlurmPartition `json:"partitions,omitempty"`
+	Region                 *string                `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace                 *bool                    `json:"replace,omitempty"`
+	RootSize                *int64                   `json:"rootSize,omitempty"`
+	RuntimeAlert            *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit        *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	SlurmResumeTimeout      any                      `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService    any                      `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime        any                      `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout     any                      `json:"slurmSuspendTimeout,omitempty"`
+	UserBootstrap           *string                  `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool                    `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool                    `json:"userBootstrapController,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddLocalWorkflowVersionInputBody struct {
+	// Replace an existing version's variables instead of adding a new version.
+	Replace *bool `json:"replace,omitempty"`
+	// Version label to add (must start with v).
+	Version string `json:"version"`
+	// The workflow definition as YAML text.
+	Yaml                 string         `json:"yaml"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddOpenstackSlurmVersionInputBody struct {
+	Architecture           *string                   `json:"architecture,omitempty"`
+	AttachedStorages       []map[string]any          `json:"attachedStorages,omitempty"`
+	ControllerImage        *string                   `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                   `json:"controllerInstanceType,omitempty"`
+	FloatingIPNetwork      *string                   `json:"floatingIpNetwork,omitempty"`
+	HealthCheck            *string                   `json:"healthCheck,omitempty"`
+	NetworkID              *string                   `json:"networkId,omitempty"`
+	Partitions             []OpenstackSlurmPartition `json:"partitions,omitempty"`
+	Region                 *string                   `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace                 *bool                    `json:"replace,omitempty"`
+	RuntimeAlert            *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit        *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	SlurmResumeTimeout      any                      `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService    any                      `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime        any                      `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout     any                      `json:"slurmSuspendTimeout,omitempty"`
+	UserBootstrap           *string                  `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool                    `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool                    `json:"userBootstrapController,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddOracleBucketVersionInputBody struct {
+	Region *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace *bool `json:"replace,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddOracleOraclefsVersionInputBody struct {
+	AvailabilityDomain *string `json:"availability_domain,omitempty"`
+	Region             *string `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace *bool `json:"replace,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddOracleSlurmVersionInputBody struct {
+	Architecture           *string                `json:"architecture,omitempty"`
+	ControllerImage        *string                `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                `json:"controllerInstanceType,omitempty"`
+	ControllerMemoryGb     *int64                 `json:"controllerMemoryGb,omitempty"`
+	ControllerOcpus        *int64                 `json:"controllerOcpus,omitempty"`
+	Disks                  []ClusterDisk          `json:"disks,omitempty"`
+	HealthCheck            *string                `json:"healthCheck,omitempty"`
+	IsFlex                 *bool                  `json:"isFlex,omitempty"`
+	Partitions             []OracleSlurmPartition `json:"partitions,omitempty"`
+	Region                 *string                `json:"region,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace                 *bool                    `json:"replace,omitempty"`
+	RootSize                *int64                   `json:"rootSize,omitempty"`
+	RuntimeAlert            *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit        *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	SlurmResumeTimeout      any                      `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService    any                      `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime        any                      `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout     any                      `json:"slurmSuspendTimeout,omitempty"`
+	UserBootstrap           *string                  `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool                    `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool                    `json:"userBootstrapController,omitempty"`
+	// Version label to add (must start with v).
+	Version              string         `json:"version"`
+	Zone                 *string        `json:"zone,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -68,6 +452,28 @@ type AddPermissionInputBody struct {
 	Permission string `json:"permission"`
 	// Team ID to share with
 	Team                 *string        `json:"team,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AddRemoteWorkflowVersionInputBody struct {
+	// Git branch.
+	Branch *string `json:"branch,omitempty"`
+	// Path to the README within the repo.
+	Readme *string `json:"readme,omitempty"`
+	// Replace an existing version's variables instead of adding a new version.
+	Replace *bool `json:"replace,omitempty"`
+	// Repository URL.
+	Repo *string `json:"repo,omitempty"`
+	// Skip the git checkout step.
+	SkipCheckout *bool `json:"skipCheckout,omitempty"`
+	// Sparse-checkout paths.
+	Sparsecheckout []string `json:"sparsecheckout,omitempty"`
+	// Path to the thumbnail image within the repo.
+	Thumbnail *string `json:"thumbnail,omitempty"`
+	// Version label to add (must start with v).
+	Version string `json:"version"`
+	// Path to the workflow YAML within the repo.
+	Yaml                 *string        `json:"yaml,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -94,6 +500,8 @@ type AiProviderResponse struct {
 	EnabledModels []string `json:"enabledModels,omitempty"`
 	// Custom provider endpoint URL
 	Endpoint *string `json:"endpoint,omitempty"`
+	// Billing group the provider is provisioned under (managed providers)
+	Group *string `json:"group,omitempty"`
 	// Whether a custom CA certificate is configured
 	HasCaCertificate *bool `json:"hasCaCertificate,omitempty"`
 	// Unique identifier for the resource
@@ -122,6 +530,8 @@ type AiProvidersResponse struct {
 	Csp string `json:"csp"`
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
+	// Billing group the provider is provisioned under (managed providers)
+	Group *string `json:"group,omitempty"`
 	// Whether the tunnel's remote destination is reachable (tunnel providers only).
 	Healthy *bool `json:"healthy,omitempty"`
 	// Unique identifier for the AI provider
@@ -250,6 +660,8 @@ type AuthSession struct {
 	Organization string `json:"organization"`
 	// Indicates if the user is an admin of the organization.
 	OrganizationAdmin bool `json:"organizationAdmin"`
+	// Indicates if the user is the owner of the organization.
+	OrganizationOwner bool `json:"organizationOwner"`
 	// Roles the user has within the organization.
 	OrganizationRoles []string `json:"organizationRoles"`
 	// Indicates if the user is a partner.
@@ -272,6 +684,8 @@ type AwsBucket struct {
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
 	// Name of the AWS bucket
 	BucketName *string `json:"bucketName,omitempty"`
+	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)
+	CanGetCredentials bool `json:"canGetCredentials"`
 	// Cloud service provider of the storage.
 	Csp string `json:"csp"`
 	// Indicates if the storage is currently being provisioned.
@@ -317,6 +731,32 @@ type AwsBucket struct {
 	// User associated with the storage.
 	User string `json:"user"`
 	// Indicates if the AWS bucket has versioning enabled
+	Versioning           *bool          `json:"versioning,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AwsBucketToken struct {
+	// Temporary AWS access key ID scoped to this bucket.
+	AccessKeyID string `json:"accessKeyId"`
+	// Name of the S3 bucket on AWS.
+	BucketName string `json:"bucketName"`
+	// Time at which the credentials expire.
+	ExpiresAt time.Time `json:"expiresAt"`
+	// Whether the bucket lives in an AWS GovCloud account.
+	GovCloud bool `json:"govCloud"`
+	// Region the bucket is in.
+	Region string `json:"region"`
+	// Temporary AWS secret access key scoped to this bucket.
+	SecretAccessKey string `json:"secretAccessKey"`
+	// Temporary AWS session token scoped to this bucket.
+	SessionToken         string         `json:"sessionToken"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AwsBucketVersionSettings struct {
+	Region *string `json:"region,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
 	Versioning           *bool          `json:"versioning,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -379,6 +819,21 @@ type AwsDisk struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type AwsDiskVersionSettings struct {
+	Encrypted       *bool   `json:"encrypted,omitempty"`
+	Iops            *int64  `json:"iops,omitempty"`
+	Region          *string `json:"region,omitempty"`
+	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
+	SizeGb          *int64  `json:"size_gb,omitempty"`
+	Snapshot        *string `json:"snapshot,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	Throughput           *int64         `json:"throughput,omitempty"`
+	Type                 *string        `json:"type,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type AwsEfs struct {
 	// Resources the storage is attached to.
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
@@ -403,7 +858,7 @@ type AwsEfs struct {
 	// URL of the icon used for the storage. This will be empty if the default image is used.
 	ImageURL *string `json:"imageUrl,omitempty"`
 	// Mount targets of the AWS elastic filesystem
-	MountTargets map[string]any `json:"mountTargets,omitempty"`
+	MountTargets map[string]string `json:"mountTargets,omitempty"`
 	// Name of the storage.
 	Name string `json:"name"`
 	// Network the storage uses to provision.
@@ -432,6 +887,18 @@ type AwsEfs struct {
 	Type string `json:"type"`
 	// User associated with the storage.
 	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AwsEfsVersionSettings struct {
+	EfsEncrypted                 *bool   `json:"efs_encrypted,omitempty"`
+	EfsPerformanceMode           *string `json:"efs_performance_mode,omitempty"`
+	ExportFsType                 *string `json:"export_fs_type,omitempty"`
+	ProvisionedThroughputInMibps *int64  `json:"provisioned_throughput_in_mibps,omitempty"`
+	Region                       *string `json:"region,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	ThroughputMode       *string        `json:"throughput_mode,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -507,6 +974,20 @@ type AwsLustre struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type AwsLustreVersionSettings struct {
+	ExportPath      *string `json:"export_path,omitempty"`
+	Fsxcompression  *string `json:"fsxcompression,omitempty"`
+	Fsxdeployment   *string `json:"fsxdeployment,omitempty"`
+	Fsxthroughput   *string `json:"fsxthroughput,omitempty"`
+	ImportPath      *string `json:"import_path,omitempty"`
+	Region          *string `json:"region,omitempty"`
+	StorageCapacity *int64  `json:"storage_capacity,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type AwsSagemakerDetail struct {
 	// The creation timestamp of the Machine Learning Workspace.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
@@ -543,11 +1024,68 @@ type AwsSagemakerDetail struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type AwsSlurmPartition struct {
+	Architecture          *string        `json:"architecture,omitempty"`
+	CapacityBlock         *bool          `json:"capacityBlock,omitempty"`
+	CapacityReservation   *bool          `json:"capacityReservation,omitempty"`
+	CapacityReservationID *string        `json:"capacityReservationId,omitempty"`
+	Default               any            `json:"default,omitempty"`
+	Disks                 []ClusterDisk  `json:"disks,omitempty"`
+	Efa                   *bool          `json:"efa,omitempty"`
+	ElasticImage          *string        `json:"elasticImage,omitempty"`
+	InstanceType          *string        `json:"instanceType,omitempty"`
+	MaxNodes              *int64         `json:"maxNodes,omitempty"`
+	MultiZone             *bool          `json:"multiZone,omitempty"`
+	MultipleNetworkCards  *bool          `json:"multipleNetworkCards,omitempty"`
+	Name                  *string        `json:"name,omitempty"`
+	PlacementGroup        *string        `json:"placementGroup,omitempty"`
+	Preemptible           *bool          `json:"preemptible,omitempty"`
+	SuspendTime           *int64         `json:"suspendTime,omitempty"`
+	UsePlacementGroup     *bool          `json:"usePlacementGroup,omitempty"`
+	Zone                  *string        `json:"zone,omitempty"`
+	Zones                 []string       `json:"zones,omitempty"`
+	AdditionalProperties  map[string]any `json:"-,omitempty"`
+}
+
+type AwsSlurmVersionSettings struct {
+	Architecture           *string                  `json:"architecture,omitempty"`
+	ControllerImage        *string                  `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                  `json:"controllerInstanceType,omitempty"`
+	Disks                  []ClusterDisk            `json:"disks,omitempty"`
+	HealthCheck            *string                  `json:"healthCheck,omitempty"`
+	Partitions             []AwsSlurmPartition      `json:"partitions,omitempty"`
+	Region                 *string                  `json:"region,omitempty"`
+	RootSize               *int64                   `json:"rootSize,omitempty"`
+	RuntimeAlert           *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit       *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	SlurmResumeTimeout     any                      `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService   any                      `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime       any                      `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout    any                      `json:"slurmSuspendTimeout,omitempty"`
+	// Subtype discriminator.
+	Subtype                 string         `json:"subtype"`
+	UserBootstrap           *string        `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool          `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool          `json:"userBootstrapController,omitempty"`
+	Zone                    *string        `json:"zone,omitempty"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
+}
+
+type AzureAzfilesVersionSettings struct {
+	Region *string `json:"region,omitempty"`
+	SizeGb *int64  `json:"sizeGb,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type AzureBlobStorage struct {
 	// Resources the storage is attached to.
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
 	// Name of the Azure blob storage
 	BucketName *string `json:"bucketName,omitempty"`
+	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)
+	CanGetCredentials bool `json:"canGetCredentials"`
 	// Cloud service provider of the storage.
 	Csp string `json:"csp"`
 	// Indicates if the storage is currently being provisioned.
@@ -592,6 +1130,33 @@ type AzureBlobStorage struct {
 	Type string `json:"type"`
 	// User associated with the storage.
 	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AzureBucketToken struct {
+	// Name of the blob container on Azure.
+	BucketName string `json:"bucketName"`
+	// URL of the blob container.
+	BucketURL string `json:"bucketUrl"`
+	// Service principal client ID scoped to this bucket.
+	ClientID string `json:"clientId"`
+	// Service principal client secret scoped to this bucket.
+	ClientSecret string `json:"clientSecret"`
+	// Time at which the credentials expire.
+	ExpiresAt time.Time `json:"expiresAt"`
+	// Name of the Azure storage account.
+	StorageAccount string `json:"storageAccount"`
+	// Azure subscription ID the bucket belongs to.
+	SubscriptionID string `json:"subscriptionId"`
+	// Azure tenant ID of the service principal.
+	TenantID             string         `json:"tenantId"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AzureBucketVersionSettings struct {
+	Region *string `json:"region,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -640,6 +1205,18 @@ type AzureDisk struct {
 	Type string `json:"type"`
 	// User associated with the storage.
 	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AzureDiskVersionSettings struct {
+	Region          *string `json:"region,omitempty"`
+	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
+	SizeGb          *int64  `json:"size_gb,omitempty"`
+	Snapshot        *string `json:"snapshot,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	Type                 *string        `json:"type,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -708,6 +1285,29 @@ type AzureFilesSas struct {
 	StorageName string `json:"storageName"`
 	// The URL of the Azure file share with the SAS token appended in the query parameters.
 	URL                  string         `json:"url"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AzureHammerspaceVersionSettings struct {
+	AnvilInstanceType *string `json:"anvil_instance_type,omitempty"`
+	DataDiskSize      *int64  `json:"data_disk_size,omitempty"`
+	DataNodeCount     *int64  `json:"data_node_count,omitempty"`
+	DataNodeDiskCount *int64  `json:"data_node_disk_count,omitempty"`
+	DataNodeDiskSize  *int64  `json:"data_node_disk_size,omitempty"`
+	DataNodeType      *string `json:"data_node_type,omitempty"`
+	DsxInstanceCount  *int64  `json:"dsx_instance_count,omitempty"`
+	DsxInstanceType   *string `json:"dsx_instance_type,omitempty"`
+	MetadataDiskCount *int64  `json:"metadata_disk_count,omitempty"`
+	MetadataDiskSize  *int64  `json:"metadata_disk_size,omitempty"`
+	Region            *string `json:"region,omitempty"`
+	StorageBackend    *string `json:"storage_backend,omitempty"`
+	StorageType       *string `json:"storage_type,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	UltraDiskIops        *int64         `json:"ultra_disk_iops,omitempty"`
+	UltraDiskMbps        *int64         `json:"ultra_disk_mbps,omitempty"`
+	UseHighAvailability  *bool          `json:"use_high_availability,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -813,6 +1413,21 @@ type AzureManagedLustre struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type AzureManagedLustreVersionSettings struct {
+	MaintenanceWindowDay     *string `json:"maintenance-window-day,omitempty"`
+	MaintenanceWindowTimeUtc *string `json:"maintenance-window-time-UTC,omitempty"`
+	Region                   *string `json:"region,omitempty"`
+	StorageSizeInTb125       *int64  `json:"storage-size-in-tb-125,omitempty"`
+	StorageSizeInTb250       *int64  `json:"storage-size-in-tb-250,omitempty"`
+	StorageSizeInTb40        *int64  `json:"storage-size-in-tb-40,omitempty"`
+	StorageSizeInTb500       *int64  `json:"storage-size-in-tb-500,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	Type                 *string        `json:"type,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type AzureNetAppFiles struct {
 	// Resources the storage is attached to.
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
@@ -871,6 +1486,16 @@ type AzureNetAppFiles struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type AzureNetappFilesVersionSettings struct {
+	Region  *string `json:"region,omitempty"`
+	Service *string `json:"service,omitempty"`
+	Size    *int64  `json:"size,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	Tags                 map[string]any `json:"tags,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type AzureSasToken struct {
 	// The expiration time of the SAS token.
 	Expiry time.Time `json:"expiry"`
@@ -879,6 +1504,54 @@ type AzureSasToken struct {
 	// The URL of the storage bucket with the SAS token appended in the query parameters.
 	URL                  string         `json:"url"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AzureSlurmPartition struct {
+	AcceleratedNetworking   *bool          `json:"acceleratedNetworking,omitempty"`
+	Architecture            *string        `json:"architecture,omitempty"`
+	Default                 any            `json:"default,omitempty"`
+	Disks                   []ClusterDisk  `json:"disks,omitempty"`
+	ElasticImage            *string        `json:"elasticImage,omitempty"`
+	HasAccNetworkingFeature *bool          `json:"has_acc_networking_feature,omitempty"`
+	InstanceType            *string        `json:"instanceType,omitempty"`
+	LocalDiskMountPoint     *string        `json:"localDiskMountPoint,omitempty"`
+	MaxNodes                *int64         `json:"maxNodes,omitempty"`
+	Name                    *string        `json:"name,omitempty"`
+	Preemptible             *bool          `json:"preemptible,omitempty"`
+	Reservation             *bool          `json:"reservation,omitempty"`
+	ReservationID           *string        `json:"reservationId,omitempty"`
+	ShowLocalDisk           *bool          `json:"show_local_disk,omitempty"`
+	SuspendTime             *int64         `json:"suspendTime,omitempty"`
+	UseLocalDisk            *bool          `json:"useLocalDisk,omitempty"`
+	Zone                    *string        `json:"zone,omitempty"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
+}
+
+type AzureSlurmVersionSettings struct {
+	Architecture           *string                  `json:"architecture,omitempty"`
+	ControllerImage        *string                  `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                  `json:"controllerInstanceType,omitempty"`
+	Disks                  []ClusterDisk            `json:"disks,omitempty"`
+	HealthCheck            *string                  `json:"healthCheck,omitempty"`
+	LocalDiskMountPoint    *string                  `json:"localDiskMountPoint,omitempty"`
+	LocalDiskNfs           *bool                    `json:"localDiskNFS,omitempty"`
+	LocaldiskLabel         map[string]any           `json:"localdiskLabel,omitempty"`
+	Partitions             []AzureSlurmPartition    `json:"partitions,omitempty"`
+	Region                 *string                  `json:"region,omitempty"`
+	RootSize               *int64                   `json:"rootSize,omitempty"`
+	RuntimeAlert           *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit       *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	SlurmResumeTimeout     any                      `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService   any                      `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime       any                      `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout    any                      `json:"slurmSuspendTimeout,omitempty"`
+	// Subtype discriminator.
+	Subtype                 string         `json:"subtype"`
+	UserBootstrap           *string        `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool          `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool          `json:"userBootstrapController,omitempty"`
+	Zone                    *string        `json:"zone,omitempty"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
 }
 
 type BillingResponse struct {
@@ -925,6 +1598,8 @@ type Bucket struct {
 	BucketAccountName string `json:"bucketAccountName"`
 	// Name of the bucket in the cloud provider
 	BucketName string `json:"bucketName"`
+	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)
+	CanGetCredentials bool `json:"canGetCredentials"`
 	// Cloud service provider of the bucket
 	Csp string `json:"csp"`
 	// Display name of the bucket
@@ -1100,7 +1775,7 @@ type ChatCompletionRequest struct {
 	// Frequency penalty (-2 to 2)
 	FrequencyPenalty *float64 `json:"frequency_penalty,omitempty"`
 	// Token logit biases
-	LogitBias map[string]any `json:"logit_bias,omitempty"`
+	LogitBias map[string]float64 `json:"logit_bias,omitempty"`
 	// Whether to return log probabilities
 	Logprobs *bool `json:"logprobs,omitempty"`
 	// Maximum completion tokens (newer OpenAI API)
@@ -1110,7 +1785,7 @@ type ChatCompletionRequest struct {
 	// List of messages in the conversation
 	Messages []ChatMessage `json:"messages"`
 	// Arbitrary metadata for the request
-	Metadata map[string]any `json:"metadata,omitempty"`
+	Metadata map[string]string `json:"metadata,omitempty"`
 	// Model ID in format 'provider-id/model-name'
 	Model string `json:"model"`
 	// Number of completions to generate
@@ -1273,17 +1948,17 @@ type CloudAccountCredentialsResponse struct {
 }
 
 type CloudAccountDetail struct {
-	Billing              CloudAccountBillingResponse     `json:"billing"`
-	Credentials          CloudAccountCredentialsResponse `json:"credentials"`
-	Csp                  string                          `json:"csp"`
-	CspID                string                          `json:"cspId"`
-	EncryptKey           *string                         `json:"encryptKey,omitempty"`
-	GovCloud             bool                            `json:"govCloud"`
-	Name                 string                          `json:"name"`
-	Networks             []CloudAccountNetworkSummary    `json:"networks"`
-	OpenstackMetadata    *OpenstackMetadata              `json:"openstackMetadata,omitempty"`
-	Permissions          map[string]any                  `json:"permissions"`
-	AdditionalProperties map[string]any                  `json:"-,omitempty"`
+	Billing              CloudAccountBillingResponse             `json:"billing"`
+	Credentials          CloudAccountCredentialsResponse         `json:"credentials"`
+	Csp                  string                                  `json:"csp"`
+	CspID                string                                  `json:"cspId"`
+	EncryptKey           *string                                 `json:"encryptKey,omitempty"`
+	GovCloud             bool                                    `json:"govCloud"`
+	Name                 string                                  `json:"name"`
+	Networks             []CloudAccountNetworkSummary            `json:"networks"`
+	OpenstackMetadata    *OpenstackMetadata                      `json:"openstackMetadata,omitempty"`
+	Permissions          map[string]CloudAccountPermissionsEntry `json:"permissions"`
+	AdditionalProperties map[string]any                          `json:"-,omitempty"`
 }
 
 type CloudAccountListItem struct {
@@ -1346,8 +2021,22 @@ type CloudImage struct {
 	OsType string `json:"osType"`
 	// Operating system version
 	OsVersion string `json:"osVersion"`
+	// Root disk size of the image in GB. Root disk must be at least this large.
+	RootDiskSizeGb *int64 `json:"rootDiskSizeGb,omitempty"`
 	// Sub-variant identifier
 	Variant              *string        `json:"variant,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ClusterDisk struct {
+	Encrypted            *bool          `json:"encrypted,omitempty"`
+	Iops                 *int64         `json:"iops,omitempty"`
+	MountPoint           *string        `json:"mountPoint,omitempty"`
+	NfsExport            *bool          `json:"nfsExport,omitempty"`
+	RestoreSnapshot      *bool          `json:"restore_snapshot,omitempty"`
+	SizeGb               *int64         `json:"sizeGb,omitempty"`
+	Throughput           *int64         `json:"throughput,omitempty"`
+	Type                 *string        `json:"type,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -1419,6 +2108,20 @@ type ClusterResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ClusterRuntimeAlert struct {
+	Enabled              *bool          `json:"enabled,omitempty"`
+	IntervalHours        *int64         `json:"intervalHours,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ClusterSessionCostLimit struct {
+	AutoTerminate        *bool          `json:"autoTerminate,omitempty"`
+	Enabled              *bool          `json:"enabled,omitempty"`
+	Limit                *float64       `json:"limit,omitempty"`
+	UseRealtime          *bool          `json:"useRealtime,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ClusterWorkspaceMount struct {
 	// The path on the cluster.
 	ClusterPath string `json:"clusterPath"`
@@ -1443,7 +2146,7 @@ type Config struct {
 	// List of keys
 	Keys []string `json:"keys"`
 	// Labels attached to the config
-	Labels map[string]any `json:"labels,omitempty"`
+	Labels map[string]string `json:"labels,omitempty"`
 	// Name of the config
 	Name string `json:"name"`
 	// Namespace of the config
@@ -1659,6 +2362,32 @@ type CreateAPIKeyOutputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type CreateAdminNotificationBody struct {
+	// Optional URL to link the notification to
+	Href *string `json:"href,omitempty"`
+	// Urgency level
+	Level *string `json:"level,omitempty"`
+	// Optional notification message
+	Message *string `json:"message,omitempty"`
+	// Usernames for the 'user' target, or the organization name for the 'organization' target
+	Recipients []string `json:"recipients,omitempty"`
+	// Subtype of notification. Valid values depend on type.
+	Subtype string `json:"subtype"`
+	// Recipient set: a single user, every member of an organization, or every user on the platform
+	Target string `json:"target"`
+	// Notification title
+	Title string `json:"title"`
+	// Type of notification
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreateAdminNotificationResponseBody struct {
+	// Usernames that did not receive the notification
+	FailedToNotifyUsers  []string       `json:"failedToNotifyUsers,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type CreateAlertBody struct {
 	// Detailed alert text shown to users.
 	Message string `json:"message"`
@@ -1815,6 +2544,28 @@ type CreateOrgAiProviderBody struct {
 	Name string `json:"name"`
 	// AI provider type
 	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreateOrganizationInputBody struct {
+	// New organization name.
+	OrganizationName string `json:"organizationName"`
+	// Name of the partner organization that will manage the new organization. Admin only.
+	PartnerName          *string        `json:"partnerName,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreateOrganizationOutputBody struct {
+	// The organization display name.
+	DisplayName string `json:"displayName"`
+	// The organization ID.
+	ID string `json:"id"`
+	// The name of the organization that manages this organization.
+	ManagedBy *string `json:"managedBy,omitempty"`
+	// The organization name.
+	Name string `json:"name"`
+	// Whether the organization is a partner organization.
+	Partner              bool           `json:"partner"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2007,7 +2758,7 @@ type CreateWorkflowRunInputBody struct {
 	// Slug of a marketplace item to run
 	Marketplace *string `json:"marketplace,omitempty"`
 	// Session names
-	SessionNames map[string]any `json:"sessionNames,omitempty"`
+	SessionNames map[string]string `json:"sessionNames,omitempty"`
 	// User-provided slug
 	Slug *string `json:"slug,omitempty"`
 	// Name of a saved workflow to run
@@ -2120,6 +2871,15 @@ type DeltaMessage struct {
 	ToolCallID *string `json:"tool_call_id,omitempty"`
 	// Tool calls made by the assistant
 	ToolCalls            []ToolCall     `json:"tool_calls,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type DesktopSessionSettings struct {
+	BindPaths            []string       `json:"bindPaths,omitempty"`
+	InitScript           *string        `json:"initScript,omitempty"`
+	OverlayPaths         []string       `json:"overlayPaths,omitempty"`
+	SifPath              *string        `json:"sifPath,omitempty"`
+	UseApptainer         *bool          `json:"useApptainer,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2249,11 +3009,36 @@ type ExistingClusterVariables struct {
 	AdditionalProperties map[string]any                  `json:"-,omitempty"`
 }
 
+type ExistingClusterVersionSettings struct {
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Jump (bastion) host.
+	Jumpnodehost *string `json:"jumpnodehost,omitempty"`
+	// Jump (bastion) user.
+	Jumpnodeuser *string `json:"jumpnodeuser,omitempty"`
+	// Shared key reference (proxycerts or the default workspace key).
+	Key *string `json:"key,omitempty"`
+	// Scheduler type, e.g. slurm.
+	SchedulerType *string `json:"schedulerType,omitempty"`
+	// Login nodes.
+	SlurmLoginNodes []ExistingLoginNode `json:"slurmLoginNodes,omitempty"`
+	// SLURM username (supports __USER__).
+	SlurmUsername *string `json:"slurmUsername,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ExistingClusterWorkspaceMount struct {
 	// Path on the cluster
 	ClusterPath string `json:"clusterPath"`
 	// Path in the workspace
 	WorkspacePath        string         `json:"workspacePath"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ExistingLoginNode struct {
+	// Login node hostname.
+	Node                 string         `json:"node"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2377,8 +3162,6 @@ type GeneralCluster struct {
 	// Existing-cluster only: the agent version currently registered for this cluster's tunnel. Empty when no agent is reporting.
 	AgentVersion        *string              `json:"agentVersion,omitempty"`
 	AllocationThreshold *AllocationThreshold `json:"allocationThreshold,omitempty"`
-	// Existing-cluster only: whether the workspace can SSH to this cluster. True if the tunnel is registered (and not user-disconnected) AND the workspace finished reconciling. Internal field, not covered by API guarantees.
-	CanConnectFromWorkspace bool `json:"canConnectFromWorkspace"`
 	// The SSH connection string for the resource.
 	ConnectionString *string `json:"connectionString,omitempty"`
 	// The cloud service provider for the resource.
@@ -2407,6 +3190,8 @@ type GeneralCluster struct {
 	RequestedNodes int64 `json:"requestedNodes"`
 	// The scheduler type used by the cluster.
 	SchedulerType *string `json:"schedulerType,omitempty"`
+	// True when SSH to this cluster must route through the platform tunnel (private network, not peered). False for public-IP or peered-private clusters that the workspace can dial directly.
+	ShouldPlatformProxy bool `json:"shouldPlatformProxy"`
 	// The status of the resource.
 	Status string `json:"status"`
 	// The tags associated with the resource.
@@ -2434,8 +3219,8 @@ type GenerateNodeTokenOutputBody struct {
 
 type GetAccessResponse struct {
 	// Access permissions by permission type
-	Permissions          map[string]any `json:"permissions"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
+	Permissions          map[string]NetworkPermissions `json:"permissions"`
+	AdditionalProperties map[string]any                `json:"-,omitempty"`
 }
 
 type GetClusterMetricsOutputBody struct {
@@ -2495,6 +3280,8 @@ type GoogleBucket struct {
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
 	// Name of the Google Bucket
 	BucketName *string `json:"bucketName,omitempty"`
+	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)
+	CanGetCredentials bool `json:"canGetCredentials"`
 	// Cloud service provider of the storage.
 	Csp string `json:"csp"`
 	// Indicates if the storage is currently being provisioned.
@@ -2539,6 +3326,23 @@ type GoogleBucket struct {
 	Type string `json:"type"`
 	// User associated with the storage.
 	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type GoogleBucketToken struct {
+	// Name of the bucket on Google Cloud Storage.
+	BucketName string `json:"bucketName"`
+	// Time at which the token expires.
+	ExpiresAt time.Time `json:"expiresAt"`
+	// OAuth2 access token scoped to this bucket.
+	Token                string         `json:"token"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type GoogleBucketVersionSettings struct {
+	Region *string `json:"region,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2587,6 +3391,18 @@ type GoogleDisk struct {
 	Type string `json:"type"`
 	// User associated with the storage.
 	User                 string         `json:"user"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type GoogleDiskVersionSettings struct {
+	Region          *string `json:"region,omitempty"`
+	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
+	SizeGb          *int64  `json:"size_gb,omitempty"`
+	Snapshot        *string `json:"snapshot,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	Type                 *string        `json:"type,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2652,6 +3468,16 @@ type GoogleFilestore struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type GoogleFilestoreVersionSettings struct {
+	FilestoreTier *string  `json:"filestore_tier,omitempty"`
+	Region        *string  `json:"region,omitempty"`
+	SizeTib       *float64 `json:"size_tib,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type GoogleManagedLustre struct {
 	// Can be ephemeral or persistent.
 	DeploymentType *bool `json:"deploymentType,omitempty"`
@@ -2680,6 +3506,71 @@ type GoogleManagedLustre struct {
 	// The gcp location of the instance.
 	Zone                 *string        `json:"zone,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type GoogleManagedLustreVersionSettings struct {
+	Performance *int64  `json:"performance,omitempty"`
+	Region      *string `json:"region,omitempty"`
+	Size1000    *int64  `json:"size_1000,omitempty"`
+	Size125     *int64  `json:"size_125,omitempty"`
+	Size250     *int64  `json:"size_250,omitempty"`
+	Size500     *int64  `json:"size_500,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type GoogleSlurmPartition struct {
+	Architecture         *string        `json:"architecture,omitempty"`
+	CustomSuspendTime    *bool          `json:"customSuspendTime,omitempty"`
+	Default              any            `json:"default,omitempty"`
+	Disks                []ClusterDisk  `json:"disks,omitempty"`
+	ElasticImage         *string        `json:"elasticImage,omitempty"`
+	Gvnic                *bool          `json:"gvnic,omitempty"`
+	InstanceType         *string        `json:"instanceType,omitempty"`
+	MaxDistance          *string        `json:"maxDistance,omitempty"`
+	MaxNodes             *int64         `json:"maxNodes,omitempty"`
+	MigrateOnMaintenance *bool          `json:"migrateOnMaintenance,omitempty"`
+	MultiZone            *bool          `json:"multiZone,omitempty"`
+	Name                 *string        `json:"name,omitempty"`
+	Os                   *string        `json:"os,omitempty"`
+	PlacementGroup       *string        `json:"placementGroup,omitempty"`
+	Preemptible          *bool          `json:"preemptible,omitempty"`
+	Reservation          *bool          `json:"reservation,omitempty"`
+	ReservationID        *string        `json:"reservationId,omitempty"`
+	SuspendTime          *int64         `json:"suspendTime,omitempty"`
+	Tier1                *bool          `json:"tier1,omitempty"`
+	UsePlacementGroup    *bool          `json:"usePlacementGroup,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	Zones                []string       `json:"zones,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type GoogleSlurmVersionSettings struct {
+	Architecture           *string                  `json:"architecture,omitempty"`
+	ControllerImage        *string                  `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                  `json:"controllerInstanceType,omitempty"`
+	ControllerTier1        *bool                    `json:"controllerTier1,omitempty"`
+	Disks                  []ClusterDisk            `json:"disks,omitempty"`
+	GoogleLabel            map[string]any           `json:"googleLabel,omitempty"`
+	HealthCheck            *string                  `json:"healthCheck,omitempty"`
+	Partitions             []GoogleSlurmPartition   `json:"partitions,omitempty"`
+	Region                 *string                  `json:"region,omitempty"`
+	RootSize               *int64                   `json:"rootSize,omitempty"`
+	RuntimeAlert           *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit       *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	SlurmResumeTimeout     any                      `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService   any                      `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime       any                      `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout    any                      `json:"slurmSuspendTimeout,omitempty"`
+	// Subtype discriminator.
+	Subtype                 string         `json:"subtype"`
+	UserBootstrap           *string        `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool          `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool          `json:"userBootstrapController,omitempty"`
+	Zone                    *string        `json:"zone,omitempty"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
 }
 
 type Group struct {
@@ -2885,7 +3776,7 @@ type HeartbeatOutputBody struct {
 	// Groups with access to this cluster
 	Groups []HeartbeatGroup `json:"groups,omitempty"`
 	// Per-node access management overrides (only nodes with overrides)
-	NodeOverrides map[string]any `json:"nodeOverrides,omitempty"`
+	NodeOverrides map[string]HeartbeatAccessManagement `json:"nodeOverrides,omitempty"`
 	// Heartbeat status
 	Status string `json:"status"`
 	// Users with access to this cluster
@@ -3328,6 +4219,16 @@ type ListModelsResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ListOrgMarketplaceItemsBody struct {
+	// Compute items published as the organization
+	Compute []OrgMarketplaceItemBody `json:"compute"`
+	// Storage items published as the organization
+	Storage []OrgMarketplaceItemBody `json:"storage"`
+	// Workflow items published as the organization
+	Workflows            []OrgMarketplaceItemBody `json:"workflows"`
+	AdditionalProperties map[string]any           `json:"-,omitempty"`
+}
+
 type ListOrgProviderModelsOutputBody struct {
 	// Available model IDs from the upstream provider
 	Models               []string       `json:"models"`
@@ -3374,6 +4275,11 @@ type ListUserAttachmentsBody struct {
 	AdditionalProperties map[string]any       `json:"-,omitempty"`
 }
 
+type ListUserThumbnailsOutputBody struct {
+	Items                []UserThumbnail `json:"items"`
+	AdditionalProperties map[string]any  `json:"-,omitempty"`
+}
+
 type ListWorkflowRunsBody struct {
 	Runs                 []WorkflowRunResponse `json:"runs"`
 	Total                int64                 `json:"total"`
@@ -3381,7 +4287,15 @@ type ListWorkflowRunsBody struct {
 }
 
 type ListWorkspaceMountsBody struct {
-	Mounts               map[string]any `json:"mounts"`
+	Mounts               map[string]ClusterMountInfoResponse `json:"mounts"`
+	AdditionalProperties map[string]any                      `json:"-,omitempty"`
+}
+
+type LocalWorkflowVersionSettings struct {
+	// Subtype discriminator.
+	Subtype string `json:"subtype"`
+	// The workflow definition as YAML text.
+	Yaml                 string         `json:"yaml"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -3400,6 +4314,8 @@ type Lustre struct {
 	DisplayName string `json:"displayName"`
 	// Indicates if the Lustre is ephemeral
 	Ephemeral *bool `json:"ephemeral,omitempty"`
+	// Whether the Lustre is favorited by the user
+	Favorite bool `json:"favorite"`
 	// Unique identifier of the Lustre
 	ID string `json:"id"`
 	// URL of the Lustre's image/icon
@@ -3512,10 +4428,10 @@ type ManagedClusterOutputBody struct {
 
 type ManagedClusterPermissionsResponse struct {
 	// Map of group names to permissions
-	Groups map[string]any `json:"groups"`
+	Groups map[string]map[string]bool `json:"groups"`
 	// Map of permission names to whether entire organization has that access
-	Organization         map[string]any `json:"organization"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
+	Organization         map[string]bool `json:"organization"`
+	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
 type ManagedFilesystem struct {
@@ -3666,7 +4582,7 @@ type MarketplaceItemBody struct {
 	Publisher string `json:"publisher"`
 	// URL-friendly identifier
 	Slug string `json:"slug"`
-	// Subtype of the item (raw, e.g. remote-github)
+	// Subtype of the item (e.g. remote)
 	Subtype string `json:"subtype"`
 	// Type of the item (workflow, storage, compute)
 	Type string `json:"type"`
@@ -3675,10 +4591,10 @@ type MarketplaceItemBody struct {
 	// Versions in semver-ascending order
 	VersionOrder []string `json:"versionOrder"`
 	// Moveable tags pointing at version keys
-	VersionTags map[string]any `json:"versionTags"`
+	VersionTags map[string]string `json:"versionTags"`
 	// Per-version settings, keyed by version string
-	Versions             map[string]any `json:"versions"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
+	Versions             map[string]MarketplaceItemBodyVersionsValue `json:"versions"`
+	AdditionalProperties map[string]any                              `json:"-,omitempty"`
 }
 
 type MarketplaceListItem struct {
@@ -3704,6 +4620,18 @@ type MarketplaceListItem struct {
 	Verified bool `json:"verified"`
 	// Available versions of the item
 	Versions             []string       `json:"versions"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type MarketplacePrivacyInput struct {
+	// Visible to these group names.
+	Group []string `json:"group"`
+	// Visible to the publisher's organization.
+	Organization bool `json:"organization"`
+	// Visible to partner organizations.
+	Partner bool `json:"partner"`
+	// Visible to all platform users.
+	Platform             bool           `json:"platform"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4063,6 +4991,10 @@ type Nfs struct {
 	Csp string `json:"csp"`
 	// Display name of the NFS
 	DisplayName string `json:"displayName"`
+	// Indicates if the NFS is ephemeral
+	Ephemeral *bool `json:"ephemeral,omitempty"`
+	// Whether the NFS is favorited by the user
+	Favorite bool `json:"favorite"`
 	// Unique identifier of the NFS
 	ID string `json:"id"`
 	// URL of the NFS's image/icon
@@ -4073,6 +5005,8 @@ type Nfs struct {
 	Namespace string `json:"namespace"`
 	// Region of the NFS
 	Region *string `json:"region,omitempty"`
+	// Indicates if the NFS is sessionless
+	Sessionless bool `json:"sessionless"`
 	// List of groups with whom the NFS is shared
 	Shared []Shared `json:"shared"`
 	// Size of the NFS in GiB
@@ -4150,7 +5084,7 @@ type NodeResponse struct {
 	// Kubernetes version running on the node
 	KubernetesVersion string `json:"kubernetesVersion"`
 	// Labels assigned to the node
-	Labels map[string]any `json:"labels"`
+	Labels map[string]string `json:"labels"`
 	// Name of the node
 	Name string `json:"name"`
 	// Operating system running on the node
@@ -4370,6 +5304,43 @@ type OpenstackNet struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type OpenstackSlurmPartition struct {
+	Architecture           *string        `json:"architecture,omitempty"`
+	AssociateFloatingIP    *bool          `json:"associateFloatingIp,omitempty"`
+	ControllerInstanceType *string        `json:"controllerInstanceType,omitempty"`
+	Default                any            `json:"default,omitempty"`
+	Disks                  []ClusterDisk  `json:"disks,omitempty"`
+	ElasticImage           *string        `json:"elasticImage,omitempty"`
+	InstanceType           *string        `json:"instanceType,omitempty"`
+	MaxNodes               *int64         `json:"maxNodes,omitempty"`
+	Name                   *string        `json:"name,omitempty"`
+	AdditionalProperties   map[string]any `json:"-,omitempty"`
+}
+
+type OpenstackSlurmVersionSettings struct {
+	Architecture           *string                   `json:"architecture,omitempty"`
+	AttachedStorages       []map[string]any          `json:"attachedStorages,omitempty"`
+	ControllerImage        *string                   `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                   `json:"controllerInstanceType,omitempty"`
+	FloatingIPNetwork      *string                   `json:"floatingIpNetwork,omitempty"`
+	HealthCheck            *string                   `json:"healthCheck,omitempty"`
+	NetworkID              *string                   `json:"networkId,omitempty"`
+	Partitions             []OpenstackSlurmPartition `json:"partitions,omitempty"`
+	Region                 *string                   `json:"region,omitempty"`
+	RuntimeAlert           *ClusterRuntimeAlert      `json:"runtimeAlert,omitempty"`
+	SessionCostLimit       *ClusterSessionCostLimit  `json:"sessionCostLimit,omitempty"`
+	SlurmResumeTimeout     any                       `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService   any                       `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime       any                       `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout    any                       `json:"slurmSuspendTimeout,omitempty"`
+	// Subtype discriminator.
+	Subtype                 string         `json:"subtype"`
+	UserBootstrap           *string        `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool          `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool          `json:"userBootstrapController,omitempty"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
+}
+
 type OpenstackSyncResponse struct {
 	Message              string         `json:"message"`
 	Status               string         `json:"status"`
@@ -4381,6 +5352,8 @@ type OracleBucket struct {
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
 	// Name of the Oracle bucket
 	BucketName *string `json:"bucketName,omitempty"`
+	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)
+	CanGetCredentials bool `json:"canGetCredentials"`
 	// Cloud service provider of the storage.
 	Csp string `json:"csp"`
 	// Indicates if the storage is currently being provisioned.
@@ -4442,6 +5415,13 @@ type OracleBucketPar struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type OracleBucketVersionSettings struct {
+	Region *string `json:"region,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type OracleFs struct {
 	// Resources the storage is attached to.
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
@@ -4498,6 +5478,58 @@ type OracleFs struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type OracleOraclefsVersionSettings struct {
+	AvailabilityDomain *string `json:"availability_domain,omitempty"`
+	Region             *string `json:"region,omitempty"`
+	// Subtype discriminator.
+	Subtype              string         `json:"subtype"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OracleSlurmPartition struct {
+	Architecture         *string        `json:"architecture,omitempty"`
+	Default              any            `json:"default,omitempty"`
+	Disks                []ClusterDisk  `json:"disks,omitempty"`
+	ElasticImage         *string        `json:"elasticImage,omitempty"`
+	InstanceType         *string        `json:"instanceType,omitempty"`
+	IsFlex               *bool          `json:"isFlex,omitempty"`
+	MaxNodes             *int64         `json:"maxNodes,omitempty"`
+	MemoryGb             *int64         `json:"memoryGb,omitempty"`
+	Name                 *string        `json:"name,omitempty"`
+	Ocpus                *int64         `json:"ocpus,omitempty"`
+	SuspendTime          *int64         `json:"suspendTime,omitempty"`
+	UsePlacementGroup    *bool          `json:"usePlacementGroup,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OracleSlurmVersionSettings struct {
+	Architecture           *string                  `json:"architecture,omitempty"`
+	ControllerImage        *string                  `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                  `json:"controllerInstanceType,omitempty"`
+	ControllerMemoryGb     *int64                   `json:"controllerMemoryGb,omitempty"`
+	ControllerOcpus        *int64                   `json:"controllerOcpus,omitempty"`
+	Disks                  []ClusterDisk            `json:"disks,omitempty"`
+	HealthCheck            *string                  `json:"healthCheck,omitempty"`
+	IsFlex                 *bool                    `json:"isFlex,omitempty"`
+	Partitions             []OracleSlurmPartition   `json:"partitions,omitempty"`
+	Region                 *string                  `json:"region,omitempty"`
+	RootSize               *int64                   `json:"rootSize,omitempty"`
+	RuntimeAlert           *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit       *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	SlurmResumeTimeout     any                      `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService   any                      `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime       any                      `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout    any                      `json:"slurmSuspendTimeout,omitempty"`
+	// Subtype discriminator.
+	Subtype                 string         `json:"subtype"`
+	UserBootstrap           *string        `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool          `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool          `json:"userBootstrapController,omitempty"`
+	Zone                    *string        `json:"zone,omitempty"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
+}
+
 type OrgAiProviderResponse struct {
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
@@ -4537,6 +5569,22 @@ type OrgMauResponse struct {
 	Organization string `json:"organization"`
 	// Start date of the query period
 	StartDate            string         `json:"startDate"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OrgMarketplaceItemBody struct {
+	// Item description
+	Description *string `json:"description,omitempty"`
+	// Marketplace item ID
+	ID string `json:"id"`
+	// Published name of the item
+	Name string `json:"name"`
+	// URL-friendly identifier
+	Slug string `json:"slug"`
+	// Subtype of the item
+	Subtype string `json:"subtype"`
+	// Type of the item (workflow, storage, compute)
+	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4612,6 +5660,8 @@ type Organization struct {
 	Members int64 `json:"members"`
 	// The organization name.
 	Name string `json:"name"`
+	// The username of the organization owner, if one is set.
+	Owner *string `json:"owner,omitempty"`
 	// Whether the organization is a partner organization.
 	Partner              bool           `json:"partner"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -4635,7 +5685,7 @@ type OrphanedInfraPreviewBody struct {
 	// List of user IDs that don't exist but are referenced by infrastructures
 	MissingUserIds []string `json:"missingUserIds"`
 	// Count of orphaned infrastructures by provision status
-	StatusCounts map[string]any `json:"statusCounts"`
+	StatusCounts map[string]int64 `json:"statusCounts"`
 	// Total number of orphaned infrastructures
 	TotalCount           int64          `json:"totalCount"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -4654,6 +5704,12 @@ type OrphanedWorkflowRunsPreviewBody struct {
 	SampleRunIds []string `json:"sampleRunIds"`
 	// Total number of orphaned workflow runs
 	TotalCount           int64          `json:"totalCount"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OwnerOutputBody struct {
+	// The username of the current organization owner, if set.
+	Username             *string        `json:"username,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4751,8 +5807,8 @@ type PatchModelConfigInputBody struct {
 
 type PatchNetworkBody struct {
 	// List of regions with corresponding CIDR ranges
-	Regions              []map[string]any `json:"regions"`
-	AdditionalProperties map[string]any   `json:"-,omitempty"`
+	Regions              []map[string]string `json:"regions"`
+	AdditionalProperties map[string]any      `json:"-,omitempty"`
 }
 
 type PatchOpenstackFlavorsBody struct {
@@ -5151,7 +6207,7 @@ type Preview struct {
 }
 
 type PrivacySettingsBody struct {
-	// Visible to these group ids (hex)
+	// Visible to these group names
 	Group []string `json:"group"`
 	// Visible to the publisher's organization
 	Organization bool `json:"organization"`
@@ -5233,6 +6289,770 @@ type ProvisionStatusStruct struct {
 	Logs string `json:"logs"`
 	// The provision status
 	Status               string         `json:"status"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishAwsBucketRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	// URL-friendly identifier.
+	Slug string `json:"slug"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Versioning           *bool          `json:"versioning,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishAwsDiskRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	Encrypted   *bool   `json:"encrypted,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	Iops     *int64  `json:"iops,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg  *bool   `json:"publishedAsOrg,omitempty"`
+	Region          *string `json:"region,omitempty"`
+	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
+	SizeGb          *int64  `json:"size_gb,omitempty"`
+	// URL-friendly identifier.
+	Slug       string  `json:"slug"`
+	Snapshot   *string `json:"snapshot,omitempty"`
+	Throughput *int64  `json:"throughput,omitempty"`
+	Type       *string `json:"type,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishAwsEfsRequest struct {
+	// Short summary of the item.
+	Description        *string `json:"description,omitempty"`
+	EfsEncrypted       *bool   `json:"efs_encrypted,omitempty"`
+	EfsPerformanceMode *string `json:"efs_performance_mode,omitempty"`
+	ExportFsType       *string `json:"export_fs_type,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name                         string                  `json:"name"`
+	PrivacySettings              MarketplacePrivacyInput `json:"privacySettings"`
+	ProvisionedThroughputInMibps *int64                  `json:"provisioned_throughput_in_mibps,omitempty"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	// URL-friendly identifier.
+	Slug           string  `json:"slug"`
+	ThroughputMode *string `json:"throughput_mode,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishAwsLustreRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	ExportPath  *string `json:"export_path,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured       *bool   `json:"featured,omitempty"`
+	Fsxcompression *string `json:"fsxcompression,omitempty"`
+	Fsxdeployment  *string `json:"fsxdeployment,omitempty"`
+	Fsxthroughput  *string `json:"fsxthroughput,omitempty"`
+	// Icon image URL.
+	ImageURL   *string `json:"imageUrl,omitempty"`
+	ImportPath *string `json:"import_path,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	// URL-friendly identifier.
+	Slug            string `json:"slug"`
+	StorageCapacity *int64 `json:"storage_capacity,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishAwsSlurmRequest struct {
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	// Short summary of the item.
+	Description *string       `json:"description,omitempty"`
+	Disks       []ClusterDisk `json:"disks,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured    *bool   `json:"featured,omitempty"`
+	HealthCheck *string `json:"healthCheck,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	Partitions      []AwsSlurmPartition     `json:"partitions,omitempty"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg   *bool                    `json:"publishedAsOrg,omitempty"`
+	Region           *string                  `json:"region,omitempty"`
+	RootSize         *int64                   `json:"rootSize,omitempty"`
+	RuntimeAlert     *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	// URL-friendly identifier.
+	Slug                    string  `json:"slug"`
+	SlurmResumeTimeout      any     `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService    any     `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime        any     `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout     any     `json:"slurmSuspendTimeout,omitempty"`
+	UserBootstrap           *string `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishAzureAzfilesRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	SizeGb         *int64  `json:"sizeGb,omitempty"`
+	// URL-friendly identifier.
+	Slug string `json:"slug"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishAzureBucketRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	// URL-friendly identifier.
+	Slug string `json:"slug"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishAzureDiskRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg  *bool   `json:"publishedAsOrg,omitempty"`
+	Region          *string `json:"region,omitempty"`
+	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
+	SizeGb          *int64  `json:"size_gb,omitempty"`
+	// URL-friendly identifier.
+	Slug     string  `json:"slug"`
+	Snapshot *string `json:"snapshot,omitempty"`
+	Type     *string `json:"type,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishAzureHammerspaceRequest struct {
+	AnvilInstanceType *string `json:"anvil_instance_type,omitempty"`
+	DataDiskSize      *int64  `json:"data_disk_size,omitempty"`
+	DataNodeCount     *int64  `json:"data_node_count,omitempty"`
+	DataNodeDiskCount *int64  `json:"data_node_disk_count,omitempty"`
+	DataNodeDiskSize  *int64  `json:"data_node_disk_size,omitempty"`
+	DataNodeType      *string `json:"data_node_type,omitempty"`
+	// Short summary of the item.
+	Description      *string `json:"description,omitempty"`
+	DsxInstanceCount *int64  `json:"dsx_instance_count,omitempty"`
+	DsxInstanceType  *string `json:"dsx_instance_type,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw       *string `json:"markdownRaw,omitempty"`
+	MetadataDiskCount *int64  `json:"metadata_disk_count,omitempty"`
+	MetadataDiskSize  *int64  `json:"metadata_disk_size,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	// URL-friendly identifier.
+	Slug                string  `json:"slug"`
+	StorageBackend      *string `json:"storage_backend,omitempty"`
+	StorageType         *string `json:"storage_type,omitempty"`
+	UltraDiskIops       *int64  `json:"ultra_disk_iops,omitempty"`
+	UltraDiskMbps       *int64  `json:"ultra_disk_mbps,omitempty"`
+	UseHighAvailability *bool   `json:"use_high_availability,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishAzureManagedLustreRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL                 *string `json:"imageUrl,omitempty"`
+	MaintenanceWindowDay     *string `json:"maintenance-window-day,omitempty"`
+	MaintenanceWindowTimeUtc *string `json:"maintenance-window-time-UTC,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	// URL-friendly identifier.
+	Slug               string  `json:"slug"`
+	StorageSizeInTb125 *int64  `json:"storage-size-in-tb-125,omitempty"`
+	StorageSizeInTb250 *int64  `json:"storage-size-in-tb-250,omitempty"`
+	StorageSizeInTb40  *int64  `json:"storage-size-in-tb-40,omitempty"`
+	StorageSizeInTb500 *int64  `json:"storage-size-in-tb-500,omitempty"`
+	Type               *string `json:"type,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishAzureNetappFilesRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	Service        *string `json:"service,omitempty"`
+	Size           *int64  `json:"size,omitempty"`
+	// URL-friendly identifier.
+	Slug string         `json:"slug"`
+	Tags map[string]any `json:"tags,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishAzureSlurmRequest struct {
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	// Short summary of the item.
+	Description *string       `json:"description,omitempty"`
+	Disks       []ClusterDisk `json:"disks,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured    *bool   `json:"featured,omitempty"`
+	HealthCheck *string `json:"healthCheck,omitempty"`
+	// Icon image URL.
+	ImageURL            *string        `json:"imageUrl,omitempty"`
+	LocalDiskMountPoint *string        `json:"localDiskMountPoint,omitempty"`
+	LocalDiskNfs        *bool          `json:"localDiskNFS,omitempty"`
+	LocaldiskLabel      map[string]any `json:"localdiskLabel,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	Partitions      []AzureSlurmPartition   `json:"partitions,omitempty"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg   *bool                    `json:"publishedAsOrg,omitempty"`
+	Region           *string                  `json:"region,omitempty"`
+	RootSize         *int64                   `json:"rootSize,omitempty"`
+	RuntimeAlert     *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	// URL-friendly identifier.
+	Slug                    string  `json:"slug"`
+	SlurmResumeTimeout      any     `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService    any     `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime        any     `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout     any     `json:"slurmSuspendTimeout,omitempty"`
+	UserBootstrap           *string `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishExistingRequest struct {
+	// Short summary of the item.
+	Description    *string                 `json:"description,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Jump (bastion) host.
+	Jumpnodehost *string `json:"jumpnodehost,omitempty"`
+	// Jump (bastion) user.
+	Jumpnodeuser *string `json:"jumpnodeuser,omitempty"`
+	// Shared key reference (proxycerts or the default workspace key).
+	Key *string `json:"key,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool `json:"publishedAsOrg,omitempty"`
+	// Scheduler type, e.g. slurm.
+	SchedulerType *string `json:"schedulerType,omitempty"`
+	// URL-friendly identifier.
+	Slug string `json:"slug"`
+	// Login nodes.
+	SlurmLoginNodes []ExistingLoginNode `json:"slurmLoginNodes,omitempty"`
+	// SLURM username (supports __USER__).
+	SlurmUsername *string `json:"slurmUsername,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishGoogleBucketRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	// URL-friendly identifier.
+	Slug string `json:"slug"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishGoogleDiskRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg  *bool   `json:"publishedAsOrg,omitempty"`
+	Region          *string `json:"region,omitempty"`
+	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
+	SizeGb          *int64  `json:"size_gb,omitempty"`
+	// URL-friendly identifier.
+	Slug     string  `json:"slug"`
+	Snapshot *string `json:"snapshot,omitempty"`
+	Type     *string `json:"type,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishGoogleFilestoreRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured      *bool   `json:"featured,omitempty"`
+	FilestoreTier *string `json:"filestore_tier,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool    `json:"publishedAsOrg,omitempty"`
+	Region         *string  `json:"region,omitempty"`
+	SizeTib        *float64 `json:"size_tib,omitempty"`
+	// URL-friendly identifier.
+	Slug string `json:"slug"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishGoogleManagedLustreRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	Performance     *int64                  `json:"performance,omitempty"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	Size1000       *int64  `json:"size_1000,omitempty"`
+	Size125        *int64  `json:"size_125,omitempty"`
+	Size250        *int64  `json:"size_250,omitempty"`
+	Size500        *int64  `json:"size_500,omitempty"`
+	// URL-friendly identifier.
+	Slug string `json:"slug"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishGoogleSlurmRequest struct {
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	ControllerTier1        *bool   `json:"controllerTier1,omitempty"`
+	// Short summary of the item.
+	Description *string       `json:"description,omitempty"`
+	Disks       []ClusterDisk `json:"disks,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured    *bool          `json:"featured,omitempty"`
+	GoogleLabel map[string]any `json:"googleLabel,omitempty"`
+	HealthCheck *string        `json:"healthCheck,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	Partitions      []GoogleSlurmPartition  `json:"partitions,omitempty"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg   *bool                    `json:"publishedAsOrg,omitempty"`
+	Region           *string                  `json:"region,omitempty"`
+	RootSize         *int64                   `json:"rootSize,omitempty"`
+	RuntimeAlert     *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	// URL-friendly identifier.
+	Slug                    string  `json:"slug"`
+	SlurmResumeTimeout      any     `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService    any     `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime        any     `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout     any     `json:"slurmSuspendTimeout,omitempty"`
+	UserBootstrap           *string `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishLocalWorkflowRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool `json:"publishedAsOrg,omitempty"`
+	// URL-friendly identifier.
+	Slug string `json:"slug"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version *string `json:"version,omitempty"`
+	// The workflow definition as YAML text.
+	Yaml                 string         `json:"yaml"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishOpenstackSlurmRequest struct {
+	Architecture           *string          `json:"architecture,omitempty"`
+	AttachedStorages       []map[string]any `json:"attachedStorages,omitempty"`
+	ControllerImage        *string          `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string          `json:"controllerInstanceType,omitempty"`
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured          *bool   `json:"featured,omitempty"`
+	FloatingIPNetwork *string `json:"floatingIpNetwork,omitempty"`
+	HealthCheck       *string `json:"healthCheck,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                    `json:"name"`
+	NetworkID       *string                   `json:"networkId,omitempty"`
+	Partitions      []OpenstackSlurmPartition `json:"partitions,omitempty"`
+	PrivacySettings MarketplacePrivacyInput   `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg   *bool                    `json:"publishedAsOrg,omitempty"`
+	Region           *string                  `json:"region,omitempty"`
+	RuntimeAlert     *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	// URL-friendly identifier.
+	Slug                    string  `json:"slug"`
+	SlurmResumeTimeout      any     `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService    any     `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime        any     `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout     any     `json:"slurmSuspendTimeout,omitempty"`
+	UserBootstrap           *string `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishOracleBucketRequest struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	// URL-friendly identifier.
+	Slug string `json:"slug"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishOracleOraclefsRequest struct {
+	AvailabilityDomain *string `json:"availability_domain,omitempty"`
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	// URL-friendly identifier.
+	Slug string `json:"slug"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishOracleSlurmRequest struct {
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	ControllerMemoryGb     *int64  `json:"controllerMemoryGb,omitempty"`
+	ControllerOcpus        *int64  `json:"controllerOcpus,omitempty"`
+	// Short summary of the item.
+	Description *string       `json:"description,omitempty"`
+	Disks       []ClusterDisk `json:"disks,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured    *bool   `json:"featured,omitempty"`
+	HealthCheck *string `json:"healthCheck,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	IsFlex   *bool   `json:"isFlex,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	Partitions      []OracleSlurmPartition  `json:"partitions,omitempty"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg   *bool                    `json:"publishedAsOrg,omitempty"`
+	Region           *string                  `json:"region,omitempty"`
+	RootSize         *int64                   `json:"rootSize,omitempty"`
+	RuntimeAlert     *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
+	// URL-friendly identifier.
+	Slug                    string  `json:"slug"`
+	SlurmResumeTimeout      any     `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService    any     `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime        any     `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout     any     `json:"slurmSuspendTimeout,omitempty"`
+	UserBootstrap           *string `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version              *string        `json:"version,omitempty"`
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PublishRemoteWorkflowRequest struct {
+	// Git branch.
+	Branch *string `json:"branch,omitempty"`
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Icon image URL.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Markdown description body.
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            string                  `json:"name"`
+	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool `json:"publishedAsOrg,omitempty"`
+	// Path to the README within the repo.
+	Readme *string `json:"readme,omitempty"`
+	// Repository URL.
+	Repo *string `json:"repo,omitempty"`
+	// Skip the git checkout step.
+	SkipCheckout *bool `json:"skipCheckout,omitempty"`
+	// URL-friendly identifier.
+	Slug string `json:"slug"`
+	// Sparse-checkout paths.
+	Sparsecheckout []string `json:"sparsecheckout,omitempty"`
+	// Path to the thumbnail image within the repo.
+	Thumbnail *string `json:"thumbnail,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified *bool `json:"verified,omitempty"`
+	// Initial version label.
+	Version *string `json:"version,omitempty"`
+	// Path to the workflow YAML within the repo.
+	Yaml                 *string        `json:"yaml,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -5465,6 +7285,26 @@ type RemoteWorkflowSettings struct {
 	// Path to the thumbnail image in the repository.
 	Thumbnail *string `json:"thumbnail,omitempty"`
 	// Path to the YAML file in the repository.
+	Yaml                 *string        `json:"yaml,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type RemoteWorkflowVersionSettings struct {
+	// Git branch.
+	Branch *string `json:"branch,omitempty"`
+	// Path to the README within the repo.
+	Readme *string `json:"readme,omitempty"`
+	// Repository URL.
+	Repo *string `json:"repo,omitempty"`
+	// Skip the git checkout step.
+	SkipCheckout *bool `json:"skipCheckout,omitempty"`
+	// Sparse-checkout paths.
+	Sparsecheckout []string `json:"sparsecheckout,omitempty"`
+	// Subtype discriminator.
+	Subtype string `json:"subtype"`
+	// Path to the thumbnail image within the repo.
+	Thumbnail *string `json:"thumbnail,omitempty"`
+	// Path to the workflow YAML within the repo.
 	Yaml                 *string        `json:"yaml,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -6056,6 +7896,12 @@ type SetAdminInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type SetOwnerInputBody struct {
+	// The username of the user to set as organization owner.
+	Username             string         `json:"username"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type SetupData struct {
 	// Email for the initial admin user (optional)
 	Email *string `json:"email,omitempty"`
@@ -6096,7 +7942,7 @@ type SingleClusterResponse struct {
 	// Kubernetes API endpoint
 	Endpoint string `json:"endpoint"`
 	// Map of team names to team IDs that have access to this cluster
-	Groups map[string]any `json:"groups"`
+	Groups map[string]string `json:"groups"`
 	// Cluster MongoDB ID
 	ID string `json:"id"`
 	// Cluster icon URL
@@ -6257,10 +8103,10 @@ type StorageResponse struct {
 
 type SubjectPermissions struct {
 	// Map of group names to permissions
-	Groups map[string]any `json:"groups"`
+	Groups map[string]map[string]bool `json:"groups"`
 	// Map of permission names to whether entire organization has that access
-	Organization         map[string]any `json:"organization"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
+	Organization         map[string]bool `json:"organization"`
+	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
 type SubnetInfo struct {
@@ -6450,10 +8296,10 @@ type UpdateAiProviderInputBody struct {
 
 type UpdateAiProviderPermissionsInputBody struct {
 	// Map of group names to permission
-	Groups map[string]any `json:"groups"`
+	Groups map[string]map[string]bool `json:"groups"`
 	// Map of permission names to whether to share with entire organization
-	Organization         map[string]any `json:"organization"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
+	Organization         map[string]bool `json:"organization"`
+	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
 type UpdateAccessManagementBody struct {
@@ -6517,10 +8363,10 @@ type UpdateAdminPlatformSettingsInputBody struct {
 
 type UpdateAllocationPermissionsInputBody struct {
 	// Map of group names to permission
-	Groups map[string]any `json:"groups"`
+	Groups map[string]map[string]bool `json:"groups"`
 	// Map of permission names to whether to share with entire organization
-	Organization         map[string]any `json:"organization"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
+	Organization         map[string]bool `json:"organization"`
+	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
 type UpdateConversationInputBody struct {
@@ -6582,10 +8428,10 @@ type UpdateManagedClusterOutputBody struct {
 
 type UpdateManagedClusterPermissionsInputBody struct {
 	// Map of group names to permission
-	Groups map[string]any `json:"groups"`
+	Groups map[string]map[string]bool `json:"groups"`
 	// Map of permission names to whether to share with entire organization
-	Organization         map[string]any `json:"organization"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
+	Organization         map[string]bool `json:"organization"`
+	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
 type UpdateManagedNodeInputBody struct {
@@ -6596,6 +8442,25 @@ type UpdateManagedNodeInputBody struct {
 type UpdateManagedNodeOutputBody struct {
 	// Hostname of the updated node
 	Hostname             string         `json:"hostname"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UpdateMarketplaceItemBody struct {
+	// Short summary of the item.
+	Description *string `json:"description,omitempty"`
+	// Mark as featured (platform admins only).
+	Featured *bool `json:"featured,omitempty"`
+	// Markdown description body (max 10,000 characters).
+	MarkdownRaw *string `json:"markdownRaw,omitempty"`
+	// Display name on the marketplace.
+	Name            *string                  `json:"name,omitempty"`
+	PrivacySettings *MarketplacePrivacyInput `json:"privacySettings,omitempty"`
+	// Publish under the organization display name (org admins only).
+	PublishedAsOrg *bool `json:"publishedAsOrg,omitempty"`
+	// URL-friendly identifier.
+	Slug *string `json:"slug,omitempty"`
+	// Mark as verified (platform admins only).
+	Verified             *bool          `json:"verified,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -6657,10 +8522,10 @@ type UpdateReportBody struct {
 
 type UpdateResourceGroupPermissionsInputBody struct {
 	// Map of group names to permissions
-	Groups map[string]any `json:"groups"`
+	Groups map[string]map[string]bool `json:"groups"`
 	// Map of permission names to whether to share with entire organization
-	Organization         map[string]any `json:"organization"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
+	Organization         map[string]bool `json:"organization"`
+	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
 type UpdateScimSettingsInputBody struct {
@@ -6882,6 +8747,26 @@ type UserSettings struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type UserThumbnail struct {
+	// SHA256 hex of the stored blob.
+	Etag string `json:"etag"`
+	// Public URL where the thumbnail is served.
+	ImageURL string `json:"imageUrl"`
+	// Detected MIME type (e.g. image/png).
+	MimeType string `json:"mimeType"`
+	// User-supplied filename.
+	Name string `json:"name"`
+	// File size in bytes.
+	Size int64 `json:"size"`
+	// When the blob was first uploaded.
+	UploadedAt time.Time `json:"uploadedAt"`
+	// Names of resources currently using this thumbnail.
+	UsedBy []string `json:"usedBy"`
+	// Number of resources currently using this thumbnail.
+	UsedCount            int64          `json:"usedCount"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type UserWorkspace struct {
 	// whether this user workspace is currently in use by the user. If switching between docker and k8s, then there will be one workspace for each, and one will be active at a time.
 	Active bool `json:"active"`
@@ -7037,7 +8922,6 @@ type WorkflowRunDetailResponse struct {
 	InlineRun            bool           `json:"inlineRun"`
 	Inputs               map[string]any `json:"inputs,omitempty"`
 	Marketplace          bool           `json:"marketplace"`
-	NewExecutor          *bool          `json:"newExecutor,omitempty"`
 	Number               *int64         `json:"number,omitempty"`
 	ResolvedYaml         map[string]any `json:"resolvedYaml,omitempty"`
 	Slug                 *string        `json:"slug,omitempty"`
@@ -7211,4 +9095,198 @@ type WorkspaceStatus struct {
 	Details              *string        `json:"details,omitempty"`
 	Status               string         `json:"status"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+// MarketplaceItemBodyVersionsValue - Per-version settings; the shape matches the item's publish body for its subtype, plus a subtype discriminator.
+
+// Variants: RemoteWorkflowVersionSettings, LocalWorkflowVersionSettings, ExistingClusterVersionSettings, AwsSlurmVersionSettings, GoogleSlurmVersionSettings, AzureSlurmVersionSettings, OracleSlurmVersionSettings, OpenstackSlurmVersionSettings, AwsBucketVersionSettings, AwsDiskVersionSettings, AwsEfsVersionSettings, AwsLustreVersionSettings, AzureBucketVersionSettings, AzureDiskVersionSettings, AzureAzfilesVersionSettings, AzureHammerspaceVersionSettings, AzureManagedLustreVersionSettings, AzureNetappFilesVersionSettings, GoogleBucketVersionSettings, GoogleDiskVersionSettings, GoogleFilestoreVersionSettings, GoogleManagedLustreVersionSettings, OracleBucketVersionSettings, OracleOraclefsVersionSettings
+type MarketplaceItemBodyVersionsValue struct {
+	Value any
+}
+
+// MarshalJSON implements json.Marshaler for MarketplaceItemBodyVersionsValue.
+func (u MarketplaceItemBodyVersionsValue) MarshalJSON() ([]byte, error) {
+	return json.Marshal(u.Value)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for MarketplaceItemBodyVersionsValue.
+func (u *MarketplaceItemBodyVersionsValue) UnmarshalJSON(data []byte) error {
+	var disc struct {
+		Subtype string `json:"subtype"`
+	}
+	if err := json.Unmarshal(data, &disc); err != nil {
+		return fmt.Errorf("unmarshaling MarketplaceItemBodyVersionsValue discriminator: %w", err)
+	}
+	switch disc.Subtype {
+	case "aws-bucket":
+		var v AwsBucketVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "aws-disk":
+		var v AwsDiskVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "aws-efs":
+		var v AwsEfsVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "aws-lustre":
+		var v AwsLustreVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "aws-slurm":
+		var v AwsSlurmVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "azure-azfiles":
+		var v AzureAzfilesVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "azure-bucket":
+		var v AzureBucketVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "azure-disk":
+		var v AzureDiskVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "azure-hammerspace":
+		var v AzureHammerspaceVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "azure-managedlustre":
+		var v AzureManagedLustreVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "azure-netappfiles":
+		var v AzureNetappFilesVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "azure-slurm":
+		var v AzureSlurmVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "existing":
+		var v ExistingClusterVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "google-bucket":
+		var v GoogleBucketVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "google-disk":
+		var v GoogleDiskVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "google-filestore":
+		var v GoogleFilestoreVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "google-managedlustre":
+		var v GoogleManagedLustreVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "google-slurm":
+		var v GoogleSlurmVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "local":
+		var v LocalWorkflowVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "openstack-slurm":
+		var v OpenstackSlurmVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "oracle-bucket":
+		var v OracleBucketVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "oracle-oraclefs":
+		var v OracleOraclefsVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "oracle-slurm":
+		var v OracleSlurmVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	case "remote":
+		var v RemoteWorkflowVersionSettings
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		u.Value = v
+		return nil
+	default:
+		return fmt.Errorf("unknown subtype value: %q", disc.Subtype)
+	}
 }

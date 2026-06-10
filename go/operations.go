@@ -1794,13 +1794,283 @@ func (c *Client) ListMarketplaceItems(ctx context.Context, opts ...ListMarketpla
 	return &result, nil
 }
 
+// PublishAwsBucket - Publish AWS Bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes AWS Bucket storage to the marketplace.
+func (c *Client) PublishAwsBucket(ctx context.Context, body PublishAwsBucketRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/aws-bucket"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishAwsDisk - Publish AWS Disk
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes AWS Disk storage to the marketplace.
+func (c *Client) PublishAwsDisk(ctx context.Context, body PublishAwsDiskRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/aws-disk"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishAwsEfs - Publish AWS EFS
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes AWS EFS storage to the marketplace.
+func (c *Client) PublishAwsEfs(ctx context.Context, body PublishAwsEfsRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/aws-efs"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishAwsLustre - Publish AWS Lustre
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes AWS Lustre storage to the marketplace.
+func (c *Client) PublishAwsLustre(ctx context.Context, body PublishAwsLustreRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/aws-lustre"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishAwsSlurm - Publish AWS Cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes an AWS SLURM cluster to the marketplace.
+func (c *Client) PublishAwsSlurm(ctx context.Context, body PublishAwsSlurmRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/aws-slurm"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishAzureAzfiles - Publish Azure Files
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes Azure Files storage to the marketplace.
+func (c *Client) PublishAzureAzfiles(ctx context.Context, body PublishAzureAzfilesRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/azure-azfiles"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishAzureBucket - Publish Azure Bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes Azure Bucket storage to the marketplace.
+func (c *Client) PublishAzureBucket(ctx context.Context, body PublishAzureBucketRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/azure-bucket"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishAzureDisk - Publish Azure Disk
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes Azure Disk storage to the marketplace.
+func (c *Client) PublishAzureDisk(ctx context.Context, body PublishAzureDiskRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/azure-disk"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishAzureHammerspace - Publish Azure Hammerspace
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes Azure Hammerspace storage to the marketplace.
+func (c *Client) PublishAzureHammerspace(ctx context.Context, body PublishAzureHammerspaceRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/azure-hammerspace"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishAzureManagedlustre - Publish Azure Managed Lustre
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes Azure Managed Lustre storage to the marketplace.
+func (c *Client) PublishAzureManagedlustre(ctx context.Context, body PublishAzureManagedLustreRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/azure-managedlustre"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishAzureNetappfiles - Publish Azure NetApp Files
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes Azure NetApp Files storage to the marketplace.
+func (c *Client) PublishAzureNetappfiles(ctx context.Context, body PublishAzureNetappFilesRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/azure-netappfiles"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishAzureSlurm - Publish Azure Cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes an Azure SLURM cluster to the marketplace.
+func (c *Client) PublishAzureSlurm(ctx context.Context, body PublishAzureSlurmRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/azure-slurm"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishExisting - Publish Existing Cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes an existing (self-managed) cluster to the marketplace.
+func (c *Client) PublishExisting(ctx context.Context, body PublishExistingRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/existing"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishGoogleBucket - Publish Google Bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes Google Bucket storage to the marketplace.
+func (c *Client) PublishGoogleBucket(ctx context.Context, body PublishGoogleBucketRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/google-bucket"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishGoogleDisk - Publish Google Disk
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes Google Disk storage to the marketplace.
+func (c *Client) PublishGoogleDisk(ctx context.Context, body PublishGoogleDiskRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/google-disk"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishGoogleFilestore - Publish Google Filestore
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes Google Filestore storage to the marketplace.
+func (c *Client) PublishGoogleFilestore(ctx context.Context, body PublishGoogleFilestoreRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/google-filestore"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishGoogleManagedlustre - Publish Google Managed Lustre
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes Google Managed Lustre storage to the marketplace.
+func (c *Client) PublishGoogleManagedlustre(ctx context.Context, body PublishGoogleManagedLustreRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/google-managedlustre"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishGoogleSlurm - Publish Google Cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes a Google SLURM cluster to the marketplace.
+func (c *Client) PublishGoogleSlurm(ctx context.Context, body PublishGoogleSlurmRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/google-slurm"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetMarketplaceItem - Get Marketplace Item
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns a single marketplace item by slug, subject to privacy filtering.
 func (c *Client) GetMarketplaceItem(ctx context.Context, slug string) (*MarketplaceItemBody, error) {
-	path := "/api/marketplace/{slug}"
+	path := "/api/marketplace/items/{slug}"
 	path = pathReplace(path, "slug", slug)
 
 	var result MarketplaceItemBody
@@ -1810,16 +2080,62 @@ func (c *Client) GetMarketplaceItem(ctx context.Context, slug string) (*Marketpl
 	return &result, nil
 }
 
+// DeleteMarketplaceItem - Delete Marketplace Item
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a marketplace item and removes the account workflows that referenced it. Only the publisher or an org admin can delete.
+func (c *Client) DeleteMarketplaceItem(ctx context.Context, slug string) error {
+	path := "/api/marketplace/items/{slug}"
+	path = pathReplace(path, "slug", slug)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// UpdateMarketplaceItem - Update Marketplace Item
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates a marketplace item's metadata. Only the publisher or an org admin can edit; verified/featured/publishedAsOrg are org-admin only.
+func (c *Client) UpdateMarketplaceItem(ctx context.Context, slug string, body UpdateMarketplaceItemBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CheckMarketplaceItemSlug - Check Marketplace Slug Availability
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Checks whether a marketplace slug is in use: 404 if available, 403 if taken by a hidden item, 200 if taken and visible.
+func (c *Client) CheckMarketplaceItemSlug(ctx context.Context, slug string) error {
+	path := "/api/marketplace/items/{slug}"
+	path = pathReplace(path, "slug", slug)
+
+	if err := c.do(ctx, "HEAD", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // GetMarketplaceAccountVersions - List Marketplace Account Versions
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Returns which versions of a marketplace item the user has in their account, keyed by version.
-func (c *Client) GetMarketplaceAccountVersions(ctx context.Context, slug string) (*map[string]any, error) {
-	path := "/api/marketplace/{slug}/account-versions"
+func (c *Client) GetMarketplaceAccountVersions(ctx context.Context, slug string) (*map[string]bool, error) {
+	path := "/api/marketplace/items/{slug}/account-versions"
 	path = pathReplace(path, "slug", slug)
 
-	var result map[string]any
+	var result map[string]bool
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -1832,7 +2148,7 @@ func (c *Client) GetMarketplaceAccountVersions(ctx context.Context, slug string)
 //
 // Adds a marketplace workflow version to the user's account as a reference.
 func (c *Client) AddMarketplaceAccountVersion(ctx context.Context, slug string, version string) error {
-	path := "/api/marketplace/{slug}/account-versions/{version}"
+	path := "/api/marketplace/items/{slug}/account-versions/{version}"
 	path = pathReplace(path, "slug", slug)
 	path = pathReplace(path, "version", version)
 
@@ -1848,7 +2164,7 @@ func (c *Client) AddMarketplaceAccountVersion(ctx context.Context, slug string, 
 //
 // Removes a marketplace workflow version reference from the user's account.
 func (c *Client) RemoveMarketplaceAccountVersion(ctx context.Context, slug string, version string) error {
-	path := "/api/marketplace/{slug}/account-versions/{version}"
+	path := "/api/marketplace/items/{slug}/account-versions/{version}"
 	path = pathReplace(path, "slug", slug)
 	path = pathReplace(path, "version", version)
 
@@ -1864,7 +2180,7 @@ func (c *Client) RemoveMarketplaceAccountVersion(ctx context.Context, slug strin
 //
 // Creates an owned resource from a marketplace item: an editable workflow copy, or a storage/compute resource.
 func (c *Client) ForkMarketplaceItem(ctx context.Context, slug string, body ForkMarketplaceItemBody) (*ForkMarketplaceItemOutputBody, error) {
-	path := "/api/marketplace/{slug}/fork"
+	path := "/api/marketplace/items/{slug}/fork"
 	path = pathReplace(path, "slug", slug)
 
 	var result ForkMarketplaceItemOutputBody
@@ -1885,7 +2201,7 @@ type GetMarketplaceIconParams struct {
 //
 // Returns the marketplace item's icon image.
 func (c *Client) GetMarketplaceIcon(ctx context.Context, slug string, opts ...GetMarketplaceIconParams) (*string, error) {
-	path := "/api/marketplace/{slug}/icon"
+	path := "/api/marketplace/items/{slug}/icon"
 	path = pathReplace(path, "slug", slug)
 
 	var headers http.Header
@@ -1905,11 +2221,11 @@ func (c *Client) GetMarketplaceIcon(ctx context.Context, slug string, opts ...Ge
 
 // UploadMarketplaceIcon - Upload Marketplace Item Icon
 //
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Uploads an image as the marketplace item's icon. Only the publisher (or org admin for org-published items) can upload.
 func (c *Client) UploadMarketplaceIcon(ctx context.Context, slug string, body *any) (*UploadMarketplaceIconOutputBody, error) {
-	path := "/api/marketplace/{slug}/icon"
+	path := "/api/marketplace/items/{slug}/icon"
 	path = pathReplace(path, "slug", slug)
 
 	var result UploadMarketplaceIconOutputBody
@@ -1921,11 +2237,11 @@ func (c *Client) UploadMarketplaceIcon(ctx context.Context, slug string, body *a
 
 // DeleteMarketplaceIcon - Delete Marketplace Item Icon
 //
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Removes the marketplace item's icon.
 func (c *Client) DeleteMarketplaceIcon(ctx context.Context, slug string) error {
-	path := "/api/marketplace/{slug}/icon"
+	path := "/api/marketplace/items/{slug}/icon"
 	path = pathReplace(path, "slug", slug)
 
 	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
@@ -1940,7 +2256,7 @@ func (c *Client) DeleteMarketplaceIcon(ctx context.Context, slug string) error {
 //
 // Returns the raw markdown description of a marketplace item
 func (c *Client) GetMarketplaceItemDescription(ctx context.Context, version string, slug string) (*string, error) {
-	path := "/api/marketplace/{slug}/version/{version}/markdown"
+	path := "/api/marketplace/items/{slug}/version/{version}/markdown"
 	path = pathReplace(path, "version", version)
 	path = pathReplace(path, "slug", slug)
 
@@ -1957,12 +2273,502 @@ func (c *Client) GetMarketplaceItemDescription(ctx context.Context, version stri
 //
 // Returns the YAML of an specific version of an item on the marketplace. The marketplace item must be a workflow.
 func (c *Client) GetMarketplaceItemYaml(ctx context.Context, version string, slug string) (*map[string]any, error) {
-	path := "/api/marketplace/{slug}/version/{version}/yaml"
+	path := "/api/marketplace/items/{slug}/version/{version}/yaml"
 	path = pathReplace(path, "version", version)
 	path = pathReplace(path, "slug", slug)
 
 	var result map[string]any
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddAwsBucketVersion - Add AWS Bucket Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a AWS Bucket storage marketplace item.
+func (c *Client) AddAwsBucketVersion(ctx context.Context, slug string, body AddAwsBucketVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/aws-bucket"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddAwsDiskVersion - Add AWS Disk Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a AWS Disk storage marketplace item.
+func (c *Client) AddAwsDiskVersion(ctx context.Context, slug string, body AddAwsDiskVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/aws-disk"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddAwsEfsVersion - Add AWS EFS Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a AWS EFS storage marketplace item.
+func (c *Client) AddAwsEfsVersion(ctx context.Context, slug string, body AddAwsEfsVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/aws-efs"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddAwsLustreVersion - Add AWS Lustre Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a AWS Lustre storage marketplace item.
+func (c *Client) AddAwsLustreVersion(ctx context.Context, slug string, body AddAwsLustreVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/aws-lustre"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddAwsSlurmVersion - Add AWS Slurm Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of an AWS Slurm cluster marketplace item.
+func (c *Client) AddAwsSlurmVersion(ctx context.Context, slug string, body AddAwsSlurmVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/aws-slurm"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddAzureAzfilesVersion - Add Azure Files Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Azure Files storage marketplace item.
+func (c *Client) AddAzureAzfilesVersion(ctx context.Context, slug string, body AddAzureAzfilesVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/azure-azfiles"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddAzureBucketVersion - Add Azure Bucket Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Azure Bucket storage marketplace item.
+func (c *Client) AddAzureBucketVersion(ctx context.Context, slug string, body AddAzureBucketVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/azure-bucket"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddAzureDiskVersion - Add Azure Disk Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Azure Disk storage marketplace item.
+func (c *Client) AddAzureDiskVersion(ctx context.Context, slug string, body AddAzureDiskVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/azure-disk"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddAzureHammerspaceVersion - Add Azure Hammerspace Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Azure Hammerspace storage marketplace item.
+func (c *Client) AddAzureHammerspaceVersion(ctx context.Context, slug string, body AddAzureHammerspaceVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/azure-hammerspace"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddAzureManagedlustreVersion - Add Azure Managed Lustre Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Azure Managed Lustre storage marketplace item.
+func (c *Client) AddAzureManagedlustreVersion(ctx context.Context, slug string, body AddAzureManagedLustreVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/azure-managedlustre"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddAzureNetappfilesVersion - Add Azure NetApp Files Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Azure NetApp Files storage marketplace item.
+func (c *Client) AddAzureNetappfilesVersion(ctx context.Context, slug string, body AddAzureNetappFilesVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/azure-netappfiles"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddAzureSlurmVersion - Add Azure Slurm Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of an Azure Slurm cluster marketplace item.
+func (c *Client) AddAzureSlurmVersion(ctx context.Context, slug string, body AddAzureSlurmVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/azure-slurm"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddExistingVersion - Add Existing Cluster Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of an existing-cluster marketplace item.
+func (c *Client) AddExistingVersion(ctx context.Context, slug string, body AddExistingVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/existing"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddGoogleBucketVersion - Add Google Bucket Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Google Bucket storage marketplace item.
+func (c *Client) AddGoogleBucketVersion(ctx context.Context, slug string, body AddGoogleBucketVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/google-bucket"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddGoogleDiskVersion - Add Google Disk Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Google Disk storage marketplace item.
+func (c *Client) AddGoogleDiskVersion(ctx context.Context, slug string, body AddGoogleDiskVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/google-disk"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddGoogleFilestoreVersion - Add Google Filestore Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Google Filestore storage marketplace item.
+func (c *Client) AddGoogleFilestoreVersion(ctx context.Context, slug string, body AddGoogleFilestoreVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/google-filestore"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddGoogleManagedlustreVersion - Add Google Managed Lustre Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Google Managed Lustre storage marketplace item.
+func (c *Client) AddGoogleManagedlustreVersion(ctx context.Context, slug string, body AddGoogleManagedLustreVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/google-managedlustre"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddGoogleSlurmVersion - Add Google Slurm Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Google Slurm cluster marketplace item.
+func (c *Client) AddGoogleSlurmVersion(ctx context.Context, slug string, body AddGoogleSlurmVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/google-slurm"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddLocalWorkflowVersion - Add Local Workflow Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a local-workflow marketplace item.
+func (c *Client) AddLocalWorkflowVersion(ctx context.Context, slug string, body AddLocalWorkflowVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/local-workflow"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddOpenstackSlurmVersion - Add OpenStack Slurm Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of an OpenStack Slurm cluster marketplace item.
+func (c *Client) AddOpenstackSlurmVersion(ctx context.Context, slug string, body AddOpenstackSlurmVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/openstack-slurm"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddOracleBucketVersion - Add Oracle Bucket Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Oracle Bucket storage marketplace item.
+func (c *Client) AddOracleBucketVersion(ctx context.Context, slug string, body AddOracleBucketVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/oracle-bucket"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddOracleOraclefsVersion - Add Oracle FS Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a Oracle FS storage marketplace item.
+func (c *Client) AddOracleOraclefsVersion(ctx context.Context, slug string, body AddOracleOraclefsVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/oracle-oraclefs"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddOracleSlurmVersion - Add Oracle Slurm Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of an Oracle Slurm cluster marketplace item.
+func (c *Client) AddOracleSlurmVersion(ctx context.Context, slug string, body AddOracleSlurmVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/oracle-slurm"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// AddRemoteWorkflowVersion - Add Remote Workflow Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds (or replaces) a version of a remote-workflow marketplace item.
+func (c *Client) AddRemoteWorkflowVersion(ctx context.Context, slug string, body AddRemoteWorkflowVersionInputBody) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/items/{slug}/versions/remote-workflow"
+	path = pathReplace(path, "slug", slug)
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// RemoveMarketplaceVersion - Remove Marketplace Version
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Removes a version from a marketplace item. An item must keep at least one version.
+func (c *Client) RemoveMarketplaceVersion(ctx context.Context, slug string, version string) error {
+	path := "/api/marketplace/items/{slug}/versions/{version}"
+	path = pathReplace(path, "slug", slug)
+	path = pathReplace(path, "version", version)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// PublishLocalWorkflow - Publish Local Workflow
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes a local workflow (inline YAML definition) to the marketplace.
+func (c *Client) PublishLocalWorkflow(ctx context.Context, body PublishLocalWorkflowRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/local-workflow"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishOpenstackSlurm - Publish OpenStack Cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes an OpenStack SLURM cluster to the marketplace.
+func (c *Client) PublishOpenstackSlurm(ctx context.Context, body PublishOpenstackSlurmRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/openstack-slurm"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishOracleBucket - Publish Oracle Bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes Oracle Bucket storage to the marketplace.
+func (c *Client) PublishOracleBucket(ctx context.Context, body PublishOracleBucketRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/oracle-bucket"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishOracleOraclefs - Publish Oracle FS
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes Oracle FS storage to the marketplace.
+func (c *Client) PublishOracleOraclefs(ctx context.Context, body PublishOracleOraclefsRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/oracle-oraclefs"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishOracleSlurm - Publish Oracle Cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes an Oracle SLURM cluster to the marketplace.
+func (c *Client) PublishOracleSlurm(ctx context.Context, body PublishOracleSlurmRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/oracle-slurm"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PublishRemoteWorkflow - Publish Remote Workflow
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Publishes a remote workflow to the marketplace.
+func (c *Client) PublishRemoteWorkflow(ctx context.Context, body PublishRemoteWorkflowRequest) (*MarketplaceItemBody, error) {
+	path := "/api/marketplace/remote-workflow"
+
+	var result MarketplaceItemBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -2085,6 +2891,23 @@ func (c *Client) GetNotifications(ctx context.Context, opts ...GetNotificationsP
 	return &result, nil
 }
 
+// CreateAdminNotification - Create admin notification
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Sends a notification to a user, every member of an organization, or every user on the platform.
+func (c *Client) CreateAdminNotification(ctx context.Context, body CreateAdminNotificationBody) (*CreateAdminNotificationResponseBody, error) {
+	path := "/api/notifications/admin"
+
+	var result CreateAdminNotificationResponseBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetNotificationsOptions - Get notification options
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -2128,6 +2951,21 @@ func (c *Client) SetNotificationsSettings(ctx context.Context, body *Notificatio
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// DeleteNotification - Delete notification
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes a notification for the currently authenticated user.
+func (c *Client) DeleteNotification(ctx context.Context, id string) error {
+	path := "/api/notifications/{id}"
+	path = pathReplace(path, "id", id)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // UpdateNotification - Update a notification
@@ -2266,6 +3104,21 @@ func (c *Client) GetOrganizations(ctx context.Context) (*[]Organization, error) 
 
 	var result []Organization
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CreateOrganization - Create organization
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new organization. Only platform admins and partners can create organizations.
+func (c *Client) CreateOrganization(ctx context.Context, body CreateOrganizationInputBody) (*CreateOrganizationOutputBody, error) {
+	path := "/api/organizations"
+
+	var result CreateOrganizationOutputBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -4520,6 +5373,25 @@ func (c *Client) GetPodLogs(ctx context.Context, organization string, infraName 
 	return &result, nil
 }
 
+// CreateKubernetesResource - Create Kubernetes resource
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a Kubernetes resource in the namespace from YAML data.
+func (c *Client) CreateKubernetesResource(ctx context.Context, organization string, infraName string, namespace string, resourceType string, body PatchResourceBody) (*ResourceYamlResponse, error) {
+	path := "/api/organizations/{organization}/kubernetes/{infraName}/namespaces/{namespace}/resourceType/{resourceType}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "infraName", infraName)
+	path = pathReplace(path, "namespace", namespace)
+	path = pathReplace(path, "resourceType", resourceType)
+
+	var result ResourceYamlResponse
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetKubernetesResource - Get Kubernetes resource
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -5170,6 +6042,22 @@ func (c *Client) PostManagedClusterSchedulerJobCommand(ctx context.Context, orga
 	return &result, nil
 }
 
+// ListOrganizationMarketplaceItems - List organization marketplace items
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the items the organization has published under its own name, bucketed by type.
+func (c *Client) ListOrganizationMarketplaceItems(ctx context.Context, organization string) (*ListOrgMarketplaceItemsBody, error) {
+	path := "/api/organizations/{organization}/marketplace"
+	path = pathReplace(path, "organization", organization)
+
+	var result ListOrgMarketplaceItemsBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetOrganizationMauParams contains optional parameters for the GetOrganizationMau operation.
 type GetOrganizationMauParams struct {
 	// End date in YYYY-MM-DD format. Defaults to current date
@@ -5249,16 +6137,32 @@ func (c *Client) GetSingleNetworkByName(ctx context.Context, organization string
 	return &result, nil
 }
 
+// SetOrganizationOwner - Set organization owner
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets or transfers the organization owner. Only platform admins or the current owner can perform this action.
+func (c *Client) SetOrganizationOwner(ctx context.Context, organization string, body SetOwnerInputBody) (*OwnerOutputBody, error) {
+	path := "/api/organizations/{organization}/owner"
+	path = pathReplace(path, "organization", organization)
+
+	var result OwnerOutputBody
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetOrganizationPolicies - Get organization policies
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns the organization policies for the specified organization.
-func (c *Client) GetOrganizationPolicies(ctx context.Context, organization string) (*map[string]any, error) {
+func (c *Client) GetOrganizationPolicies(ctx context.Context, organization string) (*map[string]Policy, error) {
 	path := "/api/organizations/{organization}/policies"
 	path = pathReplace(path, "organization", organization)
 
-	var result map[string]any
+	var result map[string]Policy
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -5270,11 +6174,11 @@ func (c *Client) GetOrganizationPolicies(ctx context.Context, organization strin
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Sets archive-cost-data policy for the organization.
-func (c *Client) SetOrganizationArchiveCostDataPolicy(ctx context.Context, organization string, body int64) (*map[string]any, error) {
+func (c *Client) SetOrganizationArchiveCostDataPolicy(ctx context.Context, organization string, body int64) (*map[string]IntPolicyOutput, error) {
 	path := "/api/organizations/{organization}/policies/archive-cost-data"
 	path = pathReplace(path, "organization", organization)
 
-	var result map[string]any
+	var result map[string]IntPolicyOutput
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -5286,11 +6190,27 @@ func (c *Client) SetOrganizationArchiveCostDataPolicy(ctx context.Context, organ
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Sets nitro-instances-only policy for the organization.
-func (c *Client) SetOrganizationNitroInstancesOnlyPolicy(ctx context.Context, organization string, body bool) (*map[string]any, error) {
+func (c *Client) SetOrganizationNitroInstancesOnlyPolicy(ctx context.Context, organization string, body bool) (*map[string]BooleanPolicyOutput, error) {
 	path := "/api/organizations/{organization}/policies/nitro-instances-only"
 	path = pathReplace(path, "organization", organization)
 
-	var result map[string]any
+	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// SetOrganizationNoPublicIPPolicy - Set organization policy: no-public-ip
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets no-public-ip policy for the organization.
+func (c *Client) SetOrganizationNoPublicIPPolicy(ctx context.Context, organization string, body bool) (*map[string]BooleanPolicyOutput, error) {
+	path := "/api/organizations/{organization}/policies/no-public-ip"
+	path = pathReplace(path, "organization", organization)
+
+	var result map[string]BooleanPolicyOutput
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -5302,11 +6222,11 @@ func (c *Client) SetOrganizationNitroInstancesOnlyPolicy(ctx context.Context, or
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Sets no-root-access policy for the organization.
-func (c *Client) SetOrganizationNoRootAccessPolicy(ctx context.Context, organization string, body bool) (*map[string]any, error) {
+func (c *Client) SetOrganizationNoRootAccessPolicy(ctx context.Context, organization string, body bool) (*map[string]BooleanPolicyOutput, error) {
 	path := "/api/organizations/{organization}/policies/no-root-access"
 	path = pathReplace(path, "organization", organization)
 
-	var result map[string]any
+	var result map[string]BooleanPolicyOutput
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -6433,6 +7353,24 @@ func (c *Client) AddCorsRulesAwsBucket(ctx context.Context, organization string,
 	return nil
 }
 
+// GetTokenAwsBucket - Get temporary credentials for AWS bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns temporary STS credentials scoped to an AWS S3 bucket. The credentials are valid for 12 hours.
+func (c *Client) GetTokenAwsBucket(ctx context.Context, organization string, user string, name string) (*AwsBucketToken, error) {
+	path := "/api/organizations/{organization}/users/{user}/aws-bucket/{name}/token"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	var result AwsBucketToken
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetAwsDisk - Get Storage: AWS disk
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6675,6 +7613,24 @@ func (c *Client) GetSasTokenAzureBucket(ctx context.Context, organization string
 	path = pathReplace(path, "name", name)
 
 	var result AzureSasToken
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetTokenAzureBucket - Get temporary credentials for Azure bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns temporary service principal credentials scoped to an Azure storage bucket. The credentials are valid for 12 hours.
+func (c *Client) GetTokenAzureBucket(ctx context.Context, organization string, user string, name string) (*AzureBucketToken, error) {
+	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/token"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	var result AzureBucketToken
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -7091,6 +8047,24 @@ func (c *Client) GetPresignedURLGoogleBucketObject(ctx context.Context, organiza
 		}
 	}
 	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetTokenGoogleBucket - Get temporary credentials for Google bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a temporary OAuth2 access token scoped to a Google Cloud Storage bucket.
+func (c *Client) GetTokenGoogleBucket(ctx context.Context, organization string, user string, name string) (*GoogleBucketToken, error) {
+	path := "/api/organizations/{organization}/users/{user}/google-bucket/{name}/token"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	var result GoogleBucketToken
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -8104,11 +9078,11 @@ func (c *Client) DeleteStorage(ctx context.Context, organization string, user st
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns the variables for the specified organization.
-func (c *Client) GetOrganizationVariables(ctx context.Context, organization string) (*map[string]any, error) {
+func (c *Client) GetOrganizationVariables(ctx context.Context, organization string) (*map[string]WorkflowVariable, error) {
 	path := "/api/organizations/{organization}/variables"
 	path = pathReplace(path, "organization", organization)
 
-	var result map[string]any
+	var result map[string]WorkflowVariable
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -8120,11 +9094,11 @@ func (c *Client) GetOrganizationVariables(ctx context.Context, organization stri
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Creates a new variable for the organization.
-func (c *Client) CreateOrganizationVariable(ctx context.Context, organization string, body CreateVariableInput) (*map[string]any, error) {
+func (c *Client) CreateOrganizationVariable(ctx context.Context, organization string, body CreateVariableInput) (*map[string]WorkflowVariable, error) {
 	path := "/api/organizations/{organization}/variables"
 	path = pathReplace(path, "organization", organization)
 
-	var result map[string]any
+	var result map[string]WorkflowVariable
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -8152,12 +9126,12 @@ func (c *Client) DeleteOrganizationVariable(ctx context.Context, organization st
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Sets the specified variable for the organization.
-func (c *Client) SetOrganizationVariable(ctx context.Context, organization string, key string, body UpdateVariableInput) (*map[string]any, error) {
+func (c *Client) SetOrganizationVariable(ctx context.Context, organization string, key string, body UpdateVariableInput) (*map[string]WorkflowVariable, error) {
 	path := "/api/organizations/{organization}/variables/{key}"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "key", key)
 
-	var result map[string]any
+	var result map[string]WorkflowVariable
 	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -8566,10 +9540,10 @@ func (c *Client) SetPlatformLicense(ctx context.Context, body LicenseData) error
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns the platform policies
-func (c *Client) GetPlatformPolicies(ctx context.Context) (*map[string]any, error) {
+func (c *Client) GetPlatformPolicies(ctx context.Context) (*map[string]Policy, error) {
 	path := "/api/platform/policies"
 
-	var result map[string]any
+	var result map[string]Policy
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -8581,10 +9555,10 @@ func (c *Client) GetPlatformPolicies(ctx context.Context) (*map[string]any, erro
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Sets the archive-cost-data policy for the platform.
-func (c *Client) SetPlatformArchiveCostDataPolicy(ctx context.Context, body int64) (*map[string]any, error) {
+func (c *Client) SetPlatformArchiveCostDataPolicy(ctx context.Context, body int64) (*map[string]IntPolicyOutput, error) {
 	path := "/api/platform/policies/archive-cost-data"
 
-	var result map[string]any
+	var result map[string]IntPolicyOutput
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -8596,10 +9570,25 @@ func (c *Client) SetPlatformArchiveCostDataPolicy(ctx context.Context, body int6
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Sets the nitro-instances-only policy for the platform.
-func (c *Client) SetPlatformNitroInstancesOnlyPolicy(ctx context.Context, body bool) (*map[string]any, error) {
+func (c *Client) SetPlatformNitroInstancesOnlyPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
 	path := "/api/platform/policies/nitro-instances-only"
 
-	var result map[string]any
+	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformNoPublicIPPolicy - Set platform policy: no-public-ip
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the no-public-ip policy for the platform.
+func (c *Client) SetPlatformNoPublicIPPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
+	path := "/api/platform/policies/no-public-ip"
+
+	var result map[string]BooleanPolicyOutput
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -8611,10 +9600,10 @@ func (c *Client) SetPlatformNitroInstancesOnlyPolicy(ctx context.Context, body b
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Sets the no-root-access policy for the platform.
-func (c *Client) SetPlatformNoRootAccessPolicy(ctx context.Context, body bool) (*map[string]any, error) {
+func (c *Client) SetPlatformNoRootAccessPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
 	path := "/api/platform/policies/no-root-access"
 
-	var result map[string]any
+	var result map[string]BooleanPolicyOutput
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -9446,6 +10435,51 @@ func (c *Client) UpdateUserSidebar(ctx context.Context, body UpdateUserSidebarIn
 	return nil
 }
 
+// ListUserThumbnails - List user thumbnails
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the authenticated user's uploaded thumbnail library.
+func (c *Client) ListUserThumbnails(ctx context.Context) (*ListUserThumbnailsOutputBody, error) {
+	path := "/api/user/thumbnails"
+
+	var result ListUserThumbnailsOutputBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UploadUserThumbnail - Upload user thumbnail
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Adds a new image to the authenticated user's thumbnail library. Stored in the content-addressable blob store and reference-counted.
+func (c *Client) UploadUserThumbnail(ctx context.Context, body *any) (*UserThumbnail, error) {
+	path := "/api/user/thumbnails"
+
+	var result UserThumbnail
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteUserThumbnail - Delete user thumbnail
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes an image from the authenticated user's thumbnail library. Resources that still reference the image continue to render it via their own refCount.
+func (c *Client) DeleteUserThumbnail(ctx context.Context, etag string) error {
+	path := "/api/user/thumbnails/{etag}"
+	path = pathReplace(path, "etag", etag)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // GetUserActivityParams contains optional parameters for the GetUserActivity operation.
 type GetUserActivityParams struct {
 	// Number of days to look back
@@ -9716,10 +10750,10 @@ func (c *Client) GetWorkflowRunFile(ctx context.Context, slug string) (*string, 
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Returns all workflow variables for the current user.
-func (c *Client) ListUserVariables(ctx context.Context) (*map[string]any, error) {
+func (c *Client) ListUserVariables(ctx context.Context) (*map[string]WorkflowVariable, error) {
 	path := "/api/workflow-variables"
 
-	var result map[string]any
+	var result map[string]WorkflowVariable
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
