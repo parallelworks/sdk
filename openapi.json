@@ -413,83 +413,6 @@
         ],
         "type": "object"
       },
-      "AddAzureHammerspaceVersionInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "anvil_instance_type": {
-            "type": "string"
-          },
-          "data_disk_size": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data_node_count": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data_node_disk_count": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data_node_disk_size": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data_node_type": {
-            "type": "string"
-          },
-          "dsx_instance_count": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "dsx_instance_type": {
-            "type": "string"
-          },
-          "metadata_disk_count": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "metadata_disk_size": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "region": {
-            "type": "string"
-          },
-          "replace": {
-            "description": "Replace an existing version's variables instead of adding a new version.",
-            "type": "boolean"
-          },
-          "storage_backend": {
-            "type": "string"
-          },
-          "storage_type": {
-            "type": "string"
-          },
-          "ultra_disk_iops": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "ultra_disk_mbps": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "use_high_availability": {
-            "type": "boolean"
-          },
-          "version": {
-            "description": "Version label to add (must start with v).",
-            "type": "string"
-          },
-          "zone": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "version"
-        ],
-        "type": "object"
-      },
       "AddAzureManagedLustreVersionInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -1257,24 +1180,24 @@
       "AddWorkspaceMountBody": {
         "additionalProperties": false,
         "properties": {
-          "clusterPath": {
-            "description": "The path on the cluster to map to the workspace path.",
+          "resourceId": {
+            "description": "The ID of the cluster or instance to mount.",
+            "type": "string"
+          },
+          "resourcePath": {
+            "description": "The path on the cluster or instance to make available at the workspace path.",
             "minLength": 1,
             "type": "string"
           },
-          "resourceId": {
-            "description": "The ID of the resource (cluster or instance) for this mount.",
-            "type": "string"
-          },
           "workspacePath": {
-            "description": "The path inside the user workspace to mount.",
+            "description": "The path inside your workspace where the resource will be mounted.",
             "minLength": 1,
             "type": "string"
           }
         },
         "required": [
           "workspacePath",
-          "clusterPath",
+          "resourcePath",
           "resourceId"
         ],
         "type": "object"
@@ -1282,6 +1205,10 @@
       "AiProviderResponse": {
         "additionalProperties": false,
         "properties": {
+          "bucketId": {
+            "description": "Attached storage bucket infrastructure ID",
+            "type": "string"
+          },
           "bucketName": {
             "description": "Attached storage bucket name",
             "type": "string"
@@ -1616,6 +1543,19 @@
             "type": "number"
           }
         },
+        "type": "object"
+      },
+      "AttachBucketInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "refreshInterval": {
+            "description": "Refresh interval for bucket ingestion",
+            "type": "string"
+          }
+        },
+        "required": [
+          "refreshInterval"
+        ],
         "type": "object"
       },
       "AttachmentResponse": {
@@ -3472,82 +3412,6 @@
         ],
         "type": "object"
       },
-      "AzureHammerspaceVersionSettings": {
-        "additionalProperties": false,
-        "properties": {
-          "anvil_instance_type": {
-            "type": "string"
-          },
-          "data_disk_size": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data_node_count": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data_node_disk_count": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data_node_disk_size": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data_node_type": {
-            "type": "string"
-          },
-          "dsx_instance_count": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "dsx_instance_type": {
-            "type": "string"
-          },
-          "metadata_disk_count": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "metadata_disk_size": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "region": {
-            "type": "string"
-          },
-          "storage_backend": {
-            "type": "string"
-          },
-          "storage_type": {
-            "type": "string"
-          },
-          "subtype": {
-            "description": "Subtype discriminator.",
-            "enum": [
-              "azure-hammerspace"
-            ],
-            "type": "string"
-          },
-          "ultra_disk_iops": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "ultra_disk_mbps": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "use_high_availability": {
-            "type": "boolean"
-          },
-          "zone": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "subtype"
-        ],
-        "type": "object"
-      },
       "AzureMachineLearningDetail": {
         "additionalProperties": false,
         "properties": {
@@ -5178,6 +5042,31 @@
         ],
         "type": "object"
       },
+      "CleanupPreviewsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "removed": {
+            "description": "Orphaned preview flags that were removed.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "usersCleaned": {
+            "description": "Number of users whose preview list was modified.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "removed",
+          "usersCleaned"
+        ],
+        "type": "object"
+      },
       "CloudAccountBillingResponse": {
         "additionalProperties": false,
         "properties": {
@@ -5775,21 +5664,6 @@
           "processes",
           "networkRxBytes",
           "networkTxBytes"
-        ],
-        "type": "object"
-      },
-      "ClusterMountInfoResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "clusterPath": {
-            "type": "string"
-          },
-          "resourceId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "clusterPath"
         ],
         "type": "object"
       },
@@ -6857,6 +6731,60 @@
           "name",
           "csp",
           "cspId"
+        ],
+        "type": "object"
+      },
+      "CreateClusterInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "caCert": {
+            "description": "PEM-encoded CA certificate. Leave empty when the cluster uses a publicly trusted certificate.",
+            "type": "string"
+          },
+          "endpoint": {
+            "description": "Kubernetes API endpoint",
+            "examples": [
+              "https://k8s.example.com:6443"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the cluster",
+            "examples": [
+              "prod-cluster"
+            ],
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "endpoint"
+        ],
+        "type": "object"
+      },
+      "CreateClusterOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Cluster MongoDB ID",
+            "examples": [
+              "507f1f77bcf86cd799439011"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Cluster name",
+            "examples": [
+              "prod-cluster"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
         ],
         "type": "object"
       },
@@ -8013,6 +7941,65 @@
         },
         "type": "object"
       },
+      "DeploymentResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "The cloud service provider",
+            "type": "string"
+          },
+          "currentStatus": {
+            "description": "The current status",
+            "type": "string"
+          },
+          "deleteStatus": {
+            "description": "The delete status",
+            "type": "string"
+          },
+          "deploymentNumber": {
+            "description": "The deployment number",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": "The deployment ID",
+            "type": "string"
+          },
+          "infraId": {
+            "description": "The infrastructure ID",
+            "type": "string"
+          },
+          "infraName": {
+            "description": "The infrastructure name",
+            "type": "string"
+          },
+          "infraType": {
+            "description": "The infrastructure type",
+            "type": "string"
+          },
+          "provisionStatus": {
+            "additionalProperties": {},
+            "description": "The provision status",
+            "type": "object"
+          },
+          "user": {
+            "description": "The user that owns this deployment",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "deploymentNumber",
+          "infraId",
+          "infraName",
+          "infraType",
+          "csp",
+          "currentStatus",
+          "deleteStatus",
+          "provisionStatus"
+        ],
+        "type": "object"
+      },
       "DesktopSessionSettings": {
         "additionalProperties": false,
         "properties": {
@@ -9084,6 +9071,10 @@
             "description": "Whether MFA is enabled for the user",
             "type": "boolean"
           },
+          "enforceWebAuthnMfa": {
+            "description": "Whether organization or platform policy restricts MFA to security keys (WebAuthn)",
+            "type": "boolean"
+          },
           "mfaSettings": {
             "description": "List of configured MFA methods",
             "items": {
@@ -9097,7 +9088,8 @@
         },
         "required": [
           "enabled",
-          "mfaSettings"
+          "mfaSettings",
+          "enforceWebAuthnMfa"
         ],
         "type": "object"
       },
@@ -10232,200 +10224,6 @@
         "required": [
           "name",
           "members"
-        ],
-        "type": "object"
-      },
-      "Hammerspace": {
-        "additionalProperties": false,
-        "properties": {
-          "anvilInstanceType": {
-            "description": "Instance type of the Anvil nodes in the Hammerspace storage",
-            "type": "string"
-          },
-          "attachedTo": {
-            "description": "Resources the storage is attached to.",
-            "items": {
-              "$ref": "#/components/schemas/StorageAttachment"
-            },
-            "type": "array"
-          },
-          "bucketName": {
-            "description": "Name of the bucket in the Hammerspace storage",
-            "type": "string"
-          },
-          "csp": {
-            "description": "Cloud service provider of the storage.",
-            "type": "string"
-          },
-          "currentlyProvisioning": {
-            "description": "Indicates if the storage is currently being provisioned.",
-            "type": "boolean"
-          },
-          "dataDiskSize": {
-            "description": "Size of the data disk in the Hammerspace storage in GB",
-            "format": "int32",
-            "type": "integer"
-          },
-          "dataNodeCount": {
-            "description": "Number of data nodes in the Hammerspace storage",
-            "format": "int32",
-            "type": "integer"
-          },
-          "dataNodeDiskCount": {
-            "description": "Number of data node disks in the Hammerspace storage",
-            "format": "int32",
-            "type": "integer"
-          },
-          "dataNodeDiskSize": {
-            "description": "Size of the data node disk in the Hammerspace storage in GB",
-            "format": "int32",
-            "type": "integer"
-          },
-          "dataNodeType": {
-            "description": "Instance type of the data nodes in the Hammerspace storage",
-            "type": "string"
-          },
-          "description": {
-            "description": "Description of the storage.",
-            "type": "string"
-          },
-          "displayName": {
-            "description": "Display name of the storage.",
-            "type": "string"
-          },
-          "dsxInstanceCount": {
-            "description": "Number of DSX (Data Storage eXtension) instances in the Hammerspace storage",
-            "format": "int32",
-            "type": "integer"
-          },
-          "dsxInstanceType": {
-            "description": "Instance type of the DSX nodes in the Hammerspace storage",
-            "type": "string"
-          },
-          "favorite": {
-            "description": "Indicates if the storage is a favorite for the requesting user.",
-            "type": "boolean"
-          },
-          "govCloud": {
-            "description": "Indicates if the storage is in a GovCloud environment.",
-            "type": "boolean"
-          },
-          "group": {
-            "description": "Group the storage bills to.",
-            "type": "string"
-          },
-          "highAvailability": {
-            "description": "Indicates if the Hammerspace storage is in high availability mode",
-            "type": "boolean"
-          },
-          "id": {
-            "description": "ID of the storage.",
-            "type": "string"
-          },
-          "imageUrl": {
-            "description": "URL of the icon used for the storage. This will be empty if the default image is used.",
-            "type": "string"
-          },
-          "metadataDiskCount": {
-            "description": "Number of metadata disks in the Hammerspace storage",
-            "format": "int32",
-            "type": "integer"
-          },
-          "metadataDiskSize": {
-            "description": "Size of the metadata disk in the Hammerspace storage in GB",
-            "format": "int32",
-            "type": "integer"
-          },
-          "name": {
-            "description": "Name of the storage.",
-            "type": "string"
-          },
-          "network": {
-            "description": "Network the storage uses to provision.",
-            "type": "string"
-          },
-          "provisionError": {
-            "description": "Error message if the storage provisioning failed.",
-            "type": "string"
-          },
-          "provisioned": {
-            "description": "Indicates if the storage has been provisioned.",
-            "type": "boolean"
-          },
-          "region": {
-            "description": "Region the Hammerspace storage is in",
-            "type": "string"
-          },
-          "runtimeAlert": {
-            "$ref": "#/components/schemas/RunAlert",
-            "description": "Runtime alert information for the storage."
-          },
-          "sessionCostLimit": {
-            "$ref": "#/components/schemas/SessionAlert",
-            "description": "Session cost limit information for the storage."
-          },
-          "sessionNumber": {
-            "description": "Session number of the storage.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "sessionless": {
-            "description": "Indicates if the storage is sessionless.",
-            "type": "boolean"
-          },
-          "shared": {
-            "description": "Sharing permissions of the storage.",
-            "items": {
-              "$ref": "#/components/schemas/Shared"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "status": {
-            "description": "Current status of the storage.",
-            "type": "string"
-          },
-          "storageBackend": {
-            "description": "Storage backend used by the Hammerspace storage",
-            "type": "string"
-          },
-          "storageType": {
-            "description": "Type of the Hammerspace storage",
-            "type": "string"
-          },
-          "tags": {
-            "description": "Tags associated with the storage.",
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "type": {
-            "description": "Type of storage.",
-            "type": "string"
-          },
-          "user": {
-            "description": "User associated with the storage.",
-            "type": "string"
-          },
-          "zone": {
-            "description": "Zone the Hammerspace storage is in",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "user",
-          "name",
-          "csp",
-          "type",
-          "shared",
-          "currentlyProvisioning",
-          "provisioned",
-          "sessionless",
-          "favorite"
         ],
         "type": "object"
       },
@@ -11719,12 +11517,16 @@
             "description": "Base DN for LDAP authentication",
             "type": "string"
           },
+          "caCert": {
+            "description": "CA certificate used to verify the LDAP server",
+            "type": "string"
+          },
           "clientCert": {
             "description": "Client certificate for LDAP authentication",
             "type": "string"
           },
           "clientKey": {
-            "description": "Client secret of the LDAP authentication method",
+            "description": "Client key of the LDAP authentication method",
             "type": "string",
             "writeOnly": true
           },
@@ -11749,11 +11551,6 @@
             "readOnly": true,
             "type": "string"
           },
-          "level": {
-            "description": "Level of the LDAP authentication method, e.g., organization or user",
-            "readOnly": true,
-            "type": "string"
-          },
           "name": {
             "description": "Name of the LDAP authentication method",
             "pattern": "^[a-z0-9-]+$",
@@ -11763,6 +11560,15 @@
           "server": {
             "description": "LDAP server address",
             "type": "string"
+          },
+          "serviceAccountBind": {
+            "description": "DN to bind with for the service account",
+            "type": "string"
+          },
+          "serviceAccountPassword": {
+            "description": "Password for the service account bind",
+            "type": "string",
+            "writeOnly": true
           },
           "type": {
             "description": "Type of the LDAP authentication method",
@@ -11798,20 +11604,113 @@
         },
         "required": [
           "name",
-          "displayName",
-          "server",
-          "useServiceAccount",
-          "baseDN",
-          "filter",
-          "useTLS",
-          "clientCert",
-          "uniqueIdentifier",
+          "server"
+        ],
+        "type": "object"
+      },
+      "LdapConnectionTest": {
+        "additionalProperties": false,
+        "properties": {
+          "baseDN": {
+            "description": "Base DN for LDAP authentication",
+            "type": "string"
+          },
+          "caCert": {
+            "description": "CA certificate used to verify the LDAP server",
+            "type": "string"
+          },
+          "clientCert": {
+            "description": "Client certificate for LDAP authentication",
+            "type": "string"
+          },
+          "clientKey": {
+            "description": "Client key of the LDAP authentication method",
+            "type": "string",
+            "writeOnly": true
+          },
+          "filter": {
+            "description": "Filter for LDAP authentication",
+            "type": "string"
+          },
+          "password": {
+            "description": "Password used only for this connection test",
+            "type": "string",
+            "writeOnly": true
+          },
+          "server": {
+            "description": "LDAP server address",
+            "type": "string"
+          },
+          "serviceAccountBind": {
+            "description": "DN to bind with for the service account",
+            "type": "string"
+          },
+          "serviceAccountPassword": {
+            "description": "Password for the service account bind",
+            "type": "string",
+            "writeOnly": true
+          },
+          "useServiceAccount": {
+            "description": "Whether to use service account for LDAP authentication",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "useTLS": {
+            "description": "Whether to use TLS for LDAP authentication",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "username": {
+            "description": "Username used only for this connection test",
+            "type": "string"
+          }
+        },
+        "required": [
+          "server"
+        ],
+        "type": "object"
+      },
+      "LdapLoginInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "authMethod": {
+            "description": "LDAP auth method ID",
+            "minLength": 1,
+            "type": "string"
+          },
+          "password": {
+            "description": "LDAP password",
+            "minLength": 1,
+            "type": "string"
+          },
+          "username": {
+            "description": "LDAP username",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
           "username",
-          "fullName",
-          "email",
-          "id",
-          "type",
-          "level"
+          "password",
+          "authMethod"
+        ],
+        "type": "object"
+      },
+      "LdapSignupInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "username": {
+            "description": "Desired username",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
         ],
         "type": "object"
       },
@@ -12221,10 +12120,13 @@
         "additionalProperties": false,
         "properties": {
           "mounts": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/ClusterMountInfoResponse"
+            "items": {
+              "$ref": "#/components/schemas/MountInfoResponse"
             },
-            "type": "object"
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "required": [
@@ -13119,7 +13021,6 @@
                   "azure-azfiles": "#/components/schemas/AzureAzfilesVersionSettings",
                   "azure-bucket": "#/components/schemas/AzureBucketVersionSettings",
                   "azure-disk": "#/components/schemas/AzureDiskVersionSettings",
-                  "azure-hammerspace": "#/components/schemas/AzureHammerspaceVersionSettings",
                   "azure-managedlustre": "#/components/schemas/AzureManagedLustreVersionSettings",
                   "azure-netappfiles": "#/components/schemas/AzureNetappFilesVersionSettings",
                   "azure-slurm": "#/components/schemas/AzureSlurmVersionSettings",
@@ -13183,9 +13084,6 @@
                 },
                 {
                   "$ref": "#/components/schemas/AzureAzfilesVersionSettings"
-                },
-                {
-                  "$ref": "#/components/schemas/AzureHammerspaceVersionSettings"
                 },
                 {
                   "$ref": "#/components/schemas/AzureManagedLustreVersionSettings"
@@ -13683,12 +13581,21 @@
       "MfaSettingResponse": {
         "additionalProperties": false,
         "properties": {
+          "createdAt": {
+            "description": "Timestamp when the MFA method was created",
+            "format": "date-time",
+            "type": "string"
+          },
           "enabled": {
             "description": "Whether this MFA method is enabled",
             "type": "boolean"
           },
           "id": {
             "description": "MFA setting ID",
+            "type": "string"
+          },
+          "name": {
+            "description": "User-supplied name for the MFA method (e.g., security key label)",
             "type": "string"
           },
           "type": {
@@ -13932,6 +13839,48 @@
         "required": [
           "object",
           "data"
+        ],
+        "type": "object"
+      },
+      "MountInfoResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "Cloud provider hosting the resource, such as aws, google, azure, openstack, or oracle. Empty for existing clusters.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "Custom icon for the cluster or instance, if one has been set.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the cluster or instance the mount points to.",
+            "type": "string"
+          },
+          "resourcePath": {
+            "type": "string"
+          },
+          "slug": {
+            "description": "Short name of the cluster or instance, used to fill in the __CLUSTER__ and __INSTANCE__ placeholders in the workspace path.",
+            "type": "string"
+          },
+          "url": {
+            "description": "Link to the cluster or instance details page.",
+            "type": "string"
+          },
+          "workspacePath": {
+            "description": "The path inside your workspace where the resource is mounted. __USER__, __CLUSTER__, and __INSTANCE__ are placeholders that get filled in with your username, cluster name, or instance name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspacePath",
+          "resourcePath",
+          "name",
+          "slug",
+          "csp",
+          "imageUrl",
+          "url"
         ],
         "type": "object"
       },
@@ -15004,11 +14953,6 @@
           },
           "jwksUri": {
             "description": "JWKS URI of the OIDC authentication method",
-            "type": "string"
-          },
-          "level": {
-            "description": "Level of the OIDC authentication method, e.g., organization or user",
-            "readOnly": true,
             "type": "string"
           },
           "name": {
@@ -16090,6 +16034,10 @@
         "properties": {
           "description": {
             "description": "Item description",
+            "type": "string"
+          },
+          "icon": {
+            "description": "Icon URL",
             "type": "string"
           },
           "id": {
@@ -17868,6 +17816,131 @@
         ],
         "type": "object"
       },
+      "PreviewStat": {
+        "additionalProperties": false,
+        "properties": {
+          "activeCount": {
+            "description": "Number of active users that have explicitly enabled this preview.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "count": {
+            "description": "Number of users that have explicitly enabled this preview.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "flag": {
+            "description": "Preview flag name.",
+            "type": "string"
+          },
+          "stale": {
+            "description": "True when the flag is present in user documents but is no longer a registered preview.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "flag",
+          "count",
+          "activeCount",
+          "stale"
+        ],
+        "type": "object"
+      },
+      "PreviewStatsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "activeUsers": {
+            "description": "Number of active users on the platform.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "stats": {
+            "description": "Per-preview adoption counts, including zero-count registered previews and stale flags.",
+            "items": {
+              "$ref": "#/components/schemas/PreviewStat"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "totalUsers": {
+            "description": "Total number of users on the platform.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "stats",
+          "totalUsers",
+          "activeUsers"
+        ],
+        "type": "object"
+      },
+      "PreviewUser": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "description": "Whether the user is active.",
+            "type": "boolean"
+          },
+          "avatarEtag": {
+            "description": "Etag of the user's uploaded avatar, if any.",
+            "type": "string"
+          },
+          "email": {
+            "description": "User email address.",
+            "type": "string"
+          },
+          "id": {
+            "description": "User ID.",
+            "type": "string"
+          },
+          "name": {
+            "description": "User's full name.",
+            "type": "string"
+          },
+          "organization": {
+            "description": "ID of the organization the user belongs to.",
+            "type": "string"
+          },
+          "username": {
+            "description": "Username.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "active"
+        ],
+        "type": "object"
+      },
+      "PreviewUsersOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "total": {
+            "description": "Total number of users with the preview enabled.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "users": {
+            "description": "Users that have explicitly enabled the preview.",
+            "items": {
+              "$ref": "#/components/schemas/PreviewUser"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "users",
+          "total"
+        ],
+        "type": "object"
+      },
       "PrivacySettingsBody": {
         "additionalProperties": false,
         "properties": {
@@ -18712,123 +18785,6 @@
           },
           "type": {
             "type": "string"
-          },
-          "verified": {
-            "description": "Mark as verified (platform admins only).",
-            "type": "boolean"
-          },
-          "version": {
-            "default": "v1.0.0",
-            "description": "Initial version label.",
-            "type": "string"
-          },
-          "zone": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "slug",
-          "privacySettings"
-        ],
-        "type": "object"
-      },
-      "PublishAzureHammerspaceRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "anvil_instance_type": {
-            "type": "string"
-          },
-          "data_disk_size": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data_node_count": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data_node_disk_count": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data_node_disk_size": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data_node_type": {
-            "type": "string"
-          },
-          "description": {
-            "description": "Short summary of the item.",
-            "maxLength": 100,
-            "type": "string"
-          },
-          "dsx_instance_count": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "dsx_instance_type": {
-            "type": "string"
-          },
-          "featured": {
-            "description": "Mark as featured (platform admins only).",
-            "type": "boolean"
-          },
-          "imageUrl": {
-            "description": "Icon image URL.",
-            "type": "string"
-          },
-          "markdownRaw": {
-            "description": "Markdown description body.",
-            "type": "string"
-          },
-          "metadata_disk_count": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "metadata_disk_size": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "name": {
-            "description": "Display name on the marketplace.",
-            "maxLength": 100,
-            "minLength": 2,
-            "type": "string"
-          },
-          "privacySettings": {
-            "$ref": "#/components/schemas/MarketplacePrivacyInput",
-            "description": "Visibility settings for the item."
-          },
-          "publishedAsOrg": {
-            "description": "Publish under the organization display name (org admins only).",
-            "type": "boolean"
-          },
-          "region": {
-            "type": "string"
-          },
-          "slug": {
-            "description": "URL-friendly identifier.",
-            "maxLength": 100,
-            "minLength": 2,
-            "type": "string"
-          },
-          "storage_backend": {
-            "type": "string"
-          },
-          "storage_type": {
-            "type": "string"
-          },
-          "ultra_disk_iops": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "ultra_disk_mbps": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "use_high_availability": {
-            "type": "boolean"
           },
           "verified": {
             "description": "Mark as verified (platform admins only).",
@@ -20705,6 +20661,36 @@
         ],
         "type": "object"
       },
+      "RecommendedResourcesBody": {
+        "additionalProperties": false,
+        "properties": {
+          "compute": {
+            "description": "Slugs of marketplace compute items recommended to new users during onboarding",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "workflows": {
+            "description": "Slugs of marketplace workflow items recommended to new users during onboarding",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "compute",
+          "workflows"
+        ],
+        "type": "object"
+      },
       "RecommendedResourcesResponse": {
         "additionalProperties": false,
         "properties": {
@@ -20957,7 +20943,7 @@
         "additionalProperties": false,
         "properties": {
           "workspacePath": {
-            "description": "The workspace path to remove from mounts.",
+            "description": "The workspace path of the mount to remove.",
             "minLength": 1,
             "type": "string"
           }
@@ -22687,65 +22673,6 @@
         ],
         "type": "object"
       },
-      "SessionResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "csp": {
-            "description": "The cloud service provider",
-            "type": "string"
-          },
-          "currentStatus": {
-            "description": "The current status",
-            "type": "string"
-          },
-          "deleteStatus": {
-            "description": "The delete status",
-            "type": "string"
-          },
-          "id": {
-            "description": "The session ID",
-            "type": "string"
-          },
-          "infraId": {
-            "description": "The infrastructure ID",
-            "type": "string"
-          },
-          "infraName": {
-            "description": "The infrastructure name",
-            "type": "string"
-          },
-          "infraType": {
-            "description": "The infrastructure type",
-            "type": "string"
-          },
-          "provisionStatus": {
-            "additionalProperties": {},
-            "description": "The provision status",
-            "type": "object"
-          },
-          "sessionNumber": {
-            "description": "The session number",
-            "format": "int64",
-            "type": "integer"
-          },
-          "user": {
-            "description": "The user that owns this session",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "sessionNumber",
-          "infraId",
-          "infraName",
-          "infraType",
-          "csp",
-          "currentStatus",
-          "deleteStatus",
-          "provisionStatus"
-        ],
-        "type": "object"
-      },
       "SessionSoftware": {
         "additionalProperties": false,
         "properties": {
@@ -24146,6 +24073,36 @@
         ],
         "type": "object"
       },
+      "UpdateClusterInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "caCert": {
+            "description": "Base64-encoded CA certificate. Leave empty when the cluster uses a publicly trusted certificate.",
+            "type": "string"
+          },
+          "endpoint": {
+            "description": "Kubernetes API endpoint",
+            "examples": [
+              "https://k8s.example.com:6443"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "description": "New name of the cluster",
+            "examples": [
+              "prod-cluster"
+            ],
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "endpoint"
+        ],
+        "type": "object"
+      },
       "UpdateConversationInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -24168,6 +24125,18 @@
         },
         "required": [
           "enableTracking"
+        ],
+        "type": "object"
+      },
+      "UpdateDeploymentInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "provisionStatus": {
+            "$ref": "#/components/schemas/ProvisionStatusStruct"
+          }
+        },
+        "required": [
+          "provisionStatus"
         ],
         "type": "object"
       },
@@ -24636,18 +24605,6 @@
           "replayUnmask",
           "tracesSampleRate",
           "replaysSampleRate"
-        ],
-        "type": "object"
-      },
-      "UpdateSessionInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "provisionStatus": {
-            "$ref": "#/components/schemas/ProvisionStatusStruct"
-          }
-        },
-        "required": [
-          "provisionStatus"
         ],
         "type": "object"
       },
@@ -25455,6 +25412,331 @@
         "required": [
           "uuid",
           "name"
+        ],
+        "type": "object"
+      },
+      "WebAuthnAuthOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "publicKey": {
+            "$ref": "#/components/schemas/WebAuthnAuthPublicKeyOptions"
+          }
+        },
+        "required": [
+          "publicKey"
+        ],
+        "type": "object"
+      },
+      "WebAuthnAuthOptionsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "options": {
+            "$ref": "#/components/schemas/WebAuthnAuthOptions",
+            "description": "WebAuthn authentication options"
+          }
+        },
+        "required": [
+          "options"
+        ],
+        "type": "object"
+      },
+      "WebAuthnAuthPublicKeyOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "allowCredentials": {
+            "description": "Credentials the user may authenticate with",
+            "items": {
+              "$ref": "#/components/schemas/WebAuthnCredentialDescriptor"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "challenge": {
+            "description": "Base64url-encoded challenge",
+            "type": "string"
+          },
+          "rpId": {
+            "description": "Relying party ID",
+            "type": "string"
+          },
+          "timeout": {
+            "description": "Timeout in milliseconds",
+            "format": "int64",
+            "type": "integer"
+          },
+          "userVerification": {
+            "description": "User verification requirement",
+            "type": "string"
+          }
+        },
+        "required": [
+          "challenge"
+        ],
+        "type": "object"
+      },
+      "WebAuthnCredentialDescriptor": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Base64url-encoded credential ID",
+            "type": "string"
+          },
+          "transports": {
+            "description": "Allowed authenticator transports",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "type": {
+            "description": "Credential type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "type": "object"
+      },
+      "WebAuthnMfaPolicyOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "level": {
+            "description": "Level of the policy",
+            "examples": [
+              "platform"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the policy",
+            "examples": [
+              "enforce-webauthn-mfa"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "value": {
+            "description": "Required security key level",
+            "enum": [
+              "hardware"
+            ],
+            "examples": [
+              "hardware"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "level",
+          "value"
+        ],
+        "type": "object"
+      },
+      "WebAuthnRegAuthenticatorSelection": {
+        "additionalProperties": false,
+        "properties": {
+          "authenticatorAttachment": {
+            "description": "Required authenticator attachment",
+            "type": "string"
+          },
+          "requireResidentKey": {
+            "description": "Whether a resident key is required",
+            "type": "boolean"
+          },
+          "residentKey": {
+            "description": "Resident key requirement",
+            "type": "string"
+          },
+          "userVerification": {
+            "description": "User verification requirement",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WebAuthnRegCredParam": {
+        "additionalProperties": false,
+        "properties": {
+          "alg": {
+            "description": "COSE algorithm identifier",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": "Credential type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "alg"
+        ],
+        "type": "object"
+      },
+      "WebAuthnRegOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "publicKey": {
+            "$ref": "#/components/schemas/WebAuthnRegPublicKeyOptions"
+          }
+        },
+        "required": [
+          "publicKey"
+        ],
+        "type": "object"
+      },
+      "WebAuthnRegPublicKeyOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "attestation": {
+            "description": "Attestation conveyance preference",
+            "type": "string"
+          },
+          "authenticatorSelection": {
+            "$ref": "#/components/schemas/WebAuthnRegAuthenticatorSelection",
+            "description": "Authenticator selection criteria"
+          },
+          "challenge": {
+            "description": "Base64url-encoded challenge",
+            "type": "string"
+          },
+          "excludeCredentials": {
+            "description": "Credentials that may not be re-registered",
+            "items": {
+              "$ref": "#/components/schemas/WebAuthnCredentialDescriptor"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "pubKeyCredParams": {
+            "description": "Acceptable credential algorithms",
+            "items": {
+              "$ref": "#/components/schemas/WebAuthnRegCredParam"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "rp": {
+            "$ref": "#/components/schemas/WebAuthnRegRelyingParty",
+            "description": "Relying party"
+          },
+          "timeout": {
+            "description": "Timeout in milliseconds",
+            "format": "int64",
+            "type": "integer"
+          },
+          "user": {
+            "$ref": "#/components/schemas/WebAuthnRegUser",
+            "description": "User entity"
+          }
+        },
+        "required": [
+          "challenge",
+          "rp",
+          "user",
+          "pubKeyCredParams"
+        ],
+        "type": "object"
+      },
+      "WebAuthnRegRelyingParty": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Relying party ID",
+            "type": "string"
+          },
+          "name": {
+            "description": "Relying party display name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "id"
+        ],
+        "type": "object"
+      },
+      "WebAuthnRegUser": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "description": "User display name",
+            "type": "string"
+          },
+          "id": {
+            "description": "Base64url-encoded user handle",
+            "type": "string"
+          },
+          "name": {
+            "description": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "displayName"
+        ],
+        "type": "object"
+      },
+      "WebAuthnRegisterOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "options": {
+            "$ref": "#/components/schemas/WebAuthnRegOptions",
+            "description": "WebAuthn registration options"
+          }
+        },
+        "required": [
+          "options"
+        ],
+        "type": "object"
+      },
+      "WebAuthnVerifyInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Optional name for the security key",
+            "examples": [
+              "My YubiKey"
+            ],
+            "type": "string"
+          },
+          "response": {
+            "description": "WebAuthn credential response from browser"
+          }
+        },
+        "required": [
+          "response"
+        ],
+        "type": "object"
+      },
+      "WebAuthnVerifyOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "description": "Success message",
+            "type": "string"
+          },
+          "redirectUrl": {
+            "description": "URL to navigate to after successful registration",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
         ],
         "type": "object"
       },
@@ -27048,6 +27330,70 @@
         "x-internal": true
       }
     },
+    "/api/admin/previews/cleanup": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nRemoves preview flags that are no longer registered previews from all user accounts and from the platform settings.",
+        "operationId": "cleanup-previews",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupPreviewsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Remove orphaned previews from all users",
+        "tags": [
+          "Previews"
+        ]
+      }
+    },
+    "/api/admin/previews/stats": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns per-preview counts of users that have explicitly enabled each preview, along with platform user totals. Includes stale flags that are still present in user documents but are no longer registered previews.",
+        "operationId": "get-preview-stats",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreviewStatsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get preview adoption statistics",
+        "tags": [
+          "Previews"
+        ]
+      }
+    },
     "/api/admin/previews/{flag}": {
       "delete": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nDisables a preview at the platform level. Users who had the preview enabled individually will retain their user-level setting.",
@@ -27115,6 +27461,77 @@
           }
         },
         "summary": "Enable a platform-wide preview",
+        "tags": [
+          "Previews"
+        ]
+      }
+    },
+    "/api/admin/previews/{flag}/users": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns the users that have explicitly enabled a preview, paginated and sorted by username. The flag is not required to be a registered preview, so users holding stale flags can be inspected.",
+        "operationId": "get-preview-users",
+        "parameters": [
+          {
+            "description": "Name of the preview flag.",
+            "in": "path",
+            "name": "flag",
+            "required": true,
+            "schema": {
+              "description": "Name of the preview flag.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Maximum number of users to return (1-100).",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 25,
+              "description": "Maximum number of users to return (1-100).",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Number of users to skip for pagination.",
+            "explode": false,
+            "in": "query",
+            "name": "skip",
+            "schema": {
+              "default": 0,
+              "description": "Number of users to skip for pagination.",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreviewUsersOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List users with a preview enabled",
         "tags": [
           "Previews"
         ]
@@ -28972,6 +29389,70 @@
           }
         },
         "summary": "Get current session",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/auth/sso/oidc/callback": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCalled by the OIDC provider after the user authenticates. Exchanges the authorization code for tokens and signs the user in.",
+        "operationId": "get-auth-sso-oidc-callback",
+        "parameters": [
+          {
+            "description": "Authorization code returned by the OIDC provider",
+            "explode": false,
+            "in": "query",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "description": "Authorization code returned by the OIDC provider",
+              "type": "string"
+            }
+          },
+          {
+            "description": "OIDC auth method ID echoed back by the provider",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "required": true,
+            "schema": {
+              "description": "OIDC auth method ID echoed back by the provider",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "OIDC login callback",
         "tags": [
           "Authentication"
         ]
@@ -30901,48 +31382,6 @@
         ]
       }
     },
-    "/api/marketplace/azure-hammerspace": {
-      "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nPublishes Azure Hammerspace storage to the marketplace.",
-        "operationId": "publish-azure-hammerspace",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PublishAzureHammerspaceRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketplaceItemBody"
-                }
-              }
-            },
-            "description": "Created"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Publish Azure Hammerspace",
-        "tags": [
-          "Marketplace"
-        ]
-      }
-    },
     "/api/marketplace/azure-managedlustre": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nPublishes Azure Managed Lustre storage to the marketplace.",
@@ -32441,62 +32880,6 @@
           }
         },
         "summary": "Add Azure Disk Version",
-        "tags": [
-          "Marketplace"
-        ]
-      }
-    },
-    "/api/marketplace/items/{slug}/versions/azure-hammerspace": {
-      "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds (or replaces) a version of a Azure Hammerspace storage marketplace item.",
-        "operationId": "add-azure-hammerspace-version",
-        "parameters": [
-          {
-            "description": "Slug of the marketplace item.",
-            "in": "path",
-            "name": "slug",
-            "required": true,
-            "schema": {
-              "description": "Slug of the marketplace item.",
-              "maxLength": 100,
-              "minLength": 2,
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddAzureHammerspaceVersionInputBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketplaceItemBody"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Add Azure Hammerspace Version",
         "tags": [
           "Marketplace"
         ]
@@ -36492,6 +36875,113 @@
         ]
       }
     },
+    "/api/organizations/{organization}/auth-methods/ldap": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds a new LDAP auth method. The connection to the LDAP server is verified before saving.",
+        "operationId": "add-organization-auth-method-ldap",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ldap"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ldap"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add organization auth method: LDAP",
+        "tags": [
+          "Auth Methods"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/auth-methods/ldap/test": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nTests an LDAP server connection and optionally a user login without saving anything.",
+        "operationId": "test-organization-auth-method-ldap",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LdapConnectionTest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Test organization auth method: LDAP",
+        "tags": [
+          "Auth Methods"
+        ]
+      }
+    },
     "/api/organizations/{organization}/auth-methods/ldap/{authName}": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a specific LDAP auth method, by auth method name.",
@@ -39368,6 +39858,63 @@
         ]
       }
     },
+    "/api/organizations/{organization}/kubernetes": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRegisters an existing Kubernetes cluster with the organization.",
+        "operationId": "create-kubernetes-cluster",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClusterInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateClusterOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add Kubernetes cluster",
+        "tags": [
+          "Kubernetes"
+        ]
+      }
+    },
     "/api/organizations/{organization}/kubernetes/ca-cert": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAutomatically resolves the CA certificate for the provided Kubernetes API endpoint.",
@@ -41390,6 +41937,67 @@
           }
         },
         "summary": "Get Kubernetes cluster details",
+        "tags": [
+          "Kubernetes"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nUpdates the name, endpoint, or CA certificate of a Kubernetes cluster after verifying connectivity.",
+        "operationId": "update-kubernetes-cluster",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Current name of the Kubernetes cluster",
+            "in": "path",
+            "name": "infraName",
+            "required": true,
+            "schema": {
+              "description": "Current name of the Kubernetes cluster",
+              "examples": [
+                "prod-cluster"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateClusterInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update Kubernetes cluster",
         "tags": [
           "Kubernetes"
         ]
@@ -44556,6 +45164,74 @@
         ]
       }
     },
+    "/api/organizations/{organization}/policies/enforce-webauthn-mfa": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets enforce-webauthn-mfa policy for the organization.",
+        "operationId": "set-organization-enforce-webauthn-mfa-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Required security key level",
+                "enum": [
+                  "hardware"
+                ],
+                "examples": [
+                  "hardware"
+                ],
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/WebAuthnMfaPolicyOutput"
+                  },
+                  "description": "Map of policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: enforce-webauthn-mfa",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/organizations/{organization}/policies/nitro-instances-only": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets nitro-instances-only policy for the organization.",
@@ -44864,6 +45540,108 @@
         "summary": "Get provision status",
         "tags": [
           "Provision Status"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/recommended-resources": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the marketplace items the organization recommends to new users during onboarding.",
+        "operationId": "get-organization-recommended-resources",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendedResourcesBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get organization recommended resources",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces the marketplace items the organization recommends to new users during onboarding.",
+        "operationId": "update-organization-recommended-resources",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendedResourcesBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendedResourcesBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update organization recommended resources",
+        "tags": [
+          "Organization"
         ]
       }
     },
@@ -47521,6 +48299,174 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/ai-providers/{name}/buckets/{bucketId}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDetach a storage bucket from an AI provider.",
+        "operationId": "detach-ai-provider-bucket",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Storage bucket infrastructure ID",
+            "in": "path",
+            "name": "bucketId",
+            "required": true,
+            "schema": {
+              "description": "Storage bucket infrastructure ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProviderResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Detach bucket from AI provider",
+        "tags": [
+          "AI Providers"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAttach a storage bucket to an AI provider for document ingestion.",
+        "operationId": "attach-ai-provider-bucket",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Storage bucket infrastructure ID",
+            "in": "path",
+            "name": "bucketId",
+            "required": true,
+            "schema": {
+              "description": "Storage bucket infrastructure ID",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachBucketInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProviderResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Attach bucket to AI provider",
+        "tags": [
+          "AI Providers"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/ai-providers/{name}/deployments": {
       "post": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nProvision an additional model deployment on an existing Azure AI provider.",
@@ -49524,82 +50470,6 @@
         ]
       }
     },
-    "/api/organizations/{organization}/users/{user}/azure-hammerspace/{name}": {
-      "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a Hammerspace",
-        "operationId": "get-hammerspace",
-        "parameters": [
-          {
-            "description": "The name of the organization.",
-            "in": "path",
-            "name": "organization",
-            "required": true,
-            "schema": {
-              "description": "The name of the organization.",
-              "examples": [
-                "parallelworks"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "Username of the target user.",
-            "in": "path",
-            "name": "user",
-            "required": true,
-            "schema": {
-              "description": "Username of the target user.",
-              "examples": [
-                "Jake.Thayne"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "The name of the storage resource.",
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "description": "The name of the storage resource.",
-              "examples": [
-                "mystorage"
-              ],
-              "maxLength": 255,
-              "minLength": 1,
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Hammerspace"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Get Storage: Hammerspace (Azure)",
-        "tags": [
-          "NFS",
-          "Storage"
-        ]
-      }
-    },
     "/api/organizations/{organization}/users/{user}/azure-managedlustre/{name}": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns an Azure Managed Lustre",
@@ -49750,6 +50620,94 @@
           "NFS",
           "Storage"
         ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/deployments/{deploymentNumber}": {
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates the provision status of a cluster deployment.",
+        "operationId": "update-cluster-deployment",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The username of the user that owns the cluster",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "The username of the user that owns the cluster",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "The cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The deployment number or 'latest'",
+            "in": "path",
+            "name": "deploymentNumber",
+            "required": true,
+            "schema": {
+              "description": "The deployment number or 'latest'",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDeploymentInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeploymentResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update cluster deployment",
+        "tags": [
+          "Clusters"
+        ],
+        "x-internal": true
       }
     },
     "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/destroy": {
@@ -50292,94 +51250,6 @@
         "tags": [
           "Scheduler Jobs"
         ]
-      }
-    },
-    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/sessions/{sessionNumber}": {
-      "patch": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates the provision status of a cluster session.",
-        "operationId": "update-cluster-session",
-        "parameters": [
-          {
-            "description": "The name of the organization.",
-            "in": "path",
-            "name": "organization",
-            "required": true,
-            "schema": {
-              "description": "The name of the organization.",
-              "examples": [
-                "parallelworks"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "The username of the user that owns the cluster",
-            "in": "path",
-            "name": "user",
-            "required": true,
-            "schema": {
-              "description": "The username of the user that owns the cluster",
-              "type": "string"
-            }
-          },
-          {
-            "description": "The cluster name",
-            "in": "path",
-            "name": "clusterName",
-            "required": true,
-            "schema": {
-              "description": "The cluster name",
-              "type": "string"
-            }
-          },
-          {
-            "description": "The session number or 'latest'",
-            "in": "path",
-            "name": "sessionNumber",
-            "required": true,
-            "schema": {
-              "description": "The session number or 'latest'",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateSessionInputBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SessionResponse"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Update cluster session",
-        "tags": [
-          "Clusters"
-        ],
-        "x-internal": true
       }
     },
     "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/snapshot": {
@@ -55093,7 +55963,6 @@
                 "azure-bucket",
                 "azure-disk",
                 "azure-azfiles",
-                "azure-hammerspace",
                 "azure-managedlustre",
                 "azure-netappfiles",
                 "google-disk",
@@ -56546,6 +57415,59 @@
           }
         },
         "summary": "Set platform policy: archive-cost-data",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/enforce-webauthn-mfa": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the enforce-webauthn-mfa policy for the platform.",
+        "operationId": "set-platform-enforce-webauthn-mfa-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Required security key level",
+                "enum": [
+                  "hardware"
+                ],
+                "examples": [
+                  "hardware"
+                ],
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/WebAuthnMfaPolicyOutput"
+                  },
+                  "description": "Map of policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: enforce-webauthn-mfa",
         "tags": [
           "Policies"
         ]
@@ -58240,6 +59162,131 @@
         ]
       }
     },
+    "/api/sso/ldap/callback": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nFinalize login after a new LDAP user has been created.",
+        "operationId": "post-ldap-signup-callback",
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "LDAP signup callback",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/sso/ldap/login": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAuthenticate against a configured LDAP auth method.",
+        "operationId": "post-ldap-login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LdapLoginInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "LDAP login",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/sso/ldap/signup": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreate a new account from a pending LDAP registration session.",
+        "operationId": "post-ldap-signup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LdapSignupInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "LDAP signup",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
     "/api/sso/logout": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nEnd the current session.",
@@ -58478,6 +59525,119 @@
           }
         },
         "summary": "Verify OTP code",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/sso/mfa/webauthn": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nInitialize WebAuthn security key registration and get credential creation options for the browser WebAuthn API.",
+        "operationId": "post-add-mfa-webauthn",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebAuthnRegisterOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add MFA method: WebAuthn security key",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/sso/mfa/webauthn/authenticate": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nGet WebAuthn authentication options for security key login. Returns credential request options for the browser WebAuthn API.",
+        "operationId": "post-webauthn-auth-options",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebAuthnAuthOptionsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get WebAuthn authentication options",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/sso/mfa/webauthn/verify": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nVerify the WebAuthn credential response and complete security key registration.",
+        "operationId": "post-verify-webauthn",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebAuthnVerifyInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebAuthnVerifyOutputBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Verify WebAuthn registration",
         "tags": [
           "Authentication"
         ]

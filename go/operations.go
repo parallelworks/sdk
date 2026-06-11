@@ -358,6 +358,40 @@ func (c *Client) RunSpecificMongoMigration(ctx context.Context, id string) (*Mig
 	return &result, nil
 }
 
+// CleanupPreviews - Remove orphaned previews from all users
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Removes preview flags that are no longer registered previews from all user accounts and from the platform settings.
+func (c *Client) CleanupPreviews(ctx context.Context) (*CleanupPreviewsOutputBody, error) {
+	path := "/api/admin/previews/cleanup"
+
+	var result CleanupPreviewsOutputBody
+	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetPreviewStats - Get preview adoption statistics
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns per-preview counts of users that have explicitly enabled each preview, along with platform user totals. Includes stale flags that are still present in user documents but are no longer registered previews.
+func (c *Client) GetPreviewStats(ctx context.Context) (*PreviewStatsOutputBody, error) {
+	path := "/api/admin/previews/stats"
+
+	var result PreviewStatsOutputBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // EnablePlatformPreview - Enable a platform-wide preview
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -390,6 +424,41 @@ func (c *Client) DisablePlatformPreview(ctx context.Context, flag string) error 
 		return parseErrorError(err)
 	}
 	return nil
+}
+
+// GetPreviewUsersParams contains optional parameters for the GetPreviewUsers operation.
+type GetPreviewUsersParams struct {
+	// Maximum number of users to return (1-100).
+	Limit *int64 `json:"limit,omitempty"`
+	// Number of users to skip for pagination.
+	Skip *int64 `json:"skip,omitempty"`
+}
+
+// GetPreviewUsers - List users with a preview enabled
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns the users that have explicitly enabled a preview, paginated and sorted by username. The flag is not required to be a registered preview, so users holding stale flags can be inspected.
+func (c *Client) GetPreviewUsers(ctx context.Context, flag string, opts ...GetPreviewUsersParams) (*PreviewUsersOutputBody, error) {
+	path := "/api/admin/previews/{flag}/users"
+	path = pathReplace(path, "flag", flag)
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "limit", params.Limit)
+		addQueryParam(queryValues, "skip", params.Skip)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result PreviewUsersOutputBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
 }
 
 // GetPlatformReportsParams contains optional parameters for the GetPlatformReports operation.
@@ -1139,6 +1208,20 @@ func (c *Client) GetAuthSession(ctx context.Context) (*AuthSession, error) {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// GetAuthSsoOidcCallback - OIDC login callback
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Called by the OIDC provider after the user authenticates. Exchanges the authorization code for tokens and signs the user in.
+func (c *Client) GetAuthSsoOidcCallback(ctx context.Context) error {
+	path := "/api/auth/sso/oidc/callback"
+
+	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // GetAuthSsoOidcRedirect - Redirect to OIDC auth
@@ -1914,21 +1997,6 @@ func (c *Client) PublishAzureDisk(ctx context.Context, body PublishAzureDiskRequ
 	return &result, nil
 }
 
-// PublishAzureHammerspace - Publish Azure Hammerspace
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Publishes Azure Hammerspace storage to the marketplace.
-func (c *Client) PublishAzureHammerspace(ctx context.Context, body PublishAzureHammerspaceRequest) (*MarketplaceItemBody, error) {
-	path := "/api/marketplace/azure-hammerspace"
-
-	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
-		return nil, parseErrorError(err)
-	}
-	return &result, nil
-}
-
 // PublishAzureManagedlustre - Publish Azure Managed Lustre
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -2403,22 +2471,6 @@ func (c *Client) AddAzureBucketVersion(ctx context.Context, slug string, body Ad
 // Adds (or replaces) a version of a Azure Disk storage marketplace item.
 func (c *Client) AddAzureDiskVersion(ctx context.Context, slug string, body AddAzureDiskVersionInputBody) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/items/{slug}/versions/azure-disk"
-	path = pathReplace(path, "slug", slug)
-
-	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
-		return nil, parseErrorError(err)
-	}
-	return &result, nil
-}
-
-// AddAzureHammerspaceVersion - Add Azure Hammerspace Version
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Adds (or replaces) a version of a Azure Hammerspace storage marketplace item.
-func (c *Client) AddAzureHammerspaceVersion(ctx context.Context, slug string, body AddAzureHammerspaceVersionInputBody) (*MarketplaceItemBody, error) {
-	path := "/api/marketplace/items/{slug}/versions/azure-hammerspace"
 	path = pathReplace(path, "slug", slug)
 
 	var result MarketplaceItemBody
@@ -3770,6 +3822,37 @@ func (c *Client) AddOrganizationAuthMethodCac(ctx context.Context, organization 
 	return &result, nil
 }
 
+// AddOrganizationAuthMethodLdap - Add organization auth method: LDAP
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds a new LDAP auth method. The connection to the LDAP server is verified before saving.
+func (c *Client) AddOrganizationAuthMethodLdap(ctx context.Context, organization string, body Ldap) (*Ldap, error) {
+	path := "/api/organizations/{organization}/auth-methods/ldap"
+	path = pathReplace(path, "organization", organization)
+
+	var result Ldap
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// TestOrganizationAuthMethodLdap - Test organization auth method: LDAP
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Tests an LDAP server connection and optionally a user login without saving anything.
+func (c *Client) TestOrganizationAuthMethodLdap(ctx context.Context, organization string, body LdapConnectionTest) error {
+	path := "/api/organizations/{organization}/auth-methods/ldap/test"
+	path = pathReplace(path, "organization", organization)
+
+	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // GetOrganizationAuthMethodLdap - Get organization auth method: LDAP
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -4664,6 +4747,22 @@ func (c *Client) PatchGroupRoles(ctx context.Context, organization string, group
 	return &result, nil
 }
 
+// CreateKubernetesCluster - Add Kubernetes cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Registers an existing Kubernetes cluster with the organization.
+func (c *Client) CreateKubernetesCluster(ctx context.Context, organization string, body CreateClusterInputBody) (*CreateClusterOutputBody, error) {
+	path := "/api/organizations/{organization}/kubernetes"
+	path = pathReplace(path, "organization", organization)
+
+	var result CreateClusterOutputBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // DiscoverKubernetesCaCert - Discover Kubernetes CA certificate
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -5281,6 +5380,22 @@ func (c *Client) GetSingleKubernetesCluster(ctx context.Context, organization st
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// UpdateKubernetesCluster - Update Kubernetes cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Updates the name, endpoint, or CA certificate of a Kubernetes cluster after verifying connectivity.
+func (c *Client) UpdateKubernetesCluster(ctx context.Context, organization string, infraName string, body UpdateClusterInputBody) error {
+	path := "/api/organizations/{organization}/kubernetes/{infraName}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "infraName", infraName)
+
+	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // UpdateKubernetesCostTracking - Enable or disable cost tracking
@@ -6185,6 +6300,22 @@ func (c *Client) SetOrganizationArchiveCostDataPolicy(ctx context.Context, organ
 	return &result, nil
 }
 
+// SetOrganizationEnforceWebauthnMfaPolicy - Set organization policy: enforce-webauthn-mfa
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets enforce-webauthn-mfa policy for the organization.
+func (c *Client) SetOrganizationEnforceWebauthnMfaPolicy(ctx context.Context, organization string, body string) (*map[string]WebAuthnMfaPolicyOutput, error) {
+	path := "/api/organizations/{organization}/policies/enforce-webauthn-mfa"
+	path = pathReplace(path, "organization", organization)
+
+	var result map[string]WebAuthnMfaPolicyOutput
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // SetOrganizationNitroInstancesOnlyPolicy - Set organization policy: nitro-instances-only
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6261,6 +6392,38 @@ func (c *Client) GetOrganizationProvisionStatusByInfraID(ctx context.Context, or
 
 	var result []ProvisionStatusResponseRecord
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetOrganizationRecommendedResources - Get organization recommended resources
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the marketplace items the organization recommends to new users during onboarding.
+func (c *Client) GetOrganizationRecommendedResources(ctx context.Context, organization string) (*RecommendedResourcesBody, error) {
+	path := "/api/organizations/{organization}/recommended-resources"
+	path = pathReplace(path, "organization", organization)
+
+	var result RecommendedResourcesBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateOrganizationRecommendedResources - Update organization recommended resources
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces the marketplace items the organization recommends to new users during onboarding.
+func (c *Client) UpdateOrganizationRecommendedResources(ctx context.Context, organization string, body RecommendedResourcesBody) (*RecommendedResourcesBody, error) {
+	path := "/api/organizations/{organization}/recommended-resources"
+	path = pathReplace(path, "organization", organization)
+
+	var result RecommendedResourcesBody
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -7162,6 +7325,44 @@ func (c *Client) PatchSingleAiProvider(ctx context.Context, organization string,
 	return &result, nil
 }
 
+// AttachAiProviderBucket - Attach bucket to AI provider
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Attach a storage bucket to an AI provider for document ingestion.
+func (c *Client) AttachAiProviderBucket(ctx context.Context, organization string, user string, name string, bucketID string, body AttachBucketInputBody) (*AiProviderResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/ai-providers/{name}/buckets/{bucketId}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+	path = pathReplace(path, "bucketId", bucketID)
+
+	var result AiProviderResponse
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DetachAiProviderBucket - Detach bucket from AI provider
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Detach a storage bucket from an AI provider.
+func (c *Client) DetachAiProviderBucket(ctx context.Context, organization string, user string, name string, bucketID string) (*AiProviderResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/ai-providers/{name}/buckets/{bucketId}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+	path = pathReplace(path, "bucketId", bucketID)
+
+	var result AiProviderResponse
+	if err := c.do(ctx, "DELETE", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // AddAiProviderDeployment - Add AI provider deployment
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -7655,24 +7856,6 @@ func (c *Client) GetAzureDisk(ctx context.Context, organization string, user str
 	return &result, nil
 }
 
-// GetHammerspace - Get Storage: Hammerspace (Azure)
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns a Hammerspace
-func (c *Client) GetHammerspace(ctx context.Context, organization string, user string, name string) (*Hammerspace, error) {
-	path := "/api/organizations/{organization}/users/{user}/azure-hammerspace/{name}"
-	path = pathReplace(path, "organization", organization)
-	path = pathReplace(path, "user", user)
-	path = pathReplace(path, "name", name)
-
-	var result Hammerspace
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
-		return nil, parseErrorError(err)
-	}
-	return &result, nil
-}
-
 // GetAzureManagedlustre - Get Storage: Azure Managed Lustre
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -7704,6 +7887,25 @@ func (c *Client) GetAzureNetappfiles(ctx context.Context, organization string, u
 
 	var result AzureNetAppFiles
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateClusterDeployment - Update cluster deployment
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates the provision status of a cluster deployment.
+func (c *Client) UpdateClusterDeployment(ctx context.Context, organization string, user string, clusterName string, deploymentNumber string, body UpdateDeploymentInputBody) (*DeploymentResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/deployments/{deploymentNumber}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+	path = pathReplace(path, "deploymentNumber", deploymentNumber)
+
+	var result DeploymentResponse
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -7873,25 +8075,6 @@ func (c *Client) PostSchedulerJobCommand(ctx context.Context, organization strin
 
 	var result SchedulerCommandResponse
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
-		return nil, parseErrorError(err)
-	}
-	return &result, nil
-}
-
-// UpdateClusterSession - Update cluster session
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Updates the provision status of a cluster session.
-func (c *Client) UpdateClusterSession(ctx context.Context, organization string, user string, clusterName string, sessionNumber string, body UpdateSessionInputBody) (*SessionResponse, error) {
-	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/sessions/{sessionNumber}"
-	path = pathReplace(path, "organization", organization)
-	path = pathReplace(path, "user", user)
-	path = pathReplace(path, "clusterName", clusterName)
-	path = pathReplace(path, "sessionNumber", sessionNumber)
-
-	var result SessionResponse
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -9565,6 +9748,21 @@ func (c *Client) SetPlatformArchiveCostDataPolicy(ctx context.Context, body int6
 	return &result, nil
 }
 
+// SetPlatformEnforceWebauthnMfaPolicy - Set platform policy: enforce-webauthn-mfa
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the enforce-webauthn-mfa policy for the platform.
+func (c *Client) SetPlatformEnforceWebauthnMfaPolicy(ctx context.Context, body string) (*map[string]WebAuthnMfaPolicyOutput, error) {
+	path := "/api/platform/policies/enforce-webauthn-mfa"
+
+	var result map[string]WebAuthnMfaPolicyOutput
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // SetPlatformNitroInstancesOnlyPolicy - Set platform policy: nitro-instances-only
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -10200,6 +10398,48 @@ func (c *Client) DeleteImpersonate(ctx context.Context) error {
 	return nil
 }
 
+// PostLdapSignupCallback - LDAP signup callback
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Finalize login after a new LDAP user has been created.
+func (c *Client) PostLdapSignupCallback(ctx context.Context) error {
+	path := "/api/sso/ldap/callback"
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// PostLdapLogin - LDAP login
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Authenticate against a configured LDAP auth method.
+func (c *Client) PostLdapLogin(ctx context.Context, body LdapLoginInputBody) error {
+	path := "/api/sso/ldap/login"
+
+	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// PostLdapSignup - LDAP signup
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Create a new account from a pending LDAP registration session.
+func (c *Client) PostLdapSignup(ctx context.Context, body LdapSignupInputBody) error {
+	path := "/api/sso/ldap/signup"
+
+	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
 // PostLogout - Logout
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -10282,6 +10522,51 @@ func (c *Client) PostVerifyOtp(ctx context.Context, body VerifyOtpInputBody) (*V
 	path := "/api/sso/mfa/otp/verify"
 
 	var result VerifyOtpOutputBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PostAddMfaWebauthn - Add MFA method: WebAuthn security key
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Initialize WebAuthn security key registration and get credential creation options for the browser WebAuthn API.
+func (c *Client) PostAddMfaWebauthn(ctx context.Context) (*WebAuthnRegisterOutputBody, error) {
+	path := "/api/sso/mfa/webauthn"
+
+	var result WebAuthnRegisterOutputBody
+	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PostWebauthnAuthOptions - Get WebAuthn authentication options
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Get WebAuthn authentication options for security key login. Returns credential request options for the browser WebAuthn API.
+func (c *Client) PostWebauthnAuthOptions(ctx context.Context) (*WebAuthnAuthOptionsOutputBody, error) {
+	path := "/api/sso/mfa/webauthn/authenticate"
+
+	var result WebAuthnAuthOptionsOutputBody
+	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// PostVerifyWebauthn - Verify WebAuthn registration
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Verify the WebAuthn credential response and complete security key registration.
+func (c *Client) PostVerifyWebauthn(ctx context.Context, body WebAuthnVerifyInputBody) (*WebAuthnVerifyOutputBody, error) {
+	path := "/api/sso/mfa/webauthn/verify"
+
+	var result WebAuthnVerifyOutputBody
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}

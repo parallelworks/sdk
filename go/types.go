@@ -165,31 +165,6 @@ type AddAzureDiskVersionInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type AddAzureHammerspaceVersionInputBody struct {
-	AnvilInstanceType *string `json:"anvil_instance_type,omitempty"`
-	DataDiskSize      *int64  `json:"data_disk_size,omitempty"`
-	DataNodeCount     *int64  `json:"data_node_count,omitempty"`
-	DataNodeDiskCount *int64  `json:"data_node_disk_count,omitempty"`
-	DataNodeDiskSize  *int64  `json:"data_node_disk_size,omitempty"`
-	DataNodeType      *string `json:"data_node_type,omitempty"`
-	DsxInstanceCount  *int64  `json:"dsx_instance_count,omitempty"`
-	DsxInstanceType   *string `json:"dsx_instance_type,omitempty"`
-	MetadataDiskCount *int64  `json:"metadata_disk_count,omitempty"`
-	MetadataDiskSize  *int64  `json:"metadata_disk_size,omitempty"`
-	Region            *string `json:"region,omitempty"`
-	// Replace an existing version's variables instead of adding a new version.
-	Replace             *bool   `json:"replace,omitempty"`
-	StorageBackend      *string `json:"storage_backend,omitempty"`
-	StorageType         *string `json:"storage_type,omitempty"`
-	UltraDiskIops       *int64  `json:"ultra_disk_iops,omitempty"`
-	UltraDiskMbps       *int64  `json:"ultra_disk_mbps,omitempty"`
-	UseHighAvailability *bool   `json:"use_high_availability,omitempty"`
-	// Version label to add (must start with v).
-	Version              string         `json:"version"`
-	Zone                 *string        `json:"zone,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
 type AddAzureManagedLustreVersionInputBody struct {
 	MaintenanceWindowDay     *string `json:"maintenance-window-day,omitempty"`
 	MaintenanceWindowTimeUtc *string `json:"maintenance-window-time-UTC,omitempty"`
@@ -478,16 +453,18 @@ type AddRemoteWorkflowVersionInputBody struct {
 }
 
 type AddWorkspaceMountBody struct {
-	// The path on the cluster to map to the workspace path.
-	ClusterPath string `json:"clusterPath"`
-	// The ID of the resource (cluster or instance) for this mount.
+	// The ID of the cluster or instance to mount.
 	ResourceID string `json:"resourceId"`
-	// The path inside the user workspace to mount.
+	// The path on the cluster or instance to make available at the workspace path.
+	ResourcePath string `json:"resourcePath"`
+	// The path inside your workspace where the resource will be mounted.
 	WorkspacePath        string         `json:"workspacePath"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AiProviderResponse struct {
+	// Attached storage bucket infrastructure ID
+	BucketID *string `json:"bucketId,omitempty"`
 	// Attached storage bucket name
 	BucketName *string `json:"bucketName,omitempty"`
 	// Cloud service provider
@@ -612,6 +589,12 @@ type Allocations struct {
 	Total *float64 `json:"total,omitempty"`
 	// Used allocation
 	Used                 *float64       `json:"used,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AttachBucketInputBody struct {
+	// Refresh interval for bucket ingestion
+	RefreshInterval      string         `json:"refreshInterval"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -1288,29 +1271,6 @@ type AzureFilesSas struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type AzureHammerspaceVersionSettings struct {
-	AnvilInstanceType *string `json:"anvil_instance_type,omitempty"`
-	DataDiskSize      *int64  `json:"data_disk_size,omitempty"`
-	DataNodeCount     *int64  `json:"data_node_count,omitempty"`
-	DataNodeDiskCount *int64  `json:"data_node_disk_count,omitempty"`
-	DataNodeDiskSize  *int64  `json:"data_node_disk_size,omitempty"`
-	DataNodeType      *string `json:"data_node_type,omitempty"`
-	DsxInstanceCount  *int64  `json:"dsx_instance_count,omitempty"`
-	DsxInstanceType   *string `json:"dsx_instance_type,omitempty"`
-	MetadataDiskCount *int64  `json:"metadata_disk_count,omitempty"`
-	MetadataDiskSize  *int64  `json:"metadata_disk_size,omitempty"`
-	Region            *string `json:"region,omitempty"`
-	StorageBackend    *string `json:"storage_backend,omitempty"`
-	StorageType       *string `json:"storage_type,omitempty"`
-	// Subtype discriminator.
-	Subtype              string         `json:"subtype"`
-	UltraDiskIops        *int64         `json:"ultra_disk_iops,omitempty"`
-	UltraDiskMbps        *int64         `json:"ultra_disk_mbps,omitempty"`
-	UseHighAvailability  *bool          `json:"use_high_availability,omitempty"`
-	Zone                 *string        `json:"zone,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
 type AzureMachineLearningDetail struct {
 	// The creation timestamp of the Machine Learning Workspace.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
@@ -1871,6 +1831,14 @@ type Choice struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type CleanupPreviewsOutputBody struct {
+	// Orphaned preview flags that were removed.
+	Removed []string `json:"removed"`
+	// Number of users whose preview list was modified.
+	UsersCleaned         int64          `json:"usersCleaned"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type CloudAccountBillingResponse struct {
 	ProvisionedByOrg     bool           `json:"provisionedByOrg"`
 	Status               string         `json:"status"`
@@ -2065,12 +2033,6 @@ type ClusterMetricsDataPoint struct {
 	NetworkTxBytes       int64          `json:"networkTxBytes"`
 	Processes            int64          `json:"processes"`
 	Timestamp            time.Time      `json:"timestamp"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type ClusterMountInfoResponse struct {
-	ClusterPath          string         `json:"clusterPath"`
-	ResourceID           *string        `json:"resourceId,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2447,6 +2409,24 @@ type CreateCloudAccountBody struct {
 	OracleTenancyOcid *string `json:"oracleTenancyOcid,omitempty"`
 	// Oracle Cloud user OCID
 	OracleUserOcid       *string        `json:"oracleUserOcid,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreateClusterInputBody struct {
+	// PEM-encoded CA certificate. Leave empty when the cluster uses a publicly trusted certificate.
+	CaCert *string `json:"caCert,omitempty"`
+	// Kubernetes API endpoint
+	Endpoint string `json:"endpoint"`
+	// Name of the cluster
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreateClusterOutputBody struct {
+	// Cluster MongoDB ID
+	ID string `json:"id"`
+	// Cluster name
+	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2874,6 +2854,30 @@ type DeltaMessage struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type DeploymentResponse struct {
+	// The cloud service provider
+	Csp string `json:"csp"`
+	// The current status
+	CurrentStatus string `json:"currentStatus"`
+	// The delete status
+	DeleteStatus string `json:"deleteStatus"`
+	// The deployment number
+	DeploymentNumber int64 `json:"deploymentNumber"`
+	// The deployment ID
+	ID string `json:"id"`
+	// The infrastructure ID
+	InfraID string `json:"infraId"`
+	// The infrastructure name
+	InfraName string `json:"infraName"`
+	// The infrastructure type
+	InfraType string `json:"infraType"`
+	// The provision status
+	ProvisionStatus map[string]any `json:"provisionStatus"`
+	// The user that owns this deployment
+	User                 *string        `json:"user,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type DesktopSessionSettings struct {
 	BindPaths            []string       `json:"bindPaths,omitempty"`
 	InitScript           *string        `json:"initScript,omitempty"`
@@ -3237,6 +3241,8 @@ type GetMessageSiblingsBody struct {
 type GetMfaSettingsOutputBody struct {
 	// Whether MFA is enabled for the user
 	Enabled bool `json:"enabled"`
+	// Whether organization or platform policy restricts MFA to security keys (WebAuthn)
+	EnforceWebAuthnMfa bool `json:"enforceWebAuthnMfa"`
 	// List of configured MFA methods
 	MfaSettings          []MfaSettingResponse `json:"mfaSettings"`
 	AdditionalProperties map[string]any       `json:"-,omitempty"`
@@ -3643,86 +3649,6 @@ type GroupWithMembers struct {
 	Organization *string `json:"organization,omitempty"`
 	// List of roles assigned to the group.
 	Roles                []string       `json:"roles,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type Hammerspace struct {
-	// Instance type of the Anvil nodes in the Hammerspace storage
-	AnvilInstanceType *string `json:"anvilInstanceType,omitempty"`
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Name of the bucket in the Hammerspace storage
-	BucketName *string `json:"bucketName,omitempty"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Size of the data disk in the Hammerspace storage in GB
-	DataDiskSize *int32 `json:"dataDiskSize,omitempty"`
-	// Number of data nodes in the Hammerspace storage
-	DataNodeCount *int32 `json:"dataNodeCount,omitempty"`
-	// Number of data node disks in the Hammerspace storage
-	DataNodeDiskCount *int32 `json:"dataNodeDiskCount,omitempty"`
-	// Size of the data node disk in the Hammerspace storage in GB
-	DataNodeDiskSize *int32 `json:"dataNodeDiskSize,omitempty"`
-	// Instance type of the data nodes in the Hammerspace storage
-	DataNodeType *string `json:"dataNodeType,omitempty"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Number of DSX (Data Storage eXtension) instances in the Hammerspace storage
-	DsxInstanceCount *int32 `json:"dsxInstanceCount,omitempty"`
-	// Instance type of the DSX nodes in the Hammerspace storage
-	DsxInstanceType *string `json:"dsxInstanceType,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// Indicates if the Hammerspace storage is in high availability mode
-	HighAvailability *bool `json:"highAvailability,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Number of metadata disks in the Hammerspace storage
-	MetadataDiskCount *int32 `json:"metadataDiskCount,omitempty"`
-	// Size of the metadata disk in the Hammerspace storage in GB
-	MetadataDiskSize *int32 `json:"metadataDiskSize,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the Hammerspace storage is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Storage backend used by the Hammerspace storage
-	StorageBackend *string `json:"storageBackend,omitempty"`
-	// Type of the Hammerspace storage
-	StorageType *string `json:"storageType,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
-	// Zone the Hammerspace storage is in
-	Zone                 *string        `json:"zone,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4138,38 +4064,86 @@ type LanguageInputBody struct {
 
 type Ldap struct {
 	// Base DN for LDAP authentication
-	BaseDn string `json:"baseDN"`
+	BaseDn *string `json:"baseDN,omitempty"`
+	// CA certificate used to verify the LDAP server
+	CaCert *string `json:"caCert,omitempty"`
 	// Client certificate for LDAP authentication
-	ClientCert string `json:"clientCert"`
-	// Client secret of the LDAP authentication method
+	ClientCert *string `json:"clientCert,omitempty"`
+	// Client key of the LDAP authentication method
 	ClientKey *string `json:"clientKey,omitempty"`
 	// Display name of the LDAP authentication method
-	DisplayName string `json:"displayName"`
+	DisplayName *string `json:"displayName,omitempty"`
 	// Email for LDAP authentication
-	Email string `json:"email"`
+	Email *string `json:"email,omitempty"`
 	// Filter for LDAP authentication
-	Filter string `json:"filter"`
+	Filter *string `json:"filter,omitempty"`
 	// Full name for LDAP authentication
-	FullName string `json:"fullName"`
+	FullName *string `json:"fullName,omitempty"`
 	// ID of the LDAP authentication method
-	ID string `json:"id"`
-	// Level of the LDAP authentication method, e.g., organization or user
-	Level string `json:"level"`
+	ID *string `json:"id,omitempty"`
 	// Name of the LDAP authentication method
 	Name string `json:"name"`
 	// LDAP server address
 	Server string `json:"server"`
+	// DN to bind with for the service account
+	ServiceAccountBind *string `json:"serviceAccountBind,omitempty"`
+	// Password for the service account bind
+	ServiceAccountPassword *string `json:"serviceAccountPassword,omitempty"`
 	// Type of the LDAP authentication method
-	Type string `json:"type"`
+	Type *string `json:"type,omitempty"`
 	// LDAP attribute containing the Unix UID number for the user
 	UidNumber *string `json:"uidNumber,omitempty"`
 	// Unique identifier for LDAP authentication
-	UniqueIdentifier string `json:"uniqueIdentifier"`
+	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
 	// Whether to use service account for LDAP authentication
-	UseServiceAccount *bool `json:"useServiceAccount"`
+	UseServiceAccount *bool `json:"useServiceAccount,omitempty"`
 	// Whether to use TLS for LDAP authentication
-	UseTLS *bool `json:"useTLS"`
+	UseTLS *bool `json:"useTLS,omitempty"`
 	// Username for LDAP authentication
+	Username             *string        `json:"username,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type LdapConnectionTest struct {
+	// Base DN for LDAP authentication
+	BaseDn *string `json:"baseDN,omitempty"`
+	// CA certificate used to verify the LDAP server
+	CaCert *string `json:"caCert,omitempty"`
+	// Client certificate for LDAP authentication
+	ClientCert *string `json:"clientCert,omitempty"`
+	// Client key of the LDAP authentication method
+	ClientKey *string `json:"clientKey,omitempty"`
+	// Filter for LDAP authentication
+	Filter *string `json:"filter,omitempty"`
+	// Password used only for this connection test
+	Password *string `json:"password,omitempty"`
+	// LDAP server address
+	Server string `json:"server"`
+	// DN to bind with for the service account
+	ServiceAccountBind *string `json:"serviceAccountBind,omitempty"`
+	// Password for the service account bind
+	ServiceAccountPassword *string `json:"serviceAccountPassword,omitempty"`
+	// Whether to use service account for LDAP authentication
+	UseServiceAccount *bool `json:"useServiceAccount,omitempty"`
+	// Whether to use TLS for LDAP authentication
+	UseTLS *bool `json:"useTLS,omitempty"`
+	// Username used only for this connection test
+	Username             *string        `json:"username,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type LdapLoginInputBody struct {
+	// LDAP auth method ID
+	AuthMethod string `json:"authMethod"`
+	// LDAP password
+	Password string `json:"password"`
+	// LDAP username
+	Username             string         `json:"username"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type LdapSignupInputBody struct {
+	// Desired username
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -4287,8 +4261,8 @@ type ListWorkflowRunsBody struct {
 }
 
 type ListWorkspaceMountsBody struct {
-	Mounts               map[string]ClusterMountInfoResponse `json:"mounts"`
-	AdditionalProperties map[string]any                      `json:"-,omitempty"`
+	Mounts               []MountInfoResponse `json:"mounts"`
+	AdditionalProperties map[string]any      `json:"-,omitempty"`
 }
 
 type LocalWorkflowVersionSettings struct {
@@ -4744,10 +4718,14 @@ type MfaLoginInputBody struct {
 }
 
 type MfaSettingResponse struct {
+	// Timestamp when the MFA method was created
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// Whether this MFA method is enabled
 	Enabled bool `json:"enabled"`
 	// MFA setting ID
 	ID string `json:"id"`
+	// User-supplied name for the MFA method (e.g., security key label)
+	Name *string `json:"name,omitempty"`
 	// MFA method type (e.g., otp)
 	Type string `json:"type"`
 	// Last update timestamp
@@ -4819,6 +4797,23 @@ type ModelsResponse struct {
 	Object               string               `json:"object"`
 	UnreachableSessions  []UnreachableSession `json:"unreachable_sessions,omitempty"`
 	AdditionalProperties map[string]any       `json:"-,omitempty"`
+}
+
+type MountInfoResponse struct {
+	// Cloud provider hosting the resource, such as aws, google, azure, openstack, or oracle. Empty for existing clusters.
+	Csp string `json:"csp"`
+	// Custom icon for the cluster or instance, if one has been set.
+	ImageURL string `json:"imageUrl"`
+	// Name of the cluster or instance the mount points to.
+	Name         string `json:"name"`
+	ResourcePath string `json:"resourcePath"`
+	// Short name of the cluster or instance, used to fill in the __CLUSTER__ and __INSTANCE__ placeholders in the workspace path.
+	Slug string `json:"slug"`
+	// Link to the cluster or instance details page.
+	URL string `json:"url"`
+	// The path inside your workspace where the resource is mounted. __USER__, __CLUSTER__, and __INSTANCE__ are placeholders that get filled in with your username, cluster name, or instance name.
+	WorkspacePath        string         `json:"workspacePath"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type MountWorkspaceDirectoryBody struct {
@@ -5206,8 +5201,6 @@ type Oidc struct {
 	Issuer *string `json:"issuer,omitempty"`
 	// JWKS URI of the OIDC authentication method
 	JwksURI *string `json:"jwksUri,omitempty"`
-	// Level of the OIDC authentication method, e.g., organization or user
-	Level *string `json:"level,omitempty"`
 	// Name of the OIDC authentication method
 	Name string `json:"name"`
 	// Private key PEM for JWT authentication method
@@ -5575,6 +5568,8 @@ type OrgMauResponse struct {
 type OrgMarketplaceItemBody struct {
 	// Item description
 	Description *string `json:"description,omitempty"`
+	// Icon URL
+	Icon *string `json:"icon,omitempty"`
 	// Marketplace item ID
 	ID string `json:"id"`
 	// Published name of the item
@@ -6206,6 +6201,54 @@ type Preview struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type PreviewStat struct {
+	// Number of active users that have explicitly enabled this preview.
+	ActiveCount int64 `json:"activeCount"`
+	// Number of users that have explicitly enabled this preview.
+	Count int64 `json:"count"`
+	// Preview flag name.
+	Flag string `json:"flag"`
+	// True when the flag is present in user documents but is no longer a registered preview.
+	Stale                bool           `json:"stale"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PreviewStatsOutputBody struct {
+	// Number of active users on the platform.
+	ActiveUsers int64 `json:"activeUsers"`
+	// Per-preview adoption counts, including zero-count registered previews and stale flags.
+	Stats []PreviewStat `json:"stats"`
+	// Total number of users on the platform.
+	TotalUsers           int64          `json:"totalUsers"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PreviewUser struct {
+	// Whether the user is active.
+	Active bool `json:"active"`
+	// Etag of the user's uploaded avatar, if any.
+	AvatarEtag *string `json:"avatarEtag,omitempty"`
+	// User email address.
+	Email *string `json:"email,omitempty"`
+	// User ID.
+	ID string `json:"id"`
+	// User's full name.
+	Name *string `json:"name,omitempty"`
+	// ID of the organization the user belongs to.
+	Organization *string `json:"organization,omitempty"`
+	// Username.
+	Username             string         `json:"username"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PreviewUsersOutputBody struct {
+	// Total number of users with the preview enabled.
+	Total int64 `json:"total"`
+	// Users that have explicitly enabled the preview.
+	Users                []PreviewUser  `json:"users"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type PrivacySettingsBody struct {
 	// Visible to these group names
 	Group []string `json:"group"`
@@ -6520,46 +6563,6 @@ type PublishAzureDiskRequest struct {
 	Slug     string  `json:"slug"`
 	Snapshot *string `json:"snapshot,omitempty"`
 	Type     *string `json:"type,omitempty"`
-	// Mark as verified (platform admins only).
-	Verified *bool `json:"verified,omitempty"`
-	// Initial version label.
-	Version              *string        `json:"version,omitempty"`
-	Zone                 *string        `json:"zone,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type PublishAzureHammerspaceRequest struct {
-	AnvilInstanceType *string `json:"anvil_instance_type,omitempty"`
-	DataDiskSize      *int64  `json:"data_disk_size,omitempty"`
-	DataNodeCount     *int64  `json:"data_node_count,omitempty"`
-	DataNodeDiskCount *int64  `json:"data_node_disk_count,omitempty"`
-	DataNodeDiskSize  *int64  `json:"data_node_disk_size,omitempty"`
-	DataNodeType      *string `json:"data_node_type,omitempty"`
-	// Short summary of the item.
-	Description      *string `json:"description,omitempty"`
-	DsxInstanceCount *int64  `json:"dsx_instance_count,omitempty"`
-	DsxInstanceType  *string `json:"dsx_instance_type,omitempty"`
-	// Mark as featured (platform admins only).
-	Featured *bool `json:"featured,omitempty"`
-	// Icon image URL.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Markdown description body.
-	MarkdownRaw       *string `json:"markdownRaw,omitempty"`
-	MetadataDiskCount *int64  `json:"metadata_disk_count,omitempty"`
-	MetadataDiskSize  *int64  `json:"metadata_disk_size,omitempty"`
-	// Display name on the marketplace.
-	Name            string                  `json:"name"`
-	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
-	// Publish under the organization display name (org admins only).
-	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
-	Region         *string `json:"region,omitempty"`
-	// URL-friendly identifier.
-	Slug                string  `json:"slug"`
-	StorageBackend      *string `json:"storage_backend,omitempty"`
-	StorageType         *string `json:"storage_type,omitempty"`
-	UltraDiskIops       *int64  `json:"ultra_disk_iops,omitempty"`
-	UltraDiskMbps       *int64  `json:"ultra_disk_mbps,omitempty"`
-	UseHighAvailability *bool   `json:"use_high_availability,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -7220,6 +7223,14 @@ type RecommendedResource struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type RecommendedResourcesBody struct {
+	// Slugs of marketplace compute items recommended to new users during onboarding
+	Compute []string `json:"compute"`
+	// Slugs of marketplace workflow items recommended to new users during onboarding
+	Workflows            []string       `json:"workflows"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type RecommendedResourcesResponse struct {
 	Compute ResourceSection `json:"compute"`
 	// Name of the organization for display
@@ -7310,7 +7321,7 @@ type RemoteWorkflowVersionSettings struct {
 }
 
 type RemoveWorkspaceMountBody struct {
-	// The workspace path to remove from mounts.
+	// The workspace path of the mount to remove.
 	WorkspacePath        string         `json:"workspacePath"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -7856,30 +7867,6 @@ type SessionCostLimitInput struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type SessionResponse struct {
-	// The cloud service provider
-	Csp string `json:"csp"`
-	// The current status
-	CurrentStatus string `json:"currentStatus"`
-	// The delete status
-	DeleteStatus string `json:"deleteStatus"`
-	// The session ID
-	ID string `json:"id"`
-	// The infrastructure ID
-	InfraID string `json:"infraId"`
-	// The infrastructure name
-	InfraName string `json:"infraName"`
-	// The infrastructure type
-	InfraType string `json:"infraType"`
-	// The provision status
-	ProvisionStatus map[string]any `json:"provisionStatus"`
-	// The session number
-	SessionNumber int64 `json:"sessionNumber"`
-	// The user that owns this session
-	User                 *string        `json:"user,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
 type SessionSoftware struct {
 	// Port the software is running on.
 	Port int64 `json:"port"`
@@ -8369,6 +8356,16 @@ type UpdateAllocationPermissionsInputBody struct {
 	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
+type UpdateClusterInputBody struct {
+	// Base64-encoded CA certificate. Leave empty when the cluster uses a publicly trusted certificate.
+	CaCert *string `json:"caCert,omitempty"`
+	// Kubernetes API endpoint
+	Endpoint string `json:"endpoint"`
+	// New name of the cluster
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type UpdateConversationInputBody struct {
 	ActiveBranchID       *string        `json:"activeBranchId,omitempty"`
 	Title                *string        `json:"title,omitempty"`
@@ -8379,6 +8376,11 @@ type UpdateCostTrackingBody struct {
 	// Whether to enable or disable cost tracking for this cluster
 	EnableTracking       bool           `json:"enableTracking"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UpdateDeploymentInputBody struct {
+	ProvisionStatus      ProvisionStatusStruct `json:"provisionStatus"`
+	AdditionalProperties map[string]any        `json:"-,omitempty"`
 }
 
 type UpdateGpuOperatorBody struct {
@@ -8548,11 +8550,6 @@ type UpdateSentrySettingsBody struct {
 	// Sentry traces sample rate (0.0-1.0).
 	TracesSampleRate     float64        `json:"tracesSampleRate"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type UpdateSessionInputBody struct {
-	ProvisionStatus      ProvisionStatusStruct `json:"provisionStatus"`
-	AdditionalProperties map[string]any        `json:"-,omitempty"`
 }
 
 type UpdateUserProfileInputBody struct {
@@ -8837,6 +8834,131 @@ type VolumeSummary struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type WebAuthnAuthOptions struct {
+	PublicKey            WebAuthnAuthPublicKeyOptions `json:"publicKey"`
+	AdditionalProperties map[string]any               `json:"-,omitempty"`
+}
+
+type WebAuthnAuthOptionsOutputBody struct {
+	Options              WebAuthnAuthOptions `json:"options"`
+	AdditionalProperties map[string]any      `json:"-,omitempty"`
+}
+
+type WebAuthnAuthPublicKeyOptions struct {
+	// Credentials the user may authenticate with
+	AllowCredentials []WebAuthnCredentialDescriptor `json:"allowCredentials,omitempty"`
+	// Base64url-encoded challenge
+	Challenge string `json:"challenge"`
+	// Relying party ID
+	RpID *string `json:"rpId,omitempty"`
+	// Timeout in milliseconds
+	Timeout *int64 `json:"timeout,omitempty"`
+	// User verification requirement
+	UserVerification     *string        `json:"userVerification,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WebAuthnCredentialDescriptor struct {
+	// Base64url-encoded credential ID
+	ID string `json:"id"`
+	// Allowed authenticator transports
+	Transports []string `json:"transports,omitempty"`
+	// Credential type
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WebAuthnMfaPolicyOutput struct {
+	// Level of the policy
+	Level string `json:"level"`
+	// Name of the policy
+	Name *string `json:"name,omitempty"`
+	// Required security key level
+	Value                string         `json:"value"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WebAuthnRegAuthenticatorSelection struct {
+	// Required authenticator attachment
+	AuthenticatorAttachment *string `json:"authenticatorAttachment,omitempty"`
+	// Whether a resident key is required
+	RequireResidentKey *bool `json:"requireResidentKey,omitempty"`
+	// Resident key requirement
+	ResidentKey *string `json:"residentKey,omitempty"`
+	// User verification requirement
+	UserVerification     *string        `json:"userVerification,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WebAuthnRegCredParam struct {
+	// COSE algorithm identifier
+	Alg int64 `json:"alg"`
+	// Credential type
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WebAuthnRegOptions struct {
+	PublicKey            WebAuthnRegPublicKeyOptions `json:"publicKey"`
+	AdditionalProperties map[string]any              `json:"-,omitempty"`
+}
+
+type WebAuthnRegPublicKeyOptions struct {
+	// Attestation conveyance preference
+	Attestation            *string                            `json:"attestation,omitempty"`
+	AuthenticatorSelection *WebAuthnRegAuthenticatorSelection `json:"authenticatorSelection,omitempty"`
+	// Base64url-encoded challenge
+	Challenge string `json:"challenge"`
+	// Credentials that may not be re-registered
+	ExcludeCredentials []WebAuthnCredentialDescriptor `json:"excludeCredentials,omitempty"`
+	// Acceptable credential algorithms
+	PubKeyCredParams []WebAuthnRegCredParam  `json:"pubKeyCredParams"`
+	Rp               WebAuthnRegRelyingParty `json:"rp"`
+	// Timeout in milliseconds
+	Timeout              *int64          `json:"timeout,omitempty"`
+	User                 WebAuthnRegUser `json:"user"`
+	AdditionalProperties map[string]any  `json:"-,omitempty"`
+}
+
+type WebAuthnRegRelyingParty struct {
+	// Relying party ID
+	ID string `json:"id"`
+	// Relying party display name
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WebAuthnRegUser struct {
+	// User display name
+	DisplayName string `json:"displayName"`
+	// Base64url-encoded user handle
+	ID string `json:"id"`
+	// Username
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WebAuthnRegisterOutputBody struct {
+	Options              WebAuthnRegOptions `json:"options"`
+	AdditionalProperties map[string]any     `json:"-,omitempty"`
+}
+
+type WebAuthnVerifyInputBody struct {
+	// Optional name for the security key
+	Name *string `json:"name,omitempty"`
+	// WebAuthn credential response from browser
+	Response             any            `json:"response"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WebAuthnVerifyOutputBody struct {
+	// Success message
+	Message string `json:"message"`
+	// URL to navigate to after successful registration
+	RedirectURL          *string        `json:"redirectUrl,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type Webhook struct {
 	// Timestamp when the webhook was created.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
@@ -9099,7 +9221,7 @@ type WorkspaceStatus struct {
 
 // MarketplaceItemBodyVersionsValue - Per-version settings; the shape matches the item's publish body for its subtype, plus a subtype discriminator.
 
-// Variants: RemoteWorkflowVersionSettings, LocalWorkflowVersionSettings, ExistingClusterVersionSettings, AwsSlurmVersionSettings, GoogleSlurmVersionSettings, AzureSlurmVersionSettings, OracleSlurmVersionSettings, OpenstackSlurmVersionSettings, AwsBucketVersionSettings, AwsDiskVersionSettings, AwsEfsVersionSettings, AwsLustreVersionSettings, AzureBucketVersionSettings, AzureDiskVersionSettings, AzureAzfilesVersionSettings, AzureHammerspaceVersionSettings, AzureManagedLustreVersionSettings, AzureNetappFilesVersionSettings, GoogleBucketVersionSettings, GoogleDiskVersionSettings, GoogleFilestoreVersionSettings, GoogleManagedLustreVersionSettings, OracleBucketVersionSettings, OracleOraclefsVersionSettings
+// Variants: RemoteWorkflowVersionSettings, LocalWorkflowVersionSettings, ExistingClusterVersionSettings, AwsSlurmVersionSettings, GoogleSlurmVersionSettings, AzureSlurmVersionSettings, OracleSlurmVersionSettings, OpenstackSlurmVersionSettings, AwsBucketVersionSettings, AwsDiskVersionSettings, AwsEfsVersionSettings, AwsLustreVersionSettings, AzureBucketVersionSettings, AzureDiskVersionSettings, AzureAzfilesVersionSettings, AzureManagedLustreVersionSettings, AzureNetappFilesVersionSettings, GoogleBucketVersionSettings, GoogleDiskVersionSettings, GoogleFilestoreVersionSettings, GoogleManagedLustreVersionSettings, OracleBucketVersionSettings, OracleOraclefsVersionSettings
 type MarketplaceItemBodyVersionsValue struct {
 	Value any
 }
@@ -9169,13 +9291,6 @@ func (u *MarketplaceItemBodyVersionsValue) UnmarshalJSON(data []byte) error {
 		return nil
 	case "azure-disk":
 		var v AzureDiskVersionSettings
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		u.Value = v
-		return nil
-	case "azure-hammerspace":
-		var v AzureHammerspaceVersionSettings
 		if err := json.Unmarshal(data, &v); err != nil {
 			return err
 		}
