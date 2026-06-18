@@ -81,6 +81,20 @@
         ],
         "type": "object"
       },
+      "AcceptTermsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "termsAcceptedAt": {
+            "description": "When the user accepted the Terms \u0026 Conditions",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "termsAcceptedAt"
+        ],
+        "type": "object"
+      },
       "AccessManagementBody": {
         "additionalProperties": false,
         "properties": {
@@ -1665,6 +1679,13 @@
             "description": "Indicates if the user is an admin of the organization.",
             "type": "boolean"
           },
+          "organizationDisplayName": {
+            "description": "Human-friendly name of the organization; falls back to the slug when unset.",
+            "examples": [
+              "Parallel Works"
+            ],
+            "type": "string"
+          },
           "organizationOwner": {
             "description": "Indicates if the user is the owner of the organization.",
             "type": "boolean"
@@ -1706,7 +1727,7 @@
             "type": "string"
           },
           "sidebarOptions": {
-            "description": "Resolved sidebar options. User customization wins; otherwise the org's defaultSidebarItems; otherwise null so the frontend can apply built-in defaults.",
+            "description": "Resolved sidebar options. User customization wins; otherwise the org's defaultSidebarItems; otherwise the built-in defaults.",
             "items": {
               "type": "string"
             },
@@ -5360,8 +5381,14 @@
           "name": {
             "type": "string"
           },
+          "natGateway": {
+            "type": "boolean"
+          },
           "organization": {
             "type": "string"
+          },
+          "peeredToPlatform": {
+            "type": "boolean"
           },
           "provisioningMode": {
             "type": "string"
@@ -5389,6 +5416,8 @@
           "cloudAccount",
           "createdAt",
           "updatedAt",
+          "peeredToPlatform",
+          "natGateway",
           "cloudResources",
           "id",
           "name",
@@ -6814,6 +6843,20 @@
         ],
         "type": "object"
       },
+      "CreateIndexBody": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "description": "Number of indexes created",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "created"
+        ],
+        "type": "object"
+      },
       "CreateInstanceSnapshotBody": {
         "additionalProperties": false,
         "properties": {
@@ -7721,6 +7764,60 @@
         ],
         "type": "object"
       },
+      "CustomResourceTag": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "description": "Tag key applied to provisioned cloud resources",
+            "examples": [
+              "cost-center"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "description": "Tag value",
+            "examples": [
+              "engineering"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "CustomResourceTagsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "reservedKeys": {
+            "description": "Tag keys the platform applies automatically and reserves; they cannot be used as custom keys. Keys beginning with 'pw-' are also reserved.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "tags": {
+            "description": "Custom tags applied to every cloud resource provisioned for the organization. Cloud providers cap how many tags a resource can hold (for example 10 on Oracle and 15 on Azure DNS zones); when a resource would exceed its cap, tags are applied best effort with essential platform tags taking priority.",
+            "items": {
+              "$ref": "#/components/schemas/CustomResourceTag"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "tags",
+          "reservedKeys"
+        ],
+        "type": "object"
+      },
       "CustomSku": {
         "additionalProperties": false,
         "properties": {
@@ -7789,6 +7886,19 @@
         "required": [
           "date",
           "activeUsers"
+        ],
+        "type": "object"
+      },
+      "DeleteIndexBody": {
+        "additionalProperties": false,
+        "properties": {
+          "deleted": {
+            "description": "Whether the index was dropped",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "deleted"
         ],
         "type": "object"
       },
@@ -7906,6 +8016,24 @@
         ],
         "type": "object"
       },
+      "DeleteStaleIndexBody": {
+        "additionalProperties": false,
+        "properties": {
+          "collection": {
+            "description": "Collection the index belongs to",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the index to drop",
+            "type": "string"
+          }
+        },
+        "required": [
+          "collection",
+          "name"
+        ],
+        "type": "object"
+      },
       "DeltaMessage": {
         "additionalProperties": false,
         "properties": {
@@ -8011,6 +8139,9 @@
               "array",
               "null"
             ]
+          },
+          "gpuAcceleration": {
+            "type": "boolean"
           },
           "initScript": {
             "type": "string"
@@ -9112,6 +9243,19 @@
         "required": [
           "hostname",
           "dataPoints"
+        ],
+        "type": "object"
+      },
+      "GetTermsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "termsAndConditions": {
+            "description": "Markdown Terms \u0026 Conditions shown during onboarding.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "termsAndConditions"
         ],
         "type": "object"
       },
@@ -10821,6 +10965,83 @@
         ],
         "type": "object"
       },
+      "IndexDifference": {
+        "additionalProperties": false,
+        "properties": {
+          "actual": {
+            "description": "Value currently in the database",
+            "type": "string"
+          },
+          "desired": {
+            "description": "Value defined in code",
+            "type": "string"
+          },
+          "field": {
+            "description": "Index option that differs from the code definition",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "desired",
+          "actual"
+        ],
+        "type": "object"
+      },
+      "IndexStatusItem": {
+        "additionalProperties": false,
+        "properties": {
+          "collection": {
+            "description": "Collection the index belongs to",
+            "type": "string"
+          },
+          "database": {
+            "description": "Database the collection lives in",
+            "type": "string"
+          },
+          "differences": {
+            "description": "Per-option drift between the live index and the code definition, populated when needsUpdate is true",
+            "items": {
+              "$ref": "#/components/schemas/IndexDifference"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "exists": {
+            "description": "Whether the index currently exists in the database",
+            "type": "boolean"
+          },
+          "keys": {
+            "description": "Key signature identifying the predefined index",
+            "type": "string"
+          },
+          "name": {
+            "description": "Index name",
+            "type": "string"
+          },
+          "needsUpdate": {
+            "description": "Whether the existing index has drifted from the code definition",
+            "type": "boolean"
+          },
+          "unique": {
+            "description": "Whether the index enforces uniqueness",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "database",
+          "collection",
+          "name",
+          "keys",
+          "unique",
+          "exists",
+          "needsUpdate",
+          "differences"
+        ],
+        "type": "object"
+      },
       "InstallationResponse": {
         "additionalProperties": false,
         "properties": {
@@ -10967,7 +11188,7 @@
               "myinstance"
             ],
             "maxLength": 63,
-            "minLength": 5,
+            "minLength": 2,
             "type": "string"
           },
           "network": {
@@ -11829,6 +12050,54 @@
         ],
         "type": "object"
       },
+      "ListIndexesBody": {
+        "additionalProperties": false,
+        "properties": {
+          "indexes": {
+            "description": "Status of every predefined index",
+            "items": {
+              "$ref": "#/components/schemas/IndexStatusItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "missing": {
+            "description": "Number of predefined indexes that do not yet exist",
+            "format": "int64",
+            "type": "integer"
+          },
+          "outdated": {
+            "description": "Number of existing predefined indexes that have drifted from the code definition",
+            "format": "int64",
+            "type": "integer"
+          },
+          "stale": {
+            "description": "Indexes present in the database that are not part of the predefined set",
+            "items": {
+              "$ref": "#/components/schemas/StaleIndexItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "total": {
+            "description": "Total number of predefined indexes",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "indexes",
+          "stale",
+          "total",
+          "missing",
+          "outdated"
+        ],
+        "type": "object"
+      },
       "ListInstallationsOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -12090,6 +12359,31 @@
         },
         "required": [
           "items"
+        ],
+        "type": "object"
+      },
+      "ListUsersOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "total": {
+            "description": "Total count of users matching filters (before pagination)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "users": {
+            "description": "Users visible to the caller",
+            "items": {
+              "$ref": "#/components/schemas/OrgUser"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "users",
+          "total"
         ],
         "type": "object"
       },
@@ -12983,6 +13277,16 @@
             "description": "Subtype of the item (e.g. remote)",
             "type": "string"
           },
+          "tags": {
+            "description": "User-defined tags for categorization and search",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "type": {
             "description": "Type of the item (workflow, storage, compute)",
             "type": "string"
@@ -13124,6 +13428,7 @@
           "type",
           "verified",
           "featured",
+          "tags",
           "versions",
           "versionOrder",
           "versionTags",
@@ -13167,6 +13472,16 @@
           "subtype": {
             "description": "Subtype of the item",
             "type": "string"
+          },
+          "tags": {
+            "description": "User-defined tags for categorization and search",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "type": {
             "description": "Type of the item (workflow, storage, compute)",
@@ -13790,17 +14105,28 @@
           "id": {
             "type": "string"
           },
+          "input_rate": {
+            "format": "double",
+            "type": "number"
+          },
           "name": {
             "type": "string"
           },
           "object": {
             "type": "string"
           },
+          "output_rate": {
+            "format": "double",
+            "type": "number"
+          },
           "owned_by": {
             "type": "string"
           },
           "provider": {
             "type": "string"
+          },
+          "usage_not_supported": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -13839,6 +14165,24 @@
         "required": [
           "object",
           "data"
+        ],
+        "type": "object"
+      },
+      "ModifyIndexBody": {
+        "additionalProperties": false,
+        "properties": {
+          "collection": {
+            "description": "Collection the index belongs to",
+            "type": "string"
+          },
+          "keys": {
+            "description": "Key signature identifying the predefined index",
+            "type": "string"
+          }
+        },
+        "required": [
+          "collection",
+          "keys"
         ],
         "type": "object"
       },
@@ -16145,6 +16489,10 @@
             "description": "Whether the user is active",
             "type": "boolean"
           },
+          "admin": {
+            "description": "Whether the user is a platform admin",
+            "type": "boolean"
+          },
           "avatarEtag": {
             "description": "Etag of the user's uploaded avatar, if any.",
             "type": "string"
@@ -16173,8 +16521,21 @@
             "format": "date-time",
             "type": "string"
           },
+          "licenseStatus": {
+            "description": "License standing: active (consumes a seat), complimentary (an account in a deployment that consumes no seat), or inactive (disabled).",
+            "enum": [
+              "active",
+              "complimentary",
+              "inactive"
+            ],
+            "type": "string"
+          },
           "name": {
             "description": "User's full name",
+            "type": "string"
+          },
+          "organization": {
+            "description": "ID of the organization the user belongs to",
             "type": "string"
           },
           "uid": {
@@ -16193,7 +16554,9 @@
         "required": [
           "id",
           "username",
-          "active"
+          "active",
+          "admin",
+          "licenseStatus"
         ],
         "type": "object"
       },
@@ -16268,6 +16631,31 @@
           "displayName",
           "members",
           "partner"
+        ],
+        "type": "object"
+      },
+      "OrganizationsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "organizations": {
+            "description": "The organizations the user can access.",
+            "items": {
+              "$ref": "#/components/schemas/Organization"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "total": {
+            "description": "Total number of organizations matching the filters, before pagination.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "organizations",
+          "total"
         ],
         "type": "object"
       },
@@ -16995,6 +17383,10 @@
             "description": "Indicates if the forgot password feature is enabled on the platform.",
             "type": "boolean"
           },
+          "hasTermsAndConditions": {
+            "description": "Indicates Terms \u0026 Conditions must be accepted during onboarding. The full document is fetched separately from /api/settings/terms. Only returned when onboarding is enabled and the text is set.",
+            "type": "boolean"
+          },
           "language": {
             "description": "User's preferred language",
             "enum": [
@@ -17246,6 +17638,10 @@
             "description": "Sentry traces sample rate (0.0-1.0).",
             "format": "double",
             "type": "number"
+          },
+          "termsAndConditions": {
+            "description": "Markdown Terms \u0026 Conditions shown to new users during onboarding. Empty disables the prompt.",
+            "type": "string"
           },
           "validLicense": {
             "description": "Indicates if the platform license is valid.",
@@ -18225,6 +18621,16 @@
             "minLength": 2,
             "type": "string"
           },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "verified": {
             "description": "Mark as verified (platform admins only).",
             "type": "boolean"
@@ -18304,6 +18710,16 @@
           },
           "snapshot": {
             "type": "string"
+          },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "throughput": {
             "format": "int64",
@@ -18388,6 +18804,16 @@
             "minLength": 2,
             "type": "string"
           },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "throughput_mode": {
             "type": "string"
           },
@@ -18469,6 +18895,16 @@
           "storage_capacity": {
             "format": "int64",
             "type": "integer"
+          },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "verified": {
             "description": "Mark as verified (platform admins only).",
@@ -18577,6 +19013,16 @@
           "slurmReturnToService": {},
           "slurmSuspendTime": {},
           "slurmSuspendTimeout": {},
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "userBootstrap": {
             "type": "string"
           },
@@ -18653,6 +19099,16 @@
             "minLength": 2,
             "type": "string"
           },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "verified": {
             "description": "Mark as verified (platform admins only).",
             "type": "boolean"
@@ -18712,6 +19168,16 @@
             "maxLength": 100,
             "minLength": 2,
             "type": "string"
+          },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "verified": {
             "description": "Mark as verified (platform admins only).",
@@ -18782,6 +19248,16 @@
           },
           "snapshot": {
             "type": "string"
+          },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "type": {
             "type": "string"
@@ -18871,6 +19347,16 @@
             "format": "int64",
             "type": "integer"
           },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "type": {
             "type": "string"
           },
@@ -18946,6 +19432,7 @@
           },
           "tags": {
             "additionalProperties": {},
+            "description": "Azure resource tags applied to the provisioned NetApp Files volume.",
             "type": "object"
           },
           "verified": {
@@ -19062,6 +19549,16 @@
           "slurmReturnToService": {},
           "slurmSuspendTime": {},
           "slurmSuspendTimeout": {},
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "userBootstrap": {
             "type": "string"
           },
@@ -19165,6 +19662,16 @@
             "description": "SLURM username (supports __USER__).",
             "type": "string"
           },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "verified": {
             "description": "Mark as verified (platform admins only).",
             "type": "boolean"
@@ -19224,6 +19731,16 @@
             "maxLength": 100,
             "minLength": 2,
             "type": "string"
+          },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "verified": {
             "description": "Mark as verified (platform admins only).",
@@ -19294,6 +19811,16 @@
           },
           "snapshot": {
             "type": "string"
+          },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "type": {
             "type": "string"
@@ -19367,6 +19894,16 @@
             "maxLength": 100,
             "minLength": 2,
             "type": "string"
+          },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "verified": {
             "description": "Mark as verified (platform admins only).",
@@ -19450,6 +19987,16 @@
             "maxLength": 100,
             "minLength": 2,
             "type": "string"
+          },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "verified": {
             "description": "Mark as verified (platform admins only).",
@@ -19565,6 +20112,16 @@
           "slurmReturnToService": {},
           "slurmSuspendTime": {},
           "slurmSuspendTimeout": {},
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "userBootstrap": {
             "type": "string"
           },
@@ -19633,6 +20190,16 @@
             "maxLength": 100,
             "minLength": 2,
             "type": "string"
+          },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "verified": {
             "description": "Mark as verified (platform admins only).",
@@ -19746,6 +20313,16 @@
           "slurmReturnToService": {},
           "slurmSuspendTime": {},
           "slurmSuspendTimeout": {},
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "userBootstrap": {
             "type": "string"
           },
@@ -19815,6 +20392,16 @@
             "minLength": 2,
             "type": "string"
           },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "verified": {
             "description": "Mark as verified (platform admins only).",
             "type": "boolean"
@@ -19877,6 +20464,16 @@
             "maxLength": 100,
             "minLength": 2,
             "type": "string"
+          },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "verified": {
             "description": "Mark as verified (platform admins only).",
@@ -19993,6 +20590,16 @@
           "slurmReturnToService": {},
           "slurmSuspendTime": {},
           "slurmSuspendTimeout": {},
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "userBootstrap": {
             "type": "string"
           },
@@ -20080,6 +20687,16 @@
           },
           "sparsecheckout": {
             "description": "Sparse-checkout paths.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
             "items": {
               "type": "string"
             },
@@ -23096,6 +23713,34 @@
         ],
         "type": "object"
       },
+      "StaleIndexItem": {
+        "additionalProperties": false,
+        "properties": {
+          "collection": {
+            "description": "Collection the index belongs to",
+            "type": "string"
+          },
+          "database": {
+            "description": "Database the collection lives in",
+            "type": "string"
+          },
+          "keys": {
+            "description": "Key signature of the index",
+            "type": "string"
+          },
+          "name": {
+            "description": "Index name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "database",
+          "collection",
+          "name",
+          "keys"
+        ],
+        "type": "object"
+      },
       "StepStruct": {
         "additionalProperties": false,
         "properties": {
@@ -23439,6 +24084,25 @@
           "cpuCores",
           "memoryTotal",
           "diskTotal"
+        ],
+        "type": "object"
+      },
+      "TagRecommendationsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "tags": {
+            "description": "Tags used by visible items of the same type, ranked most-used first.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "tags"
         ],
         "type": "object"
       },
@@ -24042,6 +24706,10 @@
           "singleOrgPlatform": {
             "description": "Whether to enable single org platform.",
             "type": "boolean"
+          },
+          "termsAndConditions": {
+            "description": "Markdown Terms \u0026 Conditions shown to new users during onboarding. Empty disables the prompt.",
+            "type": "string"
           }
         },
         "type": "object"
@@ -24374,6 +25042,13 @@
             "minLength": 2,
             "type": "string"
           },
+          "tags": {
+            "description": "User-defined tags for categorization and search.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "verified": {
             "description": "Mark as verified (platform admins only).",
             "type": "boolean"
@@ -24422,6 +25097,25 @@
             "type": "boolean"
           }
         },
+        "type": "object"
+      },
+      "UpdateOrgCustomTagsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "tags": {
+            "description": "Full replacement list of custom tags to apply to provisioned cloud resources",
+            "items": {
+              "$ref": "#/components/schemas/CustomResourceTag"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "tags"
+        ],
         "type": "object"
       },
       "UpdateOrgSidebarInputBody": {
@@ -25041,6 +25735,90 @@
         },
         "required": [
           "value"
+        ],
+        "type": "object"
+      },
+      "UserProfile": {
+        "additionalProperties": false,
+        "properties": {
+          "avatarEtag": {
+            "description": "Cache-buster for the user's avatar image.",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "When the user registered.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "description": "Email address of the user.",
+            "type": "string"
+          },
+          "groups": {
+            "description": "Names of the groups the user belongs to.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "lastPing": {
+            "description": "When the user was last active in the platform; absent if never seen.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "licenseStatus": {
+            "description": "Seat/license status: 'active' (holds a seat), 'complimentary' (active account that consumes no seat), or 'inactive' (disabled).",
+            "enum": [
+              "active",
+              "complimentary",
+              "inactive"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Full name of the user.",
+            "type": "string"
+          },
+          "organization": {
+            "description": "Slug of the organization the user belongs to.",
+            "type": "string"
+          },
+          "organizationAdmin": {
+            "description": "Whether the user is an administrator of the organization.",
+            "type": "boolean"
+          },
+          "organizationOwner": {
+            "description": "Whether the user owns the organization.",
+            "type": "boolean"
+          },
+          "platformAdmin": {
+            "description": "Whether the user is a platform administrator.",
+            "type": "boolean"
+          },
+          "uid": {
+            "description": "The user's POSIX UID.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "username": {
+            "description": "Username of the user.",
+            "examples": [
+              "jake.thayne"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "name",
+          "groups",
+          "organizationOwner",
+          "organizationAdmin",
+          "platformAdmin",
+          "licenseStatus"
         ],
         "type": "object"
       },
@@ -25880,7 +26658,7 @@
             "type": "boolean"
           },
           "slug": {
-            "description": "Name without namespace prefix, used for URLs.",
+            "description": "Workflow name, used for URLs.",
             "type": "string"
           },
           "subtype": {
@@ -26819,6 +27597,232 @@
           "Error Logs"
         ],
         "x-internal": true
+      }
+    },
+    "/api/admin/indexes": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nDrops a single predefined MongoDB index",
+        "operationId": "delete-predefined-index",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyIndexBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteIndexBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a predefined index",
+        "tags": [
+          "Indexes"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns every predefined MongoDB index and whether it currently exists",
+        "operationId": "get-predefined-index-status",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListIndexesBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get predefined index status",
+        "tags": [
+          "Indexes"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nCreates a single predefined MongoDB index",
+        "operationId": "create-predefined-index",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyIndexBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateIndexBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create a predefined index",
+        "tags": [
+          "Indexes"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nDrops and recreates a single predefined MongoDB index so it matches the code definition",
+        "operationId": "update-predefined-index",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyIndexBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateIndexBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update a predefined index",
+        "tags": [
+          "Indexes"
+        ]
+      }
+    },
+    "/api/admin/indexes/missing": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nCreates every predefined MongoDB index that does not yet exist",
+        "operationId": "create-missing-predefined-indexes",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateIndexBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create all missing predefined indexes",
+        "tags": [
+          "Indexes"
+        ]
+      }
+    },
+    "/api/admin/indexes/stale": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nDrops an index that exists in the database but is not part of the predefined set",
+        "operationId": "delete-stale-index",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteStaleIndexBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteIndexBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a stale index",
+        "tags": [
+          "Indexes"
+        ]
       }
     },
     "/api/admin/maintenance/infrastructures/orphaned/cleanup": {
@@ -34028,6 +35032,51 @@
         ]
       }
     },
+    "/api/marketplace/tag-recommendations": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns tags used by visible marketplace items of the same type, ranked by frequency, for publish-form suggestions.",
+        "operationId": "list-marketplace-tag-recommendations",
+        "parameters": [
+          {
+            "description": "Item type to source tag suggestions from (workflow, storage, compute).",
+            "explode": false,
+            "in": "query",
+            "name": "type",
+            "required": true,
+            "schema": {
+              "description": "Item type to source tag suggestions from (workflow, storage, compute).",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagRecommendationsBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Marketplace Tag Recommendations",
+        "tags": [
+          "Marketplace"
+        ]
+      }
+    },
     "/api/mlworkspaces": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the list of Machine Learning Workspaces",
@@ -34768,19 +35817,78 @@
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the organizations the user can access.",
         "operationId": "get-organizations",
+        "parameters": [
+          {
+            "description": "Maximum number of organizations to return (1-200). 0 (the default) returns all matching organizations.",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "description": "Maximum number of organizations to return (1-200). 0 (the default) returns all matching organizations.",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Number of organizations to skip for pagination.",
+            "explode": false,
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "description": "Number of organizations to skip for pagination.",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filter by organization name or display name (case-insensitive).",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Filter by organization name or display name (case-insensitive).",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Field to sort by. Omit for default ordering.",
+            "explode": false,
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "description": "Field to sort by. Omit for default ordering.",
+              "enum": [
+                "name",
+                "managedBy"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sort direction.",
+            "explode": false,
+            "in": "query",
+            "name": "sortDir",
+            "schema": {
+              "default": "asc",
+              "description": "Sort direction.",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "description": "List of organizations",
-                  "items": {
-                    "$ref": "#/components/schemas/Organization"
-                  },
-                  "type": [
-                    "array",
-                    "null"
-                  ]
+                  "$ref": "#/components/schemas/OrganizationsOutputBody"
                 }
               }
             },
@@ -38998,6 +40106,108 @@
         "summary": "List Oracle cloud images",
         "tags": [
           "Cloud Images"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/custom-resource-tags": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the custom tags the organization applies to every cloud resource it provisions.",
+        "operationId": "get-org-custom-resource-tags",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResourceTagsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get org custom resource tags",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces the organization's custom cloud resource tags. These are applied to every cloud resource provisioned for the organization.",
+        "operationId": "update-org-custom-resource-tags",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrgCustomTagsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResourceTagsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update org custom resource tags",
+        "tags": [
+          "Organization"
         ]
       }
     },
@@ -58739,6 +59949,38 @@
         ]
       }
     },
+    "/api/settings/accept-terms": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRecords the user's acceptance of the platform Terms \u0026 Conditions during onboarding.",
+        "operationId": "acceptTerms",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptTermsBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Accept terms and conditions",
+        "tags": [
+          "User Settings"
+        ]
+      }
+    },
     "/api/settings/admin": {
       "get": {
         "description": "Returns admin-only platform settings.",
@@ -58838,6 +60080,38 @@
           }
         },
         "summary": "Complete onboarding",
+        "tags": [
+          "User Settings"
+        ]
+      }
+    },
+    "/api/settings/terms": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the platform Terms \u0026 Conditions document shown during onboarding.",
+        "operationId": "getTerms",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTermsBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get terms and conditions",
         "tags": [
           "User Settings"
         ]
@@ -60142,6 +61416,118 @@
         ]
       }
     },
+    "/api/users": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the users the caller can see: members of their own organization, organizations they manage (partners), or everyone for platform admins.",
+        "operationId": "list-users",
+        "parameters": [
+          {
+            "description": "Maximum number of users to return (1-500)",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Maximum number of users to return (1-500)",
+              "format": "int64",
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Number of users to skip for pagination",
+            "explode": false,
+            "in": "query",
+            "name": "skip",
+            "schema": {
+              "default": 0,
+              "description": "Number of users to skip for pagination",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Search string to filter by username, email, or name (case-insensitive)",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Search string to filter by username, email, or name (case-insensitive)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by active status: 'all', 'true' for active only, 'false' for inactive only",
+            "explode": false,
+            "in": "query",
+            "name": "active",
+            "schema": {
+              "default": "all",
+              "description": "Filter by active status: 'all', 'true' for active only, 'false' for inactive only",
+              "enum": [
+                "all",
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Field to sort by: username, email, lastLogin, or createdAt (omit for default ordering)",
+            "explode": false,
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "description": "Field to sort by: username, email, lastLogin, or createdAt (omit for default ordering)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sort direction (only applies when sortBy is specified)",
+            "explode": false,
+            "in": "query",
+            "name": "sortDir",
+            "schema": {
+              "default": "asc",
+              "description": "Sort direction (only applies when sortBy is specified)",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListUsersOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List users",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/api/users/{username}/activity": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns a list of dates when the user was active, suitable for displaying a GitHub-style activity graph. Users can view their own activity.",
@@ -60200,6 +61586,53 @@
         "summary": "Get user activity data",
         "tags": [
           "User Settings"
+        ]
+      }
+    },
+    "/api/users/{username}/profile": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a member-safe profile for a user, readable by any member of their organization.",
+        "operationId": "get-user-profile",
+        "parameters": [
+          {
+            "description": "The username of the user.",
+            "in": "path",
+            "name": "username",
+            "required": true,
+            "schema": {
+              "description": "The username of the user.",
+              "examples": [
+                "jake.thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get user profile",
+        "tags": [
+          "Users"
         ]
       }
     },
@@ -61961,6 +63394,10 @@
     {
       "description": "Endpoints related to user and organization groups",
       "name": "Groups"
+    },
+    {
+      "description": "Administrative endpoints for creating and dropping predefined MongoDB indexes",
+      "name": "Indexes"
     },
     {
       "description": "Endpoints related to compute instances",

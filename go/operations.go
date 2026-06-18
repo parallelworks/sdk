@@ -147,6 +147,108 @@ func (c *Client) TriggerTestError(ctx context.Context) error {
 	return nil
 }
 
+// GetPredefinedIndexStatus - Get predefined index status
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns every predefined MongoDB index and whether it currently exists
+func (c *Client) GetPredefinedIndexStatus(ctx context.Context) (*ListIndexesBody, error) {
+	path := "/api/admin/indexes"
+
+	var result ListIndexesBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CreatePredefinedIndex - Create a predefined index
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Creates a single predefined MongoDB index
+func (c *Client) CreatePredefinedIndex(ctx context.Context, body ModifyIndexBody) (*CreateIndexBody, error) {
+	path := "/api/admin/indexes"
+
+	var result CreateIndexBody
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdatePredefinedIndex - Update a predefined index
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Drops and recreates a single predefined MongoDB index so it matches the code definition
+func (c *Client) UpdatePredefinedIndex(ctx context.Context, body ModifyIndexBody) (*CreateIndexBody, error) {
+	path := "/api/admin/indexes"
+
+	var result CreateIndexBody
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeletePredefinedIndex - Delete a predefined index
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Drops a single predefined MongoDB index
+func (c *Client) DeletePredefinedIndex(ctx context.Context, body ModifyIndexBody) (*DeleteIndexBody, error) {
+	path := "/api/admin/indexes"
+
+	var result DeleteIndexBody
+	if err := c.do(ctx, "DELETE", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CreateMissingPredefinedIndexes - Create all missing predefined indexes
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Creates every predefined MongoDB index that does not yet exist
+func (c *Client) CreateMissingPredefinedIndexes(ctx context.Context) (*CreateIndexBody, error) {
+	path := "/api/admin/indexes/missing"
+
+	var result CreateIndexBody
+	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteStaleIndex - Delete a stale index
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Drops an index that exists in the database but is not part of the predefined set
+func (c *Client) DeleteStaleIndex(ctx context.Context, body DeleteStaleIndexBody) (*DeleteIndexBody, error) {
+	path := "/api/admin/indexes/stale"
+
+	var result DeleteIndexBody
+	if err := c.do(ctx, "DELETE", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // CleanupOrphanedInfrastructures - Delete orphaned infrastructures
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -2826,6 +2928,21 @@ func (c *Client) PublishRemoteWorkflow(ctx context.Context, body PublishRemoteWo
 	return &result, nil
 }
 
+// ListMarketplaceTagRecommendations - List Marketplace Tag Recommendations
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns tags used by visible marketplace items of the same type, ranked by frequency, for publish-form suggestions.
+func (c *Client) ListMarketplaceTagRecommendations(ctx context.Context) (*TagRecommendationsBody, error) {
+	path := "/api/marketplace/tag-recommendations"
+
+	var result TagRecommendationsBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetMachineLearningWorkspacesParams contains optional parameters for the GetMachineLearningWorkspaces operation.
 type GetMachineLearningWorkspacesParams struct {
 	// The cloud service provider for the MACHINELEARNING WORKSPACE.
@@ -3146,15 +3263,41 @@ func (c *Client) ListAiChatModels(ctx context.Context) (*ModelsResponse, error) 
 	return &result, nil
 }
 
+// GetOrganizationsParams contains optional parameters for the GetOrganizations operation.
+type GetOrganizationsParams struct {
+	// Maximum number of organizations to return (1-200). 0 (the default) returns all matching organizations.
+	Limit *int64 `json:"limit,omitempty"`
+	// Number of organizations to skip for pagination.
+	Offset *int64 `json:"offset,omitempty"`
+	// Filter by organization name or display name (case-insensitive).
+	Search *string `json:"search,omitempty"`
+	// Field to sort by. Omit for default ordering.
+	SortBy *string `json:"sortBy,omitempty"`
+	// Sort direction.
+	SortDir *string `json:"sortDir,omitempty"`
+}
+
 // GetOrganizations - List organizations
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Returns the organizations the user can access.
-func (c *Client) GetOrganizations(ctx context.Context) (*[]Organization, error) {
+func (c *Client) GetOrganizations(ctx context.Context, opts ...GetOrganizationsParams) (*OrganizationsOutputBody, error) {
 	path := "/api/organizations"
 
-	var result []Organization
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "limit", params.Limit)
+		addQueryParam(queryValues, "offset", params.Offset)
+		addQueryParam(queryValues, "search", params.Search)
+		addQueryParam(queryValues, "sortBy", params.SortBy)
+		addQueryParam(queryValues, "sortDir", params.SortDir)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result OrganizationsOutputBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
@@ -4479,6 +4622,38 @@ func (c *Client) GetOracleCloudImages(ctx context.Context, organization string, 
 	}
 	var result []CloudImage
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetOrgCustomResourceTags - Get org custom resource tags
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the custom tags the organization applies to every cloud resource it provisions.
+func (c *Client) GetOrgCustomResourceTags(ctx context.Context, organization string) (*CustomResourceTagsOutputBody, error) {
+	path := "/api/organizations/{organization}/custom-resource-tags"
+	path = pathReplace(path, "organization", organization)
+
+	var result CustomResourceTagsOutputBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateOrgCustomResourceTags - Update org custom resource tags
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces the organization's custom cloud resource tags. These are applied to every cloud resource provisioned for the organization.
+func (c *Client) UpdateOrgCustomResourceTags(ctx context.Context, organization string, body UpdateOrgCustomTagsInputBody) (*CustomResourceTagsOutputBody, error) {
+	path := "/api/organizations/{organization}/custom-resource-tags"
+	path = pathReplace(path, "organization", organization)
+
+	var result CustomResourceTagsOutputBody
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -10219,6 +10394,21 @@ func (c *Client) GetPlatformSettings(ctx context.Context) (*PlatformSettings, er
 	return &result, nil
 }
 
+// AcceptTerms - Accept terms and conditions
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Records the user's acceptance of the platform Terms & Conditions during onboarding.
+func (c *Client) AcceptTerms(ctx context.Context) (*AcceptTermsBody, error) {
+	path := "/api/settings/accept-terms"
+
+	var result AcceptTermsBody
+	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetAdminPlatformSettings - Get admin platform settings
 //
 // Returns admin-only platform settings.
@@ -10259,6 +10449,21 @@ func (c *Client) CompleteOnboarding(ctx context.Context) (*CompleteOnboardingBod
 
 	var result CompleteOnboardingBody
 	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetTerms - Get terms and conditions
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the platform Terms & Conditions document shown during onboarding.
+func (c *Client) GetTerms(ctx context.Context) (*GetTermsBody, error) {
+	path := "/api/settings/terms"
+
+	var result GetTermsBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -10765,6 +10970,50 @@ func (c *Client) DeleteUserThumbnail(ctx context.Context, etag string) error {
 	return nil
 }
 
+// ListUsersParams contains optional parameters for the ListUsers operation.
+type ListUsersParams struct {
+	// Maximum number of users to return (1-500)
+	Limit *int64 `json:"limit,omitempty"`
+	// Number of users to skip for pagination
+	Skip *int64 `json:"skip,omitempty"`
+	// Search string to filter by username, email, or name (case-insensitive)
+	Search *string `json:"search,omitempty"`
+	// Filter by active status: 'all', 'true' for active only, 'false' for inactive only
+	Active *string `json:"active,omitempty"`
+	// Field to sort by: username, email, lastLogin, or createdAt (omit for default ordering)
+	SortBy *string `json:"sortBy,omitempty"`
+	// Sort direction (only applies when sortBy is specified)
+	SortDir *string `json:"sortDir,omitempty"`
+}
+
+// ListUsers - List users
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the users the caller can see: members of their own organization, organizations they manage (partners), or everyone for platform admins.
+func (c *Client) ListUsers(ctx context.Context, opts ...ListUsersParams) (*ListUsersOutputBody, error) {
+	path := "/api/users"
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "limit", params.Limit)
+		addQueryParam(queryValues, "skip", params.Skip)
+		addQueryParam(queryValues, "search", params.Search)
+		addQueryParam(queryValues, "active", params.Active)
+		addQueryParam(queryValues, "sortBy", params.SortBy)
+		addQueryParam(queryValues, "sortDir", params.SortDir)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result ListUsersOutputBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetUserActivityParams contains optional parameters for the GetUserActivity operation.
 type GetUserActivityParams struct {
 	// Number of days to look back
@@ -10789,6 +11038,22 @@ func (c *Client) GetUserActivity(ctx context.Context, username string, opts ...G
 		}
 	}
 	var result UserActivityResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetUserProfile - Get user profile
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a member-safe profile for a user, readable by any member of their organization.
+func (c *Client) GetUserProfile(ctx context.Context, username string) (*UserProfile, error) {
+	path := "/api/users/{username}/profile"
+	path = pathReplace(path, "username", username)
+
+	var result UserProfile
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}

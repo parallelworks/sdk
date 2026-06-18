@@ -37,6 +37,12 @@ type APIKeyResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type AcceptTermsBody struct {
+	// When the user accepted the Terms & Conditions
+	TermsAcceptedAt      time.Time      `json:"termsAcceptedAt"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type AccessManagementBody struct {
 	// Enable pam_mkhomedir for automatic home directory creation
 	HomeDirectories bool `json:"homeDirectories"`
@@ -643,6 +649,8 @@ type AuthSession struct {
 	Organization string `json:"organization"`
 	// Indicates if the user is an admin of the organization.
 	OrganizationAdmin bool `json:"organizationAdmin"`
+	// Human-friendly name of the organization; falls back to the slug when unset.
+	OrganizationDisplayName *string `json:"organizationDisplayName,omitempty"`
 	// Indicates if the user is the owner of the organization.
 	OrganizationOwner bool `json:"organizationOwner"`
 	// Roles the user has within the organization.
@@ -655,7 +663,7 @@ type AuthSession struct {
 	Previews []string `json:"previews"`
 	// Safe username of the user, used when names have stricter rules.
 	SafeUsername string `json:"safeUsername"`
-	// Resolved sidebar options. User customization wins; otherwise the org's defaultSidebarItems; otherwise null so the frontend can apply built-in defaults.
+	// Resolved sidebar options. User customization wins; otherwise the org's defaultSidebarItems; otherwise the built-in defaults.
 	SidebarOptions []string `json:"sidebarOptions"`
 	// Username of the user.
 	Username             string         `json:"username"`
@@ -1945,7 +1953,9 @@ type CloudAccountNetwork struct {
 	DnsZoneName          *string          `json:"dnsZoneName,omitempty"`
 	ID                   string           `json:"id"`
 	Name                 string           `json:"name"`
+	NatGateway           bool             `json:"natGateway"`
 	Organization         string           `json:"organization"`
+	PeeredToPlatform     bool             `json:"peeredToPlatform"`
 	ProvisioningMode     *string          `json:"provisioningMode,omitempty"`
 	Regions              []ConfigRegion   `json:"regions"`
 	Status               string           `json:"status"`
@@ -2441,6 +2451,12 @@ type CreateDiskSnapshotBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type CreateIndexBody struct {
+	// Number of indexes created
+	Created              int64          `json:"created"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type CreateInstanceSnapshotBody struct {
 	// Name of the snapshot
 	SnapshotName         string         `json:"snapshotName"`
@@ -2762,6 +2778,22 @@ type CreateWorkflowSavedInputsInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type CustomResourceTag struct {
+	// Tag key applied to provisioned cloud resources
+	Key string `json:"key"`
+	// Tag value
+	Value                string         `json:"value"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CustomResourceTagsOutputBody struct {
+	// Tag keys the platform applies automatically and reserves; they cannot be used as custom keys. Keys beginning with 'pw-' are also reserved.
+	ReservedKeys []string `json:"reservedKeys"`
+	// Custom tags applied to every cloud resource provisioned for the organization. Cloud providers cap how many tags a resource can hold (for example 10 on Oracle and 15 on Azure DNS zones); when a resource would exceed its cap, tags are applied best effort with essential platform tags taking priority.
+	Tags                 []CustomResourceTag `json:"tags"`
+	AdditionalProperties map[string]any      `json:"-,omitempty"`
+}
+
 type CustomSku struct {
 	// SKU code (e.g., SLURM_NODE_HOUR)
 	Code string `json:"code"`
@@ -2789,6 +2821,12 @@ type DailyActiveUsers struct {
 	ActiveUsers int64 `json:"activeUsers"`
 	// Date in YYYY-MM-DD format
 	Date                 string         `json:"date"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type DeleteIndexBody struct {
+	// Whether the index was dropped
+	Deleted              bool           `json:"deleted"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2838,6 +2876,14 @@ type DeleteRatedCostsResponseBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type DeleteStaleIndexBody struct {
+	// Collection the index belongs to
+	Collection string `json:"collection"`
+	// Name of the index to drop
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type DeltaMessage struct {
 	// Message content delta
 	Content any `json:"content,omitempty"`
@@ -2880,6 +2926,7 @@ type DeploymentResponse struct {
 
 type DesktopSessionSettings struct {
 	BindPaths            []string       `json:"bindPaths,omitempty"`
+	GpuAcceleration      *bool          `json:"gpuAcceleration,omitempty"`
 	InitScript           *string        `json:"initScript,omitempty"`
 	OverlayPaths         []string       `json:"overlayPaths,omitempty"`
 	SifPath              *string        `json:"sifPath,omitempty"`
@@ -3252,6 +3299,12 @@ type GetNodeMetricsOutputBody struct {
 	DataPoints           []MetricsDataPoint `json:"dataPoints"`
 	Hostname             string             `json:"hostname"`
 	AdditionalProperties map[string]any     `json:"-,omitempty"`
+}
+
+type GetTermsBody struct {
+	// Markdown Terms & Conditions shown during onboarding.
+	TermsAndConditions   string         `json:"termsAndConditions"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type GetUserContainersResponse struct {
@@ -3860,6 +3913,36 @@ type Image struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type IndexDifference struct {
+	// Value currently in the database
+	Actual string `json:"actual"`
+	// Value defined in code
+	Desired string `json:"desired"`
+	// Index option that differs from the code definition
+	Field                string         `json:"field"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type IndexStatusItem struct {
+	// Collection the index belongs to
+	Collection string `json:"collection"`
+	// Database the collection lives in
+	Database string `json:"database"`
+	// Per-option drift between the live index and the code definition, populated when needsUpdate is true
+	Differences []IndexDifference `json:"differences"`
+	// Whether the index currently exists in the database
+	Exists bool `json:"exists"`
+	// Key signature identifying the predefined index
+	Keys string `json:"keys"`
+	// Index name
+	Name string `json:"name"`
+	// Whether the existing index has drifted from the code definition
+	NeedsUpdate bool `json:"needsUpdate"`
+	// Whether the index enforces uniqueness
+	Unique               bool           `json:"unique"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type InstallationResponse struct {
 	AccountLogin         string         `json:"accountLogin"`
 	AccountType          string         `json:"accountType"`
@@ -4182,6 +4265,20 @@ type ListErrorLogsBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ListIndexesBody struct {
+	// Status of every predefined index
+	Indexes []IndexStatusItem `json:"indexes"`
+	// Number of predefined indexes that do not yet exist
+	Missing int64 `json:"missing"`
+	// Number of existing predefined indexes that have drifted from the code definition
+	Outdated int64 `json:"outdated"`
+	// Indexes present in the database that are not part of the predefined set
+	Stale []StaleIndexItem `json:"stale"`
+	// Total number of predefined indexes
+	Total                int64          `json:"total"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ListInstallationsOutputBody struct {
 	Installations        []InstallationResponse `json:"installations"`
 	AdditionalProperties map[string]any         `json:"-,omitempty"`
@@ -4252,6 +4349,14 @@ type ListUserAttachmentsBody struct {
 type ListUserThumbnailsOutputBody struct {
 	Items                []UserThumbnail `json:"items"`
 	AdditionalProperties map[string]any  `json:"-,omitempty"`
+}
+
+type ListUsersOutputBody struct {
+	// Total count of users matching filters (before pagination)
+	Total int64 `json:"total"`
+	// Users visible to the caller
+	Users                []OrgUser      `json:"users"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ListWorkflowRunsBody struct {
@@ -4558,6 +4663,8 @@ type MarketplaceItemBody struct {
 	Slug string `json:"slug"`
 	// Subtype of the item (e.g. remote)
 	Subtype string `json:"subtype"`
+	// User-defined tags for categorization and search
+	Tags []string `json:"tags"`
 	// Type of the item (workflow, storage, compute)
 	Type string `json:"type"`
 	// Whether the item is verified
@@ -4588,6 +4695,8 @@ type MarketplaceListItem struct {
 	Slug string `json:"slug"`
 	// Subtype of the item
 	Subtype string `json:"subtype"`
+	// User-defined tags for categorization and search
+	Tags []string `json:"tags,omitempty"`
 	// Type of the item (workflow, storage, compute)
 	Type string `json:"type"`
 	// Whether the item is verified
@@ -4785,10 +4894,13 @@ type MigrationStepResponse struct {
 type ModelEntry struct {
 	Created              int64          `json:"created"`
 	ID                   string         `json:"id"`
+	InputRate            *float64       `json:"input_rate,omitempty"`
 	Name                 *string        `json:"name,omitempty"`
 	Object               string         `json:"object"`
+	OutputRate           *float64       `json:"output_rate,omitempty"`
 	OwnedBy              string         `json:"owned_by"`
 	Provider             *string        `json:"provider,omitempty"`
+	UsageNotSupported    *bool          `json:"usage_not_supported,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4797,6 +4909,14 @@ type ModelsResponse struct {
 	Object               string               `json:"object"`
 	UnreachableSessions  []UnreachableSession `json:"unreachable_sessions,omitempty"`
 	AdditionalProperties map[string]any       `json:"-,omitempty"`
+}
+
+type ModifyIndexBody struct {
+	// Collection the index belongs to
+	Collection string `json:"collection"`
+	// Key signature identifying the predefined index
+	Keys                 string         `json:"keys"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type MountInfoResponse struct {
@@ -5610,6 +5730,8 @@ type OrgUsageSummaryResponse struct {
 type OrgUser struct {
 	// Whether the user is active
 	Active bool `json:"active"`
+	// Whether the user is a platform admin
+	Admin bool `json:"admin"`
 	// Etag of the user's uploaded avatar, if any.
 	AvatarEtag *string `json:"avatarEtag,omitempty"`
 	// Account creation time
@@ -5622,8 +5744,12 @@ type OrgUser struct {
 	LastLogin *time.Time `json:"lastLogin,omitempty"`
 	// Last activity timestamp
 	LastPing *time.Time `json:"lastPing,omitempty"`
+	// License standing: active (consumes a seat), complimentary (an account in a deployment that consumes no seat), or inactive (disabled).
+	LicenseStatus string `json:"licenseStatus"`
 	// User's full name
 	Name *string `json:"name,omitempty"`
+	// ID of the organization the user belongs to
+	Organization *string `json:"organization,omitempty"`
 	// User's UID
 	Uid *int64 `json:"uid,omitempty"`
 	// Username
@@ -5659,6 +5785,14 @@ type Organization struct {
 	Owner *string `json:"owner,omitempty"`
 	// Whether the organization is a partner organization.
 	Partner              bool           `json:"partner"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OrganizationsOutputBody struct {
+	// The organizations the user can access.
+	Organizations []Organization `json:"organizations"`
+	// Total number of organizations matching the filters, before pagination.
+	Total                int64          `json:"total"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -5909,6 +6043,8 @@ type PlatformSettings struct {
 	ExpirationDays *int64 `json:"expirationDays,omitempty"`
 	// Indicates if the forgot password feature is enabled on the platform.
 	ForgotPasswordEnabled bool `json:"forgotPasswordEnabled"`
+	// Indicates Terms & Conditions must be accepted during onboarding. The full document is fetched separately from /api/settings/terms. Only returned when onboarding is enabled and the text is set.
+	HasTermsAndConditions *bool `json:"hasTermsAndConditions,omitempty"`
 	// User's preferred language
 	Language *string `json:"language,omitempty"`
 	// The expiration date of the platform license. Only returned when needsLicense is true.
@@ -5998,6 +6134,8 @@ type PlatformSettingsAdmin struct {
 	SentryReplaysSampleRate float64 `json:"sentryReplaysSampleRate"`
 	// Sentry traces sample rate (0.0-1.0).
 	SentryTracesSampleRate float64 `json:"sentryTracesSampleRate"`
+	// Markdown Terms & Conditions shown to new users during onboarding. Empty disables the prompt.
+	TermsAndConditions *string `json:"termsAndConditions,omitempty"`
 	// Indicates if the platform license is valid.
 	ValidLicense         *bool          `json:"validLicense,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -6352,6 +6490,8 @@ type PublishAwsBucketRequest struct {
 	Region         *string `json:"region,omitempty"`
 	// URL-friendly identifier.
 	Slug string `json:"slug"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6380,10 +6520,12 @@ type PublishAwsDiskRequest struct {
 	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
 	SizeGb          *int64  `json:"size_gb,omitempty"`
 	// URL-friendly identifier.
-	Slug       string  `json:"slug"`
-	Snapshot   *string `json:"snapshot,omitempty"`
-	Throughput *int64  `json:"throughput,omitempty"`
-	Type       *string `json:"type,omitempty"`
+	Slug     string  `json:"slug"`
+	Snapshot *string `json:"snapshot,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags       []string `json:"tags,omitempty"`
+	Throughput *int64   `json:"throughput,omitempty"`
+	Type       *string  `json:"type,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6412,8 +6554,10 @@ type PublishAwsEfsRequest struct {
 	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
 	Region         *string `json:"region,omitempty"`
 	// URL-friendly identifier.
-	Slug           string  `json:"slug"`
-	ThroughputMode *string `json:"throughput_mode,omitempty"`
+	Slug string `json:"slug"`
+	// User-defined tags for categorization and search.
+	Tags           []string `json:"tags,omitempty"`
+	ThroughputMode *string  `json:"throughput_mode,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6444,6 +6588,8 @@ type PublishAwsLustreRequest struct {
 	// URL-friendly identifier.
 	Slug            string `json:"slug"`
 	StorageCapacity *int64 `json:"storage_capacity,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6477,14 +6623,16 @@ type PublishAwsSlurmRequest struct {
 	RuntimeAlert     *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
 	SessionCostLimit *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
 	// URL-friendly identifier.
-	Slug                    string  `json:"slug"`
-	SlurmResumeTimeout      any     `json:"slurmResumeTimeout,omitempty"`
-	SlurmReturnToService    any     `json:"slurmReturnToService,omitempty"`
-	SlurmSuspendTime        any     `json:"slurmSuspendTime,omitempty"`
-	SlurmSuspendTimeout     any     `json:"slurmSuspendTimeout,omitempty"`
-	UserBootstrap           *string `json:"userBootstrap,omitempty"`
-	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
-	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	Slug                 string `json:"slug"`
+	SlurmResumeTimeout   any    `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService any    `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     any    `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  any    `json:"slurmSuspendTimeout,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags                    []string `json:"tags,omitempty"`
+	UserBootstrap           *string  `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool    `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool    `json:"userBootstrapController,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6511,6 +6659,8 @@ type PublishAzureAzfilesRequest struct {
 	SizeGb         *int64  `json:"sizeGb,omitempty"`
 	// URL-friendly identifier.
 	Slug string `json:"slug"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6535,6 +6685,8 @@ type PublishAzureBucketRequest struct {
 	Region         *string `json:"region,omitempty"`
 	// URL-friendly identifier.
 	Slug string `json:"slug"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6562,7 +6714,9 @@ type PublishAzureDiskRequest struct {
 	// URL-friendly identifier.
 	Slug     string  `json:"slug"`
 	Snapshot *string `json:"snapshot,omitempty"`
-	Type     *string `json:"type,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
+	Type *string  `json:"type,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6589,12 +6743,14 @@ type PublishAzureManagedLustreRequest struct {
 	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
 	Region         *string `json:"region,omitempty"`
 	// URL-friendly identifier.
-	Slug               string  `json:"slug"`
-	StorageSizeInTb125 *int64  `json:"storage-size-in-tb-125,omitempty"`
-	StorageSizeInTb250 *int64  `json:"storage-size-in-tb-250,omitempty"`
-	StorageSizeInTb40  *int64  `json:"storage-size-in-tb-40,omitempty"`
-	StorageSizeInTb500 *int64  `json:"storage-size-in-tb-500,omitempty"`
-	Type               *string `json:"type,omitempty"`
+	Slug               string `json:"slug"`
+	StorageSizeInTb125 *int64 `json:"storage-size-in-tb-125,omitempty"`
+	StorageSizeInTb250 *int64 `json:"storage-size-in-tb-250,omitempty"`
+	StorageSizeInTb40  *int64 `json:"storage-size-in-tb-40,omitempty"`
+	StorageSizeInTb500 *int64 `json:"storage-size-in-tb-500,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
+	Type *string  `json:"type,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6621,7 +6777,8 @@ type PublishAzureNetappFilesRequest struct {
 	Service        *string `json:"service,omitempty"`
 	Size           *int64  `json:"size,omitempty"`
 	// URL-friendly identifier.
-	Slug string         `json:"slug"`
+	Slug string `json:"slug"`
+	// Azure resource tags applied to the provisioned NetApp Files volume.
 	Tags map[string]any `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
@@ -6658,14 +6815,16 @@ type PublishAzureSlurmRequest struct {
 	RuntimeAlert     *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
 	SessionCostLimit *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
 	// URL-friendly identifier.
-	Slug                    string  `json:"slug"`
-	SlurmResumeTimeout      any     `json:"slurmResumeTimeout,omitempty"`
-	SlurmReturnToService    any     `json:"slurmReturnToService,omitempty"`
-	SlurmSuspendTime        any     `json:"slurmSuspendTime,omitempty"`
-	SlurmSuspendTimeout     any     `json:"slurmSuspendTimeout,omitempty"`
-	UserBootstrap           *string `json:"userBootstrap,omitempty"`
-	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
-	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	Slug                 string `json:"slug"`
+	SlurmResumeTimeout   any    `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService any    `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     any    `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  any    `json:"slurmSuspendTimeout,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags                    []string `json:"tags,omitempty"`
+	UserBootstrap           *string  `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool    `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool    `json:"userBootstrapController,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6703,6 +6862,8 @@ type PublishExistingRequest struct {
 	SlurmLoginNodes []ExistingLoginNode `json:"slurmLoginNodes,omitempty"`
 	// SLURM username (supports __USER__).
 	SlurmUsername *string `json:"slurmUsername,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6727,6 +6888,8 @@ type PublishGoogleBucketRequest struct {
 	Region         *string `json:"region,omitempty"`
 	// URL-friendly identifier.
 	Slug string `json:"slug"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6754,7 +6917,9 @@ type PublishGoogleDiskRequest struct {
 	// URL-friendly identifier.
 	Slug     string  `json:"slug"`
 	Snapshot *string `json:"snapshot,omitempty"`
-	Type     *string `json:"type,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
+	Type *string  `json:"type,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6782,6 +6947,8 @@ type PublishGoogleFilestoreRequest struct {
 	SizeTib        *float64 `json:"size_tib,omitempty"`
 	// URL-friendly identifier.
 	Slug string `json:"slug"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6812,6 +6979,8 @@ type PublishGoogleManagedLustreRequest struct {
 	Size500        *int64  `json:"size_500,omitempty"`
 	// URL-friendly identifier.
 	Slug string `json:"slug"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6847,14 +7016,16 @@ type PublishGoogleSlurmRequest struct {
 	RuntimeAlert     *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
 	SessionCostLimit *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
 	// URL-friendly identifier.
-	Slug                    string  `json:"slug"`
-	SlurmResumeTimeout      any     `json:"slurmResumeTimeout,omitempty"`
-	SlurmReturnToService    any     `json:"slurmReturnToService,omitempty"`
-	SlurmSuspendTime        any     `json:"slurmSuspendTime,omitempty"`
-	SlurmSuspendTimeout     any     `json:"slurmSuspendTimeout,omitempty"`
-	UserBootstrap           *string `json:"userBootstrap,omitempty"`
-	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
-	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	Slug                 string `json:"slug"`
+	SlurmResumeTimeout   any    `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService any    `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     any    `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  any    `json:"slurmSuspendTimeout,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags                    []string `json:"tags,omitempty"`
+	UserBootstrap           *string  `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool    `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool    `json:"userBootstrapController,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6879,6 +7050,8 @@ type PublishLocalWorkflowRequest struct {
 	PublishedAsOrg *bool `json:"publishedAsOrg,omitempty"`
 	// URL-friendly identifier.
 	Slug string `json:"slug"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6914,14 +7087,16 @@ type PublishOpenstackSlurmRequest struct {
 	RuntimeAlert     *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
 	SessionCostLimit *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
 	// URL-friendly identifier.
-	Slug                    string  `json:"slug"`
-	SlurmResumeTimeout      any     `json:"slurmResumeTimeout,omitempty"`
-	SlurmReturnToService    any     `json:"slurmReturnToService,omitempty"`
-	SlurmSuspendTime        any     `json:"slurmSuspendTime,omitempty"`
-	SlurmSuspendTimeout     any     `json:"slurmSuspendTimeout,omitempty"`
-	UserBootstrap           *string `json:"userBootstrap,omitempty"`
-	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
-	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	Slug                 string `json:"slug"`
+	SlurmResumeTimeout   any    `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService any    `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     any    `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  any    `json:"slurmSuspendTimeout,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags                    []string `json:"tags,omitempty"`
+	UserBootstrap           *string  `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool    `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool    `json:"userBootstrapController,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6946,6 +7121,8 @@ type PublishOracleBucketRequest struct {
 	Region         *string `json:"region,omitempty"`
 	// URL-friendly identifier.
 	Slug string `json:"slug"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -6971,6 +7148,8 @@ type PublishOracleOraclefsRequest struct {
 	Region         *string `json:"region,omitempty"`
 	// URL-friendly identifier.
 	Slug string `json:"slug"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -7006,14 +7185,16 @@ type PublishOracleSlurmRequest struct {
 	RuntimeAlert     *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
 	SessionCostLimit *ClusterSessionCostLimit `json:"sessionCostLimit,omitempty"`
 	// URL-friendly identifier.
-	Slug                    string  `json:"slug"`
-	SlurmResumeTimeout      any     `json:"slurmResumeTimeout,omitempty"`
-	SlurmReturnToService    any     `json:"slurmReturnToService,omitempty"`
-	SlurmSuspendTime        any     `json:"slurmSuspendTime,omitempty"`
-	SlurmSuspendTimeout     any     `json:"slurmSuspendTimeout,omitempty"`
-	UserBootstrap           *string `json:"userBootstrap,omitempty"`
-	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
-	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	Slug                 string `json:"slug"`
+	SlurmResumeTimeout   any    `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService any    `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     any    `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  any    `json:"slurmSuspendTimeout,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags                    []string `json:"tags,omitempty"`
+	UserBootstrap           *string  `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool    `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool    `json:"userBootstrapController,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -7048,6 +7229,8 @@ type PublishRemoteWorkflowRequest struct {
 	Slug string `json:"slug"`
 	// Sparse-checkout paths.
 	Sparsecheckout []string `json:"sparsecheckout,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Path to the thumbnail image within the repo.
 	Thumbnail *string `json:"thumbnail,omitempty"`
 	// Mark as verified (platform admins only).
@@ -8013,6 +8196,18 @@ type SSHPrivateKey struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type StaleIndexItem struct {
+	// Collection the index belongs to
+	Collection string `json:"collection"`
+	// Database the collection lives in
+	Database string `json:"database"`
+	// Key signature of the index
+	Keys string `json:"keys"`
+	// Index name
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type StepStruct struct {
 	// Step name.
 	Name *string `json:"name,omitempty"`
@@ -8120,6 +8315,12 @@ type SystemInfo struct {
 	DiskTotal int64 `json:"diskTotal"`
 	// Total memory in bytes
 	MemoryTotal          int64          `json:"memoryTotal"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type TagRecommendationsBody struct {
+	// Tags used by visible items of the same type, ranked most-used first.
+	Tags                 []string       `json:"tags"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -8344,7 +8545,9 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	// The name of the single org.
 	SingleOrgName *string `json:"singleOrgName,omitempty"`
 	// Whether to enable single org platform.
-	SingleOrgPlatform    *bool          `json:"singleOrgPlatform,omitempty"`
+	SingleOrgPlatform *bool `json:"singleOrgPlatform,omitempty"`
+	// Markdown Terms & Conditions shown to new users during onboarding. Empty disables the prompt.
+	TermsAndConditions   *string        `json:"termsAndConditions,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -8461,6 +8664,8 @@ type UpdateMarketplaceItemBody struct {
 	PublishedAsOrg *bool `json:"publishedAsOrg,omitempty"`
 	// URL-friendly identifier.
 	Slug *string `json:"slug,omitempty"`
+	// User-defined tags for categorization and search.
+	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified             *bool          `json:"verified,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -8484,6 +8689,12 @@ type UpdateOrgAiProviderInputBody struct {
 	// Skip TLS certificate verification
 	InsecureSkipTLSVerify *bool          `json:"insecureSkipTlsVerify,omitempty"`
 	AdditionalProperties  map[string]any `json:"-,omitempty"`
+}
+
+type UpdateOrgCustomTagsInputBody struct {
+	// Full replacement list of custom tags to apply to provisioned cloud resources
+	Tags                 []CustomResourceTag `json:"tags"`
+	AdditionalProperties map[string]any      `json:"-,omitempty"`
 }
 
 type UpdateOrgSidebarInputBody struct {
@@ -8721,6 +8932,36 @@ type UserGroupRef struct {
 	Display              *string        `json:"display,omitempty"`
 	Type                 *string        `json:"type,omitempty"`
 	Value                string         `json:"value"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UserProfile struct {
+	// Cache-buster for the user's avatar image.
+	AvatarEtag *string `json:"avatarEtag,omitempty"`
+	// When the user registered.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// Email address of the user.
+	Email *string `json:"email,omitempty"`
+	// Names of the groups the user belongs to.
+	Groups []string `json:"groups"`
+	// When the user was last active in the platform; absent if never seen.
+	LastPing *time.Time `json:"lastPing,omitempty"`
+	// Seat/license status: 'active' (holds a seat), 'complimentary' (active account that consumes no seat), or 'inactive' (disabled).
+	LicenseStatus string `json:"licenseStatus"`
+	// Full name of the user.
+	Name string `json:"name"`
+	// Slug of the organization the user belongs to.
+	Organization *string `json:"organization,omitempty"`
+	// Whether the user is an administrator of the organization.
+	OrganizationAdmin bool `json:"organizationAdmin"`
+	// Whether the user owns the organization.
+	OrganizationOwner bool `json:"organizationOwner"`
+	// Whether the user is a platform administrator.
+	PlatformAdmin bool `json:"platformAdmin"`
+	// The user's POSIX UID.
+	Uid *int64 `json:"uid,omitempty"`
+	// Username of the user.
+	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -9013,7 +9254,7 @@ type WorkflowItem struct {
 	Remote *RemoteWorkflowSettings `json:"remote,omitempty"`
 	// Whether to skip automatic repository checkout during job preparation.
 	SkipCheckout *bool `json:"skipCheckout,omitempty"`
-	// Name without namespace prefix, used for URLs.
+	// Workflow name, used for URLs.
 	Slug *string `json:"slug,omitempty"`
 	// Subtype of the workflow (github for remote).
 	Subtype *string `json:"subtype,omitempty"`
