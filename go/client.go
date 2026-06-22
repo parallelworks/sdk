@@ -112,7 +112,21 @@ func (c *Client) do(ctx context.Context, method string, path string, body any, r
 
 		resp, err := transport(req)
 		if err != nil {
-			// Network errors are not retryable.
+			// A middleware may return a response alongside the error; don't leak its body.
+			if resp != nil {
+				resp.Body.Close()
+			}
+			// Retry idempotent requests on transient network errors.
+			if c.retryConfig != nil && attempt < maxAttempts-1 && isIdempotentMethod(method) && isRetryableNetworkError(err) {
+				timer := time.NewTimer(retryDelay(attempt, *c.retryConfig, nil))
+				select {
+				case <-ctx.Done():
+					timer.Stop()
+					return ctx.Err()
+				case <-timer.C:
+				}
+				continue
+			}
 			return fmt.Errorf("executing request: %w", err)
 		}
 
@@ -123,7 +137,7 @@ func (c *Client) do(ctx context.Context, method string, path string, body any, r
 		}
 
 		// Check if we should retry.
-		if c.retryConfig != nil && attempt < maxAttempts-1 && shouldRetry(resp.StatusCode, *c.retryConfig) {
+		if c.retryConfig != nil && attempt < maxAttempts-1 && shouldRetryStatus(method, resp.StatusCode, *c.retryConfig) {
 			delay := retryDelay(attempt, *c.retryConfig, resp)
 			timer := time.NewTimer(delay)
 			select {
