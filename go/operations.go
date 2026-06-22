@@ -3319,6 +3319,22 @@ func (c *Client) CreateOrganization(ctx context.Context, body CreateOrganization
 	return &result, nil
 }
 
+// GetOrganization - Get organization
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a single organization.
+func (c *Client) GetOrganization(ctx context.Context, organization string) (*Organization, error) {
+	path := "/api/organizations/{organization}"
+	path = pathReplace(path, "organization", organization)
+
+	var result Organization
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // DeleteOrganization - Delete organization
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -8934,6 +8950,22 @@ func (c *Client) GetOracleOraclefs(ctx context.Context, organization string, use
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// PutOrganizationUserPassword - Reset a user's password
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Resets another user's password. Requires the org:admin or org:users role on the organization.
+func (c *Client) PutOrganizationUserPassword(ctx context.Context, organization string, user string, body AdminPasswordResetInputBody) error {
+	path := "/api/organizations/{organization}/users/{user}/password"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+
+	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // EnableOrgUserPreview - Enable a preview for an organization user

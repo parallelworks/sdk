@@ -1216,6 +1216,34 @@
         ],
         "type": "object"
       },
+      "AdminPasswordResetInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmPassword": {
+            "description": "Confirmation of the new password",
+            "examples": [
+              "NewSecureP@ssw0rd!"
+            ],
+            "maxLength": 100,
+            "minLength": 15,
+            "type": "string"
+          },
+          "newPassword": {
+            "description": "New password (at least 15 characters with lowercase, uppercase, number, and special character)",
+            "examples": [
+              "NewSecureP@ssw0rd!"
+            ],
+            "maxLength": 100,
+            "minLength": 15,
+            "type": "string"
+          }
+        },
+        "required": [
+          "newPassword",
+          "confirmPassword"
+        ],
+        "type": "object"
+      },
       "AiProviderResponse": {
         "additionalProperties": false,
         "properties": {
@@ -16847,6 +16875,7 @@
             "examples": [
               "NewSecureP@ssw0rd!"
             ],
+            "maxLength": 100,
             "minLength": 15,
             "type": "string"
           },
@@ -23670,6 +23699,7 @@
         "properties": {
           "createdAt": {
             "description": "The creation date of the SSH key",
+            "format": "date-time",
             "readOnly": true,
             "type": "string"
           },
@@ -23690,6 +23720,11 @@
           },
           "name": {
             "description": "The name of the SSH key",
+            "readOnly": true,
+            "type": "string"
+          },
+          "publicKey": {
+            "description": "The OpenSSH public key derived from this stored private key",
             "readOnly": true,
             "type": "string"
           },
@@ -35983,6 +36018,51 @@
           }
         },
         "summary": "Delete organization",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a single organization.",
+        "operationId": "get-organization",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Organization"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get organization",
         "tags": [
           "Organization"
         ]
@@ -55235,6 +55315,69 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/password": {
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nResets another user's password. Requires the org:admin or org:users role on the organization.",
+        "operationId": "put-organization-user-password",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminPasswordResetInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Reset a user's password",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/previews/{flag}": {
       "delete": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDisables a preview for a specific user within an organization. Requires the org:users role. Platform-level previews cannot be disabled.",
@@ -56656,6 +56799,13 @@
               "Name": {
                 "schema": {
                   "description": "The name of the SSH key",
+                  "readOnly": true,
+                  "type": "string"
+                }
+              },
+              "PublicKey": {
+                "schema": {
+                  "description": "The OpenSSH public key derived from this stored private key",
                   "readOnly": true,
                   "type": "string"
                 }

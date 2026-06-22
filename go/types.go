@@ -468,6 +468,14 @@ type AddWorkspaceMountBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type AdminPasswordResetInputBody struct {
+	// Confirmation of the new password
+	ConfirmPassword string `json:"confirmPassword"`
+	// New password (at least 15 characters with lowercase, uppercase, number, and special character)
+	NewPassword          string         `json:"newPassword"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type AiProviderResponse struct {
 	// Attached storage bucket infrastructure ID
 	BucketID *string `json:"bucketId,omitempty"`
@@ -8178,7 +8186,7 @@ type Snapshot struct {
 
 type SSHPrivateKey struct {
 	// The creation date of the SSH key
-	CreatedAt *string `json:"createdAt,omitempty"`
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// The description of the SSH key
 	Description *string `json:"description,omitempty"`
 	// The unique identifier of the SSH key
@@ -8187,6 +8195,8 @@ type SSHPrivateKey struct {
 	KeyFile *string `json:"keyFile,omitempty"`
 	// The name of the SSH key
 	Name string `json:"name"`
+	// The OpenSSH public key derived from this stored private key
+	PublicKey *string `json:"publicKey,omitempty"`
 	// The SSH private key content
 	SSHPrivateKey *string `json:"sshPrivateKey,omitempty"`
 	// The type of the SSH key
