@@ -2954,6 +2954,50 @@ type DiscoverCaCertOutputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type Disk struct {
+	// Cloud service provider of the disk
+	Csp string `json:"csp"`
+	// Underlying disk type (e.g. 'gp3')
+	DiskType *string `json:"diskType,omitempty"`
+	// Display name of the disk
+	DisplayName string `json:"displayName"`
+	// Indicates if the disk is encrypted
+	Encrypted *bool `json:"encrypted,omitempty"`
+	// Indicates if the disk is ephemeral
+	Ephemeral *bool `json:"ephemeral,omitempty"`
+	// Whether the disk is favorited by the user
+	Favorite bool `json:"favorite"`
+	// Group to which the disk is billed
+	Group *string `json:"group,omitempty"`
+	// Unique identifier of the disk
+	ID string `json:"id"`
+	// URL of the disk's image/icon
+	ImageURL string `json:"imageUrl"`
+	// Platform name of the disk
+	Name string `json:"name"`
+	// VPC Network associated with the disk
+	Network *string `json:"network,omitempty"`
+	// Region of the disk
+	Region *string `json:"region,omitempty"`
+	// Indicates if the disk was restored from a snapshot
+	RestoreSnapshot *bool `json:"restoreSnapshot,omitempty"`
+	// Size of the disk in GiB
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Current provision status of the disk
+	Status string `json:"status"`
+	// Tags associated with the disk
+	Tags []string `json:"tags"`
+	// CSP-prefixed type of the disk (e.g. 'aws-disk')
+	Type string `json:"type"`
+	// Parallel Works URI for the disk (pw://user/name)
+	URI string `json:"uri"`
+	// Username of the disk owner
+	User string `json:"user"`
+	// Zone of the disk
+	Zone                 *string        `json:"zone,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type DockerWorkspaceSettings struct {
 	// A list of hosts to add to the DNS search path for workspaces.
 	Dns []string `json:"dns"`
@@ -3307,6 +3351,12 @@ type GetNodeMetricsOutputBody struct {
 	DataPoints           []MetricsDataPoint `json:"dataPoints"`
 	Hostname             string             `json:"hostname"`
 	AdditionalProperties map[string]any     `json:"-,omitempty"`
+}
+
+type GetOrgSidebarOutputBody struct {
+	// The organization's configured default sidebar item IDs, or null when the organization has not set a custom default (users fall back to platform defaults).
+	DefaultSidebar       []string       `json:"defaultSidebar"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type GetTermsBody struct {

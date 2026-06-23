@@ -1607,6 +1607,38 @@ func (c *Client) GetDefaultDesktopWallpaper(ctx context.Context) (*string, error
 	return &result, nil
 }
 
+// GetDisksParams contains optional parameters for the GetDisks operation.
+type GetDisksParams struct {
+	// Permission to filter the disks by
+	Permission *string `json:"permission,omitempty"`
+	// Filter disks by if they are provisioned or not
+	Provisioned *bool `json:"provisioned,omitempty"`
+}
+
+// GetDisks - List disks
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns disks the user can access.
+func (c *Client) GetDisks(ctx context.Context, opts ...GetDisksParams) (*[]Disk, error) {
+	path := "/api/disks"
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "permission", params.Permission)
+		addQueryParam(queryValues, "provisioned", params.Provisioned)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result []Disk
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // GetGroupsParams contains optional parameters for the GetGroups operation.
 type GetGroupsParams struct {
 	// Only return groups that have access to this network.
@@ -7139,6 +7171,22 @@ func (c *Client) ScimUserPatch(ctx context.Context, organization string, id stri
 		return parseErrorError(err)
 	}
 	return nil
+}
+
+// GetOrganizationSidebar - Get organization default sidebar
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the organization's configured default sidebar item IDs, or null when none are set.
+func (c *Client) GetOrganizationSidebar(ctx context.Context, organization string) (*GetOrgSidebarOutputBody, error) {
+	path := "/api/organizations/{organization}/sidebar"
+	path = pathReplace(path, "organization", organization)
+
+	var result GetOrgSidebarOutputBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
 }
 
 // UpdateOrganizationSidebar - Update organization default sidebar

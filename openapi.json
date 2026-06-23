@@ -8221,6 +8221,114 @@
         ],
         "type": "object"
       },
+      "Disk": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "Cloud service provider of the disk",
+            "type": "string"
+          },
+          "diskType": {
+            "description": "Underlying disk type (e.g. 'gp3')",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "Display name of the disk",
+            "type": "string"
+          },
+          "encrypted": {
+            "description": "Indicates if the disk is encrypted",
+            "type": "boolean"
+          },
+          "ephemeral": {
+            "description": "Indicates if the disk is ephemeral",
+            "type": "boolean"
+          },
+          "favorite": {
+            "description": "Whether the disk is favorited by the user",
+            "type": "boolean"
+          },
+          "group": {
+            "description": "Group to which the disk is billed",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier of the disk",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL of the disk's image/icon",
+            "type": "string"
+          },
+          "name": {
+            "description": "Platform name of the disk",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "network": {
+            "description": "VPC Network associated with the disk",
+            "type": "string"
+          },
+          "region": {
+            "description": "Region of the disk",
+            "type": "string"
+          },
+          "restoreSnapshot": {
+            "description": "Indicates if the disk was restored from a snapshot",
+            "type": "boolean"
+          },
+          "sizeGb": {
+            "description": "Size of the disk in GiB",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": "Current provision status of the disk",
+            "type": "string"
+          },
+          "tags": {
+            "description": "Tags associated with the disk",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "type": {
+            "description": "CSP-prefixed type of the disk (e.g. 'aws-disk')",
+            "type": "string"
+          },
+          "uri": {
+            "description": "Parallel Works URI for the disk (pw://user/name)",
+            "type": "string"
+          },
+          "user": {
+            "description": "Username of the disk owner",
+            "type": "string"
+          },
+          "zone": {
+            "description": "Zone of the disk",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "displayName",
+          "user",
+          "uri",
+          "type",
+          "imageUrl",
+          "csp",
+          "tags",
+          "status",
+          "favorite"
+        ],
+        "type": "object"
+      },
       "DockerWorkspaceSettings": {
         "additionalProperties": false,
         "properties": {
@@ -9271,6 +9379,25 @@
         "required": [
           "hostname",
           "dataPoints"
+        ],
+        "type": "object"
+      },
+      "GetOrgSidebarOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "defaultSidebar": {
+            "description": "The organization's configured default sidebar item IDs, or null when the organization has not set a custom default (users fall back to platform defaults).",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "defaultSidebar"
         ],
         "type": "object"
       },
@@ -31206,6 +31333,66 @@
         ]
       }
     },
+    "/api/disks": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns disks the user can access.",
+        "operationId": "get-disks",
+        "parameters": [
+          {
+            "description": "Permission to filter the disks by",
+            "explode": false,
+            "in": "query",
+            "name": "permission",
+            "schema": {
+              "description": "Permission to filter the disks by",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter disks by if they are provisioned or not",
+            "explode": false,
+            "in": "query",
+            "name": "provisioned",
+            "schema": {
+              "description": "Filter disks by if they are provisioned or not",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Disk"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List disks",
+        "tags": [
+          "Disks"
+        ]
+      }
+    },
     "/api/groups": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the groups for the currently authenticated subject.",
@@ -48335,6 +48522,51 @@
           }
         },
         "summary": "Reset organization default sidebar",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the organization's configured default sidebar item IDs, or null when none are set.",
+        "operationId": "get-organization-sidebar",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOrgSidebarOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get organization default sidebar",
         "tags": [
           "Organization"
         ]
