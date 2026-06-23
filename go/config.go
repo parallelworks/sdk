@@ -11,10 +11,10 @@ import (
 	"strings"
 )
 
-// CredentialConfig file constants
 const (
 	pwDirectoryName     = "pw"
 	credentialsFileName = ".credentials"
+	xdgCredentialsName  = "credentials"
 )
 
 // Sentinel errors for config and context operations
@@ -78,14 +78,23 @@ type ContextInfo struct {
 	IsCurrent    bool   `json:"isCurrent"`
 }
 
-// DefaultCredentialConfigPath returns the default credentials file path: ~/pw/.credentials.
-// PW_CREDENTIALS_DIR overrides the directory containing .credentials; lets dev
-// workflows isolate credentials without redirecting $HOME (which would also
-// break software cache / ssh keys when /tmp is mounted noexec).
+// DefaultCredentialConfigPath returns the credentials file path,
+// ~/.config/pw/credentials (PW_CREDENTIALS_DIR overrides). It must resolve
+// identically to the CLI's internal/paths.CredentialsFile (guarded by an
+// equivalence test); XDG is computed here rather than via os.UserConfigDir so
+// macOS matches Linux.
 func DefaultCredentialConfigPath() (string, error) {
 	if override := os.Getenv("PW_CREDENTIALS_DIR"); override != "" {
 		return filepath.Join(override, credentialsFileName), nil
 	}
+	base, err := xdgConfigHome()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(base, pwDirectoryName, xdgCredentialsName), nil
+}
+
+func legacyCredentialConfigPath() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("unable to get home directory: %w", err)
@@ -93,11 +102,31 @@ func DefaultCredentialConfigPath() (string, error) {
 	return filepath.Join(homeDir, pwDirectoryName, credentialsFileName), nil
 }
 
-// LoadCredentialConfig reads the credentials file from the default path.
+func xdgConfigHome() (string, error) {
+	if v := os.Getenv("XDG_CONFIG_HOME"); filepath.IsAbs(v) {
+		return v, nil
+	}
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("unable to get home directory: %w", err)
+	}
+	return filepath.Join(homeDir, ".config"), nil
+}
+
+// LoadCredentialConfig reads the credentials file from the default (XDG) path,
+// falling back to reading the legacy ~/pw/.credentials. The SDK never moves the
+// file; the CLI owns migration.
 func LoadCredentialConfig() (*CredentialConfig, error) {
 	path, err := DefaultCredentialConfigPath()
 	if err != nil {
 		return nil, err
+	}
+	if _, statErr := os.Stat(path); errors.Is(statErr, os.ErrNotExist) && os.Getenv("PW_CREDENTIALS_DIR") == "" {
+		if legacy, lerr := legacyCredentialConfigPath(); lerr == nil {
+			if _, lstatErr := os.Stat(legacy); lstatErr == nil {
+				return LoadCredentialConfigFrom(legacy)
+			}
+		}
 	}
 	return LoadCredentialConfigFrom(path)
 }
