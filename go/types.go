@@ -1047,6 +1047,7 @@ type AwsSlurmPartition struct {
 	Name                  *string        `json:"name,omitempty"`
 	PlacementGroup        *string        `json:"placementGroup,omitempty"`
 	Preemptible           *bool          `json:"preemptible,omitempty"`
+	ProvisioningMode      *string        `json:"provisioningMode,omitempty"`
 	SuspendTime           *int64         `json:"suspendTime,omitempty"`
 	UsePlacementGroup     *bool          `json:"usePlacementGroup,omitempty"`
 	Zone                  *string        `json:"zone,omitempty"`
@@ -1502,6 +1503,7 @@ type AzureSlurmPartition struct {
 	MaxNodes                *int64         `json:"maxNodes,omitempty"`
 	Name                    *string        `json:"name,omitempty"`
 	Preemptible             *bool          `json:"preemptible,omitempty"`
+	ProvisioningMode        *string        `json:"provisioningMode,omitempty"`
 	Reservation             *bool          `json:"reservation,omitempty"`
 	ReservationID           *string        `json:"reservationId,omitempty"`
 	ShowLocalDisk           *bool          `json:"show_local_disk,omitempty"`
@@ -4409,6 +4411,12 @@ type ListRoleBindingsOutputBody struct {
 	// List of RoleBindings in the namespace
 	RoleBindings         []RoleBindingEntry `json:"roleBindings"`
 	AdditionalProperties map[string]any     `json:"-,omitempty"`
+}
+
+type ListUnitAllocationsOutputBody struct {
+	// Names of allocations that reference this unit
+	Allocations          []string       `json:"allocations"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ListUserAttachmentsBody struct {

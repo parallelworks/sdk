@@ -7300,6 +7300,39 @@ func (c *Client) GetUnit(ctx context.Context, organization string, unit string) 
 	return &result, nil
 }
 
+// DeleteUnit - Delete a unit
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Permanently deletes a billing unit along with its SKUs, pricing rules, and all usage and billing history.
+func (c *Client) DeleteUnit(ctx context.Context, organization string, unit string) error {
+	path := "/api/organizations/{organization}/units/{unit}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "unit", unit)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
+}
+
+// ListUnitAllocations - List allocations referencing a unit
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the names of allocations that reference the unit, used to determine whether the unit can be deleted.
+func (c *Client) ListUnitAllocations(ctx context.Context, organization string, unit string) (*ListUnitAllocationsOutputBody, error) {
+	path := "/api/organizations/{organization}/units/{unit}/allocations"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "unit", unit)
+
+	var result ListUnitAllocationsOutputBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // CreateUnitRule - Create a new unit pricing rule
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.

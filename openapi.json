@@ -2814,6 +2814,9 @@
           "preemptible": {
             "type": "boolean"
           },
+          "provisioningMode": {
+            "type": "string"
+          },
           "suspendTime": {
             "format": "int64",
             "type": "integer"
@@ -4100,6 +4103,9 @@
           },
           "preemptible": {
             "type": "boolean"
+          },
+          "provisioningMode": {
+            "type": "string"
           },
           "reservation": {
             "type": "boolean"
@@ -12515,6 +12521,25 @@
         },
         "required": [
           "roleBindings"
+        ],
+        "type": "object"
+      },
+      "ListUnitAllocationsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "allocations": {
+            "description": "Names of allocations that reference this unit",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "allocations"
         ],
         "type": "object"
       },
@@ -48871,6 +48896,54 @@
       }
     },
     "/api/organizations/{organization}/units/{unit}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nPermanently deletes a billing unit along with its SKUs, pricing rules, and all usage and billing history.",
+        "operationId": "delete-unit",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Unit name",
+            "in": "path",
+            "name": "unit",
+            "required": true,
+            "schema": {
+              "description": "Unit name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a unit",
+        "tags": [
+          "Allocations"
+        ]
+      },
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a single billing unit with its pricing rules.",
         "operationId": "get-unit",
@@ -48922,6 +48995,63 @@
           }
         },
         "summary": "Get unit details",
+        "tags": [
+          "Allocations"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/units/{unit}/allocations": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the names of allocations that reference the unit, used to determine whether the unit can be deleted.",
+        "operationId": "list-unit-allocations",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Unit name",
+            "in": "path",
+            "name": "unit",
+            "required": true,
+            "schema": {
+              "description": "Unit name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListUnitAllocationsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List allocations referencing a unit",
         "tags": [
           "Allocations"
         ]
