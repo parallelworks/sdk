@@ -81,6 +81,30 @@
         ],
         "type": "object"
       },
+      "AcceleratorInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "Description": {
+            "type": "string"
+          },
+          "HourlyPrice": {
+            "format": "double",
+            "type": "number"
+          },
+          "MaximumCardsPerInstance": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name",
+          "MaximumCardsPerInstance"
+        ],
+        "type": "object"
+      },
       "AcceptTermsBody": {
         "additionalProperties": false,
         "properties": {
@@ -10174,6 +10198,17 @@
           "elasticImage": {
             "type": "string"
           },
+          "flexStartWaitTime": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "gpuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "gpuType": {
+            "type": "string"
+          },
           "gvnic": {
             "type": "boolean"
           },
@@ -10182,6 +10217,10 @@
           },
           "maxDistance": {
             "type": "string"
+          },
+          "maxDuration": {
+            "format": "int64",
+            "type": "integer"
           },
           "maxNodes": {
             "format": "int64",
@@ -10204,6 +10243,9 @@
           },
           "preemptible": {
             "type": "boolean"
+          },
+          "provisioningMode": {
+            "type": "string"
           },
           "reservation": {
             "type": "boolean"
@@ -62100,6 +62142,77 @@
         "summary": "Get current session (deprecated)",
         "tags": [
           "Authentication"
+        ]
+      }
+    },
+    "/api/v2/resources/accelerators": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns attachable GPU types available in a region (optionally narrowed to zones), with max cards per instance and regional pricing.",
+        "operationId": "get-accelerators",
+        "parameters": [
+          {
+            "description": "Cloud provider (attachable GPUs are GCP-only)",
+            "explode": false,
+            "in": "query",
+            "name": "csp",
+            "required": true,
+            "schema": {
+              "description": "Cloud provider (attachable GPUs are GCP-only)",
+              "enum": [
+                "google"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Region; GPU types and pricing are per-region",
+            "explode": false,
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "description": "Region; GPU types and pricing are per-region",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated zones. Only GPU types available in ALL of them are returned (max cards = the minimum across them).",
+            "explode": false,
+            "in": "query",
+            "name": "zones",
+            "schema": {
+              "description": "Comma-separated zones. Only GPU types available in ALL of them are returned (max cards = the minimum across them).",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/AcceleratorInfo"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get GPU accelerator types",
+        "tags": [
+          "Clusters"
         ]
       }
     },

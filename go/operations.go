@@ -11173,6 +11173,38 @@ func (c *Client) GetAuthSessionDeprecated(ctx context.Context) (*AuthSession, er
 	return &result, nil
 }
 
+// GetAcceleratorsParams contains optional parameters for the GetAccelerators operation.
+type GetAcceleratorsParams struct {
+	// Region; GPU types and pricing are per-region
+	Region *string `json:"region,omitempty"`
+	// Comma-separated zones. Only GPU types available in ALL of them are returned (max cards = the minimum across them).
+	Zones *string `json:"zones,omitempty"`
+}
+
+// GetAccelerators - Get GPU accelerator types
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns attachable GPU types available in a region (optionally narrowed to zones), with max cards per instance and regional pricing.
+func (c *Client) GetAccelerators(ctx context.Context, opts ...GetAcceleratorsParams) (*map[string]AcceleratorInfo, error) {
+	path := "/api/v2/resources/accelerators"
+
+	if len(opts) > 0 {
+		params := opts[0]
+		queryValues := url.Values{}
+		addQueryParam(queryValues, "region", params.Region)
+		addQueryParam(queryValues, "zones", params.Zones)
+		if len(queryValues) > 0 {
+			path += "?" + queryValues.Encode()
+		}
+	}
+	var result map[string]AcceleratorInfo
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // CreateSSHPublicKeyLegacy - Add an SSH public key (legacy path)
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.

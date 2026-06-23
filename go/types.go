@@ -37,6 +37,14 @@ type APIKeyResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type AcceleratorInfo struct {
+	Description             *string        `json:"Description,omitempty"`
+	HourlyPrice             *float64       `json:"HourlyPrice,omitempty"`
+	MaximumCardsPerInstance int64          `json:"MaximumCardsPerInstance"`
+	Name                    string         `json:"Name"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
+}
+
 type AcceptTermsBody struct {
 	// When the user accepted the Terms & Conditions
 	TermsAcceptedAt      time.Time      `json:"termsAcceptedAt"`
@@ -3644,9 +3652,13 @@ type GoogleSlurmPartition struct {
 	Default              any            `json:"default,omitempty"`
 	Disks                []ClusterDisk  `json:"disks,omitempty"`
 	ElasticImage         *string        `json:"elasticImage,omitempty"`
+	FlexStartWaitTime    *int64         `json:"flexStartWaitTime,omitempty"`
+	GpuCount             *int64         `json:"gpuCount,omitempty"`
+	GpuType              *string        `json:"gpuType,omitempty"`
 	Gvnic                *bool          `json:"gvnic,omitempty"`
 	InstanceType         *string        `json:"instanceType,omitempty"`
 	MaxDistance          *string        `json:"maxDistance,omitempty"`
+	MaxDuration          *int64         `json:"maxDuration,omitempty"`
 	MaxNodes             *int64         `json:"maxNodes,omitempty"`
 	MigrateOnMaintenance *bool          `json:"migrateOnMaintenance,omitempty"`
 	MultiZone            *bool          `json:"multiZone,omitempty"`
@@ -3654,6 +3666,7 @@ type GoogleSlurmPartition struct {
 	Os                   *string        `json:"os,omitempty"`
 	PlacementGroup       *string        `json:"placementGroup,omitempty"`
 	Preemptible          *bool          `json:"preemptible,omitempty"`
+	ProvisioningMode     *string        `json:"provisioningMode,omitempty"`
 	Reservation          *bool          `json:"reservation,omitempty"`
 	ReservationID        *string        `json:"reservationId,omitempty"`
 	SuspendTime          *int64         `json:"suspendTime,omitempty"`
