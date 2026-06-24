@@ -2817,6 +2817,8 @@ type CustomResourceTagsOutputBody struct {
 type CustomSku struct {
 	// SKU code (e.g., SLURM_NODE_HOUR)
 	Code string `json:"code"`
+	// Current rate multiplier: the open-ended rule's rate, else the most recent rule's, else 1
+	CurrentRate float64 `json:"currentRate"`
 	// Deletion timestamp
 	DeletedAt *time.Time `json:"deletedAt,omitempty"`
 	// Description

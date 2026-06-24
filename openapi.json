@@ -7890,6 +7890,11 @@
             "description": "SKU code (e.g., SLURM_NODE_HOUR)",
             "type": "string"
           },
+          "currentRate": {
+            "description": "Current rate multiplier: the open-ended rule's rate, else the most recent rule's, else 1",
+            "format": "double",
+            "type": "number"
+          },
           "deletedAt": {
             "description": "Deletion timestamp",
             "format": "date-time",
@@ -7931,7 +7936,8 @@
           "name",
           "unitId",
           "type",
-          "subtype"
+          "subtype",
+          "currentRate"
         ],
         "type": "object"
       },
