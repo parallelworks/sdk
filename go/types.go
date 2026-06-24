@@ -593,13 +593,9 @@ type AllocationSummary struct {
 }
 
 type AllocationThreshold struct {
-	// The description of the threshold.
-	Description string `json:"description"`
-	// The color for the threshold label.
-	LabelColor string `json:"labelColor"`
-	// The name of the threshold.
-	Name string `json:"name"`
-	// The threshold percentage.
+	// The actions configured for this threshold.
+	Actions []string `json:"actions"`
+	// The allocation usage percentage the cluster's group has crossed.
 	Threshold            float64        `json:"threshold"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -2655,6 +2651,12 @@ type CreateSSHPublicKeyInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type CreateSkuRuleBody struct {
+	// Units consumed per unit of usage quantity
+	Rate                 float64        `json:"rate"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type CreateSnapshotBody struct {
 	// Name of the snapshot
 	SnapshotName         string         `json:"snapshotName"`
@@ -2831,6 +2833,20 @@ type CustomSku struct {
 	Type string `json:"type"`
 	// Parent unit ID
 	UnitID               string         `json:"unitId"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CustomSkuRule struct {
+	// Parent SKU ID
+	CustomSkuID string `json:"customSkuId"`
+	// Start of effective period
+	EffectiveFrom time.Time `json:"effectiveFrom"`
+	// End of effective period (null = open-ended)
+	EffectiveTo *time.Time `json:"effectiveTo,omitempty"`
+	// Rule ID
+	ID string `json:"id"`
+	// Units consumed per unit of usage quantity
+	Rate                 float64        `json:"rate"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -5740,6 +5756,20 @@ type OrgAiProviderResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type OrgAllocationThreshold struct {
+	// Actions taken when the threshold is crossed.
+	Actions []string `json:"actions"`
+	// Additional email addresses notified when the notify action is set.
+	ExtraRecipients []string `json:"extraRecipients"`
+	// When true the threshold is evaluated against estimated (realtime) usage instead of billed usage.
+	Realtime bool `json:"realtime"`
+	// When true and the notify action is set, members of the group that crossed the threshold are notified.
+	SendToGroup bool `json:"sendToGroup"`
+	// The allocation usage percent that trips this threshold. Values above 100 are allowed for groups that overspend their allocation.
+	Threshold            float64        `json:"threshold"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type OrgMauBreakdown struct {
 	// Monthly active users count
 	Mau int64 `json:"mau"`
@@ -6070,6 +6100,20 @@ type PatchSessionBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type PatchSkuBody struct {
+	// SKU code (e.g., SLURM_NODE_HOUR)
+	Code *string `json:"code,omitempty"`
+	// SKU description
+	Description *string `json:"description,omitempty"`
+	// SKU display name
+	Name *string `json:"name,omitempty"`
+	// SKU subtype (e.g., NodeHour, Token)
+	Subtype *string `json:"subtype,omitempty"`
+	// SKU type (e.g., Compute, Licenses)
+	Type                 *string        `json:"type,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type PatchWebhookBody struct {
 	// Whether the webhook should be enabled.
 	Enabled              *bool          `json:"enabled"`
@@ -6379,6 +6423,8 @@ type PostSkuBody struct {
 	Description *string `json:"description,omitempty"`
 	// SKU display name
 	Name string `json:"name"`
+	// Initial SKU rate (units consumed per unit of usage quantity); defaults to 1
+	Rate *float64 `json:"rate,omitempty"`
 	// SKU subtype (e.g., NodeHour, Token)
 	Subtype string `json:"subtype"`
 	// SKU type (e.g., Compute, Licenses)
@@ -7427,6 +7473,7 @@ type RatedCostWithMetadata struct {
 	Metadata             map[string]any `json:"metadata,omitempty"`
 	OrganizationID       string         `json:"organizationId"`
 	Quantity             float64        `json:"quantity"`
+	SkuAppliedRate       float64        `json:"skuAppliedRate"`
 	StartedAt            time.Time      `json:"startedAt"`
 	Subtype              string         `json:"subtype"`
 	Type                 string         `json:"type"`

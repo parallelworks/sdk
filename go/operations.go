@@ -44,14 +44,14 @@ type GetPlatformAlertsParams struct {
 func (c *Client) GetPlatformAlerts(ctx context.Context, opts ...GetPlatformAlertsParams) (*[]Alert, error) {
 	path := "/api/admin/alerts"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Alert
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -114,15 +114,15 @@ type GetErrorLogsParams struct {
 func (c *Client) GetErrorLogs(ctx context.Context, opts ...GetErrorLogsParams) (*ListErrorLogsBody, error) {
 	path := "/api/admin/errors"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
 		addQueryParam(queryValues, "search", params.Search)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ListErrorLogsBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -307,9 +307,14 @@ func (c *Client) CleanupOldWorkflowRuns(ctx context.Context, body *DeleteOldWork
 // > This is a platform-admin only route.
 //
 // Returns the count of workflow runs that would be deleted if cleanup is performed
-func (c *Client) PreviewOldWorkflowRunsCleanup(ctx context.Context) (*WorkflowRunsCleanupPreviewBody, error) {
+func (c *Client) PreviewOldWorkflowRunsCleanup(ctx context.Context, months int64) (*WorkflowRunsCleanupPreviewBody, error) {
 	path := "/api/admin/maintenance/workflow-runs/old/preview"
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "months", months)
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
+	}
 	var result WorkflowRunsCleanupPreviewBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
@@ -364,16 +369,17 @@ type GetPlatformMauParams struct {
 // > This is a platform-admin only route.
 //
 // Returns monthly active user statistics for the entire platform, including per-organization breakdown.
-func (c *Client) GetPlatformMau(ctx context.Context, opts ...GetPlatformMauParams) (*PlatformMauResponse, error) {
+func (c *Client) GetPlatformMau(ctx context.Context, startDate string, opts ...GetPlatformMauParams) (*PlatformMauResponse, error) {
 	path := "/api/admin/mau"
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "startDate", startDate)
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "endDate", params.EndDate)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result PlatformMauResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -547,14 +553,14 @@ func (c *Client) GetPreviewUsers(ctx context.Context, flag string, opts ...GetPr
 	path := "/api/admin/previews/{flag}/users"
 	path = pathReplace(path, "flag", flag)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result PreviewUsersOutputBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -583,14 +589,14 @@ type GetPlatformReportsParams struct {
 func (c *Client) GetPlatformReports(ctx context.Context, opts ...GetPlatformReportsParams) (*[]Report, error) {
 	path := "/api/admin/reports"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Report
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -760,16 +766,16 @@ type GetUserAiUsageBreakdownParams struct {
 func (c *Client) GetUserAiUsageBreakdown(ctx context.Context, opts ...GetUserAiUsageBreakdownParams) (*UsageBreakdownResponse, error) {
 	path := "/api/ai-usage/breakdown"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "startDate", params.StartDate)
 		addQueryParam(queryValues, "endDate", params.EndDate)
 		addQueryParam(queryValues, "groupBy", params.GroupBy)
 		addQueryParam(queryValues, "limit", params.Limit)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result UsageBreakdownResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -798,16 +804,16 @@ type GetUserAiUsageOverTimeParams struct {
 func (c *Client) GetUserAiUsageOverTime(ctx context.Context, opts ...GetUserAiUsageOverTimeParams) (*[]TimeSeriesPoint, error) {
 	path := "/api/ai-usage/over-time"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "startDate", params.StartDate)
 		addQueryParam(queryValues, "endDate", params.EndDate)
 		addQueryParam(queryValues, "granularity", params.Granularity)
 		addQueryParam(queryValues, "groupBy", params.GroupBy)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []TimeSeriesPoint
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -832,14 +838,14 @@ type GetUserAiUsageSummaryParams struct {
 func (c *Client) GetUserAiUsageSummary(ctx context.Context, opts ...GetUserAiUsageSummaryParams) (*UsageSummaryResponse, error) {
 	path := "/api/ai-usage/summary"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "startDate", params.StartDate)
 		addQueryParam(queryValues, "endDate", params.EndDate)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result UsageSummaryResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -866,15 +872,15 @@ type ListUserAiChatAttachmentsParams struct {
 func (c *Client) ListUserAiChatAttachments(ctx context.Context, opts ...ListUserAiChatAttachmentsParams) (*ListUserAttachmentsBody, error) {
 	path := "/api/aichat/attachments"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "offset", params.Offset)
 		addQueryParam(queryValues, "contentType", params.ContentType)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ListUserAttachmentsBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -945,14 +951,14 @@ type ListAiChatConversationsParams struct {
 func (c *Client) ListAiChatConversations(ctx context.Context, opts ...ListAiChatConversationsParams) (*ListConversationsBody, error) {
 	path := "/api/aichat/conversations"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "offset", params.Offset)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ListConversationsBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -991,13 +997,13 @@ func (c *Client) ListAiChatAttachments(ctx context.Context, conversationID strin
 	path := "/api/aichat/conversations/{conversationId}/attachments"
 	path = pathReplace(path, "conversationId", conversationID)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "messageId", params.MessageID)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ListAttachmentsBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -1021,13 +1027,13 @@ func (c *Client) UploadAiChatAttachment(ctx context.Context, conversationID stri
 	path := "/api/aichat/conversations/{conversationId}/attachments"
 	path = pathReplace(path, "conversationId", conversationID)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "messageId", params.MessageID)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result AttachmentResponse
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
@@ -1166,13 +1172,13 @@ func (c *Client) GetAiChatConversation(ctx context.Context, id string, opts ...G
 	path := "/api/aichat/conversations/{id}"
 	path = pathReplace(path, "id", id)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "branchId", params.BranchID)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ConversationResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -1232,16 +1238,16 @@ type ListUserAllocationsParams struct {
 func (c *Client) ListUserAllocations(ctx context.Context, opts ...ListUserAllocationsParams) (*[]Allocation, error) {
 	path := "/api/allocations"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
 		addQueryParam(queryValues, "name", params.Name)
 		addQueryParam(queryValues, "sort", params.Sort)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Allocation
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -1317,9 +1323,15 @@ func (c *Client) GetAuthSession(ctx context.Context) (*AuthSession, error) {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Called by the OIDC provider after the user authenticates. Exchanges the authorization code for tokens and signs the user in.
-func (c *Client) GetAuthSsoOidcCallback(ctx context.Context) error {
+func (c *Client) GetAuthSsoOidcCallback(ctx context.Context, code string, state string) error {
 	path := "/api/auth/sso/oidc/callback"
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "code", code)
+	addQueryParam(queryValues, "state", state)
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
+	}
 	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
 		return parseErrorError(err)
 	}
@@ -1355,13 +1367,13 @@ type GetAuthTokenParams struct {
 func (c *Client) GetAuthToken(ctx context.Context, opts ...GetAuthTokenParams) (*string, error) {
 	path := "/api/auth/token"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "ttl", params.Ttl)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result string
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -1375,9 +1387,17 @@ func (c *Client) GetAuthToken(ctx context.Context, opts ...GetAuthTokenParams) (
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Generates a JWT token for cluster session authentication.
-func (c *Client) GetClusterSessionToken(ctx context.Context) (*string, error) {
+func (c *Client) GetClusterSessionToken(ctx context.Context, sessionID string, provider string, name string, sessionNumber string) (*string, error) {
 	path := "/api/auth/token/cluster-session"
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "session_id", sessionID)
+	addQueryParam(queryValues, "provider", provider)
+	addQueryParam(queryValues, "name", name)
+	addQueryParam(queryValues, "session_number", sessionNumber)
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
+	}
 	var result string
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
@@ -1399,13 +1419,13 @@ type GetAuthTokenOidcParams struct {
 func (c *Client) GetAuthTokenOidc(ctx context.Context, opts ...GetAuthTokenOidcParams) (*string, error) {
 	path := "/api/auth/token/oidc"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "clusterName", params.ClusterName)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result string
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -1561,14 +1581,14 @@ type GetBucketsParams struct {
 func (c *Client) GetBuckets(ctx context.Context, opts ...GetBucketsParams) (*[]Bucket, error) {
 	path := "/api/buckets"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "permission", params.Permission)
 		addQueryParam(queryValues, "provisioned", params.Provisioned)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Bucket
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -1623,14 +1643,14 @@ type GetDisksParams struct {
 func (c *Client) GetDisks(ctx context.Context, opts ...GetDisksParams) (*[]Disk, error) {
 	path := "/api/disks"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "permission", params.Permission)
 		addQueryParam(queryValues, "provisioned", params.Provisioned)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Disk
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -1653,13 +1673,13 @@ type GetGroupsParams struct {
 func (c *Client) GetGroups(ctx context.Context, opts ...GetGroupsParams) (*[]Group, error) {
 	path := "/api/groups"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "network", params.Network)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Group
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -1688,16 +1708,16 @@ type GetHelmChartValuesParams struct {
 func (c *Client) GetHelmChartValues(ctx context.Context, opts ...GetHelmChartValuesParams) (*HelmChartValuesOutputBody, error) {
 	path := "/api/helm-charts/values"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "repoURL", params.RepoURL)
 		addQueryParam(queryValues, "version", params.Version)
 		addQueryParam(queryValues, "chartName", params.ChartName)
 		addQueryParam(queryValues, "repoName", params.RepoName)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result HelmChartValuesOutputBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -1794,14 +1814,14 @@ type GithubOauthCallbackParams struct {
 func (c *Client) GithubOauthCallback(ctx context.Context, opts ...GithubOauthCallbackParams) error {
 	path := "/api/integrations/github/oauth/callback"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "code", params.Code)
 		addQueryParam(queryValues, "state", params.State)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
 		return parseErrorError(err)
@@ -1839,18 +1859,19 @@ type GithubReposParams struct {
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Lists repositories accessible via the user's GitHub App installation.
-func (c *Client) GithubRepos(ctx context.Context, opts ...GithubReposParams) (*ListReposOutputBody, error) {
+func (c *Client) GithubRepos(ctx context.Context, installationID int64, opts ...GithubReposParams) (*ListReposOutputBody, error) {
 	path := "/api/integrations/github/repos"
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "installation_id", installationID)
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "page", params.Page)
 		addQueryParam(queryValues, "per_page", params.PerPage)
 		addQueryParam(queryValues, "q", params.Q)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ListReposOutputBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -1906,15 +1927,15 @@ type GetIpsParams struct {
 func (c *Client) GetIps(ctx context.Context, opts ...GetIpsParams) (*[]IP, error) {
 	path := "/api/ips"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "csp", params.Csp)
 		addQueryParam(queryValues, "region", params.Region)
 		addQueryParam(queryValues, "provisioned", params.Provisioned)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []IP
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -1954,14 +1975,14 @@ type GetLustreParams struct {
 func (c *Client) GetLustre(ctx context.Context, opts ...GetLustreParams) (*[]Lustre, error) {
 	path := "/api/lustre"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "permission", params.Permission)
 		addQueryParam(queryValues, "provisioned", params.Provisioned)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Lustre
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -1992,17 +2013,17 @@ type ListMarketplaceItemsParams struct {
 func (c *Client) ListMarketplaceItems(ctx context.Context, opts ...ListMarketplaceItemsParams) (*[]MarketplaceListItem, error) {
 	path := "/api/market"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "modifiable", params.Modifiable)
 		addQueryParam(queryValues, "mine", params.Mine)
 		addQueryParam(queryValues, "organization", params.Organization)
 		addQueryParam(queryValues, "verified", params.Verified)
 		addQueryParam(queryValues, "featured", params.Featured)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []MarketplaceListItem
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -2965,9 +2986,14 @@ func (c *Client) PublishRemoteWorkflow(ctx context.Context, body PublishRemoteWo
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns tags used by visible marketplace items of the same type, ranked by frequency, for publish-form suggestions.
-func (c *Client) ListMarketplaceTagRecommendations(ctx context.Context) (*TagRecommendationsBody, error) {
+func (c *Client) ListMarketplaceTagRecommendations(ctx context.Context, type_ string) (*TagRecommendationsBody, error) {
 	path := "/api/marketplace/tag-recommendations"
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "type", type_)
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
+	}
 	var result TagRecommendationsBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
@@ -2993,15 +3019,15 @@ type GetMachineLearningWorkspacesParams struct {
 func (c *Client) GetMachineLearningWorkspaces(ctx context.Context, opts ...GetMachineLearningWorkspacesParams) (*[]MachineLearningWorkspace, error) {
 	path := "/api/mlworkspaces"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "csp", params.Csp)
 		addQueryParam(queryValues, "region", params.Region)
 		addQueryParam(queryValues, "provisioned", params.Provisioned)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []MachineLearningWorkspace
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -3041,14 +3067,14 @@ type GetNfsParams struct {
 func (c *Client) GetNfs(ctx context.Context, opts ...GetNfsParams) (*[]Nfs, error) {
 	path := "/api/nfs"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "permission", params.Permission)
 		addQueryParam(queryValues, "provisioned", params.Provisioned)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Nfs
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -3075,15 +3101,15 @@ type GetNotificationsParams struct {
 func (c *Client) GetNotifications(ctx context.Context, opts ...GetNotificationsParams) (*[]Notification, error) {
 	path := "/api/notifications"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
 		addQueryParam(queryValues, "read", params.Read)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Notification
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -3174,10 +3200,15 @@ func (c *Client) DeleteNotification(ctx context.Context, id string) error {
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Marks a notification's read or archived field as true for the currently authenticated subject.
-func (c *Client) UpdateNotification(ctx context.Context, id string) (*Notification, error) {
+func (c *Client) UpdateNotification(ctx context.Context, id string, field string) (*Notification, error) {
 	path := "/api/notifications/{id}"
 	path = pathReplace(path, "id", id)
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "field", field)
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
+	}
 	var result Notification
 	if err := c.do(ctx, "PATCH", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
@@ -3317,17 +3348,17 @@ type GetOrganizationsParams struct {
 func (c *Client) GetOrganizations(ctx context.Context, opts ...GetOrganizationsParams) (*OrganizationsOutputBody, error) {
 	path := "/api/organizations"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "offset", params.Offset)
 		addQueryParam(queryValues, "search", params.Search)
 		addQueryParam(queryValues, "sortBy", params.SortBy)
 		addQueryParam(queryValues, "sortDir", params.SortDir)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result OrganizationsOutputBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -3587,16 +3618,16 @@ func (c *Client) GetOrgUsageBreakdown(ctx context.Context, organization string, 
 	path := "/api/organizations/{organization}/ai-usage/breakdown"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "startDate", params.StartDate)
 		addQueryParam(queryValues, "endDate", params.EndDate)
 		addQueryParam(queryValues, "groupBy", params.GroupBy)
 		addQueryParam(queryValues, "limit", params.Limit)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result UsageBreakdownResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -3626,16 +3657,16 @@ func (c *Client) GetOrgUsageOverTime(ctx context.Context, organization string, o
 	path := "/api/organizations/{organization}/ai-usage/over-time"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "startDate", params.StartDate)
 		addQueryParam(queryValues, "endDate", params.EndDate)
 		addQueryParam(queryValues, "granularity", params.Granularity)
 		addQueryParam(queryValues, "groupBy", params.GroupBy)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []TimeSeriesPoint
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -3661,20 +3692,102 @@ func (c *Client) GetOrgUsageSummary(ctx context.Context, organization string, op
 	path := "/api/organizations/{organization}/ai-usage/summary"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "startDate", params.StartDate)
 		addQueryParam(queryValues, "endDate", params.EndDate)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result OrgUsageSummaryResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// GetOrganizationAllocationThresholds - List organization allocation thresholds
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the organization's allocation thresholds, sorted ascending by percent.
+func (c *Client) GetOrganizationAllocationThresholds(ctx context.Context, organization string) (*[]OrgAllocationThreshold, error) {
+	path := "/api/organizations/{organization}/allocation-thresholds"
+	path = pathReplace(path, "organization", organization)
+
+	var result []OrgAllocationThreshold
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CreateOrganizationAllocationThreshold - Create organization allocation threshold
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates an allocation threshold for the organization. The percent value must be unique within the organization.
+func (c *Client) CreateOrganizationAllocationThreshold(ctx context.Context, organization string, body OrgAllocationThreshold) (*OrgAllocationThreshold, error) {
+	path := "/api/organizations/{organization}/allocation-thresholds"
+	path = pathReplace(path, "organization", organization)
+
+	var result OrgAllocationThreshold
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetOrganizationAllocationThreshold - Get organization allocation threshold
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a single allocation threshold identified by its percent value.
+func (c *Client) GetOrganizationAllocationThreshold(ctx context.Context, organization string, threshold float64) (*OrgAllocationThreshold, error) {
+	path := "/api/organizations/{organization}/allocation-thresholds/{threshold}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "threshold", threshold)
+
+	var result OrgAllocationThreshold
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateOrganizationAllocationThreshold - Update organization allocation threshold
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces the allocation threshold identified by its percent value. Changing the percent clears the recorded state on any groups sitting at the old percent.
+func (c *Client) UpdateOrganizationAllocationThreshold(ctx context.Context, organization string, threshold float64, body OrgAllocationThreshold) (*OrgAllocationThreshold, error) {
+	path := "/api/organizations/{organization}/allocation-thresholds/{threshold}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "threshold", threshold)
+
+	var result OrgAllocationThreshold
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteOrganizationAllocationThreshold - Delete organization allocation threshold
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes the allocation threshold identified by its percent value and clears the recorded state on any groups sitting at that percent.
+func (c *Client) DeleteOrganizationAllocationThreshold(ctx context.Context, organization string, threshold float64) error {
+	path := "/api/organizations/{organization}/allocation-thresholds/{threshold}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "threshold", threshold)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // ListOrgAllocationsParams contains optional parameters for the ListOrgAllocations operation.
@@ -3700,17 +3813,17 @@ func (c *Client) ListOrgAllocations(ctx context.Context, organization string, op
 	path := "/api/organizations/{organization}/allocations"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
 		addQueryParam(queryValues, "name", params.Name)
 		addQueryParam(queryValues, "parent", params.Parent)
 		addQueryParam(queryValues, "sort", params.Sort)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Allocation
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -3845,9 +3958,9 @@ func (c *Client) ListAllocationUsageEvents(ctx context.Context, organization str
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "name", name)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "pageSize", params.PageSize)
 		addQueryParam(queryValues, "page", params.Page)
 		addQueryParam(queryValues, "startedAtFrom", params.StartedAtFrom)
@@ -3865,9 +3978,9 @@ func (c *Client) ListAllocationUsageEvents(ctx context.Context, organization str
 		addQueryParam(queryValues, "amountMin", params.AmountMin)
 		addQueryParam(queryValues, "amountMax", params.AmountMax)
 		addQueryParam(queryValues, "metadata", params.Metadata)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result RatedCostsPaginatedResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -3952,9 +4065,9 @@ func (c *Client) DeleteAllAllocationUsageEvents(ctx context.Context, organizatio
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "name", name)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "startedAtFrom", params.StartedAtFrom)
 		addQueryParam(queryValues, "startedAtTo", params.StartedAtTo)
 		addQueryParam(queryValues, "endedAtFrom", params.EndedAtFrom)
@@ -3970,9 +4083,9 @@ func (c *Client) DeleteAllAllocationUsageEvents(ctx context.Context, organizatio
 		addQueryParam(queryValues, "amountMin", params.AmountMin)
 		addQueryParam(queryValues, "amountMax", params.AmountMax)
 		addQueryParam(queryValues, "metadata", params.Metadata)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result DeleteRatedCostsResponseBody
 	if err := c.do(ctx, "DELETE", path, nil, &result, "application/json"); err != nil {
@@ -4142,13 +4255,13 @@ func (c *Client) GetOrganizationBootstrapScripts(ctx context.Context, organizati
 	path := "/api/organizations/{organization}/bootstrap"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "type", params.Type)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []BootstrapScript
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -4544,15 +4657,15 @@ func (c *Client) GetAwsCloudImages(ctx context.Context, organization string, reg
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "region", region)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "network", params.Network)
 		addQueryParam(queryValues, "architecture", params.Architecture)
 		addQueryParam(queryValues, "name", params.Name)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []CloudImage
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -4583,16 +4696,16 @@ func (c *Client) GetAzureCloudImages(ctx context.Context, organization string, r
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "region", region)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "network", params.Network)
 		addQueryParam(queryValues, "architecture", params.Architecture)
 		addQueryParam(queryValues, "name", params.Name)
 		addQueryParam(queryValues, "hyperVGeneration", params.HyperVGeneration)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []CloudImage
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -4621,15 +4734,15 @@ func (c *Client) GetGoogleCloudImages(ctx context.Context, organization string, 
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "region", region)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "network", params.Network)
 		addQueryParam(queryValues, "architecture", params.Architecture)
 		addQueryParam(queryValues, "name", params.Name)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []CloudImage
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -4658,15 +4771,15 @@ func (c *Client) GetOracleCloudImages(ctx context.Context, organization string, 
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "region", region)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "network", params.Network)
 		addQueryParam(queryValues, "architecture", params.Architecture)
 		addQueryParam(queryValues, "name", params.Name)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []CloudImage
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -4772,15 +4885,15 @@ func (c *Client) GetOrganizationGroups(ctx context.Context, organization string,
 	path := "/api/organizations/{organization}/groups"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
 		addQueryParam(queryValues, "csp", params.Csp)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Group
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -4938,13 +5051,13 @@ func (c *Client) GetGroupCapacityReservations(ctx context.Context, organization 
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "group", group)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "csp", params.Csp)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []ReservationItem
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -5021,16 +5134,16 @@ func (c *Client) ListKubernetesConfigs(ctx context.Context, organization string,
 	path := "/api/organizations/{organization}/kubernetes/configs"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "clusters", params.Clusters)
 		addQueryParam(queryValues, "namespaces", params.Namespaces)
 		addQueryParam(queryValues, "types", params.Types)
 		addQueryParam(queryValues, "search", params.Search)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ConfigsBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -5056,15 +5169,15 @@ func (c *Client) ListKubernetesHelm(ctx context.Context, organization string, op
 	path := "/api/organizations/{organization}/kubernetes/helm"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "clusters", params.Clusters)
 		addQueryParam(queryValues, "namespaces", params.Namespaces)
 		addQueryParam(queryValues, "search", params.Search)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ChartsBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -5088,13 +5201,13 @@ func (c *Client) GetAllKubernetesNamespaces(ctx context.Context, organization st
 	path := "/api/organizations/{organization}/kubernetes/namespaces"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "clusters", params.Clusters)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result NamespacesBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -5118,13 +5231,13 @@ func (c *Client) ListEnrichedKubernetesNamespaces(ctx context.Context, organizat
 	path := "/api/organizations/{organization}/kubernetes/namespaces/enriched"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "clusters", params.Clusters)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ListEnrichedNamespacesOutputBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -5148,14 +5261,14 @@ func (c *Client) ListKubernetesNodes(ctx context.Context, organization string, o
 	path := "/api/organizations/{organization}/kubernetes/nodes"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "clusters", params.Clusters)
 		addQueryParam(queryValues, "search", params.Search)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result NodesBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -5181,14 +5294,14 @@ func (c *Client) ListKubernetesQuotas(ctx context.Context, organization string, 
 	path := "/api/organizations/{organization}/kubernetes/quotas"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "clusters", params.Clusters)
 		addQueryParam(queryValues, "namespaces", params.Namespaces)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result QuotasBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -5214,15 +5327,15 @@ func (c *Client) ListKubernetesServices(ctx context.Context, organization string
 	path := "/api/organizations/{organization}/kubernetes/services"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "clusters", params.Clusters)
 		addQueryParam(queryValues, "namespaces", params.Namespaces)
 		addQueryParam(queryValues, "search", params.Search)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ServicesBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -5250,16 +5363,16 @@ func (c *Client) ListKubernetesStorage(ctx context.Context, organization string,
 	path := "/api/organizations/{organization}/kubernetes/storage"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "clusters", params.Clusters)
 		addQueryParam(queryValues, "namespaces", params.Namespaces)
 		addQueryParam(queryValues, "types", params.Types)
 		addQueryParam(queryValues, "search", params.Search)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result StorageBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -5287,16 +5400,16 @@ func (c *Client) ListKubernetesWorkloads(ctx context.Context, organization strin
 	path := "/api/organizations/{organization}/kubernetes/workloads"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "clusters", params.Clusters)
 		addQueryParam(queryValues, "namespaces", params.Namespaces)
 		addQueryParam(queryValues, "types", params.Types)
 		addQueryParam(queryValues, "search", params.Search)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result WorkloadsBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -5556,14 +5669,14 @@ func (c *Client) DeleteKubernetesWorkload(ctx context.Context, organization stri
 	path = pathReplace(path, "workloadType", workloadType)
 	path = pathReplace(path, "workloadName", workloadName)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "cascade", params.Cascade)
 		addQueryParam(queryValues, "gracePeriod", params.GracePeriod)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
 		return parseErrorError(err)
@@ -5694,15 +5807,15 @@ func (c *Client) GetPodLogs(ctx context.Context, organization string, infraName 
 	path = pathReplace(path, "namespace", namespace)
 	path = pathReplace(path, "podName", podName)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "tailLines", params.TailLines)
 		addQueryParam(queryValues, "sinceTime", params.SinceTime)
 		addQueryParam(queryValues, "lastLogHash", params.LastLogHash)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result PodLogsResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -6181,13 +6294,13 @@ func (c *Client) GetManagedClusterMetrics(ctx context.Context, organization stri
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "cluster", cluster)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "hours", params.Hours)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result GetClusterMetricsOutputBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -6265,13 +6378,13 @@ func (c *Client) GetManagedClusterNodeMetrics(ctx context.Context, organization 
 	path = pathReplace(path, "cluster", cluster)
 	path = pathReplace(path, "hostname", hostname)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "hours", params.Hours)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result GetNodeMetricsOutputBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -6329,13 +6442,13 @@ func (c *Client) GetManagedClusterLiveSchedulerJobs(ctx context.Context, organiz
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "cluster", cluster)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "filterUser", params.FilterUser)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result SchedulerJobsResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -6407,17 +6520,18 @@ type GetOrganizationMauParams struct {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns monthly active user statistics for a specific organization, including daily breakdown.
-func (c *Client) GetOrganizationMau(ctx context.Context, organization string, opts ...GetOrganizationMauParams) (*OrgMauResponse, error) {
+func (c *Client) GetOrganizationMau(ctx context.Context, organization string, startDate string, opts ...GetOrganizationMauParams) (*OrgMauResponse, error) {
 	path := "/api/organizations/{organization}/mau"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "startDate", startDate)
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "endDate", params.EndDate)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result OrgMauResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -6443,13 +6557,13 @@ func (c *Client) GetUserClusterMetrics(ctx context.Context, organization string,
 	path = pathReplace(path, "namespace", namespace)
 	path = pathReplace(path, "clusterName", clusterName)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "hours", params.Hours)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []MetricEntry
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -6675,14 +6789,15 @@ type GetAllocationUsageEventsSummaryParams struct {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns usage events grouped by day and type for charting and reporting.
-func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organization string, allocation string, opts ...GetAllocationUsageEventsSummaryParams) (*[]map[string]any, error) {
+func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organization string, allocation string, startDate string, opts ...GetAllocationUsageEventsSummaryParams) (*[]map[string]any, error) {
 	path := "/api/organizations/{organization}/reports/allocations/{allocation}/usage/by-day"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "allocation", allocation)
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "startDate", startDate)
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "endDate", params.EndDate)
 		addQueryParam(queryValues, "groupBy", params.GroupBy)
 		addQueryParam(queryValues, "type", params.Type)
@@ -6690,9 +6805,9 @@ func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organizati
 		addQueryParam(queryValues, "user", params.User)
 		addQueryParam(queryValues, "sku", params.Sku)
 		addQueryParam(queryValues, "metadata", params.Metadata)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []map[string]any
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -6757,17 +6872,17 @@ func (c *Client) ListResourceGroups(ctx context.Context, organization string, op
 	path := "/api/organizations/{organization}/resource-groups"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
 		addQueryParam(queryValues, "name", params.Name)
 		addQueryParam(queryValues, "allocation", params.Allocation)
 		addQueryParam(queryValues, "sort", params.Sort)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []ResourceGroup
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -6876,16 +6991,16 @@ func (c *Client) ScimGroupsList(ctx context.Context, organization string, opts .
 	path := "/api/organizations/{organization}/scim/v2/Groups"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "filter", params.Filter)
 		addQueryParam(queryValues, "startIndex", params.StartIndex)
 		addQueryParam(queryValues, "count", params.Count)
 		addQueryParam(queryValues, "excludeInactiveUsers", params.ExcludeInactiveUsers)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ListResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -6925,13 +7040,13 @@ func (c *Client) ScimGroupGet(ctx context.Context, organization string, id strin
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "id", id)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "excludeInactiveUsers", params.ExcludeInactiveUsers)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ScimGroup
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -7059,17 +7174,17 @@ func (c *Client) ScimUsersList(ctx context.Context, organization string, opts ..
 	path := "/api/organizations/{organization}/scim/v2/Users"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "filter", params.Filter)
 		addQueryParam(queryValues, "attributes", params.Attributes)
 		addQueryParam(queryValues, "excludedAttributes", params.ExcludedAttributes)
 		addQueryParam(queryValues, "startIndex", params.StartIndex)
 		addQueryParam(queryValues, "count", params.Count)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ListResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -7109,14 +7224,14 @@ func (c *Client) ScimUserGet(ctx context.Context, organization string, id string
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "id", id)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "attributes", params.Attributes)
 		addQueryParam(queryValues, "excludedAttributes", params.ExcludedAttributes)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ScimUser
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -7350,16 +7465,30 @@ func (c *Client) CreateUnitRule(ctx context.Context, organization string, unit s
 	return &result, nil
 }
 
+// ListUnitSkusParams contains optional parameters for the ListUnitSkus operation.
+type ListUnitSkusParams struct {
+	// Include archived (soft-deleted) SKUs
+	IncludeArchived *bool `json:"includeArchived,omitempty"`
+}
+
 // ListUnitSkus - List SKUs for a unit
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns all SKUs associated with a billing unit.
-func (c *Client) ListUnitSkus(ctx context.Context, organization string, unit string) (*[]CustomSku, error) {
+func (c *Client) ListUnitSkus(ctx context.Context, organization string, unit string, opts ...ListUnitSkusParams) (*[]CustomSku, error) {
 	path := "/api/organizations/{organization}/units/{unit}/skus"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "unit", unit)
 
+	queryValues := url.Values{}
+	if len(opts) > 0 {
+		params := opts[0]
+		addQueryParam(queryValues, "includeArchived", params.IncludeArchived)
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
+	}
 	var result []CustomSku
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
@@ -7384,6 +7513,24 @@ func (c *Client) CreateUnitSku(ctx context.Context, organization string, unit st
 	return &result, nil
 }
 
+// GetUnitSku - Get a SKU
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a single SKU, including archived SKUs.
+func (c *Client) GetUnitSku(ctx context.Context, organization string, unit string, sku string) (*CustomSku, error) {
+	path := "/api/organizations/{organization}/units/{unit}/skus/{sku}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "unit", unit)
+	path = pathReplace(path, "sku", sku)
+
+	var result CustomSku
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // DeleteUnitSku - Archive a SKU from a unit
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -7399,6 +7546,78 @@ func (c *Client) DeleteUnitSku(ctx context.Context, organization string, unit st
 		return parseErrorError(err)
 	}
 	return nil
+}
+
+// UpdateUnitSku - Update a SKU
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates the mutable fields of a SKU. Editing type or subtype only affects future billing.
+func (c *Client) UpdateUnitSku(ctx context.Context, organization string, unit string, sku string, body *PatchSkuBody) (*CustomSku, error) {
+	path := "/api/organizations/{organization}/units/{unit}/skus/{sku}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "unit", unit)
+	path = pathReplace(path, "sku", sku)
+
+	var result CustomSku
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// RestoreUnitSku - Restore an archived SKU
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Restores an archived SKU by clearing its deletion timestamp.
+func (c *Client) RestoreUnitSku(ctx context.Context, organization string, unit string, sku string) (*CustomSku, error) {
+	path := "/api/organizations/{organization}/units/{unit}/skus/{sku}/restore"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "unit", unit)
+	path = pathReplace(path, "sku", sku)
+
+	var result CustomSku
+	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// ListSkuRules - List SKU pricing rules
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the rate history for a SKU.
+func (c *Client) ListSkuRules(ctx context.Context, organization string, unit string, sku string) (*[]CustomSkuRule, error) {
+	path := "/api/organizations/{organization}/units/{unit}/skus/{sku}/rules"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "unit", unit)
+	path = pathReplace(path, "sku", sku)
+
+	var result []CustomSkuRule
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// CreateSkuRule - Create a SKU pricing rule
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a new rate (units per quantity) for a SKU, effective now.
+func (c *Client) CreateSkuRule(ctx context.Context, organization string, unit string, sku string, body *CreateSkuRuleBody) (*CustomSkuRule, error) {
+	path := "/api/organizations/{organization}/units/{unit}/skus/{sku}/rules"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "unit", unit)
+	path = pathReplace(path, "sku", sku)
+
+	var result CustomSkuRule
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
 }
 
 // ListOrganizationUsersParams contains optional parameters for the ListOrganizationUsers operation.
@@ -7426,18 +7645,18 @@ func (c *Client) ListOrganizationUsers(ctx context.Context, organization string,
 	path := "/api/organizations/{organization}/users"
 	path = pathReplace(path, "organization", organization)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
 		addQueryParam(queryValues, "search", params.Search)
 		addQueryParam(queryValues, "active", params.Active)
 		addQueryParam(queryValues, "sortBy", params.SortBy)
 		addQueryParam(queryValues, "sortDir", params.SortDir)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ListOrgUsersOutputBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -7946,20 +8165,21 @@ type GetPresignedURLAzureAzfilesObjectParams struct {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns a pre-signed URL for a file inside an Azure Files share.
-func (c *Client) GetPresignedURLAzureAzfilesObject(ctx context.Context, organization string, user string, name string, opts ...GetPresignedURLAzureAzfilesObjectParams) (*string, error) {
+func (c *Client) GetPresignedURLAzureAzfilesObject(ctx context.Context, organization string, user string, name string, objectName string, opts ...GetPresignedURLAzureAzfilesObjectParams) (*string, error) {
 	path := "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/presigned-url"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "name", name)
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "objectName", objectName)
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "expiresIn", params.ExpiresIn)
 		addQueryParam(queryValues, "permissions", params.Permissions)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result string
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -8052,20 +8272,21 @@ type GetPresignedURLAzureBucketObjectParams struct {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns a pre-signed URL for an object inside an Azure bucket.
-func (c *Client) GetPresignedURLAzureBucketObject(ctx context.Context, organization string, user string, name string, opts ...GetPresignedURLAzureBucketObjectParams) (*string, error) {
+func (c *Client) GetPresignedURLAzureBucketObject(ctx context.Context, organization string, user string, name string, objectName string, opts ...GetPresignedURLAzureBucketObjectParams) (*string, error) {
 	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/presigned-url"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "name", name)
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "objectName", objectName)
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "expiresIn", params.ExpiresIn)
 		addQueryParam(queryValues, "permissions", params.Permissions)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result string
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -8234,13 +8455,13 @@ func (c *Client) GetClusterNodes(ctx context.Context, organization string, user 
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "clusterName", clusterName)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "type", params.Type)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []ClusterNodeResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -8267,13 +8488,13 @@ func (c *Client) GetClusterNodeMetrics(ctx context.Context, organization string,
 	path = pathReplace(path, "clusterName", clusterName)
 	path = pathReplace(path, "hostname", hostname)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "hours", params.Hours)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []MetricEntry
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -8299,13 +8520,13 @@ func (c *Client) GetClusterLiveSchedulerJobs(ctx context.Context, organization s
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "clusterName", clusterName)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "filterUser", params.FilterUser)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result SchedulerJobsResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -8487,19 +8708,20 @@ type GetPresignedURLGoogleBucketObjectParams struct {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns a pre-signed URL for an object inside a Google bucket.
-func (c *Client) GetPresignedURLGoogleBucketObject(ctx context.Context, organization string, user string, name string, opts ...GetPresignedURLGoogleBucketObjectParams) (*string, error) {
+func (c *Client) GetPresignedURLGoogleBucketObject(ctx context.Context, organization string, user string, name string, objectName string, opts ...GetPresignedURLGoogleBucketObjectParams) (*string, error) {
 	path := "/api/organizations/{organization}/users/{user}/google-bucket/{name}/presigned-url"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "name", name)
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "objectName", objectName)
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "expiresIn", params.ExpiresIn)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result string
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -9818,15 +10040,15 @@ type GetAllPlatformGroupsParams struct {
 func (c *Client) GetAllPlatformGroups(ctx context.Context, opts ...GetAllPlatformGroupsParams) (*[]Group, error) {
 	path := "/api/platform/groups"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
 		addQueryParam(queryValues, "csp", params.Csp)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Group
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -9857,17 +10079,17 @@ type GetPlatformImagesParams struct {
 func (c *Client) GetPlatformImages(ctx context.Context, opts ...GetPlatformImagesParams) (*[]Image, error) {
 	path := "/api/platform/images"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "csp", params.Csp)
 		addQueryParam(queryValues, "architecture", params.Architecture)
 		addQueryParam(queryValues, "type", params.Type)
 		addQueryParam(queryValues, "region", params.Region)
 		addQueryParam(queryValues, "includeDisabled", params.IncludeDisabled)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Image
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -10336,20 +10558,22 @@ type GetReportsLegacyQueryParams struct {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns daily cost data grouped by type with support for various filters. This is a legacy endpoint.
-func (c *Client) GetReportsLegacyQuery(ctx context.Context, opts ...GetReportsLegacyQueryParams) (*[]map[string]any, error) {
+func (c *Client) GetReportsLegacyQuery(ctx context.Context, organization string, startDate string, opts ...GetReportsLegacyQueryParams) (*[]map[string]any, error) {
 	path := "/api/reports/legacy-query"
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "organization", organization)
+	addQueryParam(queryValues, "startDate", startDate)
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "user", params.User)
 		addQueryParam(queryValues, "group", params.Group)
 		addQueryParam(queryValues, "resource", params.Resource)
 		addQueryParam(queryValues, "session", params.Session)
 		addQueryParam(queryValues, "endDate", params.EndDate)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []map[string]any
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -10380,17 +10604,17 @@ type ListUserResourceGroupsParams struct {
 func (c *Client) ListUserResourceGroups(ctx context.Context, opts ...ListUserResourceGroupsParams) (*[]ResourceGroup, error) {
 	path := "/api/resource-groups"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
 		addQueryParam(queryValues, "name", params.Name)
 		addQueryParam(queryValues, "allocation", params.Allocation)
 		addQueryParam(queryValues, "sort", params.Sort)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []ResourceGroup
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -10413,13 +10637,13 @@ type GetSchedulerJobsParams struct {
 func (c *Client) GetSchedulerJobs(ctx context.Context, opts ...GetSchedulerJobsParams) (*[]SchedulerJob, error) {
 	path := "/api/scheduler-jobs"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "cluster", params.Cluster)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []SchedulerJob
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -10444,14 +10668,14 @@ type GetSessionsParams struct {
 func (c *Client) GetSessions(ctx context.Context, opts ...GetSessionsParams) (*[]Session, error) {
 	path := "/api/sessions"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "type", params.Type)
 		addQueryParam(queryValues, "subdomain", params.Subdomain)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []Session
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -11107,18 +11331,18 @@ type ListUsersParams struct {
 func (c *Client) ListUsers(ctx context.Context, opts ...ListUsersParams) (*ListUsersOutputBody, error) {
 	path := "/api/users"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "skip", params.Skip)
 		addQueryParam(queryValues, "search", params.Search)
 		addQueryParam(queryValues, "active", params.Active)
 		addQueryParam(queryValues, "sortBy", params.SortBy)
 		addQueryParam(queryValues, "sortDir", params.SortDir)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ListUsersOutputBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -11142,13 +11366,13 @@ func (c *Client) GetUserActivity(ctx context.Context, username string, opts ...G
 	path := "/api/users/{username}/activity"
 	path = pathReplace(path, "username", username)
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "days", params.Days)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result UserActivityResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -11219,17 +11443,18 @@ type GetAcceleratorsParams struct {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns attachable GPU types available in a region (optionally narrowed to zones), with max cards per instance and regional pricing.
-func (c *Client) GetAccelerators(ctx context.Context, opts ...GetAcceleratorsParams) (*map[string]AcceleratorInfo, error) {
+func (c *Client) GetAccelerators(ctx context.Context, csp string, opts ...GetAcceleratorsParams) (*map[string]AcceleratorInfo, error) {
 	path := "/api/v2/resources/accelerators"
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "csp", csp)
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "region", params.Region)
 		addQueryParam(queryValues, "zones", params.Zones)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result map[string]AcceleratorInfo
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -11291,17 +11516,17 @@ type ListWorkflowRunsParams struct {
 func (c *Client) ListWorkflowRuns(ctx context.Context, opts ...ListWorkflowRunsParams) (*ListWorkflowRunsBody, error) {
 	path := "/api/workflow-runs"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "workflow", params.Workflow)
 		addQueryParam(queryValues, "status", params.Status)
 		addQueryParam(queryValues, "search", params.Search)
 		addQueryParam(queryValues, "limit", params.Limit)
 		addQueryParam(queryValues, "offset", params.Offset)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result ListWorkflowRunsBody
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
@@ -11345,16 +11570,16 @@ type DeleteWorkflowRunsParams struct {
 func (c *Client) DeleteWorkflowRuns(ctx context.Context, opts ...DeleteWorkflowRunsParams) error {
 	path := "/api/workflow-runs"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "slugs", params.Slugs)
 		addQueryParam(queryValues, "ids", params.Ids)
 		addQueryParam(queryValues, "olderThanDays", params.OlderThanDays)
 		addQueryParam(queryValues, "status", params.Status)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
 		return parseErrorError(err)
@@ -11429,10 +11654,15 @@ func (c *Client) CancelWorkflowRun(ctx context.Context, slug string) error {
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Retrieves a file from a workflow run's output directory.
-func (c *Client) GetWorkflowRunFile(ctx context.Context, slug string) (*string, error) {
+func (c *Client) GetWorkflowRunFile(ctx context.Context, slug string, file string) (*string, error) {
 	path := "/api/workflow-runs/{slug}/files"
 	path = pathReplace(path, "slug", slug)
 
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "file", file)
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
+	}
 	var result string
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
@@ -11515,13 +11745,13 @@ type ListWorkflowsParams struct {
 func (c *Client) ListWorkflows(ctx context.Context, opts ...ListWorkflowsParams) (*[]WorkflowItem, error) {
 	path := "/api/workflows"
 
+	queryValues := url.Values{}
 	if len(opts) > 0 {
 		params := opts[0]
-		queryValues := url.Values{}
 		addQueryParam(queryValues, "favoriteOnly", params.FavoriteOnly)
-		if len(queryValues) > 0 {
-			path += "?" + queryValues.Encode()
-		}
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
 	}
 	var result []WorkflowItem
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {

@@ -1552,29 +1552,23 @@
       "AllocationThreshold": {
         "additionalProperties": false,
         "properties": {
-          "description": {
-            "description": "The description of the threshold.",
+          "actions": {
+            "description": "The actions configured for this threshold.",
             "examples": [
-              "Budget limit reached"
+              [
+                "freeze"
+              ]
             ],
-            "type": "string"
-          },
-          "labelColor": {
-            "description": "The color for the threshold label.",
-            "examples": [
-              "#0a47ff"
-            ],
-            "type": "string"
-          },
-          "name": {
-            "description": "The name of the threshold.",
-            "examples": [
-              "freeze"
-            ],
-            "type": "string"
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "threshold": {
-            "description": "The threshold percentage.",
+            "description": "The allocation usage percentage the cluster's group has crossed.",
             "examples": [
               95
             ],
@@ -1583,10 +1577,8 @@
           }
         },
         "required": [
-          "name",
           "threshold",
-          "labelColor",
-          "description"
+          "actions"
         ],
         "type": "object"
       },
@@ -7412,6 +7404,21 @@
         ],
         "type": "object"
       },
+      "CreateSkuRuleBody": {
+        "additionalProperties": false,
+        "properties": {
+          "rate": {
+            "description": "Units consumed per unit of usage quantity",
+            "format": "double",
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "rate"
+        ],
+        "type": "object"
+      },
       "CreateSnapshotBody": {
         "additionalProperties": false,
         "properties": {
@@ -7925,6 +7932,41 @@
           "unitId",
           "type",
           "subtype"
+        ],
+        "type": "object"
+      },
+      "CustomSkuRule": {
+        "additionalProperties": false,
+        "properties": {
+          "customSkuId": {
+            "description": "Parent SKU ID",
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "description": "Start of effective period",
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "description": "End of effective period (null = open-ended)",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Rule ID",
+            "type": "string"
+          },
+          "rate": {
+            "description": "Units consumed per unit of usage quantity",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "customSkuId",
+          "effectiveFrom",
+          "rate"
         ],
         "type": "object"
       },
@@ -9069,7 +9111,7 @@
           },
           "allocationThreshold": {
             "$ref": "#/components/schemas/AllocationThreshold",
-            "description": "The allocation threshold for the cluster's team (only for cloud clusters)."
+            "description": "The allocation threshold for the cluster's group (only for cloud clusters)."
           },
           "connectionString": {
             "description": "The SSH connection string for the resource.",
@@ -16531,6 +16573,66 @@
         ],
         "type": "object"
       },
+      "OrgAllocationThreshold": {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "description": "Actions taken when the threshold is crossed.",
+            "examples": [
+              [
+                "notify",
+                "freeze"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "extraRecipients": {
+            "description": "Additional email addresses notified when the notify action is set.",
+            "examples": [
+              [
+                "ops@example.com"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "realtime": {
+            "description": "When true the threshold is evaluated against estimated (realtime) usage instead of billed usage.",
+            "type": "boolean"
+          },
+          "sendToGroup": {
+            "description": "When true and the notify action is set, members of the group that crossed the threshold are notified.",
+            "type": "boolean"
+          },
+          "threshold": {
+            "description": "The allocation usage percent that trips this threshold. Values above 100 are allowed for groups that overspend their allocation.",
+            "examples": [
+              80
+            ],
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "threshold",
+          "actions",
+          "realtime",
+          "sendToGroup",
+          "extraRecipients"
+        ],
+        "type": "object"
+      },
       "OrgMAUBreakdown": {
         "additionalProperties": false,
         "properties": {
@@ -17445,6 +17547,36 @@
         },
         "type": "object"
       },
+      "PatchSkuBody": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "SKU code (e.g., SLURM_NODE_HOUR)",
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "description": "SKU description",
+            "type": "string"
+          },
+          "name": {
+            "description": "SKU display name",
+            "minLength": 1,
+            "type": "string"
+          },
+          "subtype": {
+            "description": "SKU subtype (e.g., NodeHour, Token)",
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "description": "SKU type (e.g., Compute, Licenses)",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "PatchWebhookBody": {
         "additionalProperties": false,
         "properties": {
@@ -18336,6 +18468,12 @@
             "description": "SKU display name",
             "minLength": 1,
             "type": "string"
+          },
+          "rate": {
+            "description": "Initial SKU rate (units consumed per unit of usage quantity); defaults to 1",
+            "format": "double",
+            "minimum": 0,
+            "type": "number"
           },
           "subtype": {
             "description": "SKU subtype (e.g., NodeHour, Token)",
@@ -21301,6 +21439,10 @@
             "format": "double",
             "type": "number"
           },
+          "skuAppliedRate": {
+            "format": "double",
+            "type": "number"
+          },
           "startedAt": {
             "format": "date-time",
             "type": "string"
@@ -21334,6 +21476,7 @@
           "type",
           "subtype",
           "unitAppliedRate",
+          "skuAppliedRate",
           "createdAt",
           "usageEventId"
         ],
@@ -37243,6 +37386,296 @@
         ]
       }
     },
+    "/api/organizations/{organization}/allocation-thresholds": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the organization's allocation thresholds, sorted ascending by percent.",
+        "operationId": "get-organization-allocation-thresholds",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OrgAllocationThreshold"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List organization allocation thresholds",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates an allocation threshold for the organization. The percent value must be unique within the organization.",
+        "operationId": "create-organization-allocation-threshold",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgAllocationThreshold"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgAllocationThreshold"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create organization allocation threshold",
+        "tags": [
+          "Organization"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/allocation-thresholds/{threshold}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDeletes the allocation threshold identified by its percent value and clears the recorded state on any groups sitting at that percent.",
+        "operationId": "delete-organization-allocation-threshold",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The allocation usage percent that identifies the threshold.",
+            "in": "path",
+            "name": "threshold",
+            "required": true,
+            "schema": {
+              "description": "The allocation usage percent that identifies the threshold.",
+              "examples": [
+                80
+              ],
+              "format": "double",
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete organization allocation threshold",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a single allocation threshold identified by its percent value.",
+        "operationId": "get-organization-allocation-threshold",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The allocation usage percent that identifies the threshold.",
+            "in": "path",
+            "name": "threshold",
+            "required": true,
+            "schema": {
+              "description": "The allocation usage percent that identifies the threshold.",
+              "examples": [
+                80
+              ],
+              "format": "double",
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgAllocationThreshold"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get organization allocation threshold",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces the allocation threshold identified by its percent value. Changing the percent clears the recorded state on any groups sitting at the old percent.",
+        "operationId": "update-organization-allocation-threshold",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The allocation usage percent that identifies the threshold to update.",
+            "in": "path",
+            "name": "threshold",
+            "required": true,
+            "schema": {
+              "description": "The allocation usage percent that identifies the threshold to update.",
+              "examples": [
+                80
+              ],
+              "format": "double",
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgAllocationThreshold"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgAllocationThreshold"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update organization allocation threshold",
+        "tags": [
+          "Organization"
+        ]
+      }
+    },
     "/api/organizations/{organization}/allocations": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns all allocations for the organization. Requires org admin access.",
@@ -49150,6 +49583,16 @@
               "description": "Unit name",
               "type": "string"
             }
+          },
+          {
+            "description": "Include archived (soft-deleted) SKUs",
+            "explode": false,
+            "in": "query",
+            "name": "includeArchived",
+            "schema": {
+              "description": "Include archived (soft-deleted) SKUs",
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -49305,6 +49748,359 @@
           }
         },
         "summary": "Archive a SKU from a unit",
+        "tags": [
+          "Allocations"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a single SKU, including archived SKUs.",
+        "operationId": "get-unit-sku",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Unit name",
+            "in": "path",
+            "name": "unit",
+            "required": true,
+            "schema": {
+              "description": "Unit name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "SKU ID",
+            "in": "path",
+            "name": "sku",
+            "required": true,
+            "schema": {
+              "description": "SKU ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomSku"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a SKU",
+        "tags": [
+          "Allocations"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates the mutable fields of a SKU. Editing type or subtype only affects future billing.",
+        "operationId": "update-unit-sku",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Unit name",
+            "in": "path",
+            "name": "unit",
+            "required": true,
+            "schema": {
+              "description": "Unit name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "SKU ID",
+            "in": "path",
+            "name": "sku",
+            "required": true,
+            "schema": {
+              "description": "SKU ID",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchSkuBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomSku"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update a SKU",
+        "tags": [
+          "Allocations"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/units/{unit}/skus/{sku}/restore": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRestores an archived SKU by clearing its deletion timestamp.",
+        "operationId": "restore-unit-sku",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Unit name",
+            "in": "path",
+            "name": "unit",
+            "required": true,
+            "schema": {
+              "description": "Unit name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "SKU ID",
+            "in": "path",
+            "name": "sku",
+            "required": true,
+            "schema": {
+              "description": "SKU ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomSku"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Restore an archived SKU",
+        "tags": [
+          "Allocations"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/units/{unit}/skus/{sku}/rules": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the rate history for a SKU.",
+        "operationId": "list-sku-rules",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Unit name",
+            "in": "path",
+            "name": "unit",
+            "required": true,
+            "schema": {
+              "description": "Unit name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "SKU ID",
+            "in": "path",
+            "name": "sku",
+            "required": true,
+            "schema": {
+              "description": "SKU ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CustomSkuRule"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List SKU pricing rules",
+        "tags": [
+          "Allocations"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates a new rate (units per quantity) for a SKU, effective now.",
+        "operationId": "create-sku-rule",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Unit name",
+            "in": "path",
+            "name": "unit",
+            "required": true,
+            "schema": {
+              "description": "Unit name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "SKU ID",
+            "in": "path",
+            "name": "sku",
+            "required": true,
+            "schema": {
+              "description": "SKU ID",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSkuRuleBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomSkuRule"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create a SKU pricing rule",
         "tags": [
           "Allocations"
         ]
