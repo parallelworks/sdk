@@ -13097,6 +13097,10 @@
               "null"
             ]
           },
+          "schedulerType": {
+            "description": "Scheduler type (slurm, pbs)",
+            "type": "string"
+          },
           "tags": {
             "description": "Tags",
             "items": {

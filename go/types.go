@@ -4595,6 +4595,8 @@ type ManagedClusterOutputBody struct {
 	ProxySSH bool `json:"proxySsh"`
 	// Active scheduler jobs
 	SchedulerJobs []ManagedSchedulerJob `json:"schedulerJobs,omitempty"`
+	// Scheduler type (slurm, pbs)
+	SchedulerType *string `json:"schedulerType,omitempty"`
 	// Tags
 	Tags []string `json:"tags,omitempty"`
 	// Cluster type
