@@ -26390,6 +26390,13 @@
             ],
             "type": "string"
           },
+          "runningVersion": {
+            "description": "the resolved version number of the image the workspace is actually running. Read from the image tag for pinned deployments, or resolved from the running image digest via the workspace's API for 'latest'-tag deployments.",
+            "examples": [
+              "v7.62.0"
+            ],
+            "type": "string"
+          },
           "safeToKill": {
             "description": "whether the user workspace can be safely killed without disrupting the user",
             "examples": [

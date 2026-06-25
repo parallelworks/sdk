@@ -9150,6 +9150,8 @@ type UserWorkspace struct {
 	Name string `json:"name"`
 	// the reason why the user workspace cannot be safely killed, if applicable
 	NotSafeToKillReason *string `json:"notSafeToKillReason,omitempty"`
+	// the resolved version number of the image the workspace is actually running. Read from the image tag for pinned deployments, or resolved from the running image digest via the workspace's API for 'latest'-tag deployments.
+	RunningVersion *string `json:"runningVersion,omitempty"`
 	// whether the user workspace can be safely killed without disrupting the user
 	SafeToKill bool `json:"safeToKill"`
 	// the safe username of the user associated with the workspace
