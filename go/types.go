@@ -575,6 +575,8 @@ type Allocation struct {
 	Name string `json:"name"`
 	// Parent allocation name
 	Parent *string `json:"parent,omitempty"`
+	// Whether the allocation's unit is rated in USD (false = a raw consumption unit)
+	RatedInUsd *bool `json:"ratedInUsd,omitempty"`
 	// Total allocation amount
 	Total float64 `json:"total"`
 	// Unit of measurement
@@ -6076,6 +6078,8 @@ type PatchResourceBody struct {
 type PatchSessionBody struct {
 	// API key for the session.
 	APIKey *string `json:"apiKey,omitempty"`
+	// Human-readable session description.
+	Description *string `json:"description,omitempty"`
 	// Whether the tunnel's remote destination is reachable.
 	Healthy *bool `json:"healthy,omitempty"`
 	// When the tunnel health was last checked.
@@ -6392,6 +6396,8 @@ type PostSessionAccessBody struct {
 type PostSessionBody struct {
 	// API key for the session.
 	APIKey *string `json:"apiKey,omitempty"`
+	// Human-readable session description.
+	Description *string `json:"description,omitempty"`
 	// Directory to open in VS Code. Use ~ for the user's home directory.
 	Directory *string `json:"directory,omitempty"`
 	// Local port (0 = random).
@@ -6406,6 +6412,8 @@ type PostSessionBody struct {
 	RemotePort *int64 `json:"remotePort,omitempty"`
 	// Session slug for URL path.
 	Slug *string `json:"slug,omitempty"`
+	// For endpoint sessions, strip the session URL prefix before forwarding to the local app (for apps that serve at root and can't set a base path).
+	StripPath *bool `json:"stripPath,omitempty"`
 	// Target resource ID.
 	TargetID   *string               `json:"targetId,omitempty"`
 	TargetInfo *KubernetesTunnelInfo `json:"targetInfo,omitempty"`
@@ -6437,10 +6445,12 @@ type PostSkuBody struct {
 }
 
 type PostUnitInput struct {
-	// Cost per unit in USD
-	CostPerUnit float64 `json:"costPerUnit"`
+	// Cost per unit in USD (only used when the unit is rated in USD); defaults to 1
+	CostPerUnit *float64 `json:"costPerUnit,omitempty"`
 	// Unit name
-	Name                 string         `json:"name"`
+	Name string `json:"name"`
+	// Whether usage is rated into USD via pricing rules (default true). When false, the unit is a consumption unit: allocations track raw SKU-weighted quantities and no rate applies.
+	RatedInUsd           *bool          `json:"ratedInUsd,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -7411,6 +7421,18 @@ type PutModelConfigsInputBody struct {
 	AdditionalProperties map[string]any  `json:"-,omitempty"`
 }
 
+type PutSessionBody struct {
+	// Human-readable session description.
+	Description *string `json:"description,omitempty"`
+	// Session slug for URL path.
+	Slug *string `json:"slug,omitempty"`
+	// Strip the session URL prefix before forwarding to the local app (for apps that serve at root and can't set a base path).
+	StripPath *bool `json:"stripPath,omitempty"`
+	// Session type. Only "endpoint" is supported.
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type PvResponse struct {
 	// Access modes supported by the volume
 	AccessModes []string `json:"accessModes"`
@@ -8082,10 +8104,14 @@ type ServicesMetadata struct {
 type Session struct {
 	// Session creation time.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// Human-readable session description.
+	Description *string `json:"description,omitempty"`
 	// Directory to open in VS Code.
 	Directory *string `json:"directory,omitempty"`
 	// Domain name for the session.
 	DomainName *string `json:"domainName,omitempty"`
+	// One-time pwep key for registering this endpoint session's reverse tunnel. Returned only on create for endpoint sessions.
+	EndpointToken *string `json:"endpointToken,omitempty"`
 	// Error message if session failed.
 	ErrorMessage *string `json:"errorMessage,omitempty"`
 	// External session URL.
@@ -8099,7 +8125,9 @@ type Session struct {
 	// Icon shown in the UI for the session. Comes from the workflow if associated with one.
 	ImageURL *string `json:"imageUrl,omitempty"`
 	// Internal session URL.
-	InternalHref   *string               `json:"internalHref,omitempty"`
+	InternalHref *string `json:"internalHref,omitempty"`
+	// Endpoint key epoch; bumped each time the endpoint is taken over.
+	KeyGeneration  *int64                `json:"keyGeneration,omitempty"`
 	KubernetesInfo *KubernetesTunnelInfo `json:"kubernetesInfo,omitempty"`
 	// When the tunnel health was last checked.
 	LastHealthCheck *time.Time `json:"lastHealthCheck,omitempty"`
@@ -8566,7 +8594,9 @@ type Unit struct {
 	// Unit name
 	Name string `json:"name"`
 	// Organization ID
-	OrganizationID       string         `json:"organizationId"`
+	OrganizationID string `json:"organizationId"`
+	// Whether usage is rated into USD via the unit's pricing rules; false = a consumption unit measured in raw SKU-weighted quantities
+	RatedInUsd           bool           `json:"ratedInUsd"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

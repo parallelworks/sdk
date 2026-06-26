@@ -9426,6 +9426,24 @@ func (c *Client) GetUserSession(ctx context.Context, organization string, user s
 	return &result, nil
 }
 
+// ReplaceUserSession - Replace session
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Create or replace an endpoint session by name. Re-running takes over the existing endpoint, superseding the previous process's key.
+func (c *Client) ReplaceUserSession(ctx context.Context, organization string, user string, name string, body PutSessionBody) (*Session, error) {
+	path := "/api/organizations/{organization}/users/{user}/sessions/{name}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	var result Session
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // DeleteUserSession - Delete session
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.

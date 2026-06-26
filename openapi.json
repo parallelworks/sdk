@@ -1500,6 +1500,11 @@
             "description": "Parent allocation name",
             "type": "string"
           },
+          "ratedInUsd": {
+            "description": "Whether the allocation's unit is rated in USD (false = a raw consumption unit)",
+            "readOnly": true,
+            "type": "boolean"
+          },
           "total": {
             "description": "Total allocation amount",
             "format": "double",
@@ -17471,6 +17476,11 @@
             "type": "string",
             "writeOnly": true
           },
+          "description": {
+            "description": "Human-readable session description.",
+            "maxLength": 255,
+            "type": "string"
+          },
           "healthy": {
             "description": "Whether the tunnel's remote destination is reachable.",
             "type": "boolean"
@@ -17545,7 +17555,8 @@
               "tunnel",
               "link",
               "vscode",
-              "desktop"
+              "desktop",
+              "endpoint"
             ],
             "type": "string"
           },
@@ -18388,6 +18399,11 @@
             "type": "string",
             "writeOnly": true
           },
+          "description": {
+            "description": "Human-readable session description.",
+            "maxLength": 255,
+            "type": "string"
+          },
           "directory": {
             "description": "Directory to open in VS Code. Use ~ for the user's home directory.",
             "type": "string"
@@ -18424,6 +18440,10 @@
             "description": "Session slug for URL path.",
             "type": "string"
           },
+          "stripPath": {
+            "description": "For endpoint sessions, strip the session URL prefix before forwarding to the local app (for apps that serve at root and can't set a base path).",
+            "type": "boolean"
+          },
           "targetId": {
             "description": "Target resource ID.",
             "type": "string"
@@ -18438,7 +18458,8 @@
               "tunnel",
               "link",
               "vscode",
-              "desktop"
+              "desktop",
+              "endpoint"
             ],
             "type": "string"
           },
@@ -18508,7 +18529,7 @@
         "additionalProperties": false,
         "properties": {
           "costPerUnit": {
-            "description": "Cost per unit in USD",
+            "description": "Cost per unit in USD (only used when the unit is rated in USD); defaults to 1",
             "format": "double",
             "minimum": 0,
             "type": "number"
@@ -18517,11 +18538,14 @@
             "description": "Unit name",
             "minLength": 1,
             "type": "string"
+          },
+          "ratedInUsd": {
+            "description": "Whether usage is rated into USD via pricing rules (default true). When false, the unit is a consumption unit: allocations track raw SKU-weighted quantities and no rate applies.",
+            "type": "boolean"
           }
         },
         "required": [
-          "name",
-          "costPerUnit"
+          "name"
         ],
         "type": "object"
       },
@@ -21215,6 +21239,35 @@
         ],
         "type": "object"
       },
+      "PutSessionBody": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "Human-readable session description.",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "slug": {
+            "description": "Session slug for URL path.",
+            "type": "string"
+          },
+          "stripPath": {
+            "description": "Strip the session URL prefix before forwarding to the local app (for apps that serve at root and can't set a base path).",
+            "type": "boolean"
+          },
+          "type": {
+            "description": "Session type. Only \"endpoint\" is supported.",
+            "enum": [
+              "endpoint"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "PvResponse": {
         "additionalProperties": false,
         "properties": {
@@ -23379,6 +23432,11 @@
             "readOnly": true,
             "type": "string"
           },
+          "description": {
+            "description": "Human-readable session description.",
+            "maxLength": 255,
+            "type": "string"
+          },
           "directory": {
             "description": "Directory to open in VS Code.",
             "readOnly": true,
@@ -23386,6 +23444,11 @@
           },
           "domainName": {
             "description": "Domain name for the session.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "endpointToken": {
+            "description": "One-time pwep key for registering this endpoint session's reverse tunnel. Returned only on create for endpoint sessions.",
             "readOnly": true,
             "type": "string"
           },
@@ -23426,6 +23489,12 @@
             "description": "Internal session URL.",
             "readOnly": true,
             "type": "string"
+          },
+          "keyGeneration": {
+            "description": "Endpoint key epoch; bumped each time the endpoint is taken over.",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
           },
           "kubernetesInfo": {
             "$ref": "#/components/schemas/KubernetesTunnelInfo",
@@ -23549,7 +23618,8 @@
               "tunnel",
               "link",
               "vscode",
-              "desktop"
+              "desktop",
+              "endpoint"
             ],
             "type": [
               "string",
@@ -24834,12 +24904,17 @@
           "organizationId": {
             "description": "Organization ID",
             "type": "string"
+          },
+          "ratedInUsd": {
+            "description": "Whether usage is rated into USD via the unit's pricing rules; false = a consumption unit measured in raw SKU-weighted quantities",
+            "type": "boolean"
           }
         },
         "required": [
           "id",
           "organizationId",
           "name",
+          "ratedInUsd",
           "Rules"
         ],
         "type": "object"
@@ -57328,6 +57403,73 @@
         "tags": [
           "Sessions"
         ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreate or replace an endpoint session by name. Re-running takes over the existing endpoint, superseding the previous process's key.",
+        "operationId": "replace-user-session",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutSessionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session",
+                  "description": "Created session information."
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Replace session",
+        "tags": [
+          "Sessions"
+        ]
       }
     },
     "/api/organizations/{organization}/users/{user}/sessions/{name}/access": {
@@ -61115,7 +61257,8 @@
                 "tunnel",
                 "link",
                 "vscode",
-                "desktop"
+                "desktop",
+                "endpoint"
               ],
               "type": "string"
             }
