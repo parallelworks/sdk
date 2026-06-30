@@ -3413,6 +3413,38 @@ func (c *Client) DeleteOrganization(ctx context.Context, organization string) er
 	return nil
 }
 
+// GetOrganizationActiveUserReport - Get organization active-user report settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns whether the organization receives the monthly active-user report and the recipient email addresses.
+func (c *Client) GetOrganizationActiveUserReport(ctx context.Context, organization string) (*ActiveUserReport, error) {
+	path := "/api/organizations/{organization}/active-user-report"
+	path = pathReplace(path, "organization", organization)
+
+	var result ActiveUserReport
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateOrganizationActiveUserReport - Update organization active-user report settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates whether the organization receives the monthly active-user report and its recipient email addresses. Platform admins only.
+func (c *Client) UpdateOrganizationActiveUserReport(ctx context.Context, organization string, body ActiveUserReport) (*ActiveUserReport, error) {
+	path := "/api/organizations/{organization}/active-user-report"
+	path = pathReplace(path, "organization", organization)
+
+	var result ActiveUserReport
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // ListOrgAiModels - List all org AI models
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6426,19 +6458,19 @@ func (c *Client) UpdateManagedClusterPermissions(ctx context.Context, organizati
 	return nil
 }
 
-// GetManagedClusterLiveSchedulerJobsParams contains optional parameters for the GetManagedClusterLiveSchedulerJobs operation.
-type GetManagedClusterLiveSchedulerJobsParams struct {
+// GetManagedClusterSchedulerJobsParams contains optional parameters for the GetManagedClusterSchedulerJobs operation.
+type GetManagedClusterSchedulerJobsParams struct {
 	// Optional username to filter jobs by
 	FilterUser *string `json:"filterUser,omitempty"`
 }
 
-// GetManagedClusterLiveSchedulerJobs - Get Managed Cluster Live Scheduler Jobs
+// GetManagedClusterSchedulerJobs - Get Scheduler Jobs for a Managed Cluster
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Returns live scheduler jobs from a managed cluster.
-func (c *Client) GetManagedClusterLiveSchedulerJobs(ctx context.Context, organization string, cluster string, opts ...GetManagedClusterLiveSchedulerJobsParams) (*SchedulerJobsResponse, error) {
-	path := "/api/organizations/{organization}/managed-clusters/{cluster}/scheduler-jobs/live"
+// Returns scheduler jobs for a managed cluster from the agent's cached state.
+func (c *Client) GetManagedClusterSchedulerJobs(ctx context.Context, organization string, cluster string, opts ...GetManagedClusterSchedulerJobsParams) (*SchedulerJobsResponse, error) {
+	path := "/api/organizations/{organization}/managed-clusters/{cluster}/scheduler-jobs"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "cluster", cluster)
 
@@ -6616,6 +6648,22 @@ func (c *Client) GetOrganizationPolicies(ctx context.Context, organization strin
 
 	var result map[string]Policy
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// SetOrganizationAllowPublicSessionsPolicy - Set organization policy: allow-public-sessions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets allow-public-sessions policy for the organization.
+func (c *Client) SetOrganizationAllowPublicSessionsPolicy(ctx context.Context, organization string, body bool) (*map[string]BooleanPolicyOutput, error) {
+	path := "/api/organizations/{organization}/policies/allow-public-sessions"
+	path = pathReplace(path, "organization", organization)
+
+	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -8503,19 +8551,19 @@ func (c *Client) GetClusterNodeMetrics(ctx context.Context, organization string,
 	return &result, nil
 }
 
-// GetClusterLiveSchedulerJobsParams contains optional parameters for the GetClusterLiveSchedulerJobs operation.
-type GetClusterLiveSchedulerJobsParams struct {
+// GetClusterSchedulerJobsParams contains optional parameters for the GetClusterSchedulerJobs operation.
+type GetClusterSchedulerJobsParams struct {
 	// Optional username to filter jobs by
 	FilterUser *string `json:"filterUser,omitempty"`
 }
 
-// GetClusterLiveSchedulerJobs - Get Live Scheduler Jobs
+// GetClusterSchedulerJobs - Get Scheduler Jobs for a Cluster
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Returns live scheduler jobs from a cluster.
-func (c *Client) GetClusterLiveSchedulerJobs(ctx context.Context, organization string, user string, clusterName string, opts ...GetClusterLiveSchedulerJobsParams) (*SchedulerJobsResponse, error) {
-	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/scheduler-jobs/live"
+// Returns scheduler jobs for a cluster from the agent's cached state.
+func (c *Client) GetClusterSchedulerJobs(ctx context.Context, organization string, user string, clusterName string, opts ...GetClusterSchedulerJobsParams) (*SchedulerJobsResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/scheduler-jobs"
 	path = pathReplace(path, "organization", organization)
 	path = pathReplace(path, "user", user)
 	path = pathReplace(path, "clusterName", clusterName)
@@ -8568,6 +8616,91 @@ func (c *Client) PostSchedulerJobCommand(ctx context.Context, organization strin
 
 	var result SchedulerCommandResponse
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetClusterSchedulerQueuesParams contains optional parameters for the GetClusterSchedulerQueues operation.
+type GetClusterSchedulerQueuesParams struct {
+	// Slurm-only: if provided, only partitions that allow this account are returned (AllowAccounts/DenyAccounts/ALL semantics). Ignored for PBS clusters.
+	Account *string `json:"account,omitempty"`
+}
+
+// GetClusterSchedulerQueues - List scheduler queues for a cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the cluster's queue list — Slurm partitions or PBS queues depending on the cluster's scheduler. Optional `account` filter applies Slurm AllowAccounts/DenyAccounts semantics (PBS responses ignore it).
+func (c *Client) GetClusterSchedulerQueues(ctx context.Context, organization string, user string, clusterName string, opts ...GetClusterSchedulerQueuesParams) (*SchedulerQueuesResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/scheduler-queues"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+
+	queryValues := url.Values{}
+	if len(opts) > 0 {
+		params := opts[0]
+		addQueryParam(queryValues, "account", params.Account)
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
+	}
+	var result SchedulerQueuesResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetClusterSlurmAccounts - List Slurm accounts for a cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the Slurm accounts available to the authenticated user on the specified cluster, sourced from the agent's cached `sacctmgr show assoc` table.
+func (c *Client) GetClusterSlurmAccounts(ctx context.Context, organization string, user string, clusterName string) (*[]string, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/slurm-accounts"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+
+	var result []string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// GetClusterSlurmQosParams contains optional parameters for the GetClusterSlurmQos operation.
+type GetClusterSlurmQosParams struct {
+	// Optional account filter. Combined with partition, narrows QOS to those allowed for the account on that partition.
+	Account *string `json:"account,omitempty"`
+	// Optional partition filter. Combined with account, narrows QOS to those allowed on the partition for the account.
+	Partition *string `json:"partition,omitempty"`
+}
+
+// GetClusterSlurmQos - List Slurm QOS for a cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns Slurm QOS names. When account and partition are both provided, returns the intersection of the partition's AllowQos with the account's QOS.
+func (c *Client) GetClusterSlurmQos(ctx context.Context, organization string, user string, clusterName string, opts ...GetClusterSlurmQosParams) (*[]string, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/slurm-qos"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+
+	queryValues := url.Values{}
+	if len(opts) > 0 {
+		params := opts[0]
+		addQueryParam(queryValues, "account", params.Account)
+		addQueryParam(queryValues, "partition", params.Partition)
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
+	}
+	var result []string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -9946,6 +10079,38 @@ func (c *Client) UpdateOrgWorkspaceDefaults(ctx context.Context, organization st
 	return &result, nil
 }
 
+// GetOrganizationWorkspaceEnvironment - Get org workspace environment
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the organization's workspace environment settings (mounts, environment variables, DNS, home directory prefix, Kubernetes mounts, and Docker network) applied to its users' workspaces.
+func (c *Client) GetOrganizationWorkspaceEnvironment(ctx context.Context, organization string) (*WorkspaceEnvironment, error) {
+	path := "/api/organizations/{organization}/workspace-environment"
+	path = pathReplace(path, "organization", organization)
+
+	var result WorkspaceEnvironment
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// UpdateOrganizationWorkspaceEnvironment - Update org workspace environment
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces the organization's workspace environment settings. Restricted to platform admins.
+func (c *Client) UpdateOrganizationWorkspaceEnvironment(ctx context.Context, organization string, body WorkspaceEnvironment) (*WorkspaceEnvironment, error) {
+	path := "/api/organizations/{organization}/workspace-environment"
+	path = pathReplace(path, "organization", organization)
+
+	var result WorkspaceEnvironment
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
 // PingHandler - Ping platform
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -10256,6 +10421,21 @@ func (c *Client) GetPlatformPolicies(ctx context.Context) (*map[string]Policy, e
 
 	var result map[string]Policy
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformAllowPublicSessionsPolicy - Set platform policy: allow-public-sessions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the allow-public-sessions policy for the platform.
+func (c *Client) SetPlatformAllowPublicSessionsPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
+	path := "/api/platform/policies/allow-public-sessions"
+
+	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
@@ -11510,6 +11690,36 @@ func (c *Client) GetUserSSHPublicKeysLegacy(ctx context.Context, username string
 		return nil, parseErrorError(err)
 	}
 	return &result, nil
+}
+
+// ListWorkflowPermissions - List workflow permissions
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns all workflow permission grants for the current user.
+func (c *Client) ListWorkflowPermissions(ctx context.Context) (*[]WorkflowPermissionResponse, error) {
+	path := "/api/workflow-permissions"
+
+	var result []WorkflowPermissionResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorError(err)
+	}
+	return &result, nil
+}
+
+// DeleteWorkflowPermission - Revoke workflow permissions
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Revokes all permission grants for a workflow.
+func (c *Client) DeleteWorkflowPermission(ctx context.Context, workflow string) error {
+	path := "/api/workflow-permissions/{workflow}"
+	path = pathReplace(path, "workflow", workflow)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorError(err)
+	}
+	return nil
 }
 
 // ListWorkflowRunsParams contains optional parameters for the ListWorkflowRuns operation.

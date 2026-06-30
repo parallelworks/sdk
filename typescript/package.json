@@ -1,6 +1,6 @@
 {
   "name": "@parallelworks/client",
-  "version": "7.68.0",
+  "version": "7.69.0",
   "description": "Official TypeScript client for Parallel Works ACTIVATE API",
   "type": "module",
   "exports": {
@@ -44,10 +44,10 @@
   "devDependencies": {
     "chokidar-cli": "^3.0.0",
     "openapi-typescript": "^7.13.0",
+    "typescript": "^5.4.0",
     "@types/node": "^22.0.0",
     "openapi-typescript-helpers": "^0.0.15",
     "type-fest": "^5.4.1",
-    "typescript": "^5.4.0",
     "swr": "^2.3.6",
     "swr-openapi": "^5.4.1"
   },

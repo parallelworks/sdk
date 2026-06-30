@@ -8,7 +8,24 @@ cd "$SCRIPT_DIR"
 
 # Parse optional SDK arguments (e.g., `generate.sh go python` to skip ts)
 # Valid values: ts, go, python. If none provided, all are generated.
-REQUESTED_SDKS=("$@")
+# Pass --push to commit and push the regenerated files when done.
+REQUESTED_SDKS=()
+PUSH=false
+for arg in "$@"; do
+    case "$arg" in
+        --push)
+            PUSH=true
+            ;;
+        ts | go | python)
+            REQUESTED_SDKS+=("$arg")
+            ;;
+        *)
+            echo "Unknown argument: $arg" >&2
+            echo "Usage: generate.sh [ts] [go] [python] [--push]" >&2
+            exit 1
+            ;;
+    esac
+done
 
 should_generate() {
     local sdk="$1"
@@ -89,3 +106,24 @@ if should_generate python; then
 fi
 
 echo "All SDKs generated successfully!"
+
+# ============ Push ============
+if [[ "$PUSH" == true ]]; then
+    echo ""
+    echo "Committing and pushing regenerated files..."
+    cd "$ROOT_DIR"
+
+    PATHS_TO_ADD=("sdk/openapi.json")
+    should_generate ts && PATHS_TO_ADD+=("sdk/typescript")
+    should_generate go && PATHS_TO_ADD+=("sdk/go")
+    should_generate python && PATHS_TO_ADD+=("sdk/python")
+
+    git add "${PATHS_TO_ADD[@]}"
+    if git diff --cached --quiet; then
+        echo "No SDK changes to push"
+    else
+        git commit -m "chore: regenerate SDKs"
+        git push
+        echo "Pushed regenerated SDK files"
+    fi
+fi

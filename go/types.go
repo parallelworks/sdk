@@ -63,6 +63,14 @@ type AccessManagementBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ActiveUserReport struct {
+	// Whether the organization receives the monthly active-user report.
+	Enabled bool `json:"enabled"`
+	// Email addresses that receive the active-user report.
+	Recipients           []string       `json:"recipients"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type AddAwsBucketVersionInputBody struct {
 	Region *string `json:"region,omitempty"`
 	// Replace an existing version's variables instead of adding a new version.
@@ -531,6 +539,8 @@ type AiProvidersResponse struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// Billing group the provider is provisioned under (managed providers)
 	Group *string `json:"group,omitempty"`
+	// Whether the provider's billing group is over its allocation and blocks new usage (managed providers)
+	GroupBlocked *bool `json:"groupBlocked,omitempty"`
 	// Whether the tunnel's remote destination is reachable (tunnel providers only).
 	Healthy *bool `json:"healthy,omitempty"`
 	// Unique identifier for the AI provider
@@ -1873,6 +1883,7 @@ type CloudAccountBillingResponse struct {
 type CloudAccountCreateResponse struct {
 	Csp                  string         `json:"csp"`
 	CspID                string         `json:"cspId"`
+	EnableOsLogin        bool           `json:"enableOsLogin"`
 	GovCloud             bool           `json:"govCloud"`
 	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -1891,6 +1902,8 @@ type CloudAccountCredentialsInput struct {
 	AzureTenantID *string `json:"azureTenantId,omitempty"`
 	// Cloud service provider ID
 	CspID string `json:"cspId"`
+	// When true, enables OS Login on provisioned GCE instances (required when the GCP org policy enforces constraints/compute.requireOsLogin)
+	EnableOsLogin *bool `json:"enableOsLogin,omitempty"`
 	// The ID of the CMEK crypto key for encryption
 	EncryptKey *string `json:"encryptKey,omitempty"`
 	// Google IAM roles
@@ -1944,6 +1957,7 @@ type CloudAccountDetail struct {
 	Credentials          CloudAccountCredentialsResponse         `json:"credentials"`
 	Csp                  string                                  `json:"csp"`
 	CspID                string                                  `json:"cspId"`
+	EnableOsLogin        bool                                    `json:"enableOsLogin"`
 	EncryptKey           *string                                 `json:"encryptKey,omitempty"`
 	GovCloud             bool                                    `json:"govCloud"`
 	Name                 string                                  `json:"name"`
@@ -2177,6 +2191,26 @@ type ConfigsMetadata struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ConsentRequiredError struct {
+	// Always "consent_required" for this error type.
+	Code string `json:"code"`
+	// Will always be true, indicating this is an error response.
+	Error bool `json:"error"`
+	// A human-readable message describing the error.
+	Message string `json:"message"`
+	// Workflow permissions that need approval before the workflow can run.
+	UnapprovedPermissions []string `json:"unapprovedPermissions,omitempty"`
+	// User variables that need approval before the workflow can run.
+	UnapprovedVariables  []ConsentVariable `json:"unapprovedVariables,omitempty"`
+	AdditionalProperties map[string]any    `json:"-,omitempty"`
+}
+
+type ConsentVariable struct {
+	Hint                 *string        `json:"hint,omitempty"`
+	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ConversationResponse struct {
 	// Currently active branch leaf ID
 	ActiveBranchID *string `json:"activeBranchId"`
@@ -2399,6 +2433,8 @@ type CreateCloudAccountBody struct {
 	Csp string `json:"csp"`
 	// Cloud service provider ID
 	CspID string `json:"cspId"`
+	// When true, enables OS Login on provisioned GCE instances (required when the GCP org policy enforces constraints/compute.requireOsLogin)
+	EnableOsLogin *bool `json:"enableOsLogin,omitempty"`
 	// The ID of the CMEK crypto key for encryption
 	EncryptKey *string `json:"encryptKey,omitempty"`
 	// Google IAM roles
@@ -2767,6 +2803,12 @@ type CreateWorkflowBody struct {
 }
 
 type CreateWorkflowRunInputBody struct {
+	// Auto-grant each workflow's declared user-variable needs (no consent prompt).
+	AutoApproveConsent *bool `json:"autoApproveConsent,omitempty"`
+	// Permission names the user approves for this workflow.
+	ConsentPermissions []string `json:"consentPermissions,omitempty"`
+	// User variable names the user approves for this workflow.
+	ConsentVariables []string `json:"consentVariables,omitempty"`
 	// Display name for the run
 	DisplayName *string `json:"displayName,omitempty"`
 	// Validate only, don't execute
@@ -3313,10 +3355,16 @@ type GeneralCluster struct {
 	ImageURL *string `json:"imageUrl,omitempty"`
 	// The IP address of the resource.
 	IPAddress string `json:"ipAddress"`
+	// Existing-cluster only: the configured auth method (an SSH key name, or a sentinel such as "pwcli" for clusters that connect via the CLI on the node).
+	Key *string `json:"key,omitempty"`
 	// The maximum number of nodes the cluster can scale to.
 	MaxNodes int64 `json:"maxNodes"`
 	// The name of the resource.
 	Name string `json:"name"`
+	// Existing-cluster only: the operating system auto-detected on the controller node.
+	Os *string `json:"os,omitempty"`
+	// Existing-cluster only: the OS release name auto-detected on the controller node.
+	OsRelease *string `json:"osRelease,omitempty"`
 	// The region where the resource is provisioned.
 	Region *string `json:"region,omitempty"`
 	// The number of requested nodes in the cluster.
@@ -3634,6 +3682,8 @@ type GoogleManagedLustre struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// The group the instance bills to.
 	Group *string `json:"group,omitempty"`
+	// Unique identifier of the Google Managed Lustre.
+	ID *string `json:"id,omitempty"`
 	// Identifier. The name of the instance.
 	Name string `json:"name"`
 	// The throughput in MBps/TiB of the instance.
@@ -6086,10 +6136,12 @@ type PatchSessionBody struct {
 	LastHealthCheck *time.Time `json:"lastHealthCheck,omitempty"`
 	// User workspace port.
 	LocalPort *int64 `json:"localPort,omitempty"`
-	// New session name (alphanumeric and underscores only).
+	// New session name (letters, numbers, underscores, and dashes; can't end with a dash or underscore).
 	Name *string `json:"name,omitempty"`
 	// Indicates if this is an OpenAI session.
 	OpenAi *bool `json:"openAI,omitempty"`
+	// Make the session's proxied content reachable by anyone with the link, without logging in (the session stays unlisted). Requires the allow-public-sessions policy.
+	Public *bool `json:"public,omitempty"`
 	// Remote host.
 	RemoteHost *string `json:"remoteHost,omitempty"`
 	// Port on compute resource.
@@ -6194,7 +6246,9 @@ type PlatformSettings struct {
 	NeedsSetup *bool `json:"needsSetup,omitempty"`
 	// The org name matching the current hostname's custom domain, if any.
 	OrgNameForHostname *string `json:"orgNameForHostname,omitempty"`
-	OrgTheme           *Theme  `json:"orgTheme,omitempty"`
+	// Indicates the onboarding wizard should offer the cloud-account step (self-service org owners). Only returned when true.
+	OrgOnboarding *bool  `json:"orgOnboarding,omitempty"`
+	OrgTheme      *Theme `json:"orgTheme,omitempty"`
 	// The display name of the platform.
 	PlatformName *string `json:"platformName,omitempty"`
 	// Platform-wide enabled previews.
@@ -6402,7 +6456,7 @@ type PostSessionBody struct {
 	Directory *string `json:"directory,omitempty"`
 	// Local port (0 = random).
 	LocalPort *int64 `json:"localPort,omitempty"`
-	// Session name (alphanumeric and underscores only). Auto-generated if omitted.
+	// Session name (letters, numbers, underscores, and dashes; can't end with a dash or underscore). Auto-generated if omitted.
 	Name *string `json:"name,omitempty"`
 	// If true, marks this as an OpenAI chat session (routes to /chat).
 	OpenAi *bool `json:"openAI,omitempty"`
@@ -6414,6 +6468,8 @@ type PostSessionBody struct {
 	Slug *string `json:"slug,omitempty"`
 	// For endpoint sessions, strip the session URL prefix before forwarding to the local app (for apps that serve at root and can't set a base path).
 	StripPath *bool `json:"stripPath,omitempty"`
+	// Serve this endpoint at this subdomain: a label ("my-app") or the full host under the platform sessions domain ("my-app.<sessions domain>"). Omit for an auto-assigned random subdomain; send null or "" for the path-based URL. Requires platform subdomain support.
+	Subdomain *string `json:"subdomain,omitempty"`
 	// Target resource ID.
 	TargetID   *string               `json:"targetId,omitempty"`
 	TargetInfo *KubernetesTunnelInfo `json:"targetInfo,omitempty"`
@@ -7428,6 +7484,8 @@ type PutSessionBody struct {
 	Slug *string `json:"slug,omitempty"`
 	// Strip the session URL prefix before forwarding to the local app (for apps that serve at root and can't set a base path).
 	StripPath *bool `json:"stripPath,omitempty"`
+	// Serve this endpoint at this subdomain: a label ("my-app") or the full host under the platform sessions domain ("my-app.<sessions domain>"). Omit to keep/assign a random subdomain; send null or "" to clear it. Requires platform subdomain support.
+	Subdomain *string `json:"subdomain,omitempty"`
 	// Session type. Only "endpoint" is supported.
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -8029,6 +8087,9 @@ type SchedulerNotificationSettings struct {
 
 type SchedulerPartitionData struct {
 	AllocNodes           int64          `json:"allocNodes"`
+	AllowAccounts        []string       `json:"allowAccounts,omitempty"`
+	AllowQos             []string       `json:"allowQos,omitempty"`
+	DenyAccounts         []string       `json:"denyAccounts,omitempty"`
 	IdleNodes            int64          `json:"idleNodes"`
 	MaxTime              *string        `json:"maxTime,omitempty"`
 	Name                 string         `json:"name"`
@@ -8036,6 +8097,13 @@ type SchedulerPartitionData struct {
 	State                string         `json:"state"`
 	TotalNodes           int64          `json:"totalNodes"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type SchedulerQueuesResponse struct {
+	Error                *string                  `json:"error,omitempty"`
+	Queues               []SchedulerPartitionData `json:"queues,omitempty"`
+	SchedulerType        string                   `json:"schedulerType"`
+	AdditionalProperties map[string]any           `json:"-,omitempty"`
 }
 
 type SentrySettings struct {
@@ -8133,7 +8201,7 @@ type Session struct {
 	LastHealthCheck *time.Time `json:"lastHealthCheck,omitempty"`
 	// Local workspace port.
 	LocalPort *int64 `json:"localPort,omitempty"`
-	// Session name (alphanumeric and underscores only).
+	// Session name (letters, numbers, underscores, and dashes; can't end with a dash or underscore).
 	Name *string `json:"name"`
 	// Deprecated. Use user instead
 	Namespace *string `json:"namespace,omitempty"`
@@ -8211,7 +8279,9 @@ type SessionCostLimitInput struct {
 type SessionSoftware struct {
 	// Port the software is running on.
 	Port int64 `json:"port"`
-	// Software type (vscode-server or vnc).
+	// Unix socket path the software is listening on.
+	SocketPath *string `json:"socketPath,omitempty"`
+	// Software type (vscode-server, vnc, or endpoint).
 	Type string `json:"type"`
 	// Software version.
 	Version              string         `json:"version"`
@@ -8580,6 +8650,8 @@ type ToolCall struct {
 type TunnelShared struct {
 	// Whether shared with organization.
 	Organization *bool `json:"organization,omitempty"`
+	// Whether the session's proxied content is reachable by anyone with the link, without logging in. The session is not listed for other users.
+	Public *bool `json:"public,omitempty"`
 	// Shared team IDs.
 	Teams                []string       `json:"teams,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -9439,6 +9511,16 @@ type WorkflowNotificationSettings struct {
 	AdditionalProperties map[string]any              `json:"-,omitempty"`
 }
 
+type WorkflowPermissionResponse struct {
+	// Approved workflow permissions
+	AllowedPermissions []string `json:"allowedPermissions"`
+	// Approved user variable keys
+	AllowedUserVariables []string `json:"allowedUserVariables"`
+	// Workflow name
+	Workflow             string         `json:"workflow"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type WorkflowRunDetailResponse struct {
 	CompletedAt          *time.Time     `json:"completedAt,omitempty"`
 	CreatedAt            *time.Time     `json:"createdAt,omitempty"`
@@ -9595,6 +9677,16 @@ type WorkspaceDefaultsPatchBody struct {
 	UserHost *string `json:"userHost,omitempty"`
 	// Container image for user workspaces. Send null to clear.
 	WorkspaceImage       *string        `json:"workspaceImage,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type WorkspaceEnvironment struct {
+	Dns                  []string       `json:"dns,omitempty"`
+	DockerNetwork        *string        `json:"dockerNetwork,omitempty"`
+	Envs                 []string       `json:"envs,omitempty"`
+	HomeDirPrefix        *string        `json:"homeDirPrefix,omitempty"`
+	K8sMounts            []string       `json:"k8sMounts,omitempty"`
+	Mounts               []string       `json:"mounts,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

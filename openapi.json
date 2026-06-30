@@ -147,6 +147,30 @@
         ],
         "type": "object"
       },
+      "ActiveUserReport": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether the organization receives the monthly active-user report.",
+            "type": "boolean"
+          },
+          "recipients": {
+            "description": "Email addresses that receive the active-user report.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "enabled",
+          "recipients"
+        ],
+        "type": "object"
+      },
       "AddAwsBucketVersionInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -1380,6 +1404,10 @@
           "group": {
             "description": "Billing group the provider is provisioned under (managed providers)",
             "type": "string"
+          },
+          "groupBlocked": {
+            "description": "Whether the provider's billing group is over its allocation and blocks new usage (managed providers)",
+            "type": "boolean"
           },
           "healthy": {
             "description": "Whether the tunnel's remote destination is reachable (tunnel providers only).",
@@ -5176,6 +5204,9 @@
           "cspId": {
             "type": "string"
           },
+          "enableOsLogin": {
+            "type": "boolean"
+          },
           "govCloud": {
             "type": "boolean"
           },
@@ -5187,7 +5218,8 @@
           "name",
           "csp",
           "cspId",
-          "govCloud"
+          "govCloud",
+          "enableOsLogin"
         ],
         "type": "object"
       },
@@ -5217,6 +5249,10 @@
           "cspId": {
             "description": "Cloud service provider ID",
             "type": "string"
+          },
+          "enableOsLogin": {
+            "description": "When true, enables OS Login on provisioned GCE instances (required when the GCP org policy enforces constraints/compute.requireOsLogin)",
+            "type": "boolean"
           },
           "encryptKey": {
             "description": "The ID of the CMEK crypto key for encryption",
@@ -5342,6 +5378,9 @@
           "cspId": {
             "type": "string"
           },
+          "enableOsLogin": {
+            "type": "boolean"
+          },
           "encryptKey": {
             "type": "string"
           },
@@ -5375,6 +5414,7 @@
           "csp",
           "cspId",
           "govCloud",
+          "enableOsLogin",
           "credentials",
           "billing",
           "permissions",
@@ -6122,6 +6162,64 @@
         ],
         "type": "object"
       },
+      "ConsentRequiredError": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "Always \"consent_required\" for this error type.",
+            "type": "string"
+          },
+          "error": {
+            "description": "Will always be true, indicating this is an error response.",
+            "type": "boolean"
+          },
+          "message": {
+            "description": "A human-readable message describing the error.",
+            "type": "string"
+          },
+          "unapprovedPermissions": {
+            "description": "Workflow permissions that need approval before the workflow can run.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "unapprovedVariables": {
+            "description": "User variables that need approval before the workflow can run.",
+            "items": {
+              "$ref": "#/components/schemas/ConsentVariable"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "error",
+          "message",
+          "code"
+        ],
+        "type": "object"
+      },
+      "ConsentVariable": {
+        "additionalProperties": false,
+        "properties": {
+          "hint": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
       "ConversationResponse": {
         "additionalProperties": false,
         "properties": {
@@ -6735,6 +6833,10 @@
           "cspId": {
             "description": "Cloud service provider ID",
             "type": "string"
+          },
+          "enableOsLogin": {
+            "description": "When true, enables OS Login on provisioned GCE instances (required when the GCP org policy enforces constraints/compute.requireOsLogin)",
+            "type": "boolean"
           },
           "encryptKey": {
             "description": "The ID of the CMEK crypto key for encryption",
@@ -7759,6 +7861,30 @@
       "CreateWorkflowRunInputBody": {
         "additionalProperties": false,
         "properties": {
+          "autoApproveConsent": {
+            "description": "Auto-grant each workflow's declared user-variable needs (no consent prompt).",
+            "type": "boolean"
+          },
+          "consentPermissions": {
+            "description": "Permission names the user approves for this workflow.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "consentVariables": {
+            "description": "User variable names the user approves for this workflow.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "displayName": {
             "description": "Display name for the run",
             "type": "string"
@@ -9195,6 +9321,10 @@
             "format": "ipv4",
             "type": "string"
           },
+          "key": {
+            "description": "Existing-cluster only: the configured auth method (an SSH key name, or a sentinel such as \"pwcli\" for clusters that connect via the CLI on the node).",
+            "type": "string"
+          },
           "maxNodes": {
             "description": "The maximum number of nodes the cluster can scale to.",
             "examples": [
@@ -9210,6 +9340,20 @@
             ],
             "maxLength": 63,
             "minLength": 5,
+            "type": "string"
+          },
+          "os": {
+            "description": "Existing-cluster only: the operating system auto-detected on the controller node.",
+            "examples": [
+              "linux"
+            ],
+            "type": "string"
+          },
+          "osRelease": {
+            "description": "Existing-cluster only: the OS release name auto-detected on the controller node.",
+            "examples": [
+              "Ubuntu 22.04"
+            ],
             "type": "string"
           },
           "region": {
@@ -10135,6 +10279,10 @@
           },
           "group": {
             "description": "The group the instance bills to.",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier of the Google Managed Lustre.",
             "type": "string"
           },
           "name": {
@@ -17501,11 +17649,15 @@
             ]
           },
           "name": {
-            "description": "New session name (alphanumeric and underscores only).",
+            "description": "New session name (letters, numbers, underscores, and dashes; can't end with a dash or underscore).",
             "type": "string"
           },
           "openAI": {
             "description": "Indicates if this is an OpenAI session.",
+            "type": "boolean"
+          },
+          "public": {
+            "description": "Make the session's proxied content reachable by anyone with the link, without logging in (the session stays unlisted). Requires the allow-public-sessions policy.",
             "type": "boolean"
           },
           "remoteHost": {
@@ -17813,6 +17965,10 @@
           "orgNameForHostname": {
             "description": "The org name matching the current hostname's custom domain, if any.",
             "type": "string"
+          },
+          "orgOnboarding": {
+            "description": "Indicates the onboarding wizard should offer the cloud-account step (self-service org owners). Only returned when true.",
+            "type": "boolean"
           },
           "orgTheme": {
             "$ref": "#/components/schemas/Theme",
@@ -18416,7 +18572,7 @@
             "type": "integer"
           },
           "name": {
-            "description": "Session name (alphanumeric and underscores only). Auto-generated if omitted.",
+            "description": "Session name (letters, numbers, underscores, and dashes; can't end with a dash or underscore). Auto-generated if omitted.",
             "maxLength": 255,
             "type": "string"
           },
@@ -18443,6 +18599,15 @@
           "stripPath": {
             "description": "For endpoint sessions, strip the session URL prefix before forwarding to the local app (for apps that serve at root and can't set a base path).",
             "type": "boolean"
+          },
+          "subdomain": {
+            "description": "Serve this endpoint at this subdomain: a label (\"my-app\") or the full host under the platform sessions domain (\"my-app.\u003csessions domain\u003e\"). Omit for an auto-assigned random subdomain; send null or \"\" for the path-based URL. Requires platform subdomain support.",
+            "maxLength": 253,
+            "type": [
+              "string",
+              "null"
+            ],
+            "writeOnly": true
           },
           "targetId": {
             "description": "Target resource ID.",
@@ -21255,6 +21420,15 @@
             "description": "Strip the session URL prefix before forwarding to the local app (for apps that serve at root and can't set a base path).",
             "type": "boolean"
           },
+          "subdomain": {
+            "description": "Serve this endpoint at this subdomain: a label (\"my-app\") or the full host under the platform sessions domain (\"my-app.\u003csessions domain\u003e\"). Omit to keep/assign a random subdomain; send null or \"\" to clear it. Requires platform subdomain support.",
+            "maxLength": 253,
+            "type": [
+              "string",
+              "null"
+            ],
+            "writeOnly": true
+          },
           "type": {
             "description": "Session type. Only \"endpoint\" is supported.",
             "enum": [
@@ -23179,6 +23353,33 @@
             "format": "int64",
             "type": "integer"
           },
+          "allowAccounts": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "allowQos": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "denyAccounts": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "idleNodes": {
             "format": "int64",
             "type": "integer"
@@ -23208,6 +23409,30 @@
           "allocNodes",
           "idleNodes",
           "otherNodes"
+        ],
+        "type": "object"
+      },
+      "SchedulerQueuesResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "queues": {
+            "items": {
+              "$ref": "#/components/schemas/SchedulerPartitionData"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "schedulerType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schedulerType"
         ],
         "type": "object"
       },
@@ -23517,7 +23742,7 @@
             ]
           },
           "name": {
-            "description": "Session name (alphanumeric and underscores only).",
+            "description": "Session name (letters, numbers, underscores, and dashes; can't end with a dash or underscore).",
             "maxLength": 255,
             "minLength": 1,
             "type": [
@@ -23744,8 +23969,12 @@
             "format": "int64",
             "type": "integer"
           },
+          "socketPath": {
+            "description": "Unix socket path the software is listening on.",
+            "type": "string"
+          },
           "type": {
-            "description": "Software type (vscode-server or vnc).",
+            "description": "Software type (vscode-server, vnc, or endpoint).",
             "type": "string"
           },
           "version": {
@@ -24864,6 +25093,10 @@
         "properties": {
           "organization": {
             "description": "Whether shared with organization.",
+            "type": "boolean"
+          },
+          "public": {
+            "description": "Whether the session's proxied content is reachable by anyone with the link, without logging in. The session is not listed for other users.",
             "type": "boolean"
           },
           "teams": {
@@ -27179,6 +27412,41 @@
         ],
         "type": "object"
       },
+      "WorkflowPermissionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "allowedPermissions": {
+            "description": "Approved workflow permissions",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "allowedUserVariables": {
+            "description": "Approved user variable keys",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "workflow": {
+            "description": "Workflow name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workflow",
+          "allowedPermissions",
+          "allowedUserVariables"
+        ],
+        "type": "object"
+      },
       "WorkflowRunDetailResponse": {
         "additionalProperties": false,
         "properties": {
@@ -27658,6 +27926,54 @@
             "description": "Container image for user workspaces. Send null to clear.",
             "type": [
               "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "WorkspaceEnvironment": {
+        "additionalProperties": false,
+        "properties": {
+          "dns": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "dockerNetwork": {
+            "type": "string"
+          },
+          "envs": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "homeDirPrefix": {
+            "type": "string"
+          },
+          "k8sMounts": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "mounts": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
               "null"
             ]
           }
@@ -36552,6 +36868,108 @@
           }
         },
         "summary": "Get organization",
+        "tags": [
+          "Organization"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/active-user-report": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns whether the organization receives the monthly active-user report and the recipient email addresses.",
+        "operationId": "get-organization-active-user-report",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActiveUserReport"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get organization active-user report settings",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates whether the organization receives the monthly active-user report and its recipient email addresses. Platform admins only.",
+        "operationId": "update-organization-active-user-report",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActiveUserReport"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActiveUserReport"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update organization active-user report settings",
         "tags": [
           "Organization"
         ]
@@ -46580,10 +46998,10 @@
         ]
       }
     },
-    "/api/organizations/{organization}/managed-clusters/{cluster}/scheduler-jobs/live": {
+    "/api/organizations/{organization}/managed-clusters/{cluster}/scheduler-jobs": {
       "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns live scheduler jobs from a managed cluster.",
-        "operationId": "get-managed-cluster-live-scheduler-jobs",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns scheduler jobs for a managed cluster from the agent's cached state.",
+        "operationId": "get-managed-cluster-scheduler-jobs",
         "parameters": [
           {
             "description": "The name of the organization.",
@@ -46641,7 +47059,7 @@
             "description": "Error"
           }
         },
-        "summary": "Get Managed Cluster Live Scheduler Jobs",
+        "summary": "Get Scheduler Jobs for a Managed Cluster",
         "tags": [
           "Scheduler Jobs"
         ]
@@ -47162,6 +47580,71 @@
           }
         },
         "summary": "Get organization policies",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/policies/allow-public-sessions": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets allow-public-sessions policy for the organization.",
+        "operationId": "set-organization-allow-public-sessions-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/BooleanPolicyOutput"
+                  },
+                  "description": "Map of boolean policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: allow-public-sessions",
         "tags": [
           "Policies"
         ]
@@ -53593,10 +54076,10 @@
         ]
       }
     },
-    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/scheduler-jobs/live": {
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/scheduler-jobs": {
       "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns live scheduler jobs from a cluster.",
-        "operationId": "get-cluster-live-scheduler-jobs",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns scheduler jobs for a cluster from the agent's cached state.",
+        "operationId": "get-cluster-scheduler-jobs",
         "parameters": [
           {
             "description": "The name of the organization.",
@@ -53612,22 +54095,25 @@
             }
           },
           {
-            "description": "Cluster owner username",
+            "description": "Username of the target user.",
             "in": "path",
             "name": "user",
             "required": true,
             "schema": {
-              "description": "Cluster owner username",
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
               "type": "string"
             }
           },
           {
-            "description": "Cluster name",
+            "description": "Cluster name.",
             "in": "path",
             "name": "clusterName",
             "required": true,
             "schema": {
-              "description": "Cluster name",
+              "description": "Cluster name.",
               "type": "string"
             }
           },
@@ -53664,7 +54150,7 @@
             "description": "Error"
           }
         },
-        "summary": "Get Live Scheduler Jobs",
+        "summary": "Get Scheduler Jobs for a Cluster",
         "tags": [
           "Scheduler Jobs"
         ]
@@ -53831,6 +54317,258 @@
         "summary": "Execute Scheduler Job Command",
         "tags": [
           "Scheduler Jobs"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/scheduler-queues": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the cluster's queue list — Slurm partitions or PBS queues depending on the cluster's scheduler. Optional `account` filter applies Slurm AllowAccounts/DenyAccounts semantics (PBS responses ignore it).",
+        "operationId": "get-cluster-scheduler-queues",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name.",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Cluster name.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Slurm-only: if provided, only partitions that allow this account are returned (AllowAccounts/DenyAccounts/ALL semantics). Ignored for PBS clusters.",
+            "explode": false,
+            "in": "query",
+            "name": "account",
+            "schema": {
+              "description": "Slurm-only: if provided, only partitions that allow this account are returned (AllowAccounts/DenyAccounts/ALL semantics). Ignored for PBS clusters.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchedulerQueuesResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List scheduler queues for a cluster",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/slurm-accounts": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the Slurm accounts available to the authenticated user on the specified cluster, sourced from the agent's cached `sacctmgr show assoc` table.",
+        "operationId": "get-cluster-slurm-accounts",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name.",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Cluster name.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Slurm accounts for a cluster",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/slurm-qos": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns Slurm QOS names. When account and partition are both provided, returns the intersection of the partition's AllowQos with the account's QOS.",
+        "operationId": "get-cluster-slurm-qos",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name.",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Cluster name.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional account filter. Combined with partition, narrows QOS to those allowed for the account on that partition.",
+            "explode": false,
+            "in": "query",
+            "name": "account",
+            "schema": {
+              "description": "Optional account filter. Combined with partition, narrows QOS to those allowed for the account on that partition.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional partition filter. Combined with account, narrows QOS to those allowed on the partition for the account.",
+            "explode": false,
+            "in": "query",
+            "name": "partition",
+            "schema": {
+              "description": "Optional partition filter. Combined with account, narrows QOS to those allowed on the partition for the account.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Slurm QOS for a cluster",
+        "tags": [
+          "Clusters"
         ]
       }
     },
@@ -59280,6 +60018,108 @@
         ]
       }
     },
+    "/api/organizations/{organization}/workspace-environment": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the organization's workspace environment settings (mounts, environment variables, DNS, home directory prefix, Kubernetes mounts, and Docker network) applied to its users' workspaces.",
+        "operationId": "get-organization-workspace-environment",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceEnvironment"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get org workspace environment",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces the organization's workspace environment settings. Restricted to platform admins.",
+        "operationId": "update-organization-workspace-environment",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkspaceEnvironment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceEnvironment"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update org workspace environment",
+        "tags": [
+          "Organization"
+        ]
+      }
+    },
     "/api/ping": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nPing the platform, indicating that the user is on the web page.",
@@ -60083,6 +60923,56 @@
           }
         },
         "summary": "Get platform policies",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/allow-public-sessions": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the allow-public-sessions policy for the platform.",
+        "operationId": "set-platform-allow-public-sessions-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/BooleanPolicyOutput"
+                  },
+                  "description": "Map of boolean policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: allow-public-sessions",
         "tags": [
           "Policies"
         ]
@@ -63396,6 +64286,81 @@
           "User Settings"
         ],
         "x-internal": true
+      }
+    },
+    "/api/workflow-permissions": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns all workflow permission grants for the current user.",
+        "operationId": "list-workflow-permissions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WorkflowPermissionResponse"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List workflow permissions",
+        "tags": [
+          "Workflow Variables"
+        ]
+      }
+    },
+    "/api/workflow-permissions/{workflow}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRevokes all permission grants for a workflow.",
+        "operationId": "delete-workflow-permission",
+        "parameters": [
+          {
+            "description": "Workflow name",
+            "in": "path",
+            "name": "workflow",
+            "required": true,
+            "schema": {
+              "description": "Workflow name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Revoke workflow permissions",
+        "tags": [
+          "Workflow Variables"
+        ]
       }
     },
     "/api/workflow-runs": {
