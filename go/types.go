@@ -2206,6 +2206,8 @@ type ConsentRequiredError struct {
 }
 
 type ConsentVariable struct {
+	// Whether the user has this variable defined in their account variables. An undefined variable resolves to an empty value when the workflow runs.
+	Defined              bool           `json:"defined"`
 	Hint                 *string        `json:"hint,omitempty"`
 	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -6220,10 +6222,6 @@ type PlatformSettings struct {
 	CustomDomainsEnabled bool `json:"customDomainsEnabled"`
 	// Indicates if the onboarding flow is enabled for new users.
 	EnableOnboarding *bool `json:"enableOnboarding"`
-	// Indicates if the platform requires a maximum TTL for API Keys. Only returned if the user is authenticated.
-	EnforceMaxTtl *bool `json:"enforceMaxTTL,omitempty"`
-	// The maximum number of days after which API Keys expire. Only returned if the user is authenticated.
-	ExpirationDays *int64 `json:"expirationDays,omitempty"`
 	// Indicates if the forgot password feature is enabled on the platform.
 	ForgotPasswordEnabled bool `json:"forgotPasswordEnabled"`
 	// Indicates Terms & Conditions must be accepted during onboarding. The full document is fetched separately from /api/settings/terms. Only returned when onboarding is enabled and the text is set.
@@ -6238,6 +6236,8 @@ type PlatformSettings struct {
 	MaintenanceMessage *string `json:"maintenanceMessage,omitempty"`
 	// Indicates if the platform is in maintenance mode, preventing certain actions.
 	MaintenanceMode *bool `json:"maintenanceMode,omitempty"`
+	// The maximum number of days an API key or SCIM token can be valid for, resolved from the max-api-key-ttl policy. Omitted when no cap applies. Only returned if the user is authenticated.
+	MaxAPIKeyTtlDays *int64 `json:"maxApiKeyTtlDays,omitempty"`
 	// Indicates if the platform needs a license update (no license, expired, or in grace period). Only returned when true.
 	NeedsLicense *bool `json:"needsLicense,omitempty"`
 	// Indicates if the user needs to complete onboarding. Only returned when true.
@@ -6442,8 +6442,10 @@ type PostProvisionStatusBody struct {
 type PostSessionAccessBody struct {
 	// Whether to grant (true) or revoke (false) access.
 	Access bool `json:"access"`
-	// Group ID to grant or revoke access.
-	GroupID              string         `json:"groupId"`
+	// Group ID to grant or revoke access to. Omit when sharing with the entire organization.
+	GroupID *string `json:"groupId,omitempty"`
+	// Set to true to share with (or unshare from) the entire organization instead of a single group.
+	Organization         *bool          `json:"organization,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -6454,6 +6456,8 @@ type PostSessionBody struct {
 	Description *string `json:"description,omitempty"`
 	// Directory to open in VS Code. Use ~ for the user's home directory.
 	Directory *string `json:"directory,omitempty"`
+	// For endpoint sessions, keep the session after the serving process exits. Without it a stopped endpoint session is deleted after a grace period.
+	Keep *bool `json:"keep,omitempty"`
 	// Local port (0 = random).
 	LocalPort *int64 `json:"localPort,omitempty"`
 	// Session name (letters, numbers, underscores, and dashes; can't end with a dash or underscore). Auto-generated if omitted.
@@ -7480,6 +7484,10 @@ type PutModelConfigsInputBody struct {
 type PutSessionBody struct {
 	// Human-readable session description.
 	Description *string `json:"description,omitempty"`
+	// Keep the endpoint session after the serving process exits. Without it a stopped endpoint session is deleted after a grace period. Omit to leave a takeover's existing value unchanged.
+	Keep *bool `json:"keep,omitempty"`
+	// Expose this endpoint as an OpenAI-compatible chat model, reachable via the platform's OpenAI API and listed as an AI provider.
+	OpenAi *bool `json:"openAI,omitempty"`
 	// Session slug for URL path.
 	Slug *string `json:"slug,omitempty"`
 	// Strip the session URL prefix before forwarding to the local app (for apps that serve at root and can't set a base path).
@@ -8194,6 +8202,8 @@ type Session struct {
 	ImageURL *string `json:"imageUrl,omitempty"`
 	// Internal session URL.
 	InternalHref *string `json:"internalHref,omitempty"`
+	// Whether the endpoint session is kept after the serving process exits.
+	Keep *bool `json:"keep,omitempty"`
 	// Endpoint key epoch; bumped each time the endpoint is taken over.
 	KeyGeneration  *int64                `json:"keyGeneration,omitempty"`
 	KubernetesInfo *KubernetesTunnelInfo `json:"kubernetesInfo,omitempty"`
@@ -8744,10 +8754,6 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	DockerWorkspaceSettings *DockerWorkspaceSettings `json:"dockerWorkspaceSettings,omitempty"`
 	// Whether to enable the onboarding flow.
 	EnableOnboarding *bool `json:"enableOnboarding,omitempty"`
-	// Whether to enforce max TTL for API keys.
-	EnforceMaxTtl *bool `json:"enforceMaxTTL,omitempty"`
-	// Default expiration days for API keys.
-	ExpirationDays *int64 `json:"expirationDays,omitempty"`
 	// Whether to enable the forgot password feature.
 	ForgotPasswordEnabled *bool `json:"forgotPasswordEnabled,omitempty"`
 	// The maintenance message to show.

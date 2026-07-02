@@ -6208,6 +6208,10 @@
       "ConsentVariable": {
         "additionalProperties": false,
         "properties": {
+          "defined": {
+            "description": "Whether the user has this variable defined in their account variables. An undefined variable resolves to an empty value when the workflow runs.",
+            "type": "boolean"
+          },
           "hint": {
             "type": "string"
           },
@@ -6216,7 +6220,8 @@
           }
         },
         "required": [
-          "name"
+          "name",
+          "defined"
         ],
         "type": "object"
       },
@@ -17898,15 +17903,6 @@
               "null"
             ]
           },
-          "enforceMaxTTL": {
-            "description": "Indicates if the platform requires a maximum TTL for API Keys. Only returned if the user is authenticated.",
-            "type": "boolean"
-          },
-          "expirationDays": {
-            "description": "The maximum number of days after which API Keys expire. Only returned if the user is authenticated.",
-            "format": "int64",
-            "type": "integer"
-          },
           "forgotPasswordEnabled": {
             "description": "Indicates if the forgot password feature is enabled on the platform.",
             "type": "boolean"
@@ -17949,6 +17945,11 @@
           "maintenanceMode": {
             "description": "Indicates if the platform is in maintenance mode, preventing certain actions.",
             "type": "boolean"
+          },
+          "maxApiKeyTtlDays": {
+            "description": "The maximum number of days an API key or SCIM token can be valid for, resolved from the max-api-key-ttl policy. Omitted when no cap applies. Only returned if the user is authenticated.",
+            "format": "int64",
+            "type": "integer"
           },
           "needsLicense": {
             "description": "Indicates if the platform needs a license update (no license, expired, or in grace period). Only returned when true.",
@@ -18537,12 +18538,15 @@
             "type": "boolean"
           },
           "groupId": {
-            "description": "Group ID to grant or revoke access.",
+            "description": "Group ID to grant or revoke access to. Omit when sharing with the entire organization.",
             "type": "string"
+          },
+          "organization": {
+            "description": "Set to true to share with (or unshare from) the entire organization instead of a single group.",
+            "type": "boolean"
           }
         },
         "required": [
-          "groupId",
           "access"
         ],
         "type": "object"
@@ -18563,6 +18567,10 @@
           "directory": {
             "description": "Directory to open in VS Code. Use ~ for the user's home directory.",
             "type": "string"
+          },
+          "keep": {
+            "description": "For endpoint sessions, keep the session after the serving process exits. Without it a stopped endpoint session is deleted after a grace period.",
+            "type": "boolean"
           },
           "localPort": {
             "description": "Local port (0 = random).",
@@ -21412,6 +21420,15 @@
             "maxLength": 255,
             "type": "string"
           },
+          "keep": {
+            "description": "Keep the endpoint session after the serving process exits. Without it a stopped endpoint session is deleted after a grace period. Omit to leave a takeover's existing value unchanged.",
+            "type": "boolean"
+          },
+          "openAI": {
+            "description": "Expose this endpoint as an OpenAI-compatible chat model, reachable via the platform's OpenAI API and listed as an AI provider.",
+            "type": "boolean",
+            "writeOnly": true
+          },
           "slug": {
             "description": "Session slug for URL path.",
             "type": "string"
@@ -23715,6 +23732,11 @@
             "readOnly": true,
             "type": "string"
           },
+          "keep": {
+            "description": "Whether the endpoint session is kept after the serving process exits.",
+            "readOnly": true,
+            "type": "boolean"
+          },
           "keyGeneration": {
             "description": "Endpoint key epoch; bumped each time the endpoint is taken over.",
             "format": "int64",
@@ -25321,15 +25343,6 @@
           "enableOnboarding": {
             "description": "Whether to enable the onboarding flow.",
             "type": "boolean"
-          },
-          "enforceMaxTTL": {
-            "description": "Whether to enforce max TTL for API keys.",
-            "type": "boolean"
-          },
-          "expirationDays": {
-            "description": "Default expiration days for API keys.",
-            "format": "int64",
-            "type": "integer"
           },
           "forgotPasswordEnabled": {
             "description": "Whether to enable the forgot password feature.",
@@ -28068,7 +28081,7 @@
       "cookie": {
         "description": "Cookie-based authentication, used by the ACTIVATE web UI.",
         "in": "cookie",
-        "name": "pw.sso",
+        "name": "__Host-pw.sso",
         "type": "apiKey"
       }
     }
@@ -47784,6 +47797,72 @@
         ]
       }
     },
+    "/api/organizations/{organization}/policies/max-api-key-ttl": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets max-api-key-ttl policy for the organization.",
+        "operationId": "set-organization-max-api-key-ttl-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  6
+                ],
+                "format": "int64",
+                "type": "integer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/IntPolicyOutput"
+                  },
+                  "description": "Map of int policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: max-api-key-ttl",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/organizations/{organization}/policies/nitro-instances-only": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets nitro-instances-only policy for the organization.",
@@ -61077,6 +61156,57 @@
           }
         },
         "summary": "Set platform policy: enforce-webauthn-mfa",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/max-api-key-ttl": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the max-api-key-ttl policy for the platform.",
+        "operationId": "set-platform-max-api-key-ttl-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  6
+                ],
+                "format": "int64",
+                "type": "integer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/IntPolicyOutput"
+                  },
+                  "description": "Map of int policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: max-api-key-ttl",
         "tags": [
           "Policies"
         ]
