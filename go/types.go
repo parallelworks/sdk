@@ -1727,6 +1727,24 @@ type BuiltInWorkspaceDefaults struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type CertInfo struct {
+	// DNS names the certificate covers
+	DnsNames []string `json:"dnsNames,omitempty"`
+	// True once the certificate is past its notAfter
+	Expired bool `json:"expired"`
+	// True when the certificate expires within 30 days
+	ExpiresSoon bool `json:"expiresSoon"`
+	// Issuer of the certificate leaf
+	Issuer string `json:"issuer"`
+	// End of the certificate validity window
+	NotAfter time.Time `json:"notAfter"`
+	// Start of the certificate validity window
+	NotBefore time.Time `json:"notBefore"`
+	// Subject of the certificate leaf
+	Subject              string         `json:"subject"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ChartsBody struct {
 	// List of Helm charts across all clusters
 	Charts []HelmChart `json:"charts"`
@@ -2616,6 +2634,24 @@ type CreateOrganizationOutputBody struct {
 	Name string `json:"name"`
 	// Whether the organization is a partner organization.
 	Partner              bool           `json:"partner"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreatePlatformDomainInputBody struct {
+	// How the certificate is managed. acme issues and renews it automatically via Let's Encrypt (platform domains only); manual (default) serves the uploaded certificate/privateKey
+	CertSource *string `json:"certSource,omitempty"`
+	// PEM certificate chain to serve for this domain
+	Certificate *string `json:"certificate,omitempty"`
+	// Make this the default domain for its role
+	Default *bool `json:"default,omitempty"`
+	// Host name to register; a leading *. label registers a wildcard platform domain
+	Domain string `json:"domain"`
+	// Owning organization id; the domain becomes that organization's branded login host
+	Organization *string `json:"organization,omitempty"`
+	// PEM private key matching the certificate; never returned by the API
+	PrivateKey *string `json:"privateKey,omitempty"`
+	// platform domains serve the app and frame sessions; sessions domains host session subdomains
+	Role                 string         `json:"role"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4035,8 +4071,8 @@ type Image struct {
 	Csp string `json:"csp"`
 	// Cloud provider specific image ID
 	CspID string `json:"cspId"`
-	// Whether the image is disabled and hidden from users
-	Disabled bool `json:"disabled"`
+	// Timestamp at which the image becomes disabled. nil = enabled forever; future = scheduled retirement (still alive); past or now = already disabled.
+	DisabledOn *time.Time `json:"disabledOn,omitempty"`
 	// Unique identifier
 	ID *string `json:"id,omitempty"`
 	// Whether this is the image that gets used when using Latest on compute resources
@@ -5403,6 +5439,8 @@ type Notification struct {
 	Read bool `json:"read"`
 	// Subtype of the notification.
 	Subtype string `json:"subtype"`
+	// Time the notification refers to, such as a scheduled retirement.
+	Time *time.Time `json:"time,omitempty"`
 	// Title of the notification.
 	Title string `json:"title"`
 	// Type/category of the notification.
@@ -5828,6 +5866,14 @@ type OrgAllocationThreshold struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type OrgDomainSettings struct {
+	// Host that shows this organization's branded login; empty when none
+	LoginDomain string `json:"loginDomain"`
+	// Host the organization's platform URL resolves to; empty for the deployment default
+	PlatformDomain       string         `json:"platformDomain"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type OrgMauBreakdown struct {
 	// Monthly active users count
 	Mau int64 `json:"mau"`
@@ -6070,8 +6116,8 @@ type PatchAllocationInputBody struct {
 }
 
 type PatchImageInputBody struct {
-	// Set the image as disabled
-	Disabled *bool `json:"disabled,omitempty"`
+	// RFC3339 timestamp at which the image becomes disabled. Empty string clears it.
+	DisabledOn *string `json:"disabledOn,omitempty"`
 	// Set the image as latest
 	Latest *bool `json:"latest,omitempty"`
 	// Set the image as published
@@ -6192,6 +6238,39 @@ type PermissionEntry struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type PlatformDomain struct {
+	// When the current ACME certificate was issued
+	AcmeIssuedAt *time.Time `json:"acmeIssuedAt,omitempty"`
+	// Reason the last ACME issuance attempt failed
+	AcmeLastError *string `json:"acmeLastError,omitempty"`
+	// When the ACME certificate is due for renewal
+	AcmeRenewAfter *time.Time `json:"acmeRenewAfter,omitempty"`
+	// ACME issuance state for automatic certificates: pending, issuing, issued, or error
+	AcmeStatus *string   `json:"acmeStatus,omitempty"`
+	CertInfo   *CertInfo `json:"certInfo,omitempty"`
+	// How the certificate is managed: manual or acme
+	CertSource *string `json:"certSource,omitempty"`
+	// PEM certificate chain served for this domain
+	Certificate *string `json:"certificate,omitempty"`
+	// The creation date of the entry
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// Whether this is the default domain for its role
+	Default *bool `json:"default,omitempty"`
+	// Lowercase host name; a leading *. label registers a wildcard platform domain
+	Domain string `json:"domain"`
+	// True when this deployment platform host frames every session; organization canonical origins do not
+	FrameAncestor *bool `json:"frameAncestor,omitempty"`
+	// The unique identifier of the registry entry
+	ID string `json:"id"`
+	// Owning organization id; the domain becomes that organization's branded login host
+	Organization *string `json:"organization,omitempty"`
+	// Name of the owning organization
+	OrganizationName *string `json:"organizationName,omitempty"`
+	// platform domains serve the app and frame sessions; sessions domains host session subdomains
+	Role                 string         `json:"role"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type PlatformMauResponse struct {
 	// MAU breakdown by organization
 	ByOrganization []OrgMauBreakdown `json:"byOrganization"`
@@ -6286,6 +6365,10 @@ type PlatformSettings struct {
 }
 
 type PlatformSettingsAdmin struct {
+	// Contact email registered with the ACME account for certificate expiry notices.
+	AcmeContactEmail *string `json:"acmeContactEmail,omitempty"`
+	// ACME directory URL for automatic Let's Encrypt certificates. Empty uses Let's Encrypt production.
+	AcmeDirectoryURL *string `json:"acmeDirectoryUrl,omitempty"`
 	// Indicates if k8s PVC should be created for workspaces.
 	Createk8sPvc *bool `json:"createk8sPVC,omitempty"`
 	// Indicates if user files should be deleted when their account is deleted.
@@ -7462,6 +7545,8 @@ type PutImageInputBody struct {
 	Csp string `json:"csp"`
 	// Cloud provider specific image ID
 	CspID string `json:"cspId"`
+	// RFC3339 timestamp at which the image becomes disabled. Empty string clears it.
+	DisabledOn *string `json:"disabledOn,omitempty"`
 	// Image name
 	Name string `json:"name"`
 	// Whether the image is selectable on image dropdowns
@@ -8747,6 +8832,10 @@ type UpdateAccessManagementBody struct {
 }
 
 type UpdateAdminPlatformSettingsInputBody struct {
+	// Contact email registered with the ACME account.
+	AcmeContactEmail *string `json:"acmeContactEmail,omitempty"`
+	// ACME directory URL for automatic certificates. Empty uses Let's Encrypt production.
+	AcmeDirectoryURL *string `json:"acmeDirectoryUrl,omitempty"`
 	// Whether to create a PVC for k8s workspaces.
 	Createk8sPvc *bool `json:"createk8sPVC,omitempty"`
 	// Whether to delete user files on account deletion.
@@ -8937,6 +9026,14 @@ type UpdateOrgCustomTagsInputBody struct {
 	AdditionalProperties map[string]any      `json:"-,omitempty"`
 }
 
+type UpdateOrgDomainSettingsBody struct {
+	// Host that shows the org's branded login; empty releases it
+	LoginDomain *string `json:"loginDomain,omitempty"`
+	// Host the org's platform URL resolves to; empty clears it to the deployment default
+	PlatformDomain       *string        `json:"platformDomain,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type UpdateOrgSidebarInputBody struct {
 	// The full list of sidebar option IDs that should be enabled by default for users in this organization. Pass an empty array to show only unhideable items.
 	DefaultSidebar       []string       `json:"defaultSidebar"`
@@ -8946,6 +9043,20 @@ type UpdateOrgSidebarInputBody struct {
 type UpdatePermissionInputBody struct {
 	// New permission level
 	Permission           string         `json:"permission"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UpdatePlatformDomainBody struct {
+	// Switch certificate management. acme issues and renews automatically via Let's Encrypt (platform domains only); manual serves an uploaded certificate. Set acmeStatus back to pending to force a reissue
+	CertSource *string `json:"certSource,omitempty"`
+	// PEM certificate chain; provide together with privateKey, both empty to remove the certificate
+	Certificate *string `json:"certificate,omitempty"`
+	// Make this the default domain for its role, or step it down
+	Default *bool `json:"default,omitempty"`
+	// Owning organization id; an empty string clears the owner
+	Organization *string `json:"organization,omitempty"`
+	// PEM private key matching the certificate; never returned by the API
+	PrivateKey           *string        `json:"privateKey,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

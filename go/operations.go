@@ -10,6 +10,22 @@ import (
 	"time"
 )
 
+// GetAcmeChallenge - Serve ACME HTTP-01 challenge response
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Serves the key authorization for a pending Let's Encrypt HTTP-01 challenge. Returns 404 when the token is unknown.
+func (c *Client) GetAcmeChallenge(ctx context.Context, token string) (*string, error) {
+	path := "/.well-known/acme-challenge/{token}"
+	path = pathReplace(path, "token", token)
+
+	var result string
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetPkiValidationFile - Serve PKI domain control validation file
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -4896,6 +4912,38 @@ func (c *Client) DeleteOrganizationDesktopWallpaper(ctx context.Context, organiz
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// GetOrganizationDomainSettings - Get Organization Domain Settings
+//
+// > This is a platform-admin only route.
+//
+// Returns the organization's platform origin and branded-login domains
+func (c *Client) GetOrganizationDomainSettings(ctx context.Context, organization string) (*OrgDomainSettings, error) {
+	path := "/api/organizations/{organization}/domain-settings"
+	path = pathReplace(path, "organization", organization)
+
+	var result OrgDomainSettings
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateOrganizationDomainSettings - Update Organization Domain Settings
+//
+// > This is a platform-admin only route.
+//
+// Sets the organization's platform origin and branded-login domains in the registry
+func (c *Client) UpdateOrganizationDomainSettings(ctx context.Context, organization string, body UpdateOrgDomainSettingsBody) (*OrgDomainSettings, error) {
+	path := "/api/organizations/{organization}/domain-settings"
+	path = pathReplace(path, "organization", organization)
+
+	var result OrgDomainSettings
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetOrganizationGroupsParams contains optional parameters for the GetOrganizationGroups operation.
@@ -10217,6 +10265,67 @@ func (c *Client) UpdatePlatformImage(ctx context.Context, csp string, region str
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// ListPlatformDomains - List Platform Domains
+//
+// > This is a platform-admin only route.
+//
+// Returns all domains registered in the platform domain registry
+func (c *Client) ListPlatformDomains(ctx context.Context) (*[]PlatformDomain, error) {
+	path := "/api/platform/domains"
+
+	var result []PlatformDomain
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreatePlatformDomain - Register Platform Domain
+//
+// > This is a platform-admin only route.
+//
+// Registers a domain in the platform domain registry, optionally with a TLS certificate served for it
+func (c *Client) CreatePlatformDomain(ctx context.Context, body CreatePlatformDomainInputBody) (*PlatformDomain, error) {
+	path := "/api/platform/domains"
+
+	var result PlatformDomain
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeletePlatformDomain - Delete Platform Domain
+//
+// > This is a platform-admin only route.
+//
+// Removes a domain from the platform domain registry
+func (c *Client) DeletePlatformDomain(ctx context.Context, id string) error {
+	path := "/api/platform/domains/{id}"
+	path = pathReplace(path, "id", id)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UpdatePlatformDomain - Update Platform Domain
+//
+// > This is a platform-admin only route.
+//
+// Updates a registered domain: default flag, owning organization, or TLS certificate rotation
+func (c *Client) UpdatePlatformDomain(ctx context.Context, id string, body UpdatePlatformDomainBody) (*PlatformDomain, error) {
+	path := "/api/platform/domains/{id}"
+	path = pathReplace(path, "id", id)
+
+	var result PlatformDomain
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetAllPlatformGroupsParams contains optional parameters for the GetAllPlatformGroups operation.

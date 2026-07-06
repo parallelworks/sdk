@@ -4757,6 +4757,56 @@
         ],
         "type": "object"
       },
+      "CertInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "dnsNames": {
+            "description": "DNS names the certificate covers",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "expired": {
+            "description": "True once the certificate is past its notAfter",
+            "type": "boolean"
+          },
+          "expiresSoon": {
+            "description": "True when the certificate expires within 30 days",
+            "type": "boolean"
+          },
+          "issuer": {
+            "description": "Issuer of the certificate leaf",
+            "type": "string"
+          },
+          "notAfter": {
+            "description": "End of the certificate validity window",
+            "format": "date-time",
+            "type": "string"
+          },
+          "notBefore": {
+            "description": "Start of the certificate validity window",
+            "format": "date-time",
+            "type": "string"
+          },
+          "subject": {
+            "description": "Subject of the certificate leaf",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject",
+          "issuer",
+          "notBefore",
+          "notAfter",
+          "expired",
+          "expiresSoon"
+        ],
+        "type": "object"
+      },
       "ChartsBody": {
         "additionalProperties": false,
         "properties": {
@@ -7306,6 +7356,54 @@
           "name",
           "displayName",
           "partner"
+        ],
+        "type": "object"
+      },
+      "CreatePlatformDomainInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "certSource": {
+            "description": "How the certificate is managed. acme issues and renews it automatically via Let's Encrypt (platform domains only); manual (default) serves the uploaded certificate/privateKey",
+            "enum": [
+              "manual",
+              "acme"
+            ],
+            "type": "string"
+          },
+          "certificate": {
+            "description": "PEM certificate chain to serve for this domain",
+            "type": "string"
+          },
+          "default": {
+            "description": "Make this the default domain for its role",
+            "type": "boolean"
+          },
+          "domain": {
+            "description": "Host name to register; a leading *. label registers a wildcard platform domain",
+            "maxLength": 253,
+            "minLength": 1,
+            "type": "string"
+          },
+          "organization": {
+            "description": "Owning organization id; the domain becomes that organization's branded login host",
+            "type": "string"
+          },
+          "privateKey": {
+            "description": "PEM private key matching the certificate; never returned by the API",
+            "type": "string"
+          },
+          "role": {
+            "description": "platform domains serve the app and frame sessions; sessions domains host session subdomains",
+            "enum": [
+              "platform",
+              "sessions"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain",
+          "role"
         ],
         "type": "object"
       },
@@ -11304,9 +11402,10 @@
             "description": "Cloud provider specific image ID",
             "type": "string"
           },
-          "disabled": {
-            "description": "Whether the image is disabled and hidden from users",
-            "type": "boolean"
+          "disabledOn": {
+            "description": "Timestamp at which the image becomes disabled. nil = enabled forever; future = scheduled retirement (still alive); past or now = already disabled.",
+            "format": "date-time",
+            "type": "string"
           },
           "id": {
             "description": "Unique identifier",
@@ -11369,8 +11468,7 @@
           "region",
           "type",
           "architecture",
-          "published",
-          "disabled"
+          "published"
         ],
         "type": "object"
       },
@@ -15542,6 +15640,11 @@
             "description": "Subtype of the notification.",
             "type": "string"
           },
+          "time": {
+            "description": "Time the notification refers to, such as a scheduled retirement.",
+            "format": "date-time",
+            "type": "string"
+          },
           "title": {
             "description": "Title of the notification.",
             "type": "string"
@@ -16801,6 +16904,24 @@
         ],
         "type": "object"
       },
+      "OrgDomainSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "loginDomain": {
+            "description": "Host that shows this organization's branded login; empty when none",
+            "type": "string"
+          },
+          "platformDomain": {
+            "description": "Host the organization's platform URL resolves to; empty for the deployment default",
+            "type": "string"
+          }
+        },
+        "required": [
+          "platformDomain",
+          "loginDomain"
+        ],
+        "type": "object"
+      },
       "OrgMAUBreakdown": {
         "additionalProperties": false,
         "properties": {
@@ -17469,9 +17590,9 @@
       "PatchImageInputBody": {
         "additionalProperties": false,
         "properties": {
-          "disabled": {
-            "description": "Set the image as disabled",
-            "type": "boolean"
+          "disabledOn": {
+            "description": "RFC3339 timestamp at which the image becomes disabled. Empty string clears it.",
+            "type": "string"
           },
           "latest": {
             "description": "Set the image as latest",
@@ -17802,6 +17923,94 @@
         ],
         "type": "object"
       },
+      "PlatformDomain": {
+        "additionalProperties": false,
+        "properties": {
+          "acmeIssuedAt": {
+            "description": "When the current ACME certificate was issued",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "acmeLastError": {
+            "description": "Reason the last ACME issuance attempt failed",
+            "readOnly": true,
+            "type": "string"
+          },
+          "acmeRenewAfter": {
+            "description": "When the ACME certificate is due for renewal",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "acmeStatus": {
+            "description": "ACME issuance state for automatic certificates: pending, issuing, issued, or error",
+            "readOnly": true,
+            "type": "string"
+          },
+          "certInfo": {
+            "$ref": "#/components/schemas/CertInfo",
+            "description": "Metadata derived from the stored certificate",
+            "readOnly": true
+          },
+          "certSource": {
+            "description": "How the certificate is managed: manual or acme",
+            "readOnly": true,
+            "type": "string"
+          },
+          "certificate": {
+            "description": "PEM certificate chain served for this domain",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "The creation date of the entry",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "default": {
+            "description": "Whether this is the default domain for its role",
+            "type": "boolean"
+          },
+          "domain": {
+            "description": "Lowercase host name; a leading *. label registers a wildcard platform domain",
+            "type": "string"
+          },
+          "frameAncestor": {
+            "description": "True when this deployment platform host frames every session; organization canonical origins do not",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "id": {
+            "description": "The unique identifier of the registry entry",
+            "readOnly": true,
+            "type": "string"
+          },
+          "organization": {
+            "description": "Owning organization id; the domain becomes that organization's branded login host",
+            "type": "string"
+          },
+          "organizationName": {
+            "description": "Name of the owning organization",
+            "readOnly": true,
+            "type": "string"
+          },
+          "role": {
+            "description": "platform domains serve the app and frame sessions; sessions domains host session subdomains",
+            "enum": [
+              "platform",
+              "sessions"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "domain",
+          "role"
+        ],
+        "type": "object"
+      },
       "PlatformMAUResponse": {
         "additionalProperties": false,
         "properties": {
@@ -18096,6 +18305,14 @@
       "PlatformSettingsAdmin": {
         "additionalProperties": false,
         "properties": {
+          "acmeContactEmail": {
+            "description": "Contact email registered with the ACME account for certificate expiry notices.",
+            "type": "string"
+          },
+          "acmeDirectoryUrl": {
+            "description": "ACME directory URL for automatic Let's Encrypt certificates. Empty uses Let's Encrypt production.",
+            "type": "string"
+          },
           "createk8sPVC": {
             "description": "Indicates if k8s PVC should be created for workspaces.",
             "type": "boolean"
@@ -21355,6 +21572,10 @@
           },
           "cspId": {
             "description": "Cloud provider specific image ID",
+            "type": "string"
+          },
+          "disabledOn": {
+            "description": "RFC3339 timestamp at which the image becomes disabled. Empty string clears it.",
             "type": "string"
           },
           "name": {
@@ -25328,6 +25549,14 @@
       "UpdateAdminPlatformSettingsInputBody": {
         "additionalProperties": false,
         "properties": {
+          "acmeContactEmail": {
+            "description": "Contact email registered with the ACME account.",
+            "type": "string"
+          },
+          "acmeDirectoryUrl": {
+            "description": "ACME directory URL for automatic certificates. Empty uses Let's Encrypt production.",
+            "type": "string"
+          },
           "createk8sPVC": {
             "description": "Whether to create a PVC for k8s workspaces.",
             "type": "boolean"
@@ -25821,6 +26050,20 @@
         ],
         "type": "object"
       },
+      "UpdateOrgDomainSettingsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "loginDomain": {
+            "description": "Host that shows the org's branded login; empty releases it",
+            "type": "string"
+          },
+          "platformDomain": {
+            "description": "Host the org's platform URL resolves to; empty clears it to the deployment default",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "UpdateOrgSidebarInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -25855,6 +26098,36 @@
         "required": [
           "permission"
         ],
+        "type": "object"
+      },
+      "UpdatePlatformDomainBody": {
+        "additionalProperties": false,
+        "properties": {
+          "certSource": {
+            "description": "Switch certificate management. acme issues and renews automatically via Let's Encrypt (platform domains only); manual serves an uploaded certificate. Set acmeStatus back to pending to force a reissue",
+            "enum": [
+              "manual",
+              "acme"
+            ],
+            "type": "string"
+          },
+          "certificate": {
+            "description": "PEM certificate chain; provide together with privateKey, both empty to remove the certificate",
+            "type": "string"
+          },
+          "default": {
+            "description": "Make this the default domain for its role, or step it down",
+            "type": "boolean"
+          },
+          "organization": {
+            "description": "Owning organization id; an empty string clears the owner",
+            "type": "string"
+          },
+          "privateKey": {
+            "description": "PEM private key matching the certificate; never returned by the API",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UpdateQuotaBody": {
@@ -28103,6 +28376,59 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/.well-known/acme-challenge/{token}": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nServes the key authorization for a pending Let's Encrypt HTTP-01 challenge. Returns 404 when the token is unknown.",
+        "operationId": "get-acme-challenge",
+        "parameters": [
+          {
+            "description": "ACME HTTP-01 challenge token.",
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "description": "ACME HTTP-01 challenge token.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Serve ACME HTTP-01 challenge response",
+        "tags": [
+          "Platform"
+        ],
+        "x-internal": true
+      }
+    },
     "/.well-known/pki-validation/{filename}": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nServes the configured PKI validation file for HTTP-based domain control validation. Returns 404 if no file is configured or the requested filename does not match the configured one.",
@@ -41652,6 +41978,108 @@
         "summary": "Upload organization desktop session wallpaper",
         "tags": [
           "Organization Theme"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/domain-settings": {
+      "get": {
+        "description": "\u003e This is a platform-admin only route.\n\nReturns the organization's platform origin and branded-login domains",
+        "operationId": "get-organization-domain-settings",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgDomainSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Organization Domain Settings",
+        "tags": [
+          "Domains"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a platform-admin only route.\n\nSets the organization's platform origin and branded-login domains in the registry",
+        "operationId": "update-organization-domain-settings",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrgDomainSettingsBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgDomainSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update Organization Domain Settings",
+        "tags": [
+          "Domains"
         ]
       }
     },
@@ -60521,6 +60949,173 @@
         ]
       }
     },
+    "/api/platform/domains": {
+      "get": {
+        "description": "\u003e This is a platform-admin only route.\n\nReturns all domains registered in the platform domain registry",
+        "operationId": "list-platform-domains",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformDomain"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Platform Domains",
+        "tags": [
+          "Domains"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a platform-admin only route.\n\nRegisters a domain in the platform domain registry, optionally with a TLS certificate served for it",
+        "operationId": "create-platform-domain",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlatformDomainInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDomain"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Register Platform Domain",
+        "tags": [
+          "Domains"
+        ]
+      }
+    },
+    "/api/platform/domains/{id}": {
+      "delete": {
+        "description": "\u003e This is a platform-admin only route.\n\nRemoves a domain from the platform domain registry",
+        "operationId": "delete-platform-domain",
+        "parameters": [
+          {
+            "description": "The registry entry id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "The registry entry id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete Platform Domain",
+        "tags": [
+          "Domains"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a platform-admin only route.\n\nUpdates a registered domain: default flag, owning organization, or TLS certificate rotation",
+        "operationId": "update-platform-domain",
+        "parameters": [
+          {
+            "description": "The registry entry id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "The registry entry id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlatformDomainBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDomain"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update Platform Domain",
+        "tags": [
+          "Domains"
+        ]
+      }
+    },
     "/api/platform/groups": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns a list of all groups on the platform",
@@ -66058,6 +66653,10 @@
     {
       "description": "Endpoints related to disk storage",
       "name": "Disks"
+    },
+    {
+      "description": "Endpoints related to the platform domain registry",
+      "name": "Domains"
     },
     {
       "description": "Endpoints related to error log viewing",
