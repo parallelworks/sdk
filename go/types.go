@@ -527,6 +527,8 @@ type AiProviderResponse struct {
 	Region *string `json:"region,omitempty"`
 	// Current status of the AI provider
 	Status string `json:"status"`
+	// Whether the provider endpoint supports the OpenAI Responses API
+	SupportsResponses *bool `json:"supportsResponses,omitempty"`
 	// The username of the user that owns this resource
 	User                 string         `json:"user"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -1864,6 +1866,8 @@ type ChatMessage struct {
 	Name *string `json:"name,omitempty"`
 	// Reasoning content for assistant messages (required by DeepSeek)
 	ReasoningContent *string `json:"reasoning_content,omitempty"`
+	// Raw OpenAI Responses API output items for this assistant turn (reasoning items with encrypted_content, function calls); clients echo them back so reasoning context carries across turns
+	ResponsesOutput []any `json:"responses_output,omitempty"`
 	// Message role: system, user, assistant, or tool
 	Role string `json:"role"`
 	// ID of the tool call this message responds to
@@ -2365,6 +2369,8 @@ type CreateAiProviderBody struct {
 	RefreshInterval *string `json:"refreshInterval,omitempty"`
 	// AI provider region
 	Region *string `json:"region,omitempty"`
+	// Whether the provider endpoint supports the OpenAI Responses API
+	SupportsResponses *bool `json:"supportsResponses,omitempty"`
 	// Tags for the AI provider
 	Tags                 *string        `json:"tags"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -2610,6 +2616,8 @@ type CreateOrgAiProviderBody struct {
 	InsecureSkipTLSVerify *bool `json:"insecureSkipTlsVerify,omitempty"`
 	// Name of the AI provider
 	Name string `json:"name"`
+	// Whether the provider endpoint supports the OpenAI Responses API
+	SupportsResponses *bool `json:"supportsResponses,omitempty"`
 	// AI provider type
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -3009,6 +3017,8 @@ type DeltaMessage struct {
 	Name *string `json:"name,omitempty"`
 	// Reasoning/thinking content from models like o1/o3
 	ReasoningContent *string `json:"reasoning_content,omitempty"`
+	// Raw Responses API output items for this turn; echo back in history for cross-turn reasoning continuity
+	ResponsesOutput []any `json:"responses_output,omitempty"`
 	// Message role (only in first chunk)
 	Role *string `json:"role,omitempty"`
 	// ID of the tool call this message responds to
@@ -4062,6 +4072,14 @@ type HelmReleaseResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type IconRef struct {
+	// SHA256 hex of a blob already in the caller's thumbnail library. Mutually exclusive with presetUrl.
+	Etag *string `json:"etag,omitempty"`
+	// Preset thumbnail URL from the curated platform library (e.g. /assets/images/icons/...). Mutually exclusive with etag.
+	PresetURL            *string        `json:"presetUrl,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type Image struct {
 	// Image architecture
 	Architecture string `json:"architecture"`
@@ -4953,6 +4971,8 @@ type MessageResponse struct {
 	Reasoning *string `json:"reasoning,omitempty"`
 	// Reasoning duration in milliseconds
 	ReasoningDuration *float64 `json:"reasoningDuration,omitempty"`
+	// Raw Responses API output items (reasoning with encrypted_content, function calls); echo back in history for cross-turn reasoning continuity
+	ResponsesOutput []any `json:"responsesOutput,omitempty"`
 	// Message role
 	Role string `json:"role"`
 	// Whether the message was stopped early by user
@@ -5089,6 +5109,7 @@ type ModelEntry struct {
 	OutputRate           *float64       `json:"output_rate,omitempty"`
 	OwnedBy              string         `json:"owned_by"`
 	Provider             *string        `json:"provider,omitempty"`
+	SupportsResponses    *bool          `json:"supports_responses,omitempty"`
 	UsageNotSupported    *bool          `json:"usage_not_supported,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -5847,6 +5868,8 @@ type OrgAiProviderResponse struct {
 	InsecureSkipTLSVerify *bool `json:"insecureSkipTlsVerify,omitempty"`
 	// Provider name
 	Name string `json:"name"`
+	// Whether the provider endpoint supports the OpenAI Responses API
+	SupportsResponses *bool `json:"supportsResponses,omitempty"`
 	// AI provider type
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -6402,6 +6425,8 @@ type PlatformSettingsAdmin struct {
 	SentryReplaysSampleRate float64 `json:"sentryReplaysSampleRate"`
 	// Sentry traces sample rate (0.0-1.0).
 	SentryTracesSampleRate float64 `json:"sentryTracesSampleRate"`
+	// Whether the stuck-run sweeper is enabled. When on, workflow runs whose executor stops sending heartbeats are automatically finalized. Off by default.
+	StuckRunSweeperEnabled bool `json:"stuckRunSweeperEnabled"`
 	// Markdown Terms & Conditions shown to new users during onboarding. Empty disables the prompt.
 	TermsAndConditions *string `json:"termsAndConditions,omitempty"`
 	// Indicates if the platform license is valid.
@@ -8389,9 +8414,47 @@ type SetAdminInputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type SetElasticClusterIconOutputBody struct {
+	// SHA256 hex of the attached blob, or empty when a preset was applied.
+	Etag string `json:"etag"`
+	// URL where the icon is served.
+	ImageURL             string         `json:"imageUrl"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type SetKubernetesIconOutputBody struct {
+	// SHA256 hex of the attached blob, or empty when a preset was applied.
+	Etag string `json:"etag"`
+	// URL where the icon is served.
+	ImageURL             string         `json:"imageUrl"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type SetManagedClusterIconOutputBody struct {
+	// SHA256 hex of the attached blob, or empty when a preset was applied.
+	Etag string `json:"etag"`
+	// URL where the icon is served.
+	ImageURL             string         `json:"imageUrl"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type SetOrgLogoOutputBody struct {
+	// SHA256 hex of the attached blob.
+	Etag                 string         `json:"etag"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type SetOwnerInputBody struct {
 	// The username of the user to set as organization owner.
 	Username             string         `json:"username"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type SetWorkflowIconOutputBody struct {
+	// SHA256 hex of the attached blob, or empty when a preset was applied.
+	Etag string `json:"etag"`
+	// URL where the icon is served.
+	ImageURL             string         `json:"imageUrl"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -8807,7 +8870,9 @@ type UpdateAiProviderInputBody struct {
 	// Skip TLS certificate verification
 	InsecureSkipTLSVerify *bool `json:"insecureSkipTlsVerify,omitempty"`
 	// AI model name
-	Model                *string        `json:"model,omitempty"`
+	Model *string `json:"model,omitempty"`
+	// Whether the provider endpoint supports the OpenAI Responses API
+	SupportsResponses    *bool          `json:"supportsResponses,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -8875,6 +8940,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	SingleOrgName *string `json:"singleOrgName,omitempty"`
 	// Whether to enable single org platform.
 	SingleOrgPlatform *bool `json:"singleOrgPlatform,omitempty"`
+	// Whether the stuck-run sweeper is enabled.
+	StuckRunSweeperEnabled *bool `json:"stuckRunSweeperEnabled,omitempty"`
 	// Markdown Terms & Conditions shown to new users during onboarding. Empty disables the prompt.
 	TermsAndConditions   *string        `json:"termsAndConditions,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -9016,8 +9083,10 @@ type UpdateOrgAiProviderInputBody struct {
 	// Provider endpoint URL
 	Endpoint *string `json:"endpoint,omitempty"`
 	// Skip TLS certificate verification
-	InsecureSkipTLSVerify *bool          `json:"insecureSkipTlsVerify,omitempty"`
-	AdditionalProperties  map[string]any `json:"-,omitempty"`
+	InsecureSkipTLSVerify *bool `json:"insecureSkipTlsVerify,omitempty"`
+	// Whether the provider endpoint supports the OpenAI Responses API
+	SupportsResponses    *bool          `json:"supportsResponses,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type UpdateOrgCustomTagsInputBody struct {

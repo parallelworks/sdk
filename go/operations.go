@@ -3342,6 +3342,54 @@ func (c *Client) ListAiChatModels(ctx context.Context) (*ModelsResponse, error) 
 	return &result, nil
 }
 
+// CreateAiResponseParams contains optional parameters for the CreateAiResponse operation.
+type CreateAiResponseParams struct {
+	// Persist to existing conversation
+	XConversationID *string `json:"X-Conversation-Id,omitempty"`
+	// Branch from specific message
+	XParentMessageID *string `json:"X-Parent-Message-Id,omitempty"`
+	// Whether to persist the conversation (true/false)
+	XPersist *string `json:"X-Persist,omitempty"`
+	// Client-provided user message ID
+	XUserMessageID *string `json:"X-User-Message-Id,omitempty"`
+	// Budget allocation name for org provider requests
+	XAllocation *string `json:"X-Allocation,omitempty"`
+}
+
+// CreateAiResponse - Create response (OpenAI Responses API)
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// OpenAI Responses API endpoint, forwarded to the resolved provider. Model format: 'provider-id/model-name'. Only providers with the supportsResponses setting accept requests; the models list marks capable entries with supports_responses.
+func (c *Client) CreateAiResponse(ctx context.Context, body []byte, opts ...CreateAiResponseParams) error {
+	path := "/api/openai/v1/responses"
+
+	var headers http.Header
+	if len(opts) > 0 {
+		params := opts[0]
+		headers = make(http.Header)
+		if params.XConversationID != nil {
+			headers.Set("X-Conversation-Id", fmt.Sprintf("%v", *params.XConversationID))
+		}
+		if params.XParentMessageID != nil {
+			headers.Set("X-Parent-Message-Id", fmt.Sprintf("%v", *params.XParentMessageID))
+		}
+		if params.XPersist != nil {
+			headers.Set("X-Persist", fmt.Sprintf("%v", *params.XPersist))
+		}
+		if params.XUserMessageID != nil {
+			headers.Set("X-User-Message-Id", fmt.Sprintf("%v", *params.XUserMessageID))
+		}
+		if params.XAllocation != nil {
+			headers.Set("X-Allocation", fmt.Sprintf("%v", *params.XAllocation))
+		}
+	}
+	if err := c.do(ctx, "POST", path, body, nil, "application/json", headers); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetOrganizationsParams contains optional parameters for the GetOrganizations operation.
 type GetOrganizationsParams struct {
 	// Maximum number of organizations to return (1-200). 0 (the default) returns all matching organizations.
@@ -5848,6 +5896,39 @@ func (c *Client) UpdateKubernetesCostTrackingPrices(ctx context.Context, organiz
 	return &result, nil
 }
 
+// DeleteKubernetesClusterIcon - Delete Kubernetes Cluster Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes a Kubernetes cluster's icon and releases the underlying blob.
+func (c *Client) DeleteKubernetesClusterIcon(ctx context.Context, organization string, infraName string) error {
+	path := "/api/organizations/{organization}/kubernetes/{infraName}/icon"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "infraName", infraName)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// SetKubernetesClusterIcon - Set Kubernetes Cluster Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Sets a Kubernetes cluster's icon from either a curated preset URL or a blob in the caller's thumbnail library.
+func (c *Client) SetKubernetesClusterIcon(ctx context.Context, organization string, infraName string, body IconRef) (*SetKubernetesIconOutputBody, error) {
+	path := "/api/organizations/{organization}/kubernetes/{infraName}/icon"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "infraName", infraName)
+
+	var result SetKubernetesIconOutputBody
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetKubernetesNamespaces - Get Kubernetes namespaces
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6183,6 +6264,22 @@ func (c *Client) DeleteOrganizationLogo(ctx context.Context, organization string
 	return nil
 }
 
+// SetOrganizationLogo - Set organization logo
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the org's light logo from a blob already in the caller's thumbnail library. Preset URLs are rejected for logos.
+func (c *Client) SetOrganizationLogo(ctx context.Context, organization string, body IconRef) (*SetOrgLogoOutputBody, error) {
+	path := "/api/organizations/{organization}/logo"
+	path = pathReplace(path, "organization", organization)
+
+	var result SetOrgLogoOutputBody
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetOrganizationLogoDark - Get organization dark mode logo
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6227,6 +6324,22 @@ func (c *Client) DeleteOrganizationLogoDark(ctx context.Context, organization st
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// SetOrganizationLogoDark - Set organization dark mode logo
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the org's dark logo from a blob already in the caller's thumbnail library. Preset URLs are rejected for logos.
+func (c *Client) SetOrganizationLogoDark(ctx context.Context, organization string, body IconRef) (*SetOrgLogoOutputBody, error) {
+	path := "/api/organizations/{organization}/logo-dark"
+	path = pathReplace(path, "organization", organization)
+
+	var result SetOrgLogoOutputBody
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // CreateManagedCluster - Create Managed Cluster
@@ -6356,6 +6469,23 @@ func (c *Client) DeleteManagedClusterIcon(ctx context.Context, organization stri
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// SetManagedClusterIcon - Set Managed Cluster Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Sets a cluster's icon from either a curated preset URL or a blob already in the caller's thumbnail library (org admins only).
+func (c *Client) SetManagedClusterIcon(ctx context.Context, organization string, cluster string, body IconRef) (*SetManagedClusterIconOutputBody, error) {
+	path := "/api/organizations/{organization}/managed-clusters/{cluster}/icon"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "cluster", cluster)
+
+	var result SetManagedClusterIconOutputBody
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetManagedClusterMetricsParams contains optional parameters for the GetManagedClusterMetrics operation.
@@ -8548,6 +8678,41 @@ func (c *Client) DisconnectCluster(ctx context.Context, organization string, use
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// DeleteElasticClusterIcon - Delete Elastic Cluster Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes a Compute V3 or Pool cluster's icon and releases the underlying blob.
+func (c *Client) DeleteElasticClusterIcon(ctx context.Context, organization string, user string, clusterName string) error {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/icon"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// SetElasticClusterIcon - Set Elastic Cluster Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Sets a Compute V3 or Pool (existing) cluster's icon from either a curated preset URL or a blob in the caller's thumbnail library. Requires admin or writer access to the cluster.
+func (c *Client) SetElasticClusterIcon(ctx context.Context, organization string, user string, clusterName string, body IconRef) (*SetElasticClusterIconOutputBody, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/icon"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+
+	var result SetElasticClusterIconOutputBody
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetClusterNodesParams contains optional parameters for the GetClusterNodes operation.
@@ -12280,6 +12445,22 @@ func (c *Client) DeleteWorkflowIcon(ctx context.Context, workflow string) error 
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// SetWorkflowIcon - Set Workflow Icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Sets a workflow's icon from either a curated preset URL or a blob already in the caller's thumbnail library. Increments refcount on the new blob and releases the prior one.
+func (c *Client) SetWorkflowIcon(ctx context.Context, workflow string, body IconRef) (*SetWorkflowIconOutputBody, error) {
+	path := "/api/workflows/{workflow}/icon"
+	path = pathReplace(path, "workflow", workflow)
+
+	var result SetWorkflowIconOutputBody
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetWorkflowJSON - Get Workflow JSON

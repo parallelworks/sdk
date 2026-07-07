@@ -1,6 +1,6 @@
 {
   "name": "@parallelworks/client",
-  "version": "7.72.0",
+  "version": "7.73.0",
   "description": "Official TypeScript client for Parallel Works ACTIVATE API",
   "type": "module",
   "exports": {

@@ -1375,6 +1375,10 @@
             "description": "Current status of the AI provider",
             "type": "string"
           },
+          "supportsResponses": {
+            "description": "Whether the provider endpoint supports the OpenAI Responses API",
+            "type": "boolean"
+          },
           "user": {
             "description": "The username of the user that owns this resource",
             "type": "string"
@@ -5142,6 +5146,14 @@
             "description": "Reasoning content for assistant messages (required by DeepSeek)",
             "type": "string"
           },
+          "responses_output": {
+            "description": "Raw OpenAI Responses API output items for this assistant turn (reasoning items with encrypted_content, function calls); clients echo them back so reasoning context carries across turns",
+            "items": {},
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "role": {
             "description": "Message role: system, user, assistant, or tool",
             "type": "string"
@@ -6645,6 +6657,10 @@
             "description": "AI provider region",
             "type": "string"
           },
+          "supportsResponses": {
+            "description": "Whether the provider endpoint supports the OpenAI Responses API",
+            "type": "boolean"
+          },
           "tags": {
             "description": "Tags for the AI provider",
             "type": [
@@ -7291,6 +7307,10 @@
             "maxLength": 255,
             "minLength": 1,
             "type": "string"
+          },
+          "supportsResponses": {
+            "description": "Whether the provider endpoint supports the OpenAI Responses API",
+            "type": "boolean"
           },
           "type": {
             "description": "AI provider type",
@@ -8387,6 +8407,14 @@
           "reasoning_content": {
             "description": "Reasoning/thinking content from models like o1/o3",
             "type": "string"
+          },
+          "responses_output": {
+            "description": "Raw Responses API output items for this turn; echo back in history for cross-turn reasoning continuity",
+            "items": {},
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "role": {
             "description": "Message role (only in first chunk)",
@@ -11367,6 +11395,20 @@
         ],
         "type": "object"
       },
+      "IconRef": {
+        "additionalProperties": false,
+        "properties": {
+          "etag": {
+            "description": "SHA256 hex of a blob already in the caller's thumbnail library. Mutually exclusive with presetUrl.",
+            "type": "string"
+          },
+          "presetUrl": {
+            "description": "Preset thumbnail URL from the curated platform library (e.g. /assets/images/icons/...). Mutually exclusive with etag.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Image": {
         "additionalProperties": false,
         "properties": {
@@ -14200,6 +14242,14 @@
             "format": "double",
             "type": "number"
           },
+          "responsesOutput": {
+            "description": "Raw Responses API output items (reasoning with encrypted_content, function calls); echo back in history for cross-turn reasoning continuity",
+            "items": {},
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "role": {
             "description": "Message role",
             "type": "string"
@@ -14654,6 +14704,9 @@
           },
           "provider": {
             "type": "string"
+          },
+          "supports_responses": {
+            "type": "boolean"
           },
           "usage_not_supported": {
             "type": "boolean"
@@ -16832,6 +16885,10 @@
             "description": "Provider name",
             "type": "string"
           },
+          "supportsResponses": {
+            "description": "Whether the provider endpoint supports the OpenAI Responses API",
+            "type": "boolean"
+          },
           "type": {
             "description": "AI provider type",
             "type": "string"
@@ -18389,6 +18446,10 @@
             "format": "double",
             "type": "number"
           },
+          "stuckRunSweeperEnabled": {
+            "description": "Whether the stuck-run sweeper is enabled. When on, workflow runs whose executor stops sending heartbeats are automatically finalized. Off by default.",
+            "type": "boolean"
+          },
           "termsAndConditions": {
             "description": "Markdown Terms \u0026 Conditions shown to new users during onboarding. Empty disables the prompt.",
             "type": "string"
@@ -18404,7 +18465,8 @@
           "sentryEnabled",
           "sentryReplayUnmask",
           "sentryTracesSampleRate",
-          "sentryReplaysSampleRate"
+          "sentryReplaysSampleRate",
+          "stuckRunSweeperEnabled"
         ],
         "type": "object"
       },
@@ -24245,6 +24307,73 @@
         ],
         "type": "object"
       },
+      "SetElasticClusterIconOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "etag": {
+            "description": "SHA256 hex of the attached blob, or empty when a preset was applied.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL where the icon is served.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "etag",
+          "imageUrl"
+        ],
+        "type": "object"
+      },
+      "SetKubernetesIconOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "etag": {
+            "description": "SHA256 hex of the attached blob, or empty when a preset was applied.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL where the icon is served.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "etag",
+          "imageUrl"
+        ],
+        "type": "object"
+      },
+      "SetManagedClusterIconOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "etag": {
+            "description": "SHA256 hex of the attached blob, or empty when a preset was applied.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL where the icon is served.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "etag",
+          "imageUrl"
+        ],
+        "type": "object"
+      },
+      "SetOrgLogoOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "etag": {
+            "description": "SHA256 hex of the attached blob.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "etag"
+        ],
+        "type": "object"
+      },
       "SetOwnerInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -24258,6 +24387,24 @@
         },
         "required": [
           "username"
+        ],
+        "type": "object"
+      },
+      "SetWorkflowIconOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "etag": {
+            "description": "SHA256 hex of the attached blob, or empty when a preset was applied.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL where the icon is served.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "etag",
+          "imageUrl"
         ],
         "type": "object"
       },
@@ -25493,6 +25640,10 @@
           "model": {
             "description": "AI model name",
             "type": "string"
+          },
+          "supportsResponses": {
+            "description": "Whether the provider endpoint supports the OpenAI Responses API",
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -25637,6 +25788,10 @@
           },
           "singleOrgPlatform": {
             "description": "Whether to enable single org platform.",
+            "type": "boolean"
+          },
+          "stuckRunSweeperEnabled": {
+            "description": "Whether the stuck-run sweeper is enabled.",
             "type": "boolean"
           },
           "termsAndConditions": {
@@ -26026,6 +26181,10 @@
           },
           "insecureSkipTlsVerify": {
             "description": "Skip TLS certificate verification",
+            "type": "boolean"
+          },
+          "supportsResponses": {
+            "description": "Whether the provider endpoint supports the OpenAI Responses API",
             "type": "boolean"
           }
         },
@@ -31534,13 +31693,13 @@
             }
           },
           {
-            "description": "OIDC auth method ID echoed back by the provider",
+            "description": "State issued at redirect time, carrying the auth method ID and an anti-CSRF value bound to the browser session",
             "explode": false,
             "in": "query",
             "name": "state",
             "required": true,
             "schema": {
-              "description": "OIDC auth method ID echoed back by the provider",
+              "description": "State issued at redirect time, carrying the auth method ID and an anti-CSRF value bound to the browser session",
               "type": "string"
             }
           }
@@ -36987,6 +37146,90 @@
           }
         },
         "summary": "List available AI models",
+        "tags": [
+          "AI Chat"
+        ]
+      }
+    },
+    "/api/openai/v1/responses": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nOpenAI Responses API endpoint, forwarded to the resolved provider. Model format: 'provider-id/model-name'. Only providers with the supportsResponses setting accept requests; the models list marks capable entries with supports_responses.",
+        "operationId": "createAIResponse",
+        "parameters": [
+          {
+            "description": "Persist to existing conversation",
+            "in": "header",
+            "name": "X-Conversation-Id",
+            "schema": {
+              "description": "Persist to existing conversation",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Branch from specific message",
+            "in": "header",
+            "name": "X-Parent-Message-Id",
+            "schema": {
+              "description": "Branch from specific message",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Whether to persist the conversation (true/false)",
+            "in": "header",
+            "name": "X-Persist",
+            "schema": {
+              "description": "Whether to persist the conversation (true/false)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-provided user message ID",
+            "in": "header",
+            "name": "X-User-Message-Id",
+            "schema": {
+              "description": "Client-provided user message ID",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Budget allocation name for org provider requests",
+            "in": "header",
+            "name": "X-Allocation",
+            "schema": {
+              "description": "Budget allocation name for org provider requests",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "contentMediaType": "application/octet-stream",
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create response (OpenAI Responses API)",
         "tags": [
           "AI Chat"
         ]
@@ -45065,6 +45308,115 @@
         ]
       }
     },
+    "/api/organizations/{organization}/kubernetes/{infraName}/icon": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves a Kubernetes cluster's icon and releases the underlying blob.",
+        "operationId": "delete-kubernetes-cluster-icon",
+        "parameters": [
+          {
+            "description": "Organization name.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes cluster name.",
+            "in": "path",
+            "name": "infraName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes cluster name.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete Kubernetes Cluster Icon",
+        "tags": [
+          "Kubernetes"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSets a Kubernetes cluster's icon from either a curated preset URL or a blob in the caller's thumbnail library.",
+        "operationId": "set-kubernetes-cluster-icon",
+        "parameters": [
+          {
+            "description": "Organization name.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kubernetes cluster name.",
+            "in": "path",
+            "name": "infraName",
+            "required": true,
+            "schema": {
+              "description": "Kubernetes cluster name.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IconRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetKubernetesIconOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set Kubernetes Cluster Icon",
+        "tags": [
+          "Kubernetes"
+        ]
+      }
+    },
     "/api/organizations/{organization}/kubernetes/{infraName}/namespaces": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRetrieves a list of available namespaces in the specified Kubernetes cluster.",
@@ -46317,6 +46669,61 @@
           "Organization Theme"
         ]
       },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the org's light logo from a blob already in the caller's thumbnail library. Preset URLs are rejected for logos.",
+        "operationId": "set-organization-logo",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IconRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetOrgLogoOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization logo",
+        "tags": [
+          "Organization Theme"
+        ]
+      },
       "put": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUploads a new logo for the organization.",
         "operationId": "put-organization-logo",
@@ -46467,6 +46874,61 @@
           }
         },
         "summary": "Get organization dark mode logo",
+        "tags": [
+          "Organization Theme"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the org's dark logo from a blob already in the caller's thumbnail library. Preset URLs are rejected for logos.",
+        "operationId": "set-organization-logo-dark",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IconRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetOrgLogoOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization dark mode logo",
         "tags": [
           "Organization Theme"
         ]
@@ -46898,6 +47360,71 @@
           }
         },
         "summary": "Get managed cluster icon",
+        "tags": [
+          "Clusters"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSets a cluster's icon from either a curated preset URL or a blob already in the caller's thumbnail library (org admins only).",
+        "operationId": "set-managed-cluster-icon",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name",
+            "in": "path",
+            "name": "cluster",
+            "required": true,
+            "schema": {
+              "description": "Cluster name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IconRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetManagedClusterIconOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set Managed Cluster Icon",
         "tags": [
           "Clusters"
         ]
@@ -54396,6 +54923,141 @@
           }
         },
         "summary": "Disconnect cluster",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/icon": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves a Compute V3 or Pool cluster's icon and releases the underlying blob.",
+        "operationId": "delete-elastic-cluster-icon",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the user that owns the cluster.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the user that owns the cluster.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name.",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Cluster name.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete Elastic Cluster Icon",
+        "tags": [
+          "Clusters"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSets a Compute V3 or Pool (existing) cluster's icon from either a curated preset URL or a blob in the caller's thumbnail library. Requires admin or writer access to the cluster.",
+        "operationId": "set-elastic-cluster-icon",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the user that owns the cluster.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the user that owns the cluster.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name.",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Cluster name.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IconRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetElasticClusterIconOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set Elastic Cluster Icon",
         "tags": [
           "Clusters"
         ]
@@ -66130,6 +66792,58 @@
           }
         },
         "summary": "Get Workflow Icon",
+        "tags": [
+          "Workflows"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSets a workflow's icon from either a curated preset URL or a blob already in the caller's thumbnail library. Increments refcount on the new blob and releases the prior one.",
+        "operationId": "set-workflow-icon",
+        "parameters": [
+          {
+            "description": "Name of the workflow.",
+            "in": "path",
+            "name": "workflow",
+            "required": true,
+            "schema": {
+              "description": "Name of the workflow.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IconRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetWorkflowIconOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set Workflow Icon",
         "tags": [
           "Workflows"
         ]
