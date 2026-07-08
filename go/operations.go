@@ -110,6 +110,92 @@ func (c *Client) DeletePlatformAlert(ctx context.Context, id string) error {
 	return nil
 }
 
+// GetBillingCrosscheck - Get billing cross-check data
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns CSP vs PW cost comparison data for all infrastructures
+func (c *Client) GetBillingCrosscheck(ctx context.Context) (*[]CrossCheckRow, error) {
+	path := "/api/admin/billing/crosscheck"
+
+	var result []CrossCheckRow
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListBillingRunsParams contains optional parameters for the ListBillingRuns operation.
+type ListBillingRunsParams struct {
+	// Maximum number of runs to return
+	Limit *int64 `json:"limit,omitempty"`
+	// Number of runs to skip
+	Skip *int64 `json:"skip,omitempty"`
+}
+
+// ListBillingRuns - List billing runs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns a paginated list of billing runs with total count
+func (c *Client) ListBillingRuns(ctx context.Context, opts ...ListBillingRunsParams) (*BillingRunList, error) {
+	path := "/api/admin/billing/runs"
+
+	queryValues := url.Values{}
+	if len(opts) > 0 {
+		params := opts[0]
+		addQueryParam(queryValues, "limit", params.Limit)
+		addQueryParam(queryValues, "skip", params.Skip)
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
+	}
+	var result BillingRunList
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetBillingRun - Get a billing run
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns a single billing run with full per-credential details
+func (c *Client) GetBillingRun(ctx context.Context, id string) (*BillingRunDetail, error) {
+	path := "/api/admin/billing/runs/{id}"
+	path = pathReplace(path, "id", id)
+
+	var result BillingRunDetail
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteBillingRun - Delete a billing run
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Permanently deletes a billing run by its ID
+func (c *Client) DeleteBillingRun(ctx context.Context, id string) error {
+	path := "/api/admin/billing/runs/{id}"
+	path = pathReplace(path, "id", id)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetErrorLogsParams contains optional parameters for the GetErrorLogs operation.
 type GetErrorLogsParams struct {
 	// Maximum number of error logs to return
@@ -1905,6 +1991,21 @@ func (c *Client) GithubWebhook(ctx context.Context, body []byte) error {
 	path := "/api/integrations/github/webhook"
 
 	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// ReportClusterConnectState - Report Cluster Connect State
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Records the user workspace's connection state for an existing cluster.
+func (c *Client) ReportClusterConnectState(ctx context.Context, clusterID string, body ConnectStateBody) error {
+	path := "/api/internal/usercontainer/clusters/{clusterId}/connect-state"
+	path = pathReplace(path, "clusterId", clusterID)
+
+	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -4530,6 +4631,23 @@ func (c *Client) DeleteCloudAccountBilling(ctx context.Context, organization str
 	return nil
 }
 
+// PatchCloudAccountBillingLastUpdate - Update billing last update date
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates the last billing update date to trigger reprocessing of billing data from that date.
+func (c *Client) PatchCloudAccountBillingLastUpdate(ctx context.Context, organization string, name string, body PatchBillingLastUpdateInputBody) (*PatchBillingLastUpdateOutputBody, error) {
+	path := "/api/organizations/{organization}/cloud-accounts/{name}/billing/last-update"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "name", name)
+
+	var result PatchBillingLastUpdateOutputBody
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // UpdateOrganizationCloudAccountCredentials - Update cloud account credentials
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6408,6 +6526,23 @@ func (c *Client) UpdateManagedCluster(ctx context.Context, organization string, 
 	return &result, nil
 }
 
+// UpgradeManagedClusterAgents - Upgrade all managed cluster agents
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Dispatches the agent update to every eligible node of a managed cluster (org admins only) and returns a per-hostname outcome: dispatched, offline, not-connected, up-to-date, unsupported, in-progress, or error.
+func (c *Client) UpgradeManagedClusterAgents(ctx context.Context, organization string, cluster string) (*UpgradeManagedClusterAgentsOutputBody, error) {
+	path := "/api/organizations/{organization}/managed-clusters/{cluster}/agent/upgrade"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "cluster", cluster)
+
+	var result UpgradeManagedClusterAgentsOutputBody
+	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetManagedClusterIconParams contains optional parameters for the GetManagedClusterIcon operation.
 type GetManagedClusterIconParams struct {
 	IfNoneMatch *string `json:"If-None-Match,omitempty"`
@@ -6566,6 +6701,24 @@ func (c *Client) UpdateManagedClusterNode(ctx context.Context, organization stri
 
 	var result UpdateManagedNodeOutputBody
 	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpgradeManagedNodeAgent - Upgrade managed node agent
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Tells one managed-cluster node's connected agent to update itself to the platform version (org admins only). Returns 202 on dispatch; the node restarts its agent and reports the new version on its next heartbeat.
+func (c *Client) UpgradeManagedNodeAgent(ctx context.Context, organization string, cluster string, hostname string) (*UpgradeAgentResponseBody, error) {
+	path := "/api/organizations/{organization}/managed-clusters/{cluster}/nodes/{hostname}/agent/upgrade"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "cluster", cluster)
+	path = pathReplace(path, "hostname", hostname)
+
+	var result UpgradeAgentResponseBody
+	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8341,11 +8494,31 @@ func (c *Client) GetStorageAwsEfs(ctx context.Context, organization string, user
 	return &result, nil
 }
 
+// GetStorageAwsLustre - Get Storage: AWS Lustre
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns an AWS Lustre (FSx for Lustre)
+func (c *Client) GetStorageAwsLustre(ctx context.Context, organization string, user string, name string) (*AwsLustre, error) {
+	path := "/api/organizations/{organization}/users/{user}/aws-lustre/{name}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "name", name)
+
+	var result AwsLustre
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetStorageAwsManagedlustre - Get Storage: AWS Managed Lustre
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns an AWS Managed Lustre (FSx for Lustre)
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetStorageAwsManagedlustre(ctx context.Context, organization string, user string, name string) (*AwsLustre, error) {
 	path := "/api/organizations/{organization}/users/{user}/aws-managedlustre/{name}"
 	path = pathReplace(path, "organization", organization)
@@ -8627,6 +8800,56 @@ func (c *Client) GetAzureNetappfiles(ctx context.Context, organization string, u
 	return &result, nil
 }
 
+// GetCluster - Get Cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a single cluster owned by the user.
+func (c *Client) GetCluster(ctx context.Context, organization string, user string, clusterName string) (*GeneralCluster, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+
+	var result GeneralCluster
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpgradeClusterAgentParams contains optional parameters for the UpgradeClusterAgent operation.
+type UpgradeClusterAgentParams struct {
+	// Bypass the active-session and running-workflow busy check.
+	Force *bool `json:"force,omitempty"`
+}
+
+// UpgradeClusterAgent - Upgrade cluster agent
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Tells the cluster's connected agent to update itself to the platform version. Returns 202 on dispatch; the agent restarts and reports its new version on its next heartbeat. Fails with 409 when the cluster is busy (bypass with force=true), the agent is already up to date, or the agent is too old to support platform-triggered updates.
+func (c *Client) UpgradeClusterAgent(ctx context.Context, organization string, user string, clusterName string, opts ...UpgradeClusterAgentParams) (*UpgradeAgentResponseBody, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/agent/upgrade"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+
+	queryValues := url.Values{}
+	if len(opts) > 0 {
+		params := opts[0]
+		addQueryParam(queryValues, "force", params.Force)
+	}
+	if len(queryValues) > 0 {
+		path += "?" + queryValues.Encode()
+	}
+	var result UpgradeAgentResponseBody
+	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // UpdateClusterDeployment - Update cluster deployment
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -8778,6 +9001,38 @@ func (c *Client) GetClusterNodeMetrics(ctx context.Context, organization string,
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
+}
+
+// GetUserClusterPermissions - Get Cluster Permissions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns access permissions for a cloud or existing cluster owned by the user.
+func (c *Client) GetUserClusterPermissions(ctx context.Context, organization string, user string, clusterName string) (*SubjectPermissions, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/permissions"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "clusterName", clusterName)
+
+	var result SubjectPermissions
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateUserClusterPermissions - Update Cluster Permissions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces access permissions for a cloud or existing cluster owned by the user.
+func (c *Client) UpdateUserClusterPermissions(ctx context.Context, body SubjectPermissions) error {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/permissions"
+
+	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
 }
 
 // GetClusterSchedulerJobsParams contains optional parameters for the GetClusterSchedulerJobs operation.

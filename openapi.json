@@ -4276,6 +4276,129 @@
         ],
         "type": "object"
       },
+      "BillingRun": {
+        "additionalProperties": false,
+        "properties": {
+          "completedAt": {
+            "description": "When the run completed",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Run UUID",
+            "type": "string"
+          },
+          "startedAt": {
+            "description": "When the run started",
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "description": "Run status: running, success, partial, or failed",
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/RunSummary",
+            "description": "Aggregated stats"
+          }
+        },
+        "required": [
+          "id",
+          "startedAt",
+          "completedAt",
+          "status",
+          "summary"
+        ],
+        "type": "object"
+      },
+      "BillingRunDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "completedAt": {
+            "description": "When the run completed",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "errors": {
+            "description": "Flat list of run-level errors",
+            "items": {
+              "$ref": "#/components/schemas/FlatError"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Run UUID",
+            "type": "string"
+          },
+          "results": {
+            "description": "Per-credential results",
+            "items": {
+              "$ref": "#/components/schemas/CredentialResult"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "startedAt": {
+            "description": "When the run started",
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "description": "Run status: running, success, partial, or failed",
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/RunSummary",
+            "description": "Aggregated stats"
+          }
+        },
+        "required": [
+          "id",
+          "startedAt",
+          "completedAt",
+          "status",
+          "summary",
+          "errors",
+          "results"
+        ],
+        "type": "object"
+      },
+      "BillingRunList": {
+        "additionalProperties": false,
+        "properties": {
+          "runs": {
+            "description": "Paginated billing runs",
+            "items": {
+              "$ref": "#/components/schemas/BillingRun"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "total": {
+            "description": "Total number of billing runs",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "runs",
+          "total"
+        ],
+        "type": "object"
+      },
       "BooleanPolicyOutput": {
         "additionalProperties": false,
         "properties": {
@@ -5984,24 +6107,6 @@
         },
         "type": "object"
       },
-      "ClusterWorkspaceMount": {
-        "additionalProperties": false,
-        "properties": {
-          "clusterPath": {
-            "description": "The path on the cluster.",
-            "type": "string"
-          },
-          "workspacePath": {
-            "description": "The path in the workspace.",
-            "type": "string"
-          }
-        },
-        "required": [
-          "clusterPath",
-          "workspacePath"
-        ],
-        "type": "object"
-      },
       "CompleteOnboardingBody": {
         "additionalProperties": false,
         "properties": {
@@ -6221,6 +6326,30 @@
           "totalConfigs",
           "totalConfigMaps",
           "totalSecrets"
+        ],
+        "type": "object"
+      },
+      "ConnectStateBody": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "description": "Failure detail when status is failed.",
+            "type": "string"
+          },
+          "status": {
+            "description": "The workspace's connection state; terminal on/off clears the reported state.",
+            "enum": [
+              "connecting",
+              "input_needed",
+              "failed",
+              "on",
+              "off"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
         ],
         "type": "object"
       },
@@ -7652,6 +7781,10 @@
       "CreateSnapshotBody": {
         "additionalProperties": false,
         "properties": {
+          "mountPoint": {
+            "description": "Mount point of the inline disk to snapshot; omit to snapshot the cluster root disk",
+            "type": "string"
+          },
           "snapshotName": {
             "description": "Name of the snapshot",
             "maxLength": 51,
@@ -8080,6 +8213,143 @@
         "required": [
           "name",
           "inputs"
+        ],
+        "type": "object"
+      },
+      "CredentialResult": {
+        "additionalProperties": false,
+        "properties": {
+          "accountId": {
+            "type": "string"
+          },
+          "cloudAccountName": {
+            "type": "string"
+          },
+          "csp": {
+            "type": "string"
+          },
+          "duration": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/RunError"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "infraId": {
+            "type": "string"
+          },
+          "newData": {
+            "type": "boolean"
+          },
+          "organization": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "organization",
+          "csp",
+          "infraId",
+          "accountId",
+          "status",
+          "duration",
+          "newData"
+        ],
+        "type": "object"
+      },
+      "CrossCheckRow": {
+        "additionalProperties": false,
+        "properties": {
+          "cloudAccountName": {
+            "description": "Cloud account name",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "csp": {
+            "description": "Cloud service provider",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cspCost": {
+            "description": "Cost reported by CSP",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Row UUID",
+            "type": "string"
+          },
+          "infraId": {
+            "description": "Infrastructure ID",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "infraName": {
+            "description": "Infrastructure name",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "legacy": {
+            "description": "Whether this record was produced by the legacy pipeline",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "organization": {
+            "description": "Organization name",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pwCost": {
+            "description": "Cost computed by PW",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "updated": {
+            "description": "Last update time",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "csp",
+          "cspCost",
+          "pwCost",
+          "updated",
+          "infraId",
+          "organization",
+          "infraName",
+          "cloudAccountName",
+          "legacy"
         ],
         "type": "object"
       },
@@ -9217,6 +9487,34 @@
         ],
         "type": "object"
       },
+      "FlatError": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "Cloud service provider",
+            "type": "string"
+          },
+          "message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "organization": {
+            "description": "Organization",
+            "type": "string"
+          },
+          "phase": {
+            "description": "Pipeline phase where the error occurred",
+            "type": "string"
+          }
+        },
+        "required": [
+          "organization",
+          "csp",
+          "phase",
+          "message"
+        ],
+        "type": "object"
+      },
       "FlavorCostUpdate": {
         "additionalProperties": false,
         "properties": {
@@ -9526,7 +9824,8 @@
               "failed",
               "updating",
               "deleted",
-              "connecting"
+              "connecting",
+              "input_needed"
             ],
             "examples": [
               "active"
@@ -9574,16 +9873,6 @@
               "Jake.Thayne"
             ],
             "type": "string"
-          },
-          "workspaceMounts": {
-            "description": "The workspace mount points for this cluster.",
-            "items": {
-              "$ref": "#/components/schemas/ClusterWorkspaceMount"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
           }
         },
         "required": [
@@ -9598,7 +9887,6 @@
           "maxNodes",
           "tags",
           "favorite",
-          "workspaceMounts",
           "shouldPlatformProxy"
         ],
         "type": "object"
@@ -13399,6 +13687,10 @@
             "description": "Scheduler type (slurm, pbs)",
             "type": "string"
           },
+          "sessionNode": {
+            "description": "Hostname of the registered node that hosts managed (desktop/VS Code) sessions over the tunnel",
+            "type": "string"
+          },
           "tags": {
             "description": "Tags",
             "items": {
@@ -13506,8 +13798,12 @@
       "ManagedNode": {
         "additionalProperties": false,
         "properties": {
+          "agentUpdateStatus": {
+            "description": "Transient agent-update state (updating, failed)",
+            "type": "string"
+          },
           "agentVersion": {
-            "description": "Agent version",
+            "description": "Agent version last reported via heartbeat",
             "type": "string"
           },
           "arch": {
@@ -13579,11 +13875,20 @@
           "systemInfo": {
             "$ref": "#/components/schemas/ManagedSystemInfo",
             "description": "System information"
+          },
+          "tunnelAgentVersion": {
+            "description": "Agent version reported over the live tunnel",
+            "type": "string"
+          },
+          "tunnelConnected": {
+            "description": "Node holds a live platform tunnel",
+            "type": "boolean"
           }
         },
         "required": [
           "hostname",
           "ipAddresses",
+          "tunnelConnected",
           "isController",
           "status",
           "lastHeartbeat",
@@ -13698,6 +14003,35 @@
             "description": "Access management overrides"
           }
         },
+        "type": "object"
+      },
+      "ManagedNodeUpgradeResult": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "hostname": {
+            "type": "string"
+          },
+          "result": {
+            "description": "Per-node outcome",
+            "enum": [
+              "dispatched",
+              "offline",
+              "not-connected",
+              "up-to-date",
+              "unsupported",
+              "in-progress",
+              "error"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "hostname",
+          "result"
+        ],
         "type": "object"
       },
       "ManagedPartition": {
@@ -17641,6 +17975,36 @@
         },
         "required": [
           "total"
+        ],
+        "type": "object"
+      },
+      "PatchBillingLastUpdateInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "infraId": {
+            "description": "Billing infrastructure id to update; defaults to the account's billing infra when omitted",
+            "type": "string"
+          },
+          "lastUpdate": {
+            "description": "New last update date (YYYY-MM-DD)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lastUpdate"
+        ],
+        "type": "object"
+      },
+      "PatchBillingLastUpdateOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "lastUpdate": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lastUpdate"
         ],
         "type": "object"
       },
@@ -23109,6 +23473,24 @@
         ],
         "type": "object"
       },
+      "RunError": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "phase": {
+            "description": "Pipeline phase where the error occurred",
+            "type": "string"
+          }
+        },
+        "required": [
+          "phase",
+          "message"
+        ],
+        "type": "object"
+      },
       "RunInBody": {
         "additionalProperties": false,
         "properties": {
@@ -23136,6 +23518,44 @@
         },
         "required": [
           "kind"
+        ],
+        "type": "object"
+      },
+      "RunSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "failed": {
+            "description": "Credentials that failed",
+            "format": "int64",
+            "type": "integer"
+          },
+          "partial": {
+            "description": "Credentials that partially succeeded",
+            "format": "int64",
+            "type": "integer"
+          },
+          "skipped": {
+            "description": "Credentials skipped",
+            "format": "int64",
+            "type": "integer"
+          },
+          "succeeded": {
+            "description": "Credentials that succeeded",
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCredentials": {
+            "description": "Total credentials processed",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalCredentials",
+          "succeeded",
+          "failed",
+          "partial",
+          "skipped"
         ],
         "type": "object"
       },
@@ -24704,6 +25124,18 @@
             "description": "Indicates if the snapshot is a root snapshot",
             "type": "boolean"
           },
+          "rootImageCspId": {
+            "description": "CSP image ID (e.g. AMI) of the base image a bootable snapshot was created from",
+            "type": "string"
+          },
+          "rootImageName": {
+            "description": "Name of the base image, when it still exists in the image catalog",
+            "type": "string"
+          },
+          "rootImageStatus": {
+            "description": "Status of the base image: active, retired, or unavailable",
+            "type": "string"
+          },
           "size": {
             "description": "Size of the snapshot in bytes",
             "format": "int32",
@@ -26002,6 +26434,13 @@
             "description": "Force SSH connections to proxy through the platform",
             "type": "boolean"
           },
+          "sessionNode": {
+            "description": "Hostname of the registered node that hosts managed sessions over the tunnel; empty string clears it",
+            "examples": [
+              "node-01"
+            ],
+            "type": "string"
+          },
           "tags": {
             "description": "Tags for the cluster",
             "examples": [
@@ -26568,6 +27007,49 @@
         "required": [
           "name",
           "inputs"
+        ],
+        "type": "object"
+      },
+      "UpgradeAgentResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "agentVersion": {
+            "description": "Agent version at dispatch time.",
+            "type": "string"
+          },
+          "dispatched": {
+            "type": "boolean"
+          },
+          "targetVersion": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dispatched",
+          "targetVersion",
+          "agentVersion"
+        ],
+        "type": "object"
+      },
+      "UpgradeManagedClusterAgentsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ManagedNodeUpgradeResult"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "targetVersion": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetVersion",
+          "results"
         ],
         "type": "object"
       },
@@ -28780,6 +29262,187 @@
         "summary": "Delete a platform alert",
         "tags": [
           "Platform Alerts"
+        ]
+      }
+    },
+    "/api/admin/billing/crosscheck": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns CSP vs PW cost comparison data for all infrastructures",
+        "operationId": "get-billing-crosscheck",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrossCheckRow"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get billing cross-check data",
+        "tags": [
+          "Billing"
+        ]
+      }
+    },
+    "/api/admin/billing/runs": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns a paginated list of billing runs with total count",
+        "operationId": "list-billing-runs",
+        "parameters": [
+          {
+            "description": "Maximum number of runs to return",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "description": "Maximum number of runs to return",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Number of runs to skip",
+            "explode": false,
+            "in": "query",
+            "name": "skip",
+            "schema": {
+              "default": 0,
+              "description": "Number of runs to skip",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingRunList"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List billing runs",
+        "tags": [
+          "Billing"
+        ]
+      }
+    },
+    "/api/admin/billing/runs/{id}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nPermanently deletes a billing run by its ID",
+        "operationId": "delete-billing-run",
+        "parameters": [
+          {
+            "description": "Run UUID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Run UUID",
+              "examples": [
+                "550e8400-e29b-41d4-a716-446655440000"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a billing run",
+        "tags": [
+          "Billing"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns a single billing run with full per-credential details",
+        "operationId": "get-billing-run",
+        "parameters": [
+          {
+            "description": "Run UUID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Run UUID",
+              "examples": [
+                "550e8400-e29b-41d4-a716-446655440000"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a billing run",
+        "tags": [
+          "Billing"
         ]
       }
     },
@@ -33080,6 +33743,53 @@
           "GitHub"
         ],
         "x-internal": true
+      }
+    },
+    "/api/internal/usercontainer/clusters/{clusterId}/connect-state": {
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRecords the user workspace's connection state for an existing cluster.",
+        "operationId": "report-cluster-connect-state",
+        "parameters": [
+          {
+            "description": "The cluster (pool) id.",
+            "in": "path",
+            "name": "clusterId",
+            "required": true,
+            "schema": {
+              "description": "The cluster (pool) id.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectStateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Report Cluster Connect State",
+        "tags": [
+          "Clusters"
+        ]
       }
     },
     "/api/internal/usercontainer/existing": {
@@ -40840,6 +41550,73 @@
         ]
       }
     },
+    "/api/organizations/{organization}/cloud-accounts/{name}/billing/last-update": {
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates the last billing update date to trigger reprocessing of billing data from that date.",
+        "operationId": "patch-cloud-account-billing-last-update",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cloud account name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Cloud account name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchBillingLastUpdateInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatchBillingLastUpdateOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update billing last update date",
+        "tags": [
+          "Cloud Accounts"
+        ]
+      }
+    },
     "/api/organizations/{organization}/cloud-accounts/{name}/credentials": {
       "patch": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates the credentials of a given cloud account.",
@@ -47225,6 +48002,63 @@
         ]
       }
     },
+    "/api/organizations/{organization}/managed-clusters/{cluster}/agent/upgrade": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDispatches the agent update to every eligible node of a managed cluster (org admins only) and returns a per-hostname outcome: dispatched, offline, not-connected, up-to-date, unsupported, in-progress, or error.",
+        "operationId": "upgrade-managed-cluster-agents",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name",
+            "in": "path",
+            "name": "cluster",
+            "required": true,
+            "schema": {
+              "description": "Cluster name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpgradeManagedClusterAgentsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Upgrade all managed cluster agents",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
     "/api/organizations/{organization}/managed-clusters/{cluster}/icon": {
       "delete": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves the cluster's icon (org admins only).",
@@ -47767,6 +48601,73 @@
           }
         },
         "summary": "Update Managed Cluster Node",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/managed-clusters/{cluster}/nodes/{hostname}/agent/upgrade": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nTells one managed-cluster node's connected agent to update itself to the platform version (org admins only). Returns 202 on dispatch; the node restarts its agent and reports the new version on its next heartbeat.",
+        "operationId": "upgrade-managed-node-agent",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name",
+            "in": "path",
+            "name": "cluster",
+            "required": true,
+            "schema": {
+              "description": "Cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hostname of the node to update",
+            "in": "path",
+            "name": "hostname",
+            "required": true,
+            "schema": {
+              "description": "Hostname of the node to update",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpgradeAgentResponseBody"
+                }
+              }
+            },
+            "description": "Accepted"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Upgrade managed node agent",
         "tags": [
           "Clusters"
         ]
@@ -53565,8 +54466,85 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/aws-lustre/{name}": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns an AWS Lustre (FSx for Lustre)",
+        "operationId": "get-storage-aws-lustre",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AwsLustre"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Storage: AWS Lustre",
+        "tags": [
+          "Lustre",
+          "Storage"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/aws-managedlustre/{name}": {
       "get": {
+        "deprecated": true,
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns an AWS Managed Lustre (FSx for Lustre)",
         "operationId": "get-storage-aws-managedlustre",
         "parameters": [
@@ -54721,6 +55699,151 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a single cluster owned by the user.",
+        "operationId": "get-cluster",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The username of the user that owns the cluster",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "The username of the user that owns the cluster",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "The cluster name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralCluster"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Cluster",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/agent/upgrade": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nTells the cluster's connected agent to update itself to the platform version. Returns 202 on dispatch; the agent restarts and reports its new version on its next heartbeat. Fails with 409 when the cluster is busy (bypass with force=true), the agent is already up to date, or the agent is too old to support platform-triggered updates.",
+        "operationId": "upgrade-cluster-agent",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Bypass the active-session and running-workflow busy check.",
+            "explode": false,
+            "in": "query",
+            "name": "force",
+            "schema": {
+              "description": "Bypass the active-session and running-workflow busy check.",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpgradeAgentResponseBody"
+                }
+              }
+            },
+            "description": "Accepted"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Upgrade cluster agent",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/deployments/{deploymentNumber}": {
       "patch": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates the provision status of a cluster deployment.",
@@ -55240,6 +56363,106 @@
           }
         },
         "summary": "Get a single node's metrics",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/permissions": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns access permissions for a cloud or existing cluster owned by the user.",
+        "operationId": "get-user-cluster-permissions",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The username of the user that owns the cluster",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "The username of the user that owns the cluster",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "The cluster name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectPermissions"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Cluster Permissions",
+        "tags": [
+          "Clusters"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces access permissions for a cloud or existing cluster owned by the user.",
+        "operationId": "update-user-cluster-permissions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubjectPermissions"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update Cluster Permissions",
         "tags": [
           "Clusters"
         ]
@@ -67343,6 +68566,10 @@
     {
       "description": "Endpoints related to user authentication",
       "name": "Authentication"
+    },
+    {
+      "description": "Administrative endpoints for billing run monitoring and reprocessing",
+      "name": "Billing"
     },
     {
       "description": "Content-addressable image blob serving",

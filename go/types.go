@@ -1558,6 +1558,44 @@ type BillingResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type BillingRun struct {
+	// When the run completed
+	CompletedAt *time.Time `json:"completedAt"`
+	// Run UUID
+	ID string `json:"id"`
+	// When the run started
+	StartedAt time.Time `json:"startedAt"`
+	// Run status: running, success, partial, or failed
+	Status               string         `json:"status"`
+	Summary              RunSummary     `json:"summary"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type BillingRunDetail struct {
+	// When the run completed
+	CompletedAt *time.Time `json:"completedAt"`
+	// Flat list of run-level errors
+	Errors []FlatError `json:"errors"`
+	// Run UUID
+	ID string `json:"id"`
+	// Per-credential results
+	Results []CredentialResult `json:"results"`
+	// When the run started
+	StartedAt time.Time `json:"startedAt"`
+	// Run status: running, success, partial, or failed
+	Status               string         `json:"status"`
+	Summary              RunSummary     `json:"summary"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type BillingRunList struct {
+	// Paginated billing runs
+	Runs []BillingRun `json:"runs"`
+	// Total number of billing runs
+	Total                int64          `json:"total"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type BooleanPolicyOutput struct {
 	// Level of the policy
 	Level string `json:"level"`
@@ -2146,14 +2184,6 @@ type ClusterSessionCostLimit struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type ClusterWorkspaceMount struct {
-	// The path on the cluster.
-	ClusterPath string `json:"clusterPath"`
-	// The path in the workspace.
-	WorkspacePath        string         `json:"workspacePath"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
 type CompleteOnboardingBody struct {
 	// Whether the user needs to complete onboarding
 	NeedsOnboarding      bool           `json:"needsOnboarding"`
@@ -2210,6 +2240,14 @@ type ConfigsMetadata struct {
 	TotalConfigs int64 `json:"totalConfigs"`
 	// Total number of Secrets
 	TotalSecrets         int64          `json:"totalSecrets"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ConnectStateBody struct {
+	// Failure detail when status is failed.
+	Error *string `json:"error,omitempty"`
+	// The workspace's connection state; terminal on/off clears the reported state.
+	Status               string         `json:"status"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2742,6 +2780,8 @@ type CreateSkuRuleBody struct {
 }
 
 type CreateSnapshotBody struct {
+	// Mount point of the inline disk to snapshot; omit to snapshot the cluster root disk
+	MountPoint *string `json:"mountPoint,omitempty"`
 	// Name of the snapshot
 	SnapshotName         string         `json:"snapshotName"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -2885,6 +2925,43 @@ type CreateWorkflowSavedInputsInputBody struct {
 	Inputs map[string]any `json:"inputs"`
 	// Name for the saved inputs.
 	Name                 string         `json:"name"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CredentialResult struct {
+	AccountID            string         `json:"accountId"`
+	CloudAccountName     *string        `json:"cloudAccountName,omitempty"`
+	Csp                  string         `json:"csp"`
+	Duration             int64          `json:"duration"`
+	Errors               []RunError     `json:"errors,omitempty"`
+	InfraID              string         `json:"infraId"`
+	NewData              bool           `json:"newData"`
+	Organization         string         `json:"organization"`
+	Status               string         `json:"status"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CrossCheckRow struct {
+	// Cloud account name
+	CloudAccountName *string `json:"cloudAccountName"`
+	// Cloud service provider
+	Csp *string `json:"csp"`
+	// Cost reported by CSP
+	CspCost *float64 `json:"cspCost"`
+	// Row UUID
+	ID string `json:"id"`
+	// Infrastructure ID
+	InfraID *string `json:"infraId"`
+	// Infrastructure name
+	InfraName *string `json:"infraName"`
+	// Whether this record was produced by the legacy pipeline
+	Legacy *bool `json:"legacy"`
+	// Organization name
+	Organization *string `json:"organization"`
+	// Cost computed by PW
+	PwCost *float64 `json:"pwCost"`
+	// Last update time
+	Updated              *time.Time     `json:"updated"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -3319,6 +3396,18 @@ type FilesystemInfo struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type FlatError struct {
+	// Cloud service provider
+	Csp string `json:"csp"`
+	// Error message
+	Message string `json:"message"`
+	// Organization
+	Organization string `json:"organization"`
+	// Pipeline phase where the error occurred
+	Phase                string         `json:"phase"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type FlavorCostUpdate struct {
 	// Cost per hour for this flavor
 	CostPerHour float64 `json:"costPerHour"`
@@ -3428,10 +3517,8 @@ type GeneralCluster struct {
 	// The type of the resource.
 	Type *string `json:"type"`
 	// The owner of the resource.
-	User *string `json:"user,omitempty"`
-	// The workspace mount points for this cluster.
-	WorkspaceMounts      []ClusterWorkspaceMount `json:"workspaceMounts"`
-	AdditionalProperties map[string]any          `json:"-,omitempty"`
+	User                 *string        `json:"user,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type GenerateNodeTokenOutputBody struct {
@@ -4705,6 +4792,8 @@ type ManagedClusterOutputBody struct {
 	SchedulerJobs []ManagedSchedulerJob `json:"schedulerJobs,omitempty"`
 	// Scheduler type (slurm, pbs)
 	SchedulerType *string `json:"schedulerType,omitempty"`
+	// Hostname of the registered node that hosts managed (desktop/VS Code) sessions over the tunnel
+	SessionNode *string `json:"sessionNode,omitempty"`
 	// Tags
 	Tags []string `json:"tags,omitempty"`
 	// Cluster type
@@ -4739,7 +4828,9 @@ type ManagedFilesystem struct {
 }
 
 type ManagedNode struct {
-	// Agent version
+	// Transient agent-update state (updating, failed)
+	AgentUpdateStatus *string `json:"agentUpdateStatus,omitempty"`
+	// Agent version last reported via heartbeat
 	AgentVersion *string `json:"agentVersion,omitempty"`
 	// Architecture
 	Arch *string `json:"arch,omitempty"`
@@ -4764,9 +4855,13 @@ type ManagedNode struct {
 	RegisteredAt time.Time            `json:"registeredAt"`
 	Settings     *ManagedNodeSettings `json:"settings,omitempty"`
 	// Node status (online, offline)
-	Status               string             `json:"status"`
-	SystemInfo           *ManagedSystemInfo `json:"systemInfo,omitempty"`
-	AdditionalProperties map[string]any     `json:"-,omitempty"`
+	Status     string             `json:"status"`
+	SystemInfo *ManagedSystemInfo `json:"systemInfo,omitempty"`
+	// Agent version reported over the live tunnel
+	TunnelAgentVersion *string `json:"tunnelAgentVersion,omitempty"`
+	// Node holds a live platform tunnel
+	TunnelConnected      bool           `json:"tunnelConnected"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ManagedNodeMetrics struct {
@@ -4804,6 +4899,14 @@ type ManagedNodeMetrics struct {
 type ManagedNodeSettings struct {
 	AccessManagement     *AccessManagementBody `json:"accessManagement,omitempty"`
 	AdditionalProperties map[string]any        `json:"-,omitempty"`
+}
+
+type ManagedNodeUpgradeResult struct {
+	Detail   *string `json:"detail,omitempty"`
+	Hostname string  `json:"hostname"`
+	// Per-node outcome
+	Result               string         `json:"result"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type ManagedPartition struct {
@@ -6135,6 +6238,19 @@ type PatchAccessBodyType struct {
 type PatchAllocationInputBody struct {
 	// New total allocation amount
 	Total                float64        `json:"total"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PatchBillingLastUpdateInputBody struct {
+	// Billing infrastructure id to update; defaults to the account's billing infra when omitted
+	InfraID *string `json:"infraId,omitempty"`
+	// New last update date (YYYY-MM-DD)
+	LastUpdate           string         `json:"lastUpdate"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PatchBillingLastUpdateOutputBody struct {
+	LastUpdate           time.Time      `json:"lastUpdate"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -8031,6 +8147,14 @@ type RunAlert struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type RunError struct {
+	// Error message
+	Message string `json:"message"`
+	// Pipeline phase where the error occurred
+	Phase                string         `json:"phase"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type RunInBody struct {
 	// Only run migrations marked as auto-migratable
 	AutoOnly *bool `json:"autoOnly,omitempty"`
@@ -8038,6 +8162,20 @@ type RunInBody struct {
 	Kind *string `json:"kind"`
 	// Timeout in seconds for the migration run
 	TimeoutSec           *int64         `json:"timeoutSec,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type RunSummary struct {
+	// Credentials that failed
+	Failed int64 `json:"failed"`
+	// Credentials that partially succeeded
+	Partial int64 `json:"partial"`
+	// Credentials skipped
+	Skipped int64 `json:"skipped"`
+	// Credentials that succeeded
+	Succeeded int64 `json:"succeeded"`
+	// Total credentials processed
+	TotalCredentials     int64          `json:"totalCredentials"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -8553,6 +8691,12 @@ type Snapshot struct {
 	Region string `json:"region"`
 	// Indicates if the snapshot is a root snapshot
 	Root bool `json:"root"`
+	// CSP image ID (e.g. AMI) of the base image a bootable snapshot was created from
+	RootImageCspID *string `json:"rootImageCspId,omitempty"`
+	// Name of the base image, when it still exists in the image catalog
+	RootImageName *string `json:"rootImageName,omitempty"`
+	// Status of the base image: active, retired, or unavailable
+	RootImageStatus *string `json:"rootImageStatus,omitempty"`
 	// Size of the snapshot in bytes
 	Size int32 `json:"size"`
 	// Current provision status of the snapshot
@@ -9012,6 +9156,8 @@ type UpdateManagedClusterInputBody struct {
 	Markdown *string `json:"markdown,omitempty"`
 	// Force SSH connections to proxy through the platform
 	ProxySSH *bool `json:"proxySsh,omitempty"`
+	// Hostname of the registered node that hosts managed sessions over the tunnel; empty string clears it
+	SessionNode *string `json:"sessionNode,omitempty"`
 	// Tags for the cluster
 	Tags                 []string       `json:"tags,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -9242,6 +9388,20 @@ type UpdateWorkflowSavedInputsInputBody struct {
 	// Name for the saved inputs; pass a different value to rename.
 	Name                 string         `json:"name"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UpgradeAgentResponseBody struct {
+	// Agent version at dispatch time.
+	AgentVersion         string         `json:"agentVersion"`
+	Dispatched           bool           `json:"dispatched"`
+	TargetVersion        string         `json:"targetVersion"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UpgradeManagedClusterAgentsOutputBody struct {
+	Results              []ManagedNodeUpgradeResult `json:"results"`
+	TargetVersion        string                     `json:"targetVersion"`
+	AdditionalProperties map[string]any             `json:"-,omitempty"`
 }
 
 type UploadManagedClusterIconOutputBody struct {
