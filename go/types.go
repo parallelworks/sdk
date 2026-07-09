@@ -2184,6 +2184,14 @@ type ClusterSessionCostLimit struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ClusterWorkspaceMount struct {
+	// The path on the cluster.
+	ClusterPath string `json:"clusterPath"`
+	// The path in the workspace.
+	WorkspacePath        string         `json:"workspacePath"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type CompleteOnboardingBody struct {
 	// Whether the user needs to complete onboarding
 	NeedsOnboarding      bool           `json:"needsOnboarding"`
@@ -3517,8 +3525,10 @@ type GeneralCluster struct {
 	// The type of the resource.
 	Type *string `json:"type"`
 	// The owner of the resource.
-	User                 *string        `json:"user,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
+	User *string `json:"user,omitempty"`
+	// Cloud-cluster only: the workspace mount points for this cluster.
+	WorkspaceMounts      []ClusterWorkspaceMount `json:"workspaceMounts"`
+	AdditionalProperties map[string]any          `json:"-,omitempty"`
 }
 
 type GenerateNodeTokenOutputBody struct {

@@ -6107,6 +6107,24 @@
         },
         "type": "object"
       },
+      "ClusterWorkspaceMount": {
+        "additionalProperties": false,
+        "properties": {
+          "clusterPath": {
+            "description": "The path on the cluster.",
+            "type": "string"
+          },
+          "workspacePath": {
+            "description": "The path in the workspace.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "clusterPath",
+          "workspacePath"
+        ],
+        "type": "object"
+      },
       "CompleteOnboardingBody": {
         "additionalProperties": false,
         "properties": {
@@ -9873,6 +9891,16 @@
               "Jake.Thayne"
             ],
             "type": "string"
+          },
+          "workspaceMounts": {
+            "description": "Cloud-cluster only: the workspace mount points for this cluster.",
+            "items": {
+              "$ref": "#/components/schemas/ClusterWorkspaceMount"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "required": [
@@ -9887,6 +9915,7 @@
           "maxNodes",
           "tags",
           "favorite",
+          "workspaceMounts",
           "shouldPlatformProxy"
         ],
         "type": "object"
