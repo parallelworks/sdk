@@ -19,7 +19,7 @@ const (
 
 // Sentinel errors for config and context operations
 var (
-	ErrNoContextConfigured  = errors.New("no context configured; use 'pw auth apikey' or 'pw auth token' to authenticate")
+	ErrNoContextConfigured  = errors.New("no context configured; use 'pw auth' to authenticate")
 	ErrNoCredentials        = errors.New("no credential found in context")
 	ErrContextNotFound      = errors.New("context not found")
 	ErrContextAlreadyExists = errors.New("context already exists")
@@ -156,7 +156,7 @@ func LoadCredentialConfigFrom(path string) (*CredentialConfig, error) {
 	}
 
 	if err := json.Unmarshal(data, cfg); err != nil {
-		fmt.Fprintf(os.Stderr, "warning: credentials file (%s) is unparseable, treating as missing; re-authenticate with 'pw auth apikey' or 'pw auth token' to recover\n", path)
+		fmt.Fprintf(os.Stderr, "warning: credentials file (%s) is unparseable, treating as missing; re-authenticate with 'pw auth' to recover\n", path)
 		cfg.Identities = make(map[string]Identity)
 		return cfg, nil
 	}
