@@ -691,18 +691,24 @@ type AuthSession struct {
 	SafeUsername string `json:"safeUsername"`
 	// Resolved sidebar options. User customization wins; otherwise the org's defaultSidebarItems; otherwise the built-in defaults.
 	SidebarOptions []string `json:"sidebarOptions"`
+	// IANA time zone of the user.
+	Timezone *string `json:"timezone,omitempty"`
 	// Username of the user.
 	Username             string         `json:"username"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
 type AwsBucket struct {
+	// The requesting user's access level for this bucket.
+	AccessMode string `json:"accessMode"`
 	// Resources the storage is attached to.
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
 	// Name of the AWS bucket
 	BucketName *string `json:"bucketName,omitempty"`
-	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)
+	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)
 	CanGetCredentials bool `json:"canGetCredentials"`
+	// Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)
+	CanWrite bool `json:"canWrite"`
 	// Cloud service provider of the storage.
 	Csp string `json:"csp"`
 	// Indicates if the storage is currently being provisioned.
@@ -757,6 +763,8 @@ type AwsBucketToken struct {
 	AccessKeyID string `json:"accessKeyId"`
 	// Name of the S3 bucket on AWS.
 	BucketName string `json:"bucketName"`
+	// Whether these credentials allow writing objects; false for read-only access.
+	CanWrite bool `json:"canWrite"`
 	// Time at which the credentials expire.
 	ExpiresAt time.Time `json:"expiresAt"`
 	// Whether the bucket lives in an AWS GovCloud account.
@@ -1098,12 +1106,16 @@ type AzureAzfilesVersionSettings struct {
 }
 
 type AzureBlobStorage struct {
+	// The requesting user's access level for this bucket.
+	AccessMode string `json:"accessMode"`
 	// Resources the storage is attached to.
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
 	// Name of the Azure blob storage
 	BucketName *string `json:"bucketName,omitempty"`
-	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)
+	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)
 	CanGetCredentials bool `json:"canGetCredentials"`
+	// Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)
+	CanWrite bool `json:"canWrite"`
 	// Cloud service provider of the storage.
 	Csp string `json:"csp"`
 	// Indicates if the storage is currently being provisioned.
@@ -1156,6 +1168,8 @@ type AzureBucketToken struct {
 	BucketName string `json:"bucketName"`
 	// URL of the blob container.
 	BucketURL string `json:"bucketUrl"`
+	// Whether these credentials allow writing objects; false for read-only access.
+	CanWrite bool `json:"canWrite"`
 	// Service principal client ID scoped to this bucket.
 	ClientID string `json:"clientId"`
 	// Service principal client secret scoped to this bucket.
@@ -1628,12 +1642,16 @@ type BreakdownItem struct {
 }
 
 type Bucket struct {
+	// The requesting user's access level for this bucket.
+	AccessMode string `json:"accessMode"`
 	// Account name associated with the bucket (Azure only)
 	BucketAccountName string `json:"bucketAccountName"`
 	// Name of the bucket in the cloud provider
 	BucketName string `json:"bucketName"`
-	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)
+	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)
 	CanGetCredentials bool `json:"canGetCredentials"`
+	// Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)
+	CanWrite bool `json:"canWrite"`
 	// Cloud service provider of the bucket
 	Csp string `json:"csp"`
 	// Display name of the bucket
@@ -3616,12 +3634,16 @@ type GitHubAppConfigResponse struct {
 }
 
 type GoogleBucket struct {
+	// The requesting user's access level for this bucket.
+	AccessMode string `json:"accessMode"`
 	// Resources the storage is attached to.
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
 	// Name of the Google Bucket
 	BucketName *string `json:"bucketName,omitempty"`
-	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)
+	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)
 	CanGetCredentials bool `json:"canGetCredentials"`
+	// Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)
+	CanWrite bool `json:"canWrite"`
 	// Cloud service provider of the storage.
 	Csp string `json:"csp"`
 	// Indicates if the storage is currently being provisioned.
@@ -3672,6 +3694,8 @@ type GoogleBucket struct {
 type GoogleBucketToken struct {
 	// Name of the bucket on Google Cloud Storage.
 	BucketName string `json:"bucketName"`
+	// Whether this token allows writing objects; false for read-only access.
+	CanWrite bool `json:"canWrite"`
 	// Time at which the token expires.
 	ExpiresAt time.Time `json:"expiresAt"`
 	// OAuth2 access token scoped to this bucket.
@@ -3990,6 +4014,79 @@ type GroupWithMembers struct {
 	Organization *string `json:"organization,omitempty"`
 	// List of roles assigned to the group.
 	Roles                []string       `json:"roles,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type HealthMonitoringSettings struct {
+	// Whether a custom receiver endpoint is configured (false means the Parallel Works default).
+	CustomURL bool `json:"customUrl"`
+	// Whether this deployment reports health snapshots to the configured receiver.
+	Enabled bool `json:"enabled"`
+	// How often a snapshot is sent, in seconds.
+	IntervalSeconds int64 `json:"intervalSeconds"`
+	// Platform host this deployment reports as, derived from the license.
+	PlatformHost *string `json:"platformHost,omitempty"`
+	// License subject this deployment reports as, derived from the license.
+	Subject *string `json:"subject,omitempty"`
+	// Receiver endpoint health snapshots are sent to.
+	URL                  *string        `json:"url,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type HealthSnapshot struct {
+	// Per-domain certificate summary.
+	Domains []HealthSnapshotDomain `json:"domains,omitempty"`
+	Health  HealthSnapshotHealth   `json:"health"`
+	// How often the sender promises to report, in seconds.
+	IntervalSeconds *int64                 `json:"intervalSeconds,omitempty"`
+	License         *HealthSnapshotLicense `json:"license,omitempty"`
+	Usage           HealthSnapshotUsage    `json:"usage"`
+	// Deployment version.
+	Version              *string        `json:"version,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type HealthSnapshotDomain struct {
+	// Consecutive ACME failures.
+	AcmeFailureCount *int64 `json:"acmeFailureCount,omitempty"`
+	// ACME issuance status.
+	AcmeStatus *string `json:"acmeStatus,omitempty"`
+	// Certificate source (manual or acme).
+	CertSource *string `json:"certSource,omitempty"`
+	// Domain name.
+	Domain string `json:"domain"`
+	// Certificate expiry.
+	NotAfter             *time.Time     `json:"notAfter,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type HealthSnapshotHealth struct {
+	// Whether the deployment can reach its database.
+	MongoReachable bool `json:"mongoReachable"`
+	// Process start time.
+	StartedAt            *time.Time     `json:"startedAt,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type HealthSnapshotLicense struct {
+	// Whether the license is expired beyond the grace period.
+	Expired *bool `json:"expired,omitempty"`
+	// License expiry.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	// Whether the license is in its grace period.
+	GracePeriod          *bool          `json:"gracePeriod,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type HealthSnapshotUsage struct {
+	// Users holding a license seat.
+	SeatsAssigned *int64 `json:"seatsAssigned,omitempty"`
+	// Unassigned seats, when a total is known.
+	SeatsFree *int64 `json:"seatsFree,omitempty"`
+	// Total seats allocated across organizations, when allocations exist.
+	SeatsTotal *int64 `json:"seatsTotal,omitempty"`
+	// Monthly active users over the last 30 days.
+	TotalMau             *int64         `json:"totalMAU,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -4907,8 +5004,8 @@ type ManagedNodeMetrics struct {
 }
 
 type ManagedNodeSettings struct {
-	AccessManagement     *AccessManagementBody `json:"accessManagement,omitempty"`
-	AdditionalProperties map[string]any        `json:"-,omitempty"`
+	AccessManagement     *NodeAccessManagementBody `json:"accessManagement,omitempty"`
+	AdditionalProperties map[string]any            `json:"-,omitempty"`
 }
 
 type ManagedNodeUpgradeResult struct {
@@ -5242,6 +5339,36 @@ type ModifyIndexBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type MonitoredDeploymentSummary struct {
+	// Alert rules currently firing for this deployment, evaluated live from the latest snapshot.
+	FiringAlerts []string `json:"firingAlerts"`
+	// When the deployment first reported.
+	FirstSeenAt *time.Time `json:"firstSeenAt,omitempty"`
+	// Reporting interval the deployment promised, in seconds.
+	IntervalSeconds *int64 `json:"intervalSeconds,omitempty"`
+	// When the deployment last reported.
+	LastSeenAt *time.Time `json:"lastSeenAt,omitempty"`
+	// Deployment license expiry.
+	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
+	// Deployment license standing.
+	LicenseStatus string `json:"licenseStatus"`
+	// Days until the soonest-expiring domain certificate; negative when expired.
+	MinCertDaysRemaining *int64 `json:"minCertDaysRemaining,omitempty"`
+	// Platform host from the deployment's license.
+	PlatformHost *string `json:"platformHost,omitempty"`
+	// Assigned seats the deployment reported.
+	SeatsAssigned *int64 `json:"seatsAssigned,omitempty"`
+	// Total allocated seats the deployment reported.
+	SeatsTotal *int64 `json:"seatsTotal,omitempty"`
+	// License subject the deployment reports as.
+	Subject string `json:"subject"`
+	// Monthly active users the deployment reported.
+	TotalMau *int64 `json:"totalMAU,omitempty"`
+	// Deployment version.
+	Version              *string        `json:"version,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type MountInfoResponse struct {
 	// Cloud provider hosting the resource, such as aws, google, azure, openstack, or oracle. Empty for existing clusters.
 	Csp string `json:"csp"`
@@ -5567,7 +5694,7 @@ type Notification struct {
 	ID string `json:"id"`
 	// Urgency level of the notification (info or alert).
 	Level string `json:"level"`
-	// Message content of the notification.
+	// Message content of the notification. Long messages are truncated in list and update responses (see the truncated flag); fetch the notification by ID for the full message.
 	Message string `json:"message"`
 	// Read status of the notification.
 	Read bool `json:"read"`
@@ -5577,6 +5704,8 @@ type Notification struct {
 	Time *time.Time `json:"time,omitempty"`
 	// Title of the notification.
 	Title string `json:"title"`
+	// Whether the message was truncated in this response.
+	Truncated *bool `json:"truncated,omitempty"`
 	// Type/category of the notification.
 	Type string `json:"type"`
 	// User associated with the notification.
@@ -5786,12 +5915,16 @@ type OpenstackSyncResponse struct {
 }
 
 type OracleBucket struct {
+	// The requesting user's access level for this bucket.
+	AccessMode string `json:"accessMode"`
 	// Resources the storage is attached to.
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
 	// Name of the Oracle bucket
 	BucketName *string `json:"bucketName,omitempty"`
-	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)
+	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)
 	CanGetCredentials bool `json:"canGetCredentials"`
+	// Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)
+	CanWrite bool `json:"canWrite"`
 	// Cloud service provider of the storage.
 	Csp string `json:"csp"`
 	// Indicates if the storage is currently being provisioned.
@@ -5842,13 +5975,15 @@ type OracleBucket struct {
 type OracleBucketPar struct {
 	// Name of the Oracle bucket.
 	BucketName string `json:"bucketName"`
+	// Whether the PAR URL allows writing objects; false for read-only access.
+	CanWrite bool `json:"canWrite"`
 	// The expiration time of the PAR URL.
 	Expiry time.Time `json:"expiry"`
 	// Object Storage namespace of the tenancy.
 	Namespace string `json:"namespace"`
 	// Region the Oracle bucket is in.
 	Region string `json:"region"`
-	// The Pre-Authenticated Request URL granting HTTP read/write access to the bucket.
+	// The Pre-Authenticated Request URL granting HTTP access to the bucket. Read/write for users with write access, read-only otherwise.
 	URL                  string         `json:"url"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
@@ -6481,6 +6616,8 @@ type PlatformSettings struct {
 	PlatformName *string `json:"platformName,omitempty"`
 	// Platform-wide enabled previews.
 	Previews []string `json:"previews"`
+	// Indicates if the platform advertises the QUIC tunnel transport. Clients use this to decide whether to dial QUIC first (falling back to websocket) so they don't pay the fallback cost where QUIC isn't offered.
+	QuicTunnelEnabled bool `json:"quicTunnelEnabled"`
 	// Whether Sentry error tracking is enabled.
 	SentryEnabled *bool `json:"sentryEnabled,omitempty"`
 	// Sentry environment name.
@@ -6537,6 +6674,8 @@ type PlatformSettingsAdmin struct {
 	PkiValidationContent *string `json:"pkiValidationContent,omitempty"`
 	// Filename served at /.well-known/pki-validation/. Empty disables the endpoint.
 	PkiValidationFilename *string `json:"pkiValidationFilename,omitempty"`
+	// Whether to advertise the QUIC tunnel transport to clients. When on (and the listener is bound), clients discover QUIC via /api/settings and dial it first; off by default so nobody pays the websocket fallback cost where QUIC isn't offered.
+	QuicTunnelEnabled bool `json:"quicTunnelEnabled"`
 	// Sentry DSN for backend services.
 	SentryDsn *string `json:"sentryDsn,omitempty"`
 	// Whether Sentry error tracking is enabled.
@@ -7735,6 +7874,12 @@ type PutSessionBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type PutSlackConfigInputBody struct {
+	// Slack incoming webhook URL. Stored as a credential and never returned.
+	WebhookURL           string         `json:"webhookUrl"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type PvResponse struct {
 	// Access modes supported by the volume
 	AccessModes []string `json:"accessModes"`
@@ -7795,7 +7940,9 @@ type QuotasMetadata struct {
 type RatedCostWithMetadata struct {
 	AllocationID         string         `json:"allocationId"`
 	Amount               float64        `json:"amount"`
+	AttributedToUsername *string        `json:"attributedToUsername,omitempty"`
 	CreatedAt            time.Time      `json:"createdAt"`
+	CreatedByUsername    *string        `json:"createdByUsername,omitempty"`
 	EndedAt              time.Time      `json:"endedAt"`
 	ID                   string         `json:"id"`
 	Metadata             map[string]any `json:"metadata,omitempty"`
@@ -8690,6 +8837,12 @@ type SingleVolume struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type SlackConfigResponse struct {
+	// Whether a Slack incoming webhook is configured.
+	WebhookConfigured    bool           `json:"webhookConfigured"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type Snapshot struct {
 	// Cloud service provider of the snapshot
 	Csp string `json:"csp"`
@@ -9076,6 +9229,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	PkiValidationFilename *string `json:"pkiValidationFilename,omitempty"`
 	// The display name of the platform.
 	PlatformName *string `json:"platformName,omitempty"`
+	// Whether to advertise the QUIC tunnel transport to clients.
+	QuicTunnelEnabled *bool `json:"quicTunnelEnabled,omitempty"`
 	// Sentry DSN for backend services.
 	SentryDsn *string `json:"sentryDsn,omitempty"`
 	// Whether Sentry error tracking is enabled.
@@ -9151,6 +9306,14 @@ type UpdateGpuOperatorResponseBody struct {
 	MigStrategyConfig string `json:"migStrategyConfig"`
 	// The name of the updated node
 	NodeName             string         `json:"nodeName"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UpdateHealthMonitoringSettingsInputBody struct {
+	// Whether this deployment reports health snapshots to the configured receiver.
+	Enabled bool `json:"enabled"`
+	// Receiver endpoint. Leave empty for the Parallel Works default.
+	URL                  *string        `json:"url,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -9339,15 +9502,19 @@ type UpdateSentrySettingsBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type UpdateUserProfileInputBody struct {
+type UpdateUserProfileBody struct {
 	// Full name of the user
-	Name                 string         `json:"name"`
+	Name string `json:"name"`
+	// IANA time zone of the user
+	Timezone             *string        `json:"timezone,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type UpdateUserProfileOutputBody struct {
-	// Updated full name of the user
-	Name                 string         `json:"name"`
+type UpdateUserProfileInputBody struct {
+	// Full name of the user
+	Name *string `json:"name,omitempty"`
+	// IANA time zone of the user
+	Timezone             *string        `json:"timezone,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -9548,6 +9715,8 @@ type UserProfile struct {
 	OrganizationOwner bool `json:"organizationOwner"`
 	// Whether the user is a platform administrator.
 	PlatformAdmin bool `json:"platformAdmin"`
+	// IANA time zone of the user.
+	Timezone *string `json:"timezone,omitempty"`
 	// The user's POSIX UID.
 	Uid *int64 `json:"uid,omitempty"`
 	// Username of the user.

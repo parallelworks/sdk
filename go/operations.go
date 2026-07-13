@@ -1790,6 +1790,51 @@ func (c *Client) GetGroups(ctx context.Context, opts ...GetGroupsParams) (*[]Gro
 	return &result, nil
 }
 
+// ListMonitoredDeployments - List monitored deployments
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns a health summary for each deployment reporting to this platform. Only served where the platform license carries the health monitoring receiver feature.
+func (c *Client) ListMonitoredDeployments(ctx context.Context) (*[]MonitoredDeploymentSummary, error) {
+	path := "/api/health-monitoring/deployments"
+
+	var result []MonitoredDeploymentSummary
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PostHealthMonitoringHeartbeatParams contains optional parameters for the PostHealthMonitoringHeartbeat operation.
+type PostHealthMonitoringHeartbeatParams struct {
+	// Bearer license JWT identifying the reporting deployment.
+	Authorization *string `json:"Authorization,omitempty"`
+}
+
+// PostHealthMonitoringHeartbeat - Report a deployment health snapshot
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Records a health snapshot from a deployment, authenticated with the deployment's license JWT. Only served where the platform license carries the health monitoring receiver feature.
+func (c *Client) PostHealthMonitoringHeartbeat(ctx context.Context, body HealthSnapshot, opts ...PostHealthMonitoringHeartbeatParams) error {
+	path := "/api/health-monitoring/heartbeat"
+
+	var headers http.Header
+	if len(opts) > 0 {
+		params := opts[0]
+		headers = make(http.Header)
+		if params.Authorization != nil {
+			headers.Set("Authorization", fmt.Sprintf("%v", *params.Authorization))
+		}
+	}
+	if err := c.do(ctx, "POST", path, body, nil, "application/json", headers); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetHelmChartValuesParams contains optional parameters for the GetHelmChartValues operation.
 type GetHelmChartValuesParams struct {
 	// The URL of the Helm repository.
@@ -3292,6 +3337,22 @@ func (c *Client) SetNotificationsSettings(ctx context.Context, body *Notificatio
 
 	var result NotificationSettings
 	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetNotification - Get a notification
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns a single notification with its full message for the currently authenticated subject. The list endpoint truncates long messages.
+func (c *Client) GetNotification(ctx context.Context, id string) (*Notification, error) {
+	path := "/api/notifications/{id}"
+	path = pathReplace(path, "id", id)
+
+	var result Notification
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8676,7 +8737,7 @@ func (c *Client) AddCorsRulesAzureBucket(ctx context.Context, organization strin
 
 // GetPresignedURLAzureBucketObjectParams contains optional parameters for the GetPresignedURLAzureBucketObject operation.
 type GetPresignedURLAzureBucketObjectParams struct {
-	// The expiration time in seconds for the pre-signed URL. Default is 12 hours.
+	// The expiration time in seconds for the pre-signed URL. Default and maximum is 12 hours.
 	ExpiresIn *int64 `json:"expiresIn,omitempty"`
 	// The permissions for the pre-signed URL. Default is read (r). Other permissions include write (w), delete (d), list (l), add (a), create (c). Combine multiple permissions as needed.
 	Permissions *string `json:"permissions,omitempty"`
@@ -10893,6 +10954,40 @@ func (c *Client) DeleteGithubAppConfig(ctx context.Context) error {
 	return nil
 }
 
+// GetHealthMonitoringSettings - Get health monitoring settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns the health monitoring reporting configuration.
+func (c *Client) GetHealthMonitoringSettings(ctx context.Context) (*HealthMonitoringSettings, error) {
+	path := "/api/platform/integrations/health-monitoring"
+
+	var result HealthMonitoringSettings
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateHealthMonitoringSettings - Update health monitoring settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Updates the health monitoring reporting configuration.
+func (c *Client) UpdateHealthMonitoringSettings(ctx context.Context, body UpdateHealthMonitoringSettingsInputBody) (*HealthMonitoringSettings, error) {
+	path := "/api/platform/integrations/health-monitoring"
+
+	var result HealthMonitoringSettings
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetSentrySettings - Get Sentry settings
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -10925,6 +11020,72 @@ func (c *Client) UpdateSentrySettings(ctx context.Context, body UpdateSentrySett
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
+}
+
+// GetSlackConfig - Get Slack integration configuration
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns whether a Slack incoming webhook is configured. The webhook URL itself is never returned.
+func (c *Client) GetSlackConfig(ctx context.Context) (*SlackConfigResponse, error) {
+	path := "/api/platform/integrations/slack"
+
+	var result SlackConfigResponse
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateSlackConfig - Update Slack integration configuration
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Stores the Slack incoming webhook URL used for health monitoring alerts.
+func (c *Client) UpdateSlackConfig(ctx context.Context, body PutSlackConfigInputBody) (*SlackConfigResponse, error) {
+	path := "/api/platform/integrations/slack"
+
+	var result SlackConfigResponse
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteSlackConfig - Remove Slack integration configuration
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Removes the Slack integration and deletes the stored webhook credential.
+func (c *Client) DeleteSlackConfig(ctx context.Context) error {
+	path := "/api/platform/integrations/slack"
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// PostSlackTestMessage - Send a Slack test message
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Sends a test message through the configured Slack webhook.
+func (c *Client) PostSlackTestMessage(ctx context.Context) error {
+	path := "/api/platform/integrations/slack/test"
+
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
 }
 
 // GetKeys - List JWKs
@@ -11982,10 +12143,10 @@ func (c *Client) ScaleDownUserWorkspaces(ctx context.Context) error {
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Updates the current user's profile information.
-func (c *Client) UpdateUserProfile(ctx context.Context, body UpdateUserProfileInputBody) (*UpdateUserProfileOutputBody, error) {
+func (c *Client) UpdateUserProfile(ctx context.Context, body UpdateUserProfileInputBody) (*UpdateUserProfileBody, error) {
 	path := "/api/user/profile"
 
-	var result UpdateUserProfileOutputBody
+	var result UpdateUserProfileBody
 	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}

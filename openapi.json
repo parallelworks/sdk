@@ -1817,6 +1817,13 @@
               "null"
             ]
           },
+          "timezone": {
+            "description": "IANA time zone of the user.",
+            "examples": [
+              "America/Chicago"
+            ],
+            "type": "string"
+          },
           "username": {
             "description": "Username of the user.",
             "examples": [
@@ -1845,6 +1852,16 @@
       "AwsBucket": {
         "additionalProperties": false,
         "properties": {
+          "accessMode": {
+            "description": "The requesting user's access level for this bucket.",
+            "enum": [
+              "admin",
+              "read-write",
+              "read-only",
+              "none"
+            ],
+            "type": "string"
+          },
           "attachedTo": {
             "description": "Resources the storage is attached to.",
             "items": {
@@ -1857,7 +1874,11 @@
             "type": "string"
           },
           "canGetCredentials": {
-            "description": "Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)",
+            "description": "Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)",
+            "type": "boolean"
+          },
+          "canWrite": {
+            "description": "Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)",
             "type": "boolean"
           },
           "csp": {
@@ -1968,7 +1989,6 @@
           }
         },
         "required": [
-          "canGetCredentials",
           "id",
           "user",
           "name",
@@ -1978,7 +1998,10 @@
           "currentlyProvisioning",
           "provisioned",
           "sessionless",
-          "favorite"
+          "favorite",
+          "accessMode",
+          "canGetCredentials",
+          "canWrite"
         ],
         "type": "object"
       },
@@ -1995,6 +2018,10 @@
               "mybucket"
             ],
             "type": "string"
+          },
+          "canWrite": {
+            "description": "Whether these credentials allow writing objects; false for read-only access.",
+            "type": "boolean"
           },
           "expiresAt": {
             "description": "Time at which the credentials expire.",
@@ -2031,6 +2058,7 @@
           "bucketName",
           "region",
           "govCloud",
+          "canWrite",
           "expiresAt"
         ],
         "type": "object"
@@ -2969,6 +2997,16 @@
       "AzureBlobStorage": {
         "additionalProperties": false,
         "properties": {
+          "accessMode": {
+            "description": "The requesting user's access level for this bucket.",
+            "enum": [
+              "admin",
+              "read-write",
+              "read-only",
+              "none"
+            ],
+            "type": "string"
+          },
           "attachedTo": {
             "description": "Resources the storage is attached to.",
             "items": {
@@ -2981,7 +3019,11 @@
             "type": "string"
           },
           "canGetCredentials": {
-            "description": "Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)",
+            "description": "Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)",
+            "type": "boolean"
+          },
+          "canWrite": {
+            "description": "Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)",
             "type": "boolean"
           },
           "csp": {
@@ -3088,7 +3130,6 @@
           }
         },
         "required": [
-          "canGetCredentials",
           "id",
           "user",
           "name",
@@ -3098,7 +3139,10 @@
           "currentlyProvisioning",
           "provisioned",
           "sessionless",
-          "favorite"
+          "favorite",
+          "accessMode",
+          "canGetCredentials",
+          "canWrite"
         ],
         "type": "object"
       },
@@ -3118,6 +3162,10 @@
               "https://mystorageaccount.blob.core.windows.net/mybucket"
             ],
             "type": "string"
+          },
+          "canWrite": {
+            "description": "Whether these credentials allow writing objects; false for read-only access.",
+            "type": "boolean"
           },
           "clientId": {
             "description": "Service principal client ID scoped to this bucket.",
@@ -3159,6 +3207,7 @@
           "storageAccount",
           "bucketName",
           "bucketUrl",
+          "canWrite",
           "expiresAt"
         ],
         "type": "object"
@@ -4511,6 +4560,16 @@
       "Bucket": {
         "additionalProperties": false,
         "properties": {
+          "accessMode": {
+            "description": "The requesting user's access level for this bucket.",
+            "enum": [
+              "admin",
+              "read-write",
+              "read-only",
+              "none"
+            ],
+            "type": "string"
+          },
           "bucketAccountName": {
             "description": "Account name associated with the bucket (Azure only)",
             "type": "string"
@@ -4520,7 +4579,11 @@
             "type": "string"
           },
           "canGetCredentials": {
-            "description": "Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)",
+            "description": "Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)",
+            "type": "boolean"
+          },
+          "canWrite": {
+            "description": "Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)",
             "type": "boolean"
           },
           "csp": {
@@ -4632,7 +4695,9 @@
           "sessionless",
           "govCloud",
           "favorite",
-          "canGetCredentials"
+          "accessMode",
+          "canGetCredentials",
+          "canWrite"
         ],
         "type": "object"
       },
@@ -10189,6 +10254,16 @@
       "GoogleBucket": {
         "additionalProperties": false,
         "properties": {
+          "accessMode": {
+            "description": "The requesting user's access level for this bucket.",
+            "enum": [
+              "admin",
+              "read-write",
+              "read-only",
+              "none"
+            ],
+            "type": "string"
+          },
           "attachedTo": {
             "description": "Resources the storage is attached to.",
             "items": {
@@ -10201,7 +10276,11 @@
             "type": "string"
           },
           "canGetCredentials": {
-            "description": "Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)",
+            "description": "Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)",
+            "type": "boolean"
+          },
+          "canWrite": {
+            "description": "Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)",
             "type": "boolean"
           },
           "csp": {
@@ -10308,7 +10387,6 @@
           }
         },
         "required": [
-          "canGetCredentials",
           "id",
           "user",
           "name",
@@ -10318,7 +10396,10 @@
           "currentlyProvisioning",
           "provisioned",
           "sessionless",
-          "favorite"
+          "favorite",
+          "accessMode",
+          "canGetCredentials",
+          "canWrite"
         ],
         "type": "object"
       },
@@ -10331,6 +10412,10 @@
               "mybucket"
             ],
             "type": "string"
+          },
+          "canWrite": {
+            "description": "Whether this token allows writing objects; false for read-only access.",
+            "type": "boolean"
           },
           "expiresAt": {
             "description": "Time at which the token expires.",
@@ -10348,6 +10433,7 @@
         "required": [
           "token",
           "bucketName",
+          "canWrite",
           "expiresAt"
         ],
         "type": "object"
@@ -11221,6 +11307,177 @@
           "name",
           "members"
         ],
+        "type": "object"
+      },
+      "HealthMonitoringSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "customUrl": {
+            "description": "Whether a custom receiver endpoint is configured (false means the Parallel Works default).",
+            "type": "boolean"
+          },
+          "enabled": {
+            "description": "Whether this deployment reports health snapshots to the configured receiver.",
+            "type": "boolean"
+          },
+          "intervalSeconds": {
+            "description": "How often a snapshot is sent, in seconds.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "platformHost": {
+            "description": "Platform host this deployment reports as, derived from the license.",
+            "type": "string"
+          },
+          "subject": {
+            "description": "License subject this deployment reports as, derived from the license.",
+            "type": "string"
+          },
+          "url": {
+            "description": "Receiver endpoint health snapshots are sent to.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "customUrl",
+          "intervalSeconds"
+        ],
+        "type": "object"
+      },
+      "HealthSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "domains": {
+            "description": "Per-domain certificate summary.",
+            "items": {
+              "$ref": "#/components/schemas/HealthSnapshotDomain"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "health": {
+            "$ref": "#/components/schemas/HealthSnapshotHealth",
+            "description": "Basic deployment health."
+          },
+          "intervalSeconds": {
+            "description": "How often the sender promises to report, in seconds.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "license": {
+            "$ref": "#/components/schemas/HealthSnapshotLicense",
+            "description": "License expiry status."
+          },
+          "usage": {
+            "$ref": "#/components/schemas/HealthSnapshotUsage",
+            "description": "Usage counts."
+          },
+          "version": {
+            "description": "Deployment version.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "health",
+          "usage"
+        ],
+        "type": "object"
+      },
+      "HealthSnapshotDomain": {
+        "additionalProperties": false,
+        "properties": {
+          "acmeFailureCount": {
+            "description": "Consecutive ACME failures.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "acmeStatus": {
+            "description": "ACME issuance status.",
+            "type": "string"
+          },
+          "certSource": {
+            "description": "Certificate source (manual or acme).",
+            "type": "string"
+          },
+          "domain": {
+            "description": "Domain name.",
+            "type": "string"
+          },
+          "notAfter": {
+            "description": "Certificate expiry.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain"
+        ],
+        "type": "object"
+      },
+      "HealthSnapshotHealth": {
+        "additionalProperties": false,
+        "properties": {
+          "mongoReachable": {
+            "description": "Whether the deployment can reach its database.",
+            "type": "boolean"
+          },
+          "startedAt": {
+            "description": "Process start time.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mongoReachable"
+        ],
+        "type": "object"
+      },
+      "HealthSnapshotLicense": {
+        "additionalProperties": false,
+        "properties": {
+          "expired": {
+            "description": "Whether the license is expired beyond the grace period.",
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "description": "License expiry.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "gracePeriod": {
+            "description": "Whether the license is in its grace period.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "HealthSnapshotUsage": {
+        "additionalProperties": false,
+        "properties": {
+          "seatsAssigned": {
+            "description": "Users holding a license seat.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "seatsFree": {
+            "description": "Unassigned seats, when a total is known.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "seatsTotal": {
+            "description": "Total seats allocated across organizations, when allocations exist.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalMAU": {
+            "description": "Monthly active users over the last 30 days.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
         "type": "object"
       },
       "HeartbeatAccessManagement": {
@@ -14028,7 +14285,7 @@
         "additionalProperties": false,
         "properties": {
           "accessManagement": {
-            "$ref": "#/components/schemas/AccessManagementBody",
+            "$ref": "#/components/schemas/NodeAccessManagementBody",
             "description": "Access management overrides"
           }
         },
@@ -15132,6 +15389,89 @@
         ],
         "type": "object"
       },
+      "MonitoredDeploymentSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "firingAlerts": {
+            "description": "Alert rules currently firing for this deployment, evaluated live from the latest snapshot.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "firstSeenAt": {
+            "description": "When the deployment first reported.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "intervalSeconds": {
+            "description": "Reporting interval the deployment promised, in seconds.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastSeenAt": {
+            "description": "When the deployment last reported.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "licenseExpiresAt": {
+            "description": "Deployment license expiry.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "licenseStatus": {
+            "description": "Deployment license standing.",
+            "enum": [
+              "valid",
+              "gracePeriod",
+              "expired",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "minCertDaysRemaining": {
+            "description": "Days until the soonest-expiring domain certificate; negative when expired.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "platformHost": {
+            "description": "Platform host from the deployment's license.",
+            "type": "string"
+          },
+          "seatsAssigned": {
+            "description": "Assigned seats the deployment reported.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "seatsTotal": {
+            "description": "Total allocated seats the deployment reported.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "subject": {
+            "description": "License subject the deployment reports as.",
+            "type": "string"
+          },
+          "totalMAU": {
+            "description": "Monthly active users the deployment reported.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "version": {
+            "description": "Deployment version.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject",
+          "licenseStatus",
+          "firingAlerts"
+        ],
+        "type": "object"
+      },
       "MountInfoResponse": {
         "additionalProperties": false,
         "properties": {
@@ -16045,7 +16385,7 @@
             "type": "string"
           },
           "message": {
-            "description": "Message content of the notification.",
+            "description": "Message content of the notification. Long messages are truncated in list and update responses (see the truncated flag); fetch the notification by ID for the full message.",
             "type": "string"
           },
           "read": {
@@ -16064,6 +16404,10 @@
           "title": {
             "description": "Title of the notification.",
             "type": "string"
+          },
+          "truncated": {
+            "description": "Whether the message was truncated in this response.",
+            "type": "boolean"
           },
           "type": {
             "description": "Type/category of the notification.",
@@ -16723,6 +17067,16 @@
       "OracleBucket": {
         "additionalProperties": false,
         "properties": {
+          "accessMode": {
+            "description": "The requesting user's access level for this bucket.",
+            "enum": [
+              "admin",
+              "read-write",
+              "read-only",
+              "none"
+            ],
+            "type": "string"
+          },
           "attachedTo": {
             "description": "Resources the storage is attached to.",
             "items": {
@@ -16735,7 +17089,11 @@
             "type": "string"
           },
           "canGetCredentials": {
-            "description": "Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin or Mount Storage permission)",
+            "description": "Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)",
+            "type": "boolean"
+          },
+          "canWrite": {
+            "description": "Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)",
             "type": "boolean"
           },
           "csp": {
@@ -16842,7 +17200,6 @@
           }
         },
         "required": [
-          "canGetCredentials",
           "id",
           "user",
           "name",
@@ -16852,7 +17209,10 @@
           "currentlyProvisioning",
           "provisioned",
           "sessionless",
-          "favorite"
+          "favorite",
+          "accessMode",
+          "canGetCredentials",
+          "canWrite"
         ],
         "type": "object"
       },
@@ -16865,6 +17225,10 @@
               "my-bucket"
             ],
             "type": "string"
+          },
+          "canWrite": {
+            "description": "Whether the PAR URL allows writing objects; false for read-only access.",
+            "type": "boolean"
           },
           "expiry": {
             "description": "The expiration time of the PAR URL.",
@@ -16886,7 +17250,7 @@
             "type": "string"
           },
           "url": {
-            "description": "The Pre-Authenticated Request URL granting HTTP read/write access to the bucket.",
+            "description": "The Pre-Authenticated Request URL granting HTTP access to the bucket. Read/write for users with write access, read-only otherwise.",
             "examples": [
               "https://objectstorage.us-ashburn-1.oraclecloud.com/p/abc123/n/myns/b/mybucket/o/"
             ],
@@ -16898,6 +17262,7 @@
           "bucketName",
           "namespace",
           "region",
+          "canWrite",
           "expiry"
         ],
         "type": "object"
@@ -18648,6 +19013,10 @@
               "null"
             ]
           },
+          "quicTunnelEnabled": {
+            "description": "Indicates if the platform advertises the QUIC tunnel transport. Clients use this to decide whether to dial QUIC first (falling back to websocket) so they don't pay the fallback cost where QUIC isn't offered.",
+            "type": "boolean"
+          },
           "sentryEnabled": {
             "description": "Whether Sentry error tracking is enabled.",
             "type": "boolean"
@@ -18747,6 +19116,7 @@
           "version",
           "availableAuthMethods",
           "forgotPasswordEnabled",
+          "quicTunnelEnabled",
           "customDomainsEnabled",
           "enableOnboarding"
         ],
@@ -18809,6 +19179,10 @@
             "description": "Filename served at /.well-known/pki-validation/. Empty disables the endpoint.",
             "type": "string"
           },
+          "quicTunnelEnabled": {
+            "description": "Whether to advertise the QUIC tunnel transport to clients. When on (and the listener is bound), clients discover QUIC via /api/settings and dial it first; off by default so nobody pays the websocket fallback cost where QUIC isn't offered.",
+            "type": "boolean"
+          },
           "sentryDsn": {
             "description": "Sentry DSN for backend services.",
             "type": "string"
@@ -18859,7 +19233,8 @@
           "sentryReplayUnmask",
           "sentryTracesSampleRate",
           "sentryReplaysSampleRate",
-          "stuckRunSweeperEnabled"
+          "stuckRunSweeperEnabled",
+          "quicTunnelEnabled"
         ],
         "type": "object"
       },
@@ -22135,6 +22510,20 @@
         ],
         "type": "object"
       },
+      "PutSlackConfigInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "webhookUrl": {
+            "description": "Slack incoming webhook URL. Stored as a credential and never returned.",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "webhookUrl"
+        ],
+        "type": "object"
+      },
       "PvResponse": {
         "additionalProperties": false,
         "properties": {
@@ -22347,8 +22736,14 @@
             "format": "double",
             "type": "number"
           },
+          "attributedToUsername": {
+            "type": "string"
+          },
           "createdAt": {
             "format": "date-time",
+            "type": "string"
+          },
+          "createdByUsername": {
             "type": "string"
           },
           "endedAt": {
@@ -25130,6 +25525,19 @@
         ],
         "type": "object"
       },
+      "SlackConfigResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "webhookConfigured": {
+            "description": "Whether a Slack incoming webhook is configured.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "webhookConfigured"
+        ],
+        "type": "object"
+      },
       "Snapshot": {
         "additionalProperties": false,
         "properties": {
@@ -26213,6 +26621,10 @@
             "description": "The display name of the platform.",
             "type": "string"
           },
+          "quicTunnelEnabled": {
+            "description": "Whether to advertise the QUIC tunnel transport to clients.",
+            "type": "boolean"
+          },
           "sentryDsn": {
             "description": "Sentry DSN for backend services.",
             "type": "string"
@@ -26418,6 +26830,23 @@
           "nodeName",
           "migStrategy",
           "migStrategyConfig"
+        ],
+        "type": "object"
+      },
+      "UpdateHealthMonitoringSettingsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether this deployment reports health snapshots to the configured receiver.",
+            "type": "boolean"
+          },
+          "url": {
+            "description": "Receiver endpoint. Leave empty for the Parallel Works default.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled"
         ],
         "type": "object"
       },
@@ -26905,12 +27334,15 @@
         ],
         "type": "object"
       },
-      "UpdateUserProfileInputBody": {
+      "UpdateUserProfileBody": {
         "additionalProperties": false,
         "properties": {
           "name": {
             "description": "Full name of the user",
-            "minLength": 1,
+            "type": "string"
+          },
+          "timezone": {
+            "description": "IANA time zone of the user",
             "type": "string"
           }
         },
@@ -26919,17 +27351,22 @@
         ],
         "type": "object"
       },
-      "UpdateUserProfileOutputBody": {
+      "UpdateUserProfileInputBody": {
         "additionalProperties": false,
         "properties": {
           "name": {
-            "description": "Updated full name of the user",
+            "description": "Full name of the user",
+            "minLength": 1,
+            "type": "string"
+          },
+          "timezone": {
+            "description": "IANA time zone of the user",
+            "examples": [
+              "America/Chicago"
+            ],
             "type": "string"
           }
         },
-        "required": [
-          "name"
-        ],
         "type": "object"
       },
       "UpdateUserSidebarInputBody": {
@@ -27443,6 +27880,13 @@
           "platformAdmin": {
             "description": "Whether the user is a platform administrator.",
             "type": "boolean"
+          },
+          "timezone": {
+            "description": "IANA time zone of the user.",
+            "examples": [
+              "America/Chicago"
+            ],
+            "type": "string"
           },
           "uid": {
             "description": "The user's POSIX UID.",
@@ -33255,6 +33699,91 @@
         ]
       }
     },
+    "/api/health-monitoring/deployments": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns a health summary for each deployment reporting to this platform. Only served where the platform license carries the health monitoring receiver feature.",
+        "operationId": "list-monitored-deployments",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MonitoredDeploymentSummary"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List monitored deployments",
+        "tags": [
+          "Platform"
+        ]
+      }
+    },
+    "/api/health-monitoring/heartbeat": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRecords a health snapshot from a deployment, authenticated with the deployment's license JWT. Only served where the platform license carries the health monitoring receiver feature.",
+        "operationId": "post-health-monitoring-heartbeat",
+        "parameters": [
+          {
+            "description": "Bearer license JWT identifying the reporting deployment.",
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "description": "Bearer license JWT identifying the reporting deployment.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HealthSnapshot"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Report a deployment health snapshot",
+        "tags": [
+          "Platform"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/helm-charts/values": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRetrieves the default values for a Helm chart from a repository.",
@@ -37588,6 +38117,51 @@
           }
         },
         "summary": "Delete notification",
+        "tags": [
+          "Notifications"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns a single notification with its full message for the currently authenticated subject. The list endpoint truncates long messages.",
+        "operationId": "get-notification",
+        "parameters": [
+          {
+            "description": "ID of the notification.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "ID of the notification.",
+              "examples": [
+                "507f1f77bcf86cd799439011"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Notification"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a notification",
         "tags": [
           "Notifications"
         ]
@@ -55282,17 +55856,18 @@
             }
           },
           {
-            "description": "The expiration time in seconds for the pre-signed URL. Default is 12 hours.",
+            "description": "The expiration time in seconds for the pre-signed URL. Default and maximum is 12 hours.",
             "explode": false,
             "in": "query",
             "name": "expiresIn",
             "schema": {
               "default": 43200,
-              "description": "The expiration time in seconds for the pre-signed URL. Default is 12 hours.",
+              "description": "The expiration time in seconds for the pre-signed URL. Default and maximum is 12 hours.",
               "examples": [
                 43200
               ],
               "format": "int64",
+              "maximum": 43200,
               "type": "integer"
             }
           },
@@ -63340,6 +63915,78 @@
         ]
       }
     },
+    "/api/platform/integrations/health-monitoring": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns the health monitoring reporting configuration.",
+        "operationId": "get-health-monitoring-settings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthMonitoringSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get health monitoring settings",
+        "tags": [
+          "Platform"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nUpdates the health monitoring reporting configuration.",
+        "operationId": "update-health-monitoring-settings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHealthMonitoringSettingsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthMonitoringSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update health monitoring settings",
+        "tags": [
+          "Platform"
+        ]
+      }
+    },
     "/api/platform/integrations/sentry": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns Sentry error tracking configuration.",
@@ -63407,6 +64054,126 @@
           }
         },
         "summary": "Update Sentry settings",
+        "tags": [
+          "Platform"
+        ]
+      }
+    },
+    "/api/platform/integrations/slack": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nRemoves the Slack integration and deletes the stored webhook credential.",
+        "operationId": "delete-slack-config",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Remove Slack integration configuration",
+        "tags": [
+          "Platform"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns whether a Slack incoming webhook is configured. The webhook URL itself is never returned.",
+        "operationId": "get-slack-config",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlackConfigResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Slack integration configuration",
+        "tags": [
+          "Platform"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nStores the Slack incoming webhook URL used for health monitoring alerts.",
+        "operationId": "update-slack-config",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutSlackConfigInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlackConfigResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update Slack integration configuration",
+        "tags": [
+          "Platform"
+        ]
+      }
+    },
+    "/api/platform/integrations/slack/test": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nSends a test message through the configured Slack webhook.",
+        "operationId": "post-slack-test-message",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Send a Slack test message",
         "tags": [
           "Platform"
         ]
@@ -66249,7 +67016,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UpdateUserProfileOutputBody"
+                  "$ref": "#/components/schemas/UpdateUserProfileBody"
                 }
               }
             },
