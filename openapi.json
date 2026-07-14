@@ -3392,6 +3392,16 @@
       "AzureFiles": {
         "additionalProperties": false,
         "properties": {
+          "accessMode": {
+            "description": "The requesting user's access level for this bucket.",
+            "enum": [
+              "admin",
+              "read-write",
+              "read-only",
+              "none"
+            ],
+            "type": "string"
+          },
           "attachedTo": {
             "description": "Resources the storage is attached to.",
             "items": {
@@ -3406,6 +3416,14 @@
           "azureResourceGroup": {
             "description": "Name of the Azure resource group holding the storage account",
             "type": "string"
+          },
+          "canGetCredentials": {
+            "description": "Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)",
+            "type": "boolean"
+          },
+          "canWrite": {
+            "description": "Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)",
+            "type": "boolean"
           },
           "csp": {
             "description": "Cloud service provider of the storage.",
@@ -3529,7 +3547,10 @@
           "currentlyProvisioning",
           "provisioned",
           "sessionless",
-          "favorite"
+          "favorite",
+          "accessMode",
+          "canGetCredentials",
+          "canWrite"
         ],
         "type": "object"
       },
@@ -15987,6 +16008,24 @@
       "Nfs": {
         "additionalProperties": false,
         "properties": {
+          "accessMode": {
+            "description": "The requesting user's access level for this bucket.",
+            "enum": [
+              "admin",
+              "read-write",
+              "read-only",
+              "none"
+            ],
+            "type": "string"
+          },
+          "canGetCredentials": {
+            "description": "Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)",
+            "type": "boolean"
+          },
+          "canWrite": {
+            "description": "Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)",
+            "type": "boolean"
+          },
           "csp": {
             "description": "Cloud service provider of the NFS",
             "type": "string"
@@ -16078,7 +16117,10 @@
           "status",
           "shared",
           "sessionless",
-          "favorite"
+          "favorite",
+          "accessMode",
+          "canGetCredentials",
+          "canWrite"
         ],
         "type": "object"
       },
@@ -19133,6 +19175,11 @@
             "description": "ACME directory URL for automatic Let's Encrypt certificates. Empty uses Let's Encrypt production.",
             "type": "string"
           },
+          "bucketTokenTtlMinutes": {
+            "description": "Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Default 720 (12 hours).",
+            "format": "int64",
+            "type": "integer"
+          },
           "createk8sPVC": {
             "description": "Indicates if k8s PVC should be created for workspaces.",
             "type": "boolean"
@@ -19147,6 +19194,25 @@
           "enableOnboarding": {
             "description": "Indicates if the onboarding flow is enabled for new users.",
             "type": "boolean"
+          },
+          "gcsHmacRotationEnabled": {
+            "description": "Whether GCS bucket HMAC keys are rotated automatically. Off by default: agents older than 7.78.0 never pick up a rotated key, so pair this with minimumAgentVersion.",
+            "type": "boolean"
+          },
+          "gcsHmacRotationGraceHours": {
+            "description": "Hours the previous GCS HMAC key stays active after rotation so mounts can refresh. Default 24.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "gcsHmacRotationMaxAgeHours": {
+            "description": "Age in hours after which a GCS bucket HMAC key is rotated. Default 720 (30 days).",
+            "format": "int64",
+            "type": "integer"
+          },
+          "gcsHmacRotationSweepMinutes": {
+            "description": "Minutes between GCS HMAC rotation sweeps. Default 60.",
+            "format": "int64",
+            "type": "integer"
           },
           "licenseExpiresAt": {
             "description": "The expiration date of the platform license, if valid.",
@@ -19234,7 +19300,12 @@
           "sentryTracesSampleRate",
           "sentryReplaysSampleRate",
           "stuckRunSweeperEnabled",
-          "quicTunnelEnabled"
+          "quicTunnelEnabled",
+          "bucketTokenTtlMinutes",
+          "gcsHmacRotationEnabled",
+          "gcsHmacRotationMaxAgeHours",
+          "gcsHmacRotationGraceHours",
+          "gcsHmacRotationSweepMinutes"
         ],
         "type": "object"
       },
@@ -26577,6 +26648,13 @@
             "description": "ACME directory URL for automatic certificates. Empty uses Let's Encrypt production.",
             "type": "string"
           },
+          "bucketTokenTtlMinutes": {
+            "description": "Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Minimum 15 (Vault's STS floor); maximum 720, since an Azure SAS must expire before its cached signing key does.",
+            "format": "int64",
+            "maximum": 720,
+            "minimum": 15,
+            "type": "integer"
+          },
           "createk8sPVC": {
             "description": "Whether to create a PVC for k8s workspaces.",
             "type": "boolean"
@@ -26596,6 +26674,31 @@
           "forgotPasswordEnabled": {
             "description": "Whether to enable the forgot password feature.",
             "type": "boolean"
+          },
+          "gcsHmacRotationEnabled": {
+            "description": "Whether GCS bucket HMAC keys are rotated automatically. Agents older than 7.78.0 never pick up a rotated key, so pair this with minimumAgentVersion.",
+            "type": "boolean"
+          },
+          "gcsHmacRotationGraceHours": {
+            "description": "Hours the previous GCS HMAC key stays active after rotation so mounts can refresh.",
+            "format": "int64",
+            "maximum": 8760,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "gcsHmacRotationMaxAgeHours": {
+            "description": "Age in hours after which a GCS bucket HMAC key is rotated.",
+            "format": "int64",
+            "maximum": 87600,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "gcsHmacRotationSweepMinutes": {
+            "description": "Minutes between GCS HMAC rotation sweeps.",
+            "format": "int64",
+            "maximum": 10080,
+            "minimum": 1,
+            "type": "integer"
           },
           "maintenanceMessage": {
             "description": "The maintenance message to show.",
@@ -55428,17 +55531,18 @@
             }
           },
           {
-            "description": "The expiration time in seconds for the pre-signed URL. Default is 12 hours.",
+            "description": "The expiration time in seconds for the pre-signed URL. Default and maximum is 12 hours.",
             "explode": false,
             "in": "query",
             "name": "expiresIn",
             "schema": {
               "default": 43200,
-              "description": "The expiration time in seconds for the pre-signed URL. Default is 12 hours.",
+              "description": "The expiration time in seconds for the pre-signed URL. Default and maximum is 12 hours.",
               "examples": [
                 43200
               ],
               "format": "int64",
+              "maximum": 43200,
               "type": "integer"
             }
           },

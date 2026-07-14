@@ -1253,12 +1253,18 @@ type AzureDiskVersionSettings struct {
 }
 
 type AzureFiles struct {
+	// The requesting user's access level for this bucket.
+	AccessMode string `json:"accessMode"`
 	// Resources the storage is attached to.
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
 	// Name of the Azure Files share
 	AzfilesName *string `json:"azfilesName,omitempty"`
 	// Name of the Azure resource group holding the storage account
 	AzureResourceGroup *string `json:"azureResourceGroup,omitempty"`
+	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)
+	CanGetCredentials bool `json:"canGetCredentials"`
+	// Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)
+	CanWrite bool `json:"canWrite"`
 	// Cloud service provider of the storage.
 	Csp string `json:"csp"`
 	// Indicates if the storage is currently being provisioned.
@@ -5552,6 +5558,12 @@ type NetworkRegion struct {
 }
 
 type Nfs struct {
+	// The requesting user's access level for this bucket.
+	AccessMode string `json:"accessMode"`
+	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)
+	CanGetCredentials bool `json:"canGetCredentials"`
+	// Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)
+	CanWrite bool `json:"canWrite"`
 	// Cloud service provider of the NFS
 	Csp string `json:"csp"`
 	// Display name of the NFS
@@ -6655,6 +6667,8 @@ type PlatformSettingsAdmin struct {
 	AcmeContactEmail *string `json:"acmeContactEmail,omitempty"`
 	// ACME directory URL for automatic Let's Encrypt certificates. Empty uses Let's Encrypt production.
 	AcmeDirectoryURL *string `json:"acmeDirectoryUrl,omitempty"`
+	// Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Default 720 (12 hours).
+	BucketTokenTtlMinutes int64 `json:"bucketTokenTtlMinutes"`
 	// Indicates if k8s PVC should be created for workspaces.
 	Createk8sPvc *bool `json:"createk8sPVC,omitempty"`
 	// Indicates if user files should be deleted when their account is deleted.
@@ -6662,6 +6676,14 @@ type PlatformSettingsAdmin struct {
 	DockerWorkspaceSettings *DockerWorkspaceSettings `json:"dockerWorkspaceSettings,omitempty"`
 	// Indicates if the onboarding flow is enabled for new users.
 	EnableOnboarding bool `json:"enableOnboarding"`
+	// Whether GCS bucket HMAC keys are rotated automatically. Off by default: agents older than 7.78.0 never pick up a rotated key, so pair this with minimumAgentVersion.
+	GcsHmacRotationEnabled bool `json:"gcsHmacRotationEnabled"`
+	// Hours the previous GCS HMAC key stays active after rotation so mounts can refresh. Default 24.
+	GcsHmacRotationGraceHours int64 `json:"gcsHmacRotationGraceHours"`
+	// Age in hours after which a GCS bucket HMAC key is rotated. Default 720 (30 days).
+	GcsHmacRotationMaxAgeHours int64 `json:"gcsHmacRotationMaxAgeHours"`
+	// Minutes between GCS HMAC rotation sweeps. Default 60.
+	GcsHmacRotationSweepMinutes int64 `json:"gcsHmacRotationSweepMinutes"`
 	// The expiration date of the platform license, if valid.
 	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
 	// License-level feature previews (e.g. selfService).
@@ -9208,6 +9230,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	AcmeContactEmail *string `json:"acmeContactEmail,omitempty"`
 	// ACME directory URL for automatic certificates. Empty uses Let's Encrypt production.
 	AcmeDirectoryURL *string `json:"acmeDirectoryUrl,omitempty"`
+	// Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Minimum 15 (Vault's STS floor); maximum 720, since an Azure SAS must expire before its cached signing key does.
+	BucketTokenTtlMinutes *int64 `json:"bucketTokenTtlMinutes,omitempty"`
 	// Whether to create a PVC for k8s workspaces.
 	Createk8sPvc *bool `json:"createk8sPVC,omitempty"`
 	// Whether to delete user files on account deletion.
@@ -9217,6 +9241,14 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	EnableOnboarding *bool `json:"enableOnboarding,omitempty"`
 	// Whether to enable the forgot password feature.
 	ForgotPasswordEnabled *bool `json:"forgotPasswordEnabled,omitempty"`
+	// Whether GCS bucket HMAC keys are rotated automatically. Agents older than 7.78.0 never pick up a rotated key, so pair this with minimumAgentVersion.
+	GcsHmacRotationEnabled *bool `json:"gcsHmacRotationEnabled,omitempty"`
+	// Hours the previous GCS HMAC key stays active after rotation so mounts can refresh.
+	GcsHmacRotationGraceHours *int64 `json:"gcsHmacRotationGraceHours,omitempty"`
+	// Age in hours after which a GCS bucket HMAC key is rotated.
+	GcsHmacRotationMaxAgeHours *int64 `json:"gcsHmacRotationMaxAgeHours,omitempty"`
+	// Minutes between GCS HMAC rotation sweeps.
+	GcsHmacRotationSweepMinutes *int64 `json:"gcsHmacRotationSweepMinutes,omitempty"`
 	// The maintenance message to show.
 	MaintenanceMessage *string `json:"maintenanceMessage,omitempty"`
 	// Whether to enable maintenance mode.

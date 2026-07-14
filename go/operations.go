@@ -8630,7 +8630,7 @@ func (c *Client) AddCorsRulesAzureAzfiles(ctx context.Context, organization stri
 
 // GetPresignedURLAzureAzfilesObjectParams contains optional parameters for the GetPresignedURLAzureAzfilesObject operation.
 type GetPresignedURLAzureAzfilesObjectParams struct {
-	// The expiration time in seconds for the pre-signed URL. Default is 12 hours.
+	// The expiration time in seconds for the pre-signed URL. Default and maximum is 12 hours.
 	ExpiresIn *int64 `json:"expiresIn,omitempty"`
 	// The permissions for the pre-signed URL. Default is read (r). Combine: r,w,d,c.
 	Permissions *string `json:"permissions,omitempty"`
