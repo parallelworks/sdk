@@ -6997,87 +6997,6 @@
         ],
         "type": "object"
       },
-      "CreateAdminNotificationBody": {
-        "additionalProperties": false,
-        "properties": {
-          "href": {
-            "description": "Optional URL to link the notification to",
-            "type": "string"
-          },
-          "level": {
-            "description": "Urgency level",
-            "enum": [
-              "info",
-              "alert"
-            ],
-            "type": "string"
-          },
-          "message": {
-            "description": "Optional notification message",
-            "type": "string"
-          },
-          "recipients": {
-            "description": "Usernames for the 'user' target, or the organization name for the 'organization' target",
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "subtype": {
-            "description": "Subtype of notification. Valid values depend on type.",
-            "type": "string"
-          },
-          "target": {
-            "description": "Recipient set: a single user, every member of an organization, or every user on the platform",
-            "enum": [
-              "user",
-              "organization",
-              "all"
-            ],
-            "type": "string"
-          },
-          "title": {
-            "description": "Notification title",
-            "minLength": 1,
-            "type": "string"
-          },
-          "type": {
-            "description": "Type of notification",
-            "enum": [
-              "workflow",
-              "scheduler",
-              "platform"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "type",
-          "subtype",
-          "title",
-          "target"
-        ],
-        "type": "object"
-      },
-      "CreateAdminNotificationResponseBody": {
-        "additionalProperties": false,
-        "properties": {
-          "failedToNotifyUsers": {
-            "description": "Usernames that did not receive the notification",
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          }
-        },
-        "type": "object"
-      },
       "CreateAlertBody": {
         "additionalProperties": false,
         "properties": {
@@ -7215,6 +7134,10 @@
           "oracleUserOcid": {
             "description": "Oracle Cloud user OCID",
             "type": "string"
+          },
+          "permissionCheck": {
+            "description": "When true, validate the credentials against the cloud provider before creating the account and fail if they are invalid or lack required permissions",
+            "type": "boolean"
           }
         },
         "required": [
@@ -7509,6 +7432,86 @@
           "peeredToPlatform",
           "natGateway"
         ],
+        "type": "object"
+      },
+      "CreateNotificationBody": {
+        "additionalProperties": false,
+        "properties": {
+          "href": {
+            "description": "Optional URL to link the notification to",
+            "type": "string"
+          },
+          "level": {
+            "description": "Urgency level",
+            "enum": [
+              "info",
+              "alert"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "description": "Optional notification message",
+            "type": "string"
+          },
+          "recipients": {
+            "description": "Usernames for the 'user' target, or the organization name for the 'organization' target",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "subtype": {
+            "description": "Subtype of notification. Valid values depend on type.",
+            "type": "string"
+          },
+          "target": {
+            "description": "Recipient set for platform-admin broadcasts: a single user, every member of an organization, or every user on the platform",
+            "enum": [
+              "user",
+              "organization",
+              "all"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "description": "Notification title",
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of notification",
+            "enum": [
+              "workflow",
+              "scheduler",
+              "platform"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "subtype",
+          "title"
+        ],
+        "type": "object"
+      },
+      "CreateNotificationResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "failedToNotifyUsers": {
+            "description": "Usernames that did not receive the notification",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
         "type": "object"
       },
       "CreateOrgAIProviderBody": {
@@ -9444,6 +9447,46 @@
         },
         "required": [
           "node"
+        ],
+        "type": "object"
+      },
+      "ExternalAuthMethodOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Authentication method ID",
+            "type": "string"
+          },
+          "name": {
+            "description": "Authentication method name",
+            "type": "string"
+          },
+          "type": {
+            "description": "Authentication method type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
+      "ExternalAuthOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "authMethod": {
+            "$ref": "#/components/schemas/ExternalAuthMethodOutput"
+          },
+          "externalId": {
+            "description": "External identifier for the authentication method",
+            "type": "string"
+          }
+        },
+        "required": [
+          "externalId",
+          "authMethod"
         ],
         "type": "object"
       },
@@ -25240,6 +25283,20 @@
         ],
         "type": "object"
       },
+      "SetExternalAuthInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "externalId": {
+            "description": "External identifier for the authentication method",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "externalId"
+        ],
+        "type": "object"
+      },
       "SetKubernetesIconOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -27921,6 +27978,50 @@
         },
         "required": [
           "value"
+        ],
+        "type": "object"
+      },
+      "UserHostBody": {
+        "additionalProperties": false,
+        "properties": {
+          "cloudAccountName": {
+            "description": "Name of the onboarding cloud account to provision hosts in",
+            "minLength": 1,
+            "type": "string"
+          },
+          "provider": {
+            "description": "Cloud service provider",
+            "enum": [
+              "aws",
+              "azure",
+              "google",
+              "openstack",
+              "oracle"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "cloudAccountName",
+          "provider"
+        ],
+        "type": "object"
+      },
+      "UserHostResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "cloudAccount": {
+            "description": "Cloud account the auto-provision policy targets",
+            "type": "string"
+          },
+          "provider": {
+            "description": "Cloud service provider for the auto-provision policy",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cloudAccount",
+          "provider"
         ],
         "type": "object"
       },
@@ -38031,17 +38132,15 @@
         "tags": [
           "Notifications"
         ]
-      }
-    },
-    "/api/notifications/admin": {
+      },
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nSends a notification to a user, every member of an organization, or every user on the platform.",
-        "operationId": "create-admin-notification",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates a notification. A platform-admin user broadcasts to a target user, organization, or all users.",
+        "operationId": "create-notification",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateAdminNotificationBody"
+                "$ref": "#/components/schemas/CreateNotificationBody"
               }
             }
           },
@@ -38052,7 +38151,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateAdminNotificationResponseBody"
+                  "$ref": "#/components/schemas/CreateNotificationResponseBody"
                 }
               }
             },
@@ -38069,7 +38168,7 @@
             "description": "Error"
           }
         },
-        "summary": "Create admin notification",
+        "summary": "Create notification",
         "tags": [
           "Notifications"
         ]
@@ -38436,6 +38535,48 @@
           }
         },
         "summary": "Get recommended resources",
+        "tags": [
+          "Onboarding"
+        ]
+      }
+    },
+    "/api/onboarding/user-host": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRecords the requesting user's choice to have a host provisioned in their onboarding cloud account. Provisioning is handled separately.",
+        "operationId": "post-onboarding-user-host",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserHostBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserHostResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Record user host provisioning choice",
         "tags": [
           "Onboarding"
         ]
@@ -58039,6 +58180,206 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/external-auth": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nLists the external authentication identifiers assigned to a user. Requires the org:users role.",
+        "operationId": "list-user-external-auth",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalAuthOutput"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List user external authentication",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/external-auth/{authMethod}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRemoves an external authentication identifier from a user. Requires the org:users role.",
+        "operationId": "delete-user-external-auth",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Authentication method ID",
+            "in": "path",
+            "name": "authMethod",
+            "required": true,
+            "schema": {
+              "description": "Authentication method ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete user external authentication",
+        "tags": [
+          "Users"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates or replaces an external authentication identifier for a user. Requires the org:users role.",
+        "operationId": "set-user-external-auth",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Authentication method ID",
+            "in": "path",
+            "name": "authMethod",
+            "required": true,
+            "schema": {
+              "description": "Authentication method ID",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetExternalAuthInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set user external authentication",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/google-bucket/{name}": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a Google bucket",
@@ -65660,16 +66001,6 @@
                 "desktop",
                 "endpoint"
               ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "Filter by subdomain/domain name.",
-            "explode": false,
-            "in": "query",
-            "name": "subdomain",
-            "schema": {
-              "description": "Filter by subdomain/domain name.",
               "type": "string"
             }
           }

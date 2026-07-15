@@ -3280,17 +3280,15 @@ func (c *Client) GetNotifications(ctx context.Context, opts ...GetNotificationsP
 	return &result, nil
 }
 
-// CreateAdminNotification - Create admin notification
+// CreateNotification - Create notification
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// > This is a platform-admin only route.
-//
-// Sends a notification to a user, every member of an organization, or every user on the platform.
-func (c *Client) CreateAdminNotification(ctx context.Context, body CreateAdminNotificationBody) (*CreateAdminNotificationResponseBody, error) {
-	path := "/api/notifications/admin"
+// Creates a notification. A platform-admin user broadcasts to a target user, organization, or all users.
+func (c *Client) CreateNotification(ctx context.Context, body CreateNotificationBody) (*CreateNotificationResponseBody, error) {
+	path := "/api/notifications"
 
-	var result CreateAdminNotificationResponseBody
+	var result CreateNotificationResponseBody
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -3435,6 +3433,21 @@ func (c *Client) GetRecommendedResources(ctx context.Context) (*RecommendedResou
 
 	var result RecommendedResourcesResponse
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PostOnboardingUserHost - Record user host provisioning choice
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Records the requesting user's choice to have a host provisioned in their onboarding cloud account. Provisioning is handled separately.
+func (c *Client) PostOnboardingUserHost(ctx context.Context, body UserHostBody) (*UserHostResponse, error) {
+	path := "/api/onboarding/user-host"
+
+	var result UserHostResponse
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9339,6 +9352,57 @@ func (c *Client) CreateDiskSnapshot(ctx context.Context, organization string, us
 	return &result, nil
 }
 
+// ListUserExternalAuth - List user external authentication
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Lists the external authentication identifiers assigned to a user. Requires the org:users role.
+func (c *Client) ListUserExternalAuth(ctx context.Context, organization string, user string) (*[]ExternalAuthOutput, error) {
+	path := "/api/organizations/{organization}/users/{user}/external-auth"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+
+	var result []ExternalAuthOutput
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetUserExternalAuth - Set user external authentication
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates or replaces an external authentication identifier for a user. Requires the org:users role.
+func (c *Client) SetUserExternalAuth(ctx context.Context, organization string, user string, authMethod string, body SetExternalAuthInputBody) error {
+	path := "/api/organizations/{organization}/users/{user}/external-auth/{authMethod}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "authMethod", authMethod)
+
+	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// DeleteUserExternalAuth - Delete user external authentication
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Removes an external authentication identifier from a user. Requires the org:users role.
+func (c *Client) DeleteUserExternalAuth(ctx context.Context, organization string, user string, authMethod string) error {
+	path := "/api/organizations/{organization}/users/{user}/external-auth/{authMethod}"
+	path = pathReplace(path, "organization", organization)
+	path = pathReplace(path, "user", user)
+	path = pathReplace(path, "authMethod", authMethod)
+
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetGoogleBucket - Get Storage: Google bucket
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -11575,8 +11639,6 @@ func (c *Client) GetSchedulerJobs(ctx context.Context, opts ...GetSchedulerJobsP
 type GetSessionsParams struct {
 	// Filter by session type.
 	Type *string `json:"type,omitempty"`
-	// Filter by subdomain/domain name.
-	Subdomain *string `json:"subdomain,omitempty"`
 }
 
 // GetSessions - Get sessions
@@ -11591,7 +11653,6 @@ func (c *Client) GetSessions(ctx context.Context, opts ...GetSessionsParams) (*[
 	if len(opts) > 0 {
 		params := opts[0]
 		addQueryParam(queryValues, "type", params.Type)
-		addQueryParam(queryValues, "subdomain", params.Subdomain)
 	}
 	if len(queryValues) > 0 {
 		path += "?" + queryValues.Encode()

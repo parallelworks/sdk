@@ -2480,32 +2480,6 @@ type CreateAPIKeyOutputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
-type CreateAdminNotificationBody struct {
-	// Optional URL to link the notification to
-	Href *string `json:"href,omitempty"`
-	// Urgency level
-	Level *string `json:"level,omitempty"`
-	// Optional notification message
-	Message *string `json:"message,omitempty"`
-	// Usernames for the 'user' target, or the organization name for the 'organization' target
-	Recipients []string `json:"recipients,omitempty"`
-	// Subtype of notification. Valid values depend on type.
-	Subtype string `json:"subtype"`
-	// Recipient set: a single user, every member of an organization, or every user on the platform
-	Target string `json:"target"`
-	// Notification title
-	Title string `json:"title"`
-	// Type of notification
-	Type                 string         `json:"type"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
-type CreateAdminNotificationResponseBody struct {
-	// Usernames that did not receive the notification
-	FailedToNotifyUsers  []string       `json:"failedToNotifyUsers,omitempty"`
-	AdditionalProperties map[string]any `json:"-,omitempty"`
-}
-
 type CreateAlertBody struct {
 	// Detailed alert text shown to users.
 	Message string `json:"message"`
@@ -2566,7 +2540,9 @@ type CreateCloudAccountBody struct {
 	// Oracle Cloud tenancy OCID
 	OracleTenancyOcid *string `json:"oracleTenancyOcid,omitempty"`
 	// Oracle Cloud user OCID
-	OracleUserOcid       *string        `json:"oracleUserOcid,omitempty"`
+	OracleUserOcid *string `json:"oracleUserOcid,omitempty"`
+	// When true, validate the credentials against the cloud provider before creating the account and fail if they are invalid or lack required permissions
+	PermissionCheck      *bool          `json:"permissionCheck,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -2670,6 +2646,32 @@ type CreateNetworkBody struct {
 	Regions []NetworkRegion `json:"regions"`
 	// Transit Gateway ID (required for private mode on AWS when peered to platform)
 	TransitGatewayID     string         `json:"transitGatewayId"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreateNotificationBody struct {
+	// Optional URL to link the notification to
+	Href *string `json:"href,omitempty"`
+	// Urgency level
+	Level *string `json:"level,omitempty"`
+	// Optional notification message
+	Message *string `json:"message,omitempty"`
+	// Usernames for the 'user' target, or the organization name for the 'organization' target
+	Recipients []string `json:"recipients,omitempty"`
+	// Subtype of notification. Valid values depend on type.
+	Subtype string `json:"subtype"`
+	// Recipient set for platform-admin broadcasts: a single user, every member of an organization, or every user on the platform
+	Target *string `json:"target,omitempty"`
+	// Notification title
+	Title string `json:"title"`
+	// Type of notification
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type CreateNotificationResponseBody struct {
+	// Usernames that did not receive the notification
+	FailedToNotifyUsers  []string       `json:"failedToNotifyUsers,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -3371,6 +3373,23 @@ type ExistingClusterWorkspaceMount struct {
 type ExistingLoginNode struct {
 	// Login node hostname.
 	Node                 string         `json:"node"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ExternalAuthMethodOutput struct {
+	// Authentication method ID
+	ID string `json:"id"`
+	// Authentication method name
+	Name string `json:"name"`
+	// Authentication method type
+	Type                 string         `json:"type"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ExternalAuthOutput struct {
+	AuthMethod ExternalAuthMethodOutput `json:"authMethod"`
+	// External identifier for the authentication method
+	ExternalID           string         `json:"externalId"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -8739,6 +8758,12 @@ type SetElasticClusterIconOutputBody struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type SetExternalAuthInputBody struct {
+	// External identifier for the authentication method
+	ExternalID           string         `json:"externalId"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type SetKubernetesIconOutputBody struct {
 	// SHA256 hex of the attached blob, or empty when a preset was applied.
 	Etag string `json:"etag"`
@@ -9721,6 +9746,22 @@ type UserGroupRef struct {
 	Display              *string        `json:"display,omitempty"`
 	Type                 *string        `json:"type,omitempty"`
 	Value                string         `json:"value"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UserHostBody struct {
+	// Name of the onboarding cloud account to provision hosts in
+	CloudAccountName string `json:"cloudAccountName"`
+	// Cloud service provider
+	Provider             string         `json:"provider"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type UserHostResponse struct {
+	// Cloud account the auto-provision policy targets
+	CloudAccount string `json:"cloudAccount"`
+	// Cloud service provider for the auto-provision policy
+	Provider             string         `json:"provider"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
