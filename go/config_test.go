@@ -284,6 +284,37 @@ func TestResolveIdentity_EnvVar(t *testing.T) {
 	}
 }
 
+func TestNewClientFromCredentialConfig_NoCredentialExplainsHowToAuthenticate(t *testing.T) {
+	t.Setenv("PW_API_KEY", "")
+	t.Setenv("PW_CONTEXT", "")
+	t.Setenv("PW_CREDENTIALS_DIR", t.TempDir())
+
+	path, err := DefaultCredentialConfigPath()
+	if err != nil {
+		t.Fatalf("DefaultCredentialConfigPath: %v", err)
+	}
+	cfg := &CredentialConfig{
+		Identities: map[string]Identity{
+			"empty": {Server: "cloud.parallel.works"},
+		},
+		CurrentIdentity: "empty",
+	}
+	if err := cfg.SaveTo(path); err != nil {
+		t.Fatalf("SaveTo: %v", err)
+	}
+
+	client, err := NewClientFromCredentialConfig()
+	if client != nil {
+		t.Fatal("expected no client")
+	}
+	if err != ErrNoCredentials {
+		t.Fatalf("got %v, want ErrNoCredentials", err)
+	}
+	if got, want := err.Error(), `you must first authenticate using "pw auth"`; got != want {
+		t.Errorf("error = %q, want %q", got, want)
+	}
+}
+
 func TestResolveIdentity_FlagOverridesEnvVar(t *testing.T) {
 	cfg := &CredentialConfig{
 		Identities: map[string]Identity{

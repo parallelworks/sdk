@@ -163,7 +163,7 @@ func (c *Client) Stream(ctx context.Context, method, path string, body io.Reader
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 			respBody, _ := io.ReadAll(resp.Body)
 			resp.Body.Close()
-			return nil, &APIError{StatusCode: resp.StatusCode, Status: resp.Status, Body: respBody}
+			return nil, parseErrorResponse(&APIError{StatusCode: resp.StatusCode, Status: resp.Status, Body: respBody})
 		}
 
 		return resp, nil

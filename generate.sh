@@ -70,7 +70,8 @@ if should_generate go; then
     go tool github.com/parallelworks/openapi-client-generator generate \
         -s sdk/openapi.json \
         -o sdk/go \
-        -p parallelworks
+        -p parallelworks \
+        --user-agent parallelworks-go-sdk/7
 
     cd "$SCRIPT_DIR/go"
     go mod tidy

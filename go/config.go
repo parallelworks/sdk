@@ -20,7 +20,7 @@ const (
 // Sentinel errors for config and context operations
 var (
 	ErrNoContextConfigured  = errors.New("no context configured; use 'pw auth' to authenticate")
-	ErrNoCredentials        = errors.New("no credential found in context")
+	ErrNoCredentials        = errors.New("you must first authenticate using \"pw auth\"")
 	ErrContextNotFound      = errors.New("context not found")
 	ErrContextAlreadyExists = errors.New("context already exists")
 	ErrCannotDeleteCurrent  = errors.New("cannot delete current context without --force")

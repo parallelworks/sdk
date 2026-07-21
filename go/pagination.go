@@ -2,6 +2,8 @@
 
 package parallelworks
 
+import "context"
+
 // PageIterator provides iteration over paginated API results.
 type PageIterator[T any] struct {
 	fetch      func(cursor string) ([]T, string, error)
@@ -56,5 +58,77 @@ func (it *PageIterator[T]) ForEach(fn func(T) error) error {
 				return err
 			}
 		}
+	}
+}
+
+// ListAdminEventsIter returns an iterator over paginated ListAdminEvents results.
+func (c *Client) ListAdminEventsIter(ctx context.Context, opts ...ListAdminEventsParams) *PageIterator[Event] {
+	return &PageIterator[Event]{
+		fetch: func(cursor string) ([]Event, string, error) {
+			p := ListAdminEventsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			if cursor != "" {
+				p.Cursor = &cursor
+			}
+			result, err := c.ListAdminEvents(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var next string
+			if result.NextCursor != nil {
+				next = *result.NextCursor
+			}
+			return result.Events, next, nil
+		},
+	}
+}
+
+// ListResourceEventsIter returns an iterator over paginated ListResourceEvents results.
+func (c *Client) ListResourceEventsIter(ctx context.Context, targetType string, targetID string, opts ...ListResourceEventsParams) *PageIterator[Event] {
+	return &PageIterator[Event]{
+		fetch: func(cursor string) ([]Event, string, error) {
+			p := ListResourceEventsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			if cursor != "" {
+				p.Cursor = &cursor
+			}
+			result, err := c.ListResourceEvents(ctx, targetType, targetID, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var next string
+			if result.NextCursor != nil {
+				next = *result.NextCursor
+			}
+			return result.Events, next, nil
+		},
+	}
+}
+
+// ListOrganizationEventsIter returns an iterator over paginated ListOrganizationEvents results.
+func (c *Client) ListOrganizationEventsIter(ctx context.Context, organization string, opts ...ListOrganizationEventsParams) *PageIterator[Event] {
+	return &PageIterator[Event]{
+		fetch: func(cursor string) ([]Event, string, error) {
+			p := ListOrganizationEventsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			if cursor != "" {
+				p.Cursor = &cursor
+			}
+			result, err := c.ListOrganizationEvents(ctx, organization, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var next string
+			if result.NextCursor != nil {
+				next = *result.NextCursor
+			}
+			return result.Events, next, nil
+		},
 	}
 }

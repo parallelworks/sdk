@@ -28,7 +28,7 @@ func NewClient(baseURL string, opts ...ClientOption) *Client {
 	c := &Client{
 		baseURL:    strings.TrimRight(baseURL, "/"),
 		httpClient: http.DefaultClient,
-		userAgent:  "openapi-client-generator/1.0",
+		userAgent:  "parallelworks-go-sdk/7",
 	}
 	for _, opt := range opts {
 		opt(c)

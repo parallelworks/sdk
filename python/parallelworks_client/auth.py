@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 # Prefix for Parallel Works API keys
 API_KEY_PREFIX = "pwt_"
 
+USER_AGENT = "parallelworks-python-sdk/0"
+
 
 class CredentialError(Exception):
     """Raised when a credential cannot be parsed."""
@@ -306,6 +308,7 @@ class Client:
         return {
             "Authorization": self._config.auth_header,
             "Content-Type": "application/json",
+            "User-Agent": USER_AGENT,
         }
 
     # Async client methods
@@ -380,6 +383,7 @@ class SyncClient:
         return {
             "Authorization": self._config.auth_header,
             "Content-Type": "application/json",
+            "User-Agent": USER_AGENT,
         }
 
     def __enter__(self) -> SyncClient:

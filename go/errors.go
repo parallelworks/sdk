@@ -33,20 +33,23 @@ type APIError struct {
 }
 
 func (e *APIError) Error() string {
-	// Status already carries the code (e.g. "409 Conflict"); reconstruct it from StatusCode for the
-	// sentinel errors, which set only StatusCode, so the code is never printed twice.
-	status := e.Status
-	if status == "" {
-		if text := http.StatusText(e.StatusCode); text != "" {
-			status = fmt.Sprintf("%d %s", e.StatusCode, text)
-		} else {
-			status = fmt.Sprintf("%d", e.StatusCode)
-		}
-	}
 	if len(e.Body) > 0 {
-		return fmt.Sprintf("API error %s: %s", status, e.Body)
+		return fmt.Sprintf("API error %s: %s", e.statusLabel(), e.Body)
 	}
-	return fmt.Sprintf("API error %s", status)
+	return fmt.Sprintf("API error %s", e.statusLabel())
+}
+
+// statusLabel reconstructs the label from StatusCode for the sentinel errors,
+// which set only StatusCode; Status already carries the code (e.g. "409
+// Conflict"), so the code is never printed twice.
+func (e *APIError) statusLabel() string {
+	if e.Status != "" {
+		return e.Status
+	}
+	if text := http.StatusText(e.StatusCode); text != "" {
+		return fmt.Sprintf("%d %s", e.StatusCode, text)
+	}
+	return fmt.Sprintf("%d", e.StatusCode)
 }
 
 // Is supports errors.Is by matching on status code.
@@ -65,6 +68,9 @@ type ErrorResponse struct {
 }
 
 func (e *ErrorResponse) Error() string {
+	if e.Detail.Message != "" {
+		return fmt.Sprintf("API error %s: %s", e.statusLabel(), e.Detail.Message)
+	}
 	return e.APIError.Error()
 }
 
