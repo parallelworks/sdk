@@ -26126,6 +26126,16 @@
               "null"
             ]
           },
+          "defaultClusters": {
+            "description": "Slugs of marketplace compute items automatically added to each new organization user's account at creation",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "resourcesStepEnabled": {
             "description": "Whether the onboarding Resources step is shown to new users. Defaults to true.",
             "type": "boolean"
@@ -26147,7 +26157,8 @@
         },
         "required": [
           "compute",
-          "workflows"
+          "workflows",
+          "defaultClusters"
         ],
         "type": "object"
       },
@@ -64980,6 +64991,75 @@
           }
         },
         "summary": "Provision Storage: Google Bucket",
+        "tags": [
+          "Buckets",
+          "Storage"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/google-bucket/{name}/cors-rules": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds CORS rules to a Google Cloud Storage bucket.",
+        "operationId": "add-cors-rules-google-bucket",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add CORS rules to Google bucket",
         "tags": [
           "Buckets",
           "Storage"

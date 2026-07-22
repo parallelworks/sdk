@@ -8997,6 +8997,8 @@ type RecommendedResource struct {
 type RecommendedResourcesBody struct {
 	// Slugs of marketplace compute items recommended to new users during onboarding
 	Compute []string `json:"compute"`
+	// Slugs of marketplace compute items automatically added to each new organization user's account at creation
+	DefaultClusters []string `json:"defaultClusters"`
 	// Whether the onboarding Resources step is shown to new users. Defaults to true.
 	ResourcesStepEnabled *bool `json:"resourcesStepEnabled,omitempty"`
 	// Slugs of marketplace workflow items recommended to new users during onboarding

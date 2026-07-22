@@ -9976,6 +9976,22 @@ func (c *Client) ProvisionGoogleBucket(ctx context.Context, organization string,
 	return &result, nil
 }
 
+// AddCorsRulesGoogleBucket - Add CORS rules to Google bucket
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds CORS rules to a Google Cloud Storage bucket.
+func (c *Client) AddCorsRulesGoogleBucket(ctx context.Context, organization string, user string, name string) error {
+	path := "/api/organizations/{organization}/users/{user}/google-bucket/{name}/cors-rules"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetPresignedURLGoogleBucketObjectParams contains the parameters for the GetPresignedURLGoogleBucketObject operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetPresignedURLGoogleBucketObjectParams struct {
