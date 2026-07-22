@@ -2090,7 +2090,7 @@ type ChatCompletionRequest struct {
 	ParallelToolCalls *bool `json:"parallel_tool_calls,omitempty"`
 	// Presence penalty (-2 to 2)
 	PresencePenalty *float64 `json:"presence_penalty,omitempty"`
-	// Reasoning effort level (low/medium/high) for reasoning models
+	// Reasoning effort level (none/minimal/low/medium/high/xhigh/max) for reasoning models
 	ReasoningEffort *string         `json:"reasoning_effort,omitempty"`
 	ResponseFormat  *ResponseFormat `json:"response_format,omitempty"`
 	// Random seed for deterministic output
@@ -5900,6 +5900,7 @@ type ModelEntry struct {
 	ProviderName         *string        `json:"provider_name,omitempty"`
 	ProviderOwner        *string        `json:"provider_owner,omitempty"`
 	ProviderType         *string        `json:"provider_type,omitempty"`
+	ReasoningEfforts     []string       `json:"reasoning_efforts,omitempty"`
 	SupportsResponses    *bool          `json:"supports_responses,omitempty"`
 	SupportsUsage        *bool          `json:"supports_usage,omitempty"`
 	ToolCallingMode      string         `json:"tool_calling_mode"`
@@ -7272,6 +7273,8 @@ type PlatformSettings struct {
 	// Indicates the onboarding wizard should offer the cloud-account step (self-service org owners). Only returned when true.
 	OrgOnboarding *bool  `json:"orgOnboarding,omitempty"`
 	OrgTheme      *Theme `json:"orgTheme,omitempty"`
+	// Ordered products-sidebar pins. A provided array replaces the stored one.
+	Pins []UserPin `json:"pins,omitempty"`
 	// The display name of the platform.
 	PlatformName *string `json:"platformName,omitempty"`
 	// Platform-wide enabled previews.
@@ -10581,6 +10584,18 @@ type UserHostResponse struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type UserPin struct {
+	Icon                 *string        `json:"icon,omitempty"`
+	ID                   string         `json:"id"`
+	Label                *string        `json:"label,omitempty"`
+	Name                 *string        `json:"name,omitempty"`
+	Namespace            *string        `json:"namespace,omitempty"`
+	PageID               *string        `json:"pageId,omitempty"`
+	ResourceType         *string        `json:"resourceType,omitempty"`
+	Type                 *string        `json:"type,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type UserProfile struct {
 	// Cache-buster for the user's avatar image.
 	AvatarEtag *string `json:"avatarEtag,omitempty"`
@@ -10624,6 +10639,8 @@ type UserResource struct {
 type UserSettings struct {
 	// User's preferred language
 	Language *string `json:"language,omitempty"`
+	// Ordered products-sidebar pins. A provided array replaces the stored one.
+	Pins []UserPin `json:"pins,omitempty"`
 	// Terminal font size
 	TerminalFontSize *int64 `json:"terminalFontSize,omitempty"`
 	// Terminal theme

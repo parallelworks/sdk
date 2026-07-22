@@ -6056,7 +6056,7 @@
             "type": "number"
           },
           "reasoning_effort": {
-            "description": "Reasoning effort level (low/medium/high) for reasoning models",
+            "description": "Reasoning effort level (none/minimal/low/medium/high/xhigh/max) for reasoning models",
             "type": "string"
           },
           "response_format": {
@@ -17166,6 +17166,15 @@
           "provider_type": {
             "type": "string"
           },
+          "reasoning_efforts": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "supports_responses": {
             "type": "boolean"
           },
@@ -21116,6 +21125,13 @@
           "orgTheme": {
             "$ref": "#/components/schemas/Theme",
             "description": "The theme settings for the organization, if applicable. Only returned if the user is authenticated."
+          },
+          "pins": {
+            "description": "Ordered products-sidebar pins. A provided array replaces the stored one.",
+            "items": {
+              "$ref": "#/components/schemas/UserPin"
+            },
+            "type": "array"
           },
           "platformName": {
             "description": "The display name of the platform.",
@@ -30542,6 +30558,39 @@
         ],
         "type": "object"
       },
+      "UserPin": {
+        "additionalProperties": false,
+        "properties": {
+          "icon": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "pageId": {
+            "type": "string"
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
       "UserProfile": {
         "additionalProperties": false,
         "properties": {
@@ -30674,6 +30723,13 @@
               "en"
             ],
             "type": "string"
+          },
+          "pins": {
+            "description": "Ordered products-sidebar pins. A provided array replaces the stored one.",
+            "items": {
+              "$ref": "#/components/schemas/UserPin"
+            },
+            "type": "array"
           },
           "terminalFontSize": {
             "description": "Terminal font size",
