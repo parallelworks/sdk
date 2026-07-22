@@ -1164,6 +1164,31 @@ type AwsSagemakerDetail struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type AwsSlurmDefinition struct {
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	// Admin-set provisioning debug flag.
+	DebugMode            *bool                      `json:"debugMode,omitempty"`
+	DesktopSession       *DesktopSessionSettings    `json:"desktopSession,omitempty"`
+	Disks                []ClusterNodeDisk          `json:"disks,omitempty"`
+	HealthCheck          *string                    `json:"healthCheck,omitempty"`
+	Partitions           []ClusterAwsSlurmPartition `json:"partitions,omitempty"`
+	Region               *string                    `json:"region,omitempty"`
+	RootSize             *int64                     `json:"rootSize,omitempty"`
+	SlurmResumeTimeout   *int64                     `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64                     `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64                     `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64                     `json:"slurmSuspendTimeout,omitempty"`
+	// Subtype discriminator.
+	Subtype                 string         `json:"subtype"`
+	UserBootstrap           *string        `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool          `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool          `json:"userBootstrapController,omitempty"`
+	Zone                    *string        `json:"zone,omitempty"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
+}
+
 type AwsSlurmPartition struct {
 	Architecture          *string        `json:"architecture,omitempty"`
 	CapacityBlock         *bool          `json:"capacityBlock,omitempty"`
@@ -1634,6 +1659,31 @@ type AzureSasToken struct {
 	// The URL of the storage bucket with the SAS token appended in the query parameters.
 	URL                  string         `json:"url"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type AzureSlurmDefinition struct {
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	// Admin-set provisioning debug flag.
+	DebugMode            *bool                        `json:"debugMode,omitempty"`
+	DesktopSession       *DesktopSessionSettings      `json:"desktopSession,omitempty"`
+	Disks                []ClusterNodeDisk            `json:"disks,omitempty"`
+	HealthCheck          *string                      `json:"healthCheck,omitempty"`
+	Partitions           []ClusterAzureSlurmPartition `json:"partitions,omitempty"`
+	Region               *string                      `json:"region,omitempty"`
+	RootSize             *int64                       `json:"rootSize,omitempty"`
+	SlurmResumeTimeout   *int64                       `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64                       `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64                       `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64                       `json:"slurmSuspendTimeout,omitempty"`
+	// Subtype discriminator.
+	Subtype                 string         `json:"subtype"`
+	UserBootstrap           *string        `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool          `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool          `json:"userBootstrapController,omitempty"`
+	Zone                    *string        `json:"zone,omitempty"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
 }
 
 type AzureSlurmPartition struct {
@@ -2340,6 +2390,45 @@ type CloudImage struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ClusterAwsSlurmPartition struct {
+	Architecture          *string           `json:"architecture,omitempty"`
+	CapacityBlock         *bool             `json:"capacityBlock,omitempty"`
+	CapacityReservation   *bool             `json:"capacityReservation,omitempty"`
+	CapacityReservationID *string           `json:"capacityReservationId,omitempty"`
+	Default               *bool             `json:"default,omitempty"`
+	Disks                 []ClusterNodeDisk `json:"disks,omitempty"`
+	ElasticImage          *string           `json:"elasticImage,omitempty"`
+	InstanceType          *string           `json:"instanceType,omitempty"`
+	MaxNodes              *int64            `json:"maxNodes,omitempty"`
+	MultiZone             *bool             `json:"multiZone,omitempty"`
+	Name                  *string           `json:"name,omitempty"`
+	PlacementGroup        *string           `json:"placementGroup,omitempty"`
+	Preemptible           *bool             `json:"preemptible,omitempty"`
+	ProvisioningMode      *string           `json:"provisioningMode,omitempty"`
+	SuspendTime           *int64            `json:"suspendTime,omitempty"`
+	UsePlacementGroup     *bool             `json:"usePlacementGroup,omitempty"`
+	Zone                  *string           `json:"zone,omitempty"`
+	Zones                 []string          `json:"zones,omitempty"`
+	AdditionalProperties  map[string]any    `json:"-,omitempty"`
+}
+
+type ClusterAzureSlurmPartition struct {
+	Architecture         *string           `json:"architecture,omitempty"`
+	Default              *bool             `json:"default,omitempty"`
+	Disks                []ClusterNodeDisk `json:"disks,omitempty"`
+	ElasticImage         *string           `json:"elasticImage,omitempty"`
+	InstanceType         *string           `json:"instanceType,omitempty"`
+	MaxNodes             *int64            `json:"maxNodes,omitempty"`
+	Name                 *string           `json:"name,omitempty"`
+	Preemptible          *bool             `json:"preemptible,omitempty"`
+	ProvisioningMode     *string           `json:"provisioningMode,omitempty"`
+	Reservation          *bool             `json:"reservation,omitempty"`
+	ReservationID        *string           `json:"reservationId,omitempty"`
+	SuspendTime          *int64            `json:"suspendTime,omitempty"`
+	Zone                 *string           `json:"zone,omitempty"`
+	AdditionalProperties map[string]any    `json:"-,omitempty"`
+}
+
 type ClusterDisk struct {
 	Encrypted            *bool          `json:"encrypted,omitempty"`
 	Iops                 *int64         `json:"iops,omitempty"`
@@ -2358,6 +2447,34 @@ type ClusterError struct {
 	// Error message
 	Error                string         `json:"error"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ClusterGoogleSlurmPartition struct {
+	Architecture         *string           `json:"architecture,omitempty"`
+	Default              *bool             `json:"default,omitempty"`
+	Disks                []ClusterNodeDisk `json:"disks,omitempty"`
+	ElasticImage         *string           `json:"elasticImage,omitempty"`
+	FlexStartWaitTime    *int64            `json:"flexStartWaitTime,omitempty"`
+	GpuCount             *int64            `json:"gpuCount,omitempty"`
+	GpuType              *string           `json:"gpuType,omitempty"`
+	InstanceType         *string           `json:"instanceType,omitempty"`
+	MaxDistance          *string           `json:"maxDistance,omitempty"`
+	MaxDuration          *int64            `json:"maxDuration,omitempty"`
+	MaxNodes             *int64            `json:"maxNodes,omitempty"`
+	MultiZone            *bool             `json:"multiZone,omitempty"`
+	Name                 *string           `json:"name,omitempty"`
+	Os                   *string           `json:"os,omitempty"`
+	PlacementGroup       *string           `json:"placementGroup,omitempty"`
+	Preemptible          *bool             `json:"preemptible,omitempty"`
+	ProvisioningMode     *string           `json:"provisioningMode,omitempty"`
+	Reservation          *bool             `json:"reservation,omitempty"`
+	ReservationID        *string           `json:"reservationId,omitempty"`
+	SuspendTime          *int64            `json:"suspendTime,omitempty"`
+	Tier1                *bool             `json:"tier1,omitempty"`
+	UsePlacementGroup    *bool             `json:"usePlacementGroup,omitempty"`
+	Zone                 *string           `json:"zone,omitempty"`
+	Zones                []string          `json:"zones,omitempty"`
+	AdditionalProperties map[string]any    `json:"-,omitempty"`
 }
 
 type ClusterMetricsDataPoint struct {
@@ -2380,6 +2497,19 @@ type ClusterMetricsDataPoint struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type ClusterNodeDisk struct {
+	Encrypted  *bool   `json:"encrypted,omitempty"`
+	Iops       *int64  `json:"iops,omitempty"`
+	MountPoint *string `json:"mountPoint,omitempty"`
+	NfsExport  *bool   `json:"nfsExport,omitempty"`
+	SizeGb     *int64  `json:"sizeGb,omitempty"`
+	// Platform snapshot id the disk is restored from; empty when the disk starts blank.
+	Snapshot             *string        `json:"snapshot,omitempty"`
+	Throughput           *int64         `json:"throughput,omitempty"`
+	Type                 *string        `json:"type,omitempty"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
 type ClusterNodeResponse struct {
 	// The node creation timestamp
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
@@ -2396,6 +2526,33 @@ type ClusterNodeResponse struct {
 	// The node type
 	Type                 string         `json:"type"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type ClusterOpenstackSlurmPartition struct {
+	Architecture         *string           `json:"architecture,omitempty"`
+	AssociateFloatingIP  *bool             `json:"associateFloatingIp,omitempty"`
+	Default              *bool             `json:"default,omitempty"`
+	Disks                []ClusterNodeDisk `json:"disks,omitempty"`
+	ElasticImage         *string           `json:"elasticImage,omitempty"`
+	InstanceType         *string           `json:"instanceType,omitempty"`
+	MaxNodes             *int64            `json:"maxNodes,omitempty"`
+	Name                 *string           `json:"name,omitempty"`
+	AdditionalProperties map[string]any    `json:"-,omitempty"`
+}
+
+type ClusterOracleSlurmPartition struct {
+	Architecture         *string           `json:"architecture,omitempty"`
+	Default              *bool             `json:"default,omitempty"`
+	Disks                []ClusterNodeDisk `json:"disks,omitempty"`
+	ElasticImage         *string           `json:"elasticImage,omitempty"`
+	InstanceType         *string           `json:"instanceType,omitempty"`
+	MaxNodes             *int64            `json:"maxNodes,omitempty"`
+	MemoryGb             *int64            `json:"memoryGb,omitempty"`
+	Name                 *string           `json:"name,omitempty"`
+	Ocpus                *int64            `json:"ocpus,omitempty"`
+	SuspendTime          *int64            `json:"suspendTime,omitempty"`
+	Zone                 *string           `json:"zone,omitempty"`
+	AdditionalProperties map[string]any    `json:"-,omitempty"`
 }
 
 type ClusterResponse struct {
@@ -3465,8 +3622,10 @@ type DeltaMessage struct {
 }
 
 type DeploymentIdentity struct {
-	// Build-specific version of the deployed service artifacts.
+	// Deprecated alias for buildVersion.
 	ArtifactVersion string `json:"artifactVersion"`
+	// Channel-neutral build version of the deployed service artifacts.
+	BuildVersion string `json:"buildVersion"`
 	// User-facing version of the release.
 	ReleaseVersion string `json:"releaseVersion"`
 	// Source commit used to build the deployed service artifacts.
@@ -3831,6 +3990,25 @@ type ExistingCluster struct {
 	User                 string                   `json:"user"`
 	Variables            ExistingClusterVariables `json:"variables"`
 	AdditionalProperties map[string]any           `json:"-,omitempty"`
+}
+
+type ExistingClusterDefinition struct {
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Jump (bastion) host.
+	JumpNodeHost *string `json:"jumpNodeHost,omitempty"`
+	// Jump (bastion) user.
+	JumpNodeUser *string `json:"jumpNodeUser,omitempty"`
+	// Scheduler type, e.g. slurm.
+	SchedulerType *string `json:"schedulerType,omitempty"`
+	// Login nodes.
+	SlurmLoginNodes []PoolSlurmLoginNode `json:"slurmLoginNodes,omitempty"`
+	// SLURM username (supports __USER__).
+	SlurmUsername *string `json:"slurmUsername,omitempty"`
+	// Subtype discriminator.
+	Subtype string `json:"subtype"`
+	// Cluster directories mounted into the user workspace.
+	WorkspaceMounts      []PoolWorkspaceMount `json:"workspaceMounts,omitempty"`
+	AdditionalProperties map[string]any       `json:"-,omitempty"`
 }
 
 type ExistingClusterLoginNode struct {
@@ -4412,6 +4590,32 @@ type GoogleManagedLustreVersionSettings struct {
 	Subtype              string         `json:"subtype"`
 	Zone                 *string        `json:"zone,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type GoogleSlurmDefinition struct {
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	ControllerTier1        *bool   `json:"controllerTier1,omitempty"`
+	// Admin-set provisioning debug flag.
+	DebugMode            *bool                         `json:"debugMode,omitempty"`
+	DesktopSession       *DesktopSessionSettings       `json:"desktopSession,omitempty"`
+	Disks                []ClusterNodeDisk             `json:"disks,omitempty"`
+	HealthCheck          *string                       `json:"healthCheck,omitempty"`
+	Partitions           []ClusterGoogleSlurmPartition `json:"partitions,omitempty"`
+	Region               *string                       `json:"region,omitempty"`
+	RootSize             *int64                        `json:"rootSize,omitempty"`
+	SlurmResumeTimeout   *int64                        `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64                        `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64                        `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64                        `json:"slurmSuspendTimeout,omitempty"`
+	// Subtype discriminator.
+	Subtype                 string         `json:"subtype"`
+	UserBootstrap           *string        `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool          `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool          `json:"userBootstrapController,omitempty"`
+	Zone                    *string        `json:"zone,omitempty"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
 }
 
 type GoogleSlurmPartition struct {
@@ -6469,6 +6673,30 @@ type OpenstackNet struct {
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
+type OpenstackSlurmDefinition struct {
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	// Admin-set provisioning debug flag.
+	DebugMode            *bool                            `json:"debugMode,omitempty"`
+	DesktopSession       *DesktopSessionSettings          `json:"desktopSession,omitempty"`
+	FloatingIPNetwork    *string                          `json:"floatingIpNetwork,omitempty"`
+	HealthCheck          *string                          `json:"healthCheck,omitempty"`
+	NetworkID            *string                          `json:"networkId,omitempty"`
+	Partitions           []ClusterOpenstackSlurmPartition `json:"partitions,omitempty"`
+	Region               *string                          `json:"region,omitempty"`
+	SlurmResumeTimeout   *int64                           `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64                           `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64                           `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64                           `json:"slurmSuspendTimeout,omitempty"`
+	// Subtype discriminator.
+	Subtype                 string         `json:"subtype"`
+	UserBootstrap           *string        `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool          `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool          `json:"userBootstrapController,omitempty"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
+}
+
 type OpenstackSlurmPartition struct {
 	Architecture           *string        `json:"architecture,omitempty"`
 	AssociateFloatingIP    *bool          `json:"associateFloatingIp,omitempty"`
@@ -6655,6 +6883,32 @@ type OracleOraclefsVersionSettings struct {
 	// Subtype discriminator.
 	Subtype              string         `json:"subtype"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OracleSlurmDefinition struct {
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	ControllerMemoryGb     *int64  `json:"controllerMemoryGb,omitempty"`
+	ControllerOcpus        *int64  `json:"controllerOcpus,omitempty"`
+	// Admin-set provisioning debug flag.
+	DebugMode            *bool                         `json:"debugMode,omitempty"`
+	DesktopSession       *DesktopSessionSettings       `json:"desktopSession,omitempty"`
+	HealthCheck          *string                       `json:"healthCheck,omitempty"`
+	Partitions           []ClusterOracleSlurmPartition `json:"partitions,omitempty"`
+	Region               *string                       `json:"region,omitempty"`
+	RootSize             *int64                        `json:"rootSize,omitempty"`
+	SlurmResumeTimeout   *int64                        `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64                        `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64                        `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64                        `json:"slurmSuspendTimeout,omitempty"`
+	// Subtype discriminator.
+	Subtype                 string         `json:"subtype"`
+	UserBootstrap           *string        `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool          `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool          `json:"userBootstrapController,omitempty"`
+	Zone                    *string        `json:"zone,omitempty"`
+	AdditionalProperties    map[string]any `json:"-,omitempty"`
 }
 
 type OracleSlurmPartition struct {
@@ -7462,6 +7716,17 @@ type Policy struct {
 
 type PollOrgCodexAuthorizationOutputBody struct {
 	Status               string         `json:"status"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PoolSlurmLoginNode struct {
+	Node                 *string        `json:"node"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type PoolWorkspaceMount struct {
+	ClusterPath          *string        `json:"clusterPath"`
+	WorkspacePath        *string        `json:"workspacePath"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 

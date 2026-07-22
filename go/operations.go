@@ -9306,6 +9306,23 @@ func (c *Client) UpgradeClusterAgent(ctx context.Context, organization string, u
 	return &result, nil
 }
 
+// GetClusterDefinition - Get Cluster Definition
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a cloud or existing cluster's typed configuration variables as a per-CSP discriminated union.
+func (c *Client) GetClusterDefinition(ctx context.Context, organization string, user string, clusterName string) (*any, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/definition"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	var result any
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // UpdateClusterDeployment - Update cluster deployment
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.

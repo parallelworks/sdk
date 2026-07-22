@@ -3176,6 +3176,90 @@
         ],
         "type": "object"
       },
+      "AwsSlurmDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "controllerImage": {
+            "type": "string"
+          },
+          "controllerInstanceType": {
+            "type": "string"
+          },
+          "debugMode": {
+            "description": "Admin-set provisioning debug flag.",
+            "type": "boolean"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
+          "disks": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterNodeDisk"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "healthCheck": {
+            "type": "string"
+          },
+          "partitions": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterAwsSlurmPartition"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "region": {
+            "type": "string"
+          },
+          "rootSize": {
+            "type": "integer"
+          },
+          "slurmResumeTimeout": {
+            "type": "integer"
+          },
+          "slurmReturnToService": {
+            "type": "integer"
+          },
+          "slurmSuspendTime": {
+            "type": "integer"
+          },
+          "slurmSuspendTimeout": {
+            "type": "integer"
+          },
+          "subtype": {
+            "description": "Subtype discriminator.",
+            "enum": [
+              "aws-slurm"
+            ],
+            "type": "string"
+          },
+          "userBootstrap": {
+            "type": "string"
+          },
+          "userBootstrapCompute": {
+            "type": "boolean"
+          },
+          "userBootstrapController": {
+            "type": "boolean"
+          },
+          "zone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "subtype"
+        ],
+        "type": "object"
+      },
       "AwsSlurmPartition": {
         "additionalProperties": false,
         "properties": {
@@ -4517,6 +4601,90 @@
           "url",
           "storageName",
           "expiry"
+        ],
+        "type": "object"
+      },
+      "AzureSlurmDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "controllerImage": {
+            "type": "string"
+          },
+          "controllerInstanceType": {
+            "type": "string"
+          },
+          "debugMode": {
+            "description": "Admin-set provisioning debug flag.",
+            "type": "boolean"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
+          "disks": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterNodeDisk"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "healthCheck": {
+            "type": "string"
+          },
+          "partitions": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterAzureSlurmPartition"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "region": {
+            "type": "string"
+          },
+          "rootSize": {
+            "type": "integer"
+          },
+          "slurmResumeTimeout": {
+            "type": "integer"
+          },
+          "slurmReturnToService": {
+            "type": "integer"
+          },
+          "slurmSuspendTime": {
+            "type": "integer"
+          },
+          "slurmSuspendTimeout": {
+            "type": "integer"
+          },
+          "subtype": {
+            "description": "Subtype discriminator.",
+            "enum": [
+              "azure-slurm"
+            ],
+            "type": "string"
+          },
+          "userBootstrap": {
+            "type": "string"
+          },
+          "userBootstrapCompute": {
+            "type": "boolean"
+          },
+          "userBootstrapController": {
+            "type": "boolean"
+          },
+          "zone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "subtype"
         ],
         "type": "object"
       },
@@ -6764,6 +6932,129 @@
         ],
         "type": "object"
       },
+      "ClusterAwsSlurmPartition": {
+        "additionalProperties": false,
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "capacityBlock": {
+            "type": "boolean"
+          },
+          "capacityReservation": {
+            "type": "boolean"
+          },
+          "capacityReservationId": {
+            "type": "string"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "disks": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterNodeDisk"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "elasticImage": {
+            "type": "string"
+          },
+          "instanceType": {
+            "type": "string"
+          },
+          "maxNodes": {
+            "type": "integer"
+          },
+          "multiZone": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "placementGroup": {
+            "type": "string"
+          },
+          "preemptible": {
+            "type": "boolean"
+          },
+          "provisioningMode": {
+            "type": "string"
+          },
+          "suspendTime": {
+            "type": "integer"
+          },
+          "usePlacementGroup": {
+            "type": "boolean"
+          },
+          "zone": {
+            "type": "string"
+          },
+          "zones": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "ClusterAzureSlurmPartition": {
+        "additionalProperties": false,
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "disks": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterNodeDisk"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "elasticImage": {
+            "type": "string"
+          },
+          "instanceType": {
+            "type": "string"
+          },
+          "maxNodes": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "preemptible": {
+            "type": "boolean"
+          },
+          "provisioningMode": {
+            "type": "string"
+          },
+          "reservation": {
+            "type": "boolean"
+          },
+          "reservationId": {
+            "type": "string"
+          },
+          "suspendTime": {
+            "type": "integer"
+          },
+          "zone": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ClusterDisk": {
         "additionalProperties": false,
         "properties": {
@@ -6819,6 +7110,96 @@
           "cluster",
           "error"
         ],
+        "type": "object"
+      },
+      "ClusterGoogleSlurmPartition": {
+        "additionalProperties": false,
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "disks": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterNodeDisk"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "elasticImage": {
+            "type": "string"
+          },
+          "flexStartWaitTime": {
+            "type": "integer"
+          },
+          "gpuCount": {
+            "type": "integer"
+          },
+          "gpuType": {
+            "type": "string"
+          },
+          "instanceType": {
+            "type": "string"
+          },
+          "maxDistance": {
+            "type": "string"
+          },
+          "maxDuration": {
+            "type": "integer"
+          },
+          "maxNodes": {
+            "type": "integer"
+          },
+          "multiZone": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "os": {
+            "type": "string"
+          },
+          "placementGroup": {
+            "type": "string"
+          },
+          "preemptible": {
+            "type": "boolean"
+          },
+          "provisioningMode": {
+            "type": "string"
+          },
+          "reservation": {
+            "type": "boolean"
+          },
+          "reservationId": {
+            "type": "string"
+          },
+          "suspendTime": {
+            "type": "integer"
+          },
+          "tier1": {
+            "type": "boolean"
+          },
+          "usePlacementGroup": {
+            "type": "boolean"
+          },
+          "zone": {
+            "type": "string"
+          },
+          "zones": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
         "type": "object"
       },
       "ClusterMetricsDataPoint": {
@@ -6911,6 +7292,37 @@
         ],
         "type": "object"
       },
+      "ClusterNodeDisk": {
+        "additionalProperties": false,
+        "properties": {
+          "encrypted": {
+            "type": "boolean"
+          },
+          "iops": {
+            "type": "integer"
+          },
+          "mountPoint": {
+            "type": "string"
+          },
+          "nfsExport": {
+            "type": "boolean"
+          },
+          "sizeGb": {
+            "type": "integer"
+          },
+          "snapshot": {
+            "description": "Platform snapshot id the disk is restored from; empty when the disk starts blank.",
+            "type": "string"
+          },
+          "throughput": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ClusterNodeResponse": {
         "additionalProperties": false,
         "properties": {
@@ -6952,6 +7364,87 @@
           "privateIp",
           "type"
         ],
+        "type": "object"
+      },
+      "ClusterOpenstackSlurmPartition": {
+        "additionalProperties": false,
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "associateFloatingIp": {
+            "type": "boolean"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "disks": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterNodeDisk"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "elasticImage": {
+            "type": "string"
+          },
+          "instanceType": {
+            "type": "string"
+          },
+          "maxNodes": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterOracleSlurmPartition": {
+        "additionalProperties": false,
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "disks": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterNodeDisk"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "elasticImage": {
+            "type": "string"
+          },
+          "instanceType": {
+            "type": "string"
+          },
+          "maxNodes": {
+            "type": "integer"
+          },
+          "memoryGb": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ocpus": {
+            "type": "integer"
+          },
+          "suspendTime": {
+            "type": "integer"
+          },
+          "zone": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "ClusterResponse": {
@@ -9963,7 +10456,11 @@
         "additionalProperties": false,
         "properties": {
           "artifactVersion": {
-            "description": "Build-specific version of the deployed service artifacts.",
+            "description": "Deprecated alias for buildVersion.",
+            "type": "string"
+          },
+          "buildVersion": {
+            "description": "Channel-neutral build version of the deployed service artifacts.",
             "type": "string"
           },
           "releaseVersion": {
@@ -9977,6 +10474,7 @@
         },
         "required": [
           "releaseVersion",
+          "buildVersion",
           "artifactVersion",
           "sourceCommit"
         ],
@@ -10959,6 +11457,62 @@
           "key",
           "tunnelConnected",
           "variables"
+        ],
+        "type": "object"
+      },
+      "ExistingClusterDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
+          "jumpNodeHost": {
+            "description": "Jump (bastion) host.",
+            "type": "string"
+          },
+          "jumpNodeUser": {
+            "description": "Jump (bastion) user.",
+            "type": "string"
+          },
+          "schedulerType": {
+            "description": "Scheduler type, e.g. slurm.",
+            "type": "string"
+          },
+          "slurmLoginNodes": {
+            "description": "Login nodes.",
+            "items": {
+              "$ref": "#/components/schemas/PoolSlurmLoginNode"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "slurmUsername": {
+            "description": "SLURM username (supports __USER__).",
+            "type": "string"
+          },
+          "subtype": {
+            "description": "Subtype discriminator.",
+            "enum": [
+              "existing"
+            ],
+            "type": "string"
+          },
+          "workspaceMounts": {
+            "description": "Cluster directories mounted into the user workspace.",
+            "items": {
+              "$ref": "#/components/schemas/PoolWorkspaceMount"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "subtype"
         ],
         "type": "object"
       },
@@ -12597,6 +13151,93 @@
               "google-managedlustre"
             ],
             "type": "string"
+          },
+          "zone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "subtype"
+        ],
+        "type": "object"
+      },
+      "GoogleSlurmDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "controllerImage": {
+            "type": "string"
+          },
+          "controllerInstanceType": {
+            "type": "string"
+          },
+          "controllerTier1": {
+            "type": "boolean"
+          },
+          "debugMode": {
+            "description": "Admin-set provisioning debug flag.",
+            "type": "boolean"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
+          "disks": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterNodeDisk"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "healthCheck": {
+            "type": "string"
+          },
+          "partitions": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterGoogleSlurmPartition"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "region": {
+            "type": "string"
+          },
+          "rootSize": {
+            "type": "integer"
+          },
+          "slurmResumeTimeout": {
+            "type": "integer"
+          },
+          "slurmReturnToService": {
+            "type": "integer"
+          },
+          "slurmSuspendTime": {
+            "type": "integer"
+          },
+          "slurmSuspendTimeout": {
+            "type": "integer"
+          },
+          "subtype": {
+            "description": "Subtype discriminator.",
+            "enum": [
+              "google-slurm"
+            ],
+            "type": "string"
+          },
+          "userBootstrap": {
+            "type": "string"
+          },
+          "userBootstrapCompute": {
+            "type": "boolean"
+          },
+          "userBootstrapController": {
+            "type": "boolean"
           },
           "zone": {
             "type": "string"
@@ -18834,6 +19475,81 @@
         ],
         "type": "object"
       },
+      "OpenstackSlurmDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "controllerImage": {
+            "type": "string"
+          },
+          "controllerInstanceType": {
+            "type": "string"
+          },
+          "debugMode": {
+            "description": "Admin-set provisioning debug flag.",
+            "type": "boolean"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
+          "floatingIpNetwork": {
+            "type": "string"
+          },
+          "healthCheck": {
+            "type": "string"
+          },
+          "networkId": {
+            "type": "string"
+          },
+          "partitions": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterOpenstackSlurmPartition"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "region": {
+            "type": "string"
+          },
+          "slurmResumeTimeout": {
+            "type": "integer"
+          },
+          "slurmReturnToService": {
+            "type": "integer"
+          },
+          "slurmSuspendTime": {
+            "type": "integer"
+          },
+          "slurmSuspendTimeout": {
+            "type": "integer"
+          },
+          "subtype": {
+            "description": "Subtype discriminator.",
+            "enum": [
+              "openstack-slurm"
+            ],
+            "type": "string"
+          },
+          "userBootstrap": {
+            "type": "string"
+          },
+          "userBootstrapCompute": {
+            "type": "boolean"
+          },
+          "userBootstrapController": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "subtype"
+        ],
+        "type": "object"
+      },
       "OpenstackSlurmPartition": {
         "additionalProperties": false,
         "properties": {
@@ -19338,6 +20054,87 @@
             "enum": [
               "oracle-oraclefs"
             ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "subtype"
+        ],
+        "type": "object"
+      },
+      "OracleSlurmDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "controllerImage": {
+            "type": "string"
+          },
+          "controllerInstanceType": {
+            "type": "string"
+          },
+          "controllerMemoryGb": {
+            "type": "integer"
+          },
+          "controllerOcpus": {
+            "type": "integer"
+          },
+          "debugMode": {
+            "description": "Admin-set provisioning debug flag.",
+            "type": "boolean"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
+          "healthCheck": {
+            "type": "string"
+          },
+          "partitions": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterOracleSlurmPartition"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "region": {
+            "type": "string"
+          },
+          "rootSize": {
+            "type": "integer"
+          },
+          "slurmResumeTimeout": {
+            "type": "integer"
+          },
+          "slurmReturnToService": {
+            "type": "integer"
+          },
+          "slurmSuspendTime": {
+            "type": "integer"
+          },
+          "slurmSuspendTimeout": {
+            "type": "integer"
+          },
+          "subtype": {
+            "description": "Subtype discriminator.",
+            "enum": [
+              "oracle-slurm"
+            ],
+            "type": "string"
+          },
+          "userBootstrap": {
+            "type": "string"
+          },
+          "userBootstrapCompute": {
+            "type": "boolean"
+          },
+          "userBootstrapController": {
+            "type": "boolean"
+          },
+          "zone": {
             "type": "string"
           }
         },
@@ -21674,6 +22471,43 @@
         },
         "required": [
           "status"
+        ],
+        "type": "object"
+      },
+      "PoolSlurmLoginNode": {
+        "additionalProperties": false,
+        "properties": {
+          "node": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "node"
+        ],
+        "type": "object"
+      },
+      "PoolWorkspaceMount": {
+        "additionalProperties": false,
+        "properties": {
+          "clusterPath": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "workspacePath": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "clusterPath",
+          "workspacePath"
         ],
         "type": "object"
       },
@@ -61551,6 +62385,104 @@
           }
         },
         "summary": "Upgrade cluster agent",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/definition": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a cloud or existing cluster's typed configuration variables as a per-CSP discriminated union.",
+        "operationId": "get-cluster-definition",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The username of the user that owns the cluster",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "The username of the user that owns the cluster",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "The cluster name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "A cluster's typed configuration variables; the shape is selected by the subtype discriminator.",
+                  "discriminator": {
+                    "mapping": {
+                      "aws-slurm": "#/components/schemas/AwsSlurmDefinition",
+                      "azure-slurm": "#/components/schemas/AzureSlurmDefinition",
+                      "existing": "#/components/schemas/ExistingClusterDefinition",
+                      "google-slurm": "#/components/schemas/GoogleSlurmDefinition",
+                      "openstack-slurm": "#/components/schemas/OpenstackSlurmDefinition",
+                      "oracle-slurm": "#/components/schemas/OracleSlurmDefinition"
+                    },
+                    "propertyName": "subtype"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ExistingClusterDefinition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AwsSlurmDefinition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/GoogleSlurmDefinition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AzureSlurmDefinition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OracleSlurmDefinition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OpenstackSlurmDefinition"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Cluster Definition",
         "tags": [
           "Clusters"
         ]
