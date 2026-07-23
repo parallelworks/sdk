@@ -85,6 +85,8 @@ jobs:
         run: |
           cd typescript
           pnpm run build
+          mkdir -p dist/types
+          cp src/types/api.d.ts dist/types/
           pnpm publish --no-git-checks --provenance
 
       # ============ PUBLISH PYTHON ============
