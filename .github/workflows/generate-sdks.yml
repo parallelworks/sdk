@@ -88,6 +88,20 @@ jobs:
           pnpm publish --no-git-checks --provenance
 
       # ============ PUBLISH PYTHON ============
+      - name: '🔧 Generate Python client'
+        if: steps.version.outputs.is_release == 'true'
+        run: |
+          cd python
+          cp parallelworks_client/__init__.py /tmp/pw-init-backup.py
+          cp parallelworks_client/auth.py /tmp/pw-auth-backup.py
+          uvx openapi-python-client generate \
+            --path ../openapi.json \
+            --output-path ./parallelworks_client \
+            --meta none \
+            --overwrite
+          mv /tmp/pw-init-backup.py parallelworks_client/__init__.py
+          mv /tmp/pw-auth-backup.py parallelworks_client/auth.py
+
       - name: '🚀 Build and publish Python to PyPI'
         if: steps.version.outputs.is_release == 'true'
         run: |
