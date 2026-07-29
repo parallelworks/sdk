@@ -9,6 +9,7 @@ import (
 )
 
 type AiModelConfig struct {
+	ContextWindow        *int64         `json:"contextWindow,omitempty"`
 	Enabled              bool           `json:"enabled"`
 	InputRate            float64        `json:"inputRate"`
 	ModelName            string         `json:"modelName"`
@@ -2298,7 +2299,9 @@ type CloudAccountCredentialsInput struct {
 type CloudAccountCredentialsResponse struct {
 	AwsAccessKeyID                  *string        `json:"awsAccessKeyId,omitempty"`
 	AzureClientID                   *string        `json:"azureClientId,omitempty"`
+	CredentialsCheckError           *string        `json:"credentialsCheckError,omitempty"`
 	GoogleServiceAccount            *string        `json:"googleServiceAccount,omitempty"`
+	MissingPermissions              []string       `json:"missingPermissions,omitempty"`
 	OpenstackServiceAccountUsername *string        `json:"openstackServiceAccountUsername,omitempty"`
 	OracleUserOcid                  *string        `json:"oracleUserOcid,omitempty"`
 	SufficientPermissions           string         `json:"sufficientPermissions"`
@@ -5476,6 +5479,8 @@ type ListOrgMarketplaceItemsBody struct {
 }
 
 type ListOrgProviderModelsOutputBody struct {
+	// Effective context window per model name, resolved as admin-configured > provider-detected > built-in catalog
+	ContextWindows map[string]OrgProviderModelWindow `json:"contextWindows,omitempty"`
 	// Available model IDs from the upstream provider
 	Models               []string       `json:"models"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
@@ -6093,6 +6098,7 @@ type MigrationStepResponse struct {
 }
 
 type ModelEntry struct {
+	ContextWindow        *int64         `json:"context_window,omitempty"`
 	Created              int64          `json:"created"`
 	ID                   string         `json:"id"`
 	InputRate            *float64       `json:"input_rate,omitempty"`
@@ -7050,6 +7056,8 @@ type OrgMarketplaceItemBody struct {
 }
 
 type OrgModelEntry struct {
+	// Model context window in tokens (0 = unknown)
+	ContextWindow int64 `json:"contextWindow"`
 	// Whether the model is enabled
 	Enabled bool `json:"enabled"`
 	// USD per input token
@@ -7062,6 +7070,14 @@ type OrgModelEntry struct {
 	OutputRate float64 `json:"outputRate"`
 	// Provider name
 	Provider             string         `json:"provider"`
+	AdditionalProperties map[string]any `json:"-,omitempty"`
+}
+
+type OrgProviderModelWindow struct {
+	// Effective context window in tokens (0 = unknown)
+	Effective int64 `json:"effective"`
+	// Where the window comes from: admin (configured), detected (provider-reported), or catalog (built-in); absent when unknown
+	Source               *string        `json:"source,omitempty"`
 	AdditionalProperties map[string]any `json:"-,omitempty"`
 }
 
@@ -7333,6 +7349,8 @@ type PatchInstanceStatusBody struct {
 }
 
 type PatchModelConfigInputBody struct {
+	// Model context window in tokens (0 = unknown)
+	ContextWindow *int64 `json:"contextWindow,omitempty"`
 	// Whether the model is enabled
 	Enabled *bool `json:"enabled,omitempty"`
 	// USD per input token
@@ -9659,8 +9677,6 @@ type Session struct {
 	LocalPort *int64 `json:"localPort,omitempty"`
 	// Session name (letters, numbers, underscores, and dashes; can't end with a dash or underscore).
 	Name *string `json:"name"`
-	// Deprecated. Use user instead
-	Namespace *string `json:"namespace,omitempty"`
 	// Node hostname.
 	NodeHostname *string `json:"nodeHostname,omitempty"`
 	// Indicates if this is an OpenAI session.

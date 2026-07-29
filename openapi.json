@@ -4,6 +4,10 @@
       "AIModelConfig": {
         "additionalProperties": false,
         "properties": {
+          "contextWindow": {
+            "format": "int64",
+            "type": "integer"
+          },
           "enabled": {
             "type": "boolean"
           },
@@ -6625,8 +6629,20 @@
           "azureClientId": {
             "type": "string"
           },
+          "credentialsCheckError": {
+            "type": "string"
+          },
           "googleServiceAccount": {
             "type": "string"
+          },
+          "missingPermissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "openstackServiceAccountUsername": {
             "type": "string"
@@ -15775,6 +15791,13 @@
       "ListOrgProviderModelsOutputBody": {
         "additionalProperties": false,
         "properties": {
+          "contextWindows": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/OrgProviderModelWindow"
+            },
+            "description": "Effective context window per model name, resolved as admin-configured \u003e provider-detected \u003e built-in catalog",
+            "type": "object"
+          },
           "models": {
             "description": "Available model IDs from the upstream provider",
             "items": {
@@ -17771,6 +17794,10 @@
       "ModelEntry": {
         "additionalProperties": false,
         "properties": {
+          "context_window": {
+            "format": "int64",
+            "type": "integer"
+          },
           "created": {
             "format": "int64",
             "type": "integer"
@@ -20541,6 +20568,11 @@
       "OrgModelEntry": {
         "additionalProperties": false,
         "properties": {
+          "contextWindow": {
+            "description": "Model context window in tokens (0 = unknown)",
+            "format": "int64",
+            "type": "integer"
+          },
           "enabled": {
             "description": "Whether the model is enabled",
             "type": "boolean"
@@ -20574,7 +20606,26 @@
           "modelName",
           "enabled",
           "inputRate",
-          "outputRate"
+          "outputRate",
+          "contextWindow"
+        ],
+        "type": "object"
+      },
+      "OrgProviderModelWindow": {
+        "additionalProperties": false,
+        "properties": {
+          "effective": {
+            "description": "Effective context window in tokens (0 = unknown)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "source": {
+            "description": "Where the window comes from: admin (configured), detected (provider-reported), or catalog (built-in); absent when unknown",
+            "type": "string"
+          }
+        },
+        "required": [
+          "effective"
         ],
         "type": "object"
       },
@@ -21373,6 +21424,11 @@
       "PatchModelConfigInputBody": {
         "additionalProperties": false,
         "properties": {
+          "contextWindow": {
+            "description": "Model context window in tokens (0 = unknown)",
+            "format": "int64",
+            "type": "integer"
+          },
           "enabled": {
             "description": "Whether the model is enabled",
             "type": "boolean"
@@ -28176,11 +28232,6 @@
               "string",
               "null"
             ]
-          },
-          "namespace": {
-            "description": "Deprecated. Use user instead",
-            "readOnly": true,
-            "type": "string"
           },
           "nodeHostname": {
             "description": "Node hostname.",
@@ -47546,6 +47597,56 @@
           }
         },
         "summary": "Update cloud account credentials",
+        "tags": [
+          "Cloud Accounts"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/cloud-accounts/{name}/credentials/check": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRe-runs the credentials check for a cloud account with its stored credentials. The check runs asynchronously; poll the cloud account's credentials for the result.",
+        "operationId": "check-organization-cloud-account-credentials",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cloud account name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Cloud account name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Re-run cloud account credentials check",
         "tags": [
           "Cloud Accounts"
         ]

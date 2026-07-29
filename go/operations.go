@@ -5083,6 +5083,21 @@ func (c *Client) UpdateOrganizationCloudAccountCredentials(ctx context.Context, 
 	return nil
 }
 
+// CheckOrganizationCloudAccountCredentials - Re-run cloud account credentials check
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Re-runs the credentials check for a cloud account with its stored credentials. The check runs asynchronously; poll the cloud account's credentials for the result.
+func (c *Client) CheckOrganizationCloudAccountCredentials(ctx context.Context, organization string, name string) error {
+	path := "/api/organizations/{organization}/cloud-accounts/{name}/credentials/check"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "name", "simple", false, name)
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetOrganizationCloudAccountNetworks - Get networks for cloud account
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
