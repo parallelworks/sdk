@@ -3776,8 +3776,14 @@ type EnrichedNamespaceResponse struct {
 type Environment struct {
 	// Number of available nodes.
 	AvailNodes *int64 `json:"availNodes,omitempty"`
+	// Display name of the environment's cluster. Populated only by the all-environments listing.
+	ClusterDisplayName *string `json:"clusterDisplayName,omitempty"`
 	// The cluster this environment belongs to.
 	ClusterID string `json:"clusterId"`
+	// Canonical name of the environment's cluster. Populated only by the all-environments listing.
+	ClusterName *string `json:"clusterName,omitempty"`
+	// Owner username of the environment's cluster, empty for managed clusters. Populated only by the all-environments listing.
+	ClusterUser *string `json:"clusterUser,omitempty"`
 	// Creation time.
 	CreatedAt time.Time `json:"createdAt"`
 	// Default wall time.

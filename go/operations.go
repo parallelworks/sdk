@@ -9909,6 +9909,38 @@ func (c *Client) CreateDiskSnapshot(ctx context.Context, organization string, us
 	return &result, nil
 }
 
+// ListAllEnvironmentsParams contains the parameters for the ListAllEnvironments operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListAllEnvironmentsParams struct {
+	// Filter by status.
+	Status *string `json:"status,omitempty"`
+}
+
+// ListAllEnvironments - List all environments
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns every environment across the clusters the user can schedule on, for the compute picker.
+func (c *Client) ListAllEnvironments(ctx context.Context, organization string, user string, opts ...ListAllEnvironmentsParams) (*[]Environment, error) {
+	path := "/api/organizations/{organization}/users/{user}/environments"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	var params ListAllEnvironmentsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "status", "form", false, params.Status)
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+	var result []Environment
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListUserExternalAuth - List user external authentication
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.

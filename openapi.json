@@ -10881,8 +10881,23 @@
             "readOnly": true,
             "type": "integer"
           },
+          "clusterDisplayName": {
+            "description": "Display name of the environment's cluster. Populated only by the all-environments listing.",
+            "readOnly": true,
+            "type": "string"
+          },
           "clusterId": {
             "description": "The cluster this environment belongs to.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "clusterName": {
+            "description": "Canonical name of the environment's cluster. Populated only by the all-environments listing.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "clusterUser": {
+            "description": "Owner username of the environment's cluster, empty for managed clusters. Populated only by the all-environments listing.",
             "readOnly": true,
             "type": "string"
           },
@@ -64736,6 +64751,87 @@
         "tags": [
           "Snapshots",
           "Disks"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/environments": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns every environment across the clusters the user can schedule on, for the compute picker.",
+        "operationId": "list-all-environments",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by status.",
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "description": "Filter by status.",
+              "enum": [
+                "active",
+                "inactive",
+                ""
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Environment"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List all environments",
+        "tags": [
+          "Environments"
         ]
       }
     },
