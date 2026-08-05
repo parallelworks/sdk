@@ -467,6 +467,10 @@
           "controllerInstanceType": {
             "type": "string"
           },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
           "disks": {
             "items": {
               "$ref": "#/components/schemas/ClusterDisk"
@@ -709,6 +713,10 @@
           },
           "controllerInstanceType": {
             "type": "string"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
           },
           "disks": {
             "items": {
@@ -999,6 +1007,10 @@
           "controllerTier1": {
             "type": "boolean"
           },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
           "disks": {
             "items": {
               "$ref": "#/components/schemas/ClusterDisk"
@@ -1101,6 +1113,10 @@
           },
           "controllerInstanceType": {
             "type": "string"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
           },
           "floatingIpNetwork": {
             "type": "string"
@@ -1226,6 +1242,10 @@
           "controllerOcpus": {
             "description": "OCPU count when the controller instance type is a flexible shape.",
             "type": "integer"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
           },
           "healthCheck": {
             "type": "string"
@@ -3357,6 +3377,10 @@
           "controllerInstanceType": {
             "type": "string"
           },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
           "disks": {
             "items": {
               "$ref": "#/components/schemas/ClusterDisk"
@@ -4791,6 +4815,10 @@
           },
           "controllerInstanceType": {
             "type": "string"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
           },
           "disks": {
             "items": {
@@ -14268,6 +14296,10 @@
           "controllerTier1": {
             "type": "boolean"
           },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
           "disks": {
             "items": {
               "$ref": "#/components/schemas/ClusterDisk"
@@ -20470,6 +20502,10 @@
           "controllerInstanceType": {
             "type": "string"
           },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
           "floatingIpNetwork": {
             "type": "string"
           },
@@ -21092,6 +21128,10 @@
           "controllerOcpus": {
             "description": "OCPU count when the controller instance type is a flexible shape.",
             "type": "integer"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
           },
           "healthCheck": {
             "type": "string"
@@ -24587,6 +24627,10 @@
             "maxLength": 100,
             "type": "string"
           },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
           "disks": {
             "items": {
               "$ref": "#/components/schemas/ClusterDisk"
@@ -25120,6 +25164,10 @@
             "description": "Short summary of the item.",
             "maxLength": 100,
             "type": "string"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
           },
           "disks": {
             "items": {
@@ -25696,6 +25744,10 @@
             "maxLength": 100,
             "type": "string"
           },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
+          },
           "disks": {
             "items": {
               "$ref": "#/components/schemas/ClusterDisk"
@@ -25898,6 +25950,10 @@
             "description": "Short summary of the item.",
             "maxLength": 100,
             "type": "string"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
           },
           "featured": {
             "description": "Mark as featured (platform admins only).",
@@ -26173,6 +26229,10 @@
             "description": "Short summary of the item.",
             "maxLength": 100,
             "type": "string"
+          },
+          "desktopSession": {
+            "$ref": "#/components/schemas/DesktopSessionSettings",
+            "description": "Desktop session settings."
           },
           "featured": {
             "description": "Mark as featured (platform admins only).",

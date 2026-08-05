@@ -185,13 +185,14 @@ type AddAwsLustreVersionInputBody struct {
 }
 
 type AddAwsSlurmVersionInputBody struct {
-	Architecture           *string             `json:"architecture,omitempty"`
-	ControllerImage        *string             `json:"controllerImage,omitempty"`
-	ControllerInstanceType *string             `json:"controllerInstanceType,omitempty"`
-	Disks                  []ClusterDisk       `json:"disks,omitempty"`
-	HealthCheck            *string             `json:"healthCheck,omitempty"`
-	Partitions             []AwsSlurmPartition `json:"partitions,omitempty"`
-	Region                 *string             `json:"region,omitempty"`
+	Architecture           *string                 `json:"architecture,omitempty"`
+	ControllerImage        *string                 `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                 `json:"controllerInstanceType,omitempty"`
+	DesktopSession         *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	Disks                  []ClusterDisk           `json:"disks,omitempty"`
+	HealthCheck            *string                 `json:"healthCheck,omitempty"`
+	Partitions             []AwsSlurmPartition     `json:"partitions,omitempty"`
+	Region                 *string                 `json:"region,omitempty"`
 	// Replace an existing version's variables instead of adding a new version.
 	Replace *bool `json:"replace,omitempty"`
 	// Root disk size in GiB.
@@ -268,11 +269,12 @@ type AddAzureNetappFilesVersionInputBody struct {
 }
 
 type AddAzureSlurmVersionInputBody struct {
-	Architecture           *string       `json:"architecture,omitempty"`
-	ControllerImage        *string       `json:"controllerImage,omitempty"`
-	ControllerInstanceType *string       `json:"controllerInstanceType,omitempty"`
-	Disks                  []ClusterDisk `json:"disks,omitempty"`
-	HealthCheck            *string       `json:"healthCheck,omitempty"`
+	Architecture           *string                 `json:"architecture,omitempty"`
+	ControllerImage        *string                 `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                 `json:"controllerInstanceType,omitempty"`
+	DesktopSession         *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	Disks                  []ClusterDisk           `json:"disks,omitempty"`
+	HealthCheck            *string                 `json:"healthCheck,omitempty"`
 	// Mount point of the controller's local disk; only applies when the controller instance type has a local disk.
 	LocalDiskMountPoint *string `json:"localDiskMountPoint,omitempty"`
 	// Export the controller's local disk over NFS; only applies when the controller instance type has a local disk.
@@ -369,14 +371,15 @@ type AddGoogleManagedLustreVersionInputBody struct {
 }
 
 type AddGoogleSlurmVersionInputBody struct {
-	Architecture           *string                `json:"architecture,omitempty"`
-	ControllerImage        *string                `json:"controllerImage,omitempty"`
-	ControllerInstanceType *string                `json:"controllerInstanceType,omitempty"`
-	ControllerTier1        *bool                  `json:"controllerTier1,omitempty"`
-	Disks                  []ClusterDisk          `json:"disks,omitempty"`
-	HealthCheck            *string                `json:"healthCheck,omitempty"`
-	Partitions             []GoogleSlurmPartition `json:"partitions,omitempty"`
-	Region                 *string                `json:"region,omitempty"`
+	Architecture           *string                 `json:"architecture,omitempty"`
+	ControllerImage        *string                 `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                 `json:"controllerInstanceType,omitempty"`
+	ControllerTier1        *bool                   `json:"controllerTier1,omitempty"`
+	DesktopSession         *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	Disks                  []ClusterDisk           `json:"disks,omitempty"`
+	HealthCheck            *string                 `json:"healthCheck,omitempty"`
+	Partitions             []GoogleSlurmPartition  `json:"partitions,omitempty"`
+	Region                 *string                 `json:"region,omitempty"`
 	// Replace an existing version's variables instead of adding a new version.
 	Replace *bool `json:"replace,omitempty"`
 	// Root disk size in GiB.
@@ -407,6 +410,7 @@ type AddLocalWorkflowVersionInputBody struct {
 type AddOpenstackSlurmVersionInputBody struct {
 	ControllerImage        *string                   `json:"controllerImage,omitempty"`
 	ControllerInstanceType *string                   `json:"controllerInstanceType,omitempty"`
+	DesktopSession         *DesktopSessionSettings   `json:"desktopSession,omitempty"`
 	FloatingIPNetwork      *string                   `json:"floatingIpNetwork,omitempty"`
 	HealthCheck            *string                   `json:"healthCheck,omitempty"`
 	NetworkID              *string                   `json:"networkId,omitempty"`
@@ -451,10 +455,11 @@ type AddOracleSlurmVersionInputBody struct {
 	// Memory in GiB when the controller instance type is a flexible shape.
 	ControllerMemoryGb *int64 `json:"controllerMemoryGb,omitempty"`
 	// OCPU count when the controller instance type is a flexible shape.
-	ControllerOcpus *int64                 `json:"controllerOcpus,omitempty"`
-	HealthCheck     *string                `json:"healthCheck,omitempty"`
-	Partitions      []OracleSlurmPartition `json:"partitions,omitempty"`
-	Region          *string                `json:"region,omitempty"`
+	ControllerOcpus *int64                  `json:"controllerOcpus,omitempty"`
+	DesktopSession  *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	HealthCheck     *string                 `json:"healthCheck,omitempty"`
+	Partitions      []OracleSlurmPartition  `json:"partitions,omitempty"`
+	Region          *string                 `json:"region,omitempty"`
 	// Replace an existing version's variables instead of adding a new version.
 	Replace *bool `json:"replace,omitempty"`
 	// Root disk size in GiB.
@@ -1170,13 +1175,14 @@ type AwsSlurmPartition struct {
 }
 
 type AwsSlurmVersionSettings struct {
-	Architecture           *string             `json:"architecture,omitempty"`
-	ControllerImage        *string             `json:"controllerImage,omitempty"`
-	ControllerInstanceType *string             `json:"controllerInstanceType,omitempty"`
-	Disks                  []ClusterDisk       `json:"disks,omitempty"`
-	HealthCheck            *string             `json:"healthCheck,omitempty"`
-	Partitions             []AwsSlurmPartition `json:"partitions,omitempty"`
-	Region                 *string             `json:"region,omitempty"`
+	Architecture           *string                 `json:"architecture,omitempty"`
+	ControllerImage        *string                 `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                 `json:"controllerInstanceType,omitempty"`
+	DesktopSession         *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	Disks                  []ClusterDisk           `json:"disks,omitempty"`
+	HealthCheck            *string                 `json:"healthCheck,omitempty"`
+	Partitions             []AwsSlurmPartition     `json:"partitions,omitempty"`
+	Region                 *string                 `json:"region,omitempty"`
 	// Root disk size in GiB.
 	RootSize             *int64                   `json:"rootSize,omitempty"`
 	RuntimeAlert         *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
@@ -1658,11 +1664,12 @@ type AzureSlurmPartition struct {
 }
 
 type AzureSlurmVersionSettings struct {
-	Architecture           *string       `json:"architecture,omitempty"`
-	ControllerImage        *string       `json:"controllerImage,omitempty"`
-	ControllerInstanceType *string       `json:"controllerInstanceType,omitempty"`
-	Disks                  []ClusterDisk `json:"disks,omitempty"`
-	HealthCheck            *string       `json:"healthCheck,omitempty"`
+	Architecture           *string                 `json:"architecture,omitempty"`
+	ControllerImage        *string                 `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                 `json:"controllerInstanceType,omitempty"`
+	DesktopSession         *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	Disks                  []ClusterDisk           `json:"disks,omitempty"`
+	HealthCheck            *string                 `json:"healthCheck,omitempty"`
 	// Mount point of the controller's local disk; only applies when the controller instance type has a local disk.
 	LocalDiskMountPoint *string `json:"localDiskMountPoint,omitempty"`
 	// Export the controller's local disk over NFS; only applies when the controller instance type has a local disk.
@@ -4979,14 +4986,15 @@ type GoogleSlurmPartition struct {
 }
 
 type GoogleSlurmVersionSettings struct {
-	Architecture           *string                `json:"architecture,omitempty"`
-	ControllerImage        *string                `json:"controllerImage,omitempty"`
-	ControllerInstanceType *string                `json:"controllerInstanceType,omitempty"`
-	ControllerTier1        *bool                  `json:"controllerTier1,omitempty"`
-	Disks                  []ClusterDisk          `json:"disks,omitempty"`
-	HealthCheck            *string                `json:"healthCheck,omitempty"`
-	Partitions             []GoogleSlurmPartition `json:"partitions,omitempty"`
-	Region                 *string                `json:"region,omitempty"`
+	Architecture           *string                 `json:"architecture,omitempty"`
+	ControllerImage        *string                 `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string                 `json:"controllerInstanceType,omitempty"`
+	ControllerTier1        *bool                   `json:"controllerTier1,omitempty"`
+	DesktopSession         *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	Disks                  []ClusterDisk           `json:"disks,omitempty"`
+	HealthCheck            *string                 `json:"healthCheck,omitempty"`
+	Partitions             []GoogleSlurmPartition  `json:"partitions,omitempty"`
+	Region                 *string                 `json:"region,omitempty"`
 	// Root disk size in GiB.
 	RootSize             *int64                   `json:"rootSize,omitempty"`
 	RuntimeAlert         *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
@@ -6874,6 +6882,7 @@ type OpenstackSlurmPartition struct {
 type OpenstackSlurmVersionSettings struct {
 	ControllerImage        *string                   `json:"controllerImage,omitempty"`
 	ControllerInstanceType *string                   `json:"controllerInstanceType,omitempty"`
+	DesktopSession         *DesktopSessionSettings   `json:"desktopSession,omitempty"`
 	FloatingIPNetwork      *string                   `json:"floatingIpNetwork,omitempty"`
 	HealthCheck            *string                   `json:"healthCheck,omitempty"`
 	NetworkID              *string                   `json:"networkId,omitempty"`
@@ -7094,10 +7103,11 @@ type OracleSlurmVersionSettings struct {
 	// Memory in GiB when the controller instance type is a flexible shape.
 	ControllerMemoryGb *int64 `json:"controllerMemoryGb,omitempty"`
 	// OCPU count when the controller instance type is a flexible shape.
-	ControllerOcpus *int64                 `json:"controllerOcpus,omitempty"`
-	HealthCheck     *string                `json:"healthCheck,omitempty"`
-	Partitions      []OracleSlurmPartition `json:"partitions,omitempty"`
-	Region          *string                `json:"region,omitempty"`
+	ControllerOcpus *int64                  `json:"controllerOcpus,omitempty"`
+	DesktopSession  *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	HealthCheck     *string                 `json:"healthCheck,omitempty"`
+	Partitions      []OracleSlurmPartition  `json:"partitions,omitempty"`
+	Region          *string                 `json:"region,omitempty"`
 	// Root disk size in GiB.
 	RootSize             *int64                   `json:"rootSize,omitempty"`
 	RuntimeAlert         *ClusterRuntimeAlert     `json:"runtimeAlert,omitempty"`
@@ -8250,8 +8260,9 @@ type PublishAwsSlurmRequest struct {
 	ControllerImage        *string `json:"controllerImage,omitempty"`
 	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
 	// Short summary of the item.
-	Description *string       `json:"description,omitempty"`
-	Disks       []ClusterDisk `json:"disks,omitempty"`
+	Description    *string                 `json:"description,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	Disks          []ClusterDisk           `json:"disks,omitempty"`
 	// Mark as featured (platform admins only).
 	Featured    *bool   `json:"featured,omitempty"`
 	HealthCheck *string `json:"healthCheck,omitempty"`
@@ -8434,8 +8445,9 @@ type PublishAzureSlurmRequest struct {
 	ControllerImage        *string `json:"controllerImage,omitempty"`
 	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
 	// Short summary of the item.
-	Description *string       `json:"description,omitempty"`
-	Disks       []ClusterDisk `json:"disks,omitempty"`
+	Description    *string                 `json:"description,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	Disks          []ClusterDisk           `json:"disks,omitempty"`
 	// Mark as featured (platform admins only).
 	Featured    *bool   `json:"featured,omitempty"`
 	HealthCheck *string `json:"healthCheck,omitempty"`
@@ -8633,8 +8645,9 @@ type PublishGoogleSlurmRequest struct {
 	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
 	ControllerTier1        *bool   `json:"controllerTier1,omitempty"`
 	// Short summary of the item.
-	Description *string       `json:"description,omitempty"`
-	Disks       []ClusterDisk `json:"disks,omitempty"`
+	Description    *string                 `json:"description,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	Disks          []ClusterDisk           `json:"disks,omitempty"`
 	// Mark as featured (platform admins only).
 	Featured    *bool   `json:"featured,omitempty"`
 	HealthCheck *string `json:"healthCheck,omitempty"`
@@ -8701,7 +8714,8 @@ type PublishOpenstackSlurmRequest struct {
 	ControllerImage        *string `json:"controllerImage,omitempty"`
 	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
 	// Short summary of the item.
-	Description *string `json:"description,omitempty"`
+	Description    *string                 `json:"description,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
 	// Mark as featured (platform admins only).
 	Featured          *bool   `json:"featured,omitempty"`
 	FloatingIPNetwork *string `json:"floatingIpNetwork,omitempty"`
@@ -8797,7 +8811,8 @@ type PublishOracleSlurmRequest struct {
 	// OCPU count when the controller instance type is a flexible shape.
 	ControllerOcpus *int64 `json:"controllerOcpus,omitempty"`
 	// Short summary of the item.
-	Description *string `json:"description,omitempty"`
+	Description    *string                 `json:"description,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
 	// Mark as featured (platform admins only).
 	Featured    *bool   `json:"featured,omitempty"`
 	HealthCheck *string `json:"healthCheck,omitempty"`
