@@ -1951,6 +1951,20 @@ func (c *Client) GetBuckets(ctx context.Context, opts ...GetBucketsParams) (*[]B
 	return &result, nil
 }
 
+// ListUserCloudAccounts - List accessible cloud accounts
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the cloud accounts the user can access.
+func (c *Client) ListUserCloudAccounts(ctx context.Context) (*[]CloudAccountListItem, error) {
+	path := "/api/cloud-accounts"
+	var result []CloudAccountListItem
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetClusters - Get Clusters
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -1960,6 +1974,20 @@ func (c *Client) GetClusters(ctx context.Context) (*[]GeneralCluster, error) {
 	path := "/api/clusters"
 	var result []GeneralCluster
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreateCluster - Create Cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Creates a cluster owned by the requesting user. The configuration may be included up front or filled in later through the definition endpoint.
+func (c *Client) CreateCluster(ctx context.Context, body ClusterCreate) (*GeneralCluster, error) {
+	path := "/api/clusters"
+	var result GeneralCluster
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2099,6 +2127,8 @@ func (c *Client) ListEventTypes(ctx context.Context) (*ListEventTypesOutputBody,
 type GetGroupsParams struct {
 	// Only return groups that have access to this network.
 	Network *string `json:"network,omitempty"`
+	// Only return groups that have access to this cloud account (by name).
+	CloudAccount *string `json:"cloudAccount,omitempty"`
 }
 
 // GetGroups - Get user groups
@@ -2114,6 +2144,7 @@ func (c *Client) GetGroups(ctx context.Context, opts ...GetGroupsParams) (*[]Gro
 	}
 	queryValues := url.Values{}
 	addQueryParam(queryValues, "network", "form", false, params.Network)
+	addQueryParam(queryValues, "cloudAccount", "form", false, params.CloudAccount)
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
 	}
@@ -2878,7 +2909,7 @@ func (c *Client) RemoveMarketplaceAccountVersion(ctx context.Context, slug strin
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Creates an owned resource from a marketplace item: an editable workflow copy, or a storage/compute resource.
+// Creates an owned resource from a marketplace item: an editable workflow copy, or a storage/compute resource. Organization administrators may create the resource for another member of their organization.
 func (c *Client) ForkMarketplaceItem(ctx context.Context, slug string, body ForkMarketplaceItemBody) (*ForkMarketplaceItemOutputBody, error) {
 	path := "/api/marketplace/items/{slug}/fork"
 	path = pathReplace(path, "slug", "simple", false, slug)
@@ -3477,6 +3508,42 @@ func (c *Client) GetMachineLearningWorkspaces(ctx context.Context, opts ...GetMa
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []MachineLearningWorkspace
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListNetworkInterfacesParams contains the parameters for the ListNetworkInterfaces operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListNetworkInterfacesParams struct {
+	// The cloud service provider for the network interface.
+	Csp *string `json:"csp,omitempty"`
+	// The region where the network interface is provisioned.
+	Region *string `json:"region,omitempty"`
+	// If provided, will filter the response based on the provisioned status.
+	Provisioned *bool `json:"provisioned,omitempty"`
+}
+
+// ListNetworkInterfaces - List network interfaces
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the list of network interfaces
+func (c *Client) ListNetworkInterfaces(ctx context.Context, opts ...ListNetworkInterfacesParams) (*[]NetworkInterface, error) {
+	path := "/api/network-interfaces"
+	var params ListNetworkInterfacesParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "csp", "form", false, params.Csp)
+	addQueryParam(queryValues, "region", "form", false, params.Region)
+	addQueryParam(queryValues, "provisioned", "form", false, params.Provisioned)
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+	var result []NetworkInterface
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -5269,6 +5336,38 @@ func (c *Client) PostOpenstackSync(ctx context.Context, organization string, nam
 	path = pathReplace(path, "name", "simple", false, name)
 	var result OpenstackSyncResponse
 	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetCloudAccountRdmaZonesParams contains the parameters for the GetCloudAccountRdmaZones operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetCloudAccountRdmaZonesParams struct {
+	// Only return zones within this region
+	Region *string `json:"region,omitempty"`
+}
+
+// GetCloudAccountRdmaZones - List RDMA-capable zones for a cloud account
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns zones whose project offers an IRDMA (Falcon) network profile.
+func (c *Client) GetCloudAccountRdmaZones(ctx context.Context, organization string, name string, opts ...GetCloudAccountRdmaZonesParams) (*RdmaZonesBody, error) {
+	path := "/api/organizations/{organization}/cloud-accounts/{name}/rdma-zones"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "name", "simple", false, name)
+	var params GetCloudAccountRdmaZonesParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "region", "form", false, params.Region)
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+	var result RdmaZonesBody
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9288,6 +9387,39 @@ func (c *Client) GetCluster(ctx context.Context, organization string, user strin
 	return &result, nil
 }
 
+// DeleteCluster - Delete cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a cluster. A cloud cluster must be turned off first; an existing cluster is disconnected from the platform as part of the delete.
+func (c *Client) DeleteCluster(ctx context.Context, organization string, user string, clusterName string) error {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UpdateCluster - Update Cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates a cluster's name, display name, description, tags, network, or group. Omitted fields are left unchanged.
+func (c *Client) UpdateCluster(ctx context.Context, organization string, user string, clusterName string, body UpdateClusterBody) (*UpdateClusterBody, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	var result UpdateClusterBody
+	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // UpgradeClusterAgentParams contains the parameters for the UpgradeClusterAgent operation.
 // Required parameters are value fields; optional parameters are pointers.
 type UpgradeClusterAgentParams struct {
@@ -9321,17 +9453,137 @@ func (c *Client) UpgradeClusterAgent(ctx context.Context, organization string, u
 	return &result, nil
 }
 
+// GetClusterAlerts - Get Cluster Alerts
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a cluster's run-time alert and session cost limit settings.
+func (c *Client) GetClusterAlerts(ctx context.Context, organization string, user string, clusterName string) (*ClusterAlerts, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/alerts"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	var result ClusterAlerts
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateClusterAlerts - Update Cluster Alerts
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces a cluster's run-time alert and session cost limit settings.
+func (c *Client) UpdateClusterAlerts(ctx context.Context, organization string, user string, clusterName string, body ClusterAlerts) (*ClusterAlerts, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/alerts"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	var result ClusterAlerts
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetClusterAttachedStorages - Get Cluster Attached Storages
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the filesystems mounted on a cluster as a discriminated union of platform storage resources and custom NFS exports.
+func (c *Client) GetClusterAttachedStorages(ctx context.Context, organization string, user string, clusterName string) (*[]AttachedStorage, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/attached-storages"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	var result []AttachedStorage
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// AttachClusterStorage - Attach Cluster Storage
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Mounts one filesystem on a cloud cluster, leaving the rest untouched. Mounting a filesystem that is already mounted at the same path succeeds without changing anything. A cluster's own agent may call this for the cluster it runs on.
+func (c *Client) AttachClusterStorage(ctx context.Context, organization string, user string, clusterName string, body AttachedStorageWrite) (*[]AttachedStorage, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/attached-storages"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	var result []AttachedStorage
+	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateClusterAttachedStorages - Update Cluster Attached Storages
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces the filesystems mounted on a cloud cluster. Bucket mounts are forced read-only when the caller's or owner's bucket access is read-only. Existing clusters have no attached storages.
+func (c *Client) UpdateClusterAttachedStorages(ctx context.Context, organization string, user string, clusterName string, body []AttachedStorageWrite) (*[]AttachedStorage, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/attached-storages"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	var result []AttachedStorage
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetClusterDefinition - Get Cluster Definition
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns a cloud or existing cluster's typed configuration variables as a per-CSP discriminated union.
-func (c *Client) GetClusterDefinition(ctx context.Context, organization string, user string, clusterName string) (*any, error) {
+func (c *Client) GetClusterDefinition(ctx context.Context, organization string, user string, clusterName string) (*ClusterDefinition, error) {
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/definition"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
-	var result any
+	var result ClusterDefinition
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateClusterDefinition - Update Cluster Definition
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces a cluster's configuration. A cloud cluster must be off. Fields omitted from the request are cleared.
+func (c *Client) UpdateClusterDefinition(ctx context.Context, organization string, user string, clusterName string, body ClusterDefinition) (*ClusterDefinition, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/definition"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	var result ClusterDefinition
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetClusterDeployment - Get cluster deployment
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns a cluster deployment with its step-by-step progress and the storages it provisioned.
+func (c *Client) GetClusterDeployment(ctx context.Context, organization string, user string, clusterName string, deploymentNumber string) (*ClusterDeployment, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/deployments/{deploymentNumber}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	path = pathReplace(path, "deploymentNumber", "simple", false, deploymentNumber)
+	var result ClusterDeployment
 	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -9426,6 +9678,8 @@ func (c *Client) SetElasticClusterIcon(ctx context.Context, organization string,
 type GetClusterNodesParams struct {
 	// Optional filter by node type
 	Type *string `json:"type,omitempty"`
+	// Include failed nodes, which are omitted by default
+	IncludeFailed *bool `json:"includeFailed,omitempty"`
 }
 
 // GetClusterNodes - Get cluster nodes
@@ -9444,6 +9698,7 @@ func (c *Client) GetClusterNodes(ctx context.Context, organization string, user 
 	}
 	queryValues := url.Values{}
 	addQueryParam(queryValues, "type", "form", false, params.Type)
+	addQueryParam(queryValues, "includeFailed", "form", false, params.IncludeFailed)
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
 	}
@@ -9492,7 +9747,7 @@ func (c *Client) GetClusterNodeMetrics(ctx context.Context, organization string,
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns access permissions for a cloud or existing cluster owned by the user.
+// Returns access permissions for a cloud cluster owned by the user. Existing clusters cannot be shared.
 func (c *Client) GetUserClusterPermissions(ctx context.Context, organization string, user string, clusterName string) (*SubjectPermissions, error) {
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/permissions"
 	path = pathReplace(path, "organization", "simple", false, organization)
@@ -9509,10 +9764,29 @@ func (c *Client) GetUserClusterPermissions(ctx context.Context, organization str
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Replaces access permissions for a cloud or existing cluster owned by the user.
-func (c *Client) UpdateUserClusterPermissions(ctx context.Context, body SubjectPermissions) error {
+// Replaces access permissions for a cloud cluster owned by the user. Existing clusters cannot be shared.
+func (c *Client) UpdateUserClusterPermissions(ctx context.Context, organization string, user string, clusterName string, body SubjectPermissions) error {
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/permissions"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// ResumeCluster - Resume cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Resumes a stopped cloud cluster, restarting its controller. Provisioning a cluster for the first time is a different operation.
+func (c *Client) ResumeCluster(ctx context.Context, organization string, user string, clusterName string) error {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/resume"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -9690,11 +9964,27 @@ func (c *Client) CreateClusterSnapshot(ctx context.Context, organization string,
 	return &result, nil
 }
 
+// StopCluster - Stop cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Stops a cloud cluster's controller. The cluster keeps its provisioned resources and can be started again.
+func (c *Client) StopCluster(ctx context.Context, organization string, user string, clusterName string) error {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/stop"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // UpdateClusterWhileRunning - Apply a configuration update to a running cluster
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Applies partition and user bootstrap variable changes to a running cluster through the agent tunnel.
+// Applies partition, user bootstrap and desktop session variable changes to a running cluster through the agent tunnel.
 func (c *Client) UpdateClusterWhileRunning(ctx context.Context, organization string, user string, clusterName string, body UpdateWhileRunningBody) (*UpdateWhileRunningResult, error) {
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/update-while-running"
 	path = pathReplace(path, "organization", "simple", false, organization)
@@ -9707,36 +9997,38 @@ func (c *Client) UpdateClusterWhileRunning(ctx context.Context, organization str
 	return &result, nil
 }
 
-// MountClusterDirToUserWorkspace - Mount additional cluster directory to the user workspace
+// GetClusterWorkspaceMounts - Get cluster workspace mounts
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Mounts a cluster directory to the cluster owner's user workspace.
-func (c *Client) MountClusterDirToUserWorkspace(ctx context.Context, organization string, user string, clusterName string, body MountWorkspaceDirectoryBody) error {
-	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/workspace-mount"
+// Returns the cluster directories mounted into the user workspace.
+func (c *Client) GetClusterWorkspaceMounts(ctx context.Context, organization string, user string, clusterName string) (*[]ClusterWorkspaceMount, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/workspace-mounts"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
-		return parseErrorResponse(err)
+	var result []ClusterWorkspaceMount
+	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
 	}
-	return nil
+	return &result, nil
 }
 
-// UnmountClusterDirFromUserWorkspace - Remove cluster mount from user workspace
+// UpdateClusterWorkspaceMounts - Update cluster workspace mounts
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Removes a cluster mount from the cluster owner's user workspace.
-func (c *Client) UnmountClusterDirFromUserWorkspace(ctx context.Context, organization string, user string, clusterName string, body UnmountWorkspaceDirectoryBody) error {
-	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/workspace-mount"
+// Replaces the cluster directories mounted into the user workspace.
+func (c *Client) UpdateClusterWorkspaceMounts(ctx context.Context, organization string, user string, clusterName string, body []ClusterWorkspaceMount) (*[]ClusterWorkspaceMount, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/workspace-mounts"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
-	if err := c.do(ctx, "DELETE", path, body, nil, "application/json"); err != nil {
-		return parseErrorResponse(err)
+	var result []ClusterWorkspaceMount
+	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
 	}
-	return nil
+	return &result, nil
 }
 
 // ListEnvironmentsParams contains the parameters for the ListEnvironments operation.
@@ -10398,100 +10690,32 @@ func (c *Client) GetPresignedURLMachineLearningWorkspace(ctx context.Context, or
 	return &result, nil
 }
 
-// ListNetappontap - List Storage: NetApp ONTAPs
+// CreateNetworkInterface - Create network interface
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns all NetApp ONTAP storage systems for a user
-func (c *Client) ListNetappontap(ctx context.Context, organization string, user string) (*[]NetAppOntapResponse, error) {
-	path := "/api/organizations/{organization}/users/{user}/netappontap"
+// Creates a new network interface with a static MAC address. It gets a static public IP unless its network is private.
+func (c *Client) CreateNetworkInterface(ctx context.Context, organization string, user string, body NetworkInterface) (*NetworkInterface, error) {
+	path := "/api/organizations/{organization}/users/{user}/network-interfaces"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
-	var result []NetAppOntapResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// CreateNetappontap - Create Storage: NetApp ONTAP
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Creates a new NetApp ONTAP storage
-func (c *Client) CreateNetappontap(ctx context.Context, organization string, user string, body CreateNetAppOntapInputBody) (*NetAppOntapResponse, error) {
-	path := "/api/organizations/{organization}/users/{user}/netappontap"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	var result NetAppOntapResponse
+	var result NetworkInterface
 	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
 }
 
-// GetNetappontap - Get Storage: NetApp ONTAP
+// DeleteNetworkInterface - Delete network interface
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns a NetApp ONTAP
-func (c *Client) GetNetappontap(ctx context.Context, organization string, user string, name string) (*NetAppOntap, error) {
-	path := "/api/organizations/{organization}/users/{user}/netappontap/{name}"
+// Deletes the specified network interface, releasing it and its public IP.
+func (c *Client) DeleteNetworkInterface(ctx context.Context, organization string, user string, name string) error {
+	path := "/api/organizations/{organization}/users/{user}/network-interfaces/{name}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	var result NetAppOntap
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetNetappOntapVolumes - Get NetApp ONTAP volumes
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns a list of volumes from NetApp ONTAP storage.
-func (c *Client) GetNetappOntapVolumes(ctx context.Context, organization string, user string, ontapName string) (*[]SingleVolume, error) {
-	path := "/api/organizations/{organization}/users/{user}/netappontap/{ontapName}/volumes"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "ontapName", "simple", false, ontapName)
-	var result []SingleVolume
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// CreateNetappOntapVolume - Create NetApp ONTAP volume
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Creates a new volume on NetApp ONTAP storage.
-func (c *Client) CreateNetappOntapVolume(ctx context.Context, organization string, user string, ontapName string, body CreateVolumeRequestBody) (*SingleVolume, error) {
-	path := "/api/organizations/{organization}/users/{user}/netappontap/{ontapName}/volumes"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "ontapName", "simple", false, ontapName)
-	var result SingleVolume
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// DeleteNetappOntapVolume - Delete NetApp ONTAP volume
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Deletes a volume from NetApp ONTAP storage.
-func (c *Client) DeleteNetappOntapVolume(ctx context.Context, organization string, user string, ontapName string, volumeID string) error {
-	path := "/api/organizations/{organization}/users/{user}/netappontap/{ontapName}/volumes/{volumeId}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "ontapName", "simple", false, ontapName)
-	path = pathReplace(path, "volumeId", "simple", false, volumeID)
 	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
