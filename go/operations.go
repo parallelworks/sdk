@@ -18,7 +18,7 @@ func (c *Client) GetAcmeChallenge(ctx context.Context, token string) (*string, e
 	path := "/.well-known/acme-challenge/{token}"
 	path = pathReplace(path, "token", "simple", false, token)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -33,7 +33,7 @@ func (c *Client) GetPkiValidationFile(ctx context.Context, filename string) (*st
 	path := "/.well-known/pki-validation/{filename}"
 	path = pathReplace(path, "filename", "simple", false, filename)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -68,7 +68,7 @@ func (c *Client) GetPlatformAlerts(ctx context.Context, opts ...GetPlatformAlert
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Alert
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -84,7 +84,7 @@ func (c *Client) GetPlatformAlerts(ctx context.Context, opts ...GetPlatformAlert
 func (c *Client) CreatePlatformAlert(ctx context.Context, body *CreateAlertBody) (*Alert, error) {
 	path := "/api/admin/alerts"
 	var result Alert
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -100,7 +100,7 @@ func (c *Client) CreatePlatformAlert(ctx context.Context, body *CreateAlertBody)
 func (c *Client) DeletePlatformAlert(ctx context.Context, id string) error {
 	path := "/api/admin/alerts/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -116,7 +116,7 @@ func (c *Client) DeletePlatformAlert(ctx context.Context, id string) error {
 func (c *Client) GetBillingCrosscheck(ctx context.Context) (*[]CrossCheckRow, error) {
 	path := "/api/admin/billing/crosscheck"
 	var result []CrossCheckRow
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -151,7 +151,7 @@ func (c *Client) ListBillingRuns(ctx context.Context, opts ...ListBillingRunsPar
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result BillingRunList
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -168,7 +168,7 @@ func (c *Client) GetBillingRun(ctx context.Context, id string) (*BillingRunDetai
 	path := "/api/admin/billing/runs/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
 	var result BillingRunDetail
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -184,7 +184,7 @@ func (c *Client) GetBillingRun(ctx context.Context, id string) (*BillingRunDetai
 func (c *Client) DeleteBillingRun(ctx context.Context, id string) error {
 	path := "/api/admin/billing/runs/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -222,7 +222,7 @@ func (c *Client) GetErrorLogs(ctx context.Context, opts ...GetErrorLogsParams) (
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ListErrorLogsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -237,7 +237,7 @@ func (c *Client) GetErrorLogs(ctx context.Context, opts ...GetErrorLogsParams) (
 // Returns a plain error to test the unknown error logging pipeline
 func (c *Client) TriggerTestError(ctx context.Context) error {
 	path := "/api/admin/errors/test"
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -305,7 +305,7 @@ func (c *Client) ListAdminEvents(ctx context.Context, opts ...ListAdminEventsPar
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result EventsPageBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -369,7 +369,7 @@ func (c *Client) ExportAdminEvents(ctx context.Context, opts ...ExportAdminEvent
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
 	}
-	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -385,7 +385,7 @@ func (c *Client) ExportAdminEvents(ctx context.Context, opts ...ExportAdminEvent
 func (c *Client) GetImageCompliance(ctx context.Context) (*BaseImageComplianceBody, error) {
 	path := "/api/admin/images/compliance"
 	var result BaseImageComplianceBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -401,7 +401,7 @@ func (c *Client) GetImageCompliance(ctx context.Context) (*BaseImageComplianceBo
 func (c *Client) GetPredefinedIndexStatus(ctx context.Context) (*ListIndexesBody, error) {
 	path := "/api/admin/indexes"
 	var result ListIndexesBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -417,7 +417,7 @@ func (c *Client) GetPredefinedIndexStatus(ctx context.Context) (*ListIndexesBody
 func (c *Client) CreatePredefinedIndex(ctx context.Context, body ModifyIndexBody) (*CreateIndexBody, error) {
 	path := "/api/admin/indexes"
 	var result CreateIndexBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -433,7 +433,7 @@ func (c *Client) CreatePredefinedIndex(ctx context.Context, body ModifyIndexBody
 func (c *Client) UpdatePredefinedIndex(ctx context.Context, body ModifyIndexBody) (*CreateIndexBody, error) {
 	path := "/api/admin/indexes"
 	var result CreateIndexBody
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -449,7 +449,7 @@ func (c *Client) UpdatePredefinedIndex(ctx context.Context, body ModifyIndexBody
 func (c *Client) DeletePredefinedIndex(ctx context.Context, body ModifyIndexBody) (*DeleteIndexBody, error) {
 	path := "/api/admin/indexes"
 	var result DeleteIndexBody
-	if err := c.do(ctx, "DELETE", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -465,7 +465,7 @@ func (c *Client) DeletePredefinedIndex(ctx context.Context, body ModifyIndexBody
 func (c *Client) CreateMissingPredefinedIndexes(ctx context.Context) (*CreateIndexBody, error) {
 	path := "/api/admin/indexes/missing"
 	var result CreateIndexBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -481,7 +481,7 @@ func (c *Client) CreateMissingPredefinedIndexes(ctx context.Context) (*CreateInd
 func (c *Client) DeleteStaleIndex(ctx context.Context, body DeleteStaleIndexBody) (*DeleteIndexBody, error) {
 	path := "/api/admin/indexes/stale"
 	var result DeleteIndexBody
-	if err := c.do(ctx, "DELETE", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -497,7 +497,7 @@ func (c *Client) DeleteStaleIndex(ctx context.Context, body DeleteStaleIndexBody
 func (c *Client) CleanupOrphanedInfrastructures(ctx context.Context) (*DeleteOrphanedInfraResultBody, error) {
 	path := "/api/admin/maintenance/infrastructures/orphaned/cleanup"
 	var result DeleteOrphanedInfraResultBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -513,7 +513,7 @@ func (c *Client) CleanupOrphanedInfrastructures(ctx context.Context) (*DeleteOrp
 func (c *Client) PreviewOrphanedInfrastructuresCleanup(ctx context.Context) (*OrphanedInfraPreviewBody, error) {
 	path := "/api/admin/maintenance/infrastructures/orphaned/preview"
 	var result OrphanedInfraPreviewBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -529,7 +529,7 @@ func (c *Client) PreviewOrphanedInfrastructuresCleanup(ctx context.Context) (*Or
 func (c *Client) CleanupOldWorkflowRuns(ctx context.Context, body *DeleteOldWorkflowRunsBody) (*DeleteOldWorkflowRunsResultBody, error) {
 	path := "/api/admin/maintenance/workflow-runs/old/cleanup"
 	var result DeleteOldWorkflowRunsResultBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -557,7 +557,7 @@ func (c *Client) PreviewOldWorkflowRunsCleanup(ctx context.Context, params Previ
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result WorkflowRunsCleanupPreviewBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -573,7 +573,7 @@ func (c *Client) PreviewOldWorkflowRunsCleanup(ctx context.Context, params Previ
 func (c *Client) CleanupOrphanedWorkflowRuns(ctx context.Context) (*DeleteOrphanedWorkflowRunsResultBody, error) {
 	path := "/api/admin/maintenance/workflow-runs/orphaned/cleanup"
 	var result DeleteOrphanedWorkflowRunsResultBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -589,7 +589,7 @@ func (c *Client) CleanupOrphanedWorkflowRuns(ctx context.Context) (*DeleteOrphan
 func (c *Client) PreviewOrphanedWorkflowRunsCleanup(ctx context.Context) (*OrphanedWorkflowRunsPreviewBody, error) {
 	path := "/api/admin/maintenance/workflow-runs/orphaned/preview"
 	var result OrphanedWorkflowRunsPreviewBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -620,7 +620,7 @@ func (c *Client) GetPlatformMau(ctx context.Context, params GetPlatformMauParams
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result PlatformMauResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -632,7 +632,7 @@ func (c *Client) GetPlatformMau(ctx context.Context, params GetPlatformMauParams
 func (c *Client) ListMigrationRunLogs(ctx context.Context) (*[]MigrationRunLogResponse, error) {
 	path := "/api/admin/migrations/logs"
 	var result []MigrationRunLogResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -643,7 +643,7 @@ func (c *Client) ListMigrationRunLogs(ctx context.Context) (*[]MigrationRunLogRe
 // Delete all migration run logs
 func (c *Client) DeleteAllMigrationLogs(ctx context.Context) error {
 	path := "/api/admin/migrations/logs"
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -655,7 +655,7 @@ func (c *Client) DeleteAllMigrationLogs(ctx context.Context) error {
 func (c *Client) DeleteMigrationLog(ctx context.Context, id string) error {
 	path := "/api/admin/migrations/logs/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -667,7 +667,7 @@ func (c *Client) DeleteMigrationLog(ctx context.Context, id string) error {
 func (c *Client) ListMongoMigrationsRegistry(ctx context.Context) (*[]MigrationRegistryItem, error) {
 	path := "/api/admin/migrations/registry"
 	var result []MigrationRegistryItem
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -679,7 +679,7 @@ func (c *Client) ListMongoMigrationsRegistry(ctx context.Context) (*[]MigrationR
 func (c *Client) RunMigrations(ctx context.Context, body RunInBody) (*MigrationRunLogResponse, error) {
 	path := "/api/admin/migrations/run"
 	var result MigrationRunLogResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -692,7 +692,7 @@ func (c *Client) RunSpecificMongoMigration(ctx context.Context, id string) (*Mig
 	path := "/api/admin/migrations/run/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
 	var result MigrationRunLogResponse
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -708,7 +708,7 @@ func (c *Client) RunSpecificMongoMigration(ctx context.Context, id string) (*Mig
 func (c *Client) CleanupPreviews(ctx context.Context) (*CleanupPreviewsOutputBody, error) {
 	path := "/api/admin/previews/cleanup"
 	var result CleanupPreviewsOutputBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -724,7 +724,7 @@ func (c *Client) CleanupPreviews(ctx context.Context) (*CleanupPreviewsOutputBod
 func (c *Client) GetPreviewStats(ctx context.Context) (*PreviewStatsOutputBody, error) {
 	path := "/api/admin/previews/stats"
 	var result PreviewStatsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -740,7 +740,7 @@ func (c *Client) GetPreviewStats(ctx context.Context) (*PreviewStatsOutputBody, 
 func (c *Client) EnablePlatformPreview(ctx context.Context, flag string) error {
 	path := "/api/admin/previews/{flag}"
 	path = pathReplace(path, "flag", "simple", false, flag)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -756,7 +756,7 @@ func (c *Client) EnablePlatformPreview(ctx context.Context, flag string) error {
 func (c *Client) DisablePlatformPreview(ctx context.Context, flag string) error {
 	path := "/api/admin/previews/{flag}"
 	path = pathReplace(path, "flag", "simple", false, flag)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -792,7 +792,7 @@ func (c *Client) GetPreviewUsers(ctx context.Context, flag string, opts ...GetPr
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result PreviewUsersOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -808,7 +808,7 @@ func (c *Client) GetPreviewUsers(ctx context.Context, flag string, opts ...GetPr
 func (c *Client) ListAdminProducts(ctx context.Context) (*ListAdminProductsOutputBody, error) {
 	path := "/api/admin/products"
 	var result ListAdminProductsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -824,7 +824,7 @@ func (c *Client) ListAdminProducts(ctx context.Context) (*ListAdminProductsOutpu
 func (c *Client) CreateAiIntegrationCatalogEntry(ctx context.Context, body CatalogEntryBody) (*CatalogEntryResponse, error) {
 	path := "/api/admin/products/ai/catalog"
 	var result CatalogEntryResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -841,7 +841,7 @@ func (c *Client) UpdateAiIntegrationCatalogEntry(ctx context.Context, catalogEnt
 	path := "/api/admin/products/ai/catalog/{catalogEntryId}"
 	path = pathReplace(path, "catalogEntryId", "simple", false, catalogEntryID)
 	var result CatalogEntryResponse
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -857,7 +857,7 @@ func (c *Client) UpdateAiIntegrationCatalogEntry(ctx context.Context, catalogEnt
 func (c *Client) DeleteAiConnection(ctx context.Context, connectionID string) error {
 	path := "/api/admin/products/ai/connections/{connectionId}"
 	path = pathReplace(path, "connectionId", "simple", false, connectionID)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -873,7 +873,7 @@ func (c *Client) DeleteAiConnection(ctx context.Context, connectionID string) er
 func (c *Client) MapExistingAiConnection(ctx context.Context, connectionID string, body ConnectionPathInputBody) error {
 	path := "/api/admin/products/ai/connections/{connectionId}"
 	path = pathReplace(path, "connectionId", "simple", false, connectionID)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -889,7 +889,7 @@ func (c *Client) MapExistingAiConnection(ctx context.Context, connectionID strin
 func (c *Client) GetAdminAiProductDetail(ctx context.Context) (*AiProductDetailOutputBody, error) {
 	path := "/api/admin/products/ai/detail"
 	var result AiProductDetailOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -905,7 +905,7 @@ func (c *Client) GetAdminAiProductDetail(ctx context.Context) (*AiProductDetailO
 func (c *Client) SetPlatformProductState(ctx context.Context, product string, body ProductPathInputBody) error {
 	path := "/api/admin/products/{product}"
 	path = pathReplace(path, "product", "simple", false, product)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -942,7 +942,7 @@ func (c *Client) GetPlatformReports(ctx context.Context, opts ...GetPlatformRepo
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Report
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -960,7 +960,7 @@ func (c *Client) GetPlatformReports(ctx context.Context, opts ...GetPlatformRepo
 func (c *Client) CreateAdminReport(ctx context.Context, body *CreateReportBody) (*Report, error) {
 	path := "/api/admin/reports"
 	var result Report
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -979,7 +979,7 @@ func (c *Client) GetPlatformReport(ctx context.Context, id string) (*Report, err
 	path := "/api/admin/reports/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
 	var result Report
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -997,7 +997,7 @@ func (c *Client) GetPlatformReport(ctx context.Context, id string) (*Report, err
 func (c *Client) DeletePlatformReport(ctx context.Context, id string) error {
 	path := "/api/admin/reports/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -1016,7 +1016,7 @@ func (c *Client) UpdatePlatformReport(ctx context.Context, id string, body *Upda
 	path := "/api/admin/reports/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
 	var result Report
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1033,7 +1033,7 @@ func (c *Client) KillUserWorkspace(ctx context.Context, user string, type_ strin
 	path := "/api/admin/user-workspace/users/{user}/{type}/kill"
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "type", "simple", false, type_)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -1047,7 +1047,7 @@ func (c *Client) KillUserWorkspace(ctx context.Context, user string, type_ strin
 func (c *Client) ReceiveAgentAlive(ctx context.Context, body WorkflowAgentAliveUpdate) (*WorkflowAgentResponse, error) {
 	path := "/api/agent/alive"
 	var result WorkflowAgentResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1061,7 +1061,7 @@ func (c *Client) ReceiveAgentAlive(ctx context.Context, body WorkflowAgentAliveU
 func (c *Client) AgentHeartbeat(ctx context.Context, body HeartbeatInputBody) (*HeartbeatOutputBody, error) {
 	path := "/api/agent/heartbeat"
 	var result HeartbeatOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1075,7 +1075,7 @@ func (c *Client) AgentHeartbeat(ctx context.Context, body HeartbeatInputBody) (*
 func (c *Client) RegisterNode(ctx context.Context, body RegisterNodeByTokenInputBody) (*RegisterNodeOutputBody, error) {
 	path := "/api/agent/register"
 	var result RegisterNodeOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1114,7 +1114,7 @@ func (c *Client) GetUserAiUsageBreakdown(ctx context.Context, opts ...GetUserAiU
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result UsageBreakdownResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1153,7 +1153,7 @@ func (c *Client) GetUserAiUsageOverTime(ctx context.Context, opts ...GetUserAiUs
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []TimeSeriesPoint
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1186,7 +1186,7 @@ func (c *Client) GetUserAiUsageSummary(ctx context.Context, opts ...GetUserAiUsa
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result UsageSummaryResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1200,7 +1200,7 @@ func (c *Client) GetUserAiUsageSummary(ctx context.Context, opts ...GetUserAiUsa
 func (c *Client) ListAccessibleAiProviders(ctx context.Context) (*[]AccessibleAiProviderResponse, error) {
 	path := "/api/ai/providers"
 	var result []AccessibleAiProviderResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1236,7 +1236,7 @@ func (c *Client) ListUserAiChatAttachments(ctx context.Context, opts ...ListUser
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ListUserAttachmentsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1250,7 +1250,7 @@ func (c *Client) ListUserAiChatAttachments(ctx context.Context, opts ...ListUser
 func (c *Client) UploadStandaloneAiChatAttachment(ctx context.Context, body *any) (*AttachmentResponse, error) {
 	path := "/api/aichat/attachments"
 	var result AttachmentResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "multipart/form-data", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1264,7 +1264,7 @@ func (c *Client) UploadStandaloneAiChatAttachment(ctx context.Context, body *any
 func (c *Client) DeleteAiChatAttachmentDirect(ctx context.Context, attachmentID string) error {
 	path := "/api/aichat/attachments/{attachmentId}"
 	path = pathReplace(path, "attachmentId", "simple", false, attachmentID)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -1279,7 +1279,7 @@ func (c *Client) DownloadAiChatAttachmentDirect(ctx context.Context, attachmentI
 	path := "/api/aichat/attachments/{attachmentId}/download"
 	path = pathReplace(path, "attachmentId", "simple", false, attachmentID)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1312,7 +1312,7 @@ func (c *Client) ListAiChatConversations(ctx context.Context, opts ...ListAiChat
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ListConversationsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1326,7 +1326,7 @@ func (c *Client) ListAiChatConversations(ctx context.Context, opts ...ListAiChat
 func (c *Client) CreateAiChatConversation(ctx context.Context, body CreateConversationInputBody) (*ConversationResponse, error) {
 	path := "/api/aichat/conversations"
 	var result ConversationResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1357,7 +1357,7 @@ func (c *Client) ListAiChatAttachments(ctx context.Context, conversationID strin
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ListAttachmentsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1388,7 +1388,7 @@ func (c *Client) UploadAiChatAttachment(ctx context.Context, conversationID stri
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result AttachmentResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "multipart/form-data", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1404,7 +1404,7 @@ func (c *Client) DownloadAiChatAttachment(ctx context.Context, conversationID st
 	path = pathReplace(path, "conversationId", "simple", false, conversationID)
 	path = pathReplace(path, "attachmentId", "simple", false, attachmentID)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1419,7 +1419,7 @@ func (c *Client) DeleteAiChatAttachment(ctx context.Context, conversationID stri
 	path := "/api/aichat/conversations/{conversationId}/attachments/{attachmentId}"
 	path = pathReplace(path, "conversationId", "simple", false, conversationID)
 	path = pathReplace(path, "attachmentId", "simple", false, attachmentID)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -1435,7 +1435,7 @@ func (c *Client) GetAiChatMessageSiblings(ctx context.Context, conversationID st
 	path = pathReplace(path, "conversationId", "simple", false, conversationID)
 	path = pathReplace(path, "messageId", "simple", false, messageID)
 	var result GetMessageSiblingsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1450,7 +1450,7 @@ func (c *Client) ListAiChatPermissions(ctx context.Context, conversationID strin
 	path := "/api/aichat/conversations/{conversationId}/permissions"
 	path = pathReplace(path, "conversationId", "simple", false, conversationID)
 	var result ListPermissionsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1465,7 +1465,7 @@ func (c *Client) AddAiChatPermission(ctx context.Context, conversationID string,
 	path := "/api/aichat/conversations/{conversationId}/permissions"
 	path = pathReplace(path, "conversationId", "simple", false, conversationID)
 	var result PermissionEntry
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1480,7 +1480,7 @@ func (c *Client) RemoveAiChatPermission(ctx context.Context, conversationID stri
 	path := "/api/aichat/conversations/{conversationId}/permissions/{permissionId}"
 	path = pathReplace(path, "conversationId", "simple", false, conversationID)
 	path = pathReplace(path, "permissionId", "simple", false, permissionID)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -1496,7 +1496,7 @@ func (c *Client) UpdateAiChatPermission(ctx context.Context, conversationID stri
 	path = pathReplace(path, "conversationId", "simple", false, conversationID)
 	path = pathReplace(path, "permissionId", "simple", false, permissionID)
 	var result PermissionEntry
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1527,7 +1527,7 @@ func (c *Client) GetAiChatConversation(ctx context.Context, id string, opts ...G
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ConversationResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1541,7 +1541,7 @@ func (c *Client) GetAiChatConversation(ctx context.Context, id string, opts ...G
 func (c *Client) DeleteAiChatConversation(ctx context.Context, id string) error {
 	path := "/api/aichat/conversations/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -1556,7 +1556,7 @@ func (c *Client) UpdateAiChatConversation(ctx context.Context, id string, body U
 	path := "/api/aichat/conversations/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
 	var result ConversationResponse
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1595,7 +1595,7 @@ func (c *Client) ListUserAllocations(ctx context.Context, opts ...ListUserAlloca
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Allocation
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1609,7 +1609,7 @@ func (c *Client) ListUserAllocations(ctx context.Context, opts ...ListUserAlloca
 func (c *Client) GetApikeys(ctx context.Context) (*[]APIKeyResponse, error) {
 	path := "/api/apikeys"
 	var result []APIKeyResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1625,7 +1625,7 @@ func (c *Client) GetApikeys(ctx context.Context) (*[]APIKeyResponse, error) {
 func (c *Client) CreateApikey(ctx context.Context, body CreateAPIKeyInputBody) (*CreateAPIKeyOutputBody, error) {
 	path := "/api/apikeys"
 	var result CreateAPIKeyOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1639,7 +1639,7 @@ func (c *Client) CreateApikey(ctx context.Context, body CreateAPIKeyInputBody) (
 func (c *Client) DeleteApikey(ctx context.Context, name string) error {
 	path := "/api/apikeys/{name}"
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -1653,7 +1653,7 @@ func (c *Client) DeleteApikey(ctx context.Context, name string) error {
 func (c *Client) GetAuthSession(ctx context.Context) (*AuthSession, error) {
 	path := "/api/auth/session"
 	var result AuthSession
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1681,7 +1681,7 @@ func (c *Client) GetAuthSsoOidcCallback(ctx context.Context, params GetAuthSsoOi
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
 	}
-	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -1695,7 +1695,7 @@ func (c *Client) GetAuthSsoOidcCallback(ctx context.Context, params GetAuthSsoOi
 func (c *Client) GetAuthSsoOidcRedirect(ctx context.Context, authID string) error {
 	path := "/api/auth/sso/oidc/redirect/{authID}"
 	path = pathReplace(path, "authID", "simple", false, authID)
-	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -1725,7 +1725,7 @@ func (c *Client) GetAuthToken(ctx context.Context, opts ...GetAuthTokenParams) (
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1760,7 +1760,7 @@ func (c *Client) GetClusterSessionToken(ctx context.Context, params GetClusterSe
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1790,7 +1790,7 @@ func (c *Client) GetAuthTokenOidc(ctx context.Context, opts ...GetAuthTokenOidcP
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1804,7 +1804,7 @@ func (c *Client) GetAuthTokenOidc(ctx context.Context, opts ...GetAuthTokenOidcP
 func (c *Client) GetWhoami(ctx context.Context) (*string, error) {
 	path := "/api/auth/whoami"
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1818,7 +1818,7 @@ func (c *Client) GetWhoami(ctx context.Context) (*string, error) {
 func (c *Client) GetWhoamiOrganization(ctx context.Context) (*string, error) {
 	path := "/api/auth/whoami/organization"
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1832,7 +1832,7 @@ func (c *Client) GetWhoamiOrganization(ctx context.Context) (*string, error) {
 func (c *Client) GetAvailableCsps(ctx context.Context) (*[]string, error) {
 	path := "/api/available-csps"
 	var result []string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1858,7 +1858,7 @@ func (c *Client) GetUserAvatar(ctx context.Context, opts ...GetUserAvatarParams)
 	headers := make(http.Header)
 	setHeader(headers, "If-None-Match", false, params.IfNoneMatch)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json", headers); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1872,7 +1872,7 @@ func (c *Client) GetUserAvatar(ctx context.Context, opts ...GetUserAvatarParams)
 func (c *Client) UploadUserAvatar(ctx context.Context, body *any) (*UploadUserAvatarOutputBody, error) {
 	path := "/api/avatar"
 	var result UploadUserAvatarOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "multipart/form-data", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1885,7 +1885,7 @@ func (c *Client) UploadUserAvatar(ctx context.Context, body *any) (*UploadUserAv
 // Removes the authenticated user's avatar.
 func (c *Client) DeleteUserAvatar(ctx context.Context) error {
 	path := "/api/avatar"
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -1912,7 +1912,7 @@ func (c *Client) ServeBlob(ctx context.Context, etag string, opts ...ServeBlobPa
 	headers := make(http.Header)
 	setHeader(headers, "If-None-Match", false, params.IfNoneMatch)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json", headers); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1945,7 +1945,7 @@ func (c *Client) GetBuckets(ctx context.Context, opts ...GetBucketsParams) (*[]B
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Bucket
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1959,7 +1959,7 @@ func (c *Client) GetBuckets(ctx context.Context, opts ...GetBucketsParams) (*[]B
 func (c *Client) ListUserCloudAccounts(ctx context.Context) (*[]CloudAccountListItem, error) {
 	path := "/api/cloud-accounts"
 	var result []CloudAccountListItem
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1973,7 +1973,7 @@ func (c *Client) ListUserCloudAccounts(ctx context.Context) (*[]CloudAccountList
 func (c *Client) GetClusters(ctx context.Context) (*[]GeneralCluster, error) {
 	path := "/api/clusters"
 	var result []GeneralCluster
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1987,7 +1987,7 @@ func (c *Client) GetClusters(ctx context.Context) (*[]GeneralCluster, error) {
 func (c *Client) CreateCluster(ctx context.Context, body ClusterCreate) (*GeneralCluster, error) {
 	path := "/api/clusters"
 	var result GeneralCluster
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2001,7 +2001,7 @@ func (c *Client) CreateCluster(ctx context.Context, body ClusterCreate) (*Genera
 func (c *Client) GetDefaultDesktopWallpaper(ctx context.Context) (*string, error) {
 	path := "/api/desktop-wallpaper/default"
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2034,7 +2034,7 @@ func (c *Client) GetDisks(ctx context.Context, opts ...GetDisksParams) (*[]Disk,
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Disk
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2102,7 +2102,7 @@ func (c *Client) ListResourceEvents(ctx context.Context, targetType string, targ
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result EventsPageBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2116,7 +2116,7 @@ func (c *Client) ListResourceEvents(ctx context.Context, targetType string, targ
 func (c *Client) ListEventTypes(ctx context.Context) (*ListEventTypesOutputBody, error) {
 	path := "/api/events/types"
 	var result ListEventTypesOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2149,7 +2149,7 @@ func (c *Client) GetGroups(ctx context.Context, opts ...GetGroupsParams) (*[]Gro
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Group
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2165,7 +2165,7 @@ func (c *Client) GetGroups(ctx context.Context, opts ...GetGroupsParams) (*[]Gro
 func (c *Client) ListMonitoredDeployments(ctx context.Context) (*[]MonitoredDeploymentSummary, error) {
 	path := "/api/health-monitoring/deployments"
 	var result []MonitoredDeploymentSummary
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2191,7 +2191,7 @@ func (c *Client) PostHealthMonitoringHeartbeat(ctx context.Context, body HealthS
 	}
 	headers := make(http.Header)
 	setHeader(headers, "Authorization", false, params.Authorization)
-	if err := c.do(ctx, "POST", path, body, nil, "application/json", headers); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", headers); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -2230,7 +2230,7 @@ func (c *Client) GetHelmChartValues(ctx context.Context, opts ...GetHelmChartVal
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result HelmChartValuesOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2244,7 +2244,7 @@ func (c *Client) GetHelmChartValues(ctx context.Context, opts ...GetHelmChartVal
 func (c *Client) GetInstanceFacts(ctx context.Context) (*Fact, error) {
 	path := "/api/instances/facts"
 	var result Fact
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2257,7 +2257,7 @@ func (c *Client) GetInstanceFacts(ctx context.Context) (*Fact, error) {
 // Updates the instance status based on updates from agent running on instance.
 func (c *Client) UpdateInstanceStatus(ctx context.Context, body PatchInstanceStatusBody) error {
 	path := "/api/instances/status"
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -2271,7 +2271,7 @@ func (c *Client) UpdateInstanceStatus(ctx context.Context, body PatchInstanceSta
 func (c *Client) PutInstanceWindowsCredential(ctx context.Context, body PutWindowsCredentialBody) (*PutWindowsCredentialResponse, error) {
 	path := "/api/instances/windows-credential"
 	var result PutWindowsCredentialResponse
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2285,7 +2285,7 @@ func (c *Client) PutInstanceWindowsCredential(ctx context.Context, body PutWindo
 func (c *Client) GithubInstallations(ctx context.Context) (*ListInstallationsOutputBody, error) {
 	path := "/api/integrations/github/installations"
 	var result ListInstallationsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2298,7 +2298,7 @@ func (c *Client) GithubInstallations(ctx context.Context) (*ListInstallationsOut
 // Unlinks the current user's GitHub account and removes the stored token.
 func (c *Client) GithubOauthUnlink(ctx context.Context) error {
 	path := "/api/integrations/github/oauth"
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -2311,7 +2311,7 @@ func (c *Client) GithubOauthUnlink(ctx context.Context) error {
 // Redirects the user to GitHub to install the app and authorize.
 func (c *Client) GithubOauthAuthorize(ctx context.Context) error {
 	path := "/api/integrations/github/oauth/authorize"
-	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -2343,7 +2343,7 @@ func (c *Client) GithubOauthCallback(ctx context.Context, opts ...GithubOauthCal
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
 	}
-	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -2357,7 +2357,7 @@ func (c *Client) GithubOauthCallback(ctx context.Context, opts ...GithubOauthCal
 func (c *Client) GithubOauthStatus(ctx context.Context) (*OauthStatusResponse, error) {
 	path := "/api/integrations/github/oauth/status"
 	var result OauthStatusResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2392,7 +2392,7 @@ func (c *Client) GithubRepos(ctx context.Context, params GithubReposParams) (*Li
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ListReposOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2405,7 +2405,7 @@ func (c *Client) GithubRepos(ctx context.Context, params GithubReposParams) (*Li
 // Receives webhook events from GitHub for installation and authorization lifecycle management.
 func (c *Client) GithubWebhook(ctx context.Context, body []byte) error {
 	path := "/api/integrations/github/webhook"
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/octet-stream", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -2419,7 +2419,7 @@ func (c *Client) GithubWebhook(ctx context.Context, body []byte) error {
 func (c *Client) ReportClusterConnectState(ctx context.Context, clusterID string, body ConnectStateBody) error {
 	path := "/api/internal/usercontainer/clusters/{clusterId}/connect-state"
 	path = pathReplace(path, "clusterId", "simple", false, clusterID)
-	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -2433,7 +2433,7 @@ func (c *Client) ReportClusterConnectState(ctx context.Context, clusterID string
 func (c *Client) GetExistingClusters(ctx context.Context) (*[]ExistingCluster, error) {
 	path := "/api/internal/usercontainer/existing"
 	var result []ExistingCluster
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2469,7 +2469,7 @@ func (c *Client) GetIps(ctx context.Context, opts ...GetIpsParams) (*[]IP, error
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []IP
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2483,7 +2483,7 @@ func (c *Client) GetIps(ctx context.Context, opts ...GetIpsParams) (*[]IP, error
 func (c *Client) ListKubernetesClusters(ctx context.Context) (*[]ClusterResponse, error) {
 	path := "/api/kubernetes"
 	var result []ClusterResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2516,7 +2516,7 @@ func (c *Client) GetLustre(ctx context.Context, opts ...GetLustreParams) (*[]Lus
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Lustre
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2558,7 +2558,7 @@ func (c *Client) ListMarketplaceItems(ctx context.Context, opts ...ListMarketpla
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []MarketplaceListItem
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2572,7 +2572,7 @@ func (c *Client) ListMarketplaceItems(ctx context.Context, opts ...ListMarketpla
 func (c *Client) PublishAwsBucket(ctx context.Context, body PublishAwsBucketRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/aws-bucket"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2586,7 +2586,7 @@ func (c *Client) PublishAwsBucket(ctx context.Context, body PublishAwsBucketRequ
 func (c *Client) PublishAwsDisk(ctx context.Context, body PublishAwsDiskRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/aws-disk"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2600,7 +2600,7 @@ func (c *Client) PublishAwsDisk(ctx context.Context, body PublishAwsDiskRequest)
 func (c *Client) PublishAwsEfs(ctx context.Context, body PublishAwsEfsRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/aws-efs"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2614,7 +2614,7 @@ func (c *Client) PublishAwsEfs(ctx context.Context, body PublishAwsEfsRequest) (
 func (c *Client) PublishAwsLustre(ctx context.Context, body PublishAwsLustreRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/aws-lustre"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2628,7 +2628,7 @@ func (c *Client) PublishAwsLustre(ctx context.Context, body PublishAwsLustreRequ
 func (c *Client) PublishAwsSlurm(ctx context.Context, body PublishAwsSlurmRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/aws-slurm"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2642,7 +2642,7 @@ func (c *Client) PublishAwsSlurm(ctx context.Context, body PublishAwsSlurmReques
 func (c *Client) PublishAzureAzfiles(ctx context.Context, body PublishAzureAzfilesRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/azure-azfiles"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2656,7 +2656,7 @@ func (c *Client) PublishAzureAzfiles(ctx context.Context, body PublishAzureAzfil
 func (c *Client) PublishAzureBucket(ctx context.Context, body PublishAzureBucketRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/azure-bucket"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2670,7 +2670,7 @@ func (c *Client) PublishAzureBucket(ctx context.Context, body PublishAzureBucket
 func (c *Client) PublishAzureDisk(ctx context.Context, body PublishAzureDiskRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/azure-disk"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2684,7 +2684,7 @@ func (c *Client) PublishAzureDisk(ctx context.Context, body PublishAzureDiskRequ
 func (c *Client) PublishAzureManagedlustre(ctx context.Context, body PublishAzureManagedLustreRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/azure-managedlustre"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2698,7 +2698,7 @@ func (c *Client) PublishAzureManagedlustre(ctx context.Context, body PublishAzur
 func (c *Client) PublishAzureNetappfiles(ctx context.Context, body PublishAzureNetappFilesRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/azure-netappfiles"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2712,7 +2712,7 @@ func (c *Client) PublishAzureNetappfiles(ctx context.Context, body PublishAzureN
 func (c *Client) PublishAzureSlurm(ctx context.Context, body PublishAzureSlurmRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/azure-slurm"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2726,7 +2726,7 @@ func (c *Client) PublishAzureSlurm(ctx context.Context, body PublishAzureSlurmRe
 func (c *Client) PublishExisting(ctx context.Context, body PublishExistingRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/existing"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2740,7 +2740,7 @@ func (c *Client) PublishExisting(ctx context.Context, body PublishExistingReques
 func (c *Client) PublishGoogleBucket(ctx context.Context, body PublishGoogleBucketRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/google-bucket"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2754,7 +2754,7 @@ func (c *Client) PublishGoogleBucket(ctx context.Context, body PublishGoogleBuck
 func (c *Client) PublishGoogleDisk(ctx context.Context, body PublishGoogleDiskRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/google-disk"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2768,7 +2768,7 @@ func (c *Client) PublishGoogleDisk(ctx context.Context, body PublishGoogleDiskRe
 func (c *Client) PublishGoogleFilestore(ctx context.Context, body PublishGoogleFilestoreRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/google-filestore"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2782,7 +2782,7 @@ func (c *Client) PublishGoogleFilestore(ctx context.Context, body PublishGoogleF
 func (c *Client) PublishGoogleManagedlustre(ctx context.Context, body PublishGoogleManagedLustreRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/google-managedlustre"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2796,7 +2796,7 @@ func (c *Client) PublishGoogleManagedlustre(ctx context.Context, body PublishGoo
 func (c *Client) PublishGoogleSlurm(ctx context.Context, body PublishGoogleSlurmRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/google-slurm"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2811,7 +2811,7 @@ func (c *Client) GetMarketplaceItem(ctx context.Context, slug string) (*Marketpl
 	path := "/api/marketplace/items/{slug}"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2825,7 +2825,7 @@ func (c *Client) GetMarketplaceItem(ctx context.Context, slug string) (*Marketpl
 func (c *Client) DeleteMarketplaceItem(ctx context.Context, slug string) error {
 	path := "/api/marketplace/items/{slug}"
 	path = pathReplace(path, "slug", "simple", false, slug)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -2840,7 +2840,7 @@ func (c *Client) UpdateMarketplaceItem(ctx context.Context, slug string, body Up
 	path := "/api/marketplace/items/{slug}"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2854,7 +2854,7 @@ func (c *Client) UpdateMarketplaceItem(ctx context.Context, slug string, body Up
 func (c *Client) CheckMarketplaceItemSlug(ctx context.Context, slug string) error {
 	path := "/api/marketplace/items/{slug}"
 	path = pathReplace(path, "slug", "simple", false, slug)
-	if err := c.do(ctx, "HEAD", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "HEAD", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -2869,7 +2869,7 @@ func (c *Client) GetMarketplaceAccountVersions(ctx context.Context, slug string)
 	path := "/api/marketplace/items/{slug}/account-versions"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result map[string]bool
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2884,7 +2884,7 @@ func (c *Client) AddMarketplaceAccountVersion(ctx context.Context, slug string, 
 	path := "/api/marketplace/items/{slug}/account-versions/{version}"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	path = pathReplace(path, "version", "simple", false, version)
-	if err := c.do(ctx, "PUT", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -2899,7 +2899,7 @@ func (c *Client) RemoveMarketplaceAccountVersion(ctx context.Context, slug strin
 	path := "/api/marketplace/items/{slug}/account-versions/{version}"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	path = pathReplace(path, "version", "simple", false, version)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -2914,7 +2914,7 @@ func (c *Client) ForkMarketplaceItem(ctx context.Context, slug string, body Fork
 	path := "/api/marketplace/items/{slug}/fork"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result ForkMarketplaceItemOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2941,7 +2941,7 @@ func (c *Client) GetMarketplaceIcon(ctx context.Context, slug string, opts ...Ge
 	headers := make(http.Header)
 	setHeader(headers, "If-None-Match", false, params.IfNoneMatch)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json", headers); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2956,7 +2956,7 @@ func (c *Client) UploadMarketplaceIcon(ctx context.Context, slug string, body *a
 	path := "/api/marketplace/items/{slug}/icon"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result UploadMarketplaceIconOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "multipart/form-data", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2970,7 +2970,7 @@ func (c *Client) UploadMarketplaceIcon(ctx context.Context, slug string, body *a
 func (c *Client) DeleteMarketplaceIcon(ctx context.Context, slug string) error {
 	path := "/api/marketplace/items/{slug}/icon"
 	path = pathReplace(path, "slug", "simple", false, slug)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -2986,7 +2986,7 @@ func (c *Client) GetMarketplaceItemDescription(ctx context.Context, version stri
 	path = pathReplace(path, "version", "simple", false, version)
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3002,7 +3002,7 @@ func (c *Client) GetMarketplaceItemYaml(ctx context.Context, version string, slu
 	path = pathReplace(path, "version", "simple", false, version)
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result map[string]any
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3017,7 +3017,7 @@ func (c *Client) AddAwsBucketVersion(ctx context.Context, slug string, body AddA
 	path := "/api/marketplace/items/{slug}/versions/aws-bucket"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3032,7 +3032,7 @@ func (c *Client) AddAwsDiskVersion(ctx context.Context, slug string, body AddAws
 	path := "/api/marketplace/items/{slug}/versions/aws-disk"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3047,7 +3047,7 @@ func (c *Client) AddAwsEfsVersion(ctx context.Context, slug string, body AddAwsE
 	path := "/api/marketplace/items/{slug}/versions/aws-efs"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3062,7 +3062,7 @@ func (c *Client) AddAwsLustreVersion(ctx context.Context, slug string, body AddA
 	path := "/api/marketplace/items/{slug}/versions/aws-lustre"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3077,7 +3077,7 @@ func (c *Client) AddAwsSlurmVersion(ctx context.Context, slug string, body AddAw
 	path := "/api/marketplace/items/{slug}/versions/aws-slurm"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3092,7 +3092,7 @@ func (c *Client) AddAzureAzfilesVersion(ctx context.Context, slug string, body A
 	path := "/api/marketplace/items/{slug}/versions/azure-azfiles"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3107,7 +3107,7 @@ func (c *Client) AddAzureBucketVersion(ctx context.Context, slug string, body Ad
 	path := "/api/marketplace/items/{slug}/versions/azure-bucket"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3122,7 +3122,7 @@ func (c *Client) AddAzureDiskVersion(ctx context.Context, slug string, body AddA
 	path := "/api/marketplace/items/{slug}/versions/azure-disk"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3137,7 +3137,7 @@ func (c *Client) AddAzureManagedlustreVersion(ctx context.Context, slug string, 
 	path := "/api/marketplace/items/{slug}/versions/azure-managedlustre"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3152,7 +3152,7 @@ func (c *Client) AddAzureNetappfilesVersion(ctx context.Context, slug string, bo
 	path := "/api/marketplace/items/{slug}/versions/azure-netappfiles"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3167,7 +3167,7 @@ func (c *Client) AddAzureSlurmVersion(ctx context.Context, slug string, body Add
 	path := "/api/marketplace/items/{slug}/versions/azure-slurm"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3182,7 +3182,7 @@ func (c *Client) AddExistingVersion(ctx context.Context, slug string, body AddEx
 	path := "/api/marketplace/items/{slug}/versions/existing"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3197,7 +3197,7 @@ func (c *Client) AddGoogleBucketVersion(ctx context.Context, slug string, body A
 	path := "/api/marketplace/items/{slug}/versions/google-bucket"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3212,7 +3212,7 @@ func (c *Client) AddGoogleDiskVersion(ctx context.Context, slug string, body Add
 	path := "/api/marketplace/items/{slug}/versions/google-disk"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3227,7 +3227,7 @@ func (c *Client) AddGoogleFilestoreVersion(ctx context.Context, slug string, bod
 	path := "/api/marketplace/items/{slug}/versions/google-filestore"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3242,7 +3242,7 @@ func (c *Client) AddGoogleManagedlustreVersion(ctx context.Context, slug string,
 	path := "/api/marketplace/items/{slug}/versions/google-managedlustre"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3257,7 +3257,7 @@ func (c *Client) AddGoogleSlurmVersion(ctx context.Context, slug string, body Ad
 	path := "/api/marketplace/items/{slug}/versions/google-slurm"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3272,7 +3272,7 @@ func (c *Client) AddLocalWorkflowVersion(ctx context.Context, slug string, body 
 	path := "/api/marketplace/items/{slug}/versions/local-workflow"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3287,7 +3287,7 @@ func (c *Client) AddOpenstackSlurmVersion(ctx context.Context, slug string, body
 	path := "/api/marketplace/items/{slug}/versions/openstack-slurm"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3302,7 +3302,7 @@ func (c *Client) AddOracleBucketVersion(ctx context.Context, slug string, body A
 	path := "/api/marketplace/items/{slug}/versions/oracle-bucket"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3317,7 +3317,7 @@ func (c *Client) AddOracleOraclefsVersion(ctx context.Context, slug string, body
 	path := "/api/marketplace/items/{slug}/versions/oracle-oraclefs"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3332,7 +3332,7 @@ func (c *Client) AddOracleSlurmVersion(ctx context.Context, slug string, body Ad
 	path := "/api/marketplace/items/{slug}/versions/oracle-slurm"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3347,7 +3347,7 @@ func (c *Client) AddRemoteWorkflowVersion(ctx context.Context, slug string, body
 	path := "/api/marketplace/items/{slug}/versions/remote-workflow"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3362,7 +3362,7 @@ func (c *Client) RemoveMarketplaceVersion(ctx context.Context, slug string, vers
 	path := "/api/marketplace/items/{slug}/versions/{version}"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	path = pathReplace(path, "version", "simple", false, version)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -3376,7 +3376,7 @@ func (c *Client) RemoveMarketplaceVersion(ctx context.Context, slug string, vers
 func (c *Client) PublishLocalWorkflow(ctx context.Context, body PublishLocalWorkflowRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/local-workflow"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3390,7 +3390,7 @@ func (c *Client) PublishLocalWorkflow(ctx context.Context, body PublishLocalWork
 func (c *Client) PublishOpenstackSlurm(ctx context.Context, body PublishOpenstackSlurmRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/openstack-slurm"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3404,7 +3404,7 @@ func (c *Client) PublishOpenstackSlurm(ctx context.Context, body PublishOpenstac
 func (c *Client) PublishOracleBucket(ctx context.Context, body PublishOracleBucketRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/oracle-bucket"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3418,7 +3418,7 @@ func (c *Client) PublishOracleBucket(ctx context.Context, body PublishOracleBuck
 func (c *Client) PublishOracleOraclefs(ctx context.Context, body PublishOracleOraclefsRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/oracle-oraclefs"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3432,7 +3432,7 @@ func (c *Client) PublishOracleOraclefs(ctx context.Context, body PublishOracleOr
 func (c *Client) PublishOracleSlurm(ctx context.Context, body PublishOracleSlurmRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/oracle-slurm"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3446,7 +3446,7 @@ func (c *Client) PublishOracleSlurm(ctx context.Context, body PublishOracleSlurm
 func (c *Client) PublishRemoteWorkflow(ctx context.Context, body PublishRemoteWorkflowRequest) (*MarketplaceItemBody, error) {
 	path := "/api/marketplace/remote-workflow"
 	var result MarketplaceItemBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3472,7 +3472,7 @@ func (c *Client) ListMarketplaceTagRecommendations(ctx context.Context, params L
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result TagRecommendationsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3508,7 +3508,7 @@ func (c *Client) GetMachineLearningWorkspaces(ctx context.Context, opts ...GetMa
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []MachineLearningWorkspace
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3544,7 +3544,7 @@ func (c *Client) ListNetworkInterfaces(ctx context.Context, opts ...ListNetworkI
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []NetworkInterface
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3558,7 +3558,7 @@ func (c *Client) ListNetworkInterfaces(ctx context.Context, opts ...ListNetworkI
 func (c *Client) GetNetworks(ctx context.Context) (*[]Network, error) {
 	path := "/api/networks"
 	var result []Network
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3591,7 +3591,7 @@ func (c *Client) GetNfs(ctx context.Context, opts ...GetNfsParams) (*[]Nfs, erro
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Nfs
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3627,7 +3627,7 @@ func (c *Client) GetNotifications(ctx context.Context, opts ...GetNotificationsP
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Notification
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3641,7 +3641,7 @@ func (c *Client) GetNotifications(ctx context.Context, opts ...GetNotificationsP
 func (c *Client) CreateNotification(ctx context.Context, body CreateNotificationBody) (*CreateNotificationResponseBody, error) {
 	path := "/api/notifications"
 	var result CreateNotificationResponseBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3655,7 +3655,7 @@ func (c *Client) CreateNotification(ctx context.Context, body CreateNotification
 func (c *Client) GetNotificationsOptions(ctx context.Context) (*[]NotificationCategory, error) {
 	path := "/api/notifications/options"
 	var result []NotificationCategory
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3669,7 +3669,7 @@ func (c *Client) GetNotificationsOptions(ctx context.Context) (*[]NotificationCa
 func (c *Client) NotificationsSettings(ctx context.Context) (*NotificationSettings, error) {
 	path := "/api/notifications/settings"
 	var result NotificationSettings
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3683,7 +3683,7 @@ func (c *Client) NotificationsSettings(ctx context.Context) (*NotificationSettin
 func (c *Client) SetNotificationsSettings(ctx context.Context, body *NotificationSettings) (*NotificationSettings, error) {
 	path := "/api/notifications/settings"
 	var result NotificationSettings
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3698,7 +3698,7 @@ func (c *Client) GetNotification(ctx context.Context, id string) (*Notification,
 	path := "/api/notifications/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
 	var result Notification
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3712,7 +3712,7 @@ func (c *Client) GetNotification(ctx context.Context, id string) (*Notification,
 func (c *Client) DeleteNotification(ctx context.Context, id string) error {
 	path := "/api/notifications/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -3739,7 +3739,7 @@ func (c *Client) UpdateNotification(ctx context.Context, id string, params Updat
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result Notification
-	if err := c.do(ctx, "PATCH", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3753,7 +3753,7 @@ func (c *Client) UpdateNotification(ctx context.Context, id string, params Updat
 func (c *Client) GetOidcConfiguration(ctx context.Context) (*OpenIDConfiguration, error) {
 	path := "/api/oidc/.well-known/openid-configuration"
 	var result OpenIDConfiguration
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3768,7 +3768,7 @@ func (c *Client) GetOidcSectorIdentifier(ctx context.Context, authMethodID strin
 	path := "/api/oidc/sso/{authMethodId}/sector-identifier"
 	path = pathReplace(path, "authMethodId", "simple", false, authMethodID)
 	var result []string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3782,7 +3782,7 @@ func (c *Client) GetOidcSectorIdentifier(ctx context.Context, authMethodID strin
 func (c *Client) GetRecommendedResources(ctx context.Context) (*RecommendedResourcesResponse, error) {
 	path := "/api/onboarding/recommended-resources"
 	var result RecommendedResourcesResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3796,7 +3796,7 @@ func (c *Client) GetRecommendedResources(ctx context.Context) (*RecommendedResou
 func (c *Client) PostOnboardingUserHost(ctx context.Context, body UserHostBody) (*UserHostResponse, error) {
 	path := "/api/onboarding/user-host"
 	var result UserHostResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3835,7 +3835,7 @@ func (c *Client) ChatCompletion(ctx context.Context, body ChatCompletionRequest,
 	setHeader(headers, "X-User-Message-Id", false, params.XUserMessageID)
 	setHeader(headers, "X-Allocation", false, params.XAllocation)
 	var result ChatCompletionResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json", headers); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3849,7 +3849,7 @@ func (c *Client) ChatCompletion(ctx context.Context, body ChatCompletionRequest,
 func (c *Client) ListAiChatModels(ctx context.Context) (*ModelsResponse, error) {
 	path := "/api/openai/v1/models"
 	var result ModelsResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3887,7 +3887,7 @@ func (c *Client) CreateAiResponse(ctx context.Context, body []byte, opts ...Crea
 	setHeader(headers, "X-Persist", false, params.XPersist)
 	setHeader(headers, "X-User-Message-Id", false, params.XUserMessageID)
 	setHeader(headers, "X-Allocation", false, params.XAllocation)
-	if err := c.do(ctx, "POST", path, body, nil, "application/json", headers); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/octet-stream", nil, "application/json", headers); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -3929,7 +3929,7 @@ func (c *Client) GetOrganizations(ctx context.Context, opts ...GetOrganizationsP
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result OrganizationsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3943,7 +3943,7 @@ func (c *Client) GetOrganizations(ctx context.Context, opts ...GetOrganizationsP
 func (c *Client) CreateOrganization(ctx context.Context, body CreateOrganizationInputBody) (*CreateOrganizationOutputBody, error) {
 	path := "/api/organizations"
 	var result CreateOrganizationOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3958,7 +3958,7 @@ func (c *Client) GetOrganization(ctx context.Context, organization string) (*Org
 	path := "/api/organizations/{organization}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result Organization
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3972,7 +3972,7 @@ func (c *Client) GetOrganization(ctx context.Context, organization string) (*Org
 func (c *Client) DeleteOrganization(ctx context.Context, organization string) error {
 	path := "/api/organizations/{organization}"
 	path = pathReplace(path, "organization", "simple", false, organization)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -3987,7 +3987,7 @@ func (c *Client) GetOrganizationActiveUserReport(ctx context.Context, organizati
 	path := "/api/organizations/{organization}/active-user-report"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result ActiveUserReport
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4002,7 +4002,7 @@ func (c *Client) UpdateOrganizationActiveUserReport(ctx context.Context, organiz
 	path := "/api/organizations/{organization}/active-user-report"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result ActiveUserReport
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4017,7 +4017,7 @@ func (c *Client) ListApprovedAiIntegrations(ctx context.Context, organization st
 	path := "/api/organizations/{organization}/ai-integrations"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result OrganizationCatalogOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4032,7 +4032,7 @@ func (c *Client) ListOrgAiModels(ctx context.Context, organization string) (*[]O
 	path := "/api/organizations/{organization}/ai-models"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result []OrgModelEntry
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4047,7 +4047,7 @@ func (c *Client) ListOrgAiProviders(ctx context.Context, organization string) (*
 	path := "/api/organizations/{organization}/ai-providers"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result []OrgAiProviderResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4062,7 +4062,7 @@ func (c *Client) CreateOrgAiProvider(ctx context.Context, organization string, b
 	path := "/api/organizations/{organization}/ai-providers"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result OrgAiProviderResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4078,7 +4078,7 @@ func (c *Client) GetOrgAiProvider(ctx context.Context, organization string, name
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result OrgAiProviderResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4093,7 +4093,7 @@ func (c *Client) DeleteOrgAiProvider(ctx context.Context, organization string, n
 	path := "/api/organizations/{organization}/ai-providers/{name}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -4109,7 +4109,7 @@ func (c *Client) UpdateOrgAiProvider(ctx context.Context, organization string, n
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result OrgAiProviderResponse
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4125,7 +4125,7 @@ func (c *Client) StartOrgCodexDeviceAuthorization(ctx context.Context, organizat
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result CodexDeviceAuthorizationResponse
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4140,7 +4140,7 @@ func (c *Client) PollOrgCodexDeviceAuthorization(ctx context.Context, authorizat
 	path := "/api/organizations/{organization}/ai-providers/{name}/codex-device-authorizations/{authorizationId}"
 	path = pathReplace(path, "authorizationId", "simple", false, authorizationID)
 	var result PollOrgCodexAuthorizationOutputBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4156,7 +4156,7 @@ func (c *Client) ListModelConfigs(ctx context.Context, organization string, name
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result []AiModelConfig
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4172,7 +4172,7 @@ func (c *Client) PutModelConfigs(ctx context.Context, organization string, name 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result []AiModelConfig
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4188,7 +4188,7 @@ func (c *Client) DeleteModelConfig(ctx context.Context, organization string, nam
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "model", "simple", false, model)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -4205,7 +4205,7 @@ func (c *Client) PatchModelConfig(ctx context.Context, organization string, name
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "model", "simple", false, model)
 	var result AiModelConfig
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4221,7 +4221,7 @@ func (c *Client) ListOrgProviderModels(ctx context.Context, organization string,
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result ListOrgProviderModelsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4237,7 +4237,7 @@ func (c *Client) GetOrgAiProviderPermissions(ctx context.Context, organization s
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result OrgConnectionPermissionsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4253,7 +4253,7 @@ func (c *Client) PutOrgAiProviderPermissions(ctx context.Context, organization s
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result OrgConnectionPermissionsOutputBody
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4269,7 +4269,7 @@ func (c *Client) GetOrgAiProviderUsage(ctx context.Context, organization string,
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AiProviderUsage
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4309,7 +4309,7 @@ func (c *Client) GetOrgUsageBreakdown(ctx context.Context, organization string, 
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result UsageBreakdownResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4349,7 +4349,7 @@ func (c *Client) GetOrgUsageOverTime(ctx context.Context, organization string, o
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []TimeSeriesPoint
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4383,7 +4383,7 @@ func (c *Client) GetOrgUsageSummary(ctx context.Context, organization string, op
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result OrgUsageSummaryResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4398,7 +4398,7 @@ func (c *Client) GetOrganizationAllocationThresholds(ctx context.Context, organi
 	path := "/api/organizations/{organization}/allocation-thresholds"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result []OrgAllocationThreshold
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4413,7 +4413,7 @@ func (c *Client) CreateOrganizationAllocationThreshold(ctx context.Context, orga
 	path := "/api/organizations/{organization}/allocation-thresholds"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result OrgAllocationThreshold
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4429,7 +4429,7 @@ func (c *Client) GetOrganizationAllocationThreshold(ctx context.Context, organiz
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "threshold", "simple", false, threshold)
 	var result OrgAllocationThreshold
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4445,7 +4445,7 @@ func (c *Client) UpdateOrganizationAllocationThreshold(ctx context.Context, orga
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "threshold", "simple", false, threshold)
 	var result OrgAllocationThreshold
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4460,7 +4460,7 @@ func (c *Client) DeleteOrganizationAllocationThreshold(ctx context.Context, orga
 	path := "/api/organizations/{organization}/allocation-thresholds/{threshold}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "threshold", "simple", false, threshold)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -4503,7 +4503,7 @@ func (c *Client) ListOrgAllocations(ctx context.Context, organization string, op
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Allocation
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4518,7 +4518,7 @@ func (c *Client) CreateAllocation(ctx context.Context, organization string, body
 	path := "/api/organizations/{organization}/allocations"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result Allocation
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4533,7 +4533,7 @@ func (c *Client) DeleteAllocation(ctx context.Context, organization string, name
 	path := "/api/organizations/{organization}/allocations/{name}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -4549,7 +4549,7 @@ func (c *Client) UpdateAllocation(ctx context.Context, organization string, name
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result Allocation
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4563,7 +4563,7 @@ func (c *Client) GetAllocationPermissions(ctx context.Context, organization stri
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result SubjectPermissions
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4576,7 +4576,7 @@ func (c *Client) UpdateAllocationPermissions(ctx context.Context, organization s
 	path := "/api/organizations/{organization}/allocations/{name}/permissions"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -4656,7 +4656,7 @@ func (c *Client) ListAllocationUsageEvents(ctx context.Context, organization str
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result RatedCostsPaginatedResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4670,7 +4670,7 @@ func (c *Client) CreateUsageEvent(ctx context.Context, organization string, name
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result UsageEventOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4686,7 +4686,7 @@ func (c *Client) DeleteAllocationUsageEvents(ctx context.Context, organization s
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result DeleteRatedCostsResponseBody
-	if err := c.do(ctx, "DELETE", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4760,7 +4760,7 @@ func (c *Client) DeleteAllAllocationUsageEvents(ctx context.Context, organizatio
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result DeleteRatedCostsResponseBody
-	if err := c.do(ctx, "DELETE", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4775,7 +4775,7 @@ func (c *Client) GetOrganizationAuthMethods(ctx context.Context, organization st
 	path := "/api/organizations/{organization}/auth"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result []AuthMethod
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4790,7 +4790,7 @@ func (c *Client) AddOrganizationAuthMethodCac(ctx context.Context, organization 
 	path := "/api/organizations/{organization}/auth-methods/cac"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result AuthMethod
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4805,7 +4805,7 @@ func (c *Client) AddOrganizationAuthMethodLdap(ctx context.Context, organization
 	path := "/api/organizations/{organization}/auth-methods/ldap"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result Ldap
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4819,7 +4819,7 @@ func (c *Client) AddOrganizationAuthMethodLdap(ctx context.Context, organization
 func (c *Client) TestOrganizationAuthMethodLdap(ctx context.Context, organization string, body LdapConnectionTest) error {
 	path := "/api/organizations/{organization}/auth-methods/ldap/test"
 	path = pathReplace(path, "organization", "simple", false, organization)
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -4835,7 +4835,7 @@ func (c *Client) GetOrganizationAuthMethodLdap(ctx context.Context, organization
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "authName", "simple", false, authName)
 	var result Ldap
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4851,7 +4851,7 @@ func (c *Client) UpdateOrganizationAuthMethodLdap(ctx context.Context, organizat
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "authName", "simple", false, authName)
 	var result Ldap
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4866,7 +4866,7 @@ func (c *Client) AddOrganizationAuthMethodOidc(ctx context.Context, organization
 	path := "/api/organizations/{organization}/auth-methods/oidc"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result Oidc
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4882,7 +4882,7 @@ func (c *Client) GetOrganizationAuthMethodOidc(ctx context.Context, organization
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "authName", "simple", false, authName)
 	var result Oidc
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4898,7 +4898,7 @@ func (c *Client) UpdateOrganizationAuthMethodOidc(ctx context.Context, organizat
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "authName", "simple", false, authName)
 	var result Oidc
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4913,7 +4913,7 @@ func (c *Client) AddOrganizationAuthMethodPassword(ctx context.Context, organiza
 	path := "/api/organizations/{organization}/auth-methods/password"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result AuthMethod
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4928,7 +4928,7 @@ func (c *Client) DeleteOrganizationAuthMethod(ctx context.Context, organization 
 	path := "/api/organizations/{organization}/auth-methods/{authName}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "authName", "simple", false, authName)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -4959,7 +4959,7 @@ func (c *Client) GetOrganizationBootstrapScripts(ctx context.Context, organizati
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []BootstrapScript
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4974,7 +4974,7 @@ func (c *Client) GetOrganizationCloudAccounts(ctx context.Context, organization 
 	path := "/api/organizations/{organization}/cloud-accounts"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result []CloudAccountListItem
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4989,7 +4989,7 @@ func (c *Client) CreateOrganizationCloudAccount(ctx context.Context, organizatio
 	path := "/api/organizations/{organization}/cloud-accounts"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result CloudAccountCreateResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5005,7 +5005,7 @@ func (c *Client) GetOrganizationCloudAccount(ctx context.Context, organization s
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result CloudAccountDetail
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5020,7 +5020,7 @@ func (c *Client) DeleteOrganizationCloudAccount(ctx context.Context, organizatio
 	path := "/api/organizations/{organization}/cloud-accounts/{name}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5035,7 +5035,7 @@ func (c *Client) RenameOrganizationCloudAccount(ctx context.Context, organizatio
 	path := "/api/organizations/{organization}/cloud-accounts/{name}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5051,7 +5051,7 @@ func (c *Client) GetOrganizationCloudAccountAccess(ctx context.Context, organiza
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result GetAccessResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5066,7 +5066,7 @@ func (c *Client) UpdateOrganizationCloudAccountAccess(ctx context.Context, organ
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/access"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5082,7 +5082,7 @@ func (c *Client) GetCloudAccountBilling(ctx context.Context, organization string
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result BillingResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5098,7 +5098,7 @@ func (c *Client) PostCloudAccountBilling(ctx context.Context, organization strin
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result BillingResponse
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5113,7 +5113,7 @@ func (c *Client) DeleteCloudAccountBilling(ctx context.Context, organization str
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/billing"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5129,7 +5129,7 @@ func (c *Client) PatchCloudAccountBillingLastUpdate(ctx context.Context, organiz
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result PatchBillingLastUpdateOutputBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5144,7 +5144,7 @@ func (c *Client) UpdateOrganizationCloudAccountCredentials(ctx context.Context, 
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/credentials"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5159,7 +5159,7 @@ func (c *Client) CheckOrganizationCloudAccountCredentials(ctx context.Context, o
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/credentials/check"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5175,7 +5175,7 @@ func (c *Client) GetOrganizationCloudAccountNetworks(ctx context.Context, organi
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result []CloudAccountNetworkSummary
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5191,7 +5191,7 @@ func (c *Client) CreateOrganizationCloudAccountNetwork(ctx context.Context, orga
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result CloudAccountNetwork
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5208,7 +5208,7 @@ func (c *Client) GetOrganizationCloudAccountNetwork(ctx context.Context, organiz
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "networkName", "simple", false, networkName)
 	var result CloudAccountNetwork
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5224,7 +5224,7 @@ func (c *Client) DeleteOrganizationCloudAccountNetwork(ctx context.Context, orga
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "networkName", "simple", false, networkName)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5240,7 +5240,7 @@ func (c *Client) UpdateOrganizationCloudAccountNetwork(ctx context.Context, orga
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "networkName", "simple", false, networkName)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5256,7 +5256,7 @@ func (c *Client) GetOpenstackFlavors(ctx context.Context, organization string, n
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result []OpenstackFlavor
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5271,7 +5271,7 @@ func (c *Client) PatchOpenstackFlavors(ctx context.Context, organization string,
 	path := "/api/organizations/{organization}/cloud-accounts/{name}/openstack/flavors"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5287,7 +5287,7 @@ func (c *Client) GetOpenstackMetadata(ctx context.Context, organization string, 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result OpenstackMetadata
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5303,7 +5303,7 @@ func (c *Client) GetOpenstackNetworks(ctx context.Context, organization string, 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result []OpenstackNet
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5319,7 +5319,7 @@ func (c *Client) GetOpenstackRegions(ctx context.Context, organization string, n
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result []string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5335,7 +5335,7 @@ func (c *Client) PostOpenstackSync(ctx context.Context, organization string, nam
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result OpenstackSyncResponse
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5367,7 +5367,7 @@ func (c *Client) GetCloudAccountRdmaZones(ctx context.Context, organization stri
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result RdmaZonesBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5405,7 +5405,7 @@ func (c *Client) GetAwsCloudImages(ctx context.Context, organization string, reg
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []CloudImage
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5446,7 +5446,7 @@ func (c *Client) GetAzureCloudImages(ctx context.Context, organization string, r
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []CloudImage
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5484,7 +5484,7 @@ func (c *Client) GetGoogleCloudImages(ctx context.Context, organization string, 
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []CloudImage
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5522,7 +5522,7 @@ func (c *Client) GetOracleCloudImages(ctx context.Context, organization string, 
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []CloudImage
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5537,7 +5537,7 @@ func (c *Client) GetOrgCustomResourceTags(ctx context.Context, organization stri
 	path := "/api/organizations/{organization}/custom-resource-tags"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result CustomResourceTagsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5552,7 +5552,7 @@ func (c *Client) UpdateOrgCustomResourceTags(ctx context.Context, organization s
 	path := "/api/organizations/{organization}/custom-resource-tags"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result CustomResourceTagsOutputBody
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5567,7 +5567,7 @@ func (c *Client) GetOrganizationDesktopWallpaper(ctx context.Context, organizati
 	path := "/api/organizations/{organization}/desktop-wallpaper"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5581,7 +5581,7 @@ func (c *Client) GetOrganizationDesktopWallpaper(ctx context.Context, organizati
 func (c *Client) PutOrganizationDesktopWallpaper(ctx context.Context, organization string, body *any) error {
 	path := "/api/organizations/{organization}/desktop-wallpaper"
 	path = pathReplace(path, "organization", "simple", false, organization)
-	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "multipart/form-data", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5595,7 +5595,7 @@ func (c *Client) PutOrganizationDesktopWallpaper(ctx context.Context, organizati
 func (c *Client) DeleteOrganizationDesktopWallpaper(ctx context.Context, organization string) error {
 	path := "/api/organizations/{organization}/desktop-wallpaper"
 	path = pathReplace(path, "organization", "simple", false, organization)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5610,7 +5610,7 @@ func (c *Client) GetOrganizationDomainSettings(ctx context.Context, organization
 	path := "/api/organizations/{organization}/domain-settings"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result OrgDomainSettings
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5625,7 +5625,7 @@ func (c *Client) UpdateOrganizationDomainSettings(ctx context.Context, organizat
 	path := "/api/organizations/{organization}/domain-settings"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result OrgDomainSettings
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5689,7 +5689,7 @@ func (c *Client) ListOrganizationEvents(ctx context.Context, organization string
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result EventsPageBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5749,7 +5749,7 @@ func (c *Client) ExportOrganizationEvents(ctx context.Context, organization stri
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
 	}
-	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5786,7 +5786,7 @@ func (c *Client) GetOrganizationGroups(ctx context.Context, organization string,
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Group
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5801,7 +5801,7 @@ func (c *Client) CreateGroup(ctx context.Context, organization string, body Grou
 	path := "/api/organizations/{organization}/groups"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result Group
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5817,7 +5817,7 @@ func (c *Client) GetGroup(ctx context.Context, organization string, group string
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "group", "simple", false, group)
 	var result GroupWithMembers
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5832,7 +5832,7 @@ func (c *Client) DeleteGroup(ctx context.Context, organization string, group str
 	path := "/api/organizations/{organization}/groups/{group}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "group", "simple", false, group)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5848,7 +5848,7 @@ func (c *Client) PatchGroup(ctx context.Context, organization string, group stri
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "group", "simple", false, group)
 	var result Group
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5864,7 +5864,7 @@ func (c *Client) PatchGroupAllocations(ctx context.Context, organization string,
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "group", "simple", false, group)
 	var result Group
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5880,7 +5880,7 @@ func (c *Client) GetGroupMembers(ctx context.Context, organization string, group
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "group", "simple", false, group)
 	var result []MemberDetail
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5896,7 +5896,7 @@ func (c *Client) AddGroupMember(ctx context.Context, organization string, group 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "group", "simple", false, group)
 	var result GroupWithMembers
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5911,7 +5911,7 @@ func (c *Client) RemoveGroupMember(ctx context.Context, organization string, gro
 	path := "/api/organizations/{organization}/groups/{group}/members"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "group", "simple", false, group)
-	if err := c.do(ctx, "DELETE", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -5943,7 +5943,7 @@ func (c *Client) GetGroupCapacityReservations(ctx context.Context, organization 
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []ReservationItem
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5959,7 +5959,7 @@ func (c *Client) PatchGroupRoles(ctx context.Context, organization string, group
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "group", "simple", false, group)
 	var result Group
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5974,7 +5974,7 @@ func (c *Client) CreateKubernetesCluster(ctx context.Context, organization strin
 	path := "/api/organizations/{organization}/kubernetes"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result CreateClusterOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5989,7 +5989,7 @@ func (c *Client) DiscoverKubernetesCaCert(ctx context.Context, organization stri
 	path := "/api/organizations/{organization}/kubernetes/ca-cert"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result DiscoverCaCertOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6027,7 +6027,7 @@ func (c *Client) ListKubernetesConfigs(ctx context.Context, organization string,
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ConfigsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6062,7 +6062,7 @@ func (c *Client) ListKubernetesHelm(ctx context.Context, organization string, op
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ChartsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6093,7 +6093,7 @@ func (c *Client) GetAllKubernetesNamespaces(ctx context.Context, organization st
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result NamespacesBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6124,7 +6124,7 @@ func (c *Client) ListEnrichedKubernetesNamespaces(ctx context.Context, organizat
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ListEnrichedNamespacesOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6156,7 +6156,7 @@ func (c *Client) ListKubernetesNodes(ctx context.Context, organization string, o
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result NodesBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6190,7 +6190,7 @@ func (c *Client) ListKubernetesQuotas(ctx context.Context, organization string, 
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result QuotasBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6225,7 +6225,7 @@ func (c *Client) ListKubernetesServices(ctx context.Context, organization string
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ServicesBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6263,7 +6263,7 @@ func (c *Client) ListKubernetesStorage(ctx context.Context, organization string,
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result StorageBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6301,7 +6301,7 @@ func (c *Client) ListKubernetesWorkloads(ctx context.Context, organization strin
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result WorkloadsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6317,7 +6317,7 @@ func (c *Client) CreateKubernetesNamespace(ctx context.Context, organization str
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result EnrichedNamespaceResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6333,7 +6333,7 @@ func (c *Client) DeleteKubernetesNamespace(ctx context.Context, organization str
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "namespaceName", "simple", false, namespaceName)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6350,7 +6350,7 @@ func (c *Client) UpdateKubernetesNamespace(ctx context.Context, organization str
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "namespaceName", "simple", false, namespaceName)
 	var result EnrichedNamespaceResponse
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6367,7 +6367,7 @@ func (c *Client) ListNamespaceRolebindings(ctx context.Context, organization str
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "namespaceName", "simple", false, namespaceName)
 	var result ListRoleBindingsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6384,7 +6384,7 @@ func (c *Client) CreateNamespaceRolebinding(ctx context.Context, organization st
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "namespaceName", "simple", false, namespaceName)
 	var result RoleBindingEntry
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6401,7 +6401,7 @@ func (c *Client) DeleteNamespaceRolebinding(ctx context.Context, organization st
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "namespaceName", "simple", false, namespaceName)
 	path = pathReplace(path, "roleBindingName", "simple", false, roleBindingName)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6418,7 +6418,7 @@ func (c *Client) ListHelmReleases(ctx context.Context, organization string, clus
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "namespace", "simple", false, namespace)
 	var result []HelmReleaseResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6434,7 +6434,7 @@ func (c *Client) InstallHelmChart(ctx context.Context, organization string, clus
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "namespace", "simple", false, namespace)
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6450,7 +6450,7 @@ func (c *Client) UpgradeHelmChart(ctx context.Context, organization string, clus
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "namespace", "simple", false, namespace)
-	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6468,7 +6468,7 @@ func (c *Client) GetHelmChartDetails(ctx context.Context, organization string, c
 	path = pathReplace(path, "namespace", "simple", false, namespace)
 	path = pathReplace(path, "chartName", "simple", false, chartName)
 	var result HelmChartDetails
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6485,7 +6485,7 @@ func (c *Client) RollbackHelmRelease(ctx context.Context, organization string, c
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "namespace", "simple", false, namespace)
 	path = pathReplace(path, "chartName", "simple", false, chartName)
-	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6502,7 +6502,7 @@ func (c *Client) DeleteHelmRelease(ctx context.Context, organization string, clu
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "namespace", "simple", false, namespace)
 	path = pathReplace(path, "chartName", "simple", false, chartName)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6520,7 +6520,7 @@ func (c *Client) GetHelmChartHistory(ctx context.Context, organization string, c
 	path = pathReplace(path, "namespace", "simple", false, namespace)
 	path = pathReplace(path, "chartName", "simple", false, chartName)
 	var result []HelmChartHistoryEntry
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6538,7 +6538,7 @@ func (c *Client) GetHelmReleaseValues(ctx context.Context, organization string, 
 	path = pathReplace(path, "namespace", "simple", false, namespace)
 	path = pathReplace(path, "chartName", "simple", false, chartName)
 	var result HelmReleaseValuesResponseBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6555,7 +6555,7 @@ func (c *Client) UpdateHelmReleaseValues(ctx context.Context, organization strin
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "namespace", "simple", false, namespace)
 	path = pathReplace(path, "chartName", "simple", false, chartName)
-	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6590,7 +6590,7 @@ func (c *Client) DeleteKubernetesWorkload(ctx context.Context, organization stri
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
 	}
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6606,7 +6606,7 @@ func (c *Client) RestartKubernetesWorkload(ctx context.Context, organization str
 	path = pathReplace(path, "namespace", "simple", false, namespace)
 	path = pathReplace(path, "workloadType", "simple", false, workloadType)
 	path = pathReplace(path, "workloadName", "simple", false, workloadName)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6622,7 +6622,7 @@ func (c *Client) GetSingleKubernetesCluster(ctx context.Context, organization st
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraName", "simple", false, infraName)
 	var result SingleClusterResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6637,7 +6637,7 @@ func (c *Client) UpdateKubernetesCluster(ctx context.Context, organization strin
 	path := "/api/organizations/{organization}/kubernetes/{infraName}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraName", "simple", false, infraName)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6653,7 +6653,7 @@ func (c *Client) UpdateKubernetesCostTracking(ctx context.Context, organization 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraName", "simple", false, infraName)
 	var result CostTrackingResponse
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6669,7 +6669,7 @@ func (c *Client) UpdateKubernetesCostTrackingPrices(ctx context.Context, organiz
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraName", "simple", false, infraName)
 	var result CostTrackingPricesBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6684,7 +6684,7 @@ func (c *Client) DeleteKubernetesClusterIcon(ctx context.Context, organization s
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/icon"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraName", "simple", false, infraName)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6700,7 +6700,7 @@ func (c *Client) SetKubernetesClusterIcon(ctx context.Context, organization stri
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraName", "simple", false, infraName)
 	var result SetKubernetesIconOutputBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6716,7 +6716,7 @@ func (c *Client) GetKubernetesNamespaces(ctx context.Context, organization strin
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraName", "simple", false, infraName)
 	var result []string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6756,7 +6756,7 @@ func (c *Client) GetPodLogs(ctx context.Context, organization string, infraName 
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result PodLogsResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6774,7 +6774,7 @@ func (c *Client) CreateKubernetesResource(ctx context.Context, organization stri
 	path = pathReplace(path, "namespace", "simple", false, namespace)
 	path = pathReplace(path, "resourceType", "simple", false, resourceType)
 	var result ResourceYamlResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6793,7 +6793,7 @@ func (c *Client) GetKubernetesResource(ctx context.Context, organization string,
 	path = pathReplace(path, "resourceType", "simple", false, resourceType)
 	path = pathReplace(path, "resourceName", "simple", false, resourceName)
 	var result ResourceYamlResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6812,7 +6812,7 @@ func (c *Client) PatchKubernetesResource(ctx context.Context, organization strin
 	path = pathReplace(path, "resourceType", "simple", false, resourceType)
 	path = pathReplace(path, "resourceName", "simple", false, resourceName)
 	var result ResourceYamlResponse
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6831,7 +6831,7 @@ func (c *Client) GetKubernetesResourceMetrics(ctx context.Context, organization 
 	path = pathReplace(path, "resourceType", "simple", false, resourceType)
 	path = pathReplace(path, "resourceName", "simple", false, resourceName)
 	var result []KubernetesMetricEntry
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6847,7 +6847,7 @@ func (c *Client) GetKubernetesNodes(ctx context.Context, organization string, in
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraName", "simple", false, infraName)
 	var result []NodeResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6864,7 +6864,7 @@ func (c *Client) UpdateKubernetesGpuOperator(ctx context.Context, organization s
 	path = pathReplace(path, "infraName", "simple", false, infraName)
 	path = pathReplace(path, "nodeName", "simple", false, nodeName)
 	var result UpdateGpuOperatorResponseBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6880,7 +6880,7 @@ func (c *Client) GetKubernetesPersistentVolumes(ctx context.Context, organizatio
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraName", "simple", false, infraName)
 	var result []PvResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6896,7 +6896,7 @@ func (c *Client) CreateKubernetesQuota(ctx context.Context, organization string,
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraName", "simple", false, infraName)
 	var result SingleQuotaResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6913,7 +6913,7 @@ func (c *Client) GetKubernetesQuota(ctx context.Context, organization string, in
 	path = pathReplace(path, "infraName", "simple", false, infraName)
 	path = pathReplace(path, "namespace", "simple", false, namespace)
 	var result SingleQuotaResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6929,7 +6929,7 @@ func (c *Client) DeleteKubernetesQuota(ctx context.Context, organization string,
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraName", "simple", false, infraName)
 	path = pathReplace(path, "namespace", "simple", false, namespace)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6946,7 +6946,7 @@ func (c *Client) UpdateKubernetesQuota(ctx context.Context, organization string,
 	path = pathReplace(path, "infraName", "simple", false, infraName)
 	path = pathReplace(path, "namespace", "simple", false, namespace)
 	var result SingleQuotaResponse
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6961,7 +6961,7 @@ func (c *Client) GetOrganizationLoginBanner(ctx context.Context, organization st
 	path := "/api/organizations/{organization}/login-banner"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result LoginBannerResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6976,7 +6976,7 @@ func (c *Client) PatchOrganizationLoginBanner(ctx context.Context, organization 
 	path := "/api/organizations/{organization}/login-banner"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result LoginBannerResponse
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6991,7 +6991,7 @@ func (c *Client) GetOrganizationLogo(ctx context.Context, organization string) (
 	path := "/api/organizations/{organization}/logo"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7005,7 +7005,7 @@ func (c *Client) GetOrganizationLogo(ctx context.Context, organization string) (
 func (c *Client) PutOrganizationLogo(ctx context.Context, organization string, body *any) error {
 	path := "/api/organizations/{organization}/logo"
 	path = pathReplace(path, "organization", "simple", false, organization)
-	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "multipart/form-data", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -7019,7 +7019,7 @@ func (c *Client) PutOrganizationLogo(ctx context.Context, organization string, b
 func (c *Client) DeleteOrganizationLogo(ctx context.Context, organization string) error {
 	path := "/api/organizations/{organization}/logo"
 	path = pathReplace(path, "organization", "simple", false, organization)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -7034,7 +7034,7 @@ func (c *Client) SetOrganizationLogo(ctx context.Context, organization string, b
 	path := "/api/organizations/{organization}/logo"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result SetOrgLogoOutputBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7049,7 +7049,7 @@ func (c *Client) GetOrganizationLogoDark(ctx context.Context, organization strin
 	path := "/api/organizations/{organization}/logo-dark"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7063,7 +7063,7 @@ func (c *Client) GetOrganizationLogoDark(ctx context.Context, organization strin
 func (c *Client) PutOrganizationLogoDark(ctx context.Context, organization string, body *any) error {
 	path := "/api/organizations/{organization}/logo-dark"
 	path = pathReplace(path, "organization", "simple", false, organization)
-	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "multipart/form-data", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -7077,7 +7077,7 @@ func (c *Client) PutOrganizationLogoDark(ctx context.Context, organization strin
 func (c *Client) DeleteOrganizationLogoDark(ctx context.Context, organization string) error {
 	path := "/api/organizations/{organization}/logo-dark"
 	path = pathReplace(path, "organization", "simple", false, organization)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -7092,7 +7092,7 @@ func (c *Client) SetOrganizationLogoDark(ctx context.Context, organization strin
 	path := "/api/organizations/{organization}/logo-dark"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result SetOrgLogoOutputBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7107,7 +7107,7 @@ func (c *Client) CreateManagedCluster(ctx context.Context, organization string, 
 	path := "/api/organizations/{organization}/managed-clusters"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result CreateManagedClusterOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7123,7 +7123,7 @@ func (c *Client) GetManagedCluster(ctx context.Context, organization string, clu
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	var result ManagedClusterOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7138,7 +7138,7 @@ func (c *Client) DeleteManagedCluster(ctx context.Context, organization string, 
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -7154,7 +7154,7 @@ func (c *Client) UpdateManagedCluster(ctx context.Context, organization string, 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	var result UpdateManagedClusterOutputBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7170,7 +7170,7 @@ func (c *Client) UpgradeManagedClusterAgents(ctx context.Context, organization s
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	var result UpgradeManagedClusterAgentsOutputBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7198,7 +7198,7 @@ func (c *Client) GetManagedClusterIcon(ctx context.Context, organization string,
 	headers := make(http.Header)
 	setHeader(headers, "If-None-Match", false, params.IfNoneMatch)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json", headers); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7214,7 +7214,7 @@ func (c *Client) UploadManagedClusterIcon(ctx context.Context, organization stri
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	var result UploadManagedClusterIconOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "multipart/form-data", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7229,7 +7229,7 @@ func (c *Client) DeleteManagedClusterIcon(ctx context.Context, organization stri
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}/icon"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -7245,7 +7245,7 @@ func (c *Client) SetManagedClusterIcon(ctx context.Context, organization string,
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	var result SetManagedClusterIconOutputBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7277,7 +7277,7 @@ func (c *Client) GetManagedClusterMetrics(ctx context.Context, organization stri
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result GetClusterMetricsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7293,7 +7293,7 @@ func (c *Client) GenerateNodeToken(ctx context.Context, organization string, clu
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	var result GenerateNodeTokenOutputBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7309,7 +7309,7 @@ func (c *Client) DeleteManagedClusterNode(ctx context.Context, organization stri
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	path = pathReplace(path, "hostname", "simple", false, hostname)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -7326,7 +7326,7 @@ func (c *Client) UpdateManagedClusterNode(ctx context.Context, organization stri
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	path = pathReplace(path, "hostname", "simple", false, hostname)
 	var result UpdateManagedNodeOutputBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7343,7 +7343,7 @@ func (c *Client) UpgradeManagedNodeAgent(ctx context.Context, organization strin
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	path = pathReplace(path, "hostname", "simple", false, hostname)
 	var result UpgradeAgentResponseBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7376,7 +7376,7 @@ func (c *Client) GetManagedClusterNodeMetrics(ctx context.Context, organization 
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result GetNodeMetricsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7392,7 +7392,7 @@ func (c *Client) GetManagedClusterPermissions(ctx context.Context, organization 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	var result ManagedClusterPermissionsResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7407,7 +7407,7 @@ func (c *Client) UpdateManagedClusterPermissions(ctx context.Context, organizati
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}/permissions"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -7439,7 +7439,7 @@ func (c *Client) GetManagedClusterSchedulerJobs(ctx context.Context, organizatio
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result SchedulerJobsResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7456,7 +7456,7 @@ func (c *Client) GetManagedClusterSchedulerJobDetail(ctx context.Context, organi
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	path = pathReplace(path, "jobId", "simple", false, jobID)
 	var result SchedulerJobDetailResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7473,7 +7473,7 @@ func (c *Client) PostManagedClusterSchedulerJobCommand(ctx context.Context, orga
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	path = pathReplace(path, "jobId", "simple", false, jobID)
 	var result SchedulerCommandResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7488,7 +7488,7 @@ func (c *Client) ListOrganizationMarketplaceItems(ctx context.Context, organizat
 	path := "/api/organizations/{organization}/marketplace"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result ListOrgMarketplaceItemsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7518,7 +7518,7 @@ func (c *Client) GetOrganizationMau(ctx context.Context, organization string, pa
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result OrgMauResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7551,7 +7551,7 @@ func (c *Client) GetUserClusterMetrics(ctx context.Context, organization string,
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []MetricEntry
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7567,7 +7567,7 @@ func (c *Client) GetSingleNetworkByName(ctx context.Context, organization string
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "networkName", "simple", false, networkName)
 	var result Network
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7582,7 +7582,7 @@ func (c *Client) SetOrganizationOwner(ctx context.Context, organization string, 
 	path := "/api/organizations/{organization}/owner"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result OwnerOutputBody
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7597,7 +7597,7 @@ func (c *Client) GetOrganizationPolicies(ctx context.Context, organization strin
 	path := "/api/organizations/{organization}/policies"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]Policy
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7612,7 +7612,7 @@ func (c *Client) SetOrganizationAllowPublicSessionsPolicy(ctx context.Context, o
 	path := "/api/organizations/{organization}/policies/allow-public-sessions"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]BooleanPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7627,7 +7627,7 @@ func (c *Client) SetOrganizationArchiveCostDataPolicy(ctx context.Context, organ
 	path := "/api/organizations/{organization}/policies/archive-cost-data"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]IntPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7642,7 +7642,7 @@ func (c *Client) SetOrganizationEnforceWebauthnMfaPolicy(ctx context.Context, or
 	path := "/api/organizations/{organization}/policies/enforce-webauthn-mfa"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]WebAuthnMfaPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7657,7 +7657,7 @@ func (c *Client) SetOrganizationEventRetentionDaysPolicy(ctx context.Context, or
 	path := "/api/organizations/{organization}/policies/event-retention-days"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]IntPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7672,7 +7672,7 @@ func (c *Client) SetOrganizationMaxAPIKeyTTLPolicy(ctx context.Context, organiza
 	path := "/api/organizations/{organization}/policies/max-api-key-ttl"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]IntPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7687,7 +7687,7 @@ func (c *Client) SetOrganizationNitroInstancesOnlyPolicy(ctx context.Context, or
 	path := "/api/organizations/{organization}/policies/nitro-instances-only"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]BooleanPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7702,7 +7702,7 @@ func (c *Client) SetOrganizationNoPublicIPPolicy(ctx context.Context, organizati
 	path := "/api/organizations/{organization}/policies/no-public-ip"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]BooleanPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7717,7 +7717,7 @@ func (c *Client) SetOrganizationNoRootAccessPolicy(ctx context.Context, organiza
 	path := "/api/organizations/{organization}/policies/no-root-access"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]BooleanPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7732,7 +7732,7 @@ func (c *Client) DeleteOrganizationPolicy(ctx context.Context, organization stri
 	path := "/api/organizations/{organization}/policies/{policyname}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "policyname", "simple", false, policyname)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -7748,7 +7748,7 @@ func (c *Client) GetOrganizationProvisionStatusByInfraID(ctx context.Context, or
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraId", "simple", false, infraID)
 	var result []ProvisionStatusResponseRecord
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7763,7 +7763,7 @@ func (c *Client) GetOrganizationRecommendedResources(ctx context.Context, organi
 	path := "/api/organizations/{organization}/recommended-resources"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result RecommendedResourcesBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7778,7 +7778,7 @@ func (c *Client) UpdateOrganizationRecommendedResources(ctx context.Context, org
 	path := "/api/organizations/{organization}/recommended-resources"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result RecommendedResourcesBody
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7827,7 +7827,7 @@ func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organizati
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []map[string]any
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7843,7 +7843,7 @@ func (c *Client) GetAllocationUsageEventsFilterOptions(ctx context.Context, orga
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "allocation", "simple", false, allocation)
 	var result RatedCostsFilterOptions
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7858,7 +7858,7 @@ func (c *Client) GetOrganizationReservations(ctx context.Context, organization s
 	path := "/api/organizations/{organization}/reservations"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result []ReservationItem
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7901,7 +7901,7 @@ func (c *Client) ListResourceGroups(ctx context.Context, organization string, op
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []ResourceGroup
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7916,7 +7916,7 @@ func (c *Client) GetScimSettings(ctx context.Context, organization string) (*Sci
 	path := "/api/organizations/{organization}/scim"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result ScimSettingsResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7931,7 +7931,7 @@ func (c *Client) UpdateScimSettings(ctx context.Context, organization string, bo
 	path := "/api/organizations/{organization}/scim"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result ScimSettingsResponse
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7946,7 +7946,7 @@ func (c *Client) ListScimTokens(ctx context.Context, organization string) (*[]Sc
 	path := "/api/organizations/{organization}/scim-tokens"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result []ScimTokenResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7963,7 +7963,7 @@ func (c *Client) CreateScimToken(ctx context.Context, organization string, body 
 	path := "/api/organizations/{organization}/scim-tokens"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result CreateScimTokenResponseBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7978,7 +7978,7 @@ func (c *Client) DeleteScimToken(ctx context.Context, organization string, id st
 	path := "/api/organizations/{organization}/scim-tokens/{id}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8015,7 +8015,7 @@ func (c *Client) ScimGroupsList(ctx context.Context, organization string, opts .
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ListResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8029,7 +8029,7 @@ func (c *Client) ScimGroupsList(ctx context.Context, organization string, opts .
 func (c *Client) ScimGroupsCreate(ctx context.Context, organization string) error {
 	path := "/api/organizations/{organization}/scim/v2/Groups"
 	path = pathReplace(path, "organization", "simple", false, organization)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8061,7 +8061,7 @@ func (c *Client) ScimGroupGet(ctx context.Context, organization string, id strin
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ScimGroup
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8076,7 +8076,7 @@ func (c *Client) ScimGroupReplace(ctx context.Context, organization string, id s
 	path := "/api/organizations/{organization}/scim/v2/Groups/{id}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "PUT", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8091,7 +8091,7 @@ func (c *Client) ScimGroupDelete(ctx context.Context, organization string, id st
 	path := "/api/organizations/{organization}/scim/v2/Groups/{id}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8106,7 +8106,7 @@ func (c *Client) ScimGroupPatch(ctx context.Context, organization string, id str
 	path := "/api/organizations/{organization}/scim/v2/Groups/{id}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "PATCH", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8121,7 +8121,7 @@ func (c *Client) ScimResourceTypes(ctx context.Context, organization string) (*m
 	path := "/api/organizations/{organization}/scim/v2/ResourceTypes"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]any
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8136,7 +8136,7 @@ func (c *Client) ScimSchemas(ctx context.Context, organization string) (*map[str
 	path := "/api/organizations/{organization}/scim/v2/Schemas"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]any
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8151,7 +8151,7 @@ func (c *Client) ScimServiceProviderConfig(ctx context.Context, organization str
 	path := "/api/organizations/{organization}/scim/v2/ServiceProviderConfig"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]any
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8194,7 +8194,7 @@ func (c *Client) ScimUsersList(ctx context.Context, organization string, opts ..
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ListResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8208,7 +8208,7 @@ func (c *Client) ScimUsersList(ctx context.Context, organization string, opts ..
 func (c *Client) ScimUsersCreate(ctx context.Context, organization string) error {
 	path := "/api/organizations/{organization}/scim/v2/Users"
 	path = pathReplace(path, "organization", "simple", false, organization)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8241,7 +8241,7 @@ func (c *Client) ScimUserGet(ctx context.Context, organization string, id string
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ScimUser
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8256,7 +8256,7 @@ func (c *Client) ScimUserReplace(ctx context.Context, organization string, id st
 	path := "/api/organizations/{organization}/scim/v2/Users/{id}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "PUT", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8271,7 +8271,7 @@ func (c *Client) ScimUserDelete(ctx context.Context, organization string, id str
 	path := "/api/organizations/{organization}/scim/v2/Users/{id}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8286,7 +8286,7 @@ func (c *Client) ScimUserPatch(ctx context.Context, organization string, id stri
 	path := "/api/organizations/{organization}/scim/v2/Users/{id}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "PATCH", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8301,7 +8301,7 @@ func (c *Client) GetOrganizationSidebar(ctx context.Context, organization string
 	path := "/api/organizations/{organization}/sidebar"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result GetOrgSidebarOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8315,7 +8315,7 @@ func (c *Client) GetOrganizationSidebar(ctx context.Context, organization string
 func (c *Client) UpdateOrganizationSidebar(ctx context.Context, organization string, body UpdateOrgSidebarInputBody) error {
 	path := "/api/organizations/{organization}/sidebar"
 	path = pathReplace(path, "organization", "simple", false, organization)
-	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8329,7 +8329,7 @@ func (c *Client) UpdateOrganizationSidebar(ctx context.Context, organization str
 func (c *Client) ResetOrganizationSidebar(ctx context.Context, organization string) error {
 	path := "/api/organizations/{organization}/sidebar"
 	path = pathReplace(path, "organization", "simple", false, organization)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8344,7 +8344,7 @@ func (c *Client) GetOrganizationTheme(ctx context.Context, organization string) 
 	path := "/api/organizations/{organization}/theme"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result Theme
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8359,7 +8359,7 @@ func (c *Client) PatchOrganizationTheme(ctx context.Context, organization string
 	path := "/api/organizations/{organization}/theme"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result Theme
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8374,7 +8374,7 @@ func (c *Client) ListUnits(ctx context.Context, organization string) (*[]Unit, e
 	path := "/api/organizations/{organization}/units"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result []Unit
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8389,7 +8389,7 @@ func (c *Client) CreateUnit(ctx context.Context, organization string, body *Post
 	path := "/api/organizations/{organization}/units"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result Unit
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8405,7 +8405,7 @@ func (c *Client) GetUnit(ctx context.Context, organization string, unit string) 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "unit", "simple", false, unit)
 	var result Unit
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8420,7 +8420,7 @@ func (c *Client) DeleteUnit(ctx context.Context, organization string, unit strin
 	path := "/api/organizations/{organization}/units/{unit}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "unit", "simple", false, unit)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8436,7 +8436,7 @@ func (c *Client) ListUnitAllocations(ctx context.Context, organization string, u
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "unit", "simple", false, unit)
 	var result ListUnitAllocationsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8452,7 +8452,7 @@ func (c *Client) CreateUnitRule(ctx context.Context, organization string, unit s
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "unit", "simple", false, unit)
 	var result UnitRule
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8484,7 +8484,7 @@ func (c *Client) ListUnitSkus(ctx context.Context, organization string, unit str
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []CustomSku
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8500,7 +8500,7 @@ func (c *Client) CreateUnitSku(ctx context.Context, organization string, unit st
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "unit", "simple", false, unit)
 	var result CustomSku
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8517,7 +8517,7 @@ func (c *Client) GetUnitSku(ctx context.Context, organization string, unit strin
 	path = pathReplace(path, "unit", "simple", false, unit)
 	path = pathReplace(path, "sku", "simple", false, sku)
 	var result CustomSku
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8533,7 +8533,7 @@ func (c *Client) DeleteUnitSku(ctx context.Context, organization string, unit st
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "unit", "simple", false, unit)
 	path = pathReplace(path, "sku", "simple", false, sku)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8550,7 +8550,7 @@ func (c *Client) UpdateUnitSku(ctx context.Context, organization string, unit st
 	path = pathReplace(path, "unit", "simple", false, unit)
 	path = pathReplace(path, "sku", "simple", false, sku)
 	var result CustomSku
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8567,7 +8567,7 @@ func (c *Client) RestoreUnitSku(ctx context.Context, organization string, unit s
 	path = pathReplace(path, "unit", "simple", false, unit)
 	path = pathReplace(path, "sku", "simple", false, sku)
 	var result CustomSku
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8584,7 +8584,7 @@ func (c *Client) ListSkuRules(ctx context.Context, organization string, unit str
 	path = pathReplace(path, "unit", "simple", false, unit)
 	path = pathReplace(path, "sku", "simple", false, sku)
 	var result []CustomSkuRule
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8601,7 +8601,7 @@ func (c *Client) CreateSkuRule(ctx context.Context, organization string, unit st
 	path = pathReplace(path, "unit", "simple", false, unit)
 	path = pathReplace(path, "sku", "simple", false, sku)
 	var result CustomSkuRule
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8647,7 +8647,7 @@ func (c *Client) ListOrganizationUsers(ctx context.Context, organization string,
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ListOrgUsersOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8662,7 +8662,7 @@ func (c *Client) CreateOrganizationUser(ctx context.Context, organization string
 	path := "/api/organizations/{organization}/users"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result CreateUserResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8677,7 +8677,7 @@ func (c *Client) DeleteUserMfa(ctx context.Context, organization string, usernam
 	path := "/api/organizations/{organization}/users/{username}/mfa"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "username", "simple", false, username)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8692,7 +8692,7 @@ func (c *Client) DeleteUser(ctx context.Context, organization string, user strin
 	path := "/api/organizations/{organization}/users/{user}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8707,7 +8707,7 @@ func (c *Client) SetUserAdmin(ctx context.Context, organization string, user str
 	path := "/api/organizations/{organization}/users/{user}/admin"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
-	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8723,7 +8723,7 @@ func (c *Client) ListAiProviders(ctx context.Context, organization string, user 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result []AiProvidersResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8739,7 +8739,7 @@ func (c *Client) CreateAiProvider(ctx context.Context, organization string, user
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result AiProvidersResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8756,7 +8756,7 @@ func (c *Client) GetSingleAiProvider(ctx context.Context, organization string, u
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AiProviderResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8772,7 +8772,7 @@ func (c *Client) DeleteSingleAiProvider(ctx context.Context, organization string
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8789,7 +8789,7 @@ func (c *Client) PatchSingleAiProvider(ctx context.Context, organization string,
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AiProviderResponse
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8807,7 +8807,7 @@ func (c *Client) AttachAiProviderBucket(ctx context.Context, organization string
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "bucketId", "simple", false, bucketID)
 	var result AiProviderResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8825,7 +8825,7 @@ func (c *Client) DetachAiProviderBucket(ctx context.Context, organization string
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "bucketId", "simple", false, bucketID)
 	var result AiProviderResponse
-	if err := c.do(ctx, "DELETE", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8842,7 +8842,7 @@ func (c *Client) AddAiProviderDeployment(ctx context.Context, organization strin
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AiProviderResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8860,7 +8860,7 @@ func (c *Client) DeleteAiProviderDeployment(ctx context.Context, organization st
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "model", "simple", false, model)
 	var result AiProviderResponse
-	if err := c.do(ctx, "DELETE", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8877,7 +8877,7 @@ func (c *Client) ListAiProviderModels(ctx context.Context, organization string, 
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result ListModelsResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8894,7 +8894,7 @@ func (c *Client) GetAiproviderPermissions(ctx context.Context, organization stri
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result SubjectPermissions
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8910,7 +8910,7 @@ func (c *Client) UpdateAiproviderPermissions(ctx context.Context, organization s
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -8927,7 +8927,7 @@ func (c *Client) ReindexAiProvider(ctx context.Context, organization string, use
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AiProviderResponse
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8944,7 +8944,7 @@ func (c *Client) GetAiProviderUsage(ctx context.Context, organization string, us
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AiProviderUsage
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8972,7 +8972,7 @@ func (c *Client) GetOrgUserAvatar(ctx context.Context, organization string, user
 	headers := make(http.Header)
 	setHeader(headers, "If-None-Match", false, params.IfNoneMatch)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json", headers); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -8989,7 +8989,7 @@ func (c *Client) GetStorageAwsBucket(ctx context.Context, organization string, u
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AwsBucket
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9006,7 +9006,7 @@ func (c *Client) ProvisionAwsBucket(ctx context.Context, organization string, us
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result BucketOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9022,7 +9022,7 @@ func (c *Client) AddCorsRulesAwsBucket(ctx context.Context, organization string,
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -9039,7 +9039,7 @@ func (c *Client) GetTokenAwsBucket(ctx context.Context, organization string, use
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AwsBucketToken
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9056,7 +9056,7 @@ func (c *Client) GetAwsDisk(ctx context.Context, organization string, user strin
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AwsDisk
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9073,7 +9073,7 @@ func (c *Client) GetStorageAwsEfs(ctx context.Context, organization string, user
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AwsEfs
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9090,7 +9090,7 @@ func (c *Client) GetStorageAwsLustre(ctx context.Context, organization string, u
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AwsLustre
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9109,7 +9109,7 @@ func (c *Client) GetStorageAwsManagedlustre(ctx context.Context, organization st
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AwsLustre
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9126,7 +9126,7 @@ func (c *Client) GetAzureFiles(ctx context.Context, organization string, user st
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AzureFiles
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9142,7 +9142,7 @@ func (c *Client) AddCorsRulesAzureAzfiles(ctx context.Context, organization stri
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -9177,7 +9177,7 @@ func (c *Client) GetPresignedURLAzureAzfilesObject(ctx context.Context, organiza
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9194,7 +9194,7 @@ func (c *Client) GetSasTokenAzureAzfiles(ctx context.Context, organization strin
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AzureFilesSas
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9211,7 +9211,7 @@ func (c *Client) GetAzureBucket(ctx context.Context, organization string, user s
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AzureBlobStorage
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9228,7 +9228,7 @@ func (c *Client) ProvisionAzureBucket(ctx context.Context, organization string, 
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result BucketOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9244,7 +9244,7 @@ func (c *Client) AddCorsRulesAzureBucket(ctx context.Context, organization strin
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -9279,7 +9279,7 @@ func (c *Client) GetPresignedURLAzureBucketObject(ctx context.Context, organizat
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9296,7 +9296,7 @@ func (c *Client) GetSasTokenAzureBucket(ctx context.Context, organization string
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AzureSasToken
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9313,7 +9313,7 @@ func (c *Client) GetTokenAzureBucket(ctx context.Context, organization string, u
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AzureBucketToken
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9330,7 +9330,7 @@ func (c *Client) GetAzureDisk(ctx context.Context, organization string, user str
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AzureDisk
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9347,7 +9347,7 @@ func (c *Client) GetAzureManagedlustre(ctx context.Context, organization string,
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AzureManagedLustre
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9364,7 +9364,7 @@ func (c *Client) GetAzureNetappfiles(ctx context.Context, organization string, u
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AzureNetAppFiles
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9381,7 +9381,7 @@ func (c *Client) GetCluster(ctx context.Context, organization string, user strin
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result GeneralCluster
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9397,7 +9397,7 @@ func (c *Client) DeleteCluster(ctx context.Context, organization string, user st
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -9414,7 +9414,7 @@ func (c *Client) UpdateCluster(ctx context.Context, organization string, user st
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result UpdateClusterBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9447,7 +9447,7 @@ func (c *Client) UpgradeClusterAgent(ctx context.Context, organization string, u
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result UpgradeAgentResponseBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9464,7 +9464,7 @@ func (c *Client) GetClusterAlerts(ctx context.Context, organization string, user
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result ClusterAlerts
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9481,7 +9481,7 @@ func (c *Client) UpdateClusterAlerts(ctx context.Context, organization string, u
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result ClusterAlerts
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9498,7 +9498,7 @@ func (c *Client) GetClusterAttachedStorages(ctx context.Context, organization st
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result []AttachedStorage
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9515,7 +9515,7 @@ func (c *Client) AttachClusterStorage(ctx context.Context, organization string, 
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result []AttachedStorage
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9532,7 +9532,7 @@ func (c *Client) UpdateClusterAttachedStorages(ctx context.Context, organization
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result []AttachedStorage
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9549,7 +9549,7 @@ func (c *Client) GetClusterDefinition(ctx context.Context, organization string, 
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result ClusterDefinition
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9566,7 +9566,7 @@ func (c *Client) UpdateClusterDefinition(ctx context.Context, organization strin
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result ClusterDefinition
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9584,7 +9584,7 @@ func (c *Client) GetClusterDeployment(ctx context.Context, organization string, 
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "deploymentNumber", "simple", false, deploymentNumber)
 	var result ClusterDeployment
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9602,7 +9602,7 @@ func (c *Client) UpdateClusterDeployment(ctx context.Context, organization strin
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "deploymentNumber", "simple", false, deploymentNumber)
 	var result DeploymentResponse
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9618,7 +9618,7 @@ func (c *Client) DestroyCluster(ctx context.Context, organization string, user s
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -9634,7 +9634,41 @@ func (c *Client) DisconnectCluster(ctx context.Context, organization string, use
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// AttachClusterDisk - Attach Cluster Disk
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Attaches a provisioned persistent disk to a cloud cluster. On a running cluster the cloud attachment happens asynchronously and its progress is reported on the disk's provision status.
+func (c *Client) AttachClusterDisk(ctx context.Context, organization string, user string, clusterName string, body AttachClusterDiskBody) (*ClusterDiskAttachment, error) {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/disks"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	var result ClusterDiskAttachment
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DetachClusterDisk - Detach Cluster Disk
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Detaches a persistent disk from a cloud cluster. On a running cluster the cloud detachment happens asynchronously and its progress is reported on the disk's provision status.
+func (c *Client) DetachClusterDisk(ctx context.Context, organization string, user string, clusterName string, storageID string) error {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/disks/{storageId}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	path = pathReplace(path, "storageId", "simple", false, storageID)
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -9650,7 +9684,7 @@ func (c *Client) DeleteElasticClusterIcon(ctx context.Context, organization stri
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -9667,7 +9701,7 @@ func (c *Client) SetElasticClusterIcon(ctx context.Context, organization string,
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result SetElasticClusterIconOutputBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9703,7 +9737,7 @@ func (c *Client) GetClusterNodes(ctx context.Context, organization string, user 
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []ClusterNodeResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9737,7 +9771,7 @@ func (c *Client) GetClusterNodeMetrics(ctx context.Context, organization string,
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []MetricEntry
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9754,7 +9788,7 @@ func (c *Client) GetUserClusterPermissions(ctx context.Context, organization str
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result SubjectPermissions
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9770,7 +9804,23 @@ func (c *Client) UpdateUserClusterPermissions(ctx context.Context, organization 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// ProvisionCluster - Provision cluster
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Provisions a cloud cluster for the first time, building its cloud infrastructure and starting the controller. Starting a stopped cluster again is the resume operation.
+func (c *Client) ProvisionCluster(ctx context.Context, organization string, user string, clusterName string) error {
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/provision"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -9786,7 +9836,7 @@ func (c *Client) ResumeCluster(ctx context.Context, organization string, user st
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -9819,7 +9869,7 @@ func (c *Client) GetClusterSchedulerJobs(ctx context.Context, organization strin
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result SchedulerJobsResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9837,7 +9887,7 @@ func (c *Client) GetSchedulerJobDetail(ctx context.Context, organization string,
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "jobId", "simple", false, jobID)
 	var result SchedulerJobDetailResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9855,7 +9905,7 @@ func (c *Client) PostSchedulerJobCommand(ctx context.Context, organization strin
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	path = pathReplace(path, "jobId", "simple", false, jobID)
 	var result SchedulerCommandResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9888,7 +9938,7 @@ func (c *Client) GetClusterSchedulerQueues(ctx context.Context, organization str
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result SchedulerQueuesResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9905,7 +9955,7 @@ func (c *Client) GetClusterSlurmAccounts(ctx context.Context, organization strin
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result []string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9941,7 +9991,7 @@ func (c *Client) GetClusterSlurmQos(ctx context.Context, organization string, us
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9958,7 +10008,7 @@ func (c *Client) CreateClusterSnapshot(ctx context.Context, organization string,
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result CreateSnapshotOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9974,7 +10024,7 @@ func (c *Client) StopCluster(ctx context.Context, organization string, user stri
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -9991,7 +10041,7 @@ func (c *Client) UpdateClusterWhileRunning(ctx context.Context, organization str
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result UpdateWhileRunningResult
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10008,7 +10058,7 @@ func (c *Client) GetClusterWorkspaceMounts(ctx context.Context, organization str
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result []ClusterWorkspaceMount
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10025,7 +10075,7 @@ func (c *Client) UpdateClusterWorkspaceMounts(ctx context.Context, organization 
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 	var result []ClusterWorkspaceMount
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10058,7 +10108,7 @@ func (c *Client) ListEnvironments(ctx context.Context, organization string, user
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Environment
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10075,7 +10125,7 @@ func (c *Client) CreateEnvironment(ctx context.Context, organization string, use
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	var result Environment
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10093,7 +10143,7 @@ func (c *Client) GetEnvironment(ctx context.Context, organization string, user s
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	path = pathReplace(path, "environment", "simple", false, environment)
 	var result Environment
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10110,7 +10160,7 @@ func (c *Client) DeleteEnvironment(ctx context.Context, organization string, use
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	path = pathReplace(path, "environment", "simple", false, environment)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10128,7 +10178,7 @@ func (c *Client) UpdateEnvironment(ctx context.Context, organization string, use
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	path = pathReplace(path, "environment", "simple", false, environment)
 	var result Environment
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10145,7 +10195,7 @@ func (c *Client) ConnectClusterAsync(ctx context.Context, organization string, u
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result PostClusterConnectOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10161,7 +10211,7 @@ func (c *Client) StartCodexDeviceAuthorization(ctx context.Context, organization
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result CodexDeviceAuthorizationResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10178,7 +10228,7 @@ func (c *Client) PollCodexDeviceAuthorization(ctx context.Context, organization 
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "authorizationId", "simple", false, authorizationID)
 	var result CodexDeviceAuthorizationStatus
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10195,7 +10245,7 @@ func (c *Client) CreateDiskSnapshot(ctx context.Context, organization string, us
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "diskName", "simple", false, diskName)
 	var result CreateSnapshotOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10227,7 +10277,7 @@ func (c *Client) ListAllEnvironments(ctx context.Context, organization string, u
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Environment
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10243,7 +10293,7 @@ func (c *Client) ListUserExternalAuth(ctx context.Context, organization string, 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result []ExternalAuthOutput
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10259,7 +10309,7 @@ func (c *Client) SetUserExternalAuth(ctx context.Context, organization string, u
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "authMethod", "simple", false, authMethod)
-	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10275,7 +10325,7 @@ func (c *Client) DeleteUserExternalAuth(ctx context.Context, organization string
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "authMethod", "simple", false, authMethod)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10292,7 +10342,7 @@ func (c *Client) GetGoogleBucket(ctx context.Context, organization string, user 
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result GoogleBucket
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10309,7 +10359,7 @@ func (c *Client) ProvisionGoogleBucket(ctx context.Context, organization string,
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result BucketOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10325,7 +10375,7 @@ func (c *Client) AddCorsRulesGoogleBucket(ctx context.Context, organization stri
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10357,7 +10407,7 @@ func (c *Client) GetPresignedURLGoogleBucketObject(ctx context.Context, organiza
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10374,7 +10424,7 @@ func (c *Client) GetTokenGoogleBucket(ctx context.Context, organization string, 
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result GoogleBucketToken
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10391,7 +10441,7 @@ func (c *Client) GetGoogleDisk(ctx context.Context, organization string, user st
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result GoogleDisk
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10408,7 +10458,7 @@ func (c *Client) GetGoogleFilestore(ctx context.Context, organization string, us
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result GoogleFilestore
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10424,7 +10474,7 @@ func (c *Client) CreateGoogleManagedLustre(ctx context.Context, organization str
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result GoogleManagedLustre
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10440,7 +10490,7 @@ func (c *Client) DeleteGoogleManagedLustre(ctx context.Context, organization str
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "managedLustreName", "simple", false, managedLustreName)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10456,7 +10506,7 @@ func (c *Client) GetInstances(ctx context.Context, organization string, user str
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result []Instance
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10472,7 +10522,7 @@ func (c *Client) CreateInstance(ctx context.Context, organization string, user s
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result Instance
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10489,7 +10539,7 @@ func (c *Client) GetInstance(ctx context.Context, organization string, user stri
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "instanceName", "simple", false, instanceName)
 	var result Instance
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10505,7 +10555,7 @@ func (c *Client) DeleteInstance(ctx context.Context, organization string, user s
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "instanceName", "simple", false, instanceName)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10522,7 +10572,7 @@ func (c *Client) CreateInstanceSnapshot(ctx context.Context, organization string
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "instanceName", "simple", false, instanceName)
 	var result CreateSnapshotOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10538,7 +10588,7 @@ func (c *Client) CreateIP(ctx context.Context, organization string, user string,
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result IP
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10554,7 +10604,7 @@ func (c *Client) DeleteIP(ctx context.Context, organization string, user string,
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10570,7 +10620,7 @@ func (c *Client) GetUserLanguage(ctx context.Context, organization string, user 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10586,7 +10636,7 @@ func (c *Client) SetUserLanguage(ctx context.Context, organization string, user 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result string
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10601,7 +10651,7 @@ func (c *Client) RevokeUserLoginSessions(ctx context.Context, organization strin
 	path := "/api/organizations/{organization}/users/{user}/login-sessions"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
-	if err := c.do(ctx, "DELETE", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10617,7 +10667,7 @@ func (c *Client) CreateMachineLearningWorkspaces(ctx context.Context, organizati
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result MachineLearningWorkspace
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10634,7 +10684,7 @@ func (c *Client) GetAwsMachineLearningWorkspace(ctx context.Context, organizatio
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AwsSagemakerDetail
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10651,7 +10701,7 @@ func (c *Client) GetAzureMachineLearningWorkspace(ctx context.Context, organizat
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result AzureMachineLearningDetail
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10667,7 +10717,7 @@ func (c *Client) DeleteMachineLearningWorkspacesByName(ctx context.Context, orga
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10684,7 +10734,7 @@ func (c *Client) GetPresignedURLMachineLearningWorkspace(ctx context.Context, or
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result URLResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10700,7 +10750,7 @@ func (c *Client) CreateNetworkInterface(ctx context.Context, organization string
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result NetworkInterface
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10716,7 +10766,7 @@ func (c *Client) DeleteNetworkInterface(ctx context.Context, organization string
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10733,7 +10783,7 @@ func (c *Client) GetOracleBucket(ctx context.Context, organization string, user 
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result OracleBucket
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10750,7 +10800,7 @@ func (c *Client) ProvisionOracleBucket(ctx context.Context, organization string,
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result BucketOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10767,7 +10817,7 @@ func (c *Client) GetParOracleBucket(ctx context.Context, organization string, us
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result OracleBucketPar
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10784,7 +10834,7 @@ func (c *Client) GetOracleOraclefs(ctx context.Context, organization string, use
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result OracleFs
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10799,7 +10849,7 @@ func (c *Client) PutOrganizationUserPassword(ctx context.Context, organization s
 	path := "/api/organizations/{organization}/users/{user}/password"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
-	if err := c.do(ctx, "PUT", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10815,7 +10865,7 @@ func (c *Client) EnableOrgUserPreview(ctx context.Context, organization string, 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "flag", "simple", false, flag)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10831,7 +10881,7 @@ func (c *Client) DisableOrgUserPreview(ctx context.Context, organization string,
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "flag", "simple", false, flag)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10846,7 +10896,7 @@ func (c *Client) ResetOnboarding(ctx context.Context, organization string, user 
 	path := "/api/organizations/{organization}/users/{user}/reset-onboarding"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10862,7 +10912,7 @@ func (c *Client) CreateResourceGroup(ctx context.Context, organization string, u
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result ResourceGroup
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10879,7 +10929,7 @@ func (c *Client) GetResourceGroup(ctx context.Context, organization string, user
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result ResourceGroup
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10896,7 +10946,7 @@ func (c *Client) GetResourceGroupPermissions(ctx context.Context, organization s
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result SubjectPermissions
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10912,7 +10962,7 @@ func (c *Client) UpdateResourceGroupPermissions(ctx context.Context, organizatio
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10928,7 +10978,7 @@ func (c *Client) GetUserResources(ctx context.Context, organization string, user
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result GetUserResourcesBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10945,7 +10995,7 @@ func (c *Client) GetUserSession(ctx context.Context, organization string, user s
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result Session
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10962,7 +11012,7 @@ func (c *Client) ReplaceUserSession(ctx context.Context, organization string, us
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result Session
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10978,7 +11028,7 @@ func (c *Client) DeleteUserSession(ctx context.Context, organization string, use
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -10995,7 +11045,7 @@ func (c *Client) UpdateUserSession(ctx context.Context, organization string, use
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result Session
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11011,7 +11061,7 @@ func (c *Client) UpdateUserSessionAccess(ctx context.Context, organization strin
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11028,7 +11078,7 @@ func (c *Client) GetUserSessionCredentials(ctx context.Context, organization str
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result SessionCredentials
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11044,7 +11094,7 @@ func (c *Client) DeleteSessionIcon(ctx context.Context, organization string, use
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11061,7 +11111,7 @@ func (c *Client) SetSessionIcon(ctx context.Context, organization string, user s
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result SetSessionIconOutputBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11078,7 +11128,7 @@ func (c *Client) RestartUserSession(ctx context.Context, organization string, us
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result Session
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11094,7 +11144,7 @@ func (c *Client) GetUserSettings(ctx context.Context, organization string, user 
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result UserSettings
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11109,7 +11159,7 @@ func (c *Client) DeleteUserSettings(ctx context.Context, organization string, us
 	path := "/api/organizations/{organization}/users/{user}/settings"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11125,7 +11175,7 @@ func (c *Client) UpdateUserSettings(ctx context.Context, organization string, us
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result UserSettings
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11141,7 +11191,7 @@ func (c *Client) DeleteSnapshot(ctx context.Context, organization string, user s
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "snapshotName", "simple", false, snapshotName)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11158,7 +11208,7 @@ func (c *Client) CopySnapshot(ctx context.Context, organization string, user str
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "snapshotName", "simple", false, snapshotName)
 	var result CopySnapshotOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11175,7 +11225,7 @@ func (c *Client) GetSnapshotPermissions(ctx context.Context, organization string
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "snapshotName", "simple", false, snapshotName)
 	var result SubjectPermissions
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11191,7 +11241,7 @@ func (c *Client) UpdateSnapshotPermissions(ctx context.Context, organization str
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "snapshotName", "simple", false, snapshotName)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11206,7 +11256,7 @@ func (c *Client) CreateSSHPrivateKey(ctx context.Context, organization string, u
 	path := "/api/organizations/{organization}/users/{user}/ssh-private-keys"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11222,7 +11272,7 @@ func (c *Client) GetUserWorkspace(ctx context.Context, organization string, user
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result WorkspaceSettings
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11238,7 +11288,7 @@ func (c *Client) UpdateUserWorkspace(ctx context.Context, organization string, u
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result WorkspaceSettings
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11253,7 +11303,7 @@ func (c *Client) RestartUserWorkspace(ctx context.Context, organization string, 
 	path := "/api/organizations/{organization}/users/{user}/user-workspace/restart"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11269,7 +11319,7 @@ func (c *Client) GetUserWorkspaceStatusForUser(ctx context.Context, organization
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result WorkspaceStatus
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11310,7 +11360,7 @@ func (c *Client) ListWorkers(ctx context.Context, organization string, user stri
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []WorkerResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11326,7 +11376,7 @@ func (c *Client) CreateWorker(ctx context.Context, organization string, user str
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result WorkerResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11343,7 +11393,7 @@ func (c *Client) GetWorker(ctx context.Context, organization string, user string
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "worker", "simple", false, worker)
 	var result WorkerResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11359,7 +11409,7 @@ func (c *Client) DeleteWorker(ctx context.Context, organization string, user str
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "worker", "simple", false, worker)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11375,7 +11425,7 @@ func (c *Client) ListWorkspaceMounts(ctx context.Context, organization string, u
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	var result ListWorkspaceMountsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11390,7 +11440,7 @@ func (c *Client) AddWorkspaceMount(ctx context.Context, organization string, use
 	path := "/api/organizations/{organization}/users/{user}/workspace-mounts"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11405,7 +11455,7 @@ func (c *Client) RemoveWorkspaceMount(ctx context.Context, organization string, 
 	path := "/api/organizations/{organization}/users/{user}/workspace-mounts"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
-	if err := c.do(ctx, "DELETE", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11422,7 +11472,7 @@ func (c *Client) DeleteStorage(ctx context.Context, organization string, user st
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "type", "simple", false, type_)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11437,7 +11487,7 @@ func (c *Client) GetOrganizationVariables(ctx context.Context, organization stri
 	path := "/api/organizations/{organization}/variables"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]WorkflowVariable
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11452,7 +11502,7 @@ func (c *Client) CreateOrganizationVariable(ctx context.Context, organization st
 	path := "/api/organizations/{organization}/variables"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result map[string]WorkflowVariable
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11467,7 +11517,7 @@ func (c *Client) DeleteOrganizationVariable(ctx context.Context, organization st
 	path := "/api/organizations/{organization}/variables/{key}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "key", "simple", false, key)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11483,7 +11533,7 @@ func (c *Client) SetOrganizationVariable(ctx context.Context, organization strin
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "key", "simple", false, key)
 	var result map[string]WorkflowVariable
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11498,7 +11548,7 @@ func (c *Client) ListOrganizationWebhooks(ctx context.Context, organization stri
 	path := "/api/organizations/{organization}/webhooks"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result []Webhook
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11513,7 +11563,7 @@ func (c *Client) CreateOrganizationWebhook(ctx context.Context, organization str
 	path := "/api/organizations/{organization}/webhooks"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result Webhook
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11528,7 +11578,7 @@ func (c *Client) DeleteOrganizationWebhook(ctx context.Context, organization str
 	path := "/api/organizations/{organization}/webhooks/{webhook}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "webhook", "simple", false, webhook)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11544,7 +11594,7 @@ func (c *Client) ToggleOrganizationWebhook(ctx context.Context, organization str
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "webhook", "simple", false, webhook)
 	var result Webhook
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11559,7 +11609,7 @@ func (c *Client) GetOrgWorkspaceDefaults(ctx context.Context, organization strin
 	path := "/api/organizations/{organization}/workspace-defaults"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result OrgWorkspaceDefaults
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11574,7 +11624,7 @@ func (c *Client) UpdateOrgWorkspaceDefaults(ctx context.Context, organization st
 	path := "/api/organizations/{organization}/workspace-defaults"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result OrgWorkspaceDefaults
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11589,7 +11639,7 @@ func (c *Client) GetOrganizationWorkspaceEnvironment(ctx context.Context, organi
 	path := "/api/organizations/{organization}/workspace-environment"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result WorkspaceEnvironment
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11604,7 +11654,7 @@ func (c *Client) UpdateOrganizationWorkspaceEnvironment(ctx context.Context, org
 	path := "/api/organizations/{organization}/workspace-environment"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	var result WorkspaceEnvironment
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11617,7 +11667,7 @@ func (c *Client) UpdateOrganizationWorkspaceEnvironment(ctx context.Context, org
 // Ping the platform, indicating that the user is on the web page.
 func (c *Client) PingHandler(ctx context.Context) error {
 	path := "/api/ping"
-	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11637,7 +11687,7 @@ func (c *Client) GetPlatformImage(ctx context.Context, csp string, region string
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "arch", "simple", false, arch)
 	var result Image
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11657,7 +11707,7 @@ func (c *Client) PutPlatformImage(ctx context.Context, csp string, region string
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "arch", "simple", false, arch)
 	var result Image
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11674,7 +11724,7 @@ func (c *Client) DeletePlatformImage(ctx context.Context, csp string, region str
 	path = pathReplace(path, "region", "simple", false, region)
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "arch", "simple", false, arch)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11691,7 +11741,7 @@ func (c *Client) UpdatePlatformImage(ctx context.Context, csp string, region str
 	path = pathReplace(path, "region", "simple", false, region)
 	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "arch", "simple", false, arch)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11703,7 +11753,7 @@ func (c *Client) UpdatePlatformImage(ctx context.Context, csp string, region str
 func (c *Client) GetDeploymentIdentity(ctx context.Context) (*DeploymentIdentity, error) {
 	path := "/api/platform/deployment"
 	var result DeploymentIdentity
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11717,7 +11767,7 @@ func (c *Client) GetDeploymentIdentity(ctx context.Context) (*DeploymentIdentity
 func (c *Client) ListPlatformDomains(ctx context.Context) (*[]PlatformDomain, error) {
 	path := "/api/platform/domains"
 	var result []PlatformDomain
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11731,7 +11781,7 @@ func (c *Client) ListPlatformDomains(ctx context.Context) (*[]PlatformDomain, er
 func (c *Client) CreatePlatformDomain(ctx context.Context, body CreatePlatformDomainInputBody) (*PlatformDomain, error) {
 	path := "/api/platform/domains"
 	var result PlatformDomain
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11745,7 +11795,7 @@ func (c *Client) CreatePlatformDomain(ctx context.Context, body CreatePlatformDo
 func (c *Client) DeletePlatformDomain(ctx context.Context, id string) error {
 	path := "/api/platform/domains/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11760,7 +11810,7 @@ func (c *Client) UpdatePlatformDomain(ctx context.Context, id string, body Updat
 	path := "/api/platform/domains/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
 	var result PlatformDomain
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11798,7 +11848,7 @@ func (c *Client) GetAllPlatformGroups(ctx context.Context, opts ...GetAllPlatfor
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Group
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11840,7 +11890,7 @@ func (c *Client) GetPlatformImages(ctx context.Context, opts ...GetPlatformImage
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Image
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11856,7 +11906,7 @@ func (c *Client) GetPlatformImages(ctx context.Context, opts ...GetPlatformImage
 func (c *Client) CreatePlatformImage(ctx context.Context, body *Image) (*Image, error) {
 	path := "/api/platform/images"
 	var result Image
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11872,7 +11922,7 @@ func (c *Client) CreatePlatformImage(ctx context.Context, body *Image) (*Image, 
 func (c *Client) GetGithubAppConfig(ctx context.Context) (*GitHubAppConfigResponse, error) {
 	path := "/api/platform/integrations/github"
 	var result GitHubAppConfigResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11888,7 +11938,7 @@ func (c *Client) GetGithubAppConfig(ctx context.Context) (*GitHubAppConfigRespon
 func (c *Client) PutGithubAppConfig(ctx context.Context, body PutGitHubAppConfigInputBody) (*GitHubAppConfigResponse, error) {
 	path := "/api/platform/integrations/github"
 	var result GitHubAppConfigResponse
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11903,7 +11953,7 @@ func (c *Client) PutGithubAppConfig(ctx context.Context, body PutGitHubAppConfig
 // Removes the platform-level GitHub App configuration.
 func (c *Client) DeleteGithubAppConfig(ctx context.Context) error {
 	path := "/api/platform/integrations/github"
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -11919,7 +11969,7 @@ func (c *Client) DeleteGithubAppConfig(ctx context.Context) error {
 func (c *Client) GetHealthMonitoringSettings(ctx context.Context) (*HealthMonitoringSettings, error) {
 	path := "/api/platform/integrations/health-monitoring"
 	var result HealthMonitoringSettings
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11935,7 +11985,7 @@ func (c *Client) GetHealthMonitoringSettings(ctx context.Context) (*HealthMonito
 func (c *Client) UpdateHealthMonitoringSettings(ctx context.Context, body UpdateHealthMonitoringSettingsInputBody) (*HealthMonitoringSettings, error) {
 	path := "/api/platform/integrations/health-monitoring"
 	var result HealthMonitoringSettings
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11951,7 +12001,7 @@ func (c *Client) UpdateHealthMonitoringSettings(ctx context.Context, body Update
 func (c *Client) GetSentrySettings(ctx context.Context) (*SentrySettings, error) {
 	path := "/api/platform/integrations/sentry"
 	var result SentrySettings
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11967,7 +12017,7 @@ func (c *Client) GetSentrySettings(ctx context.Context) (*SentrySettings, error)
 func (c *Client) UpdateSentrySettings(ctx context.Context, body UpdateSentrySettingsBody) (*SentrySettings, error) {
 	path := "/api/platform/integrations/sentry"
 	var result SentrySettings
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11983,7 +12033,7 @@ func (c *Client) UpdateSentrySettings(ctx context.Context, body UpdateSentrySett
 func (c *Client) GetSlackConfig(ctx context.Context) (*SlackConfigResponse, error) {
 	path := "/api/platform/integrations/slack"
 	var result SlackConfigResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11999,7 +12049,7 @@ func (c *Client) GetSlackConfig(ctx context.Context) (*SlackConfigResponse, erro
 func (c *Client) UpdateSlackConfig(ctx context.Context, body PutSlackConfigInputBody) (*SlackConfigResponse, error) {
 	path := "/api/platform/integrations/slack"
 	var result SlackConfigResponse
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12014,7 +12064,7 @@ func (c *Client) UpdateSlackConfig(ctx context.Context, body PutSlackConfigInput
 // Removes the Slack integration and deletes the stored webhook credential.
 func (c *Client) DeleteSlackConfig(ctx context.Context) error {
 	path := "/api/platform/integrations/slack"
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12029,7 +12079,7 @@ func (c *Client) DeleteSlackConfig(ctx context.Context) error {
 // Sends a test message through the configured Slack webhook.
 func (c *Client) PostSlackTestMessage(ctx context.Context) error {
 	path := "/api/platform/integrations/slack/test"
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12043,7 +12093,7 @@ func (c *Client) PostSlackTestMessage(ctx context.Context) error {
 func (c *Client) GetKeys(ctx context.Context) (*Jwks, error) {
 	path := "/api/platform/keys"
 	var result Jwks
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12056,7 +12106,7 @@ func (c *Client) GetKeys(ctx context.Context) (*Jwks, error) {
 // Set platform license.
 func (c *Client) SetPlatformLicense(ctx context.Context, body LicenseData) error {
 	path := "/api/platform/license"
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12070,7 +12120,7 @@ func (c *Client) SetPlatformLicense(ctx context.Context, body LicenseData) error
 func (c *Client) GetPlatformPolicies(ctx context.Context) (*map[string]Policy, error) {
 	path := "/api/platform/policies"
 	var result map[string]Policy
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12084,7 +12134,7 @@ func (c *Client) GetPlatformPolicies(ctx context.Context) (*map[string]Policy, e
 func (c *Client) SetPlatformAllowPublicSessionsPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
 	path := "/api/platform/policies/allow-public-sessions"
 	var result map[string]BooleanPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12098,7 +12148,7 @@ func (c *Client) SetPlatformAllowPublicSessionsPolicy(ctx context.Context, body 
 func (c *Client) SetPlatformArchiveCostDataPolicy(ctx context.Context, body int64) (*map[string]IntPolicyOutput, error) {
 	path := "/api/platform/policies/archive-cost-data"
 	var result map[string]IntPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12112,7 +12162,7 @@ func (c *Client) SetPlatformArchiveCostDataPolicy(ctx context.Context, body int6
 func (c *Client) SetPlatformBaseImageCompliancePolicy(ctx context.Context, body string) (*map[string]BaseImageCompliancePolicyOutput, error) {
 	path := "/api/platform/policies/base-image-compliance"
 	var result map[string]BaseImageCompliancePolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12126,7 +12176,7 @@ func (c *Client) SetPlatformBaseImageCompliancePolicy(ctx context.Context, body 
 func (c *Client) SetPlatformEnforceWebauthnMfaPolicy(ctx context.Context, body string) (*map[string]WebAuthnMfaPolicyOutput, error) {
 	path := "/api/platform/policies/enforce-webauthn-mfa"
 	var result map[string]WebAuthnMfaPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12140,7 +12190,7 @@ func (c *Client) SetPlatformEnforceWebauthnMfaPolicy(ctx context.Context, body s
 func (c *Client) SetPlatformEventRetentionDaysPolicy(ctx context.Context, body int64) (*map[string]IntPolicyOutput, error) {
 	path := "/api/platform/policies/event-retention-days"
 	var result map[string]IntPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12154,7 +12204,7 @@ func (c *Client) SetPlatformEventRetentionDaysPolicy(ctx context.Context, body i
 func (c *Client) SetPlatformMaxAPIKeyTTLPolicy(ctx context.Context, body int64) (*map[string]IntPolicyOutput, error) {
 	path := "/api/platform/policies/max-api-key-ttl"
 	var result map[string]IntPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12168,7 +12218,7 @@ func (c *Client) SetPlatformMaxAPIKeyTTLPolicy(ctx context.Context, body int64) 
 func (c *Client) SetPlatformNitroInstancesOnlyPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
 	path := "/api/platform/policies/nitro-instances-only"
 	var result map[string]BooleanPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12182,7 +12232,7 @@ func (c *Client) SetPlatformNitroInstancesOnlyPolicy(ctx context.Context, body b
 func (c *Client) SetPlatformNoPublicIPPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
 	path := "/api/platform/policies/no-public-ip"
 	var result map[string]BooleanPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12196,7 +12246,7 @@ func (c *Client) SetPlatformNoPublicIPPolicy(ctx context.Context, body bool) (*m
 func (c *Client) SetPlatformNoRootAccessPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
 	path := "/api/platform/policies/no-root-access"
 	var result map[string]BooleanPolicyOutput
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12210,7 +12260,7 @@ func (c *Client) SetPlatformNoRootAccessPolicy(ctx context.Context, body bool) (
 func (c *Client) DeletePlatformPolicy(ctx context.Context, policyname string) error {
 	path := "/api/platform/policies/{policyname}"
 	path = pathReplace(path, "policyname", "simple", false, policyname)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12223,7 +12273,7 @@ func (c *Client) DeletePlatformPolicy(ctx context.Context, policyname string) er
 // Creates the first user and organization. Only available when the platform needs setup (after license is set).
 func (c *Client) PostPlatformSetup(ctx context.Context, body SetupData) error {
 	path := "/api/platform/setup"
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12239,7 +12289,7 @@ func (c *Client) PostPlatformSetup(ctx context.Context, body SetupData) error {
 func (c *Client) ListPlatformWebhooks(ctx context.Context) (*[]Webhook, error) {
 	path := "/api/platform/webhooks"
 	var result []Webhook
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12255,7 +12305,7 @@ func (c *Client) ListPlatformWebhooks(ctx context.Context) (*[]Webhook, error) {
 func (c *Client) CreatePlatformWebhook(ctx context.Context, body CreateWebhookBody) (*Webhook, error) {
 	path := "/api/platform/webhooks"
 	var result Webhook
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12271,7 +12321,7 @@ func (c *Client) CreatePlatformWebhook(ctx context.Context, body CreateWebhookBo
 func (c *Client) DeletePlatformWebhook(ctx context.Context, webhook string) error {
 	path := "/api/platform/webhooks/{webhook}"
 	path = pathReplace(path, "webhook", "simple", false, webhook)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12288,7 +12338,7 @@ func (c *Client) TogglePlatformWebhook(ctx context.Context, webhook string, body
 	path := "/api/platform/webhooks/{webhook}"
 	path = pathReplace(path, "webhook", "simple", false, webhook)
 	var result Webhook
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12302,7 +12352,7 @@ func (c *Client) TogglePlatformWebhook(ctx context.Context, webhook string, body
 func (c *Client) GetWorkspaceDefaults(ctx context.Context) (*PlatformWorkspaceDefaults, error) {
 	path := "/api/platform/workspace-defaults"
 	var result PlatformWorkspaceDefaults
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12318,7 +12368,7 @@ func (c *Client) GetWorkspaceDefaults(ctx context.Context) (*PlatformWorkspaceDe
 func (c *Client) UpdateWorkspaceDefaults(ctx context.Context, body PlatformWorkspaceDefaultsPatchBody) (*PlatformWorkspaceDefaults, error) {
 	path := "/api/platform/workspace-defaults"
 	var result PlatformWorkspaceDefaults
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12332,7 +12382,7 @@ func (c *Client) UpdateWorkspaceDefaults(ctx context.Context, body PlatformWorks
 func (c *Client) GetPreviews(ctx context.Context) (*[]Preview, error) {
 	path := "/api/previews"
 	var result []Preview
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12346,7 +12396,7 @@ func (c *Client) GetPreviews(ctx context.Context) (*[]Preview, error) {
 func (c *Client) EnablePreview(ctx context.Context, flag string) error {
 	path := "/api/previews/{flag}"
 	path = pathReplace(path, "flag", "simple", false, flag)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12360,7 +12410,7 @@ func (c *Client) EnablePreview(ctx context.Context, flag string) error {
 func (c *Client) DisablePreview(ctx context.Context, flag string) error {
 	path := "/api/previews/{flag}"
 	path = pathReplace(path, "flag", "simple", false, flag)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12375,7 +12425,7 @@ func (c *Client) GetPreviewMarkdown(ctx context.Context, flag string) (*string, 
 	path := "/api/previews/{flag}/markdown"
 	path = pathReplace(path, "flag", "simple", false, flag)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12389,7 +12439,7 @@ func (c *Client) GetPreviewMarkdown(ctx context.Context, flag string) (*string, 
 func (c *Client) ListEffectiveProducts(ctx context.Context) (*ListEffectiveProductsOutputBody, error) {
 	path := "/api/products"
 	var result ListEffectiveProductsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12403,7 +12453,7 @@ func (c *Client) ListEffectiveProducts(ctx context.Context) (*ListEffectiveProdu
 func (c *Client) PostProvisionStatus(ctx context.Context, infraID string, body PostProvisionStatusBody) error {
 	path := "/api/provisionstatus/{infraId}"
 	path = pathReplace(path, "infraId", "simple", false, infraID)
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12417,7 +12467,7 @@ func (c *Client) PostProvisionStatus(ctx context.Context, infraID string, body P
 func (c *Client) PatchProvisionStatus(ctx context.Context, infraID string, body PatchProvisionStatusBody) error {
 	path := "/api/provisionstatus/{infraId}"
 	path = pathReplace(path, "infraId", "simple", false, infraID)
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12461,7 +12511,7 @@ func (c *Client) GetReportsLegacyQuery(ctx context.Context, params GetReportsLeg
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []map[string]any
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12475,7 +12525,7 @@ func (c *Client) GetReportsLegacyQuery(ctx context.Context, params GetReportsLeg
 func (c *Client) ListReservedSubdomains(ctx context.Context) (*[]ReservedSubdomainResponse, error) {
 	path := "/api/reserved-subdomains"
 	var result []ReservedSubdomainResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12489,7 +12539,7 @@ func (c *Client) ListReservedSubdomains(ctx context.Context) (*[]ReservedSubdoma
 func (c *Client) ReserveSubdomain(ctx context.Context, body ReserveSubdomainBody) (*ReservedSubdomainResponse, error) {
 	path := "/api/reserved-subdomains"
 	var result ReservedSubdomainResponse
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12503,7 +12553,7 @@ func (c *Client) ReserveSubdomain(ctx context.Context, body ReserveSubdomainBody
 func (c *Client) DeleteReservedSubdomain(ctx context.Context, id string) error {
 	path := "/api/reserved-subdomains/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12545,7 +12595,7 @@ func (c *Client) ListUserResourceGroups(ctx context.Context, opts ...ListUserRes
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []ResourceGroup
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12575,7 +12625,7 @@ func (c *Client) GetSchedulerJobs(ctx context.Context, opts ...GetSchedulerJobsP
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []SchedulerJob
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12605,7 +12655,7 @@ func (c *Client) GetSessions(ctx context.Context, opts ...GetSessionsParams) (*[
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []Session
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12619,7 +12669,7 @@ func (c *Client) GetSessions(ctx context.Context, opts ...GetSessionsParams) (*[
 func (c *Client) CreateSession(ctx context.Context, body PostSessionBody) (*Session, error) {
 	path := "/api/sessions"
 	var result Session
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12637,7 +12687,7 @@ func (c *Client) UpdateSessionDeprecated(ctx context.Context, namespace string, 
 	path = pathReplace(path, "namespace", "simple", false, namespace)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result Session
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12649,7 +12699,7 @@ func (c *Client) UpdateSessionDeprecated(ctx context.Context, namespace string, 
 func (c *Client) GetPlatformSettings(ctx context.Context) (*PlatformSettings, error) {
 	path := "/api/settings"
 	var result PlatformSettings
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12663,7 +12713,7 @@ func (c *Client) GetPlatformSettings(ctx context.Context) (*PlatformSettings, er
 func (c *Client) AcceptTerms(ctx context.Context) (*AcceptTermsBody, error) {
 	path := "/api/settings/accept-terms"
 	var result AcceptTermsBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12675,7 +12725,7 @@ func (c *Client) AcceptTerms(ctx context.Context) (*AcceptTermsBody, error) {
 func (c *Client) GetAdminPlatformSettings(ctx context.Context) (*PlatformSettingsAdmin, error) {
 	path := "/api/settings/admin"
 	var result PlatformSettingsAdmin
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12691,7 +12741,7 @@ func (c *Client) GetAdminPlatformSettings(ctx context.Context) (*PlatformSetting
 func (c *Client) UpdateAdminPlatformSettings(ctx context.Context, body UpdateAdminPlatformSettingsInputBody) (*PlatformSettingsAdmin, error) {
 	path := "/api/settings/admin"
 	var result PlatformSettingsAdmin
-	if err := c.do(ctx, "PUT", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12705,7 +12755,7 @@ func (c *Client) UpdateAdminPlatformSettings(ctx context.Context, body UpdateAdm
 func (c *Client) CompleteOnboarding(ctx context.Context) (*CompleteOnboardingBody, error) {
 	path := "/api/settings/complete-onboarding"
 	var result CompleteOnboardingBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12719,7 +12769,7 @@ func (c *Client) CompleteOnboarding(ctx context.Context) (*CompleteOnboardingBod
 func (c *Client) GetTerms(ctx context.Context) (*GetTermsBody, error) {
 	path := "/api/settings/terms"
 	var result GetTermsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12733,7 +12783,7 @@ func (c *Client) GetTerms(ctx context.Context) (*GetTermsBody, error) {
 func (c *Client) GetSnapshots(ctx context.Context) (*[]Snapshot, error) {
 	path := "/api/snapshots"
 	var result []Snapshot
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12747,7 +12797,7 @@ func (c *Client) GetSnapshots(ctx context.Context) (*[]Snapshot, error) {
 func (c *Client) GetSSHPrivateKeys(ctx context.Context) (*[]SSHPrivateKey, error) {
 	path := "/api/ssh-private-keys"
 	var result []SSHPrivateKey
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12761,7 +12811,7 @@ func (c *Client) GetSSHPrivateKeys(ctx context.Context) (*[]SSHPrivateKey, error
 func (c *Client) DeleteSSHPrivateKey(ctx context.Context, name string) error {
 	path := "/api/ssh-private-keys/{name}"
 	path = pathReplace(path, "name", "simple", false, name)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12775,7 +12825,7 @@ func (c *Client) DeleteSSHPrivateKey(ctx context.Context, name string) error {
 func (c *Client) ListSSHPublicKeys(ctx context.Context) (*[]SSHPublicKey, error) {
 	path := "/api/ssh-public-keys"
 	var result []SSHPublicKey
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12789,7 +12839,7 @@ func (c *Client) ListSSHPublicKeys(ctx context.Context) (*[]SSHPublicKey, error)
 func (c *Client) CreateSSHPublicKey(ctx context.Context, body CreateSSHPublicKeyInputBody) (*SSHPublicKey, error) {
 	path := "/api/ssh-public-keys"
 	var result SSHPublicKey
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12803,7 +12853,7 @@ func (c *Client) CreateSSHPublicKey(ctx context.Context, body CreateSSHPublicKey
 func (c *Client) DeleteSSHPublicKey(ctx context.Context, id string) error {
 	path := "/api/ssh-public-keys/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12816,7 +12866,7 @@ func (c *Client) DeleteSSHPublicKey(ctx context.Context, id string) error {
 // Redirects the user to the CAC certificate verification endpoint on port 8443.
 func (c *Client) GetCacRedirect(ctx context.Context) error {
 	path := "/api/sso/cac/redirect"
-	if err := c.do(ctx, "GET", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12831,7 +12881,7 @@ func (c *Client) GetCacRedirect(ctx context.Context) error {
 // Allows a platform administrator to impersonate another user. The admin's session will be updated to act as the target user.
 func (c *Client) PostImpersonate(ctx context.Context, body PostImpersonateInputBody) error {
 	path := "/api/sso/impersonate"
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12844,7 +12894,7 @@ func (c *Client) PostImpersonate(ctx context.Context, body PostImpersonateInputB
 // Cancels the current impersonation session and returns to the original admin user.
 func (c *Client) DeleteImpersonate(ctx context.Context) error {
 	path := "/api/sso/impersonate"
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12857,7 +12907,7 @@ func (c *Client) DeleteImpersonate(ctx context.Context) error {
 // Finalize login after a new LDAP user has been created.
 func (c *Client) PostLdapSignupCallback(ctx context.Context) error {
 	path := "/api/sso/ldap/callback"
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12870,7 +12920,7 @@ func (c *Client) PostLdapSignupCallback(ctx context.Context) error {
 // Authenticate against a configured LDAP auth method.
 func (c *Client) PostLdapLogin(ctx context.Context, body LdapLoginInputBody) error {
 	path := "/api/sso/ldap/login"
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12883,7 +12933,7 @@ func (c *Client) PostLdapLogin(ctx context.Context, body LdapLoginInputBody) err
 // Create a new account from a pending LDAP registration session.
 func (c *Client) PostLdapSignup(ctx context.Context, body LdapSignupInputBody) error {
 	path := "/api/sso/ldap/signup"
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12897,7 +12947,7 @@ func (c *Client) PostLdapSignup(ctx context.Context, body LdapSignupInputBody) e
 func (c *Client) PostLogout(ctx context.Context) (*PostLogoutOutputBody, error) {
 	path := "/api/sso/logout"
 	var result PostLogoutOutputBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12911,7 +12961,7 @@ func (c *Client) PostLogout(ctx context.Context) (*PostLogoutOutputBody, error) 
 func (c *Client) GetMfaSettings(ctx context.Context) (*GetMfaSettingsOutputBody, error) {
 	path := "/api/sso/mfa"
 	var result GetMfaSettingsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12924,7 +12974,7 @@ func (c *Client) GetMfaSettings(ctx context.Context) (*GetMfaSettingsOutputBody,
 // Remove MFA settings for the authenticated user.
 func (c *Client) DeleteMfa(ctx context.Context, body DeleteMfaInputBody) error {
 	path := "/api/sso/mfa"
-	if err := c.do(ctx, "DELETE", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12937,7 +12987,7 @@ func (c *Client) DeleteMfa(ctx context.Context, body DeleteMfaInputBody) error {
 // Complete MFA verification after password login.
 func (c *Client) PostMfaLogin(ctx context.Context, body MfaLoginInputBody) error {
 	path := "/api/sso/mfa/login"
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -12951,7 +13001,7 @@ func (c *Client) PostMfaLogin(ctx context.Context, body MfaLoginInputBody) error
 func (c *Client) PostAddMfaOtp(ctx context.Context) (*AddOtpMfaOutputBody, error) {
 	path := "/api/sso/mfa/otp"
 	var result AddOtpMfaOutputBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12965,7 +13015,7 @@ func (c *Client) PostAddMfaOtp(ctx context.Context) (*AddOtpMfaOutputBody, error
 func (c *Client) PostVerifyOtp(ctx context.Context, body VerifyOtpInputBody) (*VerifyOtpOutputBody, error) {
 	path := "/api/sso/mfa/otp/verify"
 	var result VerifyOtpOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12979,7 +13029,7 @@ func (c *Client) PostVerifyOtp(ctx context.Context, body VerifyOtpInputBody) (*V
 func (c *Client) PostAddMfaWebauthn(ctx context.Context) (*WebAuthnRegisterOutputBody, error) {
 	path := "/api/sso/mfa/webauthn"
 	var result WebAuthnRegisterOutputBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12993,7 +13043,7 @@ func (c *Client) PostAddMfaWebauthn(ctx context.Context) (*WebAuthnRegisterOutpu
 func (c *Client) PostWebauthnAuthOptions(ctx context.Context) (*WebAuthnAuthOptionsOutputBody, error) {
 	path := "/api/sso/mfa/webauthn/authenticate"
 	var result WebAuthnAuthOptionsOutputBody
-	if err := c.do(ctx, "POST", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13007,7 +13057,7 @@ func (c *Client) PostWebauthnAuthOptions(ctx context.Context) (*WebAuthnAuthOpti
 func (c *Client) PostVerifyWebauthn(ctx context.Context, body WebAuthnVerifyInputBody) (*WebAuthnVerifyOutputBody, error) {
 	path := "/api/sso/mfa/webauthn/verify"
 	var result WebAuthnVerifyOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13020,7 +13070,7 @@ func (c *Client) PostVerifyWebauthn(ctx context.Context, body WebAuthnVerifyInpu
 // Change the authenticated user's password. Requires current password verification.
 func (c *Client) PatchPassword(ctx context.Context, body PasswordChangeInputBody) error {
 	path := "/api/sso/password"
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13033,7 +13083,7 @@ func (c *Client) PatchPassword(ctx context.Context, body PasswordChangeInputBody
 // Authenticate with username/email and password.
 func (c *Client) PostPasswordLogin(ctx context.Context, body PasswordLoginInputBody) error {
 	path := "/api/sso/password/login"
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13046,7 +13096,7 @@ func (c *Client) PostPasswordLogin(ctx context.Context, body PasswordLoginInputB
 // Request a password reset email. If the username/email exists, a reset link will be sent.
 func (c *Client) PostPasswordResetEmail(ctx context.Context, body PasswordResetEmailInputBody) error {
 	path := "/api/sso/password/reset"
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13059,7 +13109,7 @@ func (c *Client) PostPasswordResetEmail(ctx context.Context, body PasswordResetE
 // Verify password reset token and change password.
 func (c *Client) PostPasswordResetVerify(ctx context.Context, body PasswordResetVerifyInputBody) error {
 	path := "/api/sso/password/reset/verify"
-	if err := c.do(ctx, "POST", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13085,7 +13135,7 @@ func (c *Client) CheckSubdomainAvailability(ctx context.Context, params CheckSub
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result SubdomainAvailabilityResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13099,7 +13149,7 @@ func (c *Client) CheckSubdomainAvailability(ctx context.Context, params CheckSub
 func (c *Client) GetUserWorkspaceStatus(ctx context.Context) (*WorkspaceStatus, error) {
 	path := "/api/user-workspace/status"
 	var result WorkspaceStatus
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13115,7 +13165,7 @@ func (c *Client) GetUserWorkspaceStatus(ctx context.Context) (*WorkspaceStatus, 
 func (c *Client) GetUserWorkspaces(ctx context.Context) (*GetUserContainersResponse, error) {
 	path := "/api/user-workspaces"
 	var result GetUserContainersResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13130,7 +13180,7 @@ func (c *Client) GetUserWorkspaces(ctx context.Context) (*GetUserContainersRespo
 // Scales down user workspaces which are considered 'safe to kill'. Safe to kill is determined by the user not being online within the last 15 minutes and not having any running workflows.
 func (c *Client) ScaleDownUserWorkspaces(ctx context.Context) error {
 	path := "/api/user-workspaces/scale-down"
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13144,7 +13194,7 @@ func (c *Client) ScaleDownUserWorkspaces(ctx context.Context) error {
 func (c *Client) UpdateUserProfile(ctx context.Context, body UpdateUserProfileInputBody) (*UpdateUserProfileBody, error) {
 	path := "/api/user/profile"
 	var result UpdateUserProfileBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13157,7 +13207,7 @@ func (c *Client) UpdateUserProfile(ctx context.Context, body UpdateUserProfileIn
 // Clears the current user's stored sidebar preferences and reverts to defaults.
 func (c *Client) ResetUserSidebar(ctx context.Context) error {
 	path := "/api/user/sidebar"
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13170,7 +13220,7 @@ func (c *Client) ResetUserSidebar(ctx context.Context) error {
 // Updates the current user's sidebar visibility preferences.
 func (c *Client) UpdateUserSidebar(ctx context.Context, body UpdateUserSidebarInputBody) error {
 	path := "/api/user/sidebar"
-	if err := c.do(ctx, "PATCH", path, body, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13184,7 +13234,7 @@ func (c *Client) UpdateUserSidebar(ctx context.Context, body UpdateUserSidebarIn
 func (c *Client) ListUserThumbnails(ctx context.Context) (*ListUserThumbnailsOutputBody, error) {
 	path := "/api/user/thumbnails"
 	var result ListUserThumbnailsOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13198,7 +13248,7 @@ func (c *Client) ListUserThumbnails(ctx context.Context) (*ListUserThumbnailsOut
 func (c *Client) UploadUserThumbnail(ctx context.Context, body *any) (*UserThumbnail, error) {
 	path := "/api/user/thumbnails"
 	var result UserThumbnail
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "multipart/form-data", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13212,7 +13262,7 @@ func (c *Client) UploadUserThumbnail(ctx context.Context, body *any) (*UserThumb
 func (c *Client) DeleteUserThumbnail(ctx context.Context, etag string) error {
 	path := "/api/user/thumbnails/{etag}"
 	path = pathReplace(path, "etag", "simple", false, etag)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13257,7 +13307,7 @@ func (c *Client) ListUsers(ctx context.Context, opts ...ListUsersParams) (*ListU
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ListUsersOutputBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13288,7 +13338,7 @@ func (c *Client) GetUserActivity(ctx context.Context, username string, opts ...G
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result UserActivityResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13303,7 +13353,7 @@ func (c *Client) GetUserProfile(ctx context.Context, username string) (*UserProf
 	path := "/api/users/{username}/profile"
 	path = pathReplace(path, "username", "simple", false, username)
 	var result UserProfile
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13318,7 +13368,7 @@ func (c *Client) GetUserSSHPublicKeys(ctx context.Context, username string) (*st
 	path := "/api/users/{username}/ssh-public-keys"
 	path = pathReplace(path, "username", "simple", false, username)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13334,7 +13384,7 @@ func (c *Client) GetUserSSHPublicKeys(ctx context.Context, username string) (*st
 func (c *Client) GetAuthSessionDeprecated(ctx context.Context) (*AuthSession, error) {
 	path := "/api/v2/auth/session"
 	var result AuthSession
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13366,7 +13416,7 @@ func (c *Client) GetAccelerators(ctx context.Context, params GetAcceleratorsPara
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result map[string]AcceleratorInfo
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13380,7 +13430,7 @@ func (c *Client) GetAccelerators(ctx context.Context, params GetAcceleratorsPara
 func (c *Client) CreateSSHPublicKeyLegacy(ctx context.Context, body CreateSSHPublicKeyInputBody) (*SSHPublicKey, error) {
 	path := "/api/v2/sshpublickeys"
 	var result SSHPublicKey
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13395,7 +13445,7 @@ func (c *Client) GetUserSSHPublicKeysLegacy(ctx context.Context, username string
 	path := "/api/v2/users/{username}/sshpublickeys"
 	path = pathReplace(path, "username", "simple", false, username)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13409,7 +13459,7 @@ func (c *Client) GetUserSSHPublicKeysLegacy(ctx context.Context, username string
 func (c *Client) ListWorkflowPermissions(ctx context.Context) (*[]WorkflowPermissionResponse, error) {
 	path := "/api/workflow-permissions"
 	var result []WorkflowPermissionResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13423,7 +13473,7 @@ func (c *Client) ListWorkflowPermissions(ctx context.Context) (*[]WorkflowPermis
 func (c *Client) DeleteWorkflowPermission(ctx context.Context, workflow string) error {
 	path := "/api/workflow-permissions/{workflow}"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13465,7 +13515,7 @@ func (c *Client) ListWorkflowRuns(ctx context.Context, opts ...ListWorkflowRunsP
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result ListWorkflowRunsBody
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13479,7 +13529,7 @@ func (c *Client) ListWorkflowRuns(ctx context.Context, opts ...ListWorkflowRunsP
 func (c *Client) CreateWorkflowRun(ctx context.Context, body CreateWorkflowRunInputBody) (*CreateWorkflowRunOutputBody, error) {
 	path := "/api/workflow-runs"
 	var result CreateWorkflowRunOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13517,7 +13567,7 @@ func (c *Client) DeleteWorkflowRuns(ctx context.Context, opts ...DeleteWorkflowR
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
 	}
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13532,7 +13582,7 @@ func (c *Client) GetWorkflowRun(ctx context.Context, slug string) (*WorkflowRunD
 	path := "/api/workflow-runs/{slug}"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result WorkflowRunDetailResponse
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13546,7 +13596,7 @@ func (c *Client) GetWorkflowRun(ctx context.Context, slug string) (*WorkflowRunD
 func (c *Client) DeleteWorkflowRun(ctx context.Context, slug string) error {
 	path := "/api/workflow-runs/{slug}"
 	path = pathReplace(path, "slug", "simple", false, slug)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13561,7 +13611,7 @@ func (c *Client) UpdateWorkflowRun(ctx context.Context, slug string, body Update
 	path := "/api/workflow-runs/{slug}"
 	path = pathReplace(path, "slug", "simple", false, slug)
 	var result WorkflowRunDetailResponse
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13575,7 +13625,7 @@ func (c *Client) UpdateWorkflowRun(ctx context.Context, slug string, body Update
 func (c *Client) CancelWorkflowRun(ctx context.Context, slug string) error {
 	path := "/api/workflow-runs/{slug}/cancel"
 	path = pathReplace(path, "slug", "simple", false, slug)
-	if err := c.do(ctx, "POST", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13602,7 +13652,7 @@ func (c *Client) GetWorkflowRunFile(ctx context.Context, slug string, params Get
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13616,7 +13666,7 @@ func (c *Client) GetWorkflowRunFile(ctx context.Context, slug string, params Get
 func (c *Client) ListUserVariables(ctx context.Context) (*map[string]WorkflowVariable, error) {
 	path := "/api/workflow-variables"
 	var result map[string]WorkflowVariable
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13630,7 +13680,7 @@ func (c *Client) ListUserVariables(ctx context.Context) (*map[string]WorkflowVar
 func (c *Client) CreateUserVariable(ctx context.Context, body CreateVariableInput) (*WorkflowVariable, error) {
 	path := "/api/workflow-variables"
 	var result WorkflowVariable
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13644,7 +13694,7 @@ func (c *Client) CreateUserVariable(ctx context.Context, body CreateVariableInpu
 func (c *Client) DeleteUserVariable(ctx context.Context, key string) error {
 	path := "/api/workflow-variables/{key}"
 	path = pathReplace(path, "key", "simple", false, key)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13659,7 +13709,7 @@ func (c *Client) UpdateUserVariable(ctx context.Context, key string, body Update
 	path := "/api/workflow-variables/{key}"
 	path = pathReplace(path, "key", "simple", false, key)
 	var result WorkflowVariable
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13689,7 +13739,7 @@ func (c *Client) ListWorkflows(ctx context.Context, opts ...ListWorkflowsParams)
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result []WorkflowItem
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13703,7 +13753,7 @@ func (c *Client) ListWorkflows(ctx context.Context, opts ...ListWorkflowsParams)
 func (c *Client) CreateWorkflow(ctx context.Context, body CreateWorkflowBody) (*WorkflowItem, error) {
 	path := "/api/workflows"
 	var result WorkflowItem
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13718,7 +13768,7 @@ func (c *Client) GetWorkflow(ctx context.Context, workflow string) (*WorkflowIte
 	path := "/api/workflows/{workflow}"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
 	var result WorkflowItem
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13732,7 +13782,7 @@ func (c *Client) GetWorkflow(ctx context.Context, workflow string) (*WorkflowIte
 func (c *Client) DeleteWorkflow(ctx context.Context, workflow string) error {
 	path := "/api/workflows/{workflow}"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13747,7 +13797,7 @@ func (c *Client) UpdateWorkflow(ctx context.Context, workflow string, body Updat
 	path := "/api/workflows/{workflow}"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
 	var result WorkflowItem
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13762,7 +13812,7 @@ func (c *Client) DuplicateWorkflow(ctx context.Context, workflow string, body Du
 	path := "/api/workflows/{workflow}/duplicate"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
 	var result WorkflowItem
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13777,7 +13827,7 @@ func (c *Client) ForkWorkflow(ctx context.Context, workflow string, body ForkWor
 	path := "/api/workflows/{workflow}/fork"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
 	var result WorkflowItem
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13804,7 +13854,7 @@ func (c *Client) GetWorkflowIcon(ctx context.Context, workflow string, opts ...G
 	headers := make(http.Header)
 	setHeader(headers, "If-None-Match", false, params.IfNoneMatch)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json", headers); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13819,7 +13869,7 @@ func (c *Client) UploadWorkflowIcon(ctx context.Context, workflow string, body *
 	path := "/api/workflows/{workflow}/icon"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
 	var result UploadWorkflowIconOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "multipart/form-data", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13833,7 +13883,7 @@ func (c *Client) UploadWorkflowIcon(ctx context.Context, workflow string, body *
 func (c *Client) DeleteWorkflowIcon(ctx context.Context, workflow string) error {
 	path := "/api/workflows/{workflow}/icon"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
-	if err := c.do(ctx, "DELETE", path, nil, nil, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -13848,7 +13898,7 @@ func (c *Client) SetWorkflowIcon(ctx context.Context, workflow string, body Icon
 	path := "/api/workflows/{workflow}/icon"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
 	var result SetWorkflowIconOutputBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13863,7 +13913,7 @@ func (c *Client) GetWorkflowJSON(ctx context.Context, workflow string) (*map[str
 	path := "/api/workflows/{workflow}/json"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
 	var result map[string]any
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13878,7 +13928,7 @@ func (c *Client) GetWorkflowMarkdown(ctx context.Context, workflow string) (*str
 	path := "/api/workflows/{workflow}/markdown"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13893,7 +13943,7 @@ func (c *Client) CreateWorkflowSavedInputs(ctx context.Context, workflow string,
 	path := "/api/workflows/{workflow}/saved-inputs"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
 	var result WorkflowSavedInputsOutputBody
-	if err := c.do(ctx, "POST", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13909,7 +13959,7 @@ func (c *Client) DeleteWorkflowSavedInputs(ctx context.Context, workflow string,
 	path = pathReplace(path, "workflow", "simple", false, workflow)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result WorkflowSavedInputsOutputBody
-	if err := c.do(ctx, "DELETE", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13925,7 +13975,7 @@ func (c *Client) UpdateWorkflowSavedInputs(ctx context.Context, workflow string,
 	path = pathReplace(path, "workflow", "simple", false, workflow)
 	path = pathReplace(path, "name", "simple", false, name)
 	var result WorkflowSavedInputsOutputBody
-	if err := c.do(ctx, "PATCH", path, body, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13940,7 +13990,7 @@ func (c *Client) GetWorkflowYaml(ctx context.Context, workflow string) (*string,
 	path := "/api/workflows/{workflow}/yaml"
 	path = pathReplace(path, "workflow", "simple", false, workflow)
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13954,7 +14004,7 @@ func (c *Client) GetWorkflowYaml(ctx context.Context, workflow string) (*string,
 func (c *Client) GetHealthCheck(ctx context.Context) (*string, error) {
 	path := "/healthzz"
 	var result string
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13966,7 +14016,7 @@ func (c *Client) GetHealthCheck(ctx context.Context) (*string, error) {
 func (c *Client) GetWorkflowSchema(ctx context.Context) (*map[string]any, error) {
 	path := "/workflow.schema.json"
 	var result map[string]any
-	if err := c.do(ctx, "GET", path, nil, &result, "application/json"); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil

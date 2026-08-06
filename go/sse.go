@@ -19,6 +19,7 @@ type sseError struct {
 // SSEReader reads SSE events from a streaming response body.
 type SSEReader struct {
 	scanner *bufio.Scanner
+	done    bool
 }
 
 // NewSSEReader creates a new SSE reader from a response body.
@@ -40,6 +41,7 @@ func (r *SSEReader) Next() (*ChatCompletionChunk, error) {
 		}
 		data := strings.TrimPrefix(line, "data: ")
 		if data == "[DONE]" {
+			r.done = true
 			return nil, io.EOF
 		}
 
@@ -59,4 +61,9 @@ func (r *SSEReader) Next() (*ChatCompletionChunk, error) {
 		return nil, err
 	}
 	return nil, io.EOF
+}
+
+// Done reports whether the stream sent its explicit [DONE] terminator.
+func (r *SSEReader) Done() bool {
+	return r.done
 }

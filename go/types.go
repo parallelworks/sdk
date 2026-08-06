@@ -3,6 +3,7 @@
 package parallelworks
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -12,7 +13,7 @@ import (
 // deleteDeclaredProperties drops the keys encoding/json already consumed into
 // struct fields. The match is case-insensitive because that is the fallback
 // encoding/json itself uses, so "Name" must not also land in the catch-all map.
-func deleteDeclaredProperties(obj map[string]json.RawMessage, declared []string) {
+func deleteDeclaredProperties[V any](obj map[string]V, declared []string) {
 	for key := range obj {
 		for _, name := range declared {
 			if strings.EqualFold(key, name) {
@@ -21,6 +22,75 @@ func deleteDeclaredProperties(obj map[string]json.RawMessage, declared []string)
 			}
 		}
 	}
+}
+
+// jsonMember is one key/value pair of a JSON object under assembly.
+type jsonMember struct {
+	key string
+	raw json.RawMessage
+}
+
+// mergeObjectMembers appends src's members to dst in order, replacing the value
+// of a key dst already holds. src must be a JSON object; null is a no-op, the
+// way encoding/json treats a nil embedded pointer.
+func mergeObjectMembers(dst []jsonMember, src []byte) ([]jsonMember, error) {
+	trimmed := bytes.TrimSpace(src)
+	if bytes.Equal(trimmed, []byte("null")) {
+		return dst, nil
+	}
+	if len(trimmed) == 0 || trimmed[0] != '{' {
+		return nil, fmt.Errorf("cannot merge non-object value %s into a JSON object", trimmed)
+	}
+	dec := json.NewDecoder(bytes.NewReader(trimmed))
+	if _, err := dec.Token(); err != nil {
+		return nil, err
+	}
+	for dec.More() {
+		keyToken, err := dec.Token()
+		if err != nil {
+			return nil, err
+		}
+		key, ok := keyToken.(string)
+		if !ok {
+			return nil, fmt.Errorf("unexpected token %v in JSON object", keyToken)
+		}
+		var value json.RawMessage
+		if err := dec.Decode(&value); err != nil {
+			return nil, err
+		}
+		replaced := false
+		for i := range dst {
+			if dst[i].key == key {
+				dst[i].raw = value
+				replaced = true
+				break
+			}
+		}
+		if !replaced {
+			dst = append(dst, jsonMember{key: key, raw: value})
+		}
+	}
+	return dst, nil
+}
+
+// encodeObject renders members as a JSON object, preserving their order.
+func encodeObject(members []jsonMember) ([]byte, error) {
+	var buf bytes.Buffer
+	buf.WriteByte('{')
+	for i, m := range members {
+		if i > 0 {
+			buf.WriteByte(',')
+		}
+		key, err := json.Marshal(m.key)
+		if err != nil {
+			return nil, err
+		}
+		buf.Write(key)
+		buf.WriteByte(':')
+		buf.Write(m.raw)
+	}
+	buf.WriteByte('}')
+	return buf.Bytes(), nil
 }
 
 type AiModelConfig struct {
@@ -145,12 +215,10 @@ type AddAwsDiskVersionInputBody struct {
 	Iops      *int64  `json:"iops,omitempty"`
 	Region    *string `json:"region,omitempty"`
 	// Replace an existing version's variables instead of adding a new version.
-	Replace         *bool   `json:"replace,omitempty"`
-	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
-	SizeGb          *int64  `json:"size_gb,omitempty"`
-	Snapshot        *string `json:"snapshot,omitempty"`
-	Throughput      *int64  `json:"throughput,omitempty"`
-	Type            *string `json:"type,omitempty"`
+	Replace    *bool   `json:"replace,omitempty"`
+	SizeGb     *int64  `json:"size_gb,omitempty"`
+	Throughput *int64  `json:"throughput,omitempty"`
+	Type       *string `json:"type,omitempty"`
 	// Version label to add (must start with v).
 	Version string  `json:"version"`
 	Zone    *string `json:"zone,omitempty"`
@@ -231,11 +299,9 @@ type AddAzureBucketVersionInputBody struct {
 type AddAzureDiskVersionInputBody struct {
 	Region *string `json:"region,omitempty"`
 	// Replace an existing version's variables instead of adding a new version.
-	Replace         *bool   `json:"replace,omitempty"`
-	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
-	SizeGb          *int64  `json:"size_gb,omitempty"`
-	Snapshot        *string `json:"snapshot,omitempty"`
-	Type            *string `json:"type,omitempty"`
+	Replace *bool   `json:"replace,omitempty"`
+	SizeGb  *int64  `json:"size_gb,omitempty"`
+	Type    *string `json:"type,omitempty"`
 	// Version label to add (must start with v).
 	Version string  `json:"version"`
 	Zone    *string `json:"zone,omitempty"`
@@ -335,11 +401,9 @@ type AddGoogleBucketVersionInputBody struct {
 type AddGoogleDiskVersionInputBody struct {
 	Region *string `json:"region,omitempty"`
 	// Replace an existing version's variables instead of adding a new version.
-	Replace         *bool   `json:"replace,omitempty"`
-	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
-	SizeGb          *int64  `json:"size_gb,omitempty"`
-	Snapshot        *string `json:"snapshot,omitempty"`
-	Type            *string `json:"type,omitempty"`
+	Replace *bool   `json:"replace,omitempty"`
+	SizeGb  *int64  `json:"size_gb,omitempty"`
+	Type    *string `json:"type,omitempty"`
 	// Version label to add (must start with v).
 	Version string  `json:"version"`
 	Zone    *string `json:"zone,omitempty"`
@@ -713,6 +777,15 @@ type AttachBucketInputBody struct {
 	RefreshInterval string `json:"refreshInterval"`
 }
 
+type AttachClusterDiskBody struct {
+	// The path to mount the disk at on the cluster.
+	MountPoint string `json:"mountPoint"`
+	// Export the disk over NFS to the cluster's compute nodes.
+	NfsExport *bool `json:"nfsExport,omitempty"`
+	// The id of the persistent disk to attach.
+	StorageID string `json:"storageId"`
+}
+
 type AttachmentResponse struct {
 	// MIME type
 	ContentType string `json:"contentType"`
@@ -896,10 +969,8 @@ type AwsDisk struct {
 	ProvisionError *string `json:"provisionError,omitempty"`
 	// Indicates if the storage has been provisioned.
 	Provisioned bool `json:"provisioned"`
-	// Region the AWS bucket is in
-	Region *string `json:"region,omitempty"`
-	// Indicates if the disk is restored from a snapshot
-	RestoreSnapshot  *bool         `json:"restoreSnapshot,omitempty"`
+	// Region the AWS disk is in
+	Region           *string       `json:"region,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
@@ -923,12 +994,10 @@ type AwsDisk struct {
 }
 
 type AwsDiskVersionSettings struct {
-	Encrypted       *bool   `json:"encrypted,omitempty"`
-	Iops            *int64  `json:"iops,omitempty"`
-	Region          *string `json:"region,omitempty"`
-	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
-	SizeGb          *int64  `json:"size_gb,omitempty"`
-	Snapshot        *string `json:"snapshot,omitempty"`
+	Encrypted *bool   `json:"encrypted,omitempty"`
+	Iops      *int64  `json:"iops,omitempty"`
+	Region    *string `json:"region,omitempty"`
+	SizeGb    *int64  `json:"size_gb,omitempty"`
 	// Subtype discriminator.
 	Subtype    string  `json:"subtype"`
 	Throughput *int64  `json:"throughput,omitempty"`
@@ -1299,6 +1368,8 @@ type AzureDisk struct {
 	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
 	// Description of the storage.
 	Description *string `json:"description,omitempty"`
+	// Type of the disk
+	DiskType *string `json:"diskType,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
 	// Indicates if the storage is a favorite for the requesting user.
@@ -1318,7 +1389,9 @@ type AzureDisk struct {
 	// Error message if the storage provisioning failed.
 	ProvisionError *string `json:"provisionError,omitempty"`
 	// Indicates if the storage has been provisioned.
-	Provisioned      bool          `json:"provisioned"`
+	Provisioned bool `json:"provisioned"`
+	// Region the disk is in
+	Region           *string       `json:"region,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
@@ -1327,6 +1400,8 @@ type AzureDisk struct {
 	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
+	// Size of the disk in GiB
+	Size *int32 `json:"size,omitempty"`
 	// Current status of the storage.
 	Status *string `json:"status,omitempty"`
 	// Tags associated with the storage.
@@ -1335,13 +1410,13 @@ type AzureDisk struct {
 	Type string `json:"type"`
 	// User associated with the storage.
 	User string `json:"user"`
+	// Zone the disk is in
+	Zone *string `json:"zone,omitempty"`
 }
 
 type AzureDiskVersionSettings struct {
-	Region          *string `json:"region,omitempty"`
-	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
-	SizeGb          *int64  `json:"size_gb,omitempty"`
-	Snapshot        *string `json:"snapshot,omitempty"`
+	Region *string `json:"region,omitempty"`
+	SizeGb *int64  `json:"size_gb,omitempty"`
 	// Subtype discriminator.
 	Subtype string  `json:"subtype"`
 	Type    *string `json:"type,omitempty"`
@@ -1697,7 +1772,7 @@ type BaseImageComplianceBody struct {
 	EnforcementMode string `json:"enforcementMode"`
 	// Disabled or removed base images with dependency counts
 	Images []ImageComplianceItem `json:"images"`
-	// Clusters and instances configured to boot from an unusable base image
+	// Clusters and instances configured with an unusable image or snapshot, or with an image outside the catalog
 	Resources []ResourceComplianceItem `json:"resources"`
 	// Root snapshots that can no longer be used
 	Snapshots []SnapshotComplianceItem `json:"snapshots"`
@@ -1716,7 +1791,7 @@ type BaseImageCompliancePolicyOutput struct {
 type BaseImageSummary struct {
 	// Root snapshots whose base image is disabled, removed, or was never recorded
 	AffectedSnapshots int64 `json:"affectedSnapshots"`
-	// Clusters and instances configured to boot from a disabled, removed, or unrecorded base image
+	// Clusters and instances configured to boot from a disabled, removed, unrecorded, or custom base image
 	AtRiskResources int64 `json:"atRiskResources"`
 	// Disabled catalog images that snapshots or resources still depend on
 	DisabledImages int64 `json:"disabledImages"`
@@ -2104,72 +2179,72 @@ type ChatCompletionRequest struct {
 	// End-user identifier
 	User *string `json:"user,omitempty"`
 	// Properties not defined by the schema.
-	AdditionalProperties map[string]any `json:"-"`
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
 }
 
 // MarshalJSON implements json.Marshaler for ChatCompletionRequest, inlining
 // AdditionalProperties alongside the schema's declared properties.
 func (t ChatCompletionRequest) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
 	type shadow ChatCompletionRequest
 	data, err := json.Marshal(shadow(t))
 	if err != nil {
 		return nil, err
 	}
-	if len(t.AdditionalProperties) == 0 {
-		return data, nil
-	}
-
-	extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
-	for key, value := range t.AdditionalProperties {
-		raw, err := json.Marshal(value)
-		if err != nil {
-			return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
-		}
-		extra[key] = raw
-	}
-	deleteDeclaredProperties(extra, []string{"frequency_penalty", "logit_bias", "logprobs", "max_completion_tokens", "max_tokens", "messages", "metadata", "model", "n", "parallel_tool_calls", "presence_penalty", "reasoning_effort", "response_format", "seed", "service_tier", "stop", "stream", "stream_options", "temperature", "thinking", "tool_choice", "tools", "top_logprobs", "top_p", "user"})
-	if len(extra) == 0 {
-		return data, nil
-	}
-	encoded, err := json.Marshal(extra)
-	if err != nil {
+	if members, err = mergeObjectMembers(members, data); err != nil {
 		return nil, err
 	}
-
-	// Splice the two objects together so the declared properties keep their
-	// struct field order instead of being re-sorted through a map.
-	merged := make([]byte, 0, len(data)+len(encoded))
-	merged = append(merged, data[:len(data)-1]...)
-	if len(data) > 2 {
-		merged = append(merged, ',')
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"frequency_penalty", "logit_bias", "logprobs", "max_completion_tokens", "max_tokens", "messages", "metadata", "model", "n", "parallel_tool_calls", "presence_penalty", "reasoning_effort", "response_format", "seed", "service_tier", "stop", "stream", "stream_options", "temperature", "thinking", "tool_choice", "tools", "top_logprobs", "top_p", "user"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
 	}
-	return append(merged, encoded[1:]...), nil
+	return encodeObject(members)
 }
 
 // UnmarshalJSON implements json.Unmarshaler for ChatCompletionRequest, collecting
 // properties the schema does not declare into AdditionalProperties.
 func (t *ChatCompletionRequest) UnmarshalJSON(data []byte) error {
-	type shadow ChatCompletionRequest
 	t.AdditionalProperties = nil
+	type shadow ChatCompletionRequest
 	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
 		return err
 	}
-
 	var obj map[string]json.RawMessage
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
 	deleteDeclaredProperties(obj, []string{"frequency_penalty", "logit_bias", "logprobs", "max_completion_tokens", "max_tokens", "messages", "metadata", "model", "n", "parallel_tool_calls", "presence_penalty", "reasoning_effort", "response_format", "seed", "service_tier", "stop", "stream", "stream_options", "temperature", "thinking", "tool_choice", "tools", "top_logprobs", "top_p", "user"})
-	if len(obj) == 0 {
-		return nil
-	}
-	t.AdditionalProperties = make(map[string]any, len(obj))
-	for key, raw := range obj {
-		var value any
-		if err := json.Unmarshal(raw, &value); err != nil {
-			return fmt.Errorf("unmarshaling additional property %q: %w", key, err)
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
 		}
-		t.AdditionalProperties[key] = value
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
 	}
 	return nil
 }
@@ -2210,72 +2285,72 @@ type ChatMessage struct {
 	// Tool calls made by the assistant
 	ToolCalls []ToolCall `json:"tool_calls,omitempty"`
 	// Properties not defined by the schema.
-	AdditionalProperties map[string]any `json:"-"`
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
 }
 
 // MarshalJSON implements json.Marshaler for ChatMessage, inlining
 // AdditionalProperties alongside the schema's declared properties.
 func (t ChatMessage) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
 	type shadow ChatMessage
 	data, err := json.Marshal(shadow(t))
 	if err != nil {
 		return nil, err
 	}
-	if len(t.AdditionalProperties) == 0 {
-		return data, nil
-	}
-
-	extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
-	for key, value := range t.AdditionalProperties {
-		raw, err := json.Marshal(value)
-		if err != nil {
-			return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
-		}
-		extra[key] = raw
-	}
-	deleteDeclaredProperties(extra, []string{"attachment_ids", "content", "name", "reasoning_content", "responses_output", "role", "tool_call_id", "tool_calls"})
-	if len(extra) == 0 {
-		return data, nil
-	}
-	encoded, err := json.Marshal(extra)
-	if err != nil {
+	if members, err = mergeObjectMembers(members, data); err != nil {
 		return nil, err
 	}
-
-	// Splice the two objects together so the declared properties keep their
-	// struct field order instead of being re-sorted through a map.
-	merged := make([]byte, 0, len(data)+len(encoded))
-	merged = append(merged, data[:len(data)-1]...)
-	if len(data) > 2 {
-		merged = append(merged, ',')
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"attachment_ids", "content", "name", "reasoning_content", "responses_output", "role", "tool_call_id", "tool_calls"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
 	}
-	return append(merged, encoded[1:]...), nil
+	return encodeObject(members)
 }
 
 // UnmarshalJSON implements json.Unmarshaler for ChatMessage, collecting
 // properties the schema does not declare into AdditionalProperties.
 func (t *ChatMessage) UnmarshalJSON(data []byte) error {
-	type shadow ChatMessage
 	t.AdditionalProperties = nil
+	type shadow ChatMessage
 	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
 		return err
 	}
-
 	var obj map[string]json.RawMessage
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
 	deleteDeclaredProperties(obj, []string{"attachment_ids", "content", "name", "reasoning_content", "responses_output", "role", "tool_call_id", "tool_calls"})
-	if len(obj) == 0 {
-		return nil
-	}
-	t.AdditionalProperties = make(map[string]any, len(obj))
-	for key, raw := range obj {
-		var value any
-		if err := json.Unmarshal(raw, &value); err != nil {
-			return fmt.Errorf("unmarshaling additional property %q: %w", key, err)
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
 		}
-		t.AdditionalProperties[key] = value
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
 	}
 	return nil
 }
@@ -2497,9 +2572,11 @@ type ClusterAzureSlurmPartition struct {
 
 type ClusterControllerDisk struct {
 	// Id of the attached persistent disk; empty for an inline disk.
-	DiskID     *string `json:"diskId,omitempty"`
-	Encrypted  *bool   `json:"encrypted,omitempty"`
-	Iops       *int64  `json:"iops,omitempty"`
+	DiskID    *string `json:"diskId,omitempty"`
+	Encrypted *bool   `json:"encrypted,omitempty"`
+	Iops      *int64  `json:"iops,omitempty"`
+	// Device slot the disk attaches at, assigned by the platform when the disk attaches.
+	Lun        *int64  `json:"lun,omitempty"`
 	MountPoint *string `json:"mountPoint,omitempty"`
 	NfsExport  *bool   `json:"nfsExport,omitempty"`
 	// Disk size in GiB.
@@ -2553,6 +2630,15 @@ type ClusterDisk struct {
 	SizeGb     *int64  `json:"sizeGb,omitempty"`
 	Throughput *int64  `json:"throughput,omitempty"`
 	Type       *string `json:"type,omitempty"`
+}
+
+type ClusterDiskAttachment struct {
+	// The device slot the disk attaches at, assigned by the platform. Absent on clouds that address the disk by its volume instead.
+	Lun *int64 `json:"lun,omitempty"`
+	// The path the disk is mounted at on the cluster.
+	MountPoint string `json:"mountPoint"`
+	// The id of the attached persistent disk.
+	StorageID string `json:"storageId"`
 }
 
 type ClusterError struct {
@@ -3939,8 +4025,6 @@ type Disk struct {
 	Network *string `json:"network,omitempty"`
 	// Region of the disk
 	Region *string `json:"region,omitempty"`
-	// Indicates if the disk was restored from a snapshot
-	RestoreSnapshot *bool `json:"restoreSnapshot,omitempty"`
 	// Size of the disk in GiB
 	SizeGb *int64 `json:"sizeGb,omitempty"`
 	// Current provision status of the disk
@@ -4399,72 +4483,72 @@ type Function struct {
 	// JSON Schema for parameters
 	Parameters map[string]any `json:"parameters,omitempty"`
 	// Properties not defined by the schema.
-	AdditionalProperties map[string]any `json:"-"`
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
 }
 
 // MarshalJSON implements json.Marshaler for Function, inlining
 // AdditionalProperties alongside the schema's declared properties.
 func (t Function) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
 	type shadow Function
 	data, err := json.Marshal(shadow(t))
 	if err != nil {
 		return nil, err
 	}
-	if len(t.AdditionalProperties) == 0 {
-		return data, nil
-	}
-
-	extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
-	for key, value := range t.AdditionalProperties {
-		raw, err := json.Marshal(value)
-		if err != nil {
-			return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
-		}
-		extra[key] = raw
-	}
-	deleteDeclaredProperties(extra, []string{"description", "name", "parameters"})
-	if len(extra) == 0 {
-		return data, nil
-	}
-	encoded, err := json.Marshal(extra)
-	if err != nil {
+	if members, err = mergeObjectMembers(members, data); err != nil {
 		return nil, err
 	}
-
-	// Splice the two objects together so the declared properties keep their
-	// struct field order instead of being re-sorted through a map.
-	merged := make([]byte, 0, len(data)+len(encoded))
-	merged = append(merged, data[:len(data)-1]...)
-	if len(data) > 2 {
-		merged = append(merged, ',')
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"description", "name", "parameters"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
 	}
-	return append(merged, encoded[1:]...), nil
+	return encodeObject(members)
 }
 
 // UnmarshalJSON implements json.Unmarshaler for Function, collecting
 // properties the schema does not declare into AdditionalProperties.
 func (t *Function) UnmarshalJSON(data []byte) error {
-	type shadow Function
 	t.AdditionalProperties = nil
+	type shadow Function
 	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
 		return err
 	}
-
 	var obj map[string]json.RawMessage
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
 	deleteDeclaredProperties(obj, []string{"description", "name", "parameters"})
-	if len(obj) == 0 {
-		return nil
-	}
-	t.AdditionalProperties = make(map[string]any, len(obj))
-	for key, raw := range obj {
-		var value any
-		if err := json.Unmarshal(raw, &value); err != nil {
-			return fmt.Errorf("unmarshaling additional property %q: %w", key, err)
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
 		}
-		t.AdditionalProperties[key] = value
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
 	}
 	return nil
 }
@@ -4475,72 +4559,72 @@ type FunctionCall struct {
 	// Function name
 	Name string `json:"name"`
 	// Properties not defined by the schema.
-	AdditionalProperties map[string]any `json:"-"`
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
 }
 
 // MarshalJSON implements json.Marshaler for FunctionCall, inlining
 // AdditionalProperties alongside the schema's declared properties.
 func (t FunctionCall) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
 	type shadow FunctionCall
 	data, err := json.Marshal(shadow(t))
 	if err != nil {
 		return nil, err
 	}
-	if len(t.AdditionalProperties) == 0 {
-		return data, nil
-	}
-
-	extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
-	for key, value := range t.AdditionalProperties {
-		raw, err := json.Marshal(value)
-		if err != nil {
-			return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
-		}
-		extra[key] = raw
-	}
-	deleteDeclaredProperties(extra, []string{"arguments", "name"})
-	if len(extra) == 0 {
-		return data, nil
-	}
-	encoded, err := json.Marshal(extra)
-	if err != nil {
+	if members, err = mergeObjectMembers(members, data); err != nil {
 		return nil, err
 	}
-
-	// Splice the two objects together so the declared properties keep their
-	// struct field order instead of being re-sorted through a map.
-	merged := make([]byte, 0, len(data)+len(encoded))
-	merged = append(merged, data[:len(data)-1]...)
-	if len(data) > 2 {
-		merged = append(merged, ',')
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"arguments", "name"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
 	}
-	return append(merged, encoded[1:]...), nil
+	return encodeObject(members)
 }
 
 // UnmarshalJSON implements json.Unmarshaler for FunctionCall, collecting
 // properties the schema does not declare into AdditionalProperties.
 func (t *FunctionCall) UnmarshalJSON(data []byte) error {
-	type shadow FunctionCall
 	t.AdditionalProperties = nil
+	type shadow FunctionCall
 	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
 		return err
 	}
-
 	var obj map[string]json.RawMessage
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
 	deleteDeclaredProperties(obj, []string{"arguments", "name"})
-	if len(obj) == 0 {
-		return nil
-	}
-	t.AdditionalProperties = make(map[string]any, len(obj))
-	for key, raw := range obj {
-		var value any
-		if err := json.Unmarshal(raw, &value); err != nil {
-			return fmt.Errorf("unmarshaling additional property %q: %w", key, err)
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
 		}
-		t.AdditionalProperties[key] = value
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
 	}
 	return nil
 }
@@ -4595,6 +4679,8 @@ type GeneralCluster struct {
 	ShouldPlatformProxy bool `json:"shouldPlatformProxy"`
 	// The status of the resource.
 	Status string `json:"status"`
+	// Human-readable explanation of the cluster's current status, present when the last provision was skipped or failed.
+	StatusDescription *string `json:"statusDescription,omitempty"`
 	// The tags associated with the resource.
 	Tags []string `json:"tags"`
 	// The type of the resource.
@@ -4763,6 +4849,8 @@ type GoogleDisk struct {
 	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
 	// Description of the storage.
 	Description *string `json:"description,omitempty"`
+	// Type of the disk
+	DiskType *string `json:"diskType,omitempty"`
 	// Display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
 	// Indicates if the storage is a favorite for the requesting user.
@@ -4782,7 +4870,9 @@ type GoogleDisk struct {
 	// Error message if the storage provisioning failed.
 	ProvisionError *string `json:"provisionError,omitempty"`
 	// Indicates if the storage has been provisioned.
-	Provisioned      bool          `json:"provisioned"`
+	Provisioned bool `json:"provisioned"`
+	// Region the disk is in
+	Region           *string       `json:"region,omitempty"`
 	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
 	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
 	// Session number of the storage.
@@ -4791,6 +4881,8 @@ type GoogleDisk struct {
 	Sessionless bool `json:"sessionless"`
 	// Sharing permissions of the storage.
 	Shared []Shared `json:"shared"`
+	// Size of the disk in GiB
+	Size *int32 `json:"size,omitempty"`
 	// Current status of the storage.
 	Status *string `json:"status,omitempty"`
 	// Tags associated with the storage.
@@ -4799,13 +4891,13 @@ type GoogleDisk struct {
 	Type string `json:"type"`
 	// User associated with the storage.
 	User string `json:"user"`
+	// Zone the disk is in
+	Zone *string `json:"zone,omitempty"`
 }
 
 type GoogleDiskVersionSettings struct {
-	Region          *string `json:"region,omitempty"`
-	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
-	SizeGb          *int64  `json:"size_gb,omitempty"`
-	Snapshot        *string `json:"snapshot,omitempty"`
+	Region *string `json:"region,omitempty"`
+	SizeGb *int64  `json:"size_gb,omitempty"`
 	// Subtype discriminator.
 	Subtype string  `json:"subtype"`
 	Type    *string `json:"type,omitempty"`
@@ -8175,13 +8267,11 @@ type PublishAwsDiskRequest struct {
 	Name            string                  `json:"name"`
 	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
 	// Publish under the organization display name (org admins only).
-	PublishedAsOrg  *bool   `json:"publishedAsOrg,omitempty"`
-	Region          *string `json:"region,omitempty"`
-	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
-	SizeGb          *int64  `json:"size_gb,omitempty"`
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	SizeGb         *int64  `json:"size_gb,omitempty"`
 	// URL-friendly identifier.
-	Slug     string  `json:"slug"`
-	Snapshot *string `json:"snapshot,omitempty"`
+	Slug string `json:"slug"`
 	// User-defined tags for categorization and search.
 	Tags       []string `json:"tags,omitempty"`
 	Throughput *int64   `json:"throughput,omitempty"`
@@ -8363,13 +8453,11 @@ type PublishAzureDiskRequest struct {
 	Name            string                  `json:"name"`
 	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
 	// Publish under the organization display name (org admins only).
-	PublishedAsOrg  *bool   `json:"publishedAsOrg,omitempty"`
-	Region          *string `json:"region,omitempty"`
-	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
-	SizeGb          *int64  `json:"size_gb,omitempty"`
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	SizeGb         *int64  `json:"size_gb,omitempty"`
 	// URL-friendly identifier.
-	Slug     string  `json:"slug"`
-	Snapshot *string `json:"snapshot,omitempty"`
+	Slug string `json:"slug"`
 	// User-defined tags for categorization and search.
 	Tags []string `json:"tags,omitempty"`
 	Type *string  `json:"type,omitempty"`
@@ -8563,13 +8651,11 @@ type PublishGoogleDiskRequest struct {
 	Name            string                  `json:"name"`
 	PrivacySettings MarketplacePrivacyInput `json:"privacySettings"`
 	// Publish under the organization display name (org admins only).
-	PublishedAsOrg  *bool   `json:"publishedAsOrg,omitempty"`
-	Region          *string `json:"region,omitempty"`
-	RestoreSnapshot *bool   `json:"restore_snapshot,omitempty"`
-	SizeGb          *int64  `json:"size_gb,omitempty"`
+	PublishedAsOrg *bool   `json:"publishedAsOrg,omitempty"`
+	Region         *string `json:"region,omitempty"`
+	SizeGb         *int64  `json:"size_gb,omitempty"`
 	// URL-friendly identifier.
-	Slug     string  `json:"slug"`
-	Snapshot *string `json:"snapshot,omitempty"`
+	Slug string `json:"slug"`
 	// User-defined tags for categorization and search.
 	Tags []string `json:"tags,omitempty"`
 	Type *string  `json:"type,omitempty"`
@@ -9320,13 +9406,13 @@ type ResourceComplianceItem struct {
 	BaseImageCspID *string `json:"baseImageCspId,omitempty"`
 	// Catalog name of the base image, when it still exists
 	BaseImageName *string `json:"baseImageName,omitempty"`
-	// Partition name the image belongs to; empty for the resource's boot image
+	// Part of the resource the image belongs to, such as a partition or a controller disk; empty for the resource's boot image
 	Component *string `json:"component,omitempty"`
 	// Cloud service provider
 	Csp *string `json:"csp,omitempty"`
 	// Resource ID
 	ID string `json:"id"`
-	// The image value the component is configured with: a CSP image id or a boot snapshot's ID
+	// The value the component is configured with: a CSP image id or a snapshot ID
 	ImageRef *string `json:"imageRef,omitempty"`
 	// Resource name
 	Name string `json:"name"`
@@ -9334,9 +9420,9 @@ type ResourceComplianceItem struct {
 	Organization *string `json:"organization,omitempty"`
 	// Whether the resource is currently provisioned
 	Running bool `json:"running"`
-	// Name of the boot snapshot the resource is configured with, when it still exists
+	// Name of the snapshot the component is configured with, when it still exists
 	SourceSnapshot *string `json:"sourceSnapshot,omitempty"`
-	// State of the resource's boot image
+	// State of the image or snapshot this component is configured with
 	State string `json:"state"`
 	// Display status computed the same way the cluster and instance APIs compute it
 	Status string `json:"status"`
@@ -9386,72 +9472,72 @@ type ResponseFormat struct {
 	// Response type: text or json_object
 	Type string `json:"type"`
 	// Properties not defined by the schema.
-	AdditionalProperties map[string]any `json:"-"`
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
 }
 
 // MarshalJSON implements json.Marshaler for ResponseFormat, inlining
 // AdditionalProperties alongside the schema's declared properties.
 func (t ResponseFormat) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
 	type shadow ResponseFormat
 	data, err := json.Marshal(shadow(t))
 	if err != nil {
 		return nil, err
 	}
-	if len(t.AdditionalProperties) == 0 {
-		return data, nil
-	}
-
-	extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
-	for key, value := range t.AdditionalProperties {
-		raw, err := json.Marshal(value)
-		if err != nil {
-			return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
-		}
-		extra[key] = raw
-	}
-	deleteDeclaredProperties(extra, []string{"type"})
-	if len(extra) == 0 {
-		return data, nil
-	}
-	encoded, err := json.Marshal(extra)
-	if err != nil {
+	if members, err = mergeObjectMembers(members, data); err != nil {
 		return nil, err
 	}
-
-	// Splice the two objects together so the declared properties keep their
-	// struct field order instead of being re-sorted through a map.
-	merged := make([]byte, 0, len(data)+len(encoded))
-	merged = append(merged, data[:len(data)-1]...)
-	if len(data) > 2 {
-		merged = append(merged, ',')
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"type"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
 	}
-	return append(merged, encoded[1:]...), nil
+	return encodeObject(members)
 }
 
 // UnmarshalJSON implements json.Unmarshaler for ResponseFormat, collecting
 // properties the schema does not declare into AdditionalProperties.
 func (t *ResponseFormat) UnmarshalJSON(data []byte) error {
-	type shadow ResponseFormat
 	t.AdditionalProperties = nil
+	type shadow ResponseFormat
 	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
 		return err
 	}
-
 	var obj map[string]json.RawMessage
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
 	deleteDeclaredProperties(obj, []string{"type"})
-	if len(obj) == 0 {
-		return nil
-	}
-	t.AdditionalProperties = make(map[string]any, len(obj))
-	for key, raw := range obj {
-		var value any
-		if err := json.Unmarshal(raw, &value); err != nil {
-			return fmt.Errorf("unmarshaling additional property %q: %w", key, err)
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
 		}
-		t.AdditionalProperties[key] = value
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
 	}
 	return nil
 }
@@ -10308,72 +10394,72 @@ type Tool struct {
 	// Tool type (currently only 'function')
 	Type string `json:"type"`
 	// Properties not defined by the schema.
-	AdditionalProperties map[string]any `json:"-"`
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
 }
 
 // MarshalJSON implements json.Marshaler for Tool, inlining
 // AdditionalProperties alongside the schema's declared properties.
 func (t Tool) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
 	type shadow Tool
 	data, err := json.Marshal(shadow(t))
 	if err != nil {
 		return nil, err
 	}
-	if len(t.AdditionalProperties) == 0 {
-		return data, nil
-	}
-
-	extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
-	for key, value := range t.AdditionalProperties {
-		raw, err := json.Marshal(value)
-		if err != nil {
-			return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
-		}
-		extra[key] = raw
-	}
-	deleteDeclaredProperties(extra, []string{"function", "type"})
-	if len(extra) == 0 {
-		return data, nil
-	}
-	encoded, err := json.Marshal(extra)
-	if err != nil {
+	if members, err = mergeObjectMembers(members, data); err != nil {
 		return nil, err
 	}
-
-	// Splice the two objects together so the declared properties keep their
-	// struct field order instead of being re-sorted through a map.
-	merged := make([]byte, 0, len(data)+len(encoded))
-	merged = append(merged, data[:len(data)-1]...)
-	if len(data) > 2 {
-		merged = append(merged, ',')
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"function", "type"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
 	}
-	return append(merged, encoded[1:]...), nil
+	return encodeObject(members)
 }
 
 // UnmarshalJSON implements json.Unmarshaler for Tool, collecting
 // properties the schema does not declare into AdditionalProperties.
 func (t *Tool) UnmarshalJSON(data []byte) error {
-	type shadow Tool
 	t.AdditionalProperties = nil
+	type shadow Tool
 	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
 		return err
 	}
-
 	var obj map[string]json.RawMessage
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
 	deleteDeclaredProperties(obj, []string{"function", "type"})
-	if len(obj) == 0 {
-		return nil
-	}
-	t.AdditionalProperties = make(map[string]any, len(obj))
-	for key, raw := range obj {
-		var value any
-		if err := json.Unmarshal(raw, &value); err != nil {
-			return fmt.Errorf("unmarshaling additional property %q: %w", key, err)
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
 		}
-		t.AdditionalProperties[key] = value
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
 	}
 	return nil
 }
@@ -10387,72 +10473,72 @@ type ToolCall struct {
 	// Tool type
 	Type *string `json:"type,omitempty"`
 	// Properties not defined by the schema.
-	AdditionalProperties map[string]any `json:"-"`
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
 }
 
 // MarshalJSON implements json.Marshaler for ToolCall, inlining
 // AdditionalProperties alongside the schema's declared properties.
 func (t ToolCall) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
 	type shadow ToolCall
 	data, err := json.Marshal(shadow(t))
 	if err != nil {
 		return nil, err
 	}
-	if len(t.AdditionalProperties) == 0 {
-		return data, nil
-	}
-
-	extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
-	for key, value := range t.AdditionalProperties {
-		raw, err := json.Marshal(value)
-		if err != nil {
-			return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
-		}
-		extra[key] = raw
-	}
-	deleteDeclaredProperties(extra, []string{"function", "id", "index", "type"})
-	if len(extra) == 0 {
-		return data, nil
-	}
-	encoded, err := json.Marshal(extra)
-	if err != nil {
+	if members, err = mergeObjectMembers(members, data); err != nil {
 		return nil, err
 	}
-
-	// Splice the two objects together so the declared properties keep their
-	// struct field order instead of being re-sorted through a map.
-	merged := make([]byte, 0, len(data)+len(encoded))
-	merged = append(merged, data[:len(data)-1]...)
-	if len(data) > 2 {
-		merged = append(merged, ',')
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"function", "id", "index", "type"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
 	}
-	return append(merged, encoded[1:]...), nil
+	return encodeObject(members)
 }
 
 // UnmarshalJSON implements json.Unmarshaler for ToolCall, collecting
 // properties the schema does not declare into AdditionalProperties.
 func (t *ToolCall) UnmarshalJSON(data []byte) error {
-	type shadow ToolCall
 	t.AdditionalProperties = nil
+	type shadow ToolCall
 	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
 		return err
 	}
-
 	var obj map[string]json.RawMessage
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
 	deleteDeclaredProperties(obj, []string{"function", "id", "index", "type"})
-	if len(obj) == 0 {
-		return nil
-	}
-	t.AdditionalProperties = make(map[string]any, len(obj))
-	for key, raw := range obj {
-		var value any
-		if err := json.Unmarshal(raw, &value); err != nil {
-			return fmt.Errorf("unmarshaling additional property %q: %w", key, err)
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
 		}
-		t.AdditionalProperties[key] = value
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
 	}
 	return nil
 }
@@ -11318,6 +11404,8 @@ type WorkerResponse struct {
 	SchedulingParams map[string]any `json:"schedulingParams,omitempty"`
 	// Session IDs assigned to this worker.
 	Sessions []string `json:"sessions,omitempty"`
+	// Port of the worker's SSH server on the compute node. Present when the worker accepts SSH sessions through its own tunnel.
+	SSHServerPort *int64 `json:"sshServerPort,omitempty"`
 	// Worker status.
 	Status *string `json:"status,omitempty"`
 	// Time when worker stopped.
@@ -11575,7 +11663,7 @@ type MarketplaceItemBodyVersionsValue struct {
 	Value any
 
 	unknownDiscriminator string
-	raw                  json.RawMessage
+	raw                  string
 }
 
 // IsUnknownVariant reports whether the payload carried a subtype
@@ -11593,13 +11681,16 @@ func (u MarketplaceItemBodyVersionsValue) UnknownDiscriminator() string {
 
 // Raw returns the original JSON of an unrecognized variant, or nil.
 func (u MarketplaceItemBodyVersionsValue) Raw() json.RawMessage {
-	return u.raw
+	if u.raw == "" {
+		return nil
+	}
+	return json.RawMessage(u.raw)
 }
 
 // MarshalJSON implements json.Marshaler for MarketplaceItemBodyVersionsValue.
 func (u MarketplaceItemBodyVersionsValue) MarshalJSON() ([]byte, error) {
 	if u.IsUnknownVariant() {
-		return u.raw, nil
+		return []byte(u.raw), nil
 	}
 	return json.Marshal(u.Value)
 }
@@ -11785,7 +11876,7 @@ func (u *MarketplaceItemBodyVersionsValue) UnmarshalJSON(data []byte) error {
 		// of the whole payload it happens to appear in.
 		*u = MarketplaceItemBodyVersionsValue{
 			unknownDiscriminator: disc.Subtype,
-			raw:                  append(json.RawMessage(nil), data...),
+			raw:                  string(data),
 		}
 		return nil
 	}
@@ -11798,7 +11889,7 @@ type ClusterCreate struct {
 	Value any
 
 	unknownDiscriminator string
-	raw                  json.RawMessage
+	raw                  string
 }
 
 // IsUnknownVariant reports whether the payload carried a type
@@ -11816,13 +11907,16 @@ func (u ClusterCreate) UnknownDiscriminator() string {
 
 // Raw returns the original JSON of an unrecognized variant, or nil.
 func (u ClusterCreate) Raw() json.RawMessage {
-	return u.raw
+	if u.raw == "" {
+		return nil
+	}
+	return json.RawMessage(u.raw)
 }
 
 // MarshalJSON implements json.Marshaler for ClusterCreate.
 func (u ClusterCreate) MarshalJSON() ([]byte, error) {
 	if u.IsUnknownVariant() {
-		return u.raw, nil
+		return []byte(u.raw), nil
 	}
 	return json.Marshal(u.Value)
 }
@@ -11889,7 +11983,7 @@ func (u *ClusterCreate) UnmarshalJSON(data []byte) error {
 		// of the whole payload it happens to appear in.
 		*u = ClusterCreate{
 			unknownDiscriminator: disc.Type,
-			raw:                  append(json.RawMessage(nil), data...),
+			raw:                  string(data),
 		}
 		return nil
 	}
@@ -11902,7 +11996,7 @@ type AttachedStorage struct {
 	Value any
 
 	unknownDiscriminator string
-	raw                  json.RawMessage
+	raw                  string
 }
 
 // IsUnknownVariant reports whether the payload carried a kind
@@ -11920,13 +12014,16 @@ func (u AttachedStorage) UnknownDiscriminator() string {
 
 // Raw returns the original JSON of an unrecognized variant, or nil.
 func (u AttachedStorage) Raw() json.RawMessage {
-	return u.raw
+	if u.raw == "" {
+		return nil
+	}
+	return json.RawMessage(u.raw)
 }
 
 // MarshalJSON implements json.Marshaler for AttachedStorage.
 func (u AttachedStorage) MarshalJSON() ([]byte, error) {
 	if u.IsUnknownVariant() {
-		return u.raw, nil
+		return []byte(u.raw), nil
 	}
 	return json.Marshal(u.Value)
 }
@@ -11965,7 +12062,7 @@ func (u *AttachedStorage) UnmarshalJSON(data []byte) error {
 		// of the whole payload it happens to appear in.
 		*u = AttachedStorage{
 			unknownDiscriminator: disc.Kind,
-			raw:                  append(json.RawMessage(nil), data...),
+			raw:                  string(data),
 		}
 		return nil
 	}
@@ -11978,7 +12075,7 @@ type AttachedStorageWrite struct {
 	Value any
 
 	unknownDiscriminator string
-	raw                  json.RawMessage
+	raw                  string
 }
 
 // IsUnknownVariant reports whether the payload carried a kind
@@ -11996,13 +12093,16 @@ func (u AttachedStorageWrite) UnknownDiscriminator() string {
 
 // Raw returns the original JSON of an unrecognized variant, or nil.
 func (u AttachedStorageWrite) Raw() json.RawMessage {
-	return u.raw
+	if u.raw == "" {
+		return nil
+	}
+	return json.RawMessage(u.raw)
 }
 
 // MarshalJSON implements json.Marshaler for AttachedStorageWrite.
 func (u AttachedStorageWrite) MarshalJSON() ([]byte, error) {
 	if u.IsUnknownVariant() {
-		return u.raw, nil
+		return []byte(u.raw), nil
 	}
 	return json.Marshal(u.Value)
 }
@@ -12041,7 +12141,7 @@ func (u *AttachedStorageWrite) UnmarshalJSON(data []byte) error {
 		// of the whole payload it happens to appear in.
 		*u = AttachedStorageWrite{
 			unknownDiscriminator: disc.Kind,
-			raw:                  append(json.RawMessage(nil), data...),
+			raw:                  string(data),
 		}
 		return nil
 	}
@@ -12054,7 +12154,7 @@ type ClusterDefinition struct {
 	Value any
 
 	unknownDiscriminator string
-	raw                  json.RawMessage
+	raw                  string
 }
 
 // IsUnknownVariant reports whether the payload carried a type
@@ -12072,13 +12172,16 @@ func (u ClusterDefinition) UnknownDiscriminator() string {
 
 // Raw returns the original JSON of an unrecognized variant, or nil.
 func (u ClusterDefinition) Raw() json.RawMessage {
-	return u.raw
+	if u.raw == "" {
+		return nil
+	}
+	return json.RawMessage(u.raw)
 }
 
 // MarshalJSON implements json.Marshaler for ClusterDefinition.
 func (u ClusterDefinition) MarshalJSON() ([]byte, error) {
 	if u.IsUnknownVariant() {
-		return u.raw, nil
+		return []byte(u.raw), nil
 	}
 	return json.Marshal(u.Value)
 }
@@ -12145,7 +12248,7 @@ func (u *ClusterDefinition) UnmarshalJSON(data []byte) error {
 		// of the whole payload it happens to appear in.
 		*u = ClusterDefinition{
 			unknownDiscriminator: disc.Type,
-			raw:                  append(json.RawMessage(nil), data...),
+			raw:                  string(data),
 		}
 		return nil
 	}

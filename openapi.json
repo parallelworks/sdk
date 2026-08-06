@@ -347,15 +347,9 @@
             "description": "Replace an existing version's variables instead of adding a new version.",
             "type": "boolean"
           },
-          "restore_snapshot": {
-            "type": "boolean"
-          },
           "size_gb": {
             "format": "int64",
             "type": "integer"
-          },
-          "snapshot": {
-            "type": "string"
           },
           "throughput": {
             "format": "int64",
@@ -597,15 +591,9 @@
             "description": "Replace an existing version's variables instead of adding a new version.",
             "type": "boolean"
           },
-          "restore_snapshot": {
-            "type": "boolean"
-          },
           "size_gb": {
             "format": "int64",
             "type": "integer"
-          },
-          "snapshot": {
-            "type": "string"
           },
           "type": {
             "type": "string"
@@ -893,15 +881,9 @@
             "description": "Replace an existing version's variables instead of adding a new version.",
             "type": "boolean"
           },
-          "restore_snapshot": {
-            "type": "boolean"
-          },
           "size_gb": {
             "format": "int64",
             "type": "integer"
-          },
-          "snapshot": {
-            "type": "string"
           },
           "type": {
             "type": "string"
@@ -2026,6 +2008,34 @@
         ],
         "type": "object"
       },
+      "AttachClusterDiskBody": {
+        "additionalProperties": false,
+        "properties": {
+          "mountPoint": {
+            "description": "The path to mount the disk at on the cluster.",
+            "examples": [
+              "/data"
+            ],
+            "type": "string"
+          },
+          "nfsExport": {
+            "description": "Export the disk over NFS to the cluster's compute nodes.",
+            "type": "boolean"
+          },
+          "storageId": {
+            "description": "The id of the persistent disk to attach.",
+            "examples": [
+              "66f1a2b3c4d5e6f7a8b9c0d1"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "storageId",
+          "mountPoint"
+        ],
+        "type": "object"
+      },
       "AttachmentResponse": {
         "additionalProperties": false,
         "properties": {
@@ -2529,12 +2539,8 @@
             "type": "boolean"
           },
           "region": {
-            "description": "Region the AWS bucket is in",
+            "description": "Region the AWS disk is in",
             "type": "string"
-          },
-          "restoreSnapshot": {
-            "description": "Indicates if the disk is restored from a snapshot",
-            "type": "boolean"
           },
           "runtimeAlert": {
             "$ref": "#/components/schemas/RunAlert",
@@ -2618,15 +2624,9 @@
           "region": {
             "type": "string"
           },
-          "restore_snapshot": {
-            "type": "boolean"
-          },
           "size_gb": {
             "format": "int64",
             "type": "integer"
-          },
-          "snapshot": {
-            "type": "string"
           },
           "subtype": {
             "description": "Subtype discriminator.",
@@ -3734,6 +3734,10 @@
             "description": "Description of the storage.",
             "type": "string"
           },
+          "diskType": {
+            "description": "Type of the disk",
+            "type": "string"
+          },
           "displayName": {
             "description": "Display name of the storage.",
             "type": "string"
@@ -3774,6 +3778,10 @@
             "description": "Indicates if the storage has been provisioned.",
             "type": "boolean"
           },
+          "region": {
+            "description": "Region the disk is in",
+            "type": "string"
+          },
           "runtimeAlert": {
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
@@ -3801,6 +3809,11 @@
               "null"
             ]
           },
+          "size": {
+            "description": "Size of the disk in GiB",
+            "format": "int32",
+            "type": "integer"
+          },
           "status": {
             "description": "Current status of the storage.",
             "type": "string"
@@ -3818,6 +3831,10 @@
           },
           "user": {
             "description": "User associated with the storage.",
+            "type": "string"
+          },
+          "zone": {
+            "description": "Zone the disk is in",
             "type": "string"
           }
         },
@@ -3841,15 +3858,9 @@
           "region": {
             "type": "string"
           },
-          "restore_snapshot": {
-            "type": "boolean"
-          },
           "size_gb": {
             "format": "int64",
             "type": "integer"
-          },
-          "snapshot": {
-            "type": "string"
           },
           "subtype": {
             "description": "Subtype discriminator.",
@@ -4922,7 +4933,7 @@
             ]
           },
           "resources": {
-            "description": "Clusters and instances configured to boot from an unusable base image",
+            "description": "Clusters and instances configured with an unusable image or snapshot, or with an image outside the catalog",
             "items": {
               "$ref": "#/components/schemas/ResourceComplianceItem"
             },
@@ -5001,7 +5012,7 @@
             "type": "integer"
           },
           "atRiskResources": {
-            "description": "Clusters and instances configured to boot from a disabled, removed, or unrecorded base image",
+            "description": "Clusters and instances configured to boot from a disabled, removed, unrecorded, or custom base image",
             "format": "int64",
             "type": "integer"
           },
@@ -7162,6 +7173,11 @@
           "iops": {
             "type": "integer"
           },
+          "lun": {
+            "description": "Device slot the disk attaches at, assigned by the platform when the disk attaches.",
+            "format": "int64",
+            "type": "integer"
+          },
           "mountPoint": {
             "type": "string"
           },
@@ -7326,6 +7342,29 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "ClusterDiskAttachment": {
+        "additionalProperties": false,
+        "properties": {
+          "lun": {
+            "description": "The device slot the disk attaches at, assigned by the platform. Absent on clouds that address the disk by its volume instead.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "mountPoint": {
+            "description": "The path the disk is mounted at on the cluster.",
+            "type": "string"
+          },
+          "storageId": {
+            "description": "The id of the attached persistent disk.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "storageId",
+          "mountPoint"
+        ],
         "type": "object"
       },
       "ClusterError": {
@@ -11541,10 +11580,6 @@
             "description": "Region of the disk",
             "type": "string"
           },
-          "restoreSnapshot": {
-            "description": "Indicates if the disk was restored from a snapshot",
-            "type": "boolean"
-          },
           "sizeGb": {
             "description": "Size of the disk in GiB",
             "format": "int64",
@@ -13082,6 +13117,10 @@
             ],
             "type": "string"
           },
+          "statusDescription": {
+            "description": "Human-readable explanation of the cluster's current status, present when the last provision was skipped or failed.",
+            "type": "string"
+          },
           "tags": {
             "description": "The tags associated with the resource.",
             "examples": [
@@ -13652,6 +13691,10 @@
             "description": "Description of the storage.",
             "type": "string"
           },
+          "diskType": {
+            "description": "Type of the disk",
+            "type": "string"
+          },
           "displayName": {
             "description": "Display name of the storage.",
             "type": "string"
@@ -13692,6 +13735,10 @@
             "description": "Indicates if the storage has been provisioned.",
             "type": "boolean"
           },
+          "region": {
+            "description": "Region the disk is in",
+            "type": "string"
+          },
           "runtimeAlert": {
             "$ref": "#/components/schemas/RunAlert",
             "description": "Runtime alert information for the storage."
@@ -13719,6 +13766,11 @@
               "null"
             ]
           },
+          "size": {
+            "description": "Size of the disk in GiB",
+            "format": "int32",
+            "type": "integer"
+          },
           "status": {
             "description": "Current status of the storage.",
             "type": "string"
@@ -13736,6 +13788,10 @@
           },
           "user": {
             "description": "User associated with the storage.",
+            "type": "string"
+          },
+          "zone": {
+            "description": "Zone the disk is in",
             "type": "string"
           }
         },
@@ -13759,15 +13815,9 @@
           "region": {
             "type": "string"
           },
-          "restore_snapshot": {
-            "type": "boolean"
-          },
           "size_gb": {
             "format": "int64",
             "type": "integer"
-          },
-          "snapshot": {
-            "type": "string"
           },
           "subtype": {
             "description": "Subtype discriminator.",
@@ -24379,9 +24429,6 @@
           "region": {
             "type": "string"
           },
-          "restore_snapshot": {
-            "type": "boolean"
-          },
           "size_gb": {
             "format": "int64",
             "type": "integer"
@@ -24390,9 +24437,6 @@
             "description": "URL-friendly identifier.",
             "maxLength": 100,
             "minLength": 2,
-            "type": "string"
-          },
-          "snapshot": {
             "type": "string"
           },
           "tags": {
@@ -24929,9 +24973,6 @@
           "region": {
             "type": "string"
           },
-          "restore_snapshot": {
-            "type": "boolean"
-          },
           "size_gb": {
             "format": "int64",
             "type": "integer"
@@ -24940,9 +24981,6 @@
             "description": "URL-friendly identifier.",
             "maxLength": 100,
             "minLength": 2,
-            "type": "string"
-          },
-          "snapshot": {
             "type": "string"
           },
           "tags": {
@@ -25502,9 +25540,6 @@
           "region": {
             "type": "string"
           },
-          "restore_snapshot": {
-            "type": "boolean"
-          },
           "size_gb": {
             "format": "int64",
             "type": "integer"
@@ -25513,9 +25548,6 @@
             "description": "URL-friendly identifier.",
             "maxLength": 100,
             "minLength": 2,
-            "type": "string"
-          },
-          "snapshot": {
             "type": "string"
           },
           "tags": {
@@ -27919,7 +27951,7 @@
             "type": "string"
           },
           "component": {
-            "description": "Partition name the image belongs to; empty for the resource's boot image",
+            "description": "Part of the resource the image belongs to, such as a partition or a controller disk; empty for the resource's boot image",
             "type": "string"
           },
           "csp": {
@@ -27931,7 +27963,7 @@
             "type": "string"
           },
           "imageRef": {
-            "description": "The image value the component is configured with: a CSP image id or a boot snapshot's ID",
+            "description": "The value the component is configured with: a CSP image id or a snapshot ID",
             "type": "string"
           },
           "name": {
@@ -27947,16 +27979,17 @@
             "type": "boolean"
           },
           "sourceSnapshot": {
-            "description": "Name of the boot snapshot the resource is configured with, when it still exists",
+            "description": "Name of the snapshot the component is configured with, when it still exists",
             "type": "string"
           },
           "state": {
-            "description": "State of the resource's boot image",
+            "description": "State of the image or snapshot this component is configured with",
             "enum": [
               "disabled",
               "removed",
               "missing",
-              "snapshot-removed"
+              "snapshot-removed",
+              "custom"
             ],
             "type": "string"
           },
@@ -33440,6 +33473,12 @@
               "array",
               "null"
             ]
+          },
+          "sshServerPort": {
+            "description": "Port of the worker's SSH server on the compute node. Present when the worker accepts SSH sessions through its own tunnel.",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
           },
           "status": {
             "description": "Worker status.",
@@ -64881,6 +64920,156 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/disks": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAttaches a provisioned persistent disk to a cloud cluster. On a running cluster the cloud attachment happens asynchronously and its progress is reported on the disk's provision status.",
+        "operationId": "attach-cluster-disk",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The username of the user that owns the cluster",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "The username of the user that owns the cluster",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "The cluster name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachClusterDiskBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterDiskAttachment"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Attach Cluster Disk",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/disks/{storageId}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDetaches a persistent disk from a cloud cluster. On a running cluster the cloud detachment happens asynchronously and its progress is reported on the disk's provision status.",
+        "operationId": "detach-cluster-disk",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The username of the user that owns the cluster",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "The username of the user that owns the cluster",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "The cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The id of the attached persistent disk",
+            "in": "path",
+            "name": "storageId",
+            "required": true,
+            "schema": {
+              "description": "The id of the attached persistent disk",
+              "examples": [
+                "66f1a2b3c4d5e6f7a8b9c0d1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Detach Cluster Disk",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/icon": {
       "delete": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves a Compute V3 or Pool cluster's icon and releases the underlying blob.",
@@ -65338,6 +65527,69 @@
           }
         },
         "summary": "Update Cluster Permissions",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/provision": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nProvisions a cloud cluster for the first time, building its cloud infrastructure and starting the controller. Starting a stopped cluster again is the resume operation.",
+        "operationId": "provision-cluster",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the cluster to provision",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "The name of the cluster to provision",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Provision cluster",
         "tags": [
           "Clusters"
         ]
