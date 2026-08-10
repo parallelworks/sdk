@@ -895,6 +895,73 @@ func (c *Client) GetAdminAiProductDetail(ctx context.Context) (*AiProductDetailO
 	return &result, nil
 }
 
+// GetComputeProxyWhitelist - Get compute proxy whitelist
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns whether platform routing is restricted, and the hosts, IPs, and CIDR ranges allowed to route SSH through the platform.
+func (c *Client) GetComputeProxyWhitelist(ctx context.Context) (*ProxyWhitelistBody, error) {
+	path := "/api/admin/products/compute/proxy-whitelist"
+	var result ProxyWhitelistBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateComputeProxyWhitelist - Update compute proxy whitelist
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Restricts platform routing and replaces the proxy whitelist. Once restricted, clusters outside the whitelist connect directly instead of proxying through the platform.
+func (c *Client) UpdateComputeProxyWhitelist(ctx context.Context, body UpdateProxyWhitelistInputBody) (*ProxyWhitelistBody, error) {
+	path := "/api/admin/products/compute/proxy-whitelist"
+	var result ProxyWhitelistBody
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListComputeProxyClusterHostsParams contains the parameters for the ListComputeProxyClusterHosts operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListComputeProxyClusterHostsParams struct {
+	// Evaluate against this scope instead of the saved one
+	Scope *string `json:"scope,omitempty"`
+	// Evaluate against these whitelist entries; only read when scope is supplied
+	Entry *[]string `json:"entry,omitempty"`
+}
+
+// ListComputeProxyClusterHosts - List existing-cluster hosts
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Lists the hosts existing clusters report, how many accounts use each, and how the current policy routes them. These are the exact values the whitelist matches against.
+func (c *Client) ListComputeProxyClusterHosts(ctx context.Context, opts ...ListComputeProxyClusterHostsParams) (*ProxyClusterHostsOutputBody, error) {
+	path := "/api/admin/products/compute/proxy-whitelist/cluster-hosts"
+	var params ListComputeProxyClusterHostsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "scope", "form", false, params.Scope)
+	addQueryParam(queryValues, "entry", "form", false, params.Entry)
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+	var result ProxyClusterHostsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetPlatformProductState - Set platform product state
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.

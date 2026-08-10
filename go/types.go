@@ -4675,7 +4675,7 @@ type GeneralCluster struct {
 	RequestedNodes int64 `json:"requestedNodes"`
 	// The scheduler type used by the cluster.
 	SchedulerType *string `json:"schedulerType,omitempty"`
-	// True when SSH to this cluster must route through the platform tunnel (private network, not peered). False for public-IP or peered-private clusters that the workspace can dial directly.
+	// True when SSH to this cluster routes through the platform. False when it is dialed directly, which a cluster on a public address does unless an administrator has whitelisted it.
 	ShouldPlatformProxy bool `json:"shouldPlatformProxy"`
 	// The status of the resource.
 	Status string `json:"status"`
@@ -8226,6 +8226,31 @@ type ProvisionStatusStruct struct {
 	Status string `json:"status"`
 }
 
+type ProxyClusterHost struct {
+	// How many accounts have an existing cluster reporting this host
+	Accounts int64 `json:"accounts"`
+	// The host an agent reports, which is the value the whitelist is matched against
+	Host string `json:"host"`
+	// Why the host routes the way it does
+	Reason string `json:"reason"`
+	// Whether SSH to this host routes through the platform under the current policy
+	ShouldProxy bool `json:"shouldProxy"`
+}
+
+type ProxyClusterHostsOutputBody struct {
+	// Reported hosts, busiest first
+	Hosts []ProxyClusterHost `json:"hosts"`
+	// Existing clusters whose agent has not reported a host; these always route through the platform
+	UnreportedClusters int64 `json:"unreportedClusters"`
+}
+
+type ProxyWhitelistBody struct {
+	// Whether every existing cluster routes SSH through the platform, or only the hosts listed below
+	ProxyScope string `json:"proxyScope"`
+	// Hosts, IP addresses, and CIDR ranges whose SSH traffic may route through the platform
+	ProxyWhitelist []string `json:"proxyWhitelist"`
+}
+
 type PublishAwsBucketRequest struct {
 	// Short summary of the item.
 	Description *string `json:"description,omitempty"`
@@ -10853,6 +10878,13 @@ type UpdatePlatformDomainBody struct {
 	Organization *string `json:"organization,omitempty"`
 	// PEM private key matching the certificate; never returned by the API
 	PrivateKey *string `json:"privateKey,omitempty"`
+}
+
+type UpdateProxyWhitelistInputBody struct {
+	// Set to specific to restrict platform routing to the whitelisted hosts, or all to route every existing cluster through the platform
+	ProxyScope *string `json:"proxyScope,omitempty"`
+	// Replaces the proxy whitelist; entries are hosts, IP addresses, or CIDR ranges
+	ProxyWhitelist []string `json:"proxyWhitelist,omitempty"`
 }
 
 type UpdateQuotaBody struct {

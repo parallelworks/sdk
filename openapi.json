@@ -13093,7 +13093,7 @@
             "type": "string"
           },
           "shouldPlatformProxy": {
-            "description": "True when SSH to this cluster must route through the platform tunnel (private network, not peered). False for public-IP or peered-private clusters that the workspace can dial directly.",
+            "description": "True when SSH to this cluster routes through the platform. False when it is dialed directly, which a cluster on a public address does unless an administrator has whitelisted it.",
             "type": "boolean"
           },
           "status": {
@@ -24312,6 +24312,94 @@
         ],
         "type": "object"
       },
+      "ProxyClusterHost": {
+        "additionalProperties": false,
+        "properties": {
+          "accounts": {
+            "description": "How many accounts have an existing cluster reporting this host",
+            "format": "int64",
+            "type": "integer"
+          },
+          "host": {
+            "description": "The host an agent reports, which is the value the whitelist is matched against",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why the host routes the way it does",
+            "enum": [
+              "unrestricted",
+              "whitelisted",
+              "not-routable",
+              "direct"
+            ],
+            "type": "string"
+          },
+          "shouldProxy": {
+            "description": "Whether SSH to this host routes through the platform under the current policy",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "host",
+          "accounts",
+          "shouldProxy",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "ProxyClusterHostsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "hosts": {
+            "description": "Reported hosts, busiest first",
+            "items": {
+              "$ref": "#/components/schemas/ProxyClusterHost"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "unreportedClusters": {
+            "description": "Existing clusters whose agent has not reported a host; these always route through the platform",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hosts",
+          "unreportedClusters"
+        ],
+        "type": "object"
+      },
+      "ProxyWhitelistBody": {
+        "additionalProperties": false,
+        "properties": {
+          "proxyScope": {
+            "description": "Whether every existing cluster routes SSH through the platform, or only the hosts listed below",
+            "enum": [
+              "all",
+              "specific"
+            ],
+            "type": "string"
+          },
+          "proxyWhitelist": {
+            "description": "Hosts, IP addresses, and CIDR ranges whose SSH traffic may route through the platform",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "proxyScope",
+          "proxyWhitelist"
+        ],
+        "type": "object"
+      },
       "PublishAwsBucketRequest": {
         "additionalProperties": false,
         "properties": {
@@ -31792,6 +31880,27 @@
         },
         "type": "object"
       },
+      "UpdateProxyWhitelistInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "proxyScope": {
+            "description": "Set to specific to restrict platform routing to the whitelisted hosts, or all to route every existing cluster through the platform",
+            "enum": [
+              "all",
+              "specific"
+            ],
+            "type": "string"
+          },
+          "proxyWhitelist": {
+            "description": "Replaces the proxy whitelist; entries are hosts, IP addresses, or CIDR ranges",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "UpdateQuotaBody": {
         "additionalProperties": false,
         "properties": {
@@ -36434,6 +36543,142 @@
           }
         },
         "summary": "Get AI product configuration",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/api/admin/products/compute/proxy-whitelist": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns whether platform routing is restricted, and the hosts, IPs, and CIDR ranges allowed to route SSH through the platform.",
+        "operationId": "get-compute-proxy-whitelist",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProxyWhitelistBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get compute proxy whitelist",
+        "tags": [
+          "Products"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nRestricts platform routing and replaces the proxy whitelist. Once restricted, clusters outside the whitelist connect directly instead of proxying through the platform.",
+        "operationId": "update-compute-proxy-whitelist",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProxyWhitelistInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProxyWhitelistBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update compute proxy whitelist",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/api/admin/products/compute/proxy-whitelist/cluster-hosts": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nLists the hosts existing clusters report, how many accounts use each, and how the current policy routes them. These are the exact values the whitelist matches against.",
+        "operationId": "list-compute-proxy-cluster-hosts",
+        "parameters": [
+          {
+            "description": "Evaluate against this scope instead of the saved one",
+            "explode": false,
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "description": "Evaluate against this scope instead of the saved one",
+              "enum": [
+                "all",
+                "specific"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Evaluate against these whitelist entries; only read when scope is supplied",
+            "explode": false,
+            "in": "query",
+            "name": "entry",
+            "schema": {
+              "description": "Evaluate against these whitelist entries; only read when scope is supplied",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProxyClusterHostsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List existing-cluster hosts",
         "tags": [
           "Products"
         ]
