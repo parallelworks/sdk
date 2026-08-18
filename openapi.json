@@ -793,6 +793,14 @@
             "description": "Model name to deploy on the existing Azure OpenAI account",
             "minLength": 1,
             "type": "string"
+          },
+          "sku": {
+            "description": "Azure SKU to deploy under (e.g. Standard, GlobalStandard, DataZoneStandard). Defaults to Standard when omitted.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Specific model version to deploy. Required for newer model families (gpt-5.x). Defaults to Azure's implicit default when omitted.",
+            "type": "string"
           }
         },
         "required": [
@@ -1610,6 +1618,10 @@
             "description": "Email of the connected ChatGPT account (codex provider)",
             "type": "string"
           },
+          "accountLogin": {
+            "description": "Login of the connected GitHub account (copilot provider)",
+            "type": "string"
+          },
           "bucketId": {
             "description": "Attached storage bucket infrastructure ID",
             "type": "string"
@@ -1666,6 +1678,10 @@
             "description": "Unique identifier for the resource",
             "type": "string"
           },
+          "imageUrl": {
+            "description": "Current icon configured on the provider's catalog entry",
+            "type": "string"
+          },
           "ingested": {
             "description": "Whether documents have been ingested",
             "type": "boolean"
@@ -1683,7 +1699,7 @@
             "type": "string"
           },
           "planType": {
-            "description": "ChatGPT subscription plan type (codex provider)",
+            "description": "Subscription plan type (subscription providers)",
             "type": "string"
           },
           "refreshInterval": {
@@ -1750,6 +1766,10 @@
           },
           "id": {
             "description": "Unique identifier for the AI provider",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "Current icon configured on the provider's catalog entry",
             "type": "string"
           },
           "model": {
@@ -2117,6 +2137,10 @@
             "description": "Cache-buster etag for the user's avatar; empty when no custom avatar is set.",
             "type": "string"
           },
+          "billingAdmin": {
+            "description": "Indicates if the user is a platform billing admin with read access to billing data across all organizations.",
+            "type": "boolean"
+          },
           "email": {
             "description": "Email address of the user.",
             "examples": [
@@ -2225,6 +2249,7 @@
           "safeUsername",
           "name",
           "admin",
+          "billingAdmin",
           "partner",
           "organization",
           "organizationAdmin",
@@ -5041,6 +5066,85 @@
         ],
         "type": "object"
       },
+      "BillingDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "cloudAccountName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "defaultAllocationName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "infraName": {
+            "type": "string"
+          },
+          "lastBillingUpdate": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "organizationName": {
+            "type": "string"
+          },
+          "provisionOutput": {
+            "$ref": "#/components/schemas/BillingProvisionOutput"
+          },
+          "provisionStatus": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ProvisionStatusRecord"
+            },
+            "type": "object"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "organizationName",
+          "cloudAccountName",
+          "infraName",
+          "status",
+          "provisionStatus",
+          "provisionOutput",
+          "lastBillingUpdate",
+          "createdAt",
+          "defaultAllocationName"
+        ],
+        "type": "object"
+      },
+      "BillingProvisionOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "awsS3Bucket": {
+            "type": "string"
+          },
+          "awsS3BucketRegion": {
+            "type": "string"
+          },
+          "azureBlobContainerName": {
+            "type": "string"
+          },
+          "azureStorageAccount": {
+            "type": "string"
+          },
+          "googleBigQueryDataset": {
+            "type": "string"
+          },
+          "googleBigQueryDatasetProject": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "BillingResponse": {
         "additionalProperties": false,
         "properties": {
@@ -5707,13 +5811,6 @@
           "cloudBoundary": {
             "type": "string"
           },
-          "credentialOwner": {
-            "enum": [
-              "organization",
-              "platform"
-            ],
-            "type": "string"
-          },
           "csp": {
             "description": "First-class provider type implied by the entry's kind",
             "type": "string"
@@ -5741,7 +5838,9 @@
           "kind": {
             "enum": [
               "azure-managed",
+              "bedrock",
               "codex-subscription",
+              "github-copilot",
               "anthropic",
               "openai",
               "grok",
@@ -5777,6 +5876,7 @@
           "protocol": {
             "enum": [
               "azure-openai",
+              "bedrock-converse",
               "codex",
               "anthropic-messages",
               "openai-chat",
@@ -5809,7 +5909,6 @@
           "endpointOrigin",
           "endpointPath",
           "minimumTlsVersion",
-          "credentialOwner",
           "csp",
           "requiresApiKey",
           "dynamicEndpoint"
@@ -5823,13 +5922,6 @@
             "type": "string"
           },
           "cloudBoundary": {
-            "type": "string"
-          },
-          "credentialOwner": {
-            "enum": [
-              "organization",
-              "platform"
-            ],
             "type": "string"
           },
           "displayName": {
@@ -5851,7 +5943,9 @@
           "kind": {
             "enum": [
               "azure-managed",
+              "bedrock",
               "codex-subscription",
+              "github-copilot",
               "anthropic",
               "openai",
               "grok",
@@ -5887,6 +5981,7 @@
           "protocol": {
             "enum": [
               "azure-openai",
+              "bedrock-converse",
               "codex",
               "anthropic-messages",
               "openai-chat",
@@ -5914,8 +6009,7 @@
           "protocol",
           "endpointOrigin",
           "endpointPath",
-          "minimumTlsVersion",
-          "credentialOwner"
+          "minimumTlsVersion"
         ],
         "type": "object"
       },
@@ -5934,13 +6028,6 @@
           },
           "createdAt": {
             "format": "date-time",
-            "type": "string"
-          },
-          "credentialOwner": {
-            "enum": [
-              "organization",
-              "platform"
-            ],
             "type": "string"
           },
           "csp": {
@@ -5963,10 +6050,16 @@
           "id": {
             "type": "string"
           },
+          "imageUrl": {
+            "description": "Admin-configured icon; empty for entries using the kind's built-in artwork",
+            "type": "string"
+          },
           "kind": {
             "enum": [
               "azure-managed",
+              "bedrock",
               "codex-subscription",
+              "github-copilot",
               "anthropic",
               "openai",
               "grok",
@@ -6009,6 +6102,7 @@
           "protocol": {
             "enum": [
               "azure-openai",
+              "bedrock-converse",
               "codex",
               "anthropic-messages",
               "openai-chat",
@@ -6048,7 +6142,6 @@
           "endpointOrigin",
           "endpointPath",
           "minimumTlsVersion",
-          "credentialOwner",
           "toolCallingMode",
           "createdAt",
           "updatedAt",
@@ -7021,6 +7114,102 @@
         ],
         "type": "object"
       },
+      "Cluster": {
+        "additionalProperties": false,
+        "properties": {
+          "alertsMuted": {
+            "description": "Whether orphan alerts are muted for the whole deployment.",
+            "type": "boolean"
+          },
+          "clusterName": {
+            "description": "Pool (cluster) name.",
+            "type": "string"
+          },
+          "csp": {
+            "description": "Cloud service provider.",
+            "type": "string"
+          },
+          "deploymentName": {
+            "description": "Resource name from the deployment table.",
+            "type": "string"
+          },
+          "deploymentType": {
+            "description": "Resource type from the deployment table.",
+            "type": "string"
+          },
+          "key": {
+            "description": "Shared session-id or pw-deployment-id.",
+            "type": "string"
+          },
+          "lastSeenAt": {
+            "description": "Most recent last-seen across the cluster.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "mutedAt": {
+            "description": "When the deployment's orphan alerts were muted.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "mutedBy": {
+            "description": "Admin who muted the deployment's orphan alerts.",
+            "type": "string"
+          },
+          "organization": {
+            "description": "Organization name.",
+            "type": "string"
+          },
+          "orphaned": {
+            "description": "Whether any resource is orphaned.",
+            "type": "boolean"
+          },
+          "resources": {
+            "description": "Resources belonging to the cluster.",
+            "items": {
+              "$ref": "#/components/schemas/Resource"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "running": {
+            "description": "Resources in an active state.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": "Cluster status: running (any active resource), stopped (a stopped VM remains), or terminated.",
+            "enum": [
+              "running",
+              "stopped",
+              "terminated"
+            ],
+            "type": "string"
+          },
+          "total": {
+            "description": "Total resources in the cluster.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "username": {
+            "description": "Owning platform user.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "clusterName",
+          "csp",
+          "running",
+          "status",
+          "total",
+          "orphaned",
+          "lastSeenAt",
+          "resources"
+        ],
+        "type": "object"
+      },
       "ClusterAlerts": {
         "additionalProperties": false,
         "properties": {
@@ -7730,13 +7919,45 @@
         },
         "type": "object"
       },
+      "ClusterResourcesResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "clusters": {
+            "description": "One page of clusters.",
+            "items": {
+              "$ref": "#/components/schemas/Cluster"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "total": {
+            "description": "Total clusters matching the filters.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "clusters",
+          "total"
+        ],
+        "type": "object"
+      },
       "ClusterResponse": {
         "additionalProperties": false,
         "properties": {
           "costTrackingStatus": {
-            "description": "Cost tracking status for the cluster",
+            "description": "Usage metering status for the cluster",
+            "enum": [
+              "on",
+              "off",
+              "provisioning",
+              "deleting",
+              "failed"
+            ],
             "examples": [
-              "enabled"
+              "on"
             ],
             "type": "string"
           },
@@ -7825,7 +8046,6 @@
             "type": "boolean"
           },
           "iops": {
-            "format": "int64",
             "type": "integer"
           },
           "mountPoint": {
@@ -7835,14 +8055,12 @@
             "type": "boolean"
           },
           "sizeGb": {
-            "format": "int64",
             "type": "integer"
           },
           "snapshot": {
             "type": "string"
           },
           "throughput": {
-            "format": "int64",
             "type": "integer"
           },
           "type": {
@@ -7879,11 +8097,9 @@
             "type": "string"
           },
           "flexStartWaitTime": {
-            "format": "int64",
             "type": "integer"
           },
           "gpuCount": {
-            "format": "int64",
             "type": "integer"
           },
           "gpuType": {
@@ -7899,15 +8115,12 @@
             "type": "string"
           },
           "maxDuration": {
-            "format": "int64",
             "type": "integer"
           },
           "maxNodes": {
-            "format": "int64",
             "type": "integer"
           },
           "memoryGb": {
-            "format": "int64",
             "type": "integer"
           },
           "multiZone": {
@@ -7917,7 +8130,6 @@
             "type": "string"
           },
           "ocpus": {
-            "format": "int64",
             "type": "integer"
           },
           "placementGroup": {
@@ -7936,7 +8148,6 @@
             "type": "string"
           },
           "suspendTime": {
-            "format": "int64",
             "type": "integer"
           },
           "tier1": {
@@ -8554,25 +8765,25 @@
         },
         "type": "object"
       },
-      "CostTrackingPricesBody": {
+      "CostTrackingRatesBody": {
         "additionalProperties": false,
         "properties": {
-          "cpuPrice": {
-            "description": "The price per CPU unit",
+          "cpuCostPerCoreHour": {
+            "description": "Allocation units charged for each CPU core-hour",
             "format": "double",
             "minimum": 0,
             "type": "number"
           },
-          "memoryPrice": {
-            "description": "The price per GB of memory",
+          "memoryCostPerGibHour": {
+            "description": "Allocation units charged for each memory GiB-hour",
             "format": "double",
             "minimum": 0,
             "type": "number"
           }
         },
         "required": [
-          "cpuPrice",
-          "memoryPrice"
+          "cpuCostPerCoreHour",
+          "memoryCostPerGibHour"
         ],
         "type": "object"
       },
@@ -8659,13 +8870,17 @@
             "minLength": 1,
             "type": "string"
           },
+          "cloudAccount": {
+            "description": "Cloud account name supplying credentials (Bedrock providers)",
+            "type": "string"
+          },
           "displayName": {
             "description": "Display name of the AI provider",
             "maxLength": 100,
             "type": "string"
           },
           "group": {
-            "description": "Billing group name (required for managed Azure providers)",
+            "description": "Billing group name (required for managed Azure and Bedrock providers)",
             "type": "string"
           },
           "model": {
@@ -8693,7 +8908,7 @@
             "type": "string"
           },
           "region": {
-            "description": "Region (managed Azure providers)",
+            "description": "Region (managed Azure and Bedrock providers)",
             "type": "string"
           }
         },
@@ -9700,8 +9915,11 @@
         "additionalProperties": false,
         "properties": {
           "allocation": {
-            "description": "Allocation name to assign",
-            "type": "string"
+            "description": "Allocation name to bill this namespace against (null to clear)",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "name": {
             "description": "Namespace name",
@@ -10567,7 +10785,7 @@
             "type": "integer"
           },
           "username": {
-            "description": "Username (3+ chars, alphanumeric with - and .)",
+            "description": "Username (3-32 chars, alphanumeric with - and .)",
             "type": "string"
           },
           "workspaceType": {
@@ -10884,6 +11102,24 @@
         ],
         "type": "object"
       },
+      "CredentialListingError": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "description": "What failed.",
+            "type": "string"
+          },
+          "scope": {
+            "description": "Failing slice of the listing: region, availability domain, or service.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope",
+          "message"
+        ],
+        "type": "object"
+      },
       "CredentialResult": {
         "additionalProperties": false,
         "properties": {
@@ -11184,6 +11420,116 @@
         "required": [
           "date",
           "activeUsers"
+        ],
+        "type": "object"
+      },
+      "DeleteDeploymentBody": {
+        "additionalProperties": false,
+        "properties": {
+          "deploymentId": {
+            "description": "Deployment id; matches resources tagged with it as session-id or pw-deployment-id.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "dryRun": {
+            "description": "Preview the affected resources without deleting anything.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "deploymentId",
+          "dryRun"
+        ],
+        "type": "object"
+      },
+      "DeleteDeploymentItem": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "Cloud service provider.",
+            "type": "string"
+          },
+          "cspId": {
+            "description": "Cloud-native resource id.",
+            "type": "string"
+          },
+          "id": {
+            "description": "resource_history row id.",
+            "type": "string"
+          },
+          "orphaned": {
+            "description": "Whether the resource is flagged as orphaned.",
+            "type": "boolean"
+          },
+          "region": {
+            "description": "Region.",
+            "type": "string"
+          },
+          "resourceName": {
+            "description": "Resource name.",
+            "type": "string"
+          },
+          "resourceType": {
+            "description": "Resource kind.",
+            "type": "string"
+          },
+          "state": {
+            "description": "Normalized state.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "resourceType",
+          "csp",
+          "region",
+          "cspId",
+          "state",
+          "orphaned"
+        ],
+        "type": "object"
+      },
+      "DeleteDeploymentResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "dispatched": {
+            "description": "Whether the delete was dispatched (always false on dry runs).",
+            "type": "boolean"
+          },
+          "dryRun": {
+            "description": "Whether this was a preview.",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "Matched resources for the preview.",
+            "items": {
+              "$ref": "#/components/schemas/DeleteDeploymentItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "live": {
+            "description": "Whether any non-orphaned resource is still running or stopped; the client requires deployment-id confirmation when true.",
+            "type": "boolean"
+          },
+          "mode": {
+            "description": "platform = deleted through its live record like a user delete; sweep = records are gone, gaia deletes by deployment tag; none = nothing left to delete.",
+            "enum": [
+              "platform",
+              "sweep",
+              "none"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "dryRun",
+          "mode",
+          "live",
+          "dispatched",
+          "items"
         ],
         "type": "object"
       },
@@ -12357,10 +12703,6 @@
             "description": "Controller/login host the live agent is reporting; falls back to the first configured login node when the agent has not reported yet",
             "type": "string"
           },
-          "status": {
-            "description": "Cluster status",
-            "type": "string"
-          },
           "tunnelConnected": {
             "description": "Whether the cluster's agent tunnel is currently registered on any ingress pod, with the user-disconnect veto applied",
             "type": "boolean"
@@ -12386,7 +12728,6 @@
           "name",
           "user",
           "type",
-          "status",
           "remoteHost",
           "key",
           "tunnelConnected",
@@ -13239,6 +13580,18 @@
         },
         "required": [
           "permissions"
+        ],
+        "type": "object"
+      },
+      "GetBillingDetailsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "billingDetails": {
+            "$ref": "#/components/schemas/BillingDetails"
+          }
+        },
+        "required": [
+          "billingDetails"
         ],
         "type": "object"
       },
@@ -15860,6 +16213,151 @@
         ],
         "type": "object"
       },
+      "InstanceData": {
+        "additionalProperties": false,
+        "properties": {
+          "AccountID": {
+            "description": "Cloud account id.",
+            "type": "string"
+          },
+          "AzureVMType": {
+            "description": "Azure VM kind (VM or VMSS VM).",
+            "type": "string"
+          },
+          "AzureVmID": {
+            "description": "Azure VM unique id.",
+            "type": "string"
+          },
+          "CacheTime": {
+            "description": "Last time the resource was seen.",
+            "type": "string"
+          },
+          "CloudState": {
+            "description": "Raw CSP state.",
+            "type": "string"
+          },
+          "ComputeType": {
+            "description": "PW compute type tag (controller/compute).",
+            "type": "string"
+          },
+          "Csp": {
+            "description": "Cloud service provider.",
+            "type": "string"
+          },
+          "Deployment": {
+            "description": "Deployment (platform) tag.",
+            "type": "string"
+          },
+          "EndTime": {
+            "description": "Stop/termination time.",
+            "type": "string"
+          },
+          "InstanceID": {
+            "description": "Cloud-native instance id.",
+            "type": "string"
+          },
+          "InstanceName": {
+            "description": "Instance name.",
+            "type": "string"
+          },
+          "InstanceType": {
+            "description": "Machine type.",
+            "type": "string"
+          },
+          "KeyOwner": {
+            "description": "Organization name owning the cloud account.",
+            "type": "string"
+          },
+          "Owner": {
+            "description": "Owner tag.",
+            "type": "string"
+          },
+          "Pool": {
+            "description": "Pool tag.",
+            "type": "string"
+          },
+          "PrivateIP": {
+            "description": "Private IP address.",
+            "type": "string"
+          },
+          "Project": {
+            "description": "Project tag.",
+            "type": "string"
+          },
+          "Provider": {
+            "description": "Provider tag.",
+            "type": "string"
+          },
+          "PublicIP": {
+            "description": "Public IP address.",
+            "type": "string"
+          },
+          "Region": {
+            "description": "Region of the instance.",
+            "type": "string"
+          },
+          "Session": {
+            "description": "Session number from the resource tags.",
+            "type": "string"
+          },
+          "SpotInstance": {
+            "description": "Whether the instance is a spot instance.",
+            "type": "boolean"
+          },
+          "StartTime": {
+            "description": "Launch time.",
+            "type": "string"
+          },
+          "State": {
+            "description": "Normalized state.",
+            "type": "string"
+          },
+          "StopTime": {
+            "description": "Unused legacy field.",
+            "type": "string"
+          },
+          "Tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "All resource tags with normalized keys.",
+            "type": "object"
+          },
+          "User": {
+            "description": "Platform user from the resource tags.",
+            "type": "string"
+          },
+          "Zone": {
+            "description": "Availability zone.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "AccountID",
+          "KeyOwner",
+          "Csp",
+          "Region",
+          "InstanceID",
+          "InstanceType",
+          "User",
+          "Session",
+          "InstanceName",
+          "Provider",
+          "Deployment",
+          "Owner",
+          "Pool",
+          "Project",
+          "PublicIP",
+          "PrivateIP",
+          "CloudState",
+          "State",
+          "StartTime",
+          "StopTime",
+          "CacheTime",
+          "SpotInstance"
+        ],
+        "type": "object"
+      },
       "IntPolicyOutput": {
         "additionalProperties": false,
         "properties": {
@@ -16452,6 +16950,63 @@
         ],
         "type": "object"
       },
+      "LdapSavedConnectionTest": {
+        "additionalProperties": false,
+        "properties": {
+          "baseDN": {
+            "description": "Overrides the saved base DN for this test",
+            "type": "string"
+          },
+          "caCert": {
+            "description": "Overrides the saved CA certificate for this test",
+            "type": "string"
+          },
+          "clientCert": {
+            "description": "Overrides the saved client certificate for this test",
+            "type": "string"
+          },
+          "clientKey": {
+            "description": "Overrides the saved client key for this test. An empty value keeps the stored key",
+            "type": "string",
+            "writeOnly": true
+          },
+          "filter": {
+            "description": "Overrides the saved filter for this test",
+            "type": "string"
+          },
+          "password": {
+            "description": "Password used only for this connection test",
+            "type": "string",
+            "writeOnly": true
+          },
+          "server": {
+            "description": "Overrides the saved LDAP server address for this test",
+            "type": "string"
+          },
+          "serviceAccountBind": {
+            "description": "Overrides the saved service account bind DN for this test",
+            "type": "string"
+          },
+          "serviceAccountPassword": {
+            "description": "Overrides the saved service account password for this test. An empty value keeps the stored password",
+            "type": "string",
+            "writeOnly": true
+          },
+          "useServiceAccount": {
+            "description": "Overrides whether to use a service account for this test",
+            "type": "boolean"
+          },
+          "useTLS": {
+            "description": "Overrides whether to use TLS for this test",
+            "type": "boolean"
+          },
+          "username": {
+            "description": "Username used only for this connection test",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "LdapSignupInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -16542,6 +17097,31 @@
         },
         "required": [
           "conversations",
+          "total"
+        ],
+        "type": "object"
+      },
+      "ListCredentialsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "credentials": {
+            "description": "Latest status per credential source.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceCredential"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "total": {
+            "description": "Total credentials matching the filters.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "credentials",
           "total"
         ],
         "type": "object"
@@ -16850,6 +17430,31 @@
         "required": [
           "repos",
           "totalCount"
+        ],
+        "type": "object"
+      },
+      "ListResourcesResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "resources": {
+            "description": "One page of resources.",
+            "items": {
+              "$ref": "#/components/schemas/Resource"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "total": {
+            "description": "Total resources matching the filters.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "resources",
+          "total"
         ],
         "type": "object"
       },
@@ -19034,6 +19639,19 @@
           },
           "givenName": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NamespaceBillingBody": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "description": "Allocation name to bill this namespace against (null to clear)",
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "type": "object"
@@ -21268,6 +21886,10 @@
             "description": "Unique identifier",
             "type": "string"
           },
+          "imageUrl": {
+            "description": "Current icon configured on the provider's catalog entry",
+            "type": "string"
+          },
           "insecureSkipTlsVerify": {
             "description": "Whether TLS certificate verification is skipped",
             "type": "boolean"
@@ -21608,6 +22230,10 @@
             "description": "Etag of the user's uploaded avatar, if any.",
             "type": "string"
           },
+          "billingAdmin": {
+            "description": "Whether the user is a platform billing admin",
+            "type": "boolean"
+          },
           "createdAt": {
             "description": "Account creation time",
             "format": "date-time",
@@ -21667,6 +22293,7 @@
           "username",
           "active",
           "admin",
+          "billingAdmin",
           "licenseStatus"
         ],
         "type": "object"
@@ -21758,13 +22385,6 @@
             "format": "date-time",
             "type": "string"
           },
-          "credentialOwner": {
-            "enum": [
-              "organization",
-              "platform"
-            ],
-            "type": "string"
-          },
           "csp": {
             "description": "First-class provider type implied by the entry's kind",
             "type": "string"
@@ -21785,10 +22405,16 @@
           "id": {
             "type": "string"
           },
+          "imageUrl": {
+            "description": "Admin-configured icon; empty for entries using the kind's built-in artwork",
+            "type": "string"
+          },
           "kind": {
             "enum": [
               "azure-managed",
+              "bedrock",
               "codex-subscription",
+              "github-copilot",
               "anthropic",
               "openai",
               "grok",
@@ -21827,6 +22453,7 @@
           "protocol": {
             "enum": [
               "azure-openai",
+              "bedrock-converse",
               "codex",
               "anthropic-messages",
               "openai-chat",
@@ -21864,7 +22491,6 @@
           "endpointOrigin",
           "endpointPath",
           "minimumTlsVersion",
-          "credentialOwner",
           "toolCallingMode",
           "createdAt",
           "updatedAt",
@@ -21914,6 +22540,53 @@
         "required": [
           "organizations",
           "total"
+        ],
+        "type": "object"
+      },
+      "OrphanMuteBody": {
+        "additionalProperties": false,
+        "properties": {
+          "deployment": {
+            "description": "Apply to the whole deployment, covering resources that appear in it later.",
+            "type": "boolean"
+          },
+          "deploymentId": {
+            "description": "Deployment id; matches resources tagged with it as session-id or pw-deployment-id.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "resourceIds": {
+            "description": "resource_history row ids to target individually; ignored when deployment is true.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "deploymentId"
+        ],
+        "type": "object"
+      },
+      "OrphanMuteResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "affected": {
+            "description": "Mute rows created or removed.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "muted": {
+            "description": "Whether the targets are muted after this call.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "muted",
+          "affected"
         ],
         "type": "object"
       },
@@ -22229,6 +22902,34 @@
         },
         "required": [
           "total"
+        ],
+        "type": "object"
+      },
+      "PatchBillingDefaultAllocationInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "defaultAllocationName": {
+            "description": "Allocation name to set as default; empty string clears it",
+            "type": "string"
+          }
+        },
+        "required": [
+          "defaultAllocationName"
+        ],
+        "type": "object"
+      },
+      "PatchBillingDefaultAllocationOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "defaultAllocationName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "defaultAllocationName"
         ],
         "type": "object"
       },
@@ -23527,6 +24228,81 @@
         ],
         "type": "object"
       },
+      "PoolInstances": {
+        "additionalProperties": false,
+        "properties": {
+          "Csp": {
+            "description": "Cloud service provider.",
+            "type": "string"
+          },
+          "EndTime": {
+            "description": "Pool end time, from the controller instance.",
+            "type": "string"
+          },
+          "Instances": {
+            "description": "Instances in this pool session.",
+            "items": {
+              "$ref": "#/components/schemas/InstanceData"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "Pool": {
+            "description": "Pool name.",
+            "type": "string"
+          },
+          "Project": {
+            "description": "Project tag.",
+            "type": "string"
+          },
+          "Region": {
+            "description": "Region.",
+            "type": "string"
+          },
+          "RunningInstances": {
+            "description": "Number of running instances.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "Session": {
+            "description": "Session number.",
+            "type": "string"
+          },
+          "Session_ID": {
+            "description": "Session id.",
+            "type": "string"
+          },
+          "StartTime": {
+            "description": "Pool start time, from the controller instance.",
+            "type": "string"
+          },
+          "State": {
+            "description": "Pool state, from the controller instance.",
+            "type": "string"
+          },
+          "Tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Tags of the first instance.",
+            "type": "object"
+          }
+        },
+        "required": [
+          "Pool",
+          "Session",
+          "Csp",
+          "Region",
+          "Project",
+          "State",
+          "StartTime",
+          "Instances",
+          "RunningInstances"
+        ],
+        "type": "object"
+      },
       "PoolSlurmLoginNode": {
         "additionalProperties": false,
         "properties": {
@@ -24125,6 +24901,47 @@
         ],
         "type": "object"
       },
+      "ProvisionStatusChild": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "id",
+          "label",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
       "ProvisionStatusChildResponse": {
         "additionalProperties": false,
         "properties": {
@@ -24177,6 +24994,91 @@
           "status",
           "createdAt",
           "updatedAt"
+        ],
+        "type": "object"
+      },
+      "ProvisionStatusRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "attributes": {
+            "items": {
+              "$ref": "#/components/schemas/ProvisionStatusRecordAttribute"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/ProvisionStatusChild"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "logs": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "id",
+          "name",
+          "status",
+          "logs",
+          "error",
+          "createdAt",
+          "updatedAt",
+          "attributes",
+          "label"
+        ],
+        "type": "object"
+      },
+      "ProvisionStatusRecordAttribute": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
         ],
         "type": "object"
       },
@@ -27638,6 +28540,21 @@
         ],
         "type": "object"
       },
+      "RenameSessionBody": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "New session name (lowercase letters, numbers, underscores, and dashes; can't end with a dash or underscore).",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
       "ReplicaSetInfo": {
         "additionalProperties": false,
         "properties": {
@@ -28027,6 +28944,136 @@
         ],
         "type": "object"
       },
+      "Resource": {
+        "additionalProperties": false,
+        "properties": {
+          "accountId": {
+            "description": "Cloud account id.",
+            "type": "string"
+          },
+          "accountName": {
+            "description": "Cloud account name from the credential registry.",
+            "type": "string"
+          },
+          "cloudState": {
+            "description": "Raw CSP state.",
+            "type": "string"
+          },
+          "csp": {
+            "description": "Cloud service provider.",
+            "type": "string"
+          },
+          "cspId": {
+            "description": "Cloud-native resource id.",
+            "type": "string"
+          },
+          "deploymentId": {
+            "description": "Deployment (platform) tag.",
+            "type": "string"
+          },
+          "endTime": {
+            "description": "Stop/termination time.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Row id.",
+            "type": "string"
+          },
+          "lastSeenAt": {
+            "description": "Last time the resource was seen in the cloud.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "organization": {
+            "description": "Organization name.",
+            "type": "string"
+          },
+          "orphanAlertMuted": {
+            "description": "Whether orphan alerts are muted for this resource, directly or via its deployment.",
+            "type": "boolean"
+          },
+          "orphanReason": {
+            "description": "Why the resource is considered orphaned.",
+            "type": "string"
+          },
+          "orphanedAt": {
+            "description": "When the resource was first detected as orphaned.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "privateIp": {
+            "description": "Private IP address.",
+            "type": "string"
+          },
+          "publicIp": {
+            "description": "Public IP address.",
+            "type": "string"
+          },
+          "region": {
+            "description": "Region.",
+            "type": "string"
+          },
+          "resourceName": {
+            "description": "Resource name.",
+            "type": "string"
+          },
+          "resourceSubtype": {
+            "description": "Machine type or storage class.",
+            "type": "string"
+          },
+          "resourceType": {
+            "description": "Resource kind: vm, disk, lustre, nfs, bucket, ip.",
+            "type": "string"
+          },
+          "sizeGb": {
+            "description": "Storage size in GB.",
+            "format": "double",
+            "type": "number"
+          },
+          "spot": {
+            "description": "Whether the resource is a spot instance.",
+            "type": "boolean"
+          },
+          "startTime": {
+            "description": "Creation/launch time.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "description": "Normalized state.",
+            "type": "string"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "All resource tags with normalized keys.",
+            "type": "object"
+          },
+          "username": {
+            "description": "Platform user from the resource tags.",
+            "type": "string"
+          },
+          "zone": {
+            "description": "Availability zone.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "resourceType",
+          "csp",
+          "accountId",
+          "region",
+          "cspId",
+          "spot",
+          "state",
+          "startTime",
+          "lastSeenAt"
+        ],
+        "type": "object"
+      },
       "ResourceComplianceItem": {
         "additionalProperties": false,
         "properties": {
@@ -28101,6 +29148,90 @@
           "state",
           "status",
           "running"
+        ],
+        "type": "object"
+      },
+      "ResourceCredential": {
+        "additionalProperties": false,
+        "properties": {
+          "accountId": {
+            "description": "Cloud-native account id; empty until the credential first resolves.",
+            "type": "string"
+          },
+          "accountName": {
+            "description": "CloudAccount (or legacy key) name.",
+            "type": "string"
+          },
+          "credentialError": {
+            "description": "Last credential fetch error.",
+            "type": "string"
+          },
+          "credentialRefreshedAt": {
+            "description": "Last successful credential fetch.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "credentialStatus": {
+            "description": "Credential fetch status: ok, error, or deleted (cloud account removed; shown up to 24h).",
+            "type": "string"
+          },
+          "csp": {
+            "description": "Cloud service provider.",
+            "type": "string"
+          },
+          "duplicateOf": {
+            "description": "Key path of the credential that wins when two sources resolve the same cloud account.",
+            "type": "string"
+          },
+          "govCloud": {
+            "description": "Whether the account lives in a government cloud realm.",
+            "type": "boolean"
+          },
+          "keyPath": {
+            "description": "Vault key path identifying the credential source.",
+            "type": "string"
+          },
+          "listedAt": {
+            "description": "When the last listing pass finished.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "listingErrors": {
+            "description": "Errors and warnings from the last listing pass.",
+            "items": {
+              "$ref": "#/components/schemas/CredentialListingError"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "listingStatus": {
+            "description": "Last listing outcome: pending, ok, warning, error, or skipped (duplicate credential).",
+            "type": "string"
+          },
+          "organization": {
+            "description": "Organization name.",
+            "type": "string"
+          },
+          "resourceCount": {
+            "description": "Resources found by the last successful listing.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "description": "When this row last changed.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "keyPath",
+          "csp",
+          "govCloud",
+          "credentialStatus",
+          "listingStatus",
+          "updatedAt"
         ],
         "type": "object"
       },
@@ -28202,6 +29333,37 @@
         ],
         "type": "object"
       },
+      "ResourceTypeSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "description": "Live resources in an active/running state.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "orphaned": {
+            "description": "Live resources flagged as orphaned.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "resourceType": {
+            "description": "Resource kind.",
+            "type": "string"
+          },
+          "total": {
+            "description": "All live resources (matches the list row count for this type).",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "resourceType",
+          "active",
+          "total",
+          "orphaned"
+        ],
+        "type": "object"
+      },
       "ResourceYAMLResponse": {
         "additionalProperties": false,
         "properties": {
@@ -28236,6 +29398,37 @@
         "required": [
           "jsonData",
           "yamlData"
+        ],
+        "type": "object"
+      },
+      "ResourcesSummaryResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "clusters": {
+            "description": "Distinct cluster sessions (for the Cluster tab count).",
+            "format": "int64",
+            "type": "integer"
+          },
+          "orphans": {
+            "description": "Distinct orphaned deployment groups (for the Orphan tab count).",
+            "format": "int64",
+            "type": "integer"
+          },
+          "summary": {
+            "description": "Per-type active and orphan counts.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceTypeSummary"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "summary",
+          "clusters",
+          "orphans"
         ],
         "type": "object"
       },
@@ -29737,6 +30930,19 @@
         ],
         "type": "object"
       },
+      "SetActiveInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "description": "Whether the user can sign in",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "active"
+        ],
+        "type": "object"
+      },
       "SetAdminInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -29747,6 +30953,37 @@
         },
         "required": [
           "admin"
+        ],
+        "type": "object"
+      },
+      "SetBillingAdminInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "billingAdmin": {
+            "description": "Whether to grant or revoke platform billing admin",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "billingAdmin"
+        ],
+        "type": "object"
+      },
+      "SetCatalogEntryIconOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "etag": {
+            "description": "SHA256 hex of the attached blob, or empty when a preset was applied.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL where the icon is served.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "etag",
+          "imageUrl"
         ],
         "type": "object"
       },
@@ -29865,6 +31102,24 @@
         ],
         "type": "object"
       },
+      "SetStorageIconOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "etag": {
+            "description": "SHA256 hex of the attached blob, or empty when a preset was applied.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL where the icon is served.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "etag",
+          "imageUrl"
+        ],
+        "type": "object"
+      },
       "SetWorkflowIconOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -29917,7 +31172,7 @@
           },
           "username": {
             "description": "Username for the initial admin user",
-            "maxLength": 100,
+            "maxLength": 32,
             "minLength": 1,
             "type": "string"
           }
@@ -29974,13 +31229,18 @@
             ],
             "type": "string"
           },
+          "costTrackingRates": {
+            "$ref": "#/components/schemas/CostTrackingRatesBody",
+            "description": "Cluster-wide billing rates in allocation units per core-hour and GiB-hour"
+          },
           "costTrackingStatus": {
-            "description": "Cost tracking status",
+            "description": "Usage metering status for the cluster",
             "enum": [
               "on",
               "off",
               "provisioning",
-              "deleting"
+              "deleting",
+              "failed"
             ],
             "examples": [
               "on"
@@ -29993,13 +31253,6 @@
               "https://k8s.example.com:6443"
             ],
             "type": "string"
-          },
-          "groups": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "Map of team names to team IDs that have access to this cluster",
-            "type": "object"
           },
           "id": {
             "description": "Cluster MongoDB ID",
@@ -30022,10 +31275,6 @@
             ],
             "type": "string"
           },
-          "resourcePrices": {
-            "$ref": "#/components/schemas/CostTrackingPricesBody",
-            "description": "CPU and memory pricing information"
-          },
           "type": {
             "description": "Infrastructure type",
             "examples": [
@@ -30038,7 +31287,6 @@
           "id",
           "name",
           "endpoint",
-          "groups",
           "caCert",
           "type"
         ],
@@ -31457,7 +32705,7 @@
         "additionalProperties": false,
         "properties": {
           "enableTracking": {
-            "description": "Whether to enable or disable cost tracking for this cluster",
+            "description": "Whether cost tracking should run on this cluster",
             "type": "boolean"
           }
         },
@@ -31748,22 +32996,6 @@
             "type": "boolean"
           }
         },
-        "type": "object"
-      },
-      "UpdateNamespaceInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "allocation": {
-            "description": "Allocation name to assign (null to clear)",
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        },
-        "required": [
-          "allocation"
-        ],
         "type": "object"
       },
       "UpdateOrgAIProviderInputBody": {
@@ -34681,7 +35913,7 @@
     },
     "/api/admin/billing/crosscheck": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns CSP vs PW cost comparison data for all infrastructures",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns CSP vs PW cost comparison data for all infrastructures. Requires platform admin or billing admin.",
         "operationId": "get-billing-crosscheck",
         "responses": {
           "200": {
@@ -34719,7 +35951,7 @@
     },
     "/api/admin/billing/runs": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns a paginated list of billing runs with total count",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a paginated list of billing runs with total count. Requires platform admin or billing admin.",
         "operationId": "list-billing-runs",
         "parameters": [
           {
@@ -34815,7 +36047,7 @@
         ]
       },
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns a single billing run with full per-credential details",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a single billing run with full per-credential details. Requires platform admin or billing admin.",
         "operationId": "get-billing-run",
         "parameters": [
           {
@@ -35156,7 +36388,7 @@
     },
     "/api/admin/events/export": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nStream audit events across all organizations as CSV or JSON.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nStream audit events across all organizations as CSV, JSON, or plain text.",
         "operationId": "export-admin-events",
         "parameters": [
           {
@@ -35311,7 +36543,8 @@
               "description": "Export format.",
               "enum": [
                 "csv",
-                "json"
+                "json",
+                "text"
               ],
               "type": "string"
             }
@@ -36438,6 +37671,91 @@
         ]
       }
     },
+    "/api/admin/products/ai/catalog/{catalogEntryId}/icon": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nRemoves a custom AI integration's icon so it falls back to the default artwork.",
+        "operationId": "delete-ai-integration-icon",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "catalogEntryId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Remove AI integration icon",
+        "tags": [
+          "Products"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nSets a custom AI integration's icon to a preset or a thumbnail from the admin's library. Built-in providers keep their own artwork.",
+        "operationId": "set-ai-integration-icon",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "catalogEntryId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IconRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetCatalogEntryIconOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set AI integration icon",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
     "/api/admin/products/ai/connections/{connectionId}": {
       "delete": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nDeletes an AI connection and its access grants; managed providers are deprovisioned. Historical usage is preserved.",
@@ -36980,6 +38298,646 @@
           "Platform Reports"
         ],
         "x-internal": true
+      }
+    },
+    "/api/admin/resources": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns live cloud resources of every kind (VMs, disks, lustre, NFS, buckets, IPs) from the resource inventory. Platform admins can query every organization; organization admins must pass their organization.",
+        "operationId": "list-resources",
+        "parameters": [
+          {
+            "description": "Filter by resource kinds (vm, disk, lustre, nfs, bucket, ip).",
+            "explode": true,
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "description": "Filter by resource kinds (vm, disk, lustre, nfs, bucket, ip).",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Filter by cloud service providers.",
+            "explode": true,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Filter by cloud service providers.",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Filter by normalized states.",
+            "explode": true,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "Filter by normalized states.",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Filter by cloud account name (or raw account id).",
+            "explode": true,
+            "in": "query",
+            "name": "account",
+            "schema": {
+              "description": "Filter by cloud account name (or raw account id).",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Filter by organization name. Required for org admins.",
+            "explode": false,
+            "in": "query",
+            "name": "organization",
+            "schema": {
+              "description": "Filter by organization name. Required for org admins.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only resources flagged as orphaned.",
+            "explode": false,
+            "in": "query",
+            "name": "orphan",
+            "schema": {
+              "description": "Only resources flagged as orphaned.",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Only resources that still exist in the cloud (hides terminated/deleted).",
+            "explode": false,
+            "in": "query",
+            "name": "live",
+            "schema": {
+              "default": false,
+              "description": "Only resources that still exist in the cloud (hides terminated/deleted).",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Only resources last seen within this preset window.",
+            "explode": false,
+            "in": "query",
+            "name": "seenWithin",
+            "schema": {
+              "default": "24h",
+              "description": "Only resources last seen within this preset window.",
+              "enum": [
+                "24h",
+                "7d",
+                "30d"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only resources last seen on or after this date (YYYY-MM-DD). Overrides seenWithin.",
+            "explode": false,
+            "in": "query",
+            "name": "seenSince",
+            "schema": {
+              "description": "Only resources last seen on or after this date (YYYY-MM-DD). Overrides seenWithin.",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Case-insensitive match on name, id, user, pool, or account.",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Case-insensitive match on name, id, user, pool, or account.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size.",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size.",
+              "format": "int64",
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page offset.",
+            "explode": false,
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "description": "Page offset.",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResourcesResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List cloud resources",
+        "tags": [
+          "Resources"
+        ]
+      }
+    },
+    "/api/admin/resources/clusters": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns cluster sessions: resources that share a session-id or pw-deployment-id and belong to a cluster (carry a pool tag), grouped per cluster with the owning user and pool name. Platform admins can query every organization; organization admins must pass their organization.",
+        "operationId": "list-resource-clusters",
+        "parameters": [
+          {
+            "description": "Filter by organization name. Required for org admins.",
+            "explode": false,
+            "in": "query",
+            "name": "organization",
+            "schema": {
+              "description": "Filter by organization name. Required for org admins.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by cloud service providers.",
+            "explode": true,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Filter by cloud service providers.",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Filter by cluster status: running, stopped, or terminated.",
+            "explode": true,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "Filter by cluster status: running, stopped, or terminated.",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Filter by cloud account name (or raw account id).",
+            "explode": true,
+            "in": "query",
+            "name": "account",
+            "schema": {
+              "description": "Filter by cloud account name (or raw account id).",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Group by deployment id instead of cluster sessions: every group has at least one orphan-flagged resource and includes the deployment's other live resources.",
+            "explode": false,
+            "in": "query",
+            "name": "orphan",
+            "schema": {
+              "description": "Group by deployment id instead of cluster sessions: every group has at least one orphan-flagged resource and includes the deployment's other live resources.",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Case-insensitive match on resource name, id, user, pool, or account.",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Case-insensitive match on resource name, id, user, pool, or account.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only resources last seen within this preset window.",
+            "explode": false,
+            "in": "query",
+            "name": "seenWithin",
+            "schema": {
+              "default": "24h",
+              "description": "Only resources last seen within this preset window.",
+              "enum": [
+                "24h",
+                "7d",
+                "30d"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only resources last seen on or after this date (YYYY-MM-DD). Overrides seenWithin.",
+            "explode": false,
+            "in": "query",
+            "name": "seenSince",
+            "schema": {
+              "description": "Only resources last seen on or after this date (YYYY-MM-DD). Overrides seenWithin.",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster page size.",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 25,
+              "description": "Cluster page size.",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cluster page offset.",
+            "explode": false,
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "description": "Cluster page offset.",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterResourcesResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List cluster sessions with their resources",
+        "tags": [
+          "Resources"
+        ]
+      }
+    },
+    "/api/admin/resources/credentials": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns the latest credential-fetch and inventory-listing status per cloud account credential, including listing errors/warnings, duplicate credential sources, and recently deleted cloud accounts (shown up to 24h). Platform admins can query every organization; organization admins must pass their organization.",
+        "operationId": "list-resource-credentials",
+        "parameters": [
+          {
+            "description": "Filter by organization name. Required for org admins.",
+            "explode": false,
+            "in": "query",
+            "name": "organization",
+            "schema": {
+              "description": "Filter by organization name. Required for org admins.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by cloud service providers.",
+            "explode": true,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Filter by cloud service providers.",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Filter by status; matches the credential or the listing status (ok, error, warning, pending, skipped, deleted). Deleted cloud accounts show for 24h after deletion by default; filtering for 'deleted' shows all.",
+            "explode": true,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "description": "Filter by status; matches the credential or the listing status (ok, error, warning, pending, skipped, deleted). Deleted cloud accounts show for 24h after deletion by default; filtering for 'deleted' shows all.",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Case-insensitive match on account name, account id, or key path.",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Case-insensitive match on account name, account id, or key path.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCredentialsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Per-cloud-account credential and listing status",
+        "tags": [
+          "Resources"
+        ]
+      }
+    },
+    "/api/admin/resources/delete-deployment": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nDeletes every live cloud resource tagged with the deployment id (as session-id or pw-deployment-id). Resources with a live platform record are deleted through it; the rest are swept directly in the cloud by gaia. Always dry-run first.",
+        "operationId": "delete-deployment-resources",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteDeploymentBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteDeploymentResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete every cloud resource belonging to a deployment",
+        "tags": [
+          "Resources"
+        ]
+      }
+    },
+    "/api/admin/resources/orphan-mute": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nRemoves orphan alert mutes. Deployment scope clears every mute of the deployment, including per-resource ones.",
+        "operationId": "unmute-orphan-alerts",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrphanMuteBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrphanMuteResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Unmute orphan alerts for a deployment or individual resources",
+        "tags": [
+          "Resources"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nStops the recurring orphan alert from naming the targeted deployment or resources. Detection keeps running and muted orphans stay visible on the resources page.",
+        "operationId": "mute-orphan-alerts",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrphanMuteBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrphanMuteResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Mute orphan alerts for a deployment or individual resources",
+        "tags": [
+          "Resources"
+        ]
+      }
+    },
+    "/api/admin/resources/summary": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns per-resource-type active and orphan counts for the resource-type tabs, scoped to the organization and last-seen window. Platform admins can query every organization; organization admins must pass their organization.",
+        "operationId": "get-resources-summary",
+        "parameters": [
+          {
+            "description": "Restrict to one organization (by name). Required for org admins.",
+            "explode": false,
+            "in": "query",
+            "name": "organization",
+            "schema": {
+              "description": "Restrict to one organization (by name). Required for org admins.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Preset window matching the list view.",
+            "explode": false,
+            "in": "query",
+            "name": "seenWithin",
+            "schema": {
+              "default": "24h",
+              "description": "Preset window matching the list view.",
+              "enum": [
+                "24h",
+                "7d",
+                "30d"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Custom last-seen date matching the list view. Overrides seenWithin.",
+            "explode": false,
+            "in": "query",
+            "name": "seenSince",
+            "schema": {
+              "description": "Custom last-seen date matching the list view. Overrides seenWithin.",
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourcesSummaryResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Per-type active and orphan resource counts",
+        "tags": [
+          "Resources"
+        ]
       }
     },
     "/api/admin/user-workspace/users/{user}/{type}/kill": {
@@ -37619,7 +39577,17 @@
                   "type": "integer"
                 }
               },
+              "Content-Security-Policy": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
                 "schema": {
                   "type": "string"
                 }
@@ -37967,7 +39935,17 @@
                   "type": "integer"
                 }
               },
+              "Content-Security-Policy": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
                 "schema": {
                   "type": "string"
                 }
@@ -38787,93 +40765,6 @@
         ]
       }
     },
-    "/api/auth/token/cluster-session": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGenerates a JWT token for cluster session authentication.",
-        "operationId": "get-cluster-session-token",
-        "parameters": [
-          {
-            "description": "The session ID",
-            "explode": false,
-            "in": "query",
-            "name": "session_id",
-            "required": true,
-            "schema": {
-              "description": "The session ID",
-              "type": "string"
-            }
-          },
-          {
-            "description": "The cloud provider",
-            "explode": false,
-            "in": "query",
-            "name": "provider",
-            "required": true,
-            "schema": {
-              "description": "The cloud provider",
-              "type": "string"
-            }
-          },
-          {
-            "description": "The cluster name",
-            "explode": false,
-            "in": "query",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "description": "The cluster name",
-              "type": "string"
-            }
-          },
-          {
-            "description": "The session number",
-            "explode": false,
-            "in": "query",
-            "name": "session_number",
-            "required": true,
-            "schema": {
-              "description": "The session number",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "contentEncoding": "base64",
-                  "type": "string"
-                }
-              }
-            },
-            "description": "OK",
-            "headers": {
-              "Content-Type": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Get cluster session JWT token",
-        "tags": [
-          "Authentication"
-        ],
-        "x-internal": true
-      }
-    },
     "/api/auth/token/oidc": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGet an OIDC token for the logged in user to access a Kubernetes cluster.",
@@ -39571,7 +41462,7 @@
     },
     "/api/events/resources/{targetType}/{targetId}": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nList audit events for a single resource. Requires view access to the resource; payloads are admin-only.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nList audit events for a single resource. Requires view access to the resource.",
         "operationId": "list-resource-events",
         "parameters": [
           {
@@ -39794,6 +41685,206 @@
           }
         },
         "summary": "List Resource Events",
+        "tags": [
+          "Events"
+        ]
+      }
+    },
+    "/api/events/resources/{targetType}/{targetId}/export": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nStream a single resource's audit events as CSV, JSON, or plain text. Requires view access to the resource.",
+        "operationId": "export-resource-events",
+        "parameters": [
+          {
+            "description": "Target resource type.",
+            "in": "path",
+            "name": "targetType",
+            "required": true,
+            "schema": {
+              "description": "Target resource type.",
+              "enum": [
+                "cluster",
+                "storage",
+                "user"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Target resource id (hex ObjectID).",
+            "in": "path",
+            "name": "targetId",
+            "required": true,
+            "schema": {
+              "description": "Target resource id (hex ObjectID).",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only events at or after this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "Only events at or after this time (RFC3339).",
+              "examples": [
+                "2026-01-01T00:00:00Z"
+              ],
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only events at or before this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Only events at or before this time (RFC3339).",
+              "examples": [
+                "2026-01-31T23:59:59Z"
+              ],
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by event type (repeatable).",
+            "explode": true,
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "description": "Filter by event type (repeatable).",
+              "examples": [
+                [
+                  "user:login"
+                ]
+              ],
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Filter by exact actor username.",
+            "explode": false,
+            "in": "query",
+            "name": "actor",
+            "schema": {
+              "description": "Filter by exact actor username.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by actor type.",
+            "explode": false,
+            "in": "query",
+            "name": "actorType",
+            "schema": {
+              "description": "Filter by actor type.",
+              "enum": [
+                "user",
+                "apikey",
+                "workflow-token",
+                "cluster-token",
+                "scim",
+                "system",
+                "anonymous"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by target type.",
+            "explode": false,
+            "in": "query",
+            "name": "targetType",
+            "schema": {
+              "description": "Filter by target type.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by target id.",
+            "explode": false,
+            "in": "query",
+            "name": "targetId",
+            "schema": {
+              "description": "Filter by target id.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by outcome.",
+            "explode": false,
+            "in": "query",
+            "name": "outcome",
+            "schema": {
+              "description": "Filter by outcome.",
+              "enum": [
+                "success",
+                "failure"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by auth session id, e.g. to trace every action in one impersonation session.",
+            "explode": false,
+            "in": "query",
+            "name": "sessionId",
+            "schema": {
+              "description": "Filter by auth session id, e.g. to trace every action in one impersonation session.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Case-insensitive search across actor username, target name, and request ID; an exact event or session id also matches.",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Case-insensitive search across actor username, target name, and request ID; an exact event or session id also matches.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Export format.",
+            "explode": false,
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "default": "csv",
+              "description": "Export format.",
+              "enum": [
+                "csv",
+                "json",
+                "text"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Export Resource Events",
         "tags": [
           "Events"
         ]
@@ -45666,6 +47757,29 @@
         "operationId": "poll-org-codex-device-authorization",
         "parameters": [
           {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Organization AI connection name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Organization AI connection name",
+              "type": "string"
+            }
+          },
+          {
             "description": "Device authorization identifier",
             "in": "path",
             "name": "authorizationId",
@@ -45699,6 +47813,63 @@
           }
         },
         "summary": "Complete organization Codex authorization",
+        "tags": [
+          "AI Providers"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/ai-providers/{name}/copilot-connection": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReconnects an organization Copilot provider with the administrator's GitHub account linked in Account Settings.",
+        "operationId": "reconnect-org-copilot-provider",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "AI provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "AI provider name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgAIProviderResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Reconnect organization Copilot provider",
         "tags": [
           "AI Providers"
         ]
@@ -48068,6 +50239,66 @@
         ]
       }
     },
+    "/api/organizations/{organization}/auth-methods/ldap/{authName}/test": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nTests a saved LDAP auth method using its stored configuration, including stored secrets. Any field sent in the request overrides the stored value for this test only; nothing is saved.",
+        "operationId": "test-saved-organization-auth-method-ldap",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the authentication method to test",
+            "in": "path",
+            "name": "authName",
+            "required": true,
+            "schema": {
+              "description": "Name of the authentication method to test",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LdapSavedConnectionTest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Test saved organization auth method: LDAP",
+        "tags": [
+          "Auth Methods"
+        ]
+      }
+    },
     "/api/organizations/{organization}/auth-methods/oidc": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds a new OIDC auth method.",
@@ -48947,6 +51178,130 @@
           }
         },
         "summary": "Provision billing for cloud account",
+        "tags": [
+          "Cloud Accounts"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/cloud-accounts/{name}/billing/default-allocation": {
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets or clears the allocation that billing charges without their own allocation are assigned to.",
+        "operationId": "patch-cloud-account-billing-default-allocation",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cloud account name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Cloud account name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchBillingDefaultAllocationInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatchBillingDefaultAllocationOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set default allocation for cloud account billing",
+        "tags": [
+          "Cloud Accounts"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/cloud-accounts/{name}/billing/details": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns detailed billing infrastructure information including provision output and default allocation.",
+        "operationId": "get-cloud-account-billing-details",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cloud account name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Cloud account name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBillingDetailsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get cloud account billing details",
         "tags": [
           "Cloud Accounts"
         ]
@@ -50827,7 +53182,7 @@
     },
     "/api/organizations/{organization}/events/export": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nStream the organization's audit events as CSV or JSON. Requires organization admin.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nStream the organization's audit events as CSV, JSON, or plain text. Requires organization admin.",
         "operationId": "export-organization-events",
         "parameters": [
           {
@@ -50985,7 +53340,8 @@
               "description": "Export format.",
               "enum": [
                 "csv",
-                "json"
+                "json",
+                "text"
               ],
               "type": "string"
             }
@@ -52778,7 +55134,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateNamespaceInputBody"
+                "$ref": "#/components/schemas/NamespaceBillingBody"
               }
             }
           },
@@ -54017,7 +56373,7 @@
     },
     "/api/organizations/{organization}/kubernetes/{infraName}/costtracking": {
       "patch": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nEnable or disable cost tracking for a Kubernetes cluster.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nEnable or disable cost tracking for a Kubernetes cluster. The in-cluster agent records billable namespace usage so it survives a disconnect from the platform.",
         "operationId": "update-kubernetes-cost-tracking",
         "parameters": [
           {
@@ -54084,7 +56440,7 @@
     },
     "/api/organizations/{organization}/kubernetes/{infraName}/costtracking/prices": {
       "patch": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdate CPU and memory prices for cost tracking calculations.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the cluster-wide billing rates applied to every namespace with an allocation attached.",
         "operationId": "update-kubernetes-cost-tracking-prices",
         "parameters": [
           {
@@ -54101,12 +56457,13 @@
             }
           },
           {
-            "description": "The Kubernetes infrastructure name",
+            "description": "The infrastructure name",
             "in": "path",
             "name": "infraName",
             "required": true,
             "schema": {
-              "description": "The Kubernetes infrastructure name",
+              "description": "The infrastructure name",
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -54115,7 +56472,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CostTrackingPricesBody"
+                "$ref": "#/components/schemas/CostTrackingRatesBody"
               }
             }
           },
@@ -54126,7 +56483,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CostTrackingPricesBody"
+                  "$ref": "#/components/schemas/CostTrackingRatesBody"
                 }
               }
             },
@@ -54143,7 +56500,7 @@
             "description": "Error"
           }
         },
-        "summary": "Update cost tracking prices",
+        "summary": "Update cost tracking rates",
         "tags": [
           "Kubernetes"
         ]
@@ -61029,6 +63386,69 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/active": {
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nEnables or disables a user's ability to sign in. An active user consumes a license seat unless the account is complimentary; deactivating a user releases the seat and fires any USER_DISABLED webhooks.",
+        "operationId": "set-user-active",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetActiveInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set user active status",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/admin": {
       "put": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nGrants or revokes platform:admin access to a user.",
@@ -61592,6 +64012,76 @@
           }
         },
         "summary": "Attach bucket to AI provider",
+        "tags": [
+          "AI Providers"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/ai-providers/{name}/copilot-connection": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReconnects a Copilot provider with the GitHub account linked in Account Settings.",
+        "operationId": "reconnect-copilot-provider",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Copilot provider name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Copilot provider name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProviderResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Reconnect Copilot provider",
         "tags": [
           "AI Providers"
         ]
@@ -63898,6 +66388,63 @@
         "tags": [
           "NFS",
           "Storage"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/billing-admin": {
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nGrants or revokes platform billing admin access to a user, allowing read-only access to billing data across all organizations.",
+        "operationId": "set-user-billing-admin",
+        "parameters": [
+          {
+            "description": "Organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "Organization name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the user to grant or revoke billing admin",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the user to grant or revoke billing admin",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetBillingAdminInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set user platform billing admin status",
+        "tags": [
+          "Users"
         ]
       }
     },
@@ -71132,6 +73679,82 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/sessions/{name}/rename": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRenames a session. Only the session owner can rename it, and not while the session is starting or stopping or is managed by an active workflow run. The rename is metadata-only: the session's custom subdomain keeps the original name and old /me/session URLs stop resolving.",
+        "operationId": "rename-user-session",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session name.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Session name.",
+              "examples": [
+                "my-session"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameSessionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Rename session",
+        "tags": [
+          "Sessions"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/sessions/{name}/restart": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRestarts the process for a session.",
@@ -72568,12 +75191,12 @@
             }
           },
           {
-            "description": "The type of storage to delete.",
+            "description": "The type of the storage.",
             "in": "path",
             "name": "type",
             "required": true,
             "schema": {
-              "description": "The type of storage to delete.",
+              "description": "The type of the storage.",
               "enum": [
                 "aws-disk",
                 "aws-lustre",
@@ -72614,6 +75237,225 @@
           }
         },
         "summary": "Delete a storage",
+        "tags": [
+          "Storage",
+          "Disks",
+          "Lustre",
+          "NFS",
+          "Buckets"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/{type}/{name}/icon": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves a storage's custom icon and releases the underlying blob reference.",
+        "operationId": "delete-storage-icon",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The type of the storage.",
+            "in": "path",
+            "name": "type",
+            "required": true,
+            "schema": {
+              "description": "The type of the storage.",
+              "enum": [
+                "aws-disk",
+                "aws-lustre",
+                "aws-efs",
+                "aws-bucket",
+                "azure-bucket",
+                "azure-disk",
+                "azure-azfiles",
+                "azure-managedlustre",
+                "azure-netappfiles",
+                "google-disk",
+                "google-bucket",
+                "google-filestore",
+                "google-managedlustre",
+                "oracle-bucket",
+                "oracle-oraclefs"
+              ],
+              "examples": [
+                "aws-lustre"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete storage icon",
+        "tags": [
+          "Storage",
+          "Disks",
+          "Lustre",
+          "NFS",
+          "Buckets"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSets a storage's icon from either a curated preset URL or a blob already in the caller's thumbnail library. Increments refcount on the new blob and releases the prior one.",
+        "operationId": "set-storage-icon",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The type of the storage.",
+            "in": "path",
+            "name": "type",
+            "required": true,
+            "schema": {
+              "description": "The type of the storage.",
+              "enum": [
+                "aws-disk",
+                "aws-lustre",
+                "aws-efs",
+                "aws-bucket",
+                "azure-bucket",
+                "azure-disk",
+                "azure-azfiles",
+                "azure-managedlustre",
+                "azure-netappfiles",
+                "google-disk",
+                "google-bucket",
+                "google-filestore",
+                "google-managedlustre",
+                "oracle-bucket",
+                "oracle-oraclefs"
+              ],
+              "examples": [
+                "aws-lustre"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IconRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetStorageIconOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set storage icon",
         "tags": [
           "Storage",
           "Disks",
@@ -73812,7 +76654,7 @@
     },
     "/api/platform/groups": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns a list of all groups on the platform",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a list of all groups on the platform. Requires platform admin or billing admin.",
         "operationId": "get-all-platform-groups",
         "parameters": [
           {
@@ -75451,6 +78293,83 @@
           }
         },
         "summary": "List effective products",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/api/products/ai/catalog/{catalogEntryId}/icon": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nServes the icon image configured for an AI integration catalog entry.",
+        "operationId": "get-ai-integration-icon",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "catalogEntryId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get AI integration icon",
         "tags": [
           "Products"
         ]
@@ -77989,6 +80908,57 @@
         ]
       }
     },
+    "/api/v2/admin/resources/instances/all": {
+      "get": {
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns every recently seen cloud instance across all organizations, in the legacy cloud-cacher shape. Deprecated: use /api/admin/resources.",
+        "operationId": "get-all-instances",
+        "parameters": [
+          {
+            "description": "Restrict to one organization (by name).",
+            "explode": false,
+            "in": "query",
+            "name": "organization",
+            "schema": {
+              "description": "Restrict to one organization (by name).",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InstanceData"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List all cached cloud instances",
+        "tags": [
+          "Resources"
+        ]
+      }
+    },
     "/api/v2/auth/session": {
       "get": {
         "deprecated": true,
@@ -78090,6 +81060,44 @@
         "summary": "Get GPU accelerator types",
         "tags": [
           "Clusters"
+        ]
+      }
+    },
+    "/api/v2/resources/instances": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the authenticated user's recently seen cloud instances grouped by pool and session, in the legacy shape.",
+        "operationId": "get-user-instances",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PoolInstances"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the current user's cloud instances grouped by pool session",
+        "tags": [
+          "Resources"
         ]
       }
     },
@@ -80025,6 +83033,10 @@
     {
       "description": "SCIM 2.0 read-only provisioning endpoints (users, groups, SSH keys)",
       "name": "SCIM"
+    },
+    {
+      "description": "Endpoints related to live cloud resource inventory",
+      "name": "Resources"
     },
     {
       "description": "Endpoints related to sessions",

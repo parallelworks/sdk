@@ -368,6 +368,10 @@ type AddAzureSlurmVersionInputBody struct {
 type AddDeploymentInputBody struct {
 	// Model name to deploy on the existing Azure OpenAI account
 	Model string `json:"model"`
+	// Azure SKU to deploy under (e.g. Standard, GlobalStandard, DataZoneStandard). Defaults to Standard when omitted.
+	Sku *string `json:"sku,omitempty"`
+	// Specific model version to deploy. Required for newer model families (gpt-5.x). Defaults to Azure's implicit default when omitted.
+	Version *string `json:"version,omitempty"`
 }
 
 type AddExistingVersionInputBody struct {
@@ -632,6 +636,8 @@ type AiProductDetailOutputBody struct {
 type AiProviderResponse struct {
 	// Email of the connected ChatGPT account (codex provider)
 	AccountEmail *string `json:"accountEmail,omitempty"`
+	// Login of the connected GitHub account (copilot provider)
+	AccountLogin *string `json:"accountLogin,omitempty"`
 	// Attached storage bucket infrastructure ID
 	BucketID *string `json:"bucketId,omitempty"`
 	// Attached storage bucket name
@@ -654,6 +660,8 @@ type AiProviderResponse struct {
 	HasCaCertificate *bool `json:"hasCaCertificate,omitempty"`
 	// Unique identifier for the resource
 	ID string `json:"id"`
+	// Current icon configured on the provider's catalog entry
+	ImageURL *string `json:"imageUrl,omitempty"`
 	// Whether documents have been ingested
 	Ingested bool `json:"ingested"`
 	// Whether TLS certificate verification is skipped
@@ -662,7 +670,7 @@ type AiProviderResponse struct {
 	Model *string `json:"model,omitempty"`
 	// Name of the AI provider
 	Name string `json:"name"`
-	// ChatGPT subscription plan type (codex provider)
+	// Subscription plan type (subscription providers)
 	PlanType *string `json:"planType,omitempty"`
 	// Refresh interval for the AI provider
 	RefreshInterval *string `json:"refreshInterval,omitempty"`
@@ -693,6 +701,8 @@ type AiProvidersResponse struct {
 	Healthy *bool `json:"healthy,omitempty"`
 	// Unique identifier for the AI provider
 	ID string `json:"id"`
+	// Current icon configured on the provider's catalog entry
+	ImageURL *string `json:"imageUrl,omitempty"`
 	// AI model name
 	Model *string `json:"model"`
 	// Name of the AI provider
@@ -819,6 +829,8 @@ type AuthSession struct {
 	Admin bool `json:"admin"`
 	// Cache-buster etag for the user's avatar; empty when no custom avatar is set.
 	AvatarEtag *string `json:"avatarEtag,omitempty"`
+	// Indicates if the user is a platform billing admin with read access to billing data across all organizations.
+	BillingAdmin bool `json:"billingAdmin"`
 	// Email address of the user.
 	Email string `json:"email"`
 	// User ID.
@@ -1801,6 +1813,27 @@ type BaseImageSummary struct {
 	TotalRootSnapshots int64 `json:"totalRootSnapshots"`
 }
 
+type BillingDetails struct {
+	CloudAccountName      string                           `json:"cloudAccountName"`
+	CreatedAt             time.Time                        `json:"createdAt"`
+	DefaultAllocationName *string                          `json:"defaultAllocationName"`
+	InfraName             string                           `json:"infraName"`
+	LastBillingUpdate     *time.Time                       `json:"lastBillingUpdate"`
+	OrganizationName      string                           `json:"organizationName"`
+	ProvisionOutput       BillingProvisionOutput           `json:"provisionOutput"`
+	ProvisionStatus       map[string]ProvisionStatusRecord `json:"provisionStatus"`
+	Status                string                           `json:"status"`
+}
+
+type BillingProvisionOutput struct {
+	AwsS3Bucket                  *string `json:"awsS3Bucket,omitempty"`
+	AwsS3BucketRegion            *string `json:"awsS3BucketRegion,omitempty"`
+	AzureBlobContainerName       *string `json:"azureBlobContainerName,omitempty"`
+	AzureStorageAccount          *string `json:"azureStorageAccount,omitempty"`
+	GoogleBigQueryDataset        *string `json:"googleBigQueryDataset,omitempty"`
+	GoogleBigQueryDatasetProject *string `json:"googleBigQueryDatasetProject,omitempty"`
+}
+
 type BillingResponse struct {
 	ID               *string    `json:"id,omitempty"`
 	ProvisionedByOrg *bool      `json:"provisionedByOrg"`
@@ -2012,9 +2045,8 @@ type BuiltInWorkspaceDefaults struct {
 }
 
 type BuiltinProviderResponse struct {
-	CaCertificate   *string `json:"caCertificate,omitempty"`
-	CloudBoundary   *string `json:"cloudBoundary,omitempty"`
-	CredentialOwner string  `json:"credentialOwner"`
+	CaCertificate *string `json:"caCertificate,omitempty"`
+	CloudBoundary *string `json:"cloudBoundary,omitempty"`
 	// First-class provider type implied by the entry's kind
 	Csp         string `json:"csp"`
 	DisplayName string `json:"displayName"`
@@ -2036,7 +2068,6 @@ type BuiltinProviderResponse struct {
 type CatalogEntryBody struct {
 	CaCertificate     *string `json:"caCertificate,omitempty"`
 	CloudBoundary     *string `json:"cloudBoundary,omitempty"`
-	CredentialOwner   string  `json:"credentialOwner"`
 	DisplayName       string  `json:"displayName"`
 	EndpointOrigin    string  `json:"endpointOrigin"`
 	EndpointPath      string  `json:"endpointPath"`
@@ -2054,15 +2085,16 @@ type CatalogEntryResponse struct {
 	CloudBoundary   *string   `json:"cloudBoundary,omitempty"`
 	ConnectionCount int64     `json:"connectionCount"`
 	CreatedAt       time.Time `json:"createdAt"`
-	CredentialOwner string    `json:"credentialOwner"`
 	// First-class provider type implied by the entry's kind
 	Csp         string `json:"csp"`
 	DisplayName string `json:"displayName"`
 	// Endpoint is provisioned or session-backed rather than a fixed vendor URL
-	DynamicEndpoint   bool    `json:"dynamicEndpoint"`
-	EndpointOrigin    string  `json:"endpointOrigin"`
-	EndpointPath      string  `json:"endpointPath"`
-	ID                string  `json:"id"`
+	DynamicEndpoint bool   `json:"dynamicEndpoint"`
+	EndpointOrigin  string `json:"endpointOrigin"`
+	EndpointPath    string `json:"endpointPath"`
+	ID              string `json:"id"`
+	// Admin-configured icon; empty for entries using the kind's built-in artwork
+	ImageURL          *string `json:"imageUrl,omitempty"`
 	Kind              string  `json:"kind"`
 	Lifecycle         string  `json:"lifecycle"`
 	MinimumTLSVersion string  `json:"minimumTlsVersion"`
@@ -2528,6 +2560,41 @@ type CloudImage struct {
 	Variant *string `json:"variant,omitempty"`
 }
 
+type Cluster struct {
+	// Whether orphan alerts are muted for the whole deployment.
+	AlertsMuted *bool `json:"alertsMuted,omitempty"`
+	// Pool (cluster) name.
+	ClusterName string `json:"clusterName"`
+	// Cloud service provider.
+	Csp string `json:"csp"`
+	// Resource name from the deployment table.
+	DeploymentName *string `json:"deploymentName,omitempty"`
+	// Resource type from the deployment table.
+	DeploymentType *string `json:"deploymentType,omitempty"`
+	// Shared session-id or pw-deployment-id.
+	Key string `json:"key"`
+	// Most recent last-seen across the cluster.
+	LastSeenAt time.Time `json:"lastSeenAt"`
+	// When the deployment's orphan alerts were muted.
+	MutedAt *time.Time `json:"mutedAt,omitempty"`
+	// Admin who muted the deployment's orphan alerts.
+	MutedBy *string `json:"mutedBy,omitempty"`
+	// Organization name.
+	Organization *string `json:"organization,omitempty"`
+	// Whether any resource is orphaned.
+	Orphaned bool `json:"orphaned"`
+	// Resources belonging to the cluster.
+	Resources []Resource `json:"resources"`
+	// Resources in an active state.
+	Running int64 `json:"running"`
+	// Cluster status: running (any active resource), stopped (a stopped VM remains), or terminated.
+	Status string `json:"status"`
+	// Total resources in the cluster.
+	Total int64 `json:"total"`
+	// Owning platform user.
+	Username *string `json:"username,omitempty"`
+}
+
 type ClusterAlerts struct {
 	RunTimeAlert     RunTimeAlert     `json:"runTimeAlert"`
 	SessionCostLimit SessionCostLimit `json:"sessionCostLimit"`
@@ -2752,8 +2819,15 @@ type ClusterPartitionDisk struct {
 	Type       *string `json:"type,omitempty"`
 }
 
+type ClusterResourcesResponse struct {
+	// One page of clusters.
+	Clusters []Cluster `json:"clusters"`
+	// Total clusters matching the filters.
+	Total int64 `json:"total"`
+}
+
 type ClusterResponse struct {
-	// Cost tracking status for the cluster
+	// Usage metering status for the cluster
 	CostTrackingStatus *string `json:"costTrackingStatus,omitempty"`
 	// Number of CPUs in the cluster
 	Cpus int64 `json:"cpus"`
@@ -3001,11 +3075,11 @@ type CoreWeaveUserExt struct {
 	SunkSSHKeys                []string `json:"sunkSshKeys,omitempty"`
 }
 
-type CostTrackingPricesBody struct {
-	// The price per CPU unit
-	CPUPrice float64 `json:"cpuPrice"`
-	// The price per GB of memory
-	MemoryPrice float64 `json:"memoryPrice"`
+type CostTrackingRatesBody struct {
+	// Allocation units charged for each CPU core-hour
+	CPUCostPerCoreHour float64 `json:"cpuCostPerCoreHour"`
+	// Allocation units charged for each memory GiB-hour
+	MemoryCostPerGibHour float64 `json:"memoryCostPerGibHour"`
 }
 
 type CostTrackingResponse struct {
@@ -3037,9 +3111,11 @@ type CreateAiProviderBody struct {
 	APIKey *string `json:"apiKey,omitempty"`
 	// Enabled platform catalog entry this provider is created from; the platform defines the provider type, endpoint, and transport policy
 	CatalogEntryID string `json:"catalogEntryId"`
+	// Cloud account name supplying credentials (Bedrock providers)
+	CloudAccount *string `json:"cloudAccount,omitempty"`
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
-	// Billing group name (required for managed Azure providers)
+	// Billing group name (required for managed Azure and Bedrock providers)
 	Group *string `json:"group,omitempty"`
 	// Initial model deployment (managed Azure providers)
 	Model *string `json:"model,omitempty"`
@@ -3049,7 +3125,7 @@ type CreateAiProviderBody struct {
 	Name string `json:"name"`
 	// Network name (managed Azure providers)
 	Network *string `json:"network,omitempty"`
-	// Region (managed Azure providers)
+	// Region (managed Azure and Bedrock providers)
 	Region *string `json:"region,omitempty"`
 }
 
@@ -3394,7 +3470,7 @@ type CreateManagedClusterOutputBody struct {
 }
 
 type CreateNamespaceInputBody struct {
-	// Allocation name to assign
+	// Allocation name to bill this namespace against (null to clear)
 	Allocation *string `json:"allocation,omitempty"`
 	// Namespace name
 	Name string `json:"name"`
@@ -3688,7 +3764,7 @@ type CreateUserBody struct {
 	Password *string `json:"password,omitempty"`
 	// Linux UID (auto-generated if not provided, must be a platform admin to use a number below 1000)
 	UID *int64 `json:"uid,omitempty"`
-	// Username (3+ chars, alphanumeric with - and .)
+	// Username (3-32 chars, alphanumeric with - and .)
 	Username string `json:"username"`
 	// Workspace container type
 	WorkspaceType *string `json:"workspaceType,omitempty"`
@@ -3787,6 +3863,13 @@ type CreateWorkflowSavedInputsInputBody struct {
 	Name string `json:"name"`
 }
 
+type CredentialListingError struct {
+	// What failed.
+	Message string `json:"message"`
+	// Failing slice of the listing: region, availability domain, or service.
+	Scope string `json:"scope"`
+}
+
 type CredentialResult struct {
 	AccountID        string     `json:"accountId"`
 	CloudAccountName *string    `json:"cloudAccountName,omitempty"`
@@ -3877,6 +3960,45 @@ type DailyActiveUsers struct {
 	ActiveUsers int64 `json:"activeUsers"`
 	// Date in YYYY-MM-DD format
 	Date string `json:"date"`
+}
+
+type DeleteDeploymentBody struct {
+	// Deployment id; matches resources tagged with it as session-id or pw-deployment-id.
+	DeploymentID string `json:"deploymentId"`
+	// Preview the affected resources without deleting anything.
+	DryRun bool `json:"dryRun"`
+}
+
+type DeleteDeploymentItem struct {
+	// Cloud service provider.
+	Csp string `json:"csp"`
+	// Cloud-native resource id.
+	CspID string `json:"cspId"`
+	// resource_history row id.
+	ID string `json:"id"`
+	// Whether the resource is flagged as orphaned.
+	Orphaned bool `json:"orphaned"`
+	// Region.
+	Region string `json:"region"`
+	// Resource name.
+	ResourceName *string `json:"resourceName,omitempty"`
+	// Resource kind.
+	ResourceType string `json:"resourceType"`
+	// Normalized state.
+	State string `json:"state"`
+}
+
+type DeleteDeploymentResponse struct {
+	// Whether the delete was dispatched (always false on dry runs).
+	Dispatched bool `json:"dispatched"`
+	// Whether this was a preview.
+	DryRun bool `json:"dryRun"`
+	// Matched resources for the preview.
+	Items []DeleteDeploymentItem `json:"items"`
+	// Whether any non-orphaned resource is still running or stopped; the client requires deployment-id confirmation when true.
+	Live bool `json:"live"`
+	// platform = deleted through its live record like a user delete; sweep = records are gone, gaia deletes by deployment tag; none = nothing left to delete.
+	Mode string `json:"mode"`
 }
 
 type DeleteIndexBody struct {
@@ -4286,8 +4408,6 @@ type ExistingCluster struct {
 	Name string `json:"name"`
 	// Controller/login host the live agent is reporting; falls back to the first configured login node when the agent has not reported yet
 	RemoteHost string `json:"remoteHost"`
-	// Cluster status
-	Status string `json:"status"`
 	// Whether the cluster's agent tunnel is currently registered on any ingress pod, with the user-disconnect veto applied
 	TunnelConnected bool `json:"tunnelConnected"`
 	// Provider type
@@ -4707,6 +4827,10 @@ type GenerateNodeTokenOutputBody struct {
 type GetAccessResponse struct {
 	// Access permissions by permission type
 	Permissions map[string]NetworkPermissions `json:"permissions"`
+}
+
+type GetBillingDetailsOutputBody struct {
+	BillingDetails BillingDetails `json:"billingDetails"`
 }
 
 type GetClusterMetricsOutputBody struct {
@@ -5571,6 +5695,65 @@ type Instance struct {
 	Zone string `json:"zone"`
 }
 
+type InstanceData struct {
+	// Cloud account id.
+	AccountID string `json:"AccountID"`
+	// Azure VM kind (VM or VMSS VM).
+	AzureVMType *string `json:"AzureVMType,omitempty"`
+	// Azure VM unique id.
+	AzureVMID *string `json:"AzureVmID,omitempty"`
+	// Last time the resource was seen.
+	CacheTime string `json:"CacheTime"`
+	// Raw CSP state.
+	CloudState string `json:"CloudState"`
+	// PW compute type tag (controller/compute).
+	ComputeType *string `json:"ComputeType,omitempty"`
+	// Cloud service provider.
+	Csp string `json:"Csp"`
+	// Deployment (platform) tag.
+	Deployment string `json:"Deployment"`
+	// Stop/termination time.
+	EndTime *string `json:"EndTime,omitempty"`
+	// Cloud-native instance id.
+	InstanceID string `json:"InstanceID"`
+	// Instance name.
+	InstanceName string `json:"InstanceName"`
+	// Machine type.
+	InstanceType string `json:"InstanceType"`
+	// Organization name owning the cloud account.
+	KeyOwner string `json:"KeyOwner"`
+	// Owner tag.
+	Owner string `json:"Owner"`
+	// Pool tag.
+	Pool string `json:"Pool"`
+	// Private IP address.
+	PrivateIP string `json:"PrivateIP"`
+	// Project tag.
+	Project string `json:"Project"`
+	// Provider tag.
+	Provider string `json:"Provider"`
+	// Public IP address.
+	PublicIP string `json:"PublicIP"`
+	// Region of the instance.
+	Region string `json:"Region"`
+	// Session number from the resource tags.
+	Session string `json:"Session"`
+	// Whether the instance is a spot instance.
+	SpotInstance bool `json:"SpotInstance"`
+	// Launch time.
+	StartTime string `json:"StartTime"`
+	// Normalized state.
+	State string `json:"State"`
+	// Unused legacy field.
+	StopTime string `json:"StopTime"`
+	// All resource tags with normalized keys.
+	Tags map[string]string `json:"Tags,omitempty"`
+	// Platform user from the resource tags.
+	User string `json:"User"`
+	// Availability zone.
+	Zone *string `json:"Zone,omitempty"`
+}
+
 type IntPolicyOutput struct {
 	// Level of the policy
 	Level string `json:"level"`
@@ -5767,6 +5950,33 @@ type LdapLoginInputBody struct {
 	Username string `json:"username"`
 }
 
+type LdapSavedConnectionTest struct {
+	// Overrides the saved base DN for this test
+	BaseDn *string `json:"baseDN,omitempty"`
+	// Overrides the saved CA certificate for this test
+	CaCert *string `json:"caCert,omitempty"`
+	// Overrides the saved client certificate for this test
+	ClientCert *string `json:"clientCert,omitempty"`
+	// Overrides the saved client key for this test. An empty value keeps the stored key
+	ClientKey *string `json:"clientKey,omitempty"`
+	// Overrides the saved filter for this test
+	Filter *string `json:"filter,omitempty"`
+	// Password used only for this connection test
+	Password *string `json:"password,omitempty"`
+	// Overrides the saved LDAP server address for this test
+	Server *string `json:"server,omitempty"`
+	// Overrides the saved service account bind DN for this test
+	ServiceAccountBind *string `json:"serviceAccountBind,omitempty"`
+	// Overrides the saved service account password for this test. An empty value keeps the stored password
+	ServiceAccountPassword *string `json:"serviceAccountPassword,omitempty"`
+	// Overrides whether to use a service account for this test
+	UseServiceAccount *bool `json:"useServiceAccount,omitempty"`
+	// Overrides whether to use TLS for this test
+	UseTLS *bool `json:"useTLS,omitempty"`
+	// Username used only for this connection test
+	Username *string `json:"username,omitempty"`
+}
+
 type LdapSignupInputBody struct {
 	// Desired username
 	Username string `json:"username"`
@@ -5790,6 +6000,13 @@ type ListAttachmentsBody struct {
 type ListConversationsBody struct {
 	Conversations []ConversationSummary `json:"conversations"`
 	Total         int64                 `json:"total"`
+}
+
+type ListCredentialsResponse struct {
+	// Latest status per credential source.
+	Credentials []ResourceCredential `json:"credentials"`
+	// Total credentials matching the filters.
+	Total int64 `json:"total"`
 }
 
 type ListEffectiveProductsOutputBody struct {
@@ -5865,6 +6082,13 @@ type ListPermissionsBody struct {
 type ListReposOutputBody struct {
 	Repos      []RepoResponse `json:"repos"`
 	TotalCount int64          `json:"totalCount"`
+}
+
+type ListResourcesResponse struct {
+	// One page of resources.
+	Resources []Resource `json:"resources"`
+	// Total resources matching the filters.
+	Total int64 `json:"total"`
 }
 
 type ListResponse struct {
@@ -6508,6 +6732,11 @@ type Name struct {
 	FamilyName *string `json:"familyName,omitempty"`
 	Formatted  *string `json:"formatted,omitempty"`
 	GivenName  *string `json:"givenName,omitempty"`
+}
+
+type NamespaceBillingBody struct {
+	// Allocation name to bill this namespace against (null to clear)
+	Allocation *string `json:"allocation,omitempty"`
 }
 
 type NamespaceResponse struct {
@@ -7227,6 +7456,8 @@ type OrgAiProviderResponse struct {
 	HasCaCertificate *bool `json:"hasCaCertificate,omitempty"`
 	// Unique identifier
 	ID string `json:"id"`
+	// Current icon configured on the provider's catalog entry
+	ImageURL *string `json:"imageUrl,omitempty"`
 	// Whether TLS certificate verification is skipped
 	InsecureSkipTLSVerify *bool `json:"insecureSkipTlsVerify,omitempty"`
 	// Provider name
@@ -7341,6 +7572,8 @@ type OrgUser struct {
 	Admin bool `json:"admin"`
 	// Etag of the user's uploaded avatar, if any.
 	AvatarEtag *string `json:"avatarEtag,omitempty"`
+	// Whether the user is a platform billing admin
+	BillingAdmin bool `json:"billingAdmin"`
 	// Account creation time
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// User email address
@@ -7393,18 +7626,19 @@ type Organization struct {
 }
 
 type OrganizationCatalogEntry struct {
-	CaCertificate   *string   `json:"caCertificate,omitempty"`
-	CloudBoundary   *string   `json:"cloudBoundary,omitempty"`
-	CreatedAt       time.Time `json:"createdAt"`
-	CredentialOwner string    `json:"credentialOwner"`
+	CaCertificate *string   `json:"caCertificate,omitempty"`
+	CloudBoundary *string   `json:"cloudBoundary,omitempty"`
+	CreatedAt     time.Time `json:"createdAt"`
 	// First-class provider type implied by the entry's kind
 	Csp         string `json:"csp"`
 	DisplayName string `json:"displayName"`
 	// Endpoint is provisioned or session-backed rather than a fixed vendor URL
-	DynamicEndpoint   bool    `json:"dynamicEndpoint"`
-	EndpointOrigin    string  `json:"endpointOrigin"`
-	EndpointPath      string  `json:"endpointPath"`
-	ID                string  `json:"id"`
+	DynamicEndpoint bool   `json:"dynamicEndpoint"`
+	EndpointOrigin  string `json:"endpointOrigin"`
+	EndpointPath    string `json:"endpointPath"`
+	ID              string `json:"id"`
+	// Admin-configured icon; empty for entries using the kind's built-in artwork
+	ImageURL          *string `json:"imageUrl,omitempty"`
 	Kind              string  `json:"kind"`
 	Lifecycle         string  `json:"lifecycle"`
 	MinimumTLSVersion string  `json:"minimumTlsVersion"`
@@ -7426,6 +7660,22 @@ type OrganizationsOutputBody struct {
 	Organizations []Organization `json:"organizations"`
 	// Total number of organizations matching the filters, before pagination.
 	Total int64 `json:"total"`
+}
+
+type OrphanMuteBody struct {
+	// Apply to the whole deployment, covering resources that appear in it later.
+	Deployment *bool `json:"deployment,omitempty"`
+	// Deployment id; matches resources tagged with it as session-id or pw-deployment-id.
+	DeploymentID string `json:"deploymentId"`
+	// resource_history row ids to target individually; ignored when deployment is true.
+	ResourceIds []string `json:"resourceIds,omitempty"`
+}
+
+type OrphanMuteResponse struct {
+	// Mute rows created or removed.
+	Affected int64 `json:"affected"`
+	// Whether the targets are muted after this call.
+	Muted bool `json:"muted"`
 }
 
 type OrphanedInfraItem struct {
@@ -7521,6 +7771,15 @@ type PatchAccessBodyType struct {
 type PatchAllocationInputBody struct {
 	// New total allocation amount
 	Total float64 `json:"total"`
+}
+
+type PatchBillingDefaultAllocationInputBody struct {
+	// Allocation name to set as default; empty string clears it
+	DefaultAllocationName string `json:"defaultAllocationName"`
+}
+
+type PatchBillingDefaultAllocationOutputBody struct {
+	DefaultAllocationName *string `json:"defaultAllocationName"`
 }
 
 type PatchBillingLastUpdateInputBody struct {
@@ -7958,6 +8217,33 @@ type PollOrgCodexAuthorizationOutputBody struct {
 	Status string `json:"status"`
 }
 
+type PoolInstances struct {
+	// Cloud service provider.
+	Csp string `json:"Csp"`
+	// Pool end time, from the controller instance.
+	EndTime *string `json:"EndTime,omitempty"`
+	// Instances in this pool session.
+	Instances []InstanceData `json:"Instances"`
+	// Pool name.
+	Pool string `json:"Pool"`
+	// Project tag.
+	Project string `json:"Project"`
+	// Region.
+	Region string `json:"Region"`
+	// Number of running instances.
+	RunningInstances int64 `json:"RunningInstances"`
+	// Session number.
+	Session string `json:"Session"`
+	// Session id.
+	SessionID *string `json:"Session_ID,omitempty"`
+	// Pool start time, from the controller instance.
+	StartTime string `json:"StartTime"`
+	// Pool state, from the controller instance.
+	State string `json:"State"`
+	// Tags of the first instance.
+	Tags map[string]string `json:"Tags,omitempty"`
+}
+
 type PoolSlurmLoginNode struct {
 	Node *string `json:"node"`
 }
@@ -8165,6 +8451,16 @@ type ProvisionStatusAttribute struct {
 	Value string `json:"value"`
 }
 
+type ProvisionStatusChild struct {
+	CreatedAt time.Time `json:"createdAt"`
+	Error     *string   `json:"error,omitempty"`
+	ID        string    `json:"id"`
+	Index     *int64    `json:"index"`
+	Label     string    `json:"label"`
+	Status    string    `json:"status"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
 type ProvisionStatusChildResponse struct {
 	// Nested child records grouped by role.
 	Children []ProvisionStatusChildResponse `json:"children,omitempty"`
@@ -8182,6 +8478,26 @@ type ProvisionStatusChildResponse struct {
 	Status string `json:"status"`
 	// The last update timestamp.
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type ProvisionStatusRecord struct {
+	Attributes []ProvisionStatusRecordAttribute `json:"attributes"`
+	Children   []ProvisionStatusChild           `json:"children,omitempty"`
+	CreatedAt  time.Time                        `json:"createdAt"`
+	Error      string                           `json:"error"`
+	ID         string                           `json:"id"`
+	Index      int64                            `json:"index"`
+	Label      string                           `json:"label"`
+	Logs       string                           `json:"logs"`
+	Name       string                           `json:"name"`
+	Status     string                           `json:"status"`
+	UpdatedAt  time.Time                        `json:"updatedAt"`
+}
+
+type ProvisionStatusRecordAttribute struct {
+	Key   string  `json:"key"`
+	Type  *string `json:"type,omitempty"`
+	Value string  `json:"value"`
 }
 
 type ProvisionStatusResponseRecord struct {
@@ -9319,6 +9635,11 @@ type RenameCloudAccountBody struct {
 	Name string `json:"name"`
 }
 
+type RenameSessionBody struct {
+	// New session name (lowercase letters, numbers, underscores, and dashes; can't end with a dash or underscore).
+	Name string `json:"name"`
+}
+
 type ReplicaSetInfo struct {
 	// ReplicaSet creation timestamp
 	CreatedAt time.Time `json:"createdAt"`
@@ -9426,6 +9747,61 @@ type ResolvedWorkspaceSettings struct {
 	UserhostSource                       string  `json:"userhostSource"`
 }
 
+type Resource struct {
+	// Cloud account id.
+	AccountID string `json:"accountId"`
+	// Cloud account name from the credential registry.
+	AccountName *string `json:"accountName,omitempty"`
+	// Raw CSP state.
+	CloudState *string `json:"cloudState,omitempty"`
+	// Cloud service provider.
+	Csp string `json:"csp"`
+	// Cloud-native resource id.
+	CspID string `json:"cspId"`
+	// Deployment (platform) tag.
+	DeploymentID *string `json:"deploymentId,omitempty"`
+	// Stop/termination time.
+	EndTime *time.Time `json:"endTime,omitempty"`
+	// Row id.
+	ID string `json:"id"`
+	// Last time the resource was seen in the cloud.
+	LastSeenAt time.Time `json:"lastSeenAt"`
+	// Organization name.
+	Organization *string `json:"organization,omitempty"`
+	// Whether orphan alerts are muted for this resource, directly or via its deployment.
+	OrphanAlertMuted *bool `json:"orphanAlertMuted,omitempty"`
+	// Why the resource is considered orphaned.
+	OrphanReason *string `json:"orphanReason,omitempty"`
+	// When the resource was first detected as orphaned.
+	OrphanedAt *time.Time `json:"orphanedAt,omitempty"`
+	// Private IP address.
+	PrivateIP *string `json:"privateIp,omitempty"`
+	// Public IP address.
+	PublicIP *string `json:"publicIp,omitempty"`
+	// Region.
+	Region string `json:"region"`
+	// Resource name.
+	ResourceName *string `json:"resourceName,omitempty"`
+	// Machine type or storage class.
+	ResourceSubtype *string `json:"resourceSubtype,omitempty"`
+	// Resource kind: vm, disk, lustre, nfs, bucket, ip.
+	ResourceType string `json:"resourceType"`
+	// Storage size in GB.
+	SizeGb *float64 `json:"sizeGb,omitempty"`
+	// Whether the resource is a spot instance.
+	Spot bool `json:"spot"`
+	// Creation/launch time.
+	StartTime time.Time `json:"startTime"`
+	// Normalized state.
+	State string `json:"state"`
+	// All resource tags with normalized keys.
+	Tags map[string]string `json:"tags,omitempty"`
+	// Platform user from the resource tags.
+	Username *string `json:"username,omitempty"`
+	// Availability zone.
+	Zone *string `json:"zone,omitempty"`
+}
+
 type ResourceComplianceItem struct {
 	// Resolved base image id the resource boots from
 	BaseImageCspID *string `json:"baseImageCspId,omitempty"`
@@ -9457,6 +9833,39 @@ type ResourceComplianceItem struct {
 	User *string `json:"user,omitempty"`
 }
 
+type ResourceCredential struct {
+	// Cloud-native account id; empty until the credential first resolves.
+	AccountID *string `json:"accountId,omitempty"`
+	// CloudAccount (or legacy key) name.
+	AccountName *string `json:"accountName,omitempty"`
+	// Last credential fetch error.
+	CredentialError *string `json:"credentialError,omitempty"`
+	// Last successful credential fetch.
+	CredentialRefreshedAt *time.Time `json:"credentialRefreshedAt,omitempty"`
+	// Credential fetch status: ok, error, or deleted (cloud account removed; shown up to 24h).
+	CredentialStatus string `json:"credentialStatus"`
+	// Cloud service provider.
+	Csp string `json:"csp"`
+	// Key path of the credential that wins when two sources resolve the same cloud account.
+	DuplicateOf *string `json:"duplicateOf,omitempty"`
+	// Whether the account lives in a government cloud realm.
+	GovCloud bool `json:"govCloud"`
+	// Vault key path identifying the credential source.
+	KeyPath string `json:"keyPath"`
+	// When the last listing pass finished.
+	ListedAt *time.Time `json:"listedAt,omitempty"`
+	// Errors and warnings from the last listing pass.
+	ListingErrors []CredentialListingError `json:"listingErrors,omitempty"`
+	// Last listing outcome: pending, ok, warning, error, or skipped (duplicate credential).
+	ListingStatus string `json:"listingStatus"`
+	// Organization name.
+	Organization *string `json:"organization,omitempty"`
+	// Resources found by the last successful listing.
+	ResourceCount *int64 `json:"resourceCount,omitempty"`
+	// When this row last changed.
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
 type ResourceGroup struct {
 	// Current allocation name
 	Allocation *string `json:"allocation"`
@@ -9482,6 +9891,17 @@ type ResourceSection struct {
 	OrgRecommended []RecommendedResource `json:"orgRecommended"`
 }
 
+type ResourceTypeSummary struct {
+	// Live resources in an active/running state.
+	Active int64 `json:"active"`
+	// Live resources flagged as orphaned.
+	Orphaned int64 `json:"orphaned"`
+	// Resource kind.
+	ResourceType string `json:"resourceType"`
+	// All live resources (matches the list row count for this type).
+	Total int64 `json:"total"`
+}
+
 type ResourceYamlResponse struct {
 	// JSON representation of the resource
 	JSONData any `json:"jsonData"`
@@ -9491,6 +9911,15 @@ type ResourceYamlResponse struct {
 	ReplicaSetList []ReplicaSetInfo `json:"replicaSetList,omitempty"`
 	// YAML representation of the resource
 	YamlData string `json:"yamlData"`
+}
+
+type ResourcesSummaryResponse struct {
+	// Distinct cluster sessions (for the Cluster tab count).
+	Clusters int64 `json:"clusters"`
+	// Distinct orphaned deployment groups (for the Orphan tab count).
+	Orphans int64 `json:"orphans"`
+	// Per-type active and orphan counts.
+	Summary []ResourceTypeSummary `json:"summary"`
 }
 
 type ResponseFormat struct {
@@ -10020,9 +10449,26 @@ type SessionSoftware struct {
 	Version string `json:"version"`
 }
 
+type SetActiveInputBody struct {
+	// Whether the user can sign in
+	Active bool `json:"active"`
+}
+
 type SetAdminInputBody struct {
 	// Whether to grant or revoke platform admin
 	Admin bool `json:"admin"`
+}
+
+type SetBillingAdminInputBody struct {
+	// Whether to grant or revoke platform billing admin
+	BillingAdmin bool `json:"billingAdmin"`
+}
+
+type SetCatalogEntryIconOutputBody struct {
+	// SHA256 hex of the attached blob, or empty when a preset was applied.
+	Etag string `json:"etag"`
+	// URL where the icon is served.
+	ImageURL string `json:"imageUrl"`
 }
 
 type SetElasticClusterIconOutputBody struct {
@@ -10068,6 +10514,13 @@ type SetSessionIconOutputBody struct {
 	ImageURL string `json:"imageUrl"`
 }
 
+type SetStorageIconOutputBody struct {
+	// SHA256 hex of the attached blob, or empty when a preset was applied.
+	Etag string `json:"etag"`
+	// URL where the icon is served.
+	ImageURL string `json:"imageUrl"`
+}
+
 type SetWorkflowIconOutputBody struct {
 	// SHA256 hex of the attached blob, or empty when a preset was applied.
 	Etag string `json:"etag"`
@@ -10106,20 +10559,18 @@ type SharedGroup struct {
 
 type SingleClusterResponse struct {
 	// Base64-encoded CA certificate
-	CaCert string `json:"caCert"`
-	// Cost tracking status
+	CaCert            string                 `json:"caCert"`
+	CostTrackingRates *CostTrackingRatesBody `json:"costTrackingRates,omitempty"`
+	// Usage metering status for the cluster
 	CostTrackingStatus *string `json:"costTrackingStatus,omitempty"`
 	// Kubernetes API endpoint
 	Endpoint string `json:"endpoint"`
-	// Map of team names to team IDs that have access to this cluster
-	Groups map[string]string `json:"groups"`
 	// Cluster MongoDB ID
 	ID string `json:"id"`
 	// Cluster icon URL
 	ImageURL *string `json:"imageUrl,omitempty"`
 	// Cluster name
-	Name           string                  `json:"name"`
-	ResourcePrices *CostTrackingPricesBody `json:"resourcePrices,omitempty"`
+	Name string `json:"name"`
 	// Infrastructure type
 	Type string `json:"type"`
 }
@@ -10739,7 +11190,7 @@ type UpdateConversationInputBody struct {
 }
 
 type UpdateCostTrackingBody struct {
-	// Whether to enable or disable cost tracking for this cluster
+	// Whether cost tracking should run on this cluster
 	EnableTracking bool `json:"enableTracking"`
 }
 
@@ -10831,11 +11282,6 @@ type UpdateMarketplaceItemBody struct {
 	Tags []string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
-}
-
-type UpdateNamespaceInputBody struct {
-	// Allocation name to assign (null to clear)
-	Allocation *string `json:"allocation"`
 }
 
 type UpdateOrgAiProviderInputBody struct {

@@ -5,7 +5,7 @@ import createClient, {
 import type { paths } from './types/api'
 
 export type { paths }
-export type { components } from './types/api'
+export type { components, operations } from './types/api'
 
 type OpenAPIFetchClient = ReturnType<typeof createClient<paths>>
 

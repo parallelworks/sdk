@@ -110,9 +110,7 @@ func (c *Client) DeletePlatformAlert(ctx context.Context, id string) error {
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// > This is a platform-admin only route.
-//
-// Returns CSP vs PW cost comparison data for all infrastructures
+// Returns CSP vs PW cost comparison data for all infrastructures. Requires platform admin or billing admin.
 func (c *Client) GetBillingCrosscheck(ctx context.Context) (*[]CrossCheckRow, error) {
 	path := "/api/admin/billing/crosscheck"
 	var result []CrossCheckRow
@@ -135,9 +133,7 @@ type ListBillingRunsParams struct {
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// > This is a platform-admin only route.
-//
-// Returns a paginated list of billing runs with total count
+// Returns a paginated list of billing runs with total count. Requires platform admin or billing admin.
 func (c *Client) ListBillingRuns(ctx context.Context, opts ...ListBillingRunsParams) (*BillingRunList, error) {
 	path := "/api/admin/billing/runs"
 	var params ListBillingRunsParams
@@ -161,9 +157,7 @@ func (c *Client) ListBillingRuns(ctx context.Context, opts ...ListBillingRunsPar
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// > This is a platform-admin only route.
-//
-// Returns a single billing run with full per-credential details
+// Returns a single billing run with full per-credential details. Requires platform admin or billing admin.
 func (c *Client) GetBillingRun(ctx context.Context, id string) (*BillingRunDetail, error) {
 	path := "/api/admin/billing/runs/{id}"
 	path = pathReplace(path, "id", "simple", false, id)
@@ -346,7 +340,7 @@ type ExportAdminEventsParams struct {
 //
 // > This is a platform-admin only route.
 //
-// Stream audit events across all organizations as CSV or JSON.
+// Stream audit events across all organizations as CSV, JSON, or plain text.
 func (c *Client) ExportAdminEvents(ctx context.Context, opts ...ExportAdminEventsParams) error {
 	path := "/api/admin/events/export"
 	var params ExportAdminEventsParams
@@ -847,6 +841,39 @@ func (c *Client) UpdateAiIntegrationCatalogEntry(ctx context.Context, catalogEnt
 	return &result, nil
 }
 
+// DeleteAiIntegrationIcon - Remove AI integration icon
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Removes a custom AI integration's icon so it falls back to the default artwork.
+func (c *Client) DeleteAiIntegrationIcon(ctx context.Context, catalogEntryID string) error {
+	path := "/api/admin/products/ai/catalog/{catalogEntryId}/icon"
+	path = pathReplace(path, "catalogEntryId", "simple", false, catalogEntryID)
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// SetAiIntegrationIcon - Set AI integration icon
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Sets a custom AI integration's icon to a preset or a thumbnail from the admin's library. Built-in providers keep their own artwork.
+func (c *Client) SetAiIntegrationIcon(ctx context.Context, catalogEntryID string, body IconRef) (*SetCatalogEntryIconOutputBody, error) {
+	path := "/api/admin/products/ai/catalog/{catalogEntryId}/icon"
+	path = pathReplace(path, "catalogEntryId", "simple", false, catalogEntryID)
+	var result SetCatalogEntryIconOutputBody
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // DeleteAiConnection - Delete AI connection
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -1084,6 +1111,257 @@ func (c *Client) UpdatePlatformReport(ctx context.Context, id string, body *Upda
 	path = pathReplace(path, "id", "simple", false, id)
 	var result Report
 	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListResourcesParams contains the parameters for the ListResources operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListResourcesParams struct {
+	// Filter by resource kinds (vm, disk, lustre, nfs, bucket, ip).
+	Type *[]string `json:"type,omitempty"`
+	// Filter by cloud service providers.
+	Csp *[]string `json:"csp,omitempty"`
+	// Filter by normalized states.
+	State *[]string `json:"state,omitempty"`
+	// Filter by cloud account name (or raw account id).
+	Account *[]string `json:"account,omitempty"`
+	// Filter by organization name. Required for org admins.
+	Organization *string `json:"organization,omitempty"`
+	// Only resources flagged as orphaned.
+	Orphan *bool `json:"orphan,omitempty"`
+	// Only resources that still exist in the cloud (hides terminated/deleted).
+	Live *bool `json:"live,omitempty"`
+	// Only resources last seen within this preset window.
+	SeenWithin *string `json:"seenWithin,omitempty"`
+	// Only resources last seen on or after this date (YYYY-MM-DD). Overrides seenWithin.
+	SeenSince *string `json:"seenSince,omitempty"`
+	// Case-insensitive match on name, id, user, pool, or account.
+	Search *string `json:"search,omitempty"`
+	// Page size.
+	Limit *int64 `json:"limit,omitempty"`
+	// Page offset.
+	Offset *int64 `json:"offset,omitempty"`
+}
+
+// ListResources - List cloud resources
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns live cloud resources of every kind (VMs, disks, lustre, NFS, buckets, IPs) from the resource inventory. Platform admins can query every organization; organization admins must pass their organization.
+func (c *Client) ListResources(ctx context.Context, opts ...ListResourcesParams) (*ListResourcesResponse, error) {
+	path := "/api/admin/resources"
+	var params ListResourcesParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "type", "form", true, params.Type)
+	addQueryParam(queryValues, "csp", "form", true, params.Csp)
+	addQueryParam(queryValues, "state", "form", true, params.State)
+	addQueryParam(queryValues, "account", "form", true, params.Account)
+	addQueryParam(queryValues, "organization", "form", false, params.Organization)
+	addQueryParam(queryValues, "orphan", "form", false, params.Orphan)
+	addQueryParam(queryValues, "live", "form", false, params.Live)
+	addQueryParam(queryValues, "seenWithin", "form", false, params.SeenWithin)
+	addQueryParam(queryValues, "seenSince", "form", false, params.SeenSince)
+	addQueryParam(queryValues, "search", "form", false, params.Search)
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+	addQueryParam(queryValues, "offset", "form", false, params.Offset)
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+	var result ListResourcesResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListResourceClustersParams contains the parameters for the ListResourceClusters operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListResourceClustersParams struct {
+	// Filter by organization name. Required for org admins.
+	Organization *string `json:"organization,omitempty"`
+	// Filter by cloud service providers.
+	Csp *[]string `json:"csp,omitempty"`
+	// Filter by cluster status: running, stopped, or terminated.
+	State *[]string `json:"state,omitempty"`
+	// Filter by cloud account name (or raw account id).
+	Account *[]string `json:"account,omitempty"`
+	// Group by deployment id instead of cluster sessions: every group has at least one orphan-flagged resource and includes the deployment's other live resources.
+	Orphan *bool `json:"orphan,omitempty"`
+	// Case-insensitive match on resource name, id, user, pool, or account.
+	Search *string `json:"search,omitempty"`
+	// Only resources last seen within this preset window.
+	SeenWithin *string `json:"seenWithin,omitempty"`
+	// Only resources last seen on or after this date (YYYY-MM-DD). Overrides seenWithin.
+	SeenSince *string `json:"seenSince,omitempty"`
+	// Cluster page size.
+	Limit *int64 `json:"limit,omitempty"`
+	// Cluster page offset.
+	Offset *int64 `json:"offset,omitempty"`
+}
+
+// ListResourceClusters - List cluster sessions with their resources
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns cluster sessions: resources that share a session-id or pw-deployment-id and belong to a cluster (carry a pool tag), grouped per cluster with the owning user and pool name. Platform admins can query every organization; organization admins must pass their organization.
+func (c *Client) ListResourceClusters(ctx context.Context, opts ...ListResourceClustersParams) (*ClusterResourcesResponse, error) {
+	path := "/api/admin/resources/clusters"
+	var params ListResourceClustersParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "organization", "form", false, params.Organization)
+	addQueryParam(queryValues, "csp", "form", true, params.Csp)
+	addQueryParam(queryValues, "state", "form", true, params.State)
+	addQueryParam(queryValues, "account", "form", true, params.Account)
+	addQueryParam(queryValues, "orphan", "form", false, params.Orphan)
+	addQueryParam(queryValues, "search", "form", false, params.Search)
+	addQueryParam(queryValues, "seenWithin", "form", false, params.SeenWithin)
+	addQueryParam(queryValues, "seenSince", "form", false, params.SeenSince)
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+	addQueryParam(queryValues, "offset", "form", false, params.Offset)
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+	var result ClusterResourcesResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListResourceCredentialsParams contains the parameters for the ListResourceCredentials operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListResourceCredentialsParams struct {
+	// Filter by organization name. Required for org admins.
+	Organization *string `json:"organization,omitempty"`
+	// Filter by cloud service providers.
+	Csp *[]string `json:"csp,omitempty"`
+	// Filter by status; matches the credential or the listing status (ok, error, warning, pending, skipped, deleted). Deleted cloud accounts show for 24h after deletion by default; filtering for 'deleted' shows all.
+	Status *[]string `json:"status,omitempty"`
+	// Case-insensitive match on account name, account id, or key path.
+	Search *string `json:"search,omitempty"`
+}
+
+// ListResourceCredentials - Per-cloud-account credential and listing status
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns the latest credential-fetch and inventory-listing status per cloud account credential, including listing errors/warnings, duplicate credential sources, and recently deleted cloud accounts (shown up to 24h). Platform admins can query every organization; organization admins must pass their organization.
+func (c *Client) ListResourceCredentials(ctx context.Context, opts ...ListResourceCredentialsParams) (*ListCredentialsResponse, error) {
+	path := "/api/admin/resources/credentials"
+	var params ListResourceCredentialsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "organization", "form", false, params.Organization)
+	addQueryParam(queryValues, "csp", "form", true, params.Csp)
+	addQueryParam(queryValues, "status", "form", true, params.Status)
+	addQueryParam(queryValues, "search", "form", false, params.Search)
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+	var result ListCredentialsResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteDeploymentResources - Delete every cloud resource belonging to a deployment
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Deletes every live cloud resource tagged with the deployment id (as session-id or pw-deployment-id). Resources with a live platform record are deleted through it; the rest are swept directly in the cloud by gaia. Always dry-run first.
+func (c *Client) DeleteDeploymentResources(ctx context.Context, body DeleteDeploymentBody) (*DeleteDeploymentResponse, error) {
+	path := "/api/admin/resources/delete-deployment"
+	var result DeleteDeploymentResponse
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// MuteOrphanAlerts - Mute orphan alerts for a deployment or individual resources
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Stops the recurring orphan alert from naming the targeted deployment or resources. Detection keeps running and muted orphans stay visible on the resources page.
+func (c *Client) MuteOrphanAlerts(ctx context.Context, body OrphanMuteBody) (*OrphanMuteResponse, error) {
+	path := "/api/admin/resources/orphan-mute"
+	var result OrphanMuteResponse
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UnmuteOrphanAlerts - Unmute orphan alerts for a deployment or individual resources
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Removes orphan alert mutes. Deployment scope clears every mute of the deployment, including per-resource ones.
+func (c *Client) UnmuteOrphanAlerts(ctx context.Context, body OrphanMuteBody) (*OrphanMuteResponse, error) {
+	path := "/api/admin/resources/orphan-mute"
+	var result OrphanMuteResponse
+	if err := c.do(ctx, "DELETE", path, body, "application/json", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetResourcesSummaryParams contains the parameters for the GetResourcesSummary operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetResourcesSummaryParams struct {
+	// Restrict to one organization (by name). Required for org admins.
+	Organization *string `json:"organization,omitempty"`
+	// Preset window matching the list view.
+	SeenWithin *string `json:"seenWithin,omitempty"`
+	// Custom last-seen date matching the list view. Overrides seenWithin.
+	SeenSince *string `json:"seenSince,omitempty"`
+}
+
+// GetResourcesSummary - Per-type active and orphan resource counts
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns per-resource-type active and orphan counts for the resource-type tabs, scoped to the organization and last-seen window. Platform admins can query every organization; organization admins must pass their organization.
+func (c *Client) GetResourcesSummary(ctx context.Context, opts ...GetResourcesSummaryParams) (*ResourcesSummaryResponse, error) {
+	path := "/api/admin/resources/summary"
+	var params GetResourcesSummaryParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "organization", "form", false, params.Organization)
+	addQueryParam(queryValues, "seenWithin", "form", false, params.SeenWithin)
+	addQueryParam(queryValues, "seenSince", "form", false, params.SeenSince)
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+	var result ResourcesSummaryResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -1798,41 +2076,6 @@ func (c *Client) GetAuthToken(ctx context.Context, opts ...GetAuthTokenParams) (
 	return &result, nil
 }
 
-// GetClusterSessionTokenParams contains the parameters for the GetClusterSessionToken operation.
-// Required parameters are value fields; optional parameters are pointers.
-type GetClusterSessionTokenParams struct {
-	// The session ID
-	SessionID string `json:"session_id"`
-	// The cloud provider
-	Provider string `json:"provider"`
-	// The cluster name
-	Name string `json:"name"`
-	// The session number
-	SessionNumber string `json:"session_number"`
-}
-
-// GetClusterSessionToken - Get cluster session JWT token
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Generates a JWT token for cluster session authentication.
-func (c *Client) GetClusterSessionToken(ctx context.Context, params GetClusterSessionTokenParams) (*string, error) {
-	path := "/api/auth/token/cluster-session"
-	queryValues := url.Values{}
-	addQueryParam(queryValues, "session_id", "form", false, params.SessionID)
-	addQueryParam(queryValues, "provider", "form", false, params.Provider)
-	addQueryParam(queryValues, "name", "form", false, params.Name)
-	addQueryParam(queryValues, "session_number", "form", false, params.SessionNumber)
-	if len(queryValues) > 0 {
-		path += "?" + encodeQuery(queryValues)
-	}
-	var result string
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
 // GetAuthTokenOidcParams contains the parameters for the GetAuthTokenOidc operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetAuthTokenOidcParams struct {
@@ -2142,7 +2385,7 @@ type ListResourceEventsParams struct {
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// List audit events for a single resource. Requires view access to the resource; payloads are admin-only.
+// List audit events for a single resource. Requires view access to the resource.
 func (c *Client) ListResourceEvents(ctx context.Context, targetType string, targetID string, opts ...ListResourceEventsParams) (*EventsPageBody, error) {
 	path := "/api/events/resources/{targetType}/{targetId}"
 	path = pathReplace(path, "targetType", "simple", false, targetType)
@@ -2173,6 +2416,67 @@ func (c *Client) ListResourceEvents(ctx context.Context, targetType string, targ
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
+}
+
+// ExportResourceEventsParams contains the parameters for the ExportResourceEvents operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ExportResourceEventsParams struct {
+	// Only events at or after this time (RFC3339).
+	From *time.Time `json:"from,omitempty"`
+	// Only events at or before this time (RFC3339).
+	To *time.Time `json:"to,omitempty"`
+	// Filter by event type (repeatable).
+	Type *[]string `json:"type,omitempty"`
+	// Filter by exact actor username.
+	Actor *string `json:"actor,omitempty"`
+	// Filter by actor type.
+	ActorType *string `json:"actorType,omitempty"`
+	// Filter by target type.
+	TargetType *string `json:"targetType,omitempty"`
+	// Filter by target id.
+	TargetID *string `json:"targetId,omitempty"`
+	// Filter by outcome.
+	Outcome *string `json:"outcome,omitempty"`
+	// Filter by auth session id, e.g. to trace every action in one impersonation session.
+	SessionID *string `json:"sessionId,omitempty"`
+	// Case-insensitive search across actor username, target name, and request ID; an exact event or session id also matches.
+	Search *string `json:"search,omitempty"`
+	// Export format.
+	Format *string `json:"format,omitempty"`
+}
+
+// ExportResourceEvents - Export Resource Events
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Stream a single resource's audit events as CSV, JSON, or plain text. Requires view access to the resource.
+func (c *Client) ExportResourceEvents(ctx context.Context, targetType string, targetID string, opts ...ExportResourceEventsParams) error {
+	path := "/api/events/resources/{targetType}/{targetId}/export"
+	path = pathReplace(path, "targetType", "simple", false, targetType)
+	path = pathReplace(path, "targetId", "simple", false, targetID)
+	var params ExportResourceEventsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "from", "form", false, params.From)
+	addQueryParam(queryValues, "to", "form", false, params.To)
+	addQueryParam(queryValues, "type", "form", true, params.Type)
+	addQueryParam(queryValues, "actor", "form", false, params.Actor)
+	addQueryParam(queryValues, "actorType", "form", false, params.ActorType)
+	addQueryParam(queryValues, "targetType", "form", false, params.TargetType)
+	addQueryParam(queryValues, "targetId", "form", false, params.TargetID)
+	addQueryParam(queryValues, "outcome", "form", false, params.Outcome)
+	addQueryParam(queryValues, "sessionId", "form", false, params.SessionID)
+	addQueryParam(queryValues, "search", "form", false, params.Search)
+	addQueryParam(queryValues, "format", "form", false, params.Format)
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
 }
 
 // ListEventTypes - List Event Types
@@ -4203,10 +4507,28 @@ func (c *Client) StartOrgCodexDeviceAuthorization(ctx context.Context, organizat
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Checks a ChatGPT device-code authorization and connects the organization provider when approved.
-func (c *Client) PollOrgCodexDeviceAuthorization(ctx context.Context, authorizationID string) (*PollOrgCodexAuthorizationOutputBody, error) {
+func (c *Client) PollOrgCodexDeviceAuthorization(ctx context.Context, organization string, name string, authorizationID string) (*PollOrgCodexAuthorizationOutputBody, error) {
 	path := "/api/organizations/{organization}/ai-providers/{name}/codex-device-authorizations/{authorizationId}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "name", "simple", false, name)
 	path = pathReplace(path, "authorizationId", "simple", false, authorizationID)
 	var result PollOrgCodexAuthorizationOutputBody
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ReconnectOrgCopilotProvider - Reconnect organization Copilot provider
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Reconnects an organization Copilot provider with the administrator's GitHub account linked in Account Settings.
+func (c *Client) ReconnectOrgCopilotProvider(ctx context.Context, organization string, name string) (*OrgAiProviderResponse, error) {
+	path := "/api/organizations/{organization}/ai-providers/{name}/copilot-connection"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "name", "simple", false, name)
+	var result OrgAiProviderResponse
 	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -4924,6 +5246,21 @@ func (c *Client) UpdateOrganizationAuthMethodLdap(ctx context.Context, organizat
 	return &result, nil
 }
 
+// TestSavedOrganizationAuthMethodLdap - Test saved organization auth method: LDAP
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Tests a saved LDAP auth method using its stored configuration, including stored secrets. Any field sent in the request overrides the stored value for this test only; nothing is saved.
+func (c *Client) TestSavedOrganizationAuthMethodLdap(ctx context.Context, organization string, authName string, body LdapSavedConnectionTest) error {
+	path := "/api/organizations/{organization}/auth-methods/ldap/{authName}/test"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "authName", "simple", false, authName)
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // AddOrganizationAuthMethodOidc - Add organization auth method: OIDC
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -5184,6 +5521,38 @@ func (c *Client) DeleteCloudAccountBilling(ctx context.Context, organization str
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// PatchCloudAccountBillingDefaultAllocation - Set default allocation for cloud account billing
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets or clears the allocation that billing charges without their own allocation are assigned to.
+func (c *Client) PatchCloudAccountBillingDefaultAllocation(ctx context.Context, organization string, name string, body PatchBillingDefaultAllocationInputBody) (*PatchBillingDefaultAllocationOutputBody, error) {
+	path := "/api/organizations/{organization}/cloud-accounts/{name}/billing/default-allocation"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "name", "simple", false, name)
+	var result PatchBillingDefaultAllocationOutputBody
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetCloudAccountBillingDetails - Get cloud account billing details
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns detailed billing infrastructure information including provision output and default allocation.
+func (c *Client) GetCloudAccountBillingDetails(ctx context.Context, organization string, name string) (*GetBillingDetailsOutputBody, error) {
+	path := "/api/organizations/{organization}/cloud-accounts/{name}/billing/details"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "name", "simple", false, name)
+	var result GetBillingDetailsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // PatchCloudAccountBillingLastUpdate - Update billing last update date
@@ -5793,7 +6162,7 @@ type ExportOrganizationEventsParams struct {
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Stream the organization's audit events as CSV or JSON. Requires organization admin.
+// Stream the organization's audit events as CSV, JSON, or plain text. Requires organization admin.
 func (c *Client) ExportOrganizationEvents(ctx context.Context, organization string, opts ...ExportOrganizationEventsParams) error {
 	path := "/api/organizations/{organization}/events/export"
 	path = pathReplace(path, "organization", "simple", false, organization)
@@ -6411,7 +6780,7 @@ func (c *Client) DeleteKubernetesNamespace(ctx context.Context, organization str
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Updates the allocation annotation on a Kubernetes namespace.
-func (c *Client) UpdateKubernetesNamespace(ctx context.Context, organization string, clusterName string, namespaceName string, body UpdateNamespaceInputBody) (*EnrichedNamespaceResponse, error) {
+func (c *Client) UpdateKubernetesNamespace(ctx context.Context, organization string, clusterName string, namespaceName string, body NamespaceBillingBody) (*EnrichedNamespaceResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{clusterName}/namespaces/{namespaceName}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
@@ -6714,7 +7083,7 @@ func (c *Client) UpdateKubernetesCluster(ctx context.Context, organization strin
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Enable or disable cost tracking for a Kubernetes cluster.
+// Enable or disable cost tracking for a Kubernetes cluster. The in-cluster agent records billable namespace usage so it survives a disconnect from the platform.
 func (c *Client) UpdateKubernetesCostTracking(ctx context.Context, organization string, infraName string, body *UpdateCostTrackingBody) (*CostTrackingResponse, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/costtracking"
 	path = pathReplace(path, "organization", "simple", false, organization)
@@ -6726,16 +7095,16 @@ func (c *Client) UpdateKubernetesCostTracking(ctx context.Context, organization 
 	return &result, nil
 }
 
-// UpdateKubernetesCostTrackingPrices - Update cost tracking prices
+// UpdateKubernetesCostTrackingPrices - Update cost tracking rates
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Update CPU and memory prices for cost tracking calculations.
-func (c *Client) UpdateKubernetesCostTrackingPrices(ctx context.Context, organization string, infraName string, body CostTrackingPricesBody) (*CostTrackingPricesBody, error) {
+// Sets the cluster-wide billing rates applied to every namespace with an allocation attached.
+func (c *Client) UpdateKubernetesCostTrackingPrices(ctx context.Context, organization string, infraName string, body CostTrackingRatesBody) (*CostTrackingRatesBody, error) {
 	path := "/api/organizations/{organization}/kubernetes/{infraName}/costtracking/prices"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "infraName", "simple", false, infraName)
-	var result CostTrackingPricesBody
+	var result CostTrackingRatesBody
 	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -8765,6 +9134,21 @@ func (c *Client) DeleteUser(ctx context.Context, organization string, user strin
 	return nil
 }
 
+// SetUserActive - Set user active status
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Enables or disables a user's ability to sign in. An active user consumes a license seat unless the account is complimentary; deactivating a user releases the seat and fires any USER_DISABLED webhooks.
+func (c *Client) SetUserActive(ctx context.Context, organization string, user string, body SetActiveInputBody) error {
+	path := "/api/organizations/{organization}/users/{user}/active"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	if err := c.do(ctx, "PUT", path, body, "application/json", nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // SetUserAdmin - Set user platform admin status
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -8893,6 +9277,23 @@ func (c *Client) DetachAiProviderBucket(ctx context.Context, organization string
 	path = pathReplace(path, "bucketId", "simple", false, bucketID)
 	var result AiProviderResponse
 	if err := c.do(ctx, "DELETE", path, nil, "", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ReconnectCopilotProvider - Reconnect Copilot provider
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Reconnects a Copilot provider with the GitHub account linked in Account Settings.
+func (c *Client) ReconnectCopilotProvider(ctx context.Context, organization string, user string, name string) (*AiProviderResponse, error) {
+	path := "/api/organizations/{organization}/users/{user}/ai-providers/{name}/copilot-connection"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+	var result AiProviderResponse
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9435,6 +9836,21 @@ func (c *Client) GetAzureNetappfiles(ctx context.Context, organization string, u
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
+}
+
+// SetUserBillingAdmin - Set user platform billing admin status
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Grants or revokes platform billing admin access to a user, allowing read-only access to billing data across all organizations.
+func (c *Client) SetUserBillingAdmin(ctx context.Context, organization string, user string, body SetBillingAdminInputBody) error {
+	path := "/api/organizations/{organization}/users/{user}/billing-admin"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	if err := c.do(ctx, "PUT", path, body, "application/json", nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
 }
 
 // GetCluster - Get Cluster
@@ -11184,6 +11600,22 @@ func (c *Client) SetSessionIcon(ctx context.Context, organization string, user s
 	return &result, nil
 }
 
+// RenameUserSession - Rename session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Renames a session. Only the session owner can rename it, and not while the session is starting or stopping or is managed by an active workflow run. The rename is metadata-only: the session's custom subdomain keeps the original name and old /me/session URLs stop resolving.
+func (c *Client) RenameUserSession(ctx context.Context, organization string, user string, name string, body RenameSessionBody) error {
+	path := "/api/organizations/{organization}/users/{user}/sessions/{name}/rename"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // RestartUserSession - Restart session
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -11545,6 +11977,41 @@ func (c *Client) DeleteStorage(ctx context.Context, organization string, user st
 	return nil
 }
 
+// DeleteStorageIcon - Delete storage icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes a storage's custom icon and releases the underlying blob reference.
+func (c *Client) DeleteStorageIcon(ctx context.Context, organization string, user string, name string, type_ string) error {
+	path := "/api/organizations/{organization}/users/{user}/{type}/{name}/icon"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+	path = pathReplace(path, "type", "simple", false, type_)
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json"); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// SetStorageIcon - Set storage icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Sets a storage's icon from either a curated preset URL or a blob already in the caller's thumbnail library. Increments refcount on the new blob and releases the prior one.
+func (c *Client) SetStorageIcon(ctx context.Context, organization string, user string, name string, type_ string, body IconRef) (*SetStorageIconOutputBody, error) {
+	path := "/api/organizations/{organization}/users/{user}/{type}/{name}/icon"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+	path = pathReplace(path, "type", "simple", false, type_)
+	var result SetStorageIconOutputBody
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetOrganizationVariables - List workflow variables
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -11898,9 +12365,7 @@ type GetAllPlatformGroupsParams struct {
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// > This is a platform-admin only route.
-//
-// Returns a list of all groups on the platform
+// Returns a list of all groups on the platform. Requires platform admin or billing admin.
 func (c *Client) GetAllPlatformGroups(ctx context.Context, opts ...GetAllPlatformGroupsParams) (*[]Group, error) {
 	path := "/api/platform/groups"
 	var params GetAllPlatformGroupsParams
@@ -12507,6 +12972,33 @@ func (c *Client) ListEffectiveProducts(ctx context.Context) (*ListEffectiveProdu
 	path := "/api/products"
 	var result ListEffectiveProductsOutputBody
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAiIntegrationIconParams contains the parameters for the GetAiIntegrationIcon operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAiIntegrationIconParams struct {
+	IfNoneMatch *string `json:"If-None-Match,omitempty"`
+}
+
+// GetAiIntegrationIcon - Get AI integration icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Serves the icon image configured for an AI integration catalog entry.
+func (c *Client) GetAiIntegrationIcon(ctx context.Context, catalogEntryID string, opts ...GetAiIntegrationIconParams) (*string, error) {
+	path := "/api/products/ai/catalog/{catalogEntryId}/icon"
+	path = pathReplace(path, "catalogEntryId", "simple", false, catalogEntryID)
+	var params GetAiIntegrationIconParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	headers := make(http.Header)
+	setHeader(headers, "If-None-Match", false, params.IfNoneMatch)
+	var result string
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13441,6 +13933,40 @@ func (c *Client) GetUserSSHPublicKeys(ctx context.Context, username string) (*st
 	return &result, nil
 }
 
+// GetAllInstancesParams contains the parameters for the GetAllInstances operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAllInstancesParams struct {
+	// Restrict to one organization (by name).
+	Organization *string `json:"organization,omitempty"`
+}
+
+// GetAllInstances - List all cached cloud instances
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns every recently seen cloud instance across all organizations, in the legacy cloud-cacher shape. Deprecated: use /api/admin/resources.
+//
+// Deprecated: this operation is deprecated.
+func (c *Client) GetAllInstances(ctx context.Context, opts ...GetAllInstancesParams) (*[]InstanceData, error) {
+	path := "/api/v2/admin/resources/instances/all"
+	var params GetAllInstancesParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "organization", "form", false, params.Organization)
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+	var result []InstanceData
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetAuthSessionDeprecated - Get current session (deprecated)
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -13483,6 +14009,20 @@ func (c *Client) GetAccelerators(ctx context.Context, params GetAcceleratorsPara
 		path += "?" + encodeQuery(queryValues)
 	}
 	var result map[string]AcceleratorInfo
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetUserInstances - List the current user's cloud instances grouped by pool session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the authenticated user's recently seen cloud instances grouped by pool and session, in the legacy shape.
+func (c *Client) GetUserInstances(ctx context.Context) (*[]PoolInstances, error) {
+	path := "/api/v2/resources/instances"
+	var result []PoolInstances
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json"); err != nil {
 		return nil, parseErrorResponse(err)
 	}
