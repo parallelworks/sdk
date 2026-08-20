@@ -6201,75 +6201,6 @@
         ],
         "type": "object"
       },
-      "ChartsBody": {
-        "additionalProperties": false,
-        "properties": {
-          "charts": {
-            "description": "List of Helm charts across all clusters",
-            "items": {
-              "$ref": "#/components/schemas/HelmChart"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "errors": {
-            "description": "List of cluster errors, if any",
-            "items": {
-              "$ref": "#/components/schemas/ClusterError"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/ChartsMetadata",
-            "description": "Response metadata"
-          }
-        },
-        "required": [
-          "charts",
-          "metadata"
-        ],
-        "type": "object"
-      },
-      "ChartsMetadata": {
-        "additionalProperties": false,
-        "properties": {
-          "successfulClusters": {
-            "description": "Number of clusters successfully queried",
-            "examples": [
-              4
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalCharts": {
-            "description": "Total unique Helm charts across all clusters",
-            "examples": [
-              50
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalClusters": {
-            "description": "Total number of clusters queried",
-            "examples": [
-              5
-            ],
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "totalClusters",
-          "successfulClusters",
-          "totalCharts"
-        ],
-        "type": "object"
-      },
       "ChatCompletionChunk": {
         "additionalProperties": false,
         "properties": {
@@ -6663,6 +6594,9 @@
             "type": "boolean"
           },
           "name": {
+            "type": "string"
+          },
+          "userHostError": {
             "type": "string"
           }
         },
@@ -7944,69 +7878,6 @@
         ],
         "type": "object"
       },
-      "ClusterResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "costTrackingStatus": {
-            "description": "Usage metering status for the cluster",
-            "enum": [
-              "on",
-              "off",
-              "provisioning",
-              "deleting",
-              "failed"
-            ],
-            "examples": [
-              "on"
-            ],
-            "type": "string"
-          },
-          "cpus": {
-            "description": "Number of CPUs in the cluster",
-            "examples": [
-              16
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "id": {
-            "description": "Unique identifier for the cluster",
-            "examples": [
-              "cluster-1234"
-            ],
-            "type": "string"
-          },
-          "imageUrl": {
-            "description": "URL of the cluster image",
-            "examples": [
-              "https://example.com/cluster-image.png"
-            ],
-            "type": "string"
-          },
-          "memory": {
-            "description": "Amount of memory in the cluster in bytes",
-            "examples": [
-              32768
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "name": {
-            "description": "Name of the cluster",
-            "examples": [
-              "prod-cluster"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "cpus",
-          "memory"
-        ],
-        "type": "object"
-      },
       "ClusterRuntimeAlert": {
         "additionalProperties": false,
         "properties": {
@@ -8212,24 +8083,6 @@
         },
         "type": "object"
       },
-      "ClusterWorkspaceMount": {
-        "additionalProperties": false,
-        "properties": {
-          "clusterPath": {
-            "description": "The path on the cluster.",
-            "type": "string"
-          },
-          "workspacePath": {
-            "description": "The path in the workspace.",
-            "type": "string"
-          }
-        },
-        "required": [
-          "clusterPath",
-          "workspacePath"
-        ],
-        "type": "object"
-      },
       "CodexDeviceAuthorizationResponse": {
         "additionalProperties": false,
         "properties": {
@@ -8423,93 +8276,6 @@
         "required": [
           "region",
           "cidr"
-        ],
-        "type": "object"
-      },
-      "ConfigsBody": {
-        "additionalProperties": false,
-        "properties": {
-          "configs": {
-            "description": "List of configs",
-            "items": {
-              "$ref": "#/components/schemas/Config"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "errors": {
-            "description": "List of cluster errors, if any",
-            "items": {
-              "$ref": "#/components/schemas/ClusterError"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/ConfigsMetadata",
-            "description": "Response metadata"
-          }
-        },
-        "required": [
-          "configs",
-          "metadata"
-        ],
-        "type": "object"
-      },
-      "ConfigsMetadata": {
-        "additionalProperties": false,
-        "properties": {
-          "successfulClusters": {
-            "description": "Number of clusters successfully queried",
-            "examples": [
-              4
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalClusters": {
-            "description": "Total number of clusters queried",
-            "examples": [
-              5
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalConfigMaps": {
-            "description": "Total number of ConfigMaps",
-            "examples": [
-              60
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalConfigs": {
-            "description": "Total number of configs returned",
-            "examples": [
-              100
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalSecrets": {
-            "description": "Total number of Secrets",
-            "examples": [
-              40
-            ],
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "totalClusters",
-          "successfulClusters",
-          "totalConfigs",
-          "totalConfigMaps",
-          "totalSecrets"
         ],
         "type": "object"
       },
@@ -9330,6 +9096,10 @@
             "description": "Azure tenant ID",
             "type": "string"
           },
+          "createUserhost": {
+            "description": "When true, provision a user host for the organization in this cloud account after it is created",
+            "type": "boolean"
+          },
           "csp": {
             "description": "Cloud service provider",
             "enum": [
@@ -9426,6 +9196,10 @@
           "permissionCheck": {
             "description": "When true, validate the credentials against the cloud provider before creating the account and fail if they are invalid or lack required permissions",
             "type": "boolean"
+          },
+          "userhostRegion": {
+            "description": "Region to provision the user host in. Only used when createUserhost is true; defaults to us-east-1",
+            "type": "string"
           }
         },
         "required": [
@@ -12832,20 +12606,9 @@
           "slurmUsername": {
             "description": "SLURM username",
             "type": "string"
-          },
-          "workspaceMounts": {
-            "description": "Workspace mount points",
-            "items": {
-              "$ref": "#/components/schemas/ExistingClusterWorkspaceMount"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
           }
         },
         "required": [
-          "workspaceMounts",
           "jumpNodeHost",
           "jumpNodeUser",
           "slurmUsername",
@@ -12900,24 +12663,6 @@
         },
         "required": [
           "subtype"
-        ],
-        "type": "object"
-      },
-      "ExistingClusterWorkspaceMount": {
-        "additionalProperties": false,
-        "properties": {
-          "clusterPath": {
-            "description": "Path on the cluster",
-            "type": "string"
-          },
-          "workspacePath": {
-            "description": "Path in the workspace",
-            "type": "string"
-          }
-        },
-        "required": [
-          "clusterPath",
-          "workspacePath"
         ],
         "type": "object"
       },
@@ -13507,16 +13252,6 @@
               "Jake.Thayne"
             ],
             "type": "string"
-          },
-          "workspaceMounts": {
-            "description": "Cloud-cluster only: the workspace mount points for this cluster.",
-            "items": {
-              "$ref": "#/components/schemas/ClusterWorkspaceMount"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
           }
         },
         "required": [
@@ -13532,7 +13267,6 @@
           "maxNodes",
           "tags",
           "favorite",
-          "workspaceMounts",
           "shouldPlatformProxy",
           "updateFailed"
         ],
@@ -16619,6 +16353,225 @@
         ],
         "type": "object"
       },
+      "KubernetesChartsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "charts": {
+            "description": "List of Helm charts across all clusters",
+            "items": {
+              "$ref": "#/components/schemas/HelmChart"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "errors": {
+            "description": "List of cluster errors, if any",
+            "items": {
+              "$ref": "#/components/schemas/ClusterError"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/KubernetesChartsMetadata",
+            "description": "Response metadata"
+          }
+        },
+        "required": [
+          "charts",
+          "metadata"
+        ],
+        "type": "object"
+      },
+      "KubernetesChartsMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "successfulClusters": {
+            "description": "Number of clusters successfully queried",
+            "examples": [
+              4
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCharts": {
+            "description": "Total unique Helm charts across all clusters",
+            "examples": [
+              50
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalClusters": {
+            "description": "Total number of clusters queried",
+            "examples": [
+              5
+            ],
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalClusters",
+          "successfulClusters",
+          "totalCharts"
+        ],
+        "type": "object"
+      },
+      "KubernetesClusterResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "costTrackingStatus": {
+            "description": "Usage metering status for the cluster",
+            "enum": [
+              "on",
+              "off",
+              "provisioning",
+              "deleting",
+              "failed"
+            ],
+            "examples": [
+              "on"
+            ],
+            "type": "string"
+          },
+          "cpus": {
+            "description": "Number of CPUs in the cluster",
+            "examples": [
+              16
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": "Unique identifier for the cluster",
+            "examples": [
+              "cluster-1234"
+            ],
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL of the cluster image",
+            "examples": [
+              "https://example.com/cluster-image.png"
+            ],
+            "type": "string"
+          },
+          "memory": {
+            "description": "Amount of memory in the cluster in bytes",
+            "examples": [
+              32768
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Name of the cluster",
+            "examples": [
+              "prod-cluster"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "cpus",
+          "memory"
+        ],
+        "type": "object"
+      },
+      "KubernetesConfigsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "configs": {
+            "description": "List of configs",
+            "items": {
+              "$ref": "#/components/schemas/Config"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "errors": {
+            "description": "List of cluster errors, if any",
+            "items": {
+              "$ref": "#/components/schemas/ClusterError"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/KubernetesConfigsMetadata",
+            "description": "Response metadata"
+          }
+        },
+        "required": [
+          "configs",
+          "metadata"
+        ],
+        "type": "object"
+      },
+      "KubernetesConfigsMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "successfulClusters": {
+            "description": "Number of clusters successfully queried",
+            "examples": [
+              4
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalClusters": {
+            "description": "Total number of clusters queried",
+            "examples": [
+              5
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalConfigMaps": {
+            "description": "Total number of ConfigMaps",
+            "examples": [
+              60
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalConfigs": {
+            "description": "Total number of configs returned",
+            "examples": [
+              100
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalSecrets": {
+            "description": "Total number of Secrets",
+            "examples": [
+              40
+            ],
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalClusters",
+          "successfulClusters",
+          "totalConfigs",
+          "totalConfigMaps",
+          "totalSecrets"
+        ],
+        "type": "object"
+      },
       "KubernetesCpuMetrics": {
         "additionalProperties": false,
         "properties": {
@@ -16681,6 +16634,443 @@
         ],
         "type": "object"
       },
+      "KubernetesServiceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "cluster": {
+            "description": "Cluster name",
+            "examples": [
+              "production"
+            ],
+            "type": "string"
+          },
+          "clusterIP": {
+            "description": "Cluster IP address",
+            "examples": [
+              "10.0.0.1"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "Creation timestamp of the service",
+            "format": "date-time",
+            "type": "string"
+          },
+          "externalIP": {
+            "description": "External IP address",
+            "examples": [
+              "203.0.113.1"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the service",
+            "examples": [
+              "nginx-service"
+            ],
+            "type": "string"
+          },
+          "namespace": {
+            "description": "Namespace of the service",
+            "examples": [
+              "default"
+            ],
+            "type": "string"
+          },
+          "ports": {
+            "description": "Service ports",
+            "examples": [
+              [
+                "80/TCP",
+                "443/TCP"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "selector": {
+            "description": "Pod selector",
+            "examples": [
+              "app=nginx"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "description": "Service type",
+            "enum": [
+              "ClusterIP",
+              "NodePort",
+              "LoadBalancer",
+              "ExternalName"
+            ],
+            "examples": [
+              "ClusterIP"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "namespace",
+          "cluster",
+          "type",
+          "clusterIP",
+          "ports",
+          "selector",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "KubernetesServicesBody": {
+        "additionalProperties": false,
+        "properties": {
+          "errors": {
+            "description": "List of cluster errors, if any",
+            "items": {
+              "$ref": "#/components/schemas/ClusterError"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/KubernetesServicesMetadata",
+            "description": "Response metadata"
+          },
+          "services": {
+            "description": "List of services",
+            "items": {
+              "$ref": "#/components/schemas/KubernetesServiceResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "services",
+          "metadata"
+        ],
+        "type": "object"
+      },
+      "KubernetesServicesMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "successfulClusters": {
+            "description": "Number of clusters successfully queried",
+            "examples": [
+              4
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalClusters": {
+            "description": "Total number of clusters queried",
+            "examples": [
+              5
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalServices": {
+            "description": "Total number of services returned",
+            "examples": [
+              45
+            ],
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalClusters",
+          "successfulClusters",
+          "totalServices"
+        ],
+        "type": "object"
+      },
+      "KubernetesSingleClusterResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "caCert": {
+            "description": "Base64-encoded CA certificate",
+            "examples": [
+              "LS0tLS1CRUdJTi..."
+            ],
+            "type": "string"
+          },
+          "costTrackingRates": {
+            "$ref": "#/components/schemas/CostTrackingRatesBody",
+            "description": "Cluster-wide billing rates in allocation units per core-hour and GiB-hour"
+          },
+          "costTrackingStatus": {
+            "description": "Usage metering status for the cluster",
+            "enum": [
+              "on",
+              "off",
+              "provisioning",
+              "deleting",
+              "failed"
+            ],
+            "examples": [
+              "on"
+            ],
+            "type": "string"
+          },
+          "endpoint": {
+            "description": "Kubernetes API endpoint",
+            "examples": [
+              "https://k8s.example.com:6443"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "description": "Cluster MongoDB ID",
+            "examples": [
+              "507f1f77bcf86cd799439011"
+            ],
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "Cluster icon URL",
+            "examples": [
+              "https://example.com/cluster.png"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Cluster name",
+            "examples": [
+              "prod-cluster"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "description": "Infrastructure type",
+            "examples": [
+              "kubernetes"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "endpoint",
+          "caCert",
+          "type"
+        ],
+        "type": "object"
+      },
+      "KubernetesStorageBody": {
+        "additionalProperties": false,
+        "properties": {
+          "errors": {
+            "description": "List of cluster errors, if any",
+            "items": {
+              "$ref": "#/components/schemas/ClusterError"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/KubernetesStorageMetadata",
+            "description": "Response metadata"
+          },
+          "storage": {
+            "description": "List of storage resources",
+            "items": {
+              "$ref": "#/components/schemas/KubernetesStorageResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "storage",
+          "metadata"
+        ],
+        "type": "object"
+      },
+      "KubernetesStorageMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "successfulClusters": {
+            "description": "Number of clusters successfully queried",
+            "examples": [
+              4
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalClusters": {
+            "description": "Total number of clusters queried",
+            "examples": [
+              5
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPVCs": {
+            "description": "Total number of PVCs",
+            "examples": [
+              30
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPVs": {
+            "description": "Total number of PVs",
+            "examples": [
+              20
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalStorage": {
+            "description": "Total number of storage resources returned",
+            "examples": [
+              50
+            ],
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalClusters",
+          "successfulClusters",
+          "totalStorage",
+          "totalPVCs",
+          "totalPVs"
+        ],
+        "type": "object"
+      },
+      "KubernetesStorageResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "accessModes": {
+            "description": "Access modes",
+            "examples": [
+              "ReadWriteOnce"
+            ],
+            "type": "string"
+          },
+          "capacity": {
+            "description": "Storage capacity",
+            "examples": [
+              "10Gi"
+            ],
+            "type": "string"
+          },
+          "claim": {
+            "description": "Bound claim (for PVs)",
+            "examples": [
+              "default/data-mysql-0"
+            ],
+            "type": "string"
+          },
+          "cluster": {
+            "description": "Cluster name",
+            "examples": [
+              "production"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "Creation timestamp of the resource",
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the storage resource",
+            "examples": [
+              "data-mysql-0"
+            ],
+            "type": "string"
+          },
+          "namespace": {
+            "description": "Kubernetes namespace (for PVCs)",
+            "examples": [
+              "default"
+            ],
+            "type": "string"
+          },
+          "reclaimPolicy": {
+            "description": "Reclaim policy (for PVs)",
+            "examples": [
+              "Delete"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "description": "Storage status",
+            "enum": [
+              "Bound",
+              "Pending",
+              "Available",
+              "Released",
+              "Failed"
+            ],
+            "examples": [
+              "Bound"
+            ],
+            "type": "string"
+          },
+          "storageClass": {
+            "description": "Storage class name",
+            "examples": [
+              "standard"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "description": "Storage type",
+            "enum": [
+              "PVC",
+              "PV"
+            ],
+            "examples": [
+              "PVC"
+            ],
+            "type": "string"
+          },
+          "usedBy": {
+            "description": "Pod using this PVC",
+            "examples": [
+              "mysql-0"
+            ],
+            "type": "string"
+          },
+          "volume": {
+            "description": "Bound volume name (for PVCs)",
+            "examples": [
+              "pvc-12345"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "cluster",
+          "type",
+          "status",
+          "capacity",
+          "accessModes",
+          "storageClass",
+          "createdAt"
+        ],
+        "type": "object"
+      },
       "KubernetesTunnelInfo": {
         "additionalProperties": false,
         "properties": {
@@ -16733,6 +17123,165 @@
         },
         "required": [
           "usage"
+        ],
+        "type": "object"
+      },
+      "KubernetesWorkloadResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "cluster": {
+            "description": "Cluster name",
+            "examples": [
+              "production"
+            ],
+            "type": "string"
+          },
+          "cpu": {
+            "description": "CPU usage",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "Creation timestamp of the workload",
+            "format": "date-time",
+            "type": "string"
+          },
+          "memory": {
+            "description": "Memory usage",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the workload",
+            "examples": [
+              "nginx-deployment"
+            ],
+            "type": "string"
+          },
+          "namespace": {
+            "description": "Kubernetes namespace of the workload",
+            "examples": [
+              "default"
+            ],
+            "type": "string"
+          },
+          "pods": {
+            "description": "Pod count (ready/total)",
+            "examples": [
+              "3/3"
+            ],
+            "type": "string"
+          },
+          "restarts": {
+            "description": "Number of restarts",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": "Status of the workload",
+            "enum": [
+              "Running",
+              "Pending",
+              "Failed",
+              "Completed",
+              "Unknown"
+            ],
+            "examples": [
+              "Running"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of workload",
+            "enum": [
+              "Deployment",
+              "StatefulSet",
+              "DaemonSet",
+              "Job",
+              "CronJob",
+              "Pod"
+            ],
+            "examples": [
+              "Deployment"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "namespace",
+          "cluster",
+          "status",
+          "type",
+          "pods",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "KubernetesWorkloadsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "errors": {
+            "description": "List of cluster errors, if any",
+            "items": {
+              "$ref": "#/components/schemas/ClusterError"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/KubernetesWorkloadsMetadata",
+            "description": "Response metadata"
+          },
+          "workloads": {
+            "description": "List of workloads",
+            "items": {
+              "$ref": "#/components/schemas/KubernetesWorkloadResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "workloads",
+          "metadata"
+        ],
+        "type": "object"
+      },
+      "KubernetesWorkloadsMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "successfulClusters": {
+            "description": "Number of clusters successfully queried",
+            "examples": [
+              4
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalClusters": {
+            "description": "Total number of clusters queried",
+            "examples": [
+              5
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalWorkloads": {
+            "description": "Total number of workloads returned",
+            "examples": [
+              150
+            ],
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalClusters",
+          "successfulClusters",
+          "totalWorkloads"
         ],
         "type": "object"
       },
@@ -17688,6 +18237,48 @@
           "null"
         ]
       },
+      "LoginSessionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "description": "When the session was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "current": {
+            "description": "Whether this is the session making the request.",
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "description": "When the session expires.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the login session.",
+            "type": "string"
+          },
+          "ipAddress": {
+            "description": "Client IP address at login. Only included for the user's own sessions.",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "description": "When the session was last used.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "userAgent": {
+            "description": "Client user agent at login.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "createdAt",
+          "current"
+        ],
+        "type": "object"
+      },
       "Lustre": {
         "additionalProperties": false,
         "properties": {
@@ -18421,6 +19012,86 @@
           "name",
           "nodes",
           "state"
+        ],
+        "type": "object"
+      },
+      "ManagedSKU": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "Cloud service provider",
+            "type": "string"
+          },
+          "description": {
+            "description": "CSP product description",
+            "type": "string"
+          },
+          "id": {
+            "description": "CSP-native SKU identifier",
+            "type": "string"
+          },
+          "subtype": {
+            "description": "Cost subtype (Instance, Disk, Egress, ...)",
+            "type": "string"
+          },
+          "type": {
+            "description": "Cost type (Compute, Storage, Network, unknown, ...)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "csp",
+          "type",
+          "subtype",
+          "description"
+        ],
+        "type": "object"
+      },
+      "ManagedSKUList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "description": "One page of managed SKUs",
+            "items": {
+              "$ref": "#/components/schemas/ManagedSKU"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "subtypes": {
+            "description": "All distinct subtype values, for filter menus",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "total": {
+            "description": "Total SKUs matching the filters",
+            "format": "int64",
+            "type": "integer"
+          },
+          "types": {
+            "description": "All distinct type values, for filter menus",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "types",
+          "subtypes"
         ],
         "type": "object"
       },
@@ -19593,12 +20264,28 @@
             "description": "Cloud provider hosting the resource, such as aws, google, azure, openstack, or oracle. Empty for existing clusters.",
             "type": "string"
           },
+          "deleted": {
+            "description": "Whether the cluster or instance the mount points to has been deleted.",
+            "type": "boolean"
+          },
+          "error": {
+            "description": "Reason the mount failed, if it is not mounted. Empty while pending or mounted.",
+            "type": "string"
+          },
           "imageUrl": {
             "description": "Custom icon for the cluster or instance, if one has been set.",
             "type": "string"
           },
+          "mounted": {
+            "description": "Whether the userworkspace currently has this path mounted.",
+            "type": "boolean"
+          },
           "name": {
             "description": "Name of the cluster or instance the mount points to.",
+            "type": "string"
+          },
+          "resourceId": {
+            "description": "ID of the cluster or instance the mount points to.",
             "type": "string"
           },
           "resourcePath": {
@@ -19620,11 +20307,15 @@
         "required": [
           "workspacePath",
           "resourcePath",
+          "resourceId",
           "name",
           "slug",
           "csp",
           "imageUrl",
-          "url"
+          "url",
+          "mounted",
+          "error",
+          "deleted"
         ],
         "type": "object"
       },
@@ -22361,6 +23052,10 @@
           "partner": {
             "description": "Whether the organization is a partner organization.",
             "type": "boolean"
+          },
+          "selfService": {
+            "description": "Whether the organization is a self-service organization.",
+            "type": "boolean"
           }
         },
         "required": [
@@ -22368,7 +23063,8 @@
           "name",
           "displayName",
           "members",
-          "partner"
+          "partner",
+          "selfService"
         ],
         "type": "object"
       },
@@ -24670,6 +25366,16 @@
           "startedAt",
           "endedAt"
         ],
+        "type": "object"
+      },
+      "PostUserHostInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "region": {
+            "description": "Region to provision the user host in; defaults to us-east-1",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "Preview": {
@@ -28724,6 +29430,24 @@
         ],
         "type": "object"
       },
+      "ReportWorkspaceMountStatusInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "mounts": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceMountStatus"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "mounts"
+        ],
+        "type": "object"
+      },
       "ReservationItem": {
         "additionalProperties": false,
         "properties": {
@@ -29442,41 +30166,6 @@
         },
         "required": [
           "type"
-        ],
-        "type": "object"
-      },
-      "ResponseMetadata": {
-        "additionalProperties": false,
-        "properties": {
-          "successfulClusters": {
-            "description": "Number of clusters successfully queried",
-            "examples": [
-              4
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalClusters": {
-            "description": "Total number of clusters queried",
-            "examples": [
-              5
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalWorkloads": {
-            "description": "Total number of workloads returned",
-            "examples": [
-              150
-            ],
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "totalClusters",
-          "successfulClusters",
-          "totalWorkloads"
         ],
         "type": "object"
       },
@@ -30324,167 +31013,6 @@
         ],
         "type": "object"
       },
-      "ServiceResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "cluster": {
-            "description": "Cluster name",
-            "examples": [
-              "production"
-            ],
-            "type": "string"
-          },
-          "clusterIP": {
-            "description": "Cluster IP address",
-            "examples": [
-              "10.0.0.1"
-            ],
-            "type": "string"
-          },
-          "createdAt": {
-            "description": "Creation timestamp of the service",
-            "format": "date-time",
-            "type": "string"
-          },
-          "externalIP": {
-            "description": "External IP address",
-            "examples": [
-              "203.0.113.1"
-            ],
-            "type": "string"
-          },
-          "name": {
-            "description": "Name of the service",
-            "examples": [
-              "nginx-service"
-            ],
-            "type": "string"
-          },
-          "namespace": {
-            "description": "Namespace of the service",
-            "examples": [
-              "default"
-            ],
-            "type": "string"
-          },
-          "ports": {
-            "description": "Service ports",
-            "examples": [
-              [
-                "80/TCP",
-                "443/TCP"
-              ]
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "selector": {
-            "description": "Pod selector",
-            "examples": [
-              "app=nginx"
-            ],
-            "type": "string"
-          },
-          "type": {
-            "description": "Service type",
-            "enum": [
-              "ClusterIP",
-              "NodePort",
-              "LoadBalancer",
-              "ExternalName"
-            ],
-            "examples": [
-              "ClusterIP"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "namespace",
-          "cluster",
-          "type",
-          "clusterIP",
-          "ports",
-          "selector",
-          "createdAt"
-        ],
-        "type": "object"
-      },
-      "ServicesBody": {
-        "additionalProperties": false,
-        "properties": {
-          "errors": {
-            "description": "List of cluster errors, if any",
-            "items": {
-              "$ref": "#/components/schemas/ClusterError"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/ServicesMetadata",
-            "description": "Response metadata"
-          },
-          "services": {
-            "description": "List of services",
-            "items": {
-              "$ref": "#/components/schemas/ServiceResponse"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          }
-        },
-        "required": [
-          "services",
-          "metadata"
-        ],
-        "type": "object"
-      },
-      "ServicesMetadata": {
-        "additionalProperties": false,
-        "properties": {
-          "successfulClusters": {
-            "description": "Number of clusters successfully queried",
-            "examples": [
-              4
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalClusters": {
-            "description": "Total number of clusters queried",
-            "examples": [
-              5
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalServices": {
-            "description": "Total number of services returned",
-            "examples": [
-              45
-            ],
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "totalClusters",
-          "successfulClusters",
-          "totalServices"
-        ],
-        "type": "object"
-      },
       "Session": {
         "additionalProperties": false,
         "properties": {
@@ -31219,79 +31747,6 @@
         ],
         "type": "object"
       },
-      "SingleClusterResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "caCert": {
-            "description": "Base64-encoded CA certificate",
-            "examples": [
-              "LS0tLS1CRUdJTi..."
-            ],
-            "type": "string"
-          },
-          "costTrackingRates": {
-            "$ref": "#/components/schemas/CostTrackingRatesBody",
-            "description": "Cluster-wide billing rates in allocation units per core-hour and GiB-hour"
-          },
-          "costTrackingStatus": {
-            "description": "Usage metering status for the cluster",
-            "enum": [
-              "on",
-              "off",
-              "provisioning",
-              "deleting",
-              "failed"
-            ],
-            "examples": [
-              "on"
-            ],
-            "type": "string"
-          },
-          "endpoint": {
-            "description": "Kubernetes API endpoint",
-            "examples": [
-              "https://k8s.example.com:6443"
-            ],
-            "type": "string"
-          },
-          "id": {
-            "description": "Cluster MongoDB ID",
-            "examples": [
-              "507f1f77bcf86cd799439011"
-            ],
-            "type": "string"
-          },
-          "imageUrl": {
-            "description": "Cluster icon URL",
-            "examples": [
-              "https://example.com/cluster.png"
-            ],
-            "type": "string"
-          },
-          "name": {
-            "description": "Cluster name",
-            "examples": [
-              "prod-cluster"
-            ],
-            "type": "string"
-          },
-          "type": {
-            "description": "Infrastructure type",
-            "examples": [
-              "kubernetes"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "endpoint",
-          "caCert",
-          "type"
-        ],
-        "type": "object"
-      },
       "SingleQuotaResponse": {
         "additionalProperties": false,
         "properties": {
@@ -31628,209 +32083,6 @@
           "name",
           "user",
           "status"
-        ],
-        "type": "object"
-      },
-      "StorageBody": {
-        "additionalProperties": false,
-        "properties": {
-          "errors": {
-            "description": "List of cluster errors, if any",
-            "items": {
-              "$ref": "#/components/schemas/ClusterError"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/StorageMetadata",
-            "description": "Response metadata"
-          },
-          "storage": {
-            "description": "List of storage resources",
-            "items": {
-              "$ref": "#/components/schemas/StorageResponse"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          }
-        },
-        "required": [
-          "storage",
-          "metadata"
-        ],
-        "type": "object"
-      },
-      "StorageMetadata": {
-        "additionalProperties": false,
-        "properties": {
-          "successfulClusters": {
-            "description": "Number of clusters successfully queried",
-            "examples": [
-              4
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalClusters": {
-            "description": "Total number of clusters queried",
-            "examples": [
-              5
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalPVCs": {
-            "description": "Total number of PVCs",
-            "examples": [
-              30
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalPVs": {
-            "description": "Total number of PVs",
-            "examples": [
-              20
-            ],
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalStorage": {
-            "description": "Total number of storage resources returned",
-            "examples": [
-              50
-            ],
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "totalClusters",
-          "successfulClusters",
-          "totalStorage",
-          "totalPVCs",
-          "totalPVs"
-        ],
-        "type": "object"
-      },
-      "StorageResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "accessModes": {
-            "description": "Access modes",
-            "examples": [
-              "ReadWriteOnce"
-            ],
-            "type": "string"
-          },
-          "capacity": {
-            "description": "Storage capacity",
-            "examples": [
-              "10Gi"
-            ],
-            "type": "string"
-          },
-          "claim": {
-            "description": "Bound claim (for PVs)",
-            "examples": [
-              "default/data-mysql-0"
-            ],
-            "type": "string"
-          },
-          "cluster": {
-            "description": "Cluster name",
-            "examples": [
-              "production"
-            ],
-            "type": "string"
-          },
-          "createdAt": {
-            "description": "Creation timestamp of the resource",
-            "format": "date-time",
-            "type": "string"
-          },
-          "name": {
-            "description": "Name of the storage resource",
-            "examples": [
-              "data-mysql-0"
-            ],
-            "type": "string"
-          },
-          "namespace": {
-            "description": "Kubernetes namespace (for PVCs)",
-            "examples": [
-              "default"
-            ],
-            "type": "string"
-          },
-          "reclaimPolicy": {
-            "description": "Reclaim policy (for PVs)",
-            "examples": [
-              "Delete"
-            ],
-            "type": "string"
-          },
-          "status": {
-            "description": "Storage status",
-            "enum": [
-              "Bound",
-              "Pending",
-              "Available",
-              "Released",
-              "Failed"
-            ],
-            "examples": [
-              "Bound"
-            ],
-            "type": "string"
-          },
-          "storageClass": {
-            "description": "Storage class name",
-            "examples": [
-              "standard"
-            ],
-            "type": "string"
-          },
-          "type": {
-            "description": "Storage type",
-            "enum": [
-              "PVC",
-              "PV"
-            ],
-            "examples": [
-              "PVC"
-            ],
-            "type": "string"
-          },
-          "usedBy": {
-            "description": "Pod using this PVC",
-            "examples": [
-              "mysql-0"
-            ],
-            "type": "string"
-          },
-          "volume": {
-            "description": "Bound volume name (for PVCs)",
-            "examples": [
-              "pvc-12345"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "cluster",
-          "type",
-          "status",
-          "capacity",
-          "accessModes",
-          "storageClass",
-          "createdAt"
         ],
         "type": "object"
       },
@@ -33802,47 +34054,45 @@
         ],
         "type": "object"
       },
-      "UserHostBody": {
-        "additionalProperties": false,
-        "properties": {
-          "cloudAccountName": {
-            "description": "Name of the onboarding cloud account to provision hosts in",
-            "minLength": 1,
-            "type": "string"
-          },
-          "provider": {
-            "description": "Cloud service provider",
-            "enum": [
-              "aws",
-              "azure",
-              "google",
-              "openstack",
-              "oracle"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "cloudAccountName",
-          "provider"
-        ],
-        "type": "object"
-      },
       "UserHostResponse": {
         "additionalProperties": false,
         "properties": {
           "cloudAccount": {
-            "description": "Cloud account the auto-provision policy targets",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "instanceId": {
             "type": "string"
           },
           "provider": {
-            "description": "Cloud service provider for the auto-provision policy",
+            "type": "string"
+          },
+          "provisionStatus": {
+            "items": {
+              "$ref": "#/components/schemas/ProvisionStatusResponseRecord"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "region": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
             "type": "string"
           }
         },
         "required": [
-          "cloudAccount",
-          "provider"
+          "status",
+          "region"
         ],
         "type": "object"
       },
@@ -35282,130 +35532,6 @@
         ],
         "type": "object"
       },
-      "WorkloadResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "cluster": {
-            "description": "Cluster name",
-            "examples": [
-              "production"
-            ],
-            "type": "string"
-          },
-          "cpu": {
-            "description": "CPU usage",
-            "type": "string"
-          },
-          "createdAt": {
-            "description": "Creation timestamp of the workload",
-            "format": "date-time",
-            "type": "string"
-          },
-          "memory": {
-            "description": "Memory usage",
-            "type": "string"
-          },
-          "name": {
-            "description": "Name of the workload",
-            "examples": [
-              "nginx-deployment"
-            ],
-            "type": "string"
-          },
-          "namespace": {
-            "description": "Kubernetes namespace of the workload",
-            "examples": [
-              "default"
-            ],
-            "type": "string"
-          },
-          "pods": {
-            "description": "Pod count (ready/total)",
-            "examples": [
-              "3/3"
-            ],
-            "type": "string"
-          },
-          "restarts": {
-            "description": "Number of restarts",
-            "format": "int64",
-            "type": "integer"
-          },
-          "status": {
-            "description": "Status of the workload",
-            "enum": [
-              "Running",
-              "Pending",
-              "Failed",
-              "Completed",
-              "Unknown"
-            ],
-            "examples": [
-              "Running"
-            ],
-            "type": "string"
-          },
-          "type": {
-            "description": "Type of workload",
-            "enum": [
-              "Deployment",
-              "StatefulSet",
-              "DaemonSet",
-              "Job",
-              "CronJob",
-              "Pod"
-            ],
-            "examples": [
-              "Deployment"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "namespace",
-          "cluster",
-          "status",
-          "type",
-          "pods",
-          "createdAt"
-        ],
-        "type": "object"
-      },
-      "WorkloadsBody": {
-        "additionalProperties": false,
-        "properties": {
-          "errors": {
-            "description": "List of cluster errors, if any",
-            "items": {
-              "$ref": "#/components/schemas/ClusterError"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/ResponseMetadata",
-            "description": "Response metadata"
-          },
-          "workloads": {
-            "description": "List of workloads",
-            "items": {
-              "$ref": "#/components/schemas/WorkloadResponse"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          }
-        },
-        "required": [
-          "workloads",
-          "metadata"
-        ],
-        "type": "object"
-      },
       "WorkspaceDefaultValues": {
         "additionalProperties": false,
         "properties": {
@@ -35566,6 +35692,26 @@
         "required": [
           "clusterPath",
           "workspacePath"
+        ],
+        "type": "object"
+      },
+      "WorkspaceMountStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "mounted": {
+            "type": "boolean"
+          },
+          "workspacePath": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspacePath",
+          "mounted",
+          "error"
         ],
         "type": "object"
       },
@@ -36087,6 +36233,167 @@
           }
         },
         "summary": "Get a billing run",
+        "tags": [
+          "Billing"
+        ]
+      }
+    },
+    "/api/admin/billing/skus": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a filtered, paginated list of managed SKUs used by billing cost categorization. Requires platform admin or billing admin.",
+        "operationId": "list-managed-skus",
+        "parameters": [
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page offset",
+            "explode": false,
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "description": "Page offset",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filter by cloud service providers",
+            "explode": true,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Filter by cloud service providers",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Filter by cost types (unknown = unclassified)",
+            "explode": true,
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "description": "Filter by cost types (unknown = unclassified)",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Filter by cost subtypes",
+            "explode": true,
+            "in": "query",
+            "name": "subtype",
+            "schema": {
+              "description": "Filter by cost subtypes",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Case-insensitive match on SKU id or description",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Case-insensitive match on SKU id or description",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedSKUList"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List managed SKUs",
+        "tags": [
+          "Billing"
+        ]
+      }
+    },
+    "/api/admin/billing/skus/export": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDownloads managed SKUs as CSV in the managed_skus.csv format. Requires platform admin or billing admin.",
+        "operationId": "export-managed-skus",
+        "parameters": [
+          {
+            "description": "all = every SKU, unknown = only unclassified SKUs",
+            "explode": false,
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "default": "all",
+              "description": "all = every SKU, unknown = only unclassified SKUs",
+              "enum": [
+                "all",
+                "unknown"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Export managed SKUs as CSV",
         "tags": [
           "Billing"
         ]
@@ -41167,6 +41474,11 @@
             "name": "permission",
             "schema": {
               "description": "Permission to filter the bucket by",
+              "enum": [
+                "read",
+                "mount",
+                "edit"
+              ],
               "type": "string"
             }
           },
@@ -41257,6 +41569,21 @@
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns a list of clusters.",
         "operationId": "get-clusters",
+        "parameters": [
+          {
+            "description": "Whose clusters to list: mine (default), all, or user:\u003cusername\u003e. Widening requires administrator access.",
+            "explode": false,
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "description": "Whose clusters to list: mine (default), all, or user:\u003cusername\u003e. Widening requires administrator access.",
+              "examples": [
+                "all"
+              ],
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -41412,6 +41739,11 @@
             "name": "permission",
             "schema": {
               "description": "Permission to filter the disks by",
+              "enum": [
+                "read",
+                "mount",
+                "edit"
+              ],
               "type": "string"
             }
           },
@@ -42721,6 +43053,42 @@
         "x-internal": true
       }
     },
+    "/api/internal/usercontainer/workspace-mounts/status": {
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nThe userworkspace reports each mount's success or failure so the UI can show its state.",
+        "operationId": "report-workspace-mount-status",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportWorkspaceMountStatusInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Report workspace mount status",
+        "tags": [
+          "User Settings"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/ips": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the list of IP Addresses",
@@ -42805,7 +43173,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/ClusterResponse"
+                    "$ref": "#/components/schemas/KubernetesClusterResponse"
                   },
                   "type": [
                     "array",
@@ -42845,6 +43213,11 @@
             "name": "permission",
             "schema": {
               "description": "Permission to filter the Lustre by",
+              "enum": [
+                "read",
+                "mount",
+                "edit"
+              ],
               "type": "string"
             }
           },
@@ -46213,8 +46586,9 @@
             "schema": {
               "description": "Permission to filter the NFS by",
               "enum": [
-                "edit",
-                "mount"
+                "read",
+                "mount",
+                "edit"
               ],
               "type": "string"
             }
@@ -46737,48 +47111,6 @@
           }
         },
         "summary": "Get recommended resources",
-        "tags": [
-          "Onboarding"
-        ]
-      }
-    },
-    "/api/onboarding/user-host": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRecords the requesting user's choice to have a host provisioned in their onboarding cloud account. Provisioning is handled separately.",
-        "operationId": "post-onboarding-user-host",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserHostBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserHostResponse"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Record user host provisioning choice",
         "tags": [
           "Onboarding"
         ]
@@ -52233,6 +52565,121 @@
         ]
       }
     },
+    "/api/organizations/{organization}/cloud-accounts/{name}/userhost": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nTears down the organization's user host: its instance, security group, and network.",
+        "operationId": "delete-organization-userhost",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cloud account name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Cloud account name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete organization user host",
+        "tags": [
+          "Cloud Accounts"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nProvisions the organization's user host in the given cloud account. One user host is allowed per organization.",
+        "operationId": "create-organization-userhost",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cloud account name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Cloud account name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostUserHostInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserHostResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Provision organization user host",
+        "tags": [
+          "Cloud Accounts"
+        ]
+      }
+    },
     "/api/organizations/{organization}/clouds/aws/regions/{region}/cloudimages": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns public cloud images (AWS AMIs, Azure VM images, GCP images, Oracle images) available in the specified region. Uses the specified cloud account credentials to query the cloud provider. Results are cached for 24 hours to improve performance.",
@@ -54267,7 +54714,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ConfigsBody",
+                  "$ref": "#/components/schemas/KubernetesConfigsBody",
                   "description": "Configs response"
                 }
               }
@@ -54358,7 +54805,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChartsBody"
+                  "$ref": "#/components/schemas/KubernetesChartsBody"
                 }
               }
             },
@@ -54729,7 +55176,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServicesBody"
+                  "$ref": "#/components/schemas/KubernetesServicesBody"
                 }
               }
             },
@@ -54835,7 +55282,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StorageBody"
+                  "$ref": "#/components/schemas/KubernetesStorageBody"
                 }
               }
             },
@@ -54941,7 +55388,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WorkloadsBody",
+                  "$ref": "#/components/schemas/KubernetesWorkloadsBody",
                   "description": "Workloads response"
                 }
               }
@@ -56287,7 +56734,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SingleClusterResponse"
+                  "$ref": "#/components/schemas/KubernetesSingleClusterResponse"
                 }
               }
             },
@@ -63103,6 +63550,53 @@
         ]
       }
     },
+    "/api/organizations/{organization}/userhost": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the organization's user host, if one is provisioned.",
+        "operationId": "get-organization-userhost",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserHostResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get organization user host",
+        "tags": [
+          "Cloud Accounts"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a paginated list of users in the organization with optional filtering and sorting.",
@@ -69170,166 +69664,6 @@
         ]
       }
     },
-    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/workspace-mounts": {
-      "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the cluster directories mounted into the user workspace.",
-        "operationId": "get-cluster-workspace-mounts",
-        "parameters": [
-          {
-            "description": "The name of the organization.",
-            "in": "path",
-            "name": "organization",
-            "required": true,
-            "schema": {
-              "description": "The name of the organization.",
-              "examples": [
-                "parallelworks"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "The username of the user that owns the cluster.",
-            "in": "path",
-            "name": "user",
-            "required": true,
-            "schema": {
-              "description": "The username of the user that owns the cluster.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "The name of the cluster.",
-            "in": "path",
-            "name": "clusterName",
-            "required": true,
-            "schema": {
-              "description": "The name of the cluster.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ClusterWorkspaceMount"
-                  },
-                  "type": [
-                    "array",
-                    "null"
-                  ]
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Get cluster workspace mounts",
-        "tags": [
-          "Clusters"
-        ]
-      },
-      "put": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces the cluster directories mounted into the user workspace.",
-        "operationId": "update-cluster-workspace-mounts",
-        "parameters": [
-          {
-            "description": "The name of the organization.",
-            "in": "path",
-            "name": "organization",
-            "required": true,
-            "schema": {
-              "description": "The name of the organization.",
-              "examples": [
-                "parallelworks"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "The username of the user that owns the cluster.",
-            "in": "path",
-            "name": "user",
-            "required": true,
-            "schema": {
-              "description": "The username of the user that owns the cluster.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "The name of the cluster.",
-            "in": "path",
-            "name": "clusterName",
-            "required": true,
-            "schema": {
-              "description": "The name of the cluster.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "items": {
-                  "$ref": "#/components/schemas/ClusterWorkspaceMount"
-                },
-                "type": [
-                  "array",
-                  "null"
-                ]
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ClusterWorkspaceMount"
-                  },
-                  "type": [
-                    "array",
-                    "null"
-                  ]
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Update cluster workspace mounts",
-        "tags": [
-          "Clusters"
-        ]
-      }
-    },
     "/api/organizations/{organization}/users/{user}/clusters/{cluster}/environments": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the environments for a cluster.",
@@ -70098,6 +70432,19 @@
                 "active",
                 "inactive",
                 ""
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Whose clusters to cover: mine, all, or user:\u003cusername\u003e. Defaults to the user named in the path. Widening past yourself requires administrator access and covers cloud and managed clusters, never another user's connected clusters.",
+            "explode": false,
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "description": "Whose clusters to cover: mine, all, or user:\u003cusername\u003e. Defaults to the user named in the path. Widening past yourself requires administrator access and covers cloud and managed clusters, never another user's connected clusters.",
+              "examples": [
+                "all"
               ],
               "type": "string"
             }
@@ -71649,7 +71996,7 @@
     },
     "/api/organizations/{organization}/users/{user}/login-sessions": {
       "delete": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRevokes all login sessions for the specified user.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRevokes all login sessions for the specified user, except the session making the request. Only callable via browser session authentication.",
         "operationId": "revoke-user-login-sessions",
         "parameters": [
           {
@@ -71704,6 +72051,133 @@
           }
         },
         "summary": "Revoke user login sessions",
+        "tags": [
+          "Login Sessions"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nLists the active login sessions for the specified user. IP addresses are only included when listing your own sessions.",
+        "operationId": "list-user-login-sessions",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The username of the user",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "The username of the user",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LoginSessionResponse"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List user login sessions",
+        "tags": [
+          "Login Sessions"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/login-sessions/{id}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRevokes a single login session for the specified user. Only callable via browser session authentication.",
+        "operationId": "revoke-user-login-session",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The username of the user",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "The username of the user",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the login session to revoke.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "The ID of the login session to revoke.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Revoke a user login session",
         "tags": [
           "Login Sessions"
         ]

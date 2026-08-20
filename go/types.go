@@ -2125,23 +2125,6 @@ type CertInfo struct {
 	Subject string `json:"subject"`
 }
 
-type ChartsBody struct {
-	// List of Helm charts across all clusters
-	Charts []HelmChart `json:"charts"`
-	// List of cluster errors, if any
-	Errors   []ClusterError `json:"errors,omitempty"`
-	Metadata ChartsMetadata `json:"metadata"`
-}
-
-type ChartsMetadata struct {
-	// Number of clusters successfully queried
-	SuccessfulClusters int64 `json:"successfulClusters"`
-	// Total unique Helm charts across all clusters
-	TotalCharts int64 `json:"totalCharts"`
-	// Total number of clusters queried
-	TotalClusters int64 `json:"totalClusters"`
-}
-
 type ChatCompletionChunk struct {
 	// Completion choices
 	Choices []Choice `json:"choices"`
@@ -2410,11 +2393,12 @@ type CloudAccountBillingResponse struct {
 }
 
 type CloudAccountCreateResponse struct {
-	Csp           string `json:"csp"`
-	CspID         string `json:"cspId"`
-	EnableOsLogin bool   `json:"enableOsLogin"`
-	GovCloud      bool   `json:"govCloud"`
-	Name          string `json:"name"`
+	Csp           string  `json:"csp"`
+	CspID         string  `json:"cspId"`
+	EnableOsLogin bool    `json:"enableOsLogin"`
+	GovCloud      bool    `json:"govCloud"`
+	Name          string  `json:"name"`
+	UserHostError *string `json:"userHostError,omitempty"`
 }
 
 type CloudAccountCredentialsInput struct {
@@ -2826,21 +2810,6 @@ type ClusterResourcesResponse struct {
 	Total int64 `json:"total"`
 }
 
-type ClusterResponse struct {
-	// Usage metering status for the cluster
-	CostTrackingStatus *string `json:"costTrackingStatus,omitempty"`
-	// Number of CPUs in the cluster
-	Cpus int64 `json:"cpus"`
-	// Unique identifier for the cluster
-	ID string `json:"id"`
-	// URL of the cluster image
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Amount of memory in the cluster in bytes
-	Memory int64 `json:"memory"`
-	// Name of the cluster
-	Name string `json:"name"`
-}
-
 type ClusterRuntimeAlert struct {
 	Enabled       *bool  `json:"enabled,omitempty"`
 	IntervalHours *int64 `json:"intervalHours,omitempty"`
@@ -2915,13 +2884,6 @@ type ClusterUpdateVariables struct {
 	UserBootstrapController *bool `json:"userBootstrapController,omitempty"`
 }
 
-type ClusterWorkspaceMount struct {
-	// The path on the cluster.
-	ClusterPath string `json:"clusterPath"`
-	// The path in the workspace.
-	WorkspacePath string `json:"workspacePath"`
-}
-
 type CodexDeviceAuthorizationResponse struct {
 	// Time when this device authorization expires
 	ExpiresAt time.Time `json:"expiresAt"`
@@ -2974,27 +2936,6 @@ type Config struct {
 type ConfigRegion struct {
 	Cidr   string `json:"cidr"`
 	Region string `json:"region"`
-}
-
-type ConfigsBody struct {
-	// List of configs
-	Configs []Config `json:"configs"`
-	// List of cluster errors, if any
-	Errors   []ClusterError  `json:"errors,omitempty"`
-	Metadata ConfigsMetadata `json:"metadata"`
-}
-
-type ConfigsMetadata struct {
-	// Number of clusters successfully queried
-	SuccessfulClusters int64 `json:"successfulClusters"`
-	// Total number of clusters queried
-	TotalClusters int64 `json:"totalClusters"`
-	// Total number of ConfigMaps
-	TotalConfigMaps int64 `json:"totalConfigMaps"`
-	// Total number of configs returned
-	TotalConfigs int64 `json:"totalConfigs"`
-	// Total number of Secrets
-	TotalSecrets int64 `json:"totalSecrets"`
 }
 
 type ConnectStateBody struct {
@@ -3271,6 +3212,8 @@ type CreateCloudAccountBody struct {
 	AzureClientSecret *string `json:"azureClientSecret,omitempty"`
 	// Azure tenant ID
 	AzureTenantID *string `json:"azureTenantId,omitempty"`
+	// When true, provision a user host for the organization in this cloud account after it is created
+	CreateUserhost *bool `json:"createUserhost,omitempty"`
 	// Cloud service provider
 	Csp string `json:"csp"`
 	// Cloud service provider ID
@@ -3315,6 +3258,8 @@ type CreateCloudAccountBody struct {
 	OracleUserOcid *string `json:"oracleUserOcid,omitempty"`
 	// When true, validate the credentials against the cloud provider before creating the account and fail if they are invalid or lack required permissions
 	PermissionCheck *bool `json:"permissionCheck,omitempty"`
+	// Region to provision the user host in. Only used when createUserhost is true; defaults to us-east-1
+	UserhostRegion *string `json:"userhostRegion,omitempty"`
 }
 
 type CreateClusterInputBody struct {
@@ -4451,8 +4396,6 @@ type ExistingClusterVariables struct {
 	SlurmLoginNodes []ExistingClusterLoginNode `json:"slurmLoginNodes"`
 	// SLURM username
 	SlurmUsername string `json:"slurmUsername"`
-	// Workspace mount points
-	WorkspaceMounts []ExistingClusterWorkspaceMount `json:"workspaceMounts"`
 }
 
 type ExistingClusterVersionSettings struct {
@@ -4471,13 +4414,6 @@ type ExistingClusterVersionSettings struct {
 	SlurmUsername *string `json:"slurmUsername,omitempty"`
 	// Subtype discriminator.
 	Subtype string `json:"subtype"`
-}
-
-type ExistingClusterWorkspaceMount struct {
-	// Path on the cluster
-	ClusterPath string `json:"clusterPath"`
-	// Path in the workspace
-	WorkspacePath string `json:"workspacePath"`
 }
 
 type ExistingLoginNode struct {
@@ -4809,8 +4745,6 @@ type GeneralCluster struct {
 	UpdateFailed bool `json:"updateFailed"`
 	// The owner of the resource.
 	User *string `json:"user,omitempty"`
-	// Cloud-cluster only: the workspace mount points for this cluster.
-	WorkspaceMounts []ClusterWorkspaceMount `json:"workspaceMounts"`
 }
 
 type GenerateNodeTokenOutputBody struct {
@@ -5831,6 +5765,59 @@ type Jwks struct {
 	Keys []Jwk `json:"keys"`
 }
 
+type KubernetesChartsBody struct {
+	// List of Helm charts across all clusters
+	Charts []HelmChart `json:"charts"`
+	// List of cluster errors, if any
+	Errors   []ClusterError           `json:"errors,omitempty"`
+	Metadata KubernetesChartsMetadata `json:"metadata"`
+}
+
+type KubernetesChartsMetadata struct {
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total unique Helm charts across all clusters
+	TotalCharts int64 `json:"totalCharts"`
+	// Total number of clusters queried
+	TotalClusters int64 `json:"totalClusters"`
+}
+
+type KubernetesClusterResponse struct {
+	// Usage metering status for the cluster
+	CostTrackingStatus *string `json:"costTrackingStatus,omitempty"`
+	// Number of CPUs in the cluster
+	Cpus int64 `json:"cpus"`
+	// Unique identifier for the cluster
+	ID string `json:"id"`
+	// URL of the cluster image
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Amount of memory in the cluster in bytes
+	Memory int64 `json:"memory"`
+	// Name of the cluster
+	Name string `json:"name"`
+}
+
+type KubernetesConfigsBody struct {
+	// List of configs
+	Configs []Config `json:"configs"`
+	// List of cluster errors, if any
+	Errors   []ClusterError            `json:"errors,omitempty"`
+	Metadata KubernetesConfigsMetadata `json:"metadata"`
+}
+
+type KubernetesConfigsMetadata struct {
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total number of clusters queried
+	TotalClusters int64 `json:"totalClusters"`
+	// Total number of ConfigMaps
+	TotalConfigMaps int64 `json:"totalConfigMaps"`
+	// Total number of configs returned
+	TotalConfigs int64 `json:"totalConfigs"`
+	// Total number of Secrets
+	TotalSecrets int64 `json:"totalSecrets"`
+}
+
 type KubernetesCPUMetrics struct {
 	// CPU limit in cores
 	Limit *float64 `json:"limit,omitempty"`
@@ -5846,6 +5833,112 @@ type KubernetesMetricEntry struct {
 	Storage KubernetesUsageMetrics `json:"storage"`
 	// Metric timestamp
 	Timestamp time.Time `json:"timestamp"`
+}
+
+type KubernetesServiceResponse struct {
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// Cluster IP address
+	ClusterIP string `json:"clusterIP"`
+	// Creation timestamp of the service
+	CreatedAt time.Time `json:"createdAt"`
+	// External IP address
+	ExternalIP *string `json:"externalIP,omitempty"`
+	// Name of the service
+	Name string `json:"name"`
+	// Namespace of the service
+	Namespace string `json:"namespace"`
+	// Service ports
+	Ports []string `json:"ports"`
+	// Pod selector
+	Selector string `json:"selector"`
+	// Service type
+	Type string `json:"type"`
+}
+
+type KubernetesServicesBody struct {
+	// List of cluster errors, if any
+	Errors   []ClusterError             `json:"errors,omitempty"`
+	Metadata KubernetesServicesMetadata `json:"metadata"`
+	// List of services
+	Services []KubernetesServiceResponse `json:"services"`
+}
+
+type KubernetesServicesMetadata struct {
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total number of clusters queried
+	TotalClusters int64 `json:"totalClusters"`
+	// Total number of services returned
+	TotalServices int64 `json:"totalServices"`
+}
+
+type KubernetesSingleClusterResponse struct {
+	// Base64-encoded CA certificate
+	CaCert            string                 `json:"caCert"`
+	CostTrackingRates *CostTrackingRatesBody `json:"costTrackingRates,omitempty"`
+	// Usage metering status for the cluster
+	CostTrackingStatus *string `json:"costTrackingStatus,omitempty"`
+	// Kubernetes API endpoint
+	Endpoint string `json:"endpoint"`
+	// Cluster MongoDB ID
+	ID string `json:"id"`
+	// Cluster icon URL
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Cluster name
+	Name string `json:"name"`
+	// Infrastructure type
+	Type string `json:"type"`
+}
+
+type KubernetesStorageBody struct {
+	// List of cluster errors, if any
+	Errors   []ClusterError            `json:"errors,omitempty"`
+	Metadata KubernetesStorageMetadata `json:"metadata"`
+	// List of storage resources
+	Storage []KubernetesStorageResponse `json:"storage"`
+}
+
+type KubernetesStorageMetadata struct {
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total number of clusters queried
+	TotalClusters int64 `json:"totalClusters"`
+	// Total number of PVCs
+	TotalPvCs int64 `json:"totalPVCs"`
+	// Total number of PVs
+	TotalPVs int64 `json:"totalPVs"`
+	// Total number of storage resources returned
+	TotalStorage int64 `json:"totalStorage"`
+}
+
+type KubernetesStorageResponse struct {
+	// Access modes
+	AccessModes string `json:"accessModes"`
+	// Storage capacity
+	Capacity string `json:"capacity"`
+	// Bound claim (for PVs)
+	Claim *string `json:"claim,omitempty"`
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// Creation timestamp of the resource
+	CreatedAt time.Time `json:"createdAt"`
+	// Name of the storage resource
+	Name string `json:"name"`
+	// Kubernetes namespace (for PVCs)
+	Namespace *string `json:"namespace,omitempty"`
+	// Reclaim policy (for PVs)
+	ReclaimPolicy *string `json:"reclaimPolicy,omitempty"`
+	// Storage status
+	Status string `json:"status"`
+	// Storage class name
+	StorageClass string `json:"storageClass"`
+	// Storage type
+	Type string `json:"type"`
+	// Pod using this PVC
+	UsedBy *string `json:"usedBy,omitempty"`
+	// Bound volume name (for PVCs)
+	Volume *string `json:"volume,omitempty"`
 }
 
 type KubernetesTunnelInfo struct {
@@ -5866,6 +5959,46 @@ type KubernetesUsageMetrics struct {
 	Request *float64 `json:"request,omitempty"`
 	// Usage amount
 	Usage float64 `json:"usage"`
+}
+
+type KubernetesWorkloadResponse struct {
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// CPU usage
+	CPU *string `json:"cpu,omitempty"`
+	// Creation timestamp of the workload
+	CreatedAt time.Time `json:"createdAt"`
+	// Memory usage
+	Memory *string `json:"memory,omitempty"`
+	// Name of the workload
+	Name string `json:"name"`
+	// Kubernetes namespace of the workload
+	Namespace string `json:"namespace"`
+	// Pod count (ready/total)
+	Pods string `json:"pods"`
+	// Number of restarts
+	Restarts *int64 `json:"restarts,omitempty"`
+	// Status of the workload
+	Status string `json:"status"`
+	// Type of workload
+	Type string `json:"type"`
+}
+
+type KubernetesWorkloadsBody struct {
+	// List of cluster errors, if any
+	Errors   []ClusterError              `json:"errors,omitempty"`
+	Metadata KubernetesWorkloadsMetadata `json:"metadata"`
+	// List of workloads
+	Workloads []KubernetesWorkloadResponse `json:"workloads"`
+}
+
+type KubernetesWorkloadsMetadata struct {
+	// Number of clusters successfully queried
+	SuccessfulClusters int64 `json:"successfulClusters"`
+	// Total number of clusters queried
+	TotalClusters int64 `json:"totalClusters"`
+	// Total number of workloads returned
+	TotalWorkloads int64 `json:"totalWorkloads"`
 }
 
 type LanguageInputBody struct {
@@ -6148,6 +6281,23 @@ type LoginBannerResponse struct {
 	Title *string `json:"title,omitempty"`
 }
 
+type LoginSessionResponse struct {
+	// When the session was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// Whether this is the session making the request.
+	Current bool `json:"current"`
+	// When the session expires.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	// The unique identifier for the login session.
+	ID string `json:"id"`
+	// Client IP address at login. Only included for the user's own sessions.
+	IPAddress *string `json:"ipAddress,omitempty"`
+	// When the session was last used.
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+	// Client user agent at login.
+	UserAgent *string `json:"userAgent,omitempty"`
+}
+
 type Lustre struct {
 	// Cloud service provider of the Lustre
 	Csp string `json:"csp"`
@@ -6381,6 +6531,30 @@ type ManagedPartition struct {
 	Nodes int64 `json:"nodes"`
 	// Partition state
 	State string `json:"state"`
+}
+
+type ManagedSku struct {
+	// Cloud service provider
+	Csp string `json:"csp"`
+	// CSP product description
+	Description string `json:"description"`
+	// CSP-native SKU identifier
+	ID string `json:"id"`
+	// Cost subtype (Instance, Disk, Egress, ...)
+	Subtype string `json:"subtype"`
+	// Cost type (Compute, Storage, Network, unknown, ...)
+	Type string `json:"type"`
+}
+
+type ManagedSkuList struct {
+	// One page of managed SKUs
+	Items []ManagedSku `json:"items"`
+	// All distinct subtype values, for filter menus
+	Subtypes []string `json:"subtypes"`
+	// Total SKUs matching the filters
+	Total int64 `json:"total"`
+	// All distinct type values, for filter menus
+	Types []string `json:"types"`
 }
 
 type ManagedSchedulerJob struct {
@@ -6715,10 +6889,18 @@ type MonitoredDeploymentSummary struct {
 type MountInfoResponse struct {
 	// Cloud provider hosting the resource, such as aws, google, azure, openstack, or oracle. Empty for existing clusters.
 	Csp string `json:"csp"`
+	// Whether the cluster or instance the mount points to has been deleted.
+	Deleted bool `json:"deleted"`
+	// Reason the mount failed, if it is not mounted. Empty while pending or mounted.
+	Error string `json:"error"`
 	// Custom icon for the cluster or instance, if one has been set.
 	ImageURL string `json:"imageUrl"`
+	// Whether the userworkspace currently has this path mounted.
+	Mounted bool `json:"mounted"`
 	// Name of the cluster or instance the mount points to.
-	Name         string `json:"name"`
+	Name string `json:"name"`
+	// ID of the cluster or instance the mount points to.
+	ResourceID   string `json:"resourceId"`
 	ResourcePath string `json:"resourcePath"`
 	// Short name of the cluster or instance, used to fill in the __CLUSTER__ and __INSTANCE__ placeholders in the workspace path.
 	Slug string `json:"slug"`
@@ -7623,6 +7805,8 @@ type Organization struct {
 	Owner *string `json:"owner,omitempty"`
 	// Whether the organization is a partner organization.
 	Partner bool `json:"partner"`
+	// Whether the organization is a self-service organization.
+	SelfService bool `json:"selfService"`
 }
 
 type OrganizationCatalogEntry struct {
@@ -8370,6 +8554,11 @@ type PostUsageEventInput struct {
 	StartedAt time.Time `json:"startedAt"`
 	// The user who this usage event will be associated with.
 	User *string `json:"user,omitempty"`
+}
+
+type PostUserHostInputBody struct {
+	// Region to provision the user host in; defaults to us-east-1
+	Region *string `json:"region,omitempty"`
 }
 
 type Preview struct {
@@ -9685,6 +9874,10 @@ type Report struct {
 	Who *string `json:"who,omitempty"`
 }
 
+type ReportWorkspaceMountStatusInputBody struct {
+	Mounts []WorkspaceMountStatus `json:"mounts"`
+}
+
 type ReservationItem struct {
 	// Cloud service provider
 	Csp string `json:"csp"`
@@ -9996,15 +10189,6 @@ func (t *ResponseFormat) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type ResponseMetadata struct {
-	// Number of clusters successfully queried
-	SuccessfulClusters int64 `json:"successfulClusters"`
-	// Total number of clusters queried
-	TotalClusters int64 `json:"totalClusters"`
-	// Total number of workloads returned
-	TotalWorkloads int64 `json:"totalWorkloads"`
-}
-
 type RestartOption struct {
 	// Whether to force kill the workspace.
 	ForceKill bool `json:"forceKill"`
@@ -10256,44 +10440,6 @@ type SentrySettings struct {
 	ReplaysSampleRate float64 `json:"replaysSampleRate"`
 	// Sentry traces sample rate (0.0-1.0).
 	TracesSampleRate float64 `json:"tracesSampleRate"`
-}
-
-type ServiceResponse struct {
-	// Cluster name
-	Cluster string `json:"cluster"`
-	// Cluster IP address
-	ClusterIP string `json:"clusterIP"`
-	// Creation timestamp of the service
-	CreatedAt time.Time `json:"createdAt"`
-	// External IP address
-	ExternalIP *string `json:"externalIP,omitempty"`
-	// Name of the service
-	Name string `json:"name"`
-	// Namespace of the service
-	Namespace string `json:"namespace"`
-	// Service ports
-	Ports []string `json:"ports"`
-	// Pod selector
-	Selector string `json:"selector"`
-	// Service type
-	Type string `json:"type"`
-}
-
-type ServicesBody struct {
-	// List of cluster errors, if any
-	Errors   []ClusterError   `json:"errors,omitempty"`
-	Metadata ServicesMetadata `json:"metadata"`
-	// List of services
-	Services []ServiceResponse `json:"services"`
-}
-
-type ServicesMetadata struct {
-	// Number of clusters successfully queried
-	SuccessfulClusters int64 `json:"successfulClusters"`
-	// Total number of clusters queried
-	TotalClusters int64 `json:"totalClusters"`
-	// Total number of services returned
-	TotalServices int64 `json:"totalServices"`
 }
 
 type Session struct {
@@ -10557,24 +10703,6 @@ type SharedGroup struct {
 	Role string `json:"role"`
 }
 
-type SingleClusterResponse struct {
-	// Base64-encoded CA certificate
-	CaCert            string                 `json:"caCert"`
-	CostTrackingRates *CostTrackingRatesBody `json:"costTrackingRates,omitempty"`
-	// Usage metering status for the cluster
-	CostTrackingStatus *string `json:"costTrackingStatus,omitempty"`
-	// Kubernetes API endpoint
-	Endpoint string `json:"endpoint"`
-	// Cluster MongoDB ID
-	ID string `json:"id"`
-	// Cluster icon URL
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Cluster name
-	Name string `json:"name"`
-	// Infrastructure type
-	Type string `json:"type"`
-}
-
 type SingleQuotaResponse struct {
 	// Creation timestamp of the quota
 	CreatedAt time.Time     `json:"createdAt"`
@@ -10698,56 +10826,6 @@ type StorageAttachment struct {
 	Type *string `json:"type,omitempty"`
 	// Username of the resource owner.
 	User string `json:"user"`
-}
-
-type StorageBody struct {
-	// List of cluster errors, if any
-	Errors   []ClusterError  `json:"errors,omitempty"`
-	Metadata StorageMetadata `json:"metadata"`
-	// List of storage resources
-	Storage []StorageResponse `json:"storage"`
-}
-
-type StorageMetadata struct {
-	// Number of clusters successfully queried
-	SuccessfulClusters int64 `json:"successfulClusters"`
-	// Total number of clusters queried
-	TotalClusters int64 `json:"totalClusters"`
-	// Total number of PVCs
-	TotalPvCs int64 `json:"totalPVCs"`
-	// Total number of PVs
-	TotalPVs int64 `json:"totalPVs"`
-	// Total number of storage resources returned
-	TotalStorage int64 `json:"totalStorage"`
-}
-
-type StorageResponse struct {
-	// Access modes
-	AccessModes string `json:"accessModes"`
-	// Storage capacity
-	Capacity string `json:"capacity"`
-	// Bound claim (for PVs)
-	Claim *string `json:"claim,omitempty"`
-	// Cluster name
-	Cluster string `json:"cluster"`
-	// Creation timestamp of the resource
-	CreatedAt time.Time `json:"createdAt"`
-	// Name of the storage resource
-	Name string `json:"name"`
-	// Kubernetes namespace (for PVCs)
-	Namespace *string `json:"namespace,omitempty"`
-	// Reclaim policy (for PVs)
-	ReclaimPolicy *string `json:"reclaimPolicy,omitempty"`
-	// Storage status
-	Status string `json:"status"`
-	// Storage class name
-	StorageClass string `json:"storageClass"`
-	// Storage type
-	Type string `json:"type"`
-	// Pod using this PVC
-	UsedBy *string `json:"usedBy,omitempty"`
-	// Bound volume name (for PVCs)
-	Volume *string `json:"volume,omitempty"`
 }
 
 type SubdomainAvailabilityResponse struct {
@@ -11562,18 +11640,15 @@ type UserGroupRef struct {
 	Value   string  `json:"value"`
 }
 
-type UserHostBody struct {
-	// Name of the onboarding cloud account to provision hosts in
-	CloudAccountName string `json:"cloudAccountName"`
-	// Cloud service provider
-	Provider string `json:"provider"`
-}
-
 type UserHostResponse struct {
-	// Cloud account the auto-provision policy targets
-	CloudAccount string `json:"cloudAccount"`
-	// Cloud service provider for the auto-provision policy
-	Provider string `json:"provider"`
+	CloudAccount    *string                         `json:"cloudAccount,omitempty"`
+	CreatedAt       *time.Time                      `json:"createdAt,omitempty"`
+	InstanceID      *string                         `json:"instanceId,omitempty"`
+	Provider        *string                         `json:"provider,omitempty"`
+	ProvisionStatus []ProvisionStatusResponseRecord `json:"provisionStatus,omitempty"`
+	Region          string                          `json:"region"`
+	Status          string                          `json:"status"`
+	UpdatedAt       *time.Time                      `json:"updatedAt,omitempty"`
 }
 
 type UserPin struct {
@@ -12037,37 +12112,6 @@ type WorkflowVariable struct {
 	Value *string `json:"value"`
 }
 
-type WorkloadResponse struct {
-	// Cluster name
-	Cluster string `json:"cluster"`
-	// CPU usage
-	CPU *string `json:"cpu,omitempty"`
-	// Creation timestamp of the workload
-	CreatedAt time.Time `json:"createdAt"`
-	// Memory usage
-	Memory *string `json:"memory,omitempty"`
-	// Name of the workload
-	Name string `json:"name"`
-	// Kubernetes namespace of the workload
-	Namespace string `json:"namespace"`
-	// Pod count (ready/total)
-	Pods string `json:"pods"`
-	// Number of restarts
-	Restarts *int64 `json:"restarts,omitempty"`
-	// Status of the workload
-	Status string `json:"status"`
-	// Type of workload
-	Type string `json:"type"`
-}
-
-type WorkloadsBody struct {
-	// List of cluster errors, if any
-	Errors   []ClusterError   `json:"errors,omitempty"`
-	Metadata ResponseMetadata `json:"metadata"`
-	// List of workloads
-	Workloads []WorkloadResponse `json:"workloads"`
-}
-
 type WorkspaceDefaultValues struct {
 	// CPU limit (cores) for user workspaces.
 	CPULimit *float64 `json:"cpuLimit,omitempty"`
@@ -12113,6 +12157,12 @@ type WorkspaceEnvironment struct {
 
 type WorkspaceMount struct {
 	ClusterPath   string `json:"clusterPath"`
+	WorkspacePath string `json:"workspacePath"`
+}
+
+type WorkspaceMountStatus struct {
+	Error         string `json:"error"`
+	Mounted       bool   `json:"mounted"`
 	WorkspacePath string `json:"workspacePath"`
 }
 
