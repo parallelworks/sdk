@@ -4465,8 +4465,6 @@ type Fact struct {
 	User string `json:"user"`
 	// The script input by users to bootstrap the instance.
 	UserBootstrap string `json:"user_bootstrap"`
-	// Mounts of local directories to instance directories.
-	WorkspaceMounts []string `json:"workspace_mounts"`
 	// The zone of the instance, if applicable.
 	Zone string `json:"zone"`
 }

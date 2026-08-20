@@ -12778,16 +12778,6 @@
             "description": "The script input by users to bootstrap the instance.",
             "type": "string"
           },
-          "workspace_mounts": {
-            "description": "Mounts of local directories to instance directories.",
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
           "zone": {
             "description": "The zone of the instance, if applicable.",
             "type": "string"
@@ -12803,7 +12793,6 @@
           "hostname",
           "public_ip",
           "private_ip",
-          "workspace_mounts",
           "node_type",
           "session",
           "zone",
