@@ -2045,8 +2045,9 @@ type BuiltInWorkspaceDefaults struct {
 }
 
 type BuiltinProviderResponse struct {
-	CaCertificate *string `json:"caCertificate,omitempty"`
-	CloudBoundary *string `json:"cloudBoundary,omitempty"`
+	CaCertificate   *string `json:"caCertificate,omitempty"`
+	CloudBoundary   *string `json:"cloudBoundary,omitempty"`
+	ConnectionCount int64   `json:"connectionCount"`
 	// First-class provider type implied by the entry's kind
 	Csp         string `json:"csp"`
 	DisplayName string `json:"displayName"`
@@ -2058,6 +2059,7 @@ type BuiltinProviderResponse struct {
 	Kind              string  `json:"kind"`
 	Lifecycle         string  `json:"lifecycle"`
 	MinimumTLSVersion string  `json:"minimumTlsVersion"`
+	ModelCount        int64   `json:"modelCount"`
 	Protocol          string  `json:"protocol"`
 	Region            *string `json:"region,omitempty"`
 	// Connections carry a credential
@@ -3016,6 +3018,29 @@ type CoreWeaveUserExt struct {
 	SunkSSHKeys                []string `json:"sunkSshKeys,omitempty"`
 }
 
+type CostFilterOptions struct {
+	// Resources with cost rows in scope, narrowed by the user filter.
+	Resources []string `json:"resources"`
+	// Sessions with cost rows in scope, narrowed by the user and resource filters, newest first.
+	Sessions []string `json:"sessions"`
+	// Users with cost rows in scope.
+	Users []string `json:"users"`
+}
+
+type CostRow struct {
+	// Summed cost, rounded to cents.
+	Cost float64 `json:"cost"`
+	// Calendar day in the requested time zone (YYYY-MM-DD).
+	Day *string `json:"day,omitempty"`
+	// Group name.
+	Group        *string `json:"group,omitempty"`
+	InstanceType *string `json:"instanceType,omitempty"`
+	Resource     *string `json:"resource,omitempty"`
+	Session      *string `json:"session,omitempty"`
+	Type         *string `json:"type,omitempty"`
+	User         *string `json:"user,omitempty"`
+}
+
 type CostTrackingRatesBody struct {
 	// Allocation units charged for each CPU core-hour
 	CPUCostPerCoreHour float64 `json:"cpuCostPerCoreHour"`
@@ -3790,6 +3815,8 @@ type CreateWorkflowRunInputBody struct {
 	SessionNames map[string]string `json:"sessionNames,omitempty"`
 	// User-provided slug
 	Slug *string `json:"slug,omitempty"`
+	// Treat this YAML as third-party code: never auto-grant, and apply only the consent echoed back on this request.
+	Untrusted *bool `json:"untrusted,omitempty"`
 	// Name of a saved workflow to run
 	Workflow *string `json:"workflow,omitempty"`
 	// Inline YAML workflow content
@@ -8115,6 +8142,10 @@ type PlatformAttachedStorage struct {
 	MountPoint *string `json:"mountPoint"`
 	// The name of the storage resource. Absent when the mount references a storage resource that no longer exists.
 	Name *string `json:"name,omitempty"`
+	// Whether the storage resource is persistent. Absent when the mount references a storage resource that no longer exists.
+	Persistent *bool `json:"persistent,omitempty"`
+	// Whether the storage resource is provisioned. Absent when the mount references a storage resource that no longer exists.
+	Provisioned *bool `json:"provisioned,omitempty"`
 	// Whether the mount uses read-only credentials.
 	ReadOnly *bool `json:"readOnly,omitempty"`
 	// The id of the platform storage resource being mounted.
@@ -8311,7 +8342,7 @@ type PlatformSettingsAdmin struct {
 	SentryTracesSampleRate float64 `json:"sentryTracesSampleRate"`
 	// Whether to advertise resumable SSH sessions, letting tunneled connections to supporting agents survive tunnel drops and ingress restarts. Off by default; turning it off instantly falls new connections back to plain bridging.
 	SSHResumeEnabled bool `json:"sshResumeEnabled"`
-	// Whether the stuck-run sweeper is enabled. When on, workflow runs whose executor stops sending heartbeats are automatically finalized. Off by default.
+	// Whether the stuck-run sweeper is enabled. When on, workflow runs whose executor stops sending heartbeats are automatically finalized. On by default; turn it off only if a deployment cannot keep executor heartbeats flowing.
 	StuckRunSweeperEnabled bool `json:"stuckRunSweeperEnabled"`
 	// Markdown Terms & Conditions shown to new users during onboarding. Empty disables the prompt.
 	TermsAndConditions *string `json:"termsAndConditions,omitempty"`
@@ -9885,6 +9916,8 @@ type ReservationItem struct {
 	Group string `json:"group"`
 	// Cloud service provider reservation identifier
 	ID string `json:"id"`
+	// Instance type the reservation holds capacity for
+	InstanceType *string `json:"instanceType,omitempty"`
 }
 
 type ReserveSubdomainBody struct {
@@ -12213,6 +12246,12 @@ func (u MarketplaceItemBodyVersionsValue) Raw() json.RawMessage {
 	return json.RawMessage(u.raw)
 }
 
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u MarketplaceItemBodyVersionsValue) unionValue() any {
+	return u.Value
+}
+
 // MarshalJSON implements json.Marshaler for MarketplaceItemBodyVersionsValue.
 func (u MarketplaceItemBodyVersionsValue) MarshalJSON() ([]byte, error) {
 	if u.IsUnknownVariant() {
@@ -12408,6 +12447,21 @@ func (u *MarketplaceItemBodyVersionsValue) UnmarshalJSON(data []byte) error {
 	}
 }
 
+type UploadStandaloneAiChatAttachmentBody struct {
+	// File to upload
+	File FormFile `json:"file"`
+}
+
+type UploadAiChatAttachmentBody struct {
+	// File to upload
+	File FormFile `json:"file"`
+}
+
+type UploadUserAvatarBody struct {
+	// Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).
+	File FormFile `json:"file"`
+}
+
 // ClusterCreate - A cluster to create; the shape is selected by the type discriminator. The full definition may be included up front; omitted definition fields are left unset.
 
 // Variants: CreateExistingClusterBody, CreateAwsSlurmClusterBody, CreateGoogleSlurmClusterBody, CreateAzureSlurmClusterBody, CreateOracleSlurmClusterBody, CreateOpenstackSlurmClusterBody
@@ -12437,6 +12491,81 @@ func (u ClusterCreate) Raw() json.RawMessage {
 		return nil
 	}
 	return json.RawMessage(u.raw)
+}
+
+// Base returns the ClusterCreateBase that every variant of ClusterCreate carries, or
+// nil when Value holds none of them. It is a copy: writing to it does not change
+// the value the union holds.
+func (u ClusterCreate) Base() *ClusterCreateBase {
+	switch v := u.Value.(type) {
+	case CreateExistingClusterBody:
+		return &ClusterCreateBase{
+			Description:    v.Description,
+			DesktopSession: v.DesktopSession,
+			DisplayName:    v.DisplayName,
+			DuplicatedFrom: v.DuplicatedFrom,
+			Name:           v.Name,
+			RunTimeAlert:   v.RunTimeAlert,
+			Tags:           v.Tags,
+		}
+	case CreateAwsSlurmClusterBody:
+		return &ClusterCreateBase{
+			Description:    v.Description,
+			DesktopSession: v.DesktopSession,
+			DisplayName:    v.DisplayName,
+			DuplicatedFrom: v.DuplicatedFrom,
+			Name:           v.Name,
+			RunTimeAlert:   v.RunTimeAlert,
+			Tags:           v.Tags,
+		}
+	case CreateGoogleSlurmClusterBody:
+		return &ClusterCreateBase{
+			Description:    v.Description,
+			DesktopSession: v.DesktopSession,
+			DisplayName:    v.DisplayName,
+			DuplicatedFrom: v.DuplicatedFrom,
+			Name:           v.Name,
+			RunTimeAlert:   v.RunTimeAlert,
+			Tags:           v.Tags,
+		}
+	case CreateAzureSlurmClusterBody:
+		return &ClusterCreateBase{
+			Description:    v.Description,
+			DesktopSession: v.DesktopSession,
+			DisplayName:    v.DisplayName,
+			DuplicatedFrom: v.DuplicatedFrom,
+			Name:           v.Name,
+			RunTimeAlert:   v.RunTimeAlert,
+			Tags:           v.Tags,
+		}
+	case CreateOracleSlurmClusterBody:
+		return &ClusterCreateBase{
+			Description:    v.Description,
+			DesktopSession: v.DesktopSession,
+			DisplayName:    v.DisplayName,
+			DuplicatedFrom: v.DuplicatedFrom,
+			Name:           v.Name,
+			RunTimeAlert:   v.RunTimeAlert,
+			Tags:           v.Tags,
+		}
+	case CreateOpenstackSlurmClusterBody:
+		return &ClusterCreateBase{
+			Description:    v.Description,
+			DesktopSession: v.DesktopSession,
+			DisplayName:    v.DisplayName,
+			DuplicatedFrom: v.DuplicatedFrom,
+			Name:           v.Name,
+			RunTimeAlert:   v.RunTimeAlert,
+			Tags:           v.Tags,
+		}
+	}
+	return nil
+}
+
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u ClusterCreate) unionValue() any {
+	return u.Value
 }
 
 // MarshalJSON implements json.Marshaler for ClusterCreate.
@@ -12515,6 +12644,31 @@ func (u *ClusterCreate) UnmarshalJSON(data []byte) error {
 	}
 }
 
+type UploadMarketplaceIconBody struct {
+	// Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).
+	File FormFile `json:"file"`
+}
+
+type PutOrganizationDesktopWallpaperBody struct {
+	// The desktop session wallpaper file to upload.
+	Wallpaper FormFile `json:"wallpaper"`
+}
+
+type PutOrganizationLogoBody struct {
+	// The logo file to upload.
+	Logo FormFile `json:"logo"`
+}
+
+type PutOrganizationLogoDarkBody struct {
+	// The dark mode logo file to upload.
+	Logo FormFile `json:"logo"`
+}
+
+type UploadManagedClusterIconBody struct {
+	// Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).
+	File FormFile `json:"file"`
+}
+
 // AttachedStorage - A filesystem mounted on the cluster; the shape is selected by the kind discriminator.
 
 // Variants: PlatformAttachedStorage, NfsAttachedStorage
@@ -12544,6 +12698,31 @@ func (u AttachedStorage) Raw() json.RawMessage {
 		return nil
 	}
 	return json.RawMessage(u.raw)
+}
+
+// Base returns the AttachedStorageBase that every variant of AttachedStorage carries, or
+// nil when Value holds none of them. It is a copy: writing to it does not change
+// the value the union holds.
+func (u AttachedStorage) Base() *AttachedStorageBase {
+	switch v := u.Value.(type) {
+	case PlatformAttachedStorage:
+		return &AttachedStorageBase{
+			MountPoint: v.MountPoint,
+			ReadOnly:   v.ReadOnly,
+		}
+	case NfsAttachedStorage:
+		return &AttachedStorageBase{
+			MountPoint: v.MountPoint,
+			ReadOnly:   v.ReadOnly,
+		}
+	}
+	return nil
+}
+
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u AttachedStorage) unionValue() any {
+	return u.Value
 }
 
 // MarshalJSON implements json.Marshaler for AttachedStorage.
@@ -12625,6 +12804,31 @@ func (u AttachedStorageWrite) Raw() json.RawMessage {
 	return json.RawMessage(u.raw)
 }
 
+// Base returns the AttachedStorageWriteBase that every variant of AttachedStorageWrite carries, or
+// nil when Value holds none of them. It is a copy: writing to it does not change
+// the value the union holds.
+func (u AttachedStorageWrite) Base() *AttachedStorageWriteBase {
+	switch v := u.Value.(type) {
+	case PutPlatformAttachedStorage:
+		return &AttachedStorageWriteBase{
+			MountPoint: v.MountPoint,
+			ReadOnly:   v.ReadOnly,
+		}
+	case PutNfsAttachedStorage:
+		return &AttachedStorageWriteBase{
+			MountPoint: v.MountPoint,
+			ReadOnly:   v.ReadOnly,
+		}
+	}
+	return nil
+}
+
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u AttachedStorageWrite) unionValue() any {
+	return u.Value
+}
+
 // MarshalJSON implements json.Marshaler for AttachedStorageWrite.
 func (u AttachedStorageWrite) MarshalJSON() ([]byte, error) {
 	if u.IsUnknownVariant() {
@@ -12704,6 +12908,45 @@ func (u ClusterDefinition) Raw() json.RawMessage {
 	return json.RawMessage(u.raw)
 }
 
+// Base returns the ClusterDefinitionBase that every variant of ClusterDefinition carries, or
+// nil when Value holds none of them. It is a copy: writing to it does not change
+// the value the union holds.
+func (u ClusterDefinition) Base() *ClusterDefinitionBase {
+	switch v := u.Value.(type) {
+	case ExistingClusterDefinition:
+		return &ClusterDefinitionBase{
+			DesktopSession: v.DesktopSession,
+		}
+	case AwsSlurmDefinition:
+		return &ClusterDefinitionBase{
+			DesktopSession: v.DesktopSession,
+		}
+	case GoogleSlurmDefinition:
+		return &ClusterDefinitionBase{
+			DesktopSession: v.DesktopSession,
+		}
+	case AzureSlurmDefinition:
+		return &ClusterDefinitionBase{
+			DesktopSession: v.DesktopSession,
+		}
+	case OracleSlurmDefinition:
+		return &ClusterDefinitionBase{
+			DesktopSession: v.DesktopSession,
+		}
+	case OpenstackSlurmDefinition:
+		return &ClusterDefinitionBase{
+			DesktopSession: v.DesktopSession,
+		}
+	}
+	return nil
+}
+
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u ClusterDefinition) unionValue() any {
+	return u.Value
+}
+
 // MarshalJSON implements json.Marshaler for ClusterDefinition.
 func (u ClusterDefinition) MarshalJSON() ([]byte, error) {
 	if u.IsUnknownVariant() {
@@ -12778,4 +13021,59 @@ func (u *ClusterDefinition) UnmarshalJSON(data []byte) error {
 		}
 		return nil
 	}
+}
+
+type UploadUserThumbnailBody struct {
+	// Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).
+	File FormFile `json:"file"`
+}
+
+type UploadWorkflowIconBody struct {
+	// Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).
+	File FormFile `json:"file"`
+}
+
+// ClusterCreateBase - The properties every variant of ClusterCreate declares.
+// Derived from the variants rather than declared by the spec, so it
+// changes when they do.
+type ClusterCreateBase struct {
+	// Description.
+	Description    *string                 `json:"description,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Display name; defaults to the cluster name.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Name of the cluster this one was duplicated from; recorded in the audit trail.
+	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
+	// Cluster name; only lowercase letters and numbers.
+	Name         string        `json:"name"`
+	RunTimeAlert *RunTimeAlert `json:"runTimeAlert,omitempty"`
+	// Tags.
+	Tags []string `json:"tags,omitempty"`
+}
+
+// AttachedStorageBase - The properties every variant of AttachedStorage declares.
+// Derived from the variants rather than declared by the spec, so it
+// changes when they do.
+type AttachedStorageBase struct {
+	// The path the filesystem is mounted at on the cluster.
+	MountPoint *string `json:"mountPoint"`
+	// Whether the mount uses read-only credentials.
+	ReadOnly *bool `json:"readOnly,omitempty"`
+}
+
+// AttachedStorageWriteBase - The properties every variant of AttachedStorageWrite declares.
+// Derived from the variants rather than declared by the spec, so it
+// changes when they do.
+type AttachedStorageWriteBase struct {
+	// The path to mount the filesystem at on the cluster.
+	MountPoint string `json:"mountPoint"`
+	// Mount a bucket with read-only credentials; omit to keep the mount's current choice. Forced on when the caller's or owner's bucket access is read-only.
+	ReadOnly *bool `json:"readOnly,omitempty"`
+}
+
+// ClusterDefinitionBase - The properties every variant of ClusterDefinition declares.
+// Derived from the variants rather than declared by the spec, so it
+// changes when they do.
+type ClusterDefinitionBase struct {
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
 }

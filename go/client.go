@@ -37,16 +37,62 @@ func NewClient(baseURL string, opts ...ClientOption) *Client {
 }
 
 // do executes an HTTP request and decodes the response. contentType selects the
-// request body encoding and is sent as the Content-Type header.
-func (c *Client) do(ctx context.Context, method string, path string, body any, contentType string, result any, accept string, headers ...http.Header) error {
+// request body encoding and is sent as the Content-Type header. An operation
+// whose spec declares an empty security requirement passes authenticated false,
+// since it says it takes no credential.
+func (c *Client) do(ctx context.Context, method string, path string, body any, contentType string, result any, accept string, authenticated bool, headers ...http.Header) error {
+	resp, err := c.send(ctx, method, path, body, contentType, accept, authenticated, headers...)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("reading response body: %w", err)
+	}
+
+	if result != nil && len(respBody) > 0 {
+		ct := resp.Header.Get("Content-Type")
+		switch {
+		case strings.Contains(ct, "json") || ct == "":
+			if err := json.Unmarshal(respBody, result); err != nil {
+				return fmt.Errorf("decoding response body: %w", err)
+			}
+		case isRawResult(result, respBody):
+			// A body the operation types as bytes or text is itself the value,
+			// so it is taken verbatim rather than parsed.
+		default:
+			// A server that labels JSON as something else is common enough to
+			// try anyway, and the media types name each other when it fails.
+			if err := json.Unmarshal(respBody, result); err != nil {
+				return fmt.Errorf("decoding response body: asked for %s and the server sent %s: %w", accept, ct, err)
+			}
+		}
+	}
+
+	return nil
+}
+
+// doStream executes an HTTP request and hands back the response with its body
+// unread, for an operation whose payload arrives an event at a time. The caller
+// closes it.
+func (c *Client) doStream(ctx context.Context, method string, path string, body any, contentType string, accept string, authenticated bool, headers ...http.Header) (*http.Response, error) {
+	return c.send(ctx, method, path, body, contentType, accept, authenticated, headers...)
+}
+
+// send runs the request, retrying as the config allows, and returns the response
+// with its body still unread. A status outside 2xx comes back as an *APIError
+// carrying the body, so a body is left open only for a response that succeeded.
+func (c *Client) send(ctx context.Context, method string, path string, body any, contentType string, accept string, authenticated bool, headers ...http.Header) (*http.Response, error) {
 	fullURL := c.baseURL + path
 
 	var payload []byte
-	if body != nil {
+	if hasRequestBody(body) {
 		var err error
 		payload, contentType, err = encodeRequestBody(body, contentType)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -72,7 +118,7 @@ func (c *Client) do(ctx context.Context, method string, path string, body any, c
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 		// Check context cancellation before each attempt.
 		if err := ctx.Err(); err != nil {
-			return err
+			return nil, err
 		}
 
 		var bodyReader io.Reader
@@ -82,7 +128,7 @@ func (c *Client) do(ctx context.Context, method string, path string, body any, c
 
 		req, err := http.NewRequestWithContext(ctx, method, fullURL, bodyReader)
 		if err != nil {
-			return fmt.Errorf("creating request: %w", err)
+			return nil, fmt.Errorf("creating request: %w", err)
 		}
 
 		if payload != nil {
@@ -105,9 +151,9 @@ func (c *Client) do(ctx context.Context, method string, path string, body any, c
 			}
 		}
 
-		if c.auth != nil {
+		if c.auth != nil && authenticated {
 			if err := c.auth.Apply(req); err != nil {
-				return fmt.Errorf("applying auth: %w", err)
+				return nil, fmt.Errorf("applying auth: %w", err)
 			}
 		}
 
@@ -123,54 +169,44 @@ func (c *Client) do(ctx context.Context, method string, path string, body any, c
 				select {
 				case <-ctx.Done():
 					timer.Stop()
-					return ctx.Err()
+					return nil, ctx.Err()
 				case <-timer.C:
 				}
 				continue
 			}
-			return fmt.Errorf("executing request: %w", err)
-		}
-
-		respBody, err := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		if err != nil {
-			return fmt.Errorf("reading response body: %w", err)
+			return nil, fmt.Errorf("executing request: %w", err)
 		}
 
 		// Check if we should retry.
-		if c.retryConfig != nil && attempt < maxAttempts-1 && shouldRetryStatus(method, resp.StatusCode, *c.retryConfig) {
+		if c.retryConfig != nil && attempt < maxAttempts-1 && shouldRetryStatus(method, resp.StatusCode, *c.retryConfig) && withinRetryBudget(resp, *c.retryConfig) {
 			delay := retryDelay(attempt, *c.retryConfig, resp)
+			// The next attempt replaces this response, so its body is drained
+			// rather than read: draining lets the connection be reused.
+			io.Copy(io.Discard, resp.Body)
+			resp.Body.Close()
 			timer := time.NewTimer(delay)
 			select {
 			case <-ctx.Done():
 				timer.Stop()
-				return ctx.Err()
+				return nil, ctx.Err()
 			case <-timer.C:
 			}
 			continue
 		}
 
+		captureResponse(ctx, resp)
+
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-			return &APIError{StatusCode: resp.StatusCode, Status: resp.Status, Body: respBody}
-		}
-
-		if result != nil && len(respBody) > 0 {
-			ct := resp.Header.Get("Content-Type")
-			if strings.Contains(ct, "json") || ct == "" {
-				if err := json.Unmarshal(respBody, result); err != nil {
-					return fmt.Errorf("decoding response body: %w", err)
-				}
-			} else if s, ok := result.(*string); ok {
-				*s = string(respBody)
-			} else {
-				if err := json.Unmarshal(respBody, result); err != nil {
-					return fmt.Errorf("decoding response body: %w", err)
-				}
+			respBody, readErr := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if readErr != nil {
+				return nil, fmt.Errorf("reading response body: %w", readErr)
 			}
+			return nil, &APIError{StatusCode: resp.StatusCode, Status: resp.Status, Body: respBody}
 		}
 
-		return nil
+		return resp, nil
 	}
 
-	return fmt.Errorf("max retries exceeded")
+	return nil, fmt.Errorf("max retries exceeded")
 }

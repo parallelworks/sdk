@@ -2,7 +2,11 @@
 
 package parallelworks
 
-import "context"
+import (
+	"context"
+	"fmt"
+	"strconv"
+)
 
 // PageIterator provides iteration over paginated API results.
 type PageIterator[T any] struct {
@@ -20,7 +24,10 @@ func (it *PageIterator[T]) Next() ([]T, error) {
 	if err != nil {
 		return nil, err
 	}
-	if next == "" {
+	// A cursor that comes back unchanged means the page did not advance, which
+	// an echoed request cursor would otherwise turn into an endless run of
+	// identical requests.
+	if next == "" || next == it.nextCursor {
 		it.done = true
 	}
 	it.nextCursor = next
@@ -61,6 +68,169 @@ func (it *PageIterator[T]) ForEach(fn func(T) error) error {
 	}
 }
 
+// GetPlatformAlertsIter returns an iterator over paginated GetPlatformAlerts results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) GetPlatformAlertsIter(ctx context.Context, opts ...GetPlatformAlertsParams) *PageIterator[Alert] {
+	return &PageIterator[Alert]{
+		fetch: func(cursor string) ([]Alert, string, error) {
+			p := GetPlatformAlertsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.GetPlatformAlerts(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var items []Alert
+			if result != nil {
+				items = *result
+			}
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListBillingRunsIter returns an iterator over paginated ListBillingRuns results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListBillingRunsIter(ctx context.Context, opts ...ListBillingRunsParams) *PageIterator[BillingRun] {
+	return &PageIterator[BillingRun]{
+		fetch: func(cursor string) ([]BillingRun, string, error) {
+			p := ListBillingRunsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.ListBillingRuns(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Runs
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListManagedSkusIter returns an iterator over paginated ListManagedSkus results.
+// It advances offset by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListManagedSkusIter(ctx context.Context, opts ...ListManagedSkusParams) *PageIterator[ManagedSku] {
+	return &PageIterator[ManagedSku]{
+		fetch: func(cursor string) ([]ManagedSku, string, error) {
+			p := ListManagedSkusParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Offset != nil {
+				at = int64(*p.Offset)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the offset to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Offset = &next
+			}
+
+			result, err := c.ListManagedSkus(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Items
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// GetErrorLogsIter returns an iterator over paginated GetErrorLogs results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) GetErrorLogsIter(ctx context.Context, opts ...GetErrorLogsParams) *PageIterator[ErrorLogItem] {
+	return &PageIterator[ErrorLogItem]{
+		fetch: func(cursor string) ([]ErrorLogItem, string, error) {
+			p := GetErrorLogsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.GetErrorLogs(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.ErrorLogs
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
 // ListAdminEventsIter returns an iterator over paginated ListAdminEvents results.
 func (c *Client) ListAdminEventsIter(ctx context.Context, opts ...ListAdminEventsParams) *PageIterator[Event] {
 	return &PageIterator[Event]{
@@ -81,6 +251,292 @@ func (c *Client) ListAdminEventsIter(ctx context.Context, opts ...ListAdminEvent
 				next = *result.NextCursor
 			}
 			return result.Events, next, nil
+		},
+	}
+}
+
+// GetPreviewUsersIter returns an iterator over paginated GetPreviewUsers results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) GetPreviewUsersIter(ctx context.Context, flag string, opts ...GetPreviewUsersParams) *PageIterator[PreviewUser] {
+	return &PageIterator[PreviewUser]{
+		fetch: func(cursor string) ([]PreviewUser, string, error) {
+			p := GetPreviewUsersParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.GetPreviewUsers(ctx, flag, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Users
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// GetPlatformReportsIter returns an iterator over paginated GetPlatformReports results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) GetPlatformReportsIter(ctx context.Context, opts ...GetPlatformReportsParams) *PageIterator[Report] {
+	return &PageIterator[Report]{
+		fetch: func(cursor string) ([]Report, string, error) {
+			p := GetPlatformReportsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.GetPlatformReports(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var items []Report
+			if result != nil {
+				items = *result
+			}
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListResourcesIter returns an iterator over paginated ListResources results.
+// It advances offset by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListResourcesIter(ctx context.Context, opts ...ListResourcesParams) *PageIterator[Resource] {
+	return &PageIterator[Resource]{
+		fetch: func(cursor string) ([]Resource, string, error) {
+			p := ListResourcesParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Offset != nil {
+				at = int64(*p.Offset)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the offset to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Offset = &next
+			}
+
+			result, err := c.ListResources(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Resources
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListResourceClustersIter returns an iterator over paginated ListResourceClusters results.
+// It advances offset by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListResourceClustersIter(ctx context.Context, opts ...ListResourceClustersParams) *PageIterator[Cluster] {
+	return &PageIterator[Cluster]{
+		fetch: func(cursor string) ([]Cluster, string, error) {
+			p := ListResourceClustersParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Offset != nil {
+				at = int64(*p.Offset)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the offset to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Offset = &next
+			}
+
+			result, err := c.ListResourceClusters(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Clusters
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListUserAiChatAttachmentsIter returns an iterator over paginated ListUserAiChatAttachments results.
+// It advances offset by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListUserAiChatAttachmentsIter(ctx context.Context, opts ...ListUserAiChatAttachmentsParams) *PageIterator[AttachmentResponse] {
+	return &PageIterator[AttachmentResponse]{
+		fetch: func(cursor string) ([]AttachmentResponse, string, error) {
+			p := ListUserAiChatAttachmentsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Offset != nil {
+				at = int64(*p.Offset)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the offset to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Offset = &next
+			}
+
+			result, err := c.ListUserAiChatAttachments(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Attachments
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListAiChatConversationsIter returns an iterator over paginated ListAiChatConversations results.
+// It advances offset by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListAiChatConversationsIter(ctx context.Context, opts ...ListAiChatConversationsParams) *PageIterator[ConversationSummary] {
+	return &PageIterator[ConversationSummary]{
+		fetch: func(cursor string) ([]ConversationSummary, string, error) {
+			p := ListAiChatConversationsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Offset != nil {
+				at = int64(*p.Offset)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the offset to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Offset = &next
+			}
+
+			result, err := c.ListAiChatConversations(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Conversations
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListUserAllocationsIter returns an iterator over paginated ListUserAllocations results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListUserAllocationsIter(ctx context.Context, opts ...ListUserAllocationsParams) *PageIterator[Allocation] {
+	return &PageIterator[Allocation]{
+		fetch: func(cursor string) ([]Allocation, string, error) {
+			p := ListUserAllocationsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.ListUserAllocations(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var items []Allocation
+			if result != nil {
+				items = *result
+			}
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
 		},
 	}
 }
@@ -109,6 +565,209 @@ func (c *Client) ListResourceEventsIter(ctx context.Context, targetType string, 
 	}
 }
 
+// GithubReposIter returns an iterator over paginated GithubRepos results.
+// It advances page one page at a time,
+// and stops on the first page that comes back empty.
+func (c *Client) GithubReposIter(ctx context.Context, params GithubReposParams) *PageIterator[RepoResponse] {
+	return &PageIterator[RepoResponse]{
+		fetch: func(cursor string) ([]RepoResponse, string, error) {
+			p := params
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(1)
+			if p.Page != nil {
+				at = int64(*p.Page)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the page to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Page = &next
+			}
+
+			result, err := c.GithubRepos(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Repos
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+1, 10), nil
+		},
+	}
+}
+
+// GetNotificationsIter returns an iterator over paginated GetNotifications results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) GetNotificationsIter(ctx context.Context, opts ...GetNotificationsParams) *PageIterator[Notification] {
+	return &PageIterator[Notification]{
+		fetch: func(cursor string) ([]Notification, string, error) {
+			p := GetNotificationsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.GetNotifications(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var items []Notification
+			if result != nil {
+				items = *result
+			}
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// GetOrganizationsIter returns an iterator over paginated GetOrganizations results.
+// It advances offset by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) GetOrganizationsIter(ctx context.Context, opts ...GetOrganizationsParams) *PageIterator[Organization] {
+	return &PageIterator[Organization]{
+		fetch: func(cursor string) ([]Organization, string, error) {
+			p := GetOrganizationsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Offset != nil {
+				at = int64(*p.Offset)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the offset to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Offset = &next
+			}
+
+			result, err := c.GetOrganizations(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Organizations
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListOrgAllocationsIter returns an iterator over paginated ListOrgAllocations results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListOrgAllocationsIter(ctx context.Context, organization string, opts ...ListOrgAllocationsParams) *PageIterator[Allocation] {
+	return &PageIterator[Allocation]{
+		fetch: func(cursor string) ([]Allocation, string, error) {
+			p := ListOrgAllocationsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.ListOrgAllocations(ctx, organization, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var items []Allocation
+			if result != nil {
+				items = *result
+			}
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListAllocationUsageEventsIter returns an iterator over paginated ListAllocationUsageEvents results.
+// It advances page one page at a time,
+// and stops on the first page that comes back empty.
+func (c *Client) ListAllocationUsageEventsIter(ctx context.Context, organization string, name string, opts ...ListAllocationUsageEventsParams) *PageIterator[RatedCostWithMetadata] {
+	return &PageIterator[RatedCostWithMetadata]{
+		fetch: func(cursor string) ([]RatedCostWithMetadata, string, error) {
+			p := ListAllocationUsageEventsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(1)
+			if p.Page != nil {
+				at = int64(*p.Page)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the page to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Page = &next
+			}
+
+			result, err := c.ListAllocationUsageEvents(ctx, organization, name, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Items
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+1, 10), nil
+		},
+	}
+}
+
 // ListOrganizationEventsIter returns an iterator over paginated ListOrganizationEvents results.
 func (c *Client) ListOrganizationEventsIter(ctx context.Context, organization string, opts ...ListOrganizationEventsParams) *PageIterator[Event] {
 	return &PageIterator[Event]{
@@ -129,6 +788,341 @@ func (c *Client) ListOrganizationEventsIter(ctx context.Context, organization st
 				next = *result.NextCursor
 			}
 			return result.Events, next, nil
+		},
+	}
+}
+
+// GetOrganizationGroupsIter returns an iterator over paginated GetOrganizationGroups results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) GetOrganizationGroupsIter(ctx context.Context, organization string, opts ...GetOrganizationGroupsParams) *PageIterator[Group] {
+	return &PageIterator[Group]{
+		fetch: func(cursor string) ([]Group, string, error) {
+			p := GetOrganizationGroupsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.GetOrganizationGroups(ctx, organization, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var items []Group
+			if result != nil {
+				items = *result
+			}
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListResourceGroupsIter returns an iterator over paginated ListResourceGroups results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListResourceGroupsIter(ctx context.Context, organization string, opts ...ListResourceGroupsParams) *PageIterator[ResourceGroup] {
+	return &PageIterator[ResourceGroup]{
+		fetch: func(cursor string) ([]ResourceGroup, string, error) {
+			p := ListResourceGroupsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.ListResourceGroups(ctx, organization, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var items []ResourceGroup
+			if result != nil {
+				items = *result
+			}
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListOrganizationUsersIter returns an iterator over paginated ListOrganizationUsers results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListOrganizationUsersIter(ctx context.Context, organization string, opts ...ListOrganizationUsersParams) *PageIterator[OrgUser] {
+	return &PageIterator[OrgUser]{
+		fetch: func(cursor string) ([]OrgUser, string, error) {
+			p := ListOrganizationUsersParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.ListOrganizationUsers(ctx, organization, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Users
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListWorkersIter returns an iterator over paginated ListWorkers results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListWorkersIter(ctx context.Context, organization string, user string, opts ...ListWorkersParams) *PageIterator[WorkerResponse] {
+	return &PageIterator[WorkerResponse]{
+		fetch: func(cursor string) ([]WorkerResponse, string, error) {
+			p := ListWorkersParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.ListWorkers(ctx, organization, user, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var items []WorkerResponse
+			if result != nil {
+				items = *result
+			}
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// GetAllPlatformGroupsIter returns an iterator over paginated GetAllPlatformGroups results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) GetAllPlatformGroupsIter(ctx context.Context, opts ...GetAllPlatformGroupsParams) *PageIterator[Group] {
+	return &PageIterator[Group]{
+		fetch: func(cursor string) ([]Group, string, error) {
+			p := GetAllPlatformGroupsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.GetAllPlatformGroups(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var items []Group
+			if result != nil {
+				items = *result
+			}
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListUserResourceGroupsIter returns an iterator over paginated ListUserResourceGroups results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListUserResourceGroupsIter(ctx context.Context, opts ...ListUserResourceGroupsParams) *PageIterator[ResourceGroup] {
+	return &PageIterator[ResourceGroup]{
+		fetch: func(cursor string) ([]ResourceGroup, string, error) {
+			p := ListUserResourceGroupsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.ListUserResourceGroups(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var items []ResourceGroup
+			if result != nil {
+				items = *result
+			}
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListUsersIter returns an iterator over paginated ListUsers results.
+// It advances skip by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListUsersIter(ctx context.Context, opts ...ListUsersParams) *PageIterator[OrgUser] {
+	return &PageIterator[OrgUser]{
+		fetch: func(cursor string) ([]OrgUser, string, error) {
+			p := ListUsersParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Skip != nil {
+				at = int64(*p.Skip)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the skip to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Skip = &next
+			}
+
+			result, err := c.ListUsers(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Users
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListWorkflowRunsIter returns an iterator over paginated ListWorkflowRuns results.
+// It advances offset by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListWorkflowRunsIter(ctx context.Context, opts ...ListWorkflowRunsParams) *PageIterator[WorkflowRunResponse] {
+	return &PageIterator[WorkflowRunResponse]{
+		fetch: func(cursor string) ([]WorkflowRunResponse, string, error) {
+			p := ListWorkflowRunsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Offset != nil {
+				at = int64(*p.Offset)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the offset to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Offset = &next
+			}
+
+			result, err := c.ListWorkflowRuns(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Runs
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
 		},
 	}
 }

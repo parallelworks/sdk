@@ -5811,6 +5811,10 @@
           "cloudBoundary": {
             "type": "string"
           },
+          "connectionCount": {
+            "format": "int64",
+            "type": "integer"
+          },
           "csp": {
             "description": "First-class provider type implied by the entry's kind",
             "type": "string"
@@ -5873,6 +5877,10 @@
             ],
             "type": "string"
           },
+          "modelCount": {
+            "format": "int64",
+            "type": "integer"
+          },
           "protocol": {
             "enum": [
               "azure-openai",
@@ -5901,6 +5909,8 @@
           }
         },
         "required": [
+          "connectionCount",
+          "modelCount",
           "id",
           "displayName",
           "lifecycle",
@@ -8531,6 +8541,84 @@
         },
         "type": "object"
       },
+      "CostFilterOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "resources": {
+            "description": "Resources with cost rows in scope, narrowed by the user filter.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "sessions": {
+            "description": "Sessions with cost rows in scope, narrowed by the user and resource filters, newest first.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "users": {
+            "description": "Users with cost rows in scope.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "users",
+          "resources",
+          "sessions"
+        ],
+        "type": "object"
+      },
+      "CostRow": {
+        "additionalProperties": false,
+        "properties": {
+          "cost": {
+            "description": "Summed cost, rounded to cents.",
+            "format": "double",
+            "type": "number"
+          },
+          "day": {
+            "description": "Calendar day in the requested time zone (YYYY-MM-DD).",
+            "type": "string"
+          },
+          "group": {
+            "description": "Group name.",
+            "type": "string"
+          },
+          "instanceType": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          },
+          "session": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cost"
+        ],
+        "type": "object"
+      },
       "CostTrackingRatesBody": {
         "additionalProperties": false,
         "properties": {
@@ -10828,6 +10916,10 @@
           "slug": {
             "description": "User-provided slug",
             "type": "string"
+          },
+          "untrusted": {
+            "description": "Treat this YAML as third-party code: never auto-grant, and apply only the consent echoed back on this request.",
+            "type": "boolean"
           },
           "workflow": {
             "description": "Name of a saved workflow to run",
@@ -24063,6 +24155,14 @@
             ],
             "type": "string"
           },
+          "persistent": {
+            "description": "Whether the storage resource is persistent. Absent when the mount references a storage resource that no longer exists.",
+            "type": "boolean"
+          },
+          "provisioned": {
+            "description": "Whether the storage resource is provisioned. Absent when the mount references a storage resource that no longer exists.",
+            "type": "boolean"
+          },
           "readOnly": {
             "description": "Whether the mount uses read-only credentials.",
             "type": "boolean"
@@ -24627,7 +24727,7 @@
             "type": "boolean"
           },
           "stuckRunSweeperEnabled": {
-            "description": "Whether the stuck-run sweeper is enabled. When on, workflow runs whose executor stops sending heartbeats are automatically finalized. Off by default.",
+            "description": "Whether the stuck-run sweeper is enabled. When on, workflow runs whose executor stops sending heartbeats are automatically finalized. On by default; turn it off only if a deployment cannot keep executor heartbeats flowing.",
             "type": "boolean"
           },
           "termsAndConditions": {
@@ -29454,6 +29554,10 @@
           },
           "id": {
             "description": "Cloud service provider reservation identifier",
+            "type": "string"
+          },
+          "instanceType": {
+            "description": "Instance type the reservation holds capacity for",
             "type": "string"
           }
         },
@@ -78948,17 +79052,16 @@
     },
     "/api/reports/legacy-query": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns daily cost data grouped by type with support for various filters. This is a legacy endpoint.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSums cloud cost rows for the groups the caller may report on, optionally grouped by day, group, user, type, resource, session, or instance type. Members see their own groups; organization admins and billing admins see the whole organization. This is a legacy endpoint.",
         "operationId": "get-reports-legacy-query",
         "parameters": [
           {
-            "description": "Filter by organization",
+            "description": "Organization name. Defaults to the caller's organization; reporting on another organization needs an organization admin or billing admin.",
             "explode": false,
             "in": "query",
             "name": "organization",
-            "required": true,
             "schema": {
-              "description": "Filter by organization",
+              "description": "Organization name. Defaults to the caller's organization; reporting on another organization needs an organization admin or billing admin.",
               "examples": [
                 "parallelworks"
               ],
@@ -78966,33 +79069,12 @@
             }
           },
           {
-            "description": "Filter by users",
-            "explode": true,
-            "in": "query",
-            "name": "user",
-            "schema": {
-              "description": "Filter by users",
-              "examples": [
-                [
-                  "Jake.Thayne"
-                ]
-              ],
-              "items": {
-                "type": "string"
-              },
-              "type": [
-                "array",
-                "null"
-              ]
-            }
-          },
-          {
-            "description": "Filter by groups",
+            "description": "Group names or ids. Defaults to every group the caller may report on.",
             "explode": true,
             "in": "query",
             "name": "group",
             "schema": {
-              "description": "Filter by groups",
+              "description": "Group names or ids. Defaults to every group the caller may report on.",
               "examples": [
                 [
                   "group1"
@@ -79008,12 +79090,33 @@
             }
           },
           {
-            "description": "Filter by resource names",
+            "description": "Usernames as recorded on the cost rows.",
+            "explode": true,
+            "in": "query",
+            "name": "user",
+            "schema": {
+              "description": "Usernames as recorded on the cost rows.",
+              "examples": [
+                [
+                  "jakethayne"
+                ]
+              ],
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Resource names.",
             "explode": true,
             "in": "query",
             "name": "resource",
             "schema": {
-              "description": "Filter by resource names",
+              "description": "Resource names.",
               "examples": [
                 [
                   "mycluster"
@@ -79029,15 +79132,15 @@
             }
           },
           {
-            "description": "Filter by sessions",
+            "description": "Session numbers.",
             "explode": true,
             "in": "query",
             "name": "session",
             "schema": {
-              "description": "Filter by sessions",
+              "description": "Session numbers.",
               "examples": [
                 [
-                  "123"
+                  "00042"
                 ]
               ],
               "items": {
@@ -79050,31 +79153,125 @@
             }
           },
           {
-            "description": "Start date, specified in UTC",
+            "description": "Cost types.",
+            "explode": true,
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "description": "Cost types.",
+              "examples": [
+                [
+                  "Compute"
+                ]
+              ],
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Cloud service provider.",
             "explode": false,
             "in": "query",
-            "name": "startDate",
-            "required": true,
+            "name": "csp",
             "schema": {
-              "description": "Start date, specified in UTC",
-              "examples": [
-                "2025-01-01"
+              "description": "Cloud service provider.",
+              "enum": [
+                "AWS",
+                "GCP",
+                "AZ"
               ],
-              "format": "date",
               "type": "string"
             }
           },
           {
-            "description": "End date, specified in UTC Optional; defaults to current UTC time",
+            "description": "Only rows dated at or after this time (RFC 3339).",
             "explode": false,
             "in": "query",
-            "name": "endDate",
+            "name": "start",
             "schema": {
-              "description": "End date, specified in UTC Optional; defaults to current UTC time",
+              "description": "Only rows dated at or after this time (RFC 3339).",
               "examples": [
-                "2025-01-31"
+                "2026-01-01T00:00:00Z"
               ],
-              "format": "date",
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only rows dated at or before this time (RFC 3339).",
+            "explode": false,
+            "in": "query",
+            "name": "end",
+            "schema": {
+              "description": "Only rows dated at or before this time (RFC 3339).",
+              "examples": [
+                "2026-01-31T23:59:59Z"
+              ],
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Include realtime estimates alongside billed rows.",
+            "explode": false,
+            "in": "query",
+            "name": "realtime",
+            "schema": {
+              "description": "Include realtime estimates alongside billed rows.",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Include prorated rows.",
+            "explode": false,
+            "in": "query",
+            "name": "prorated",
+            "schema": {
+              "description": "Include prorated rows.",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Dimensions to group by. Omit for a single total row.",
+            "explode": true,
+            "in": "query",
+            "name": "groupBy",
+            "schema": {
+              "description": "Dimensions to group by. Omit for a single total row.",
+              "items": {
+                "enum": [
+                  "day",
+                  "group",
+                  "user",
+                  "type",
+                  "resource",
+                  "session",
+                  "instanceType"
+                ],
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "IANA time zone used to bucket days.",
+            "explode": false,
+            "in": "query",
+            "name": "timezone",
+            "schema": {
+              "default": "UTC",
+              "description": "IANA time zone used to bucket days.",
+              "examples": [
+                "America/Chicago"
+              ],
               "type": "string"
             }
           }
@@ -79085,8 +79282,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": {},
-                    "type": "object"
+                    "$ref": "#/components/schemas/CostRow"
                   },
                   "type": [
                     "array",
@@ -79108,7 +79304,223 @@
             "description": "Error"
           }
         },
-        "summary": "Get daily cost report data (legacy)",
+        "summary": "Get cost report data (legacy)",
+        "tags": [
+          "Reports"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/reports/legacy-query/filter-options": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the users, resources, and sessions that have cost rows in the requested scope, for populating report filters. This is a legacy endpoint.",
+        "operationId": "get-reports-legacy-query-filter-options",
+        "parameters": [
+          {
+            "description": "Organization name. Defaults to the caller's organization; reporting on another organization needs an organization admin or billing admin.",
+            "explode": false,
+            "in": "query",
+            "name": "organization",
+            "schema": {
+              "description": "Organization name. Defaults to the caller's organization; reporting on another organization needs an organization admin or billing admin.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Group names or ids. Defaults to every group the caller may report on.",
+            "explode": true,
+            "in": "query",
+            "name": "group",
+            "schema": {
+              "description": "Group names or ids. Defaults to every group the caller may report on.",
+              "examples": [
+                [
+                  "group1"
+                ]
+              ],
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Usernames as recorded on the cost rows.",
+            "explode": true,
+            "in": "query",
+            "name": "user",
+            "schema": {
+              "description": "Usernames as recorded on the cost rows.",
+              "examples": [
+                [
+                  "jakethayne"
+                ]
+              ],
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Resource names.",
+            "explode": true,
+            "in": "query",
+            "name": "resource",
+            "schema": {
+              "description": "Resource names.",
+              "examples": [
+                [
+                  "mycluster"
+                ]
+              ],
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Session numbers.",
+            "explode": true,
+            "in": "query",
+            "name": "session",
+            "schema": {
+              "description": "Session numbers.",
+              "examples": [
+                [
+                  "00042"
+                ]
+              ],
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Cost types.",
+            "explode": true,
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "description": "Cost types.",
+              "examples": [
+                [
+                  "Compute"
+                ]
+              ],
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Cloud service provider.",
+            "explode": false,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Cloud service provider.",
+              "enum": [
+                "AWS",
+                "GCP",
+                "AZ"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only rows dated at or after this time (RFC 3339).",
+            "explode": false,
+            "in": "query",
+            "name": "start",
+            "schema": {
+              "description": "Only rows dated at or after this time (RFC 3339).",
+              "examples": [
+                "2026-01-01T00:00:00Z"
+              ],
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only rows dated at or before this time (RFC 3339).",
+            "explode": false,
+            "in": "query",
+            "name": "end",
+            "schema": {
+              "description": "Only rows dated at or before this time (RFC 3339).",
+              "examples": [
+                "2026-01-31T23:59:59Z"
+              ],
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Include realtime estimates alongside billed rows.",
+            "explode": false,
+            "in": "query",
+            "name": "realtime",
+            "schema": {
+              "description": "Include realtime estimates alongside billed rows.",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Include prorated rows.",
+            "explode": false,
+            "in": "query",
+            "name": "prorated",
+            "schema": {
+              "description": "Include prorated rows.",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostFilterOptions"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get cost report filter options (legacy)",
         "tags": [
           "Reports"
         ],

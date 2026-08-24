@@ -44,7 +44,17 @@ func derefParam(value any) (reflect.Value, bool) {
 		}
 		rv = rv.Elem()
 	}
+	// A union is a wrapper around the value it decoded, and the server is owed
+	// the value, not the wrapper.
+	if u, ok := rv.Interface().(unionValuer); ok {
+		return derefParam(u.unionValue())
+	}
 	return rv, true
+}
+
+// unionValuer is implemented by every generated union.
+type unionValuer interface {
+	unionValue() any
 }
 
 // isSlice reports whether rv is a multi-value slice; a []byte is a scalar
@@ -252,6 +262,59 @@ func encodeQuery(values url.Values) string {
 	return strings.ReplaceAll(values.Encode(), "+", "%20")
 }
 
+// reservedPassthrough are the RFC 3986 reserved characters a parameter marked
+// allowReserved sends unescaped. The separators a query string is itself parsed
+// with are missing on purpose: passing "&", "=", or "#" through would end the
+// value early, and "+" reads as a space, so a value carrying any of them would
+// arrive as something other than what was sent.
+const reservedPassthrough = `:/?[]@!$'()*,;`
+
+// encodeQueryAllowingReserved renders the query with the named keys' values left
+// unescaped over the reserved set. Every other key is encoded as usual.
+func encodeQueryAllowingReserved(values url.Values, reservedKeys ...string) string {
+	reserved := make(map[string]bool, len(reservedKeys))
+	for _, k := range reservedKeys {
+		reserved[k] = true
+	}
+
+	keys := make([]string, 0, len(values))
+	for k := range values {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var b strings.Builder
+	for _, k := range keys {
+		for _, v := range values[k] {
+			if b.Len() > 0 {
+				b.WriteByte('&')
+			}
+			b.WriteString(url.QueryEscape(k))
+			b.WriteByte('=')
+			if reserved[k] {
+				b.WriteString(escapeAllowingReserved(v))
+			} else {
+				b.WriteString(strings.ReplaceAll(url.QueryEscape(v), "+", "%20"))
+			}
+		}
+	}
+	return b.String()
+}
+
+// escapeAllowingReserved percent-encodes a value except for the reserved
+// characters the spec says to pass through.
+func escapeAllowingReserved(value string) string {
+	var b strings.Builder
+	for i := 0; i < len(value); i++ {
+		if c := value[i]; strings.IndexByte(reservedPassthrough, c) >= 0 {
+			b.WriteByte(c)
+			continue
+		}
+		b.WriteString(strings.ReplaceAll(url.QueryEscape(string(value[i])), "+", "%20"))
+	}
+	return b.String()
+}
+
 // queryDelim is the separator for an unexploded array under a query style.
 func queryDelim(style string) string {
 	switch style {
@@ -360,6 +423,74 @@ func pathSep(explode bool, exploded string) string {
 		return exploded
 	}
 	return ","
+}
+
+// hasRequestBody reports whether there is a body to send. An optional body
+// arrives as a nil pointer inside an interface, which is not itself nil, and
+// encoding it would send the JSON literal null where the caller meant to send
+// nothing at all.
+func hasRequestBody(body any) bool {
+	if body == nil {
+		return false
+	}
+	rv := reflect.ValueOf(body)
+	return rv.Kind() != reflect.Pointer || !rv.IsNil()
+}
+
+// isRawResult fills a result the operation types as bytes or text with the body
+// as it arrived, reporting whether it did. Such a body is the value itself, not
+// a document to parse.
+func isRawResult(result any, body []byte) bool {
+	switch v := result.(type) {
+	case *[]byte:
+		*v = body
+		return true
+	case *string:
+		*v = string(body)
+		return true
+	}
+	return false
+}
+
+// contentParamValue serializes a parameter declared with a media type rather than
+// a style. A nil optional pointer yields no value at all, which the callers skip.
+func contentParamValue(value any) (string, bool) {
+	rv, ok := derefParam(value)
+	if !ok {
+		return "", false
+	}
+	encoded, err := json.Marshal(rv.Interface())
+	if err != nil {
+		return "", false
+	}
+	return string(encoded), true
+}
+
+// addContentQueryParam adds a query parameter whose value is a serialized
+// document. The document goes in whole, percent-encoded by the query encoder.
+func addContentQueryParam(values url.Values, key string, value any) {
+	if encoded, ok := contentParamValue(value); ok {
+		values.Set(key, encoded)
+	}
+}
+
+// setContentHeader sets a header whose value is a serialized document.
+func setContentHeader(headers http.Header, name string, value any) {
+	if encoded, ok := contentParamValue(value); ok {
+		headers.Set(name, encoded)
+	}
+}
+
+// addContentCookieHeader appends a cookie whose value is a serialized document.
+func addContentCookieHeader(headers http.Header, name string, value any) {
+	if encoded, ok := contentParamValue(value); ok {
+		cookie := (&http.Cookie{Name: name, Value: encoded}).String()
+		if existing := headers.Get("Cookie"); existing != "" {
+			headers.Set("Cookie", existing+"; "+cookie)
+		} else {
+			headers.Set("Cookie", cookie)
+		}
+	}
 }
 
 // setHeader sets a header parameter (simple style), skipping a nil optional
