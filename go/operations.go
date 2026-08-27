@@ -1117,6 +1117,25 @@ func (c *Client) SetAiIntegrationIcon(ctx context.Context, catalogEntryID string
 	return &result, nil
 }
 
+// ListAiIntegrationCatalogModels - List models reported for an AI integration
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Aggregates the model IDs existing connections report live for this integration, as a picking aid for the allowed-models list.
+func (c *Client) ListAiIntegrationCatalogModels(ctx context.Context, catalogEntryID string) (*CatalogModelsOutputBody, error) {
+
+	path := "/api/admin/products/ai/catalog/{catalogEntryId}/models"
+	path = pathReplace(path, "catalogEntryId", "simple", false, catalogEntryID)
+
+	var result CatalogModelsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // DeleteAiConnection - Delete AI connection
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6415,7 +6434,7 @@ func (c *Client) GetOrganizationBootstrapScripts(ctx context.Context, organizati
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Sets the organization's bootstrap script of the given type, replacing any existing script of that type. Cloud cluster bootstrap scripts run on every cloud cluster before any user bootstrap or health check scripts.
+// Sets the organization's bootstrap script of the given type, replacing any existing script of that type. Cloud cluster bootstrap scripts run on every cloud cluster before any user bootstrap or health check scripts. User workspace bootstrap scripts run as root in every user workspace in the organization at startup, before the home directory is prepared, receive the username as the first argument, and stop the workspace from starting when they exit non-zero. Every user can read the workspace script from inside their workspace, so it must not contain secrets.
 func (c *Client) PutOrganizationBootstrapScript(ctx context.Context, organization string, body PutBootstrapScriptInputBody) (*BootstrapScript, error) {
 
 	path := "/api/organizations/{organization}/bootstrap"
@@ -9762,6 +9781,23 @@ func (c *Client) SetOrganizationArchiveCostDataPolicy(ctx context.Context, organ
 	return &result, nil
 }
 
+// SetOrganizationDisablePasswordLoginPolicy - Set organization policy: disable-password-login
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets disable-password-login policy for the organization.
+func (c *Client) SetOrganizationDisablePasswordLoginPolicy(ctx context.Context, organization string, body bool) (*map[string]BooleanPolicyOutput, error) {
+
+	path := "/api/organizations/{organization}/policies/disable-password-login"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetOrganizationEnforceMfaPolicy - Set organization policy: enforce-mfa
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -11656,6 +11692,8 @@ type GetPresignedURLAzureAzfilesObjectParams struct {
 	ExpiresIn *int64 `json:"expiresIn,omitempty"`
 	// The permissions for the pre-signed URL. Default is read (r). Combine: r,w,d,c.
 	Permissions *string `json:"permissions,omitempty"`
+	// Content-Disposition the file is served with, so a browser download can be given a filename. Omit to serve the file as stored.
+	ContentDisposition *string `json:"contentDisposition,omitempty"`
 }
 
 // GetPresignedURLAzureAzfilesObject - Get presigned URL for Azure Files object
@@ -11675,6 +11713,8 @@ func (c *Client) GetPresignedURLAzureAzfilesObject(ctx context.Context, organiza
 	addQueryParam(queryValues, "expiresIn", "form", false, params.ExpiresIn)
 
 	addQueryParam(queryValues, "permissions", "form", false, params.Permissions)
+
+	addQueryParam(queryValues, "contentDisposition", "form", false, params.ContentDisposition)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
@@ -11771,6 +11811,8 @@ type GetPresignedURLAzureBucketObjectParams struct {
 	ExpiresIn *int64 `json:"expiresIn,omitempty"`
 	// The permissions for the pre-signed URL. Default is read (r). Other permissions include write (w), delete (d), list (l), add (a), create (c). Combine multiple permissions as needed.
 	Permissions *string `json:"permissions,omitempty"`
+	// Content-Disposition the blob is served with, so a browser download can be given a filename. Omit to serve the blob as stored.
+	ContentDisposition *string `json:"contentDisposition,omitempty"`
 }
 
 // GetPresignedURLAzureBucketObject - Get presigned URL for Azure bucket object
@@ -11790,6 +11832,8 @@ func (c *Client) GetPresignedURLAzureBucketObject(ctx context.Context, organizat
 	addQueryParam(queryValues, "expiresIn", "form", false, params.ExpiresIn)
 
 	addQueryParam(queryValues, "permissions", "form", false, params.Permissions)
+
+	addQueryParam(queryValues, "contentDisposition", "form", false, params.ContentDisposition)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
@@ -13276,6 +13320,8 @@ type GetPresignedURLGoogleBucketObjectParams struct {
 	ObjectName string `json:"objectName"`
 	// The expiration time in seconds for the pre-signed URL. Default is 12 hours.
 	ExpiresIn *int64 `json:"expiresIn,omitempty"`
+	// Content-Disposition the object is served with, so a browser download can be given a filename. Omit to serve the object as stored.
+	ContentDisposition *string `json:"contentDisposition,omitempty"`
 }
 
 // GetPresignedURLGoogleBucketObject - Get presigned URL for Google bucket object
@@ -13293,6 +13339,8 @@ func (c *Client) GetPresignedURLGoogleBucketObject(ctx context.Context, organiza
 	addQueryParam(queryValues, "objectName", "form", false, params.ObjectName)
 
 	addQueryParam(queryValues, "expiresIn", "form", false, params.ExpiresIn)
+
+	addQueryParam(queryValues, "contentDisposition", "form", false, params.ContentDisposition)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
@@ -14431,6 +14479,43 @@ func (c *Client) GetStorageDeploymentProvisionLog(ctx context.Context, organizat
 	return &result, nil
 }
 
+// GetStoragePermissions - Get storage permissions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the set of permissions granted on a storage.
+func (c *Client) GetStoragePermissions(ctx context.Context, organization string, user string, name string) (*SubjectPermissions, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/permissions"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	var result SubjectPermissions
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateStoragePermissions - Update storage permissions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces the set of permissions granted on a storage.
+func (c *Client) UpdateStoragePermissions(ctx context.Context, organization string, user string, name string, body SubjectPermissions) error {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/permissions"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetUserWorkspace - Get User Workspace
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -15488,6 +15573,22 @@ func (c *Client) SetPlatformBaseImageCompliancePolicy(ctx context.Context, body 
 	path := "/api/platform/policies/base-image-compliance"
 
 	var result map[string]BaseImageCompliancePolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformDisablePasswordLoginPolicy - Set platform policy: disable-password-login
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the disable-password-login policy for the platform.
+func (c *Client) SetPlatformDisablePasswordLoginPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
+
+	path := "/api/platform/policies/disable-password-login"
+
+	var result map[string]BooleanPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -16815,6 +16916,22 @@ func (c *Client) CheckSubdomainAvailability(ctx context.Context, params CheckSub
 	}
 
 	var result SubdomainAvailabilityResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetUserWorkspaceBootstrapScript - Get user workspace bootstrap script
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the bootstrap script the currently authenticated user's organization runs in every user workspace at startup, or an empty script when none is set.
+func (c *Client) GetUserWorkspaceBootstrapScript(ctx context.Context) (*GetUserWorkspaceBootstrapScriptOutputBody, error) {
+
+	path := "/api/user-workspace/bootstrap-script"
+
+	var result GetUserWorkspaceBootstrapScriptOutputBody
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}

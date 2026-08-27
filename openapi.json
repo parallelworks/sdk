@@ -206,28 +206,22 @@
         "additionalProperties": false,
         "properties": {
           "homeDirectories": {
-            "description": "Enable pam_mkhomedir for automatic home directory creation",
+            "description": "Enable pam_mkhomedir for automatic home directory creation; absent means unmanaged",
             "type": "boolean"
           },
           "sshKeys": {
-            "description": "Enable AuthorizedKeysCommand for SSH key lookup",
+            "description": "Enable AuthorizedKeysCommand for SSH key lookup; absent means unmanaged",
             "type": "boolean"
           },
           "sudoAccess": {
-            "description": "Enable sudoers.d for pwsudo group",
+            "description": "Enable sudoers.d for pwsudo group; absent means unmanaged",
             "type": "boolean"
           },
           "userPopulation": {
-            "description": "Enable libnss_cache, nsswitch, and user/group cache file sync",
+            "description": "Enable libnss_cache, nsswitch, and user/group cache file sync; absent means unmanaged",
             "type": "boolean"
           }
         },
-        "required": [
-          "userPopulation",
-          "homeDirectories",
-          "sshKeys",
-          "sudoAccess"
-        ],
         "type": "object"
       },
       "AccessibleAIProviderResponse": {
@@ -1632,6 +1626,16 @@
             "description": "Login of the connected GitHub account (copilot provider)",
             "type": "string"
           },
+          "allowedModels": {
+            "description": "Admin allowlist from the catalog entry; empty allows every model the provider reports",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "bucketId": {
             "description": "Attached storage bucket infrastructure ID",
             "type": "string"
@@ -1684,10 +1688,6 @@
             "description": "Billing group the provider is provisioned under (managed providers)",
             "type": "string"
           },
-          "hasCaCertificate": {
-            "description": "Whether a custom CA certificate is configured",
-            "type": "boolean"
-          },
           "id": {
             "description": "Unique identifier for the resource",
             "type": "string"
@@ -1731,6 +1731,15 @@
           "supportsUsage": {
             "description": "Whether the provider reports usage information",
             "type": "boolean"
+          },
+          "tlsVerification": {
+            "description": "How the integration's TLS certificate is verified",
+            "enum": [
+              "public",
+              "ca-certificate",
+              "skip"
+            ],
+            "type": "string"
           },
           "user": {
             "description": "The username of the user that owns this resource",
@@ -5620,7 +5629,8 @@
           "type": {
             "description": "The type of the bootstrap script.",
             "enum": [
-              "cloudclusters"
+              "cloudclusters",
+              "userworkspaces"
             ],
             "examples": [
               "cloudclusters"
@@ -6122,6 +6132,17 @@
       "BuiltinProviderResponse": {
         "additionalProperties": false,
         "properties": {
+          "allowedModels": {
+            "description": "Model IDs users may see and enable; empty allows every model the provider reports",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 500,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "caCertificate": {
             "type": "string"
           },
@@ -6210,6 +6231,14 @@
             "description": "Connections carry a credential",
             "type": "boolean"
           },
+          "tlsVerification": {
+            "enum": [
+              "public",
+              "ca-certificate",
+              "skip"
+            ],
+            "type": "string"
+          },
           "toolCallingMode": {
             "enum": [
               "native",
@@ -6239,6 +6268,17 @@
       "CatalogEntryBody": {
         "additionalProperties": false,
         "properties": {
+          "allowedModels": {
+            "description": "Model IDs users may see and enable; empty allows every model the provider reports",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 500,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "caCertificate": {
             "type": "string"
           },
@@ -6307,6 +6347,14 @@
             ],
             "type": "string"
           },
+          "tlsVerification": {
+            "enum": [
+              "public",
+              "ca-certificate",
+              "skip"
+            ],
+            "type": "string"
+          },
           "toolCallingMode": {
             "enum": [
               "native",
@@ -6331,6 +6379,16 @@
       "CatalogEntryResponse": {
         "additionalProperties": false,
         "properties": {
+          "allowedModels": {
+            "description": "Model IDs users may see and enable; empty allows every model the provider reports",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "caCertificate": {
             "type": "string"
           },
@@ -6426,6 +6484,14 @@
             "description": "Connections carry a credential",
             "type": "boolean"
           },
+          "tlsVerification": {
+            "enum": [
+              "public",
+              "ca-certificate",
+              "skip"
+            ],
+            "type": "string"
+          },
           "toolCallingMode": {
             "enum": [
               "native",
@@ -6451,12 +6517,38 @@
           "endpointOrigin",
           "endpointPath",
           "minimumTlsVersion",
+          "tlsVerification",
           "toolCallingMode",
           "createdAt",
           "updatedAt",
           "csp",
           "requiresApiKey",
           "dynamicEndpoint"
+        ],
+        "type": "object"
+      },
+      "CatalogModelsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "connections": {
+            "description": "Connections that reported models",
+            "format": "int64",
+            "type": "integer"
+          },
+          "models": {
+            "description": "Union of model IDs reported live by connections mapped to this integration",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "models",
+          "connections"
         ],
         "type": "object"
       },
@@ -7176,6 +7268,15 @@
           },
           "dnsZoneName": {
             "type": "string"
+          },
+          "firewallRules": {
+            "items": {
+              "$ref": "#/components/schemas/NetworkFirewallRule"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "id": {
             "type": "string"
@@ -10352,6 +10453,17 @@
       "CreateNetworkBody": {
         "additionalProperties": false,
         "properties": {
+          "firewallRules": {
+            "description": "Custom ingress security group rules applied to resources provisioned on this network",
+            "items": {
+              "$ref": "#/components/schemas/NetworkFirewallRule"
+            },
+            "maxItems": 50,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "name": {
             "description": "Name of the network",
             "maxLength": 255,
@@ -14255,6 +14367,19 @@
         ],
         "type": "object"
       },
+      "GetUserWorkspaceBootstrapScriptOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "script": {
+            "description": "The organization's user workspace bootstrap script, or empty when none is set.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "script"
+        ],
+        "type": "object"
+      },
       "GitHubAppConfigResponse": {
         "additionalProperties": false,
         "properties": {
@@ -15882,28 +16007,22 @@
         "additionalProperties": false,
         "properties": {
           "homeDirectories": {
-            "description": "Enable pam_mkhomedir for automatic home directory creation",
+            "description": "Enable pam_mkhomedir for automatic home directory creation; absent means unmanaged",
             "type": "boolean"
           },
           "sshKeys": {
-            "description": "Enable AuthorizedKeysCommand for SSH key lookup",
+            "description": "Enable AuthorizedKeysCommand for SSH key lookup; absent means unmanaged",
             "type": "boolean"
           },
           "sudoAccess": {
-            "description": "Enable sudoers.d for pwsudo group",
+            "description": "Enable sudoers.d for pwsudo group; absent means unmanaged",
             "type": "boolean"
           },
           "userPopulation": {
-            "description": "Enable libnss_cache, nsswitch, and user/group cache file sync",
+            "description": "Enable libnss_cache, nsswitch, and user/group cache file sync; absent means unmanaged",
             "type": "boolean"
           }
         },
-        "required": [
-          "userPopulation",
-          "homeDirectories",
-          "sshKeys",
-          "sudoAccess"
-        ],
         "type": "object"
       },
       "HeartbeatGroup": {
@@ -16036,6 +16155,10 @@
             "description": "Effective per-node access management settings (cluster defaults merged with the node's overrides), present only for nodes with overrides",
             "type": "object"
           },
+          "schedulerReporter": {
+            "description": "Whether this node should report cluster-wide scheduler partitions and jobs on its next heartbeat",
+            "type": "boolean"
+          },
           "status": {
             "description": "Heartbeat status",
             "type": "string"
@@ -16053,6 +16176,7 @@
         },
         "required": [
           "status",
+          "schedulerReporter",
           "accessManagement"
         ],
         "type": "object"
@@ -21535,6 +21659,44 @@
         ],
         "type": "object"
       },
+      "NetworkFirewallRule": {
+        "additionalProperties": false,
+        "properties": {
+          "cidr": {
+            "description": "Source CIDR block allowed by this rule",
+            "type": "string"
+          },
+          "fromPort": {
+            "description": "Start of the destination port range",
+            "format": "int64",
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "protocol": {
+            "description": "Protocol for the rule",
+            "enum": [
+              "tcp",
+              "udp"
+            ],
+            "type": "string"
+          },
+          "toPort": {
+            "description": "End of the destination port range",
+            "format": "int64",
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cidr",
+          "protocol",
+          "fromPort",
+          "toPort"
+        ],
+        "type": "object"
+      },
       "NetworkInterface": {
         "additionalProperties": false,
         "properties": {
@@ -23921,10 +24083,6 @@
             "description": "Provider endpoint URL",
             "type": "string"
           },
-          "hasCaCertificate": {
-            "description": "Whether a custom CA certificate is configured",
-            "type": "boolean"
-          },
           "id": {
             "description": "Unique identifier",
             "type": "string"
@@ -23944,6 +24102,15 @@
           "supportsUsage": {
             "description": "Whether the provider reports plan usage limits",
             "type": "boolean"
+          },
+          "tlsVerification": {
+            "description": "How the integration's TLS certificate is verified",
+            "enum": [
+              "public",
+              "ca-certificate",
+              "skip"
+            ],
+            "type": "string"
           },
           "type": {
             "description": "AI provider type",
@@ -24443,6 +24610,16 @@
       "OrganizationCatalogEntry": {
         "additionalProperties": false,
         "properties": {
+          "allowedModels": {
+            "description": "Model IDs users may see and enable; empty allows every model the provider reports",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "caCertificate": {
             "type": "string"
           },
@@ -24530,6 +24707,14 @@
             "description": "Connections carry a credential",
             "type": "boolean"
           },
+          "tlsVerification": {
+            "enum": [
+              "public",
+              "ca-certificate",
+              "skip"
+            ],
+            "type": "string"
+          },
           "toolCallingMode": {
             "enum": [
               "native",
@@ -24553,6 +24738,7 @@
           "endpointOrigin",
           "endpointPath",
           "minimumTlsVersion",
+          "tlsVerification",
           "toolCallingMode",
           "createdAt",
           "updatedAt",
@@ -25187,6 +25373,17 @@
       "PatchNetworkBody": {
         "additionalProperties": false,
         "properties": {
+          "firewallRules": {
+            "description": "Custom ingress security group rules applied to resources provisioned on this network; omit to leave unchanged",
+            "items": {
+              "$ref": "#/components/schemas/NetworkFirewallRule"
+            },
+            "maxItems": 50,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "regions": {
             "description": "List of regions with corresponding CIDR ranges",
             "items": {
@@ -29678,9 +29875,10 @@
           },
           "type": {
             "default": "cloudclusters",
-            "description": "The type of the bootstrap script.",
+            "description": "The type of the bootstrap script. cloudclusters runs on every cloud cluster before user bootstrap and health check scripts. userworkspaces runs as root in every user workspace at startup, before the home directory is prepared, with the username as the first argument; a non-zero exit stops the workspace from starting. Every user can read it from inside their workspace, so it must not contain secrets.",
             "enum": [
-              "cloudclusters"
+              "cloudclusters",
+              "userworkspaces"
             ],
             "examples": [
               "cloudclusters"
@@ -34872,20 +35070,32 @@
         "additionalProperties": false,
         "properties": {
           "homeDirectories": {
-            "description": "Enable pam_mkhomedir for automatic home directory creation",
-            "type": "boolean"
+            "description": "Enable pam_mkhomedir for automatic home directory creation. Send null to stop managing it.",
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "sshKeys": {
-            "description": "Enable AuthorizedKeysCommand for SSH key lookup",
-            "type": "boolean"
+            "description": "Enable AuthorizedKeysCommand for SSH key lookup. Send null to stop managing it.",
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "sudoAccess": {
-            "description": "Enable sudoers.d for pwsudo group",
-            "type": "boolean"
+            "description": "Enable sudoers.d for pwsudo group. Send null to stop managing it.",
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "userPopulation": {
-            "description": "Enable libnss_cache, nsswitch, and user/group cache file sync",
-            "type": "boolean"
+            "description": "Enable libnss_cache, nsswitch, and user/group cache file sync. Send null to stop managing it.",
+            "type": [
+              "boolean",
+              "null"
+            ]
           }
         },
         "type": "object"
@@ -36700,6 +36910,13 @@
             "description": "the reason why the user workspace cannot be safely killed, if applicable",
             "examples": [
               "User has running workflows"
+            ],
+            "type": "string"
+          },
+          "organization": {
+            "description": "the organization of the user associated with the workspace",
+            "examples": [
+              "parallelworks"
             ],
             "type": "string"
           },
@@ -40391,6 +40608,48 @@
           }
         },
         "summary": "Set AI integration icon",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/api/admin/products/ai/catalog/{catalogEntryId}/models": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nAggregates the model IDs existing connections report live for this integration, as a picking aid for the allowed-models list.",
+        "operationId": "list-ai-integration-catalog-models",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "catalogEntryId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogModelsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List models reported for an AI integration",
         "tags": [
           "Products"
         ]
@@ -53641,6 +53900,10 @@
             "name": "type",
             "schema": {
               "description": "The type of the bootstrap script.",
+              "enum": [
+                "cloudclusters",
+                "userworkspaces"
+              ],
               "examples": [
                 "cloudclusters"
               ],
@@ -53682,7 +53945,7 @@
         ]
       },
       "put": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the organization's bootstrap script of the given type, replacing any existing script of that type. Cloud cluster bootstrap scripts run on every cloud cluster before any user bootstrap or health check scripts.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the organization's bootstrap script of the given type, replacing any existing script of that type. Cloud cluster bootstrap scripts run on every cloud cluster before any user bootstrap or health check scripts. User workspace bootstrap scripts run as root in every user workspace in the organization at startup, before the home directory is prepared, receive the username as the first argument, and stop the workspace from starting when they exit non-zero. Every user can read the workspace script from inside their workspace, so it must not contain secrets.",
         "operationId": "put-organization-bootstrap-script",
         "parameters": [
           {
@@ -63972,6 +64235,71 @@
         ]
       }
     },
+    "/api/organizations/{organization}/policies/disable-password-login": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets disable-password-login policy for the organization.",
+        "operationId": "set-organization-disable-password-login-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/BooleanPolicyOutput"
+                  },
+                  "description": "Map of boolean policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: disable-password-login",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/organizations/{organization}/policies/enforce-mfa": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets whether the organization's members must complete multi-factor authentication to sign in. Only platform admins can change this.",
@@ -69946,6 +70274,21 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "description": "Content-Disposition the file is served with, so a browser download can be given a filename. Omit to serve the file as stored.",
+            "explode": false,
+            "in": "query",
+            "name": "contentDisposition",
+            "schema": {
+              "description": "Content-Disposition the file is served with, so a browser download can be given a filename. Omit to serve the file as stored.",
+              "examples": [
+                "attachment; filename=\"report.csv\""
+              ],
+              "maxLength": 512,
+              "pattern": "^[\\x20-\\x7e]*$",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -70373,6 +70716,21 @@
               "examples": [
                 "rwdlac"
               ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Content-Disposition the blob is served with, so a browser download can be given a filename. Omit to serve the blob as stored.",
+            "explode": false,
+            "in": "query",
+            "name": "contentDisposition",
+            "schema": {
+              "description": "Content-Disposition the blob is served with, so a browser download can be given a filename. Omit to serve the blob as stored.",
+              "examples": [
+                "attachment; filename=\"report.csv\""
+              ],
+              "maxLength": 512,
+              "pattern": "^[\\x20-\\x7e]*$",
               "type": "string"
             }
           }
@@ -75668,6 +76026,21 @@
               "format": "int64",
               "type": "integer"
             }
+          },
+          {
+            "description": "Content-Disposition the object is served with, so a browser download can be given a filename. Omit to serve the object as stored.",
+            "explode": false,
+            "in": "query",
+            "name": "contentDisposition",
+            "schema": {
+              "description": "Content-Disposition the object is served with, so a browser download can be given a filename. Omit to serve the object as stored.",
+              "examples": [
+                "attachment; filename=\"report.csv\""
+              ],
+              "maxLength": 512,
+              "pattern": "^[\\x20-\\x7e]*$",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -79934,6 +80307,147 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/storage/{name}/permissions": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the set of permissions granted on a storage.",
+        "operationId": "get-storage-permissions",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Platform name of the storage.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Platform name of the storage.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectPermissions"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get storage permissions",
+        "tags": [
+          "Storage"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces the set of permissions granted on a storage.",
+        "operationId": "update-storage-permissions",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Platform name of the storage.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Platform name of the storage.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubjectPermissions"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update storage permissions",
+        "tags": [
+          "Storage"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/user-workspace": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRetrieves the user workspace details for the specified user.",
@@ -83000,6 +83514,56 @@
           }
         },
         "summary": "Set platform policy: base-image-compliance",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/disable-password-login": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the disable-password-login policy for the platform.",
+        "operationId": "set-platform-disable-password-login-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/BooleanPolicyOutput"
+                  },
+                  "description": "Map of boolean policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: disable-password-login",
         "tags": [
           "Policies"
         ]
@@ -86320,6 +86884,38 @@
         "summary": "Check subdomain availability",
         "tags": [
           "Sessions"
+        ]
+      }
+    },
+    "/api/user-workspace/bootstrap-script": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the bootstrap script the currently authenticated user's organization runs in every user workspace at startup, or an empty script when none is set.",
+        "operationId": "get-user-workspace-bootstrap-script",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserWorkspaceBootstrapScriptOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get user workspace bootstrap script",
+        "tags": [
+          "User Workspaces"
         ]
       }
     },

@@ -163,14 +163,14 @@ type AcceptTermsBody struct {
 }
 
 type AccessManagementBody struct {
-	// Enable pam_mkhomedir for automatic home directory creation
-	HomeDirectories bool `json:"homeDirectories"`
-	// Enable AuthorizedKeysCommand for SSH key lookup
-	SSHKeys bool `json:"sshKeys"`
-	// Enable sudoers.d for pwsudo group
-	SudoAccess bool `json:"sudoAccess"`
-	// Enable libnss_cache, nsswitch, and user/group cache file sync
-	UserPopulation bool `json:"userPopulation"`
+	// Enable pam_mkhomedir for automatic home directory creation; absent means unmanaged
+	HomeDirectories *bool `json:"homeDirectories,omitempty"`
+	// Enable AuthorizedKeysCommand for SSH key lookup; absent means unmanaged
+	SSHKeys *bool `json:"sshKeys,omitempty"`
+	// Enable sudoers.d for pwsudo group; absent means unmanaged
+	SudoAccess *bool `json:"sudoAccess,omitempty"`
+	// Enable libnss_cache, nsswitch, and user/group cache file sync; absent means unmanaged
+	UserPopulation *bool `json:"userPopulation,omitempty"`
 }
 
 type AccessibleAiProviderResponse struct {
@@ -642,6 +642,8 @@ type AiProviderResponse struct {
 	AccountEmail *string `json:"accountEmail,omitempty"`
 	// Login of the connected GitHub account (copilot provider)
 	AccountLogin *string `json:"accountLogin,omitempty"`
+	// Admin allowlist from the catalog entry; empty allows every model the provider reports
+	AllowedModels []string `json:"allowedModels,omitempty"`
 	// Attached storage bucket infrastructure ID
 	BucketID *string `json:"bucketId,omitempty"`
 	// Attached storage bucket name
@@ -662,8 +664,6 @@ type AiProviderResponse struct {
 	Endpoint *string `json:"endpoint,omitempty"`
 	// Billing group the provider is provisioned under (managed providers)
 	Group *string `json:"group,omitempty"`
-	// Whether a custom CA certificate is configured
-	HasCaCertificate *bool `json:"hasCaCertificate,omitempty"`
 	// Unique identifier for the resource
 	ID string `json:"id"`
 	// Current icon configured on the provider's catalog entry
@@ -686,6 +686,8 @@ type AiProviderResponse struct {
 	SupportsResponses *bool `json:"supportsResponses,omitempty"`
 	// Whether the provider reports usage information
 	SupportsUsage *bool `json:"supportsUsage,omitempty"`
+	// How the integration's TLS certificate is verified
+	TLSVerification *string `json:"tlsVerification,omitempty"`
 	// The username of the user that owns this resource
 	User string `json:"user"`
 }
@@ -2140,8 +2142,10 @@ type BuiltInWorkspaceDefaults struct {
 }
 
 type BuiltinProviderResponse struct {
-	CaCertificate   *string `json:"caCertificate,omitempty"`
-	ConnectionCount int64   `json:"connectionCount"`
+	// Model IDs users may see and enable; empty allows every model the provider reports
+	AllowedModels   []string `json:"allowedModels,omitempty"`
+	CaCertificate   *string  `json:"caCertificate,omitempty"`
+	ConnectionCount int64    `json:"connectionCount"`
 	// First-class provider type implied by the entry's kind
 	Csp         string `json:"csp"`
 	DisplayName string `json:"displayName"`
@@ -2157,23 +2161,29 @@ type BuiltinProviderResponse struct {
 	Protocol          string `json:"protocol"`
 	// Connections carry a credential
 	RequiresAPIKey  bool    `json:"requiresApiKey"`
+	TLSVerification *string `json:"tlsVerification,omitempty"`
 	ToolCallingMode *string `json:"toolCallingMode,omitempty"`
 }
 
 type CatalogEntryBody struct {
-	CaCertificate     *string `json:"caCertificate,omitempty"`
-	DisplayName       string  `json:"displayName"`
-	EndpointOrigin    string  `json:"endpointOrigin"`
-	EndpointPath      string  `json:"endpointPath"`
-	ID                string  `json:"id"`
-	Kind              string  `json:"kind"`
-	Lifecycle         string  `json:"lifecycle"`
-	MinimumTLSVersion string  `json:"minimumTlsVersion"`
-	Protocol          string  `json:"protocol"`
-	ToolCallingMode   *string `json:"toolCallingMode,omitempty"`
+	// Model IDs users may see and enable; empty allows every model the provider reports
+	AllowedModels     []string `json:"allowedModels,omitempty"`
+	CaCertificate     *string  `json:"caCertificate,omitempty"`
+	DisplayName       string   `json:"displayName"`
+	EndpointOrigin    string   `json:"endpointOrigin"`
+	EndpointPath      string   `json:"endpointPath"`
+	ID                string   `json:"id"`
+	Kind              string   `json:"kind"`
+	Lifecycle         string   `json:"lifecycle"`
+	MinimumTLSVersion string   `json:"minimumTlsVersion"`
+	Protocol          string   `json:"protocol"`
+	TLSVerification   *string  `json:"tlsVerification,omitempty"`
+	ToolCallingMode   *string  `json:"toolCallingMode,omitempty"`
 }
 
 type CatalogEntryResponse struct {
+	// Model IDs users may see and enable; empty allows every model the provider reports
+	AllowedModels   []string  `json:"allowedModels,omitempty"`
 	CaCertificate   *string   `json:"caCertificate,omitempty"`
 	ConnectionCount int64     `json:"connectionCount"`
 	CreatedAt       time.Time `json:"createdAt"`
@@ -2195,8 +2205,16 @@ type CatalogEntryResponse struct {
 	Protocol          string  `json:"protocol"`
 	// Connections carry a credential
 	RequiresAPIKey  bool      `json:"requiresApiKey"`
+	TLSVerification string    `json:"tlsVerification"`
 	ToolCallingMode string    `json:"toolCallingMode"`
 	UpdatedAt       time.Time `json:"updatedAt"`
+}
+
+type CatalogModelsOutputBody struct {
+	// Connections that reported models
+	Connections int64 `json:"connections"`
+	// Union of model IDs reported live by connections mapped to this integration
+	Models []string `json:"models"`
 }
 
 type CertInfo struct {
@@ -2576,22 +2594,23 @@ type CloudAccountListItem struct {
 }
 
 type CloudAccountNetwork struct {
-	CloudAccount     string           `json:"cloudAccount"`
-	CloudResources   []RegionResource `json:"cloudResources"`
-	CreatedAt        time.Time        `json:"createdAt"`
-	Csp              string           `json:"csp"`
-	DNSZoneID        *string          `json:"dnsZoneId,omitempty"`
-	DNSZoneName      *string          `json:"dnsZoneName,omitempty"`
-	ID               string           `json:"id"`
-	Name             string           `json:"name"`
-	NatGateway       bool             `json:"natGateway"`
-	Organization     string           `json:"organization"`
-	PeeredToPlatform bool             `json:"peeredToPlatform"`
-	ProvisioningMode *string          `json:"provisioningMode,omitempty"`
-	RdmaProfile      *string          `json:"rdmaProfile,omitempty"`
-	Regions          []ConfigRegion   `json:"regions"`
-	Status           string           `json:"status"`
-	UpdatedAt        time.Time        `json:"updatedAt"`
+	CloudAccount     string                `json:"cloudAccount"`
+	CloudResources   []RegionResource      `json:"cloudResources"`
+	CreatedAt        time.Time             `json:"createdAt"`
+	Csp              string                `json:"csp"`
+	DNSZoneID        *string               `json:"dnsZoneId,omitempty"`
+	DNSZoneName      *string               `json:"dnsZoneName,omitempty"`
+	FirewallRules    []NetworkFirewallRule `json:"firewallRules,omitempty"`
+	ID               string                `json:"id"`
+	Name             string                `json:"name"`
+	NatGateway       bool                  `json:"natGateway"`
+	Organization     string                `json:"organization"`
+	PeeredToPlatform bool                  `json:"peeredToPlatform"`
+	ProvisioningMode *string               `json:"provisioningMode,omitempty"`
+	RdmaProfile      *string               `json:"rdmaProfile,omitempty"`
+	Regions          []ConfigRegion        `json:"regions"`
+	Status           string                `json:"status"`
+	UpdatedAt        time.Time             `json:"updatedAt"`
 }
 
 type CloudAccountNetworkSummary struct {
@@ -3635,6 +3654,8 @@ type CreateNamespaceInputBody struct {
 }
 
 type CreateNetworkBody struct {
+	// Custom ingress security group rules applied to resources provisioned on this network
+	FirewallRules []NetworkFirewallRule `json:"firewallRules,omitempty"`
 	// Name of the network
 	Name string `json:"name"`
 	// Whether to provision a NAT gateway for outbound internet access (only applies when provisioning mode is private and not peered to platform)
@@ -5064,6 +5085,11 @@ type GetUserResourcesBody struct {
 	Inactive []UserResource `json:"inactive"`
 }
 
+type GetUserWorkspaceBootstrapScriptOutputBody struct {
+	// The organization's user workspace bootstrap script, or empty when none is set.
+	Script string `json:"script"`
+}
+
 type GitHubAppConfigResponse struct {
 	AppID                   int64  `json:"appId"`
 	AppName                 string `json:"appName"`
@@ -5630,14 +5656,14 @@ type HealthSnapshotUsage struct {
 }
 
 type HeartbeatAccessManagement struct {
-	// Enable pam_mkhomedir for automatic home directory creation
-	HomeDirectories bool `json:"homeDirectories"`
-	// Enable AuthorizedKeysCommand for SSH key lookup
-	SSHKeys bool `json:"sshKeys"`
-	// Enable sudoers.d for pwsudo group
-	SudoAccess bool `json:"sudoAccess"`
-	// Enable libnss_cache, nsswitch, and user/group cache file sync
-	UserPopulation bool `json:"userPopulation"`
+	// Enable pam_mkhomedir for automatic home directory creation; absent means unmanaged
+	HomeDirectories *bool `json:"homeDirectories,omitempty"`
+	// Enable AuthorizedKeysCommand for SSH key lookup; absent means unmanaged
+	SSHKeys *bool `json:"sshKeys,omitempty"`
+	// Enable sudoers.d for pwsudo group; absent means unmanaged
+	SudoAccess *bool `json:"sudoAccess,omitempty"`
+	// Enable libnss_cache, nsswitch, and user/group cache file sync; absent means unmanaged
+	UserPopulation *bool `json:"userPopulation,omitempty"`
 }
 
 type HeartbeatGroup struct {
@@ -5677,6 +5703,8 @@ type HeartbeatOutputBody struct {
 	Groups []HeartbeatGroup `json:"groups,omitempty"`
 	// Effective per-node access management settings (cluster defaults merged with the node's overrides), present only for nodes with overrides
 	NodeOverrides map[string]HeartbeatAccessManagement `json:"nodeOverrides,omitempty"`
+	// Whether this node should report cluster-wide scheduler partitions and jobs on its next heartbeat
+	SchedulerReporter bool `json:"schedulerReporter"`
 	// Heartbeat status
 	Status string `json:"status"`
 	// Users with access to this cluster
@@ -7310,6 +7338,17 @@ type Network struct {
 	Zone *string `json:"zone,omitempty"`
 }
 
+type NetworkFirewallRule struct {
+	// Source CIDR block allowed by this rule
+	Cidr string `json:"cidr"`
+	// Start of the destination port range
+	FromPort int64 `json:"fromPort"`
+	// Protocol for the rule
+	Protocol string `json:"protocol"`
+	// End of the destination port range
+	ToPort int64 `json:"toPort"`
+}
+
 type NetworkInterface struct {
 	// The resource to which this network interface is attached.
 	AttachedTo *string `json:"attachedTo,omitempty"`
@@ -8054,8 +8093,6 @@ type OrgAiProviderResponse struct {
 	EmulatedToolCalling *bool `json:"emulatedToolCalling,omitempty"`
 	// Provider endpoint URL
 	Endpoint *string `json:"endpoint,omitempty"`
-	// Whether a custom CA certificate is configured
-	HasCaCertificate *bool `json:"hasCaCertificate,omitempty"`
 	// Unique identifier
 	ID string `json:"id"`
 	// Current icon configured on the provider's catalog entry
@@ -8066,6 +8103,8 @@ type OrgAiProviderResponse struct {
 	SupportsResponses *bool `json:"supportsResponses,omitempty"`
 	// Whether the provider reports plan usage limits
 	SupportsUsage *bool `json:"supportsUsage,omitempty"`
+	// How the integration's TLS certificate is verified
+	TLSVerification *string `json:"tlsVerification,omitempty"`
 	// AI provider type
 	Type string `json:"type"`
 }
@@ -8235,6 +8274,8 @@ type Organization struct {
 }
 
 type OrganizationCatalogEntry struct {
+	// Model IDs users may see and enable; empty allows every model the provider reports
+	AllowedModels []string  `json:"allowedModels,omitempty"`
 	CaCertificate *string   `json:"caCertificate,omitempty"`
 	CreatedAt     time.Time `json:"createdAt"`
 	// First-class provider type implied by the entry's kind
@@ -8254,6 +8295,7 @@ type OrganizationCatalogEntry struct {
 	Protocol          string  `json:"protocol"`
 	// Connections carry a credential
 	RequiresAPIKey  bool      `json:"requiresApiKey"`
+	TLSVerification string    `json:"tlsVerification"`
 	ToolCallingMode string    `json:"toolCallingMode"`
 	UpdatedAt       time.Time `json:"updatedAt"`
 }
@@ -8458,6 +8500,8 @@ type PatchModelConfigInputBody struct {
 }
 
 type PatchNetworkBody struct {
+	// Custom ingress security group rules applied to resources provisioned on this network; omit to leave unchanged
+	FirewallRules []NetworkFirewallRule `json:"firewallRules,omitempty"`
 	// List of regions with corresponding CIDR ranges
 	Regions []map[string]string `json:"regions"`
 }
@@ -9952,7 +9996,7 @@ type PublishRemoteWorkflowRequest struct {
 type PutBootstrapScriptInputBody struct {
 	// The script to run. Replaces the organization's existing script of this type.
 	Script string `json:"script"`
-	// The type of the bootstrap script.
+	// The type of the bootstrap script. cloudclusters runs on every cloud cluster before user bootstrap and health check scripts. userworkspaces runs as root in every user workspace at startup, before the home directory is prepared, with the username as the first argument; a non-zero exit stops the workspace from starting. Every user can read it from inside their workspace, so it must not contain secrets.
 	Type *string `json:"type,omitempty"`
 }
 
@@ -11814,13 +11858,13 @@ type UpdateAiProviderPermissionsInputBody struct {
 }
 
 type UpdateAccessManagementBody struct {
-	// Enable pam_mkhomedir for automatic home directory creation
+	// Enable pam_mkhomedir for automatic home directory creation. Send null to stop managing it.
 	HomeDirectories *bool `json:"homeDirectories,omitempty"`
-	// Enable AuthorizedKeysCommand for SSH key lookup
+	// Enable AuthorizedKeysCommand for SSH key lookup. Send null to stop managing it.
 	SSHKeys *bool `json:"sshKeys,omitempty"`
-	// Enable sudoers.d for pwsudo group
+	// Enable sudoers.d for pwsudo group. Send null to stop managing it.
 	SudoAccess *bool `json:"sudoAccess,omitempty"`
-	// Enable libnss_cache, nsswitch, and user/group cache file sync
+	// Enable libnss_cache, nsswitch, and user/group cache file sync. Send null to stop managing it.
 	UserPopulation *bool `json:"userPopulation,omitempty"`
 }
 
@@ -12442,6 +12486,8 @@ type UserWorkspace struct {
 	Name string `json:"name"`
 	// the reason why the user workspace cannot be safely killed, if applicable
 	NotSafeToKillReason *string `json:"notSafeToKillReason,omitempty"`
+	// the organization of the user associated with the workspace
+	Organization *string `json:"organization,omitempty"`
 	// the resolved version number of the image the workspace is actually running. Read from the image tag for pinned deployments, or resolved from the running image digest via the workspace's API for 'latest'-tag deployments.
 	RunningVersion *string `json:"runningVersion,omitempty"`
 	// whether the user workspace can be safely killed without disrupting the user
