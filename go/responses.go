@@ -275,6 +275,22 @@ func (m *ResponseMeta) GithubOauthCallbackHeaders() GithubOauthCallbackHeaders {
 	}
 }
 
+// GitlabOauthCallbackHeaders holds the headers GitlabOauthCallback declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GitlabOauthCallbackHeaders struct {
+	Location  string
+	SetCookie string
+}
+
+// GitlabOauthCallbackHeaders reads the headers GitlabOauthCallback declares out of the captured
+// response.
+func (m *ResponseMeta) GitlabOauthCallbackHeaders() GitlabOauthCallbackHeaders {
+	return GitlabOauthCallbackHeaders{
+		Location:  m.Header.Get("Location"),
+		SetCookie: m.Header.Get("Set-Cookie"),
+	}
+}
+
 // GetMarketplaceIconHeaders holds the headers GetMarketplaceIcon declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type GetMarketplaceIconHeaders struct {
@@ -366,6 +382,22 @@ type GetTokenAzureBucketHeaders struct {
 func (m *ResponseMeta) GetTokenAzureBucketHeaders() GetTokenAzureBucketHeaders {
 	return GetTokenAzureBucketHeaders{
 		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// GitlabOauthAuthorizeHeaders holds the headers GitlabOauthAuthorize declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GitlabOauthAuthorizeHeaders struct {
+	Location  string
+	SetCookie string
+}
+
+// GitlabOauthAuthorizeHeaders reads the headers GitlabOauthAuthorize declares out of the captured
+// response.
+func (m *ResponseMeta) GitlabOauthAuthorizeHeaders() GitlabOauthAuthorizeHeaders {
+	return GitlabOauthAuthorizeHeaders{
+		Location:  m.Header.Get("Location"),
+		SetCookie: m.Header.Get("Set-Cookie"),
 	}
 }
 

@@ -366,7 +366,11 @@ type AddAzureSlurmVersionInputBody struct {
 }
 
 type AddDeploymentInputBody struct {
-	// Model name to deploy on the existing Azure OpenAI account
+	// Rate-limit capacity to request, as Azure rates the model for this SKU. Defaults to 50 when omitted.
+	Capacity *int32 `json:"capacity,omitempty"`
+	// Publisher format of the model (e.g. OpenAI, Meta, Mistral AI, DeepSeek). Defaults to OpenAI when omitted.
+	Format *string `json:"format,omitempty"`
+	// Model name to deploy on the provider's existing Azure AI Foundry account
 	Model string `json:"model"`
 	// Azure SKU to deploy under (e.g. Standard, GlobalStandard, DataZoneStandard). Defaults to Standard when omitted.
 	Sku *string `json:"sku,omitempty"`
@@ -650,6 +654,8 @@ type AiProviderResponse struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// List of ingested documents
 	Documents []string `json:"documents,omitempty"`
+	// Whether emulated tool calling is enabled; only present for providers on emulated catalog entries
+	EmulatedToolCalling *bool `json:"emulatedToolCalling,omitempty"`
 	// List of model IDs enabled for the chat interface
 	EnabledModels []string `json:"enabledModels,omitempty"`
 	// Custom provider endpoint URL
@@ -664,8 +670,6 @@ type AiProviderResponse struct {
 	ImageURL *string `json:"imageUrl,omitempty"`
 	// Whether documents have been ingested
 	Ingested bool `json:"ingested"`
-	// Whether TLS certificate verification is skipped
-	InsecureSkipTLSVerify *bool `json:"insecureSkipTlsVerify,omitempty"`
 	// AI model name
 	Model *string `json:"model,omitempty"`
 	// Name of the AI provider
@@ -731,6 +735,8 @@ type Alert struct {
 }
 
 type Allocation struct {
+	// Resource types a managed allocation may fund. Empty means unrestricted.
+	Allowed []string `json:"allowed,omitempty"`
 	// Whether the current user can edit the allocation amount
 	CanEditTotal *bool `json:"canEditTotal,omitempty"`
 	// Current organization threshold level
@@ -747,10 +753,26 @@ type Allocation struct {
 	RatedInUsd *bool `json:"ratedInUsd,omitempty"`
 	// Total allocation amount
 	Total float64 `json:"total"`
+	// Allocation type: managed (USD, rated by the billing system) or custom (denominated in a custom unit). Derived from the unit when omitted.
+	Type *string `json:"type,omitempty"`
 	// Unit of measurement
 	Unit string `json:"unit"`
 	// Amount used
 	Used *float64 `json:"used,omitempty"`
+}
+
+type AllocationResourceGroup struct {
+	// Resource group name
+	Name string `json:"name"`
+	// Resource group owner's username
+	User string `json:"user"`
+}
+
+type AllocationResourceGroupList struct {
+	// True when the allocation funds more resource groups than this response returns
+	HasMore bool `json:"hasMore"`
+	// Resource groups currently funded by this allocation, sorted by name
+	ResourceGroups []AllocationResourceGroup `json:"resourceGroups"`
 }
 
 type AllocationSummary struct {
@@ -774,6 +796,30 @@ type Allocations struct {
 	Total *float64 `json:"total,omitempty"`
 	// Used allocation
 	Used *float64 `json:"used,omitempty"`
+}
+
+type AllowedInstanceTypes struct {
+	// AWS instance types the organization may launch
+	Aws []string `json:"aws,omitempty"`
+	// Azure instance types the organization may launch
+	Azure []string `json:"azure,omitempty"`
+	// Google instance types the organization may launch
+	Google []string `json:"google,omitempty"`
+	// Oracle shapes the organization may launch
+	Oracle []string `json:"oracle,omitempty"`
+}
+
+type AllowedInstanceTypesOutputBody struct {
+	// AWS instance types the organization may launch
+	Aws []string `json:"aws,omitempty"`
+	// Azure instance types the organization may launch
+	Azure []string `json:"azure,omitempty"`
+	// Google instance types the organization may launch
+	Google []string `json:"google,omitempty"`
+	// Oracle shapes the organization may launch
+	Oracle []string `json:"oracle,omitempty"`
+	// Where the limit in force comes from
+	Source string `json:"source"`
 }
 
 type AssignedOrganization struct {
@@ -829,7 +875,7 @@ type AuthSession struct {
 	Admin bool `json:"admin"`
 	// Cache-buster etag for the user's avatar; empty when no custom avatar is set.
 	AvatarEtag *string `json:"avatarEtag,omitempty"`
-	// Indicates if the user is a platform billing admin with read access to billing data across all organizations.
+	// Indicates if the user is a platform billing admin with read-only access to billing data and the admin cloud resource inventory across all organizations.
 	BillingAdmin bool `json:"billingAdmin"`
 	// Email address of the user.
 	Email string `json:"email"`
@@ -1154,6 +1200,21 @@ type AwsLustre struct {
 	User string `json:"user"`
 }
 
+type AwsLustreDefinition struct {
+	// Availability zone the filesystem is in.
+	AvailabilityZone *string `json:"availabilityZone,omitempty"`
+	// Data compression algorithm, e.g. LZ4.
+	FsxCompression *string `json:"fsxCompression,omitempty"`
+	// FSx deployment type, e.g. PERSISTENT_2.
+	FsxDeploymentType *string `json:"fsxDeploymentType,omitempty"`
+	// Per-unit throughput in MBps/TiB.
+	FsxThroughput *string `json:"fsxThroughput,omitempty"`
+	// Provisioned capacity in GB.
+	StorageCapacityGb *int32 `json:"storageCapacityGb,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+}
+
 type AwsLustreVersionSettings struct {
 	ExportPath      *string `json:"export_path,omitempty"`
 	Fsxcompression  *string `json:"fsxcompression,omitempty"`
@@ -1222,7 +1283,9 @@ type AwsSlurmDefinition struct {
 	Partitions []ClusterAwsSlurmPartition `json:"partitions,omitempty"`
 	Region     *string                    `json:"region,omitempty"`
 	// Root disk size in GiB.
-	RootSize             *int64 `json:"rootSize,omitempty"`
+	RootSize *int64 `json:"rootSize,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
 	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
 	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
 	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
@@ -1607,6 +1670,21 @@ type AzureManagedLustre struct {
 	Zone *string `json:"zone,omitempty"`
 }
 
+type AzureManagedLustreDefinition struct {
+	// Day of the week for the maintenance window.
+	MaintenanceWindowDay *string `json:"maintenanceWindowDay,omitempty"`
+	// Time of day for the maintenance window, UTC.
+	MaintenanceWindowTime *string `json:"maintenanceWindowTime,omitempty"`
+	// AMLFS SKU, e.g. AMLFS-Durable-Premium-125.
+	Sku *string `json:"sku,omitempty"`
+	// Provisioned capacity in TB.
+	StorageSizeTb *int32 `json:"storageSizeTb,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+	// Zone the filesystem is in.
+	Zone *string `json:"zone,omitempty"`
+}
+
 type AzureManagedLustreVersionSettings struct {
 	MaintenanceWindowDay     *string `json:"maintenance-window-day,omitempty"`
 	MaintenanceWindowTimeUtc *string `json:"maintenance-window-time-UTC,omitempty"`
@@ -1720,7 +1798,9 @@ type AzureSlurmDefinition struct {
 	Partitions   []ClusterAzureSlurmPartition `json:"partitions,omitempty"`
 	Region       *string                      `json:"region,omitempty"`
 	// Root disk size in GiB.
-	RootSize             *int64 `json:"rootSize,omitempty"`
+	RootSize *int64 `json:"rootSize,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
 	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
 	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
 	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
@@ -1957,6 +2037,17 @@ type Bucket struct {
 	User string `json:"user"`
 }
 
+type BucketDefinition struct {
+	// Azure resource group the storage account belongs to.
+	AzureResourceGroup *string `json:"azureResourceGroup,omitempty"`
+	// Azure storage account hosting the container.
+	AzureStorageAccount *string `json:"azureStorageAccount,omitempty"`
+	// Name of the bucket at the cloud provider, which can differ from the platform name.
+	BucketName *string `json:"bucketName,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+}
+
 type BucketOutput struct {
 	// Resources the storage is attached to.
 	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
@@ -2019,12 +2110,16 @@ type BucketResource struct {
 	Description *string `json:"description,omitempty"`
 	// The display name of the storage.
 	DisplayName *string `json:"displayName,omitempty"`
+	// Two regions forming a dual-region to provision the bucket in (e.g. ["us-east1","us-west1"]). Both regions must belong to the same location. For Google buckets only.
+	DualRegions []string `json:"dualRegions,omitempty"`
 	// Indicates if versioning will be enabled. For AWS buckets only.
 	EnableVersioning *bool `json:"enableVersioning,omitempty"`
 	// The group to which the storage will be associated.
 	Group string `json:"group"`
-	// Region the storage will be provisioned in.
-	Region string `json:"region"`
+	// Multi-region location to provision the bucket in. When set, the bucket is provisioned as a multi-region bucket instead of a regional bucket. For Google buckets only.
+	MultiRegion *string `json:"multiRegion,omitempty"`
+	// Region the storage will be provisioned in. Required unless a Google multi-region or dual-region is specified.
+	Region *string `json:"region,omitempty"`
 	// The tags associated with the storage.
 	Tags []string `json:"tags,omitempty"`
 }
@@ -2046,22 +2141,20 @@ type BuiltInWorkspaceDefaults struct {
 
 type BuiltinProviderResponse struct {
 	CaCertificate   *string `json:"caCertificate,omitempty"`
-	CloudBoundary   *string `json:"cloudBoundary,omitempty"`
 	ConnectionCount int64   `json:"connectionCount"`
 	// First-class provider type implied by the entry's kind
 	Csp         string `json:"csp"`
 	DisplayName string `json:"displayName"`
 	// Endpoint is provisioned or session-backed rather than a fixed vendor URL
-	DynamicEndpoint   bool    `json:"dynamicEndpoint"`
-	EndpointOrigin    string  `json:"endpointOrigin"`
-	EndpointPath      string  `json:"endpointPath"`
-	ID                string  `json:"id"`
-	Kind              string  `json:"kind"`
-	Lifecycle         string  `json:"lifecycle"`
-	MinimumTLSVersion string  `json:"minimumTlsVersion"`
-	ModelCount        int64   `json:"modelCount"`
-	Protocol          string  `json:"protocol"`
-	Region            *string `json:"region,omitempty"`
+	DynamicEndpoint   bool   `json:"dynamicEndpoint"`
+	EndpointOrigin    string `json:"endpointOrigin"`
+	EndpointPath      string `json:"endpointPath"`
+	ID                string `json:"id"`
+	Kind              string `json:"kind"`
+	Lifecycle         string `json:"lifecycle"`
+	MinimumTLSVersion string `json:"minimumTlsVersion"`
+	ModelCount        int64  `json:"modelCount"`
+	Protocol          string `json:"protocol"`
 	// Connections carry a credential
 	RequiresAPIKey  bool    `json:"requiresApiKey"`
 	ToolCallingMode *string `json:"toolCallingMode,omitempty"`
@@ -2069,7 +2162,6 @@ type BuiltinProviderResponse struct {
 
 type CatalogEntryBody struct {
 	CaCertificate     *string `json:"caCertificate,omitempty"`
-	CloudBoundary     *string `json:"cloudBoundary,omitempty"`
 	DisplayName       string  `json:"displayName"`
 	EndpointOrigin    string  `json:"endpointOrigin"`
 	EndpointPath      string  `json:"endpointPath"`
@@ -2078,13 +2170,11 @@ type CatalogEntryBody struct {
 	Lifecycle         string  `json:"lifecycle"`
 	MinimumTLSVersion string  `json:"minimumTlsVersion"`
 	Protocol          string  `json:"protocol"`
-	Region            *string `json:"region,omitempty"`
 	ToolCallingMode   *string `json:"toolCallingMode,omitempty"`
 }
 
 type CatalogEntryResponse struct {
 	CaCertificate   *string   `json:"caCertificate,omitempty"`
-	CloudBoundary   *string   `json:"cloudBoundary,omitempty"`
 	ConnectionCount int64     `json:"connectionCount"`
 	CreatedAt       time.Time `json:"createdAt"`
 	// First-class provider type implied by the entry's kind
@@ -2103,7 +2193,6 @@ type CatalogEntryResponse struct {
 	ModelCount        int64   `json:"modelCount"`
 	ObjectID          string  `json:"objectId"`
 	Protocol          string  `json:"protocol"`
-	Region            *string `json:"region,omitempty"`
 	// Connections carry a credential
 	RequiresAPIKey  bool      `json:"requiresApiKey"`
 	ToolCallingMode string    `json:"toolCallingMode"`
@@ -2519,6 +2608,90 @@ type CloudAccountPermissionsEntry struct {
 	Organization bool     `json:"organization"`
 }
 
+type CloudBrowserClusterDeployment struct {
+	// Cluster name.
+	ClusterName string `json:"clusterName"`
+	// Cloud service provider.
+	Csp string `json:"csp"`
+	// The deployment ID.
+	DeploymentID *string `json:"deploymentId,omitempty"`
+	// The deployment number.
+	DeploymentNumber int64 `json:"deploymentNumber"`
+	// Deployment end time, from the controller instance.
+	EndTime *time.Time `json:"endTime,omitempty"`
+	// Instances in this cluster deployment.
+	Instances []CloudBrowserInstance `json:"instances"`
+	// Project tag.
+	Project string `json:"project"`
+	// Region.
+	Region string `json:"region"`
+	// Number of running instances.
+	RunningInstances int64 `json:"runningInstances"`
+	// Deployment start time, from the controller instance.
+	StartTime time.Time `json:"startTime"`
+	// Deployment state, from the controller instance.
+	State string `json:"state"`
+	// Tags of the first instance.
+	Tags map[string]string `json:"tags,omitempty"`
+}
+
+type CloudBrowserInstance struct {
+	// Cloud account id.
+	AccountID string `json:"accountId"`
+	// Azure VM unique id.
+	AzureVMID *string `json:"azureVmId,omitempty"`
+	// Azure VM kind (VM or VMSS VM).
+	AzureVMType *string `json:"azureVmType,omitempty"`
+	// Raw CSP state.
+	CloudState string `json:"cloudState"`
+	// Name of the cluster the instance belongs to.
+	ClusterName string `json:"clusterName"`
+	// PW compute type tag (controller or compute).
+	ComputeType *string `json:"computeType,omitempty"`
+	// Cloud service provider.
+	Csp string `json:"csp"`
+	// Deployment (platform) tag.
+	Deployment string `json:"deployment"`
+	// The deployment number, from the resource tags.
+	DeploymentNumber int64 `json:"deploymentNumber"`
+	// Stop or termination time.
+	EndTime *time.Time `json:"endTime,omitempty"`
+	// Cloud-native instance id.
+	InstanceID string `json:"instanceId"`
+	// Instance name.
+	InstanceName string `json:"instanceName"`
+	// Machine type.
+	InstanceType string `json:"instanceType"`
+	// Organization name owning the cloud account.
+	KeyOwner string `json:"keyOwner"`
+	// Last time the instance was seen in the cloud inventory.
+	LastSeenAt time.Time `json:"lastSeenAt"`
+	// Owner tag.
+	Owner string `json:"owner"`
+	// Private IP address.
+	PrivateIP string `json:"privateIp"`
+	// Project tag.
+	Project string `json:"project"`
+	// Provider tag.
+	Provider string `json:"provider"`
+	// Public IP address.
+	PublicIP string `json:"publicIp"`
+	// Region of the instance.
+	Region string `json:"region"`
+	// Whether the instance is a spot instance.
+	SpotInstance bool `json:"spotInstance"`
+	// Launch time.
+	StartTime time.Time `json:"startTime"`
+	// Normalized state.
+	State string `json:"state"`
+	// All resource tags with normalized keys.
+	Tags map[string]string `json:"tags,omitempty"`
+	// Platform user from the resource tags.
+	User string `json:"user"`
+	// Availability zone.
+	Zone *string `json:"zone,omitempty"`
+}
+
 type CloudImage struct {
 	// CPU architecture (amd64, arm64)
 	Architecture string `json:"architecture"`
@@ -2549,7 +2722,7 @@ type CloudImage struct {
 type Cluster struct {
 	// Whether orphan alerts are muted for the whole deployment.
 	AlertsMuted *bool `json:"alertsMuted,omitempty"`
-	// Pool (cluster) name.
+	// Cluster name.
 	ClusterName string `json:"clusterName"`
 	// Cloud service provider.
 	Csp string `json:"csp"`
@@ -2867,9 +3040,13 @@ type ClusterUpdatePartition struct {
 }
 
 type ClusterUpdateVariables struct {
-	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// New controller instance type. May only change while the cluster's controller is stopped.
+	ControllerInstanceType *string                 `json:"controllerInstanceType,omitempty"`
+	DesktopSession         *DesktopSessionSettings `json:"desktopSession,omitempty"`
 	// Slurm partition definitions
 	Partitions []ClusterUpdatePartition `json:"partitions,omitempty"`
+	// Record every node's running processes and what preceded a freeze. The agents start or stop collecting on their next heartbeat.
+	RunningProcesses *bool `json:"runningProcesses,omitempty"`
 	// Max seconds to wait for nodes to start
 	SlurmResumeTimeout any `json:"slurmResumeTimeout,omitempty"`
 	// How DOWN nodes are returned to service
@@ -2945,6 +3122,11 @@ type ConnectStateBody struct {
 	Error *string `json:"error,omitempty"`
 	// The workspace's connection state; terminal on/off clears the reported state.
 	Status string `json:"status"`
+}
+
+type ConnectWithTokenInputBody struct {
+	// A personal access token from the GitLab server with the read_api scope. Stored in the platform vault and never returned.
+	Token string `json:"token"`
 }
 
 type ConnectionPathInputBody struct {
@@ -3162,12 +3344,14 @@ type CreateAwsSlurmClusterBody struct {
 	Partitions []ClusterAwsSlurmPartition `json:"partitions,omitempty"`
 	Region     *string                    `json:"region,omitempty"`
 	// Root disk size in GiB.
-	RootSize             *int64        `json:"rootSize,omitempty"`
-	RunTimeAlert         *RunTimeAlert `json:"runTimeAlert,omitempty"`
-	SlurmResumeTimeout   *int64        `json:"slurmResumeTimeout,omitempty"`
-	SlurmReturnToService *int64        `json:"slurmReturnToService,omitempty"`
-	SlurmSuspendTime     *int64        `json:"slurmSuspendTime,omitempty"`
-	SlurmSuspendTimeout  *int64        `json:"slurmSuspendTimeout,omitempty"`
+	RootSize     *int64        `json:"rootSize,omitempty"`
+	RunTimeAlert *RunTimeAlert `json:"runTimeAlert,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
+	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64 `json:"slurmSuspendTimeout,omitempty"`
 	// Tags.
 	Tags []string `json:"tags,omitempty"`
 	// Type discriminator.
@@ -3210,12 +3394,14 @@ type CreateAzureSlurmClusterBody struct {
 	Partitions []ClusterAzureSlurmPartition `json:"partitions,omitempty"`
 	Region     *string                      `json:"region,omitempty"`
 	// Root disk size in GiB.
-	RootSize             *int64        `json:"rootSize,omitempty"`
-	RunTimeAlert         *RunTimeAlert `json:"runTimeAlert,omitempty"`
-	SlurmResumeTimeout   *int64        `json:"slurmResumeTimeout,omitempty"`
-	SlurmReturnToService *int64        `json:"slurmReturnToService,omitempty"`
-	SlurmSuspendTime     *int64        `json:"slurmSuspendTime,omitempty"`
-	SlurmSuspendTimeout  *int64        `json:"slurmSuspendTimeout,omitempty"`
+	RootSize     *int64        `json:"rootSize,omitempty"`
+	RunTimeAlert *RunTimeAlert `json:"runTimeAlert,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
+	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64 `json:"slurmSuspendTimeout,omitempty"`
 	// Tags.
 	Tags []string `json:"tags,omitempty"`
 	// Type discriminator.
@@ -3393,12 +3579,14 @@ type CreateGoogleSlurmClusterBody struct {
 	Partitions []ClusterGoogleSlurmPartition `json:"partitions,omitempty"`
 	Region     *string                       `json:"region,omitempty"`
 	// Root disk size in GiB.
-	RootSize             *int64        `json:"rootSize,omitempty"`
-	RunTimeAlert         *RunTimeAlert `json:"runTimeAlert,omitempty"`
-	SlurmResumeTimeout   *int64        `json:"slurmResumeTimeout,omitempty"`
-	SlurmReturnToService *int64        `json:"slurmReturnToService,omitempty"`
-	SlurmSuspendTime     *int64        `json:"slurmSuspendTime,omitempty"`
-	SlurmSuspendTimeout  *int64        `json:"slurmSuspendTimeout,omitempty"`
+	RootSize     *int64        `json:"rootSize,omitempty"`
+	RunTimeAlert *RunTimeAlert `json:"runTimeAlert,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
+	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64 `json:"slurmSuspendTimeout,omitempty"`
 	// Tags.
 	Tags []string `json:"tags,omitempty"`
 	// Type discriminator.
@@ -3510,15 +3698,17 @@ type CreateOpenstackSlurmClusterBody struct {
 	FloatingIPNetwork *string `json:"floatingIpNetwork,omitempty"`
 	HealthCheck       *string `json:"healthCheck,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
-	Name                 string                           `json:"name"`
-	NetworkID            *string                          `json:"networkId,omitempty"`
-	Partitions           []ClusterOpenstackSlurmPartition `json:"partitions,omitempty"`
-	Region               *string                          `json:"region,omitempty"`
-	RunTimeAlert         *RunTimeAlert                    `json:"runTimeAlert,omitempty"`
-	SlurmResumeTimeout   *int64                           `json:"slurmResumeTimeout,omitempty"`
-	SlurmReturnToService *int64                           `json:"slurmReturnToService,omitempty"`
-	SlurmSuspendTime     *int64                           `json:"slurmSuspendTime,omitempty"`
-	SlurmSuspendTimeout  *int64                           `json:"slurmSuspendTimeout,omitempty"`
+	Name         string                           `json:"name"`
+	NetworkID    *string                          `json:"networkId,omitempty"`
+	Partitions   []ClusterOpenstackSlurmPartition `json:"partitions,omitempty"`
+	Region       *string                          `json:"region,omitempty"`
+	RunTimeAlert *RunTimeAlert                    `json:"runTimeAlert,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
+	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64 `json:"slurmSuspendTimeout,omitempty"`
 	// Tags.
 	Tags []string `json:"tags,omitempty"`
 	// Type discriminator.
@@ -3557,12 +3747,14 @@ type CreateOracleSlurmClusterBody struct {
 	Partitions []ClusterOracleSlurmPartition `json:"partitions,omitempty"`
 	Region     *string                       `json:"region,omitempty"`
 	// Root disk size in GiB.
-	RootSize             *int64        `json:"rootSize,omitempty"`
-	RunTimeAlert         *RunTimeAlert `json:"runTimeAlert,omitempty"`
-	SlurmResumeTimeout   *int64        `json:"slurmResumeTimeout,omitempty"`
-	SlurmReturnToService *int64        `json:"slurmReturnToService,omitempty"`
-	SlurmSuspendTime     *int64        `json:"slurmSuspendTime,omitempty"`
-	SlurmSuspendTimeout  *int64        `json:"slurmSuspendTimeout,omitempty"`
+	RootSize     *int64        `json:"rootSize,omitempty"`
+	RunTimeAlert *RunTimeAlert `json:"runTimeAlert,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
+	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64 `json:"slurmSuspendTimeout,omitempty"`
 	// Tags.
 	Tags []string `json:"tags,omitempty"`
 	// Type discriminator.
@@ -3651,6 +3843,19 @@ type CreateReportBody struct {
 	Type string `json:"type"`
 	// Specific user or group for the report.
 	Who *string `json:"who,omitempty"`
+}
+
+type CreateReservationBody struct {
+	// Cloud service provider that issued the reservation.
+	Csp string `json:"csp"`
+	// Reservation description.
+	Description *string `json:"description,omitempty"`
+	// Name of the group that can use this reservation.
+	Group string `json:"group"`
+	// Cloud service provider reservation identifier.
+	ID string `json:"id"`
+	// Instance type the reservation holds capacity for.
+	InstanceType *string `json:"instanceType,omitempty"`
 }
 
 type CreateRoleBindingInputBody struct {
@@ -3788,7 +3993,7 @@ type CreateWorkflowBody struct {
 	// Resource name
 	Name   string                  `json:"name"`
 	Remote *RemoteWorkflowSettings `json:"remote,omitempty"`
-	// Selected workflow subtype (required for remote type)
+	// Where a remote workflow lives (required for remote type); must match the host of remote.repo.
 	Subtype *string `json:"subtype,omitempty"`
 	// Resource tags
 	Tags []string `json:"tags,omitempty"`
@@ -3811,6 +4016,8 @@ type CreateWorkflowRunInputBody struct {
 	Inputs map[string]any `json:"inputs,omitempty"`
 	// Slug of a marketplace item to run
 	Marketplace *string `json:"marketplace,omitempty"`
+	// Run the workflow.yaml at the root of a repository: OWNER/REPO or a github.com URL, or the URL of a project on one of the organization's registered GitLab servers, each with an optional @REF. Read as the caller, treated as third-party code.
+	Repository *string `json:"repository,omitempty"`
 	// Session names
 	SessionNames map[string]string `json:"sessionNames,omitempty"`
 	// User-provided slug
@@ -4017,6 +4224,11 @@ type DeleteRatedCostsResponseBody struct {
 	Deleted int64 `json:"deleted"`
 }
 
+type DeleteReservationBody struct {
+	// Identifier of the reservation to delete.
+	Reservation string `json:"reservation"`
+}
+
 type DeleteStaleIndexBody struct {
 	// Collection the index belongs to
 	Collection string `json:"collection"`
@@ -4132,6 +4344,17 @@ type Disk struct {
 	// Username of the disk owner
 	User string `json:"user"`
 	// Zone of the disk
+	Zone *string `json:"zone,omitempty"`
+}
+
+type DiskDefinition struct {
+	// Underlying disk type, e.g. gp3.
+	DiskType *string `json:"diskType,omitempty"`
+	// Provisioned capacity in GB.
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+	// Zone the disk is in.
 	Zone *string `json:"zone,omitempty"`
 }
 
@@ -4754,6 +4977,8 @@ type GeneralCluster struct {
 	Region *string `json:"region,omitempty"`
 	// The number of requested nodes in the cluster.
 	RequestedNodes int64 `json:"requestedNodes"`
+	// Cloud-cluster only: whether running-processes collection is turned on, which lets anyone with access to the cluster view processes and freeze events on each node's detail page.
+	RunningProcesses *bool `json:"runningProcesses,omitempty"`
 	// The scheduler type used by the cluster.
 	SchedulerType *string `json:"schedulerType,omitempty"`
 	// True when SSH to this cluster routes through the platform. False when it is dialed directly, which a cluster on a public address does unless an administrator has whitelisted it.
@@ -4847,6 +5072,77 @@ type GitHubAppConfigResponse struct {
 	ClientSecretConfigured  bool   `json:"clientSecretConfigured"`
 	PrivateKeyConfigured    bool   `json:"privateKeyConfigured"`
 	WebhookSecretConfigured bool   `json:"webhookSecretConfigured"`
+}
+
+type GitLabConnection struct {
+	// Origin of the GitLab instance.
+	BaseURL string `json:"baseUrl"`
+	// When the account was connected, present once connected.
+	ConnectedAt *time.Time `json:"connectedAt,omitempty"`
+	// Hostname repository URLs are matched against.
+	Host string `json:"host"`
+	// How the account was connected, present once connected.
+	Method *string `json:"method,omitempty"`
+	// How this server lets members connect: oauth, token, or both.
+	Methods []string `json:"methods"`
+	// Name of the registered GitLab server.
+	Server string `json:"server"`
+	// The connected GitLab username, present once connected.
+	Username *string `json:"username,omitempty"`
+}
+
+type GitLabServer struct {
+	// Whether members may connect by pasting a personal access token with the read_api scope.
+	AllowPersonalAccessTokens bool `json:"allowPersonalAccessTokens"`
+	// Whether the platform may reach the server on a private network address. Platform administrators only.
+	AllowPrivateAddress bool `json:"allowPrivateAddress"`
+	// Origin of the GitLab instance, for example https://gitlab.example.com.
+	BaseURL string `json:"baseUrl"`
+	// Application ID of the OAuth application registered on the server, when members may connect through OAuth.
+	ClientID *string `json:"clientId,omitempty"`
+	// Whether the application secret is stored.
+	ClientSecretConfigured bool      `json:"clientSecretConfigured"`
+	CreatedAt              time.Time `json:"createdAt"`
+	// Hostname repository URLs are matched against.
+	Host string `json:"host"`
+	// Unique identifier of the server registration.
+	ID string `json:"id"`
+	// How members may connect: oauth, token, or both.
+	Methods []string `json:"methods"`
+	// Short name of the server, unique within the organization.
+	Name string `json:"name"`
+	// Redirect URI to configure on the OAuth application.
+	RedirectURI string `json:"redirectUri"`
+}
+
+type GitLabServerCreateBody struct {
+	// Let members connect by pasting a personal access token with the read_api scope.
+	AllowPersonalAccessTokens *bool `json:"allowPersonalAccessTokens,omitempty"`
+	// Whether the platform may reach the server on a private network address. Platform administrators only.
+	AllowPrivateAddress *bool `json:"allowPrivateAddress,omitempty"`
+	// Origin of the GitLab instance, for example https://gitlab.example.com.
+	BaseURL string `json:"baseUrl"`
+	// Application ID of the OAuth application registered on the server. Give it together with clientSecret to let members connect through OAuth.
+	ClientID *string `json:"clientId,omitempty"`
+	// Secret of the OAuth application. Stored in the platform vault and never returned.
+	ClientSecret *string `json:"clientSecret,omitempty"`
+	// Short name of the server, unique within the organization.
+	Name string `json:"name"`
+}
+
+type GitLabServerPatchBody struct {
+	// Let members connect by pasting a personal access token with the read_api scope.
+	AllowPersonalAccessTokens *bool `json:"allowPersonalAccessTokens,omitempty"`
+	// Whether the platform may reach the server on a private network address. Platform administrators only.
+	AllowPrivateAddress *bool `json:"allowPrivateAddress,omitempty"`
+	// New origin of the GitLab instance.
+	BaseURL *string `json:"baseUrl,omitempty"`
+	// New application ID.
+	ClientID *string `json:"clientId,omitempty"`
+	// New application secret.
+	ClientSecret *string `json:"clientSecret,omitempty"`
+	// New short name of the server.
+	Name *string `json:"name,omitempty"`
 }
 
 type GoogleBucket struct {
@@ -5088,6 +5384,17 @@ type GoogleManagedLustre struct {
 	Zone *string `json:"zone,omitempty"`
 }
 
+type GoogleManagedLustreDefinition struct {
+	// Throughput tier in MBps per TiB, which is what the price is keyed on.
+	PerformanceMbpsPerTib *int64 `json:"performanceMbpsPerTib,omitempty"`
+	// Provisioned capacity in GB.
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+	// Zone the filesystem is in.
+	Zone *string `json:"zone,omitempty"`
+}
+
 type GoogleManagedLustreVersionSettings struct {
 	Performance *int64  `json:"performance,omitempty"`
 	Region      *string `json:"region,omitempty"`
@@ -5121,7 +5428,9 @@ type GoogleSlurmDefinition struct {
 	Partitions []ClusterGoogleSlurmPartition `json:"partitions,omitempty"`
 	Region     *string                       `json:"region,omitempty"`
 	// Root disk size in GiB.
-	RootSize             *int64 `json:"rootSize,omitempty"`
+	RootSize *int64 `json:"rootSize,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
 	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
 	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
 	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
@@ -5654,63 +5963,54 @@ type Instance struct {
 	Zone string `json:"zone"`
 }
 
-type InstanceData struct {
-	// Cloud account id.
-	AccountID string `json:"AccountID"`
-	// Azure VM kind (VM or VMSS VM).
-	AzureVMType *string `json:"AzureVMType,omitempty"`
-	// Azure VM unique id.
-	AzureVMID *string `json:"AzureVmID,omitempty"`
-	// Last time the resource was seen.
-	CacheTime string `json:"CacheTime"`
-	// Raw CSP state.
-	CloudState string `json:"CloudState"`
-	// PW compute type tag (controller/compute).
-	ComputeType *string `json:"ComputeType,omitempty"`
-	// Cloud service provider.
-	Csp string `json:"Csp"`
-	// Deployment (platform) tag.
-	Deployment string `json:"Deployment"`
-	// Stop/termination time.
-	EndTime *string `json:"EndTime,omitempty"`
-	// Cloud-native instance id.
-	InstanceID string `json:"InstanceID"`
-	// Instance name.
-	InstanceName string `json:"InstanceName"`
-	// Machine type.
-	InstanceType string `json:"InstanceType"`
-	// Organization name owning the cloud account.
-	KeyOwner string `json:"KeyOwner"`
-	// Owner tag.
-	Owner string `json:"Owner"`
-	// Pool tag.
-	Pool string `json:"Pool"`
-	// Private IP address.
-	PrivateIP string `json:"PrivateIP"`
-	// Project tag.
-	Project string `json:"Project"`
-	// Provider tag.
-	Provider string `json:"Provider"`
-	// Public IP address.
-	PublicIP string `json:"PublicIP"`
-	// Region of the instance.
-	Region string `json:"Region"`
-	// Session number from the resource tags.
-	Session string `json:"Session"`
-	// Whether the instance is a spot instance.
-	SpotInstance bool `json:"SpotInstance"`
-	// Launch time.
-	StartTime string `json:"StartTime"`
-	// Normalized state.
-	State string `json:"State"`
-	// Unused legacy field.
-	StopTime string `json:"StopTime"`
-	// All resource tags with normalized keys.
-	Tags map[string]string `json:"Tags,omitempty"`
-	// Platform user from the resource tags.
-	User string `json:"User"`
-	// Availability zone.
-	Zone *string `json:"Zone,omitempty"`
+type InstanceType struct {
+	// Supports Azure accelerated networking
+	AcceleratedNetworking *bool `json:"acceleratedNetworking,omitempty"`
+	// CPU architecture
+	Arch *string `json:"arch,omitempty"`
+	// Price per OCPU per hour for a flexible shape
+	CPUHourly *float64 `json:"cpuHourly,omitempty"`
+	// Supports AWS Elastic Fabric Adapter
+	Efa *bool `json:"efa,omitempty"`
+	// Supports GCP Flex Start provisioning
+	FlexStart *bool `json:"flexStart,omitempty"`
+	// Supports Azure Hyper-V generation 1
+	Gen1 *bool `json:"gen1,omitempty"`
+	// Supports Azure Hyper-V generation 2
+	Gen2 *bool `json:"gen2,omitempty"`
+	// Model of the built-in GPUs
+	GpuName *string `json:"gpuName,omitempty"`
+	// Number of built-in GPUs
+	Gpus *int64 `json:"gpus,omitempty"`
+	// On-demand price per hour in USD
+	HourlyPrice *float64 `json:"hourlyPrice,omitempty"`
+	// OCI flexible shape: CPU and memory are chosen at launch
+	IsFlex *bool `json:"isFlex,omitempty"`
+	// Size of the local temporary disk in GB
+	LocalDiskSizeGb *float64 `json:"localDiskSizeGb,omitempty"`
+	// Maximum memory in GB for a flexible shape
+	MaxMemoryGb *float64 `json:"maxMemoryGb,omitempty"`
+	// Maximum OCPUs for a flexible shape
+	MaxOcpus *int64 `json:"maxOcpus,omitempty"`
+	// Memory in GB
+	MemoryGb float64 `json:"memoryGb"`
+	// Price per GB of memory per hour for a flexible shape
+	MemoryHourly *float64 `json:"memoryHourly,omitempty"`
+	// Surcharge per hour for GCP Tier 1 networking, where the shape supports it
+	Tier1HourlyPrice *float64 `json:"tier1HourlyPrice,omitempty"`
+	// Virtual CPUs
+	Vcpus int64 `json:"vcpus"`
+}
+
+type InstanceTypeSummary struct {
+	// CPU architecture
+	Arch *string `json:"arch,omitempty"`
+	// Memory in GB
+	MemoryGb float64 `json:"memoryGb"`
+	// Instance type name
+	Name string `json:"name"`
+	// Virtual CPUs
+	Vcpus int64 `json:"vcpus"`
 }
 
 type IntPolicyOutput struct {
@@ -7130,6 +7430,40 @@ type NodeAccessManagementBody struct {
 	UserPopulation *bool `json:"userPopulation,omitempty"`
 }
 
+type NodeBoot struct {
+	BootTime *time.Time `json:"bootTime,omitempty"`
+	Kernel   *string    `json:"kernel,omitempty"`
+	NodeType *string    `json:"nodeType,omitempty"`
+}
+
+type NodeDisk struct {
+	Free        int64   `json:"free"`
+	InodesFree  *int64  `json:"inodesFree,omitempty"`
+	MountPoint  string  `json:"mountPoint"`
+	Total       int64   `json:"total"`
+	UsedPercent float64 `json:"usedPercent"`
+}
+
+type NodeKernelEvent struct {
+	Category string  `json:"category"`
+	Message  string  `json:"message"`
+	Priority int64   `json:"priority"`
+	Sequence int64   `json:"sequence"`
+	Uptime   float64 `json:"uptime"`
+}
+
+type NodeMemory struct {
+	Available int64 `json:"available"`
+	Buffers   int64 `json:"buffers"`
+	Cached    int64 `json:"cached"`
+	Dirty     int64 `json:"dirty"`
+	Free      int64 `json:"free"`
+	SwapFree  int64 `json:"swapFree"`
+	SwapTotal int64 `json:"swapTotal"`
+	Total     int64 `json:"total"`
+	Writeback int64 `json:"writeback"`
+}
+
 type NodeMetrics struct {
 	// CPU usage percentage
 	CPUUsage float64 `json:"cpuUsage"`
@@ -7161,6 +7495,45 @@ type NodeMetrics struct {
 	Uptime int64 `json:"uptime"`
 }
 
+type NodePressure struct {
+	FullAvg10 *float64 `json:"fullAvg10,omitempty"`
+	SomeAvg10 float64  `json:"someAvg10"`
+	SomeAvg60 float64  `json:"someAvg60"`
+}
+
+type NodeProcess struct {
+	Cmdline     *string `json:"cmdline,omitempty"`
+	Comm        string  `json:"comm"`
+	CPUSeconds  float64 `json:"cpuSeconds"`
+	OomScoreAdj int64   `json:"oomScoreAdj"`
+	Pid         int64   `json:"pid"`
+	Ppid        int64   `json:"ppid"`
+	RssBytes    int64   `json:"rssBytes"`
+	State       string  `json:"state"`
+	UID         int64   `json:"uid"`
+	VMBytes     int64   `json:"vmBytes"`
+}
+
+type NodeProcessCounts struct {
+	Blocked int64  `json:"blocked"`
+	PidMax  *int64 `json:"pidMax,omitempty"`
+	Running int64  `json:"running"`
+	Total   int64  `json:"total"`
+}
+
+type NodeRecord struct {
+	AgentVersion *string          `json:"agentVersion,omitempty"`
+	Boot         *NodeBoot        `json:"boot,omitempty"`
+	Host         *string          `json:"host,omitempty"`
+	Kernel       *NodeKernelEvent `json:"kernel,omitempty"`
+	Kind         string           `json:"kind"`
+	Limits       *RecordLimits    `json:"limits,omitempty"`
+	Reasons      []string         `json:"reasons,omitempty"`
+	System       *NodeSystem      `json:"system,omitempty"`
+	Time         time.Time        `json:"time"`
+	Usage        []ProcessUsage   `json:"usage,omitempty"`
+}
+
 type NodeResponse struct {
 	// Resource allocatable of the node
 	Allocatable map[string]any `json:"allocatable"`
@@ -7190,6 +7563,22 @@ type NodeResponse struct {
 
 type NodeSettingsBody struct {
 	AccessManagement *NodeAccessManagementBody `json:"accessManagement,omitempty"`
+}
+
+type NodeSystem struct {
+	Blocked        []NodeProcess     `json:"blocked,omitempty"`
+	Cores          int64             `json:"cores"`
+	CPUPressure    *NodePressure     `json:"cpuPressure,omitempty"`
+	Disk           *NodeDisk         `json:"disk,omitempty"`
+	IOPressure     *NodePressure     `json:"ioPressure,omitempty"`
+	Load1          float64           `json:"load1"`
+	Load15         float64           `json:"load15"`
+	Load5          float64           `json:"load5"`
+	Memory         NodeMemory        `json:"memory"`
+	MemoryPressure *NodePressure     `json:"memoryPressure,omitempty"`
+	Processes      NodeProcessCounts `json:"processes"`
+	Top            []NodeProcess     `json:"top,omitempty"`
+	Uptime         float64           `json:"uptime"`
 }
 
 type NodesBody struct {
@@ -7378,17 +7767,19 @@ type OpenstackSlurmDefinition struct {
 	ControllerImage        *string `json:"controllerImage,omitempty"`
 	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
 	// Admin-set provisioning debug flag.
-	DebugMode            *bool                            `json:"debugMode,omitempty"`
-	DesktopSession       *DesktopSessionSettings          `json:"desktopSession,omitempty"`
-	FloatingIPNetwork    *string                          `json:"floatingIpNetwork,omitempty"`
-	HealthCheck          *string                          `json:"healthCheck,omitempty"`
-	NetworkID            *string                          `json:"networkId,omitempty"`
-	Partitions           []ClusterOpenstackSlurmPartition `json:"partitions,omitempty"`
-	Region               *string                          `json:"region,omitempty"`
-	SlurmResumeTimeout   *int64                           `json:"slurmResumeTimeout,omitempty"`
-	SlurmReturnToService *int64                           `json:"slurmReturnToService,omitempty"`
-	SlurmSuspendTime     *int64                           `json:"slurmSuspendTime,omitempty"`
-	SlurmSuspendTimeout  *int64                           `json:"slurmSuspendTimeout,omitempty"`
+	DebugMode         *bool                            `json:"debugMode,omitempty"`
+	DesktopSession    *DesktopSessionSettings          `json:"desktopSession,omitempty"`
+	FloatingIPNetwork *string                          `json:"floatingIpNetwork,omitempty"`
+	HealthCheck       *string                          `json:"healthCheck,omitempty"`
+	NetworkID         *string                          `json:"networkId,omitempty"`
+	Partitions        []ClusterOpenstackSlurmPartition `json:"partitions,omitempty"`
+	Region            *string                          `json:"region,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
+	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64 `json:"slurmSuspendTimeout,omitempty"`
 	// Type discriminator.
 	Type                    string  `json:"type"`
 	UserBootstrap           *string `json:"userBootstrap,omitempty"`
@@ -7595,7 +7986,9 @@ type OracleSlurmDefinition struct {
 	Partitions     []ClusterOracleSlurmPartition `json:"partitions,omitempty"`
 	Region         *string                       `json:"region,omitempty"`
 	// Root disk size in GiB.
-	RootSize             *int64 `json:"rootSize,omitempty"`
+	RootSize *int64 `json:"rootSize,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
 	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
 	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
 	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
@@ -7657,6 +8050,8 @@ type OrgAiProviderResponse struct {
 	CatalogEntryID *string `json:"catalogEntryId,omitempty"`
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
+	// Whether emulated tool calling is enabled; only present for connections on emulated catalog entries
+	EmulatedToolCalling *bool `json:"emulatedToolCalling,omitempty"`
 	// Provider endpoint URL
 	Endpoint *string `json:"endpoint,omitempty"`
 	// Whether a custom CA certificate is configured
@@ -7665,8 +8060,6 @@ type OrgAiProviderResponse struct {
 	ID string `json:"id"`
 	// Current icon configured on the provider's catalog entry
 	ImageURL *string `json:"imageUrl,omitempty"`
-	// Whether TLS certificate verification is skipped
-	InsecureSkipTLSVerify *bool `json:"insecureSkipTlsVerify,omitempty"`
 	// Provider name
 	Name string `json:"name"`
 	// Whether the provider endpoint supports the OpenAI Responses API
@@ -7781,6 +8174,8 @@ type OrgUser struct {
 	AvatarEtag *string `json:"avatarEtag,omitempty"`
 	// Whether the user is a platform billing admin
 	BillingAdmin bool `json:"billingAdmin"`
+	// Whether the account consumes no license seat, independent of whether it is currently active
+	Complimentary bool `json:"complimentary"`
 	// Account creation time
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// User email address
@@ -7801,6 +8196,11 @@ type OrgUser struct {
 	UID *int64 `json:"uid,omitempty"`
 	// Username
 	Username string `json:"username"`
+}
+
+type OrgUserPreviewsOutputBody struct {
+	// Preview flags the user has opted into.
+	Previews []string `json:"previews"`
 }
 
 type OrgWorkspaceDefaults struct {
@@ -7836,7 +8236,6 @@ type Organization struct {
 
 type OrganizationCatalogEntry struct {
 	CaCertificate *string   `json:"caCertificate,omitempty"`
-	CloudBoundary *string   `json:"cloudBoundary,omitempty"`
 	CreatedAt     time.Time `json:"createdAt"`
 	// First-class provider type implied by the entry's kind
 	Csp         string `json:"csp"`
@@ -7853,7 +8252,6 @@ type OrganizationCatalogEntry struct {
 	MinimumTLSVersion string  `json:"minimumTlsVersion"`
 	ObjectID          string  `json:"objectId"`
 	Protocol          string  `json:"protocol"`
-	Region            *string `json:"region,omitempty"`
 	// Connections carry a credential
 	RequiresAPIKey  bool      `json:"requiresApiKey"`
 	ToolCallingMode string    `json:"toolCallingMode"`
@@ -7862,6 +8260,13 @@ type OrganizationCatalogEntry struct {
 
 type OrganizationCatalogOutputBody struct {
 	Integrations []OrganizationCatalogEntry `json:"integrations"`
+}
+
+type OrganizationSeats struct {
+	// Seats allocated to the organization, or null when the organization has no seat limit.
+	Seats *int64 `json:"seats"`
+	// Seats currently held by active, non-complimentary users.
+	UsedSeats int64 `json:"usedSeats"`
 }
 
 type OrganizationsOutputBody struct {
@@ -7978,6 +8383,8 @@ type PatchAccessBodyType struct {
 }
 
 type PatchAllocationInputBody struct {
+	// Replace the allowed resource types (managed allocations only). An empty list clears the restriction.
+	Allowed []string `json:"allowed,omitempty"`
 	// New total allocation amount
 	Total float64 `json:"total"`
 }
@@ -8430,33 +8837,6 @@ type PollOrgCodexAuthorizationOutputBody struct {
 	Status string `json:"status"`
 }
 
-type PoolInstances struct {
-	// Cloud service provider.
-	Csp string `json:"Csp"`
-	// Pool end time, from the controller instance.
-	EndTime *string `json:"EndTime,omitempty"`
-	// Instances in this pool session.
-	Instances []InstanceData `json:"Instances"`
-	// Pool name.
-	Pool string `json:"Pool"`
-	// Project tag.
-	Project string `json:"Project"`
-	// Region.
-	Region string `json:"Region"`
-	// Number of running instances.
-	RunningInstances int64 `json:"RunningInstances"`
-	// Session number.
-	Session string `json:"Session"`
-	// Session id.
-	SessionID *string `json:"Session_ID,omitempty"`
-	// Pool start time, from the controller instance.
-	StartTime string `json:"StartTime"`
-	// Pool state, from the controller instance.
-	State string `json:"State"`
-	// Tags of the first instance.
-	Tags map[string]string `json:"Tags,omitempty"`
-}
-
 type PoolSlurmLoginNode struct {
 	Node *string `json:"node"`
 }
@@ -8652,12 +9032,53 @@ type PrivacySettingsBody struct {
 	Platform bool `json:"platform"`
 }
 
+type ProcessSample struct {
+	Cmdline          *string `json:"cmdline,omitempty"`
+	Comm             string  `json:"comm"`
+	CPUPercent       float64 `json:"cpuPercent"`
+	CPUSeconds       float64 `json:"cpuSeconds"`
+	OomScoreAdj      int64   `json:"oomScoreAdj"`
+	Pid              int64   `json:"pid"`
+	Ppid             int64   `json:"ppid"`
+	ReadBytesPerSec  int64   `json:"readBytesPerSec"`
+	RssBytes         int64   `json:"rssBytes"`
+	State            string  `json:"state"`
+	UID              int64   `json:"uid"`
+	User             *string `json:"user,omitempty"`
+	VMBytes          int64   `json:"vmBytes"`
+	WriteBytesPerSec int64   `json:"writeBytesPerSec"`
+}
+
+type ProcessSnapshot struct {
+	Host      string          `json:"host"`
+	NodeType  *string         `json:"nodeType,omitempty"`
+	Processes []ProcessSample `json:"processes"`
+	Time      time.Time       `json:"time"`
+	Total     int64           `json:"total"`
+}
+
+type ProcessUsage struct {
+	Cmd        string  `json:"cmd"`
+	CPUPercent float64 `json:"cpuPercent"`
+	Pid        int64   `json:"pid"`
+	RssBytes   int64   `json:"rssBytes"`
+}
+
 type ProductPathInputBody struct {
 	// Organization names granted the product; when present the assignment set is replaced to match
 	AssignedOrganizations []string `json:"assignedOrganizations,omitempty"`
 	Enabled               *bool    `json:"enabled,omitempty"`
 	OrganizationScope     *string  `json:"organizationScope,omitempty"`
 	ProviderScope         *string  `json:"providerScope,omitempty"`
+}
+
+type Project struct {
+	DefaultBranch     string `json:"defaultBranch"`
+	Description       string `json:"description"`
+	LastActivityAt    string `json:"lastActivityAt"`
+	PathWithNamespace string `json:"pathWithNamespace"`
+	Visibility        string `json:"visibility"`
+	WebURL            string `json:"webUrl"`
 }
 
 type ProvisionStatusAttribute struct {
@@ -9528,6 +9949,13 @@ type PublishRemoteWorkflowRequest struct {
 	Yaml *string `json:"yaml,omitempty"`
 }
 
+type PutBootstrapScriptInputBody struct {
+	// The script to run. Replaces the organization's existing script of this type.
+	Script string `json:"script"`
+	// The type of the bootstrap script.
+	Type *string `json:"type,omitempty"`
+}
+
 type PutGitHubAppConfigInputBody struct {
 	// GitHub App ID
 	AppID int64 `json:"appId"`
@@ -9773,6 +10201,12 @@ type RecommendedResourcesResponse struct {
 	OrganizationName *string         `json:"organizationName,omitempty"`
 	Storage          ResourceSection `json:"storage"`
 	Workflows        ResourceSection `json:"workflows"`
+}
+
+type RecordLimits struct {
+	Backups      int64 `json:"backups"`
+	MaxBytes     int64 `json:"maxBytes"`
+	MinFreeBytes int64 `json:"minFreeBytes"`
 }
 
 type RegionResource struct {
@@ -10286,6 +10720,30 @@ type RunTimeAlert struct {
 	IntervalHours int64 `json:"intervalHours"`
 }
 
+type RunningProcesses struct {
+	// Whether the controller agent was reachable to serve the data.
+	Connected bool `json:"connected"`
+	// Whether the cluster has running-processes collection turned on.
+	Enabled bool `json:"enabled"`
+	// Why the controller could not serve the data, when it was reachable but the read failed.
+	Error *string `json:"error,omitempty"`
+	// Ceiling the record can never exceed on the controller.
+	MaxBytes int64 `json:"maxBytes"`
+	// When the record was last written.
+	ModifiedAt *time.Time `json:"modifiedAt,omitempty"`
+	// Path of the record on the controller.
+	Path *string `json:"path,omitempty"`
+	// Matching records, oldest first.
+	Records []NodeRecord `json:"records"`
+	// Bytes the record occupies on the controller, across the live file and its rotated backups.
+	SizeBytes int64            `json:"sizeBytes"`
+	Snapshot  *ProcessSnapshot `json:"snapshot,omitempty"`
+	// Whether the controller agent is new enough to serve the data. A connected agent that predates the feature reports false.
+	Supported bool `json:"supported"`
+	// Whether older matching records were dropped to satisfy the limit.
+	Truncated bool `json:"truncated"`
+}
+
 type RuntimeAlertInput struct {
 	// Whether to enable runtime alerts.
 	Enabled bool `json:"enabled"`
@@ -10488,6 +10946,8 @@ type Session struct {
 	ErrorMessage *string `json:"errorMessage,omitempty"`
 	// External session URL.
 	ExternalHref *string `json:"externalHref,omitempty"`
+	// Whether the requesting user has this session favorited. Sessions are favorited by default; unfavoriting hides the session from the dashboard sessions widget.
+	Favorite bool `json:"favorite"`
 	// Whether the session has an API key configured.
 	HasAPIKey *bool `json:"hasApiKey,omitempty"`
 	// Whether the tunnel's remote destination is reachable.
@@ -10648,6 +11108,11 @@ type SetCatalogEntryIconOutputBody struct {
 	ImageURL string `json:"imageUrl"`
 }
 
+type SetComplimentaryInputBody struct {
+	// Whether the account is complimentary and consumes no license seat
+	Complimentary bool `json:"complimentary"`
+}
+
 type SetElasticClusterIconOutputBody struct {
 	// SHA256 hex of the attached blob, or empty when a preset was applied.
 	Etag string `json:"etag"`
@@ -10746,6 +11211,17 @@ type SingleQuotaResponse struct {
 type SlackConfigResponse struct {
 	// Whether a Slack incoming webhook is configured.
 	WebhookConfigured bool `json:"webhookConfigured"`
+}
+
+type Slice struct {
+	// The requested slice of the log, empty when nothing has been written yet
+	Log string `json:"log"`
+	// Offset to request next to read only what has since been appended
+	NextOffset int64 `json:"nextOffset"`
+	// Byte offset the returned slice starts at. Lower than the requested offset when the log was replaced, meaning the slice replaces rather than appends to what was read before.
+	Offset int64 `json:"offset"`
+	// Current size of the log in bytes
+	Size int64 `json:"size"`
 }
 
 type Snapshot struct {
@@ -10857,6 +11333,156 @@ type StorageAttachment struct {
 	Type *string `json:"type,omitempty"`
 	// Username of the resource owner.
 	User string `json:"user"`
+}
+
+type StorageDetail struct {
+	// Whether the storage is currently attached to a cluster.
+	Attached bool `json:"attached"`
+	// Category of the storage.
+	Category string `json:"category"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// The storage's typed configuration.
+	Definition StorageDefinition `json:"definition"`
+	// Display name of the storage.
+	DisplayName string `json:"displayName"`
+	// Whether the storage is ephemeral.
+	Ephemeral *bool `json:"ephemeral,omitempty"`
+	// When the platform purges this record, an hour after the storage is deleted or its provision fails, so it stays visible as deleted or failed until then. Absent while the storage is live.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	// Whether the storage is favorited by the requesting user.
+	Favorite bool `json:"favorite"`
+	// Name of the group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// Unique identifier of the storage.
+	ID string `json:"id"`
+	// URL of the storage's icon.
+	ImageURL string `json:"imageUrl"`
+	// The number of the storage's most recent deployment. Absent when the storage has never been deployed.
+	LatestDeploymentNumber *int64 `json:"latestDeploymentNumber,omitempty"`
+	// Platform name of the storage.
+	Name string `json:"name"`
+	// Deprecated: use 'user' instead. Username of the storage owner.
+	//
+	// Deprecated: this field is deprecated.
+	Namespace string `json:"namespace"`
+	// Name of the network the storage provisions into. Buckets have no network.
+	Network     *string             `json:"network,omitempty"`
+	Permissions *StoragePermissions `json:"permissions,omitempty"`
+	// Region the storage is in.
+	Region *string `json:"region,omitempty"`
+	// Whether the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
+	// Size of the storage in GiB.
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Current status of the storage.
+	Status string `json:"status"`
+	// User-facing message describing the current status.
+	StatusDescription *string `json:"statusDescription,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags"`
+	// CSP-qualified type of the storage.
+	Type string `json:"type"`
+	// Parallel Works URI for the storage (pw://user/name).
+	URI string `json:"uri"`
+	// Username of the storage owner.
+	User string `json:"user"`
+	// Zone the storage is in, when it is zonal.
+	Zone *string `json:"zone,omitempty"`
+}
+
+type StorageListItem struct {
+	// Whether the storage is currently attached to a cluster.
+	Attached bool `json:"attached"`
+	// Category of the storage.
+	Category string `json:"category"`
+	// Cloud service provider of the storage.
+	Csp string `json:"csp"`
+	// Display name of the storage.
+	DisplayName string `json:"displayName"`
+	// Whether the storage is ephemeral.
+	Ephemeral *bool `json:"ephemeral,omitempty"`
+	// When the platform purges this record, an hour after the storage is deleted or its provision fails, so it stays visible as deleted or failed until then. Absent while the storage is live.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	// Whether the storage is favorited by the requesting user.
+	Favorite bool `json:"favorite"`
+	// Name of the group the storage bills to.
+	Group *string `json:"group,omitempty"`
+	// Unique identifier of the storage.
+	ID string `json:"id"`
+	// URL of the storage's icon.
+	ImageURL string `json:"imageUrl"`
+	// The number of the storage's most recent deployment. Absent when the storage has never been deployed.
+	LatestDeploymentNumber *int64 `json:"latestDeploymentNumber,omitempty"`
+	// Platform name of the storage.
+	Name string `json:"name"`
+	// Deprecated: use 'user' instead. Username of the storage owner.
+	//
+	// Deprecated: this field is deprecated.
+	Namespace string `json:"namespace"`
+	// Name of the network the storage provisions into. Buckets have no network.
+	Network     *string             `json:"network,omitempty"`
+	Permissions *StoragePermissions `json:"permissions,omitempty"`
+	// Region the storage is in.
+	Region *string `json:"region,omitempty"`
+	// Whether the storage is sessionless.
+	Sessionless bool `json:"sessionless"`
+	// Size of the storage in GiB.
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Current status of the storage.
+	Status string `json:"status"`
+	// User-facing message describing the current status.
+	StatusDescription *string `json:"statusDescription,omitempty"`
+	// Tags associated with the storage.
+	Tags []string `json:"tags"`
+	// CSP-qualified type of the storage.
+	Type string `json:"type"`
+	// Parallel Works URI for the storage (pw://user/name).
+	URI string `json:"uri"`
+	// Username of the storage owner.
+	User string `json:"user"`
+	// Zone the storage is in, when it is zonal.
+	Zone *string `json:"zone,omitempty"`
+}
+
+type StoragePermissions struct {
+	// Whether the requesting user can obtain access credentials for this storage. Only buckets issue credentials.
+	CanGetCredentials bool `json:"canGetCredentials"`
+	// Whether the requesting user may write to this storage, which is also what decides whether it can be mounted.
+	CanWrite bool `json:"canWrite"`
+}
+
+type StorageTypes struct {
+	// Azure NetApp Files meters. Capacity pools are keyed by service level followed by Capacity, for example Standard Capacity.
+	NetAppFiles map[string]float64 `json:"NetApp_Files,omitempty"`
+	// Azure Premium SSD sizes
+	PremiumSsd map[string]float64 `json:"Premium_SSD,omitempty"`
+	// Azure Premium SSD v2 sizes
+	PremiumSsdV2 map[string]float64 `json:"Premium_SSD_v2,omitempty"`
+	// Azure Standard HDD sizes
+	StandardHdd map[string]float64 `json:"Standard_HDD,omitempty"`
+	// Azure Standard SSD sizes
+	StandardSsd map[string]float64 `json:"Standard_SSD,omitempty"`
+	// Azure Ultra Disk sizes
+	UltraDisk map[string]float64 `json:"Ultra_Disk,omitempty"`
+	// Azure Files provisioned share rates, keyed by redundancy
+	Azfiles map[string]float64 `json:"azfiles,omitempty"`
+	// OCI Block Volume performance tiers
+	BlockVolume map[string]float64 `json:"block_volume,omitempty"`
+	// Attached disk types (AWS, Azure, GCP)
+	Disk map[string]float64 `json:"disk,omitempty"`
+	// AWS Elastic File System tiers
+	Efs map[string]float64 `json:"efs,omitempty"`
+	// OCI File Storage flat rate
+	FileStorage *float64 `json:"file_storage,omitempty"`
+	// Google Filestore tiers
+	Filestore map[string]float64 `json:"filestore,omitempty"`
+	// AWS FSx for Lustre deployment types; persistent types nest by throughput
+	Lustre map[string]any `json:"lustre,omitempty"`
+	// Google Managed Lustre performance tiers
+	ManagedLustre map[string]float64 `json:"managed_lustre,omitempty"`
+	// Azure Managed Lustre tiers
+	Managedlustre map[string]float64 `json:"managedlustre,omitempty"`
 }
 
 type SubdomainAvailabilityResponse struct {
@@ -11174,6 +11800,8 @@ type UpdateAiProviderInputBody struct {
 	APIKey *string `json:"apiKey,omitempty"`
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
+	// Whether emulated tool calling is enabled (providers on emulated catalog entries only)
+	EmulatedToolCalling *bool `json:"emulatedToolCalling,omitempty"`
 	// List of model IDs enabled for the chat interface
 	EnabledModels []string `json:"enabledModels,omitempty"`
 }
@@ -11398,6 +12026,8 @@ type UpdateOrgAiProviderInputBody struct {
 	APIKey *string `json:"apiKey,omitempty"`
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
+	// Whether emulated tool calling is enabled (connections on emulated catalog entries only)
+	EmulatedToolCalling *bool `json:"emulatedToolCalling,omitempty"`
 }
 
 type UpdateOrgCustomTagsInputBody struct {
@@ -11412,9 +12042,26 @@ type UpdateOrgDomainSettingsBody struct {
 	PlatformDomain *string `json:"platformDomain,omitempty"`
 }
 
+type UpdateOrgSeatsBody struct {
+	// Seats to allocate to the organization. Null removes the seat limit.
+	Seats *int64 `json:"seats"`
+}
+
 type UpdateOrgSidebarInputBody struct {
 	// The full list of sidebar option IDs that should be enabled by default for users in this organization. Pass an empty array to show only unhideable items.
 	DefaultSidebar []string `json:"defaultSidebar"`
+}
+
+type UpdateOrgUserInputBody struct {
+	// Full name of the user
+	Name *string `json:"name,omitempty"`
+	// Linux UID. Changing it stops the user's workspace so it comes back under the new UID, ending any running session. Files the user already created stay owned by the old UID, so a workspace or cloud cluster holding their files needs those ownerships updated by hand. A value below 1000 requires a platform administrator.
+	UID *int64 `json:"uid,omitempty"`
+}
+
+type UpdateOrganizationBody struct {
+	// Whether the organization may create and manage other organizations. Omit to leave unchanged.
+	Partner *bool `json:"partner,omitempty"`
 }
 
 type UpdatePermissionInputBody struct {
@@ -11462,6 +12109,19 @@ type UpdateReportBody struct {
 	Type *string `json:"type,omitempty"`
 	// Specific user or group for the report.
 	Who *string `json:"who,omitempty"`
+}
+
+type UpdateReservationBody struct {
+	// Reservation description.
+	Description *string `json:"description,omitempty"`
+	// Name of the group that can use this reservation.
+	Group *string `json:"group,omitempty"`
+	// New reservation identifier. Renames the reservation when it differs from the current one.
+	ID *string `json:"id,omitempty"`
+	// Instance type the reservation holds capacity for.
+	InstanceType *string `json:"instanceType,omitempty"`
+	// Identifier of the reservation to update.
+	Reservation string `json:"reservation"`
 }
 
 type UpdateResourceGroupPermissionsInputBody struct {
@@ -11696,12 +12356,18 @@ type UserPin struct {
 type UserProfile struct {
 	// Cache-buster for the user's avatar image.
 	AvatarEtag *string `json:"avatarEtag,omitempty"`
+	// Whether the user is a platform billing administrator.
+	BillingAdmin bool `json:"billingAdmin"`
+	// Whether the account consumes no license seat, independent of whether it is currently active
+	Complimentary bool `json:"complimentary"`
 	// When the user registered.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// Email address of the user.
 	Email *string `json:"email,omitempty"`
 	// Names of the groups the user belongs to.
 	Groups []string `json:"groups"`
+	// Unique identifier of the user.
+	ID string `json:"id"`
 	// When the user was last active in the platform; absent if never seen.
 	LastPing *time.Time `json:"lastPing,omitempty"`
 	// Seat/license status: 'active' (holds a seat), 'complimentary' (active account that consumes no seat), or 'inactive' (disabled).
@@ -12034,7 +12700,7 @@ type WorkflowItem struct {
 	Remote *RemoteWorkflowSettings `json:"remote,omitempty"`
 	// Workflow name, used for URLs.
 	Slug *string `json:"slug,omitempty"`
-	// Subtype of the workflow (github for remote).
+	// Subtype of the workflow (github or gitlab for remote).
 	Subtype *string `json:"subtype,omitempty"`
 	// Tags associated with the workflow.
 	Tags []string `json:"tags,omitempty"`
@@ -12441,6 +13107,147 @@ func (u *MarketplaceItemBodyVersionsValue) UnmarshalJSON(data []byte) error {
 		// of the whole payload it happens to appear in.
 		*u = MarketplaceItemBodyVersionsValue{
 			unknownDiscriminator: disc.Subtype,
+			raw:                  string(data),
+		}
+		return nil
+	}
+}
+
+// StorageDefinition - The storage's typed configuration.
+
+// Variants: AwsLustreDefinition, AzureManagedLustreDefinition, GoogleManagedLustreDefinition, BucketDefinition, DiskDefinition
+type StorageDefinition struct {
+	Value any
+
+	unknownDiscriminator string
+	raw                  string
+}
+
+// IsUnknownVariant reports whether the payload carried a type
+// this client does not know. Value is nil in that case; the original JSON is
+// available from Raw and is re-marshaled unchanged.
+func (u StorageDefinition) IsUnknownVariant() bool {
+	return u.Value == nil && len(u.raw) > 0
+}
+
+// UnknownDiscriminator returns the unrecognized type value,
+// or "" when the payload decoded into a known variant.
+func (u StorageDefinition) UnknownDiscriminator() string {
+	return u.unknownDiscriminator
+}
+
+// Raw returns the original JSON of an unrecognized variant, or nil.
+func (u StorageDefinition) Raw() json.RawMessage {
+	if u.raw == "" {
+		return nil
+	}
+	return json.RawMessage(u.raw)
+}
+
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u StorageDefinition) unionValue() any {
+	return u.Value
+}
+
+// MarshalJSON implements json.Marshaler for StorageDefinition.
+func (u StorageDefinition) MarshalJSON() ([]byte, error) {
+	if u.IsUnknownVariant() {
+		return []byte(u.raw), nil
+	}
+	return json.Marshal(u.Value)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for StorageDefinition.
+func (u *StorageDefinition) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	var disc struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &disc); err != nil {
+		return fmt.Errorf("unmarshaling StorageDefinition discriminator: %w", err)
+	}
+	switch disc.Type {
+	case "aws-bucket":
+		var v BucketDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "aws-disk":
+		var v DiskDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "aws-lustre":
+		var v AwsLustreDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "azure-bucket":
+		var v BucketDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "azure-disk":
+		var v DiskDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "azure-managedlustre":
+		var v AzureManagedLustreDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "google-bucket":
+		var v BucketDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "google-disk":
+		var v DiskDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "google-managedlustre":
+		var v GoogleManagedLustreDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "oracle-bucket":
+		var v BucketDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "":
+		return fmt.Errorf("unmarshaling StorageDefinition: missing type discriminator")
+	default:
+		// Adding a variant to a oneOf is meant to be a backward-compatible change,
+		// so an unrecognized one is preserved verbatim instead of failing the decode
+		// of the whole payload it happens to appear in.
+		*u = StorageDefinition{
+			unknownDiscriminator: disc.Type,
 			raw:                  string(data),
 		}
 		return nil
