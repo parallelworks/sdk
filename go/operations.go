@@ -4939,6 +4939,35 @@ func (c *Client) GetOidcSectorIdentifier(ctx context.Context, authMethodID strin
 	return &result, nil
 }
 
+// GetOidcTokenDirectParams contains the parameters for the GetOidcTokenDirect operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetOidcTokenDirectParams struct {
+	// The client ID of the application to mint a token for
+	ClientID string `json:"clientId"`
+}
+
+// GetOidcTokenDirect - Get an identity token by direct grant
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Mints an identity token for the logged-in user against a registered application, without a browser redirect. This is the exec-credential pattern used by kubectl.
+func (c *Client) GetOidcTokenDirect(ctx context.Context, params GetOidcTokenDirectParams) (*string, error) {
+
+	path := "/api/oidc/token/direct"
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "clientId", "form", false, params.ClientID)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result string
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetRecommendedResources - Get recommended resources
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -9691,6 +9720,166 @@ func (c *Client) GetSingleNetworkByName(ctx context.Context, organization string
 
 	var result Network
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListOrgOidcApps - List OIDC applications
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Lists the applications registered for the organization. Requires an organization administrator. Client secrets are never included.
+func (c *Client) ListOrgOidcApps(ctx context.Context, organization string) (*[]AppResponse, error) {
+
+	path := "/api/organizations/{organization}/oidc/apps"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result []AppResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreateOrgOidcApp - Register an OIDC application
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Registers an application that uses the platform as its identity provider. Requires an organization administrator. The client ID is generated; it cannot be chosen.
+func (c *Client) CreateOrgOidcApp(ctx context.Context, organization string, body AppBody) (*AppResponse, error) {
+
+	path := "/api/organizations/{organization}/oidc/apps"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result AppResponse
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetOrgOidcApp - Get an OIDC application
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a single registered application. Requires an organization administrator. Client secrets are never included.
+func (c *Client) GetOrgOidcApp(ctx context.Context, organization string, clientID string) (*AppResponse, error) {
+
+	path := "/api/organizations/{organization}/oidc/apps/{clientId}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "clientId", "simple", false, clientID)
+
+	var result AppResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateOrgOidcApp - Update an OIDC application
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates a registered application. Requires an organization administrator.
+func (c *Client) UpdateOrgOidcApp(ctx context.Context, organization string, clientID string, body AppBody) (*AppResponse, error) {
+
+	path := "/api/organizations/{organization}/oidc/apps/{clientId}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "clientId", "simple", false, clientID)
+
+	var result AppResponse
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteOrgOidcApp - Delete an OIDC application
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Removes a registered application and its client secrets. Requires an organization administrator.
+func (c *Client) DeleteOrgOidcApp(ctx context.Context, organization string, clientID string) error {
+
+	path := "/api/organizations/{organization}/oidc/apps/{clientId}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "clientId", "simple", false, clientID)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// CreateOrgOidcAppSecret - Create a client secret
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Issues a new client secret for the application and returns it. Requires an organization administrator.
+func (c *Client) CreateOrgOidcAppSecret(ctx context.Context, organization string, clientID string) (*SecretResponse, error) {
+
+	path := "/api/organizations/{organization}/oidc/apps/{clientId}/secrets"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "clientId", "simple", false, clientID)
+
+	var result SecretResponse
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RotateOrgOidcAppSecret - Rotate the client secret
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Issues a replacement client secret. Requires an organization administrator. The previous secrets keep working for the overlap window so the application can be updated without an outage.
+func (c *Client) RotateOrgOidcAppSecret(ctx context.Context, organization string, clientID string, body RotateSecretInputBody) (*SecretResponse, error) {
+
+	path := "/api/organizations/{organization}/oidc/apps/{clientId}/secrets/rotate"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "clientId", "simple", false, clientID)
+
+	var result SecretResponse
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteOrgOidcAppSecret - Delete a client secret
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Removes a client secret immediately. Requires an organization administrator.
+func (c *Client) DeleteOrgOidcAppSecret(ctx context.Context, organization string, clientID string, secretID string) error {
+
+	path := "/api/organizations/{organization}/oidc/apps/{clientId}/secrets/{secretId}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "clientId", "simple", false, clientID)
+	path = pathReplace(path, "secretId", "simple", false, secretID)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// RevealOrgOidcAppSecret - Reveal a client secret
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a stored client secret again. Requires an organization administrator. Every reveal is recorded as an audit event.
+func (c *Client) RevealOrgOidcAppSecret(ctx context.Context, organization string, clientID string, secretID string) (*SecretResponse, error) {
+
+	path := "/api/organizations/{organization}/oidc/apps/{clientId}/secrets/{secretId}/reveal"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "clientId", "simple", false, clientID)
+	path = pathReplace(path, "secretId", "simple", false, secretID)
+
+	var result SecretResponse
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
