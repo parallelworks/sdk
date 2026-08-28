@@ -7568,6 +7568,23 @@ func (c *Client) CreateOrganizationGitlabServer(ctx context.Context, organizatio
 	return &result, nil
 }
 
+// DiscoverOrganizationGitlabServerCaCert - Discover a GitLab server's CA certificate
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Dials the GitLab server and returns the CA certificate its TLS chain is issued by, for registrations that verify against a custom CA.
+func (c *Client) DiscoverOrganizationGitlabServerCaCert(ctx context.Context, organization string, body DiscoverCaCertInputBody1) (*DiscoverCaCertOutputBody1, error) {
+
+	path := "/api/organizations/{organization}/gitlab-servers/ca-cert"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result DiscoverCaCertOutputBody1
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetOrganizationGitlabServer - Get a GitLab server
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -12817,14 +12834,14 @@ func (c *Client) CreateClusterSnapshot(ctx context.Context, organization string,
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Stops a cloud cluster's controller. The cluster keeps its provisioned resources and can be started again.
-func (c *Client) StopCluster(ctx context.Context, organization string, user string, clusterName string) error {
+func (c *Client) StopCluster(ctx context.Context, organization string, user string, clusterName string, body *StopClusterOptions) error {
 
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/stop"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 
-	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -17718,23 +17735,6 @@ func (c *Client) UpdateWorkflow(ctx context.Context, workflow string, body Updat
 
 	var result WorkflowItem
 	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// DuplicateWorkflow - Duplicate Workflow
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Creates a copy of an existing workflow with a new name.
-func (c *Client) DuplicateWorkflow(ctx context.Context, workflow string, body DuplicateWorkflowBody) (*WorkflowItem, error) {
-
-	path := "/api/workflows/{workflow}/duplicate"
-	path = pathReplace(path, "workflow", "simple", false, workflow)
-
-	var result WorkflowItem
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil

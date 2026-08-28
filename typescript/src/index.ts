@@ -125,13 +125,13 @@ function extractHostFromToken(token: string): string {
   try {
     if (typeof atob !== 'undefined') {
       // Browser - handle URL-safe base64
-      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
+      const normalized = payload!.replace(/-/g, '+').replace(/_/g, '/')
       // Add padding if needed
       const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4)
       payloadJson = atob(padded)
     } else {
       // Node.js
-      payloadJson = Buffer.from(payload, 'base64url').toString()
+      payloadJson = Buffer.from(payload!, 'base64url').toString()
     }
   } catch (e) {
     throw new CredentialError(`Could not decode JWT payload: ${e}`)
@@ -298,9 +298,9 @@ export class Client {
             body && typeof body === 'object'
               ? (body as Record<string, unknown>)
               : {}
-          record.status = response.status
-          if (typeof record.message !== 'string' || !record.message) {
-            record.message =
+          record['status'] = response.status
+          if (typeof record['message'] !== 'string' || !record['message']) {
+            record['message'] =
               response.statusText ||
               `Request failed with status ${response.status}`
           }

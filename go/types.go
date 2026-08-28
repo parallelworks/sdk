@@ -4009,8 +4009,12 @@ type CreateWorkerBody struct {
 type CreateWorkflowBody struct {
 	// Resource description
 	Description *string `json:"description,omitempty"`
+	// Markdown description of the workflow
+	DescriptionMarkdown *string `json:"descriptionMarkdown,omitempty"`
 	// Display name of the workflow
 	DisplayName *string `json:"displayName,omitempty"`
+	// URL of the workflow icon
+	ImageURL *string `json:"imageUrl,omitempty"`
 	// Resource name
 	Name   string                  `json:"name"`
 	Remote *RemoteWorkflowSettings `json:"remote,omitempty"`
@@ -4020,6 +4024,8 @@ type CreateWorkflowBody struct {
 	Tags []string `json:"tags,omitempty"`
 	// Selected workflow type
 	Type string `json:"type"`
+	// Workflow YAML definition as a YAML string. If not provided, a default template is used.
+	Yaml *string `json:"yaml,omitempty"`
 }
 
 type CreateWorkflowRunInputBody struct {
@@ -4322,8 +4328,20 @@ type DiscoverCaCertInputBody struct {
 	Endpoint string `json:"endpoint"`
 }
 
+type DiscoverCaCertInputBody1 struct {
+	// Whether the server may sit on a private network address. Platform administrators only.
+	AllowPrivateAddress *bool `json:"allowPrivateAddress,omitempty"`
+	// Origin of the GitLab instance to dial, for example https://gitlab.example.com.
+	BaseURL string `json:"baseUrl"`
+}
+
 type DiscoverCaCertOutputBody struct {
 	// PEM-encoded CA certificate served by the endpoint
+	CaCert string `json:"caCert"`
+}
+
+type DiscoverCaCertOutputBody1 struct {
+	// PEM-encoded CA certificate served by the endpoint.
 	CaCert string `json:"caCert"`
 }
 
@@ -4390,11 +4408,6 @@ type DockerWorkspaceSettings struct {
 	K8sMounts []string `json:"k8sMounts"`
 	// A list of mounts to be used in docker workspaces.
 	Mounts []string `json:"mounts"`
-}
-
-type DuplicateWorkflowBody struct {
-	// Display name for the duplicated workflow
-	NewName string `json:"newName"`
 }
 
 type EffectiveProduct struct {
@@ -5054,6 +5067,10 @@ type GetMfaSettingsOutputBody struct {
 	EnforceWebAuthnMfa bool `json:"enforceWebAuthnMfa"`
 	// List of configured MFA methods
 	MfaSettings []MfaSettingResponse `json:"mfaSettings"`
+	// Whether the user's registered security key does not meet the required level and must be replaced
+	WebAuthnKeyRequiresReplacement bool `json:"webAuthnKeyRequiresReplacement"`
+	// Required security key level (hardware or fips); empty when not enforced
+	WebAuthnMfaLevel *string `json:"webAuthnMfaLevel,omitempty"`
 }
 
 type GetNodeMetricsOutputBody struct {
@@ -5124,6 +5141,8 @@ type GitLabServer struct {
 	AllowPrivateAddress bool `json:"allowPrivateAddress"`
 	// Origin of the GitLab instance, for example https://gitlab.example.com.
 	BaseURL string `json:"baseUrl"`
+	// PEM-encoded CA certificate the server's certificate chains to, when tlsVerification is ca-certificate.
+	CaCertificate *string `json:"caCertificate,omitempty"`
 	// Application ID of the OAuth application registered on the server, when members may connect through OAuth.
 	ClientID *string `json:"clientId,omitempty"`
 	// Whether the application secret is stored.
@@ -5135,10 +5154,14 @@ type GitLabServer struct {
 	ID string `json:"id"`
 	// How members may connect: oauth, token, or both.
 	Methods []string `json:"methods"`
+	// Lowest TLS version the platform negotiates with the server.
+	MinimumTLSVersion string `json:"minimumTlsVersion"`
 	// Short name of the server, unique within the organization.
 	Name string `json:"name"`
 	// Redirect URI to configure on the OAuth application.
 	RedirectURI string `json:"redirectUri"`
+	// How the server's certificate is verified: against the public roots, against the supplied CA certificate, or not at all.
+	TLSVerification string `json:"tlsVerification"`
 }
 
 type GitLabServerCreateBody struct {
@@ -5148,12 +5171,18 @@ type GitLabServerCreateBody struct {
 	AllowPrivateAddress *bool `json:"allowPrivateAddress,omitempty"`
 	// Origin of the GitLab instance, for example https://gitlab.example.com.
 	BaseURL string `json:"baseUrl"`
+	// PEM-encoded CA certificate the server's certificate chains to. Required for ca-certificate verification and not accepted otherwise.
+	CaCertificate *string `json:"caCertificate,omitempty"`
 	// Application ID of the OAuth application registered on the server. Give it together with clientSecret to let members connect through OAuth.
 	ClientID *string `json:"clientId,omitempty"`
 	// Secret of the OAuth application. Stored in the platform vault and never returned.
 	ClientSecret *string `json:"clientSecret,omitempty"`
+	// Lowest TLS version the platform negotiates with the server. Defaults to 1.2.
+	MinimumTLSVersion *string `json:"minimumTlsVersion,omitempty"`
 	// Short name of the server, unique within the organization.
 	Name string `json:"name"`
+	// How the server's certificate is verified. Defaults to public, or ca-certificate when one is supplied.
+	TLSVerification *string `json:"tlsVerification,omitempty"`
 }
 
 type GitLabServerPatchBody struct {
@@ -5163,12 +5192,18 @@ type GitLabServerPatchBody struct {
 	AllowPrivateAddress *bool `json:"allowPrivateAddress,omitempty"`
 	// New origin of the GitLab instance.
 	BaseURL *string `json:"baseUrl,omitempty"`
+	// PEM-encoded CA certificate the server's certificate chains to. Only accepted with ca-certificate verification.
+	CaCertificate *string `json:"caCertificate,omitempty"`
 	// New application ID.
 	ClientID *string `json:"clientId,omitempty"`
 	// New application secret.
 	ClientSecret *string `json:"clientSecret,omitempty"`
+	// Lowest TLS version the platform negotiates with the server.
+	MinimumTLSVersion *string `json:"minimumTlsVersion,omitempty"`
 	// New short name of the server.
 	Name *string `json:"name,omitempty"`
+	// How the server's certificate is verified. Switching away from ca-certificate discards the stored CA certificate.
+	TLSVerification *string `json:"tlsVerification,omitempty"`
 }
 
 type GoogleBucket struct {
@@ -11364,6 +11399,11 @@ type StepStruct struct {
 	Name *string `json:"name,omitempty"`
 	// Step status.
 	Status *string `json:"status,omitempty"`
+}
+
+type StopClusterOptions struct {
+	// Stop the controller through the cloud provider instead of waiting for the cluster agent to shut it down from inside the guest.
+	Force *bool `json:"force,omitempty"`
 }
 
 type StorageAttachment struct {

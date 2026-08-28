@@ -11531,9 +11531,17 @@
             "maxLength": 100,
             "type": "string"
           },
+          "descriptionMarkdown": {
+            "description": "Markdown description of the workflow",
+            "type": "string"
+          },
           "displayName": {
             "description": "Display name of the workflow",
             "maxLength": 100,
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL of the workflow icon",
             "type": "string"
           },
           "name": {
@@ -11570,6 +11578,10 @@
               "remote",
               "local"
             ],
+            "type": "string"
+          },
+          "yaml": {
+            "description": "Workflow YAML definition as a YAML string. If not provided, a default template is used.",
             "type": "string"
           }
         },
@@ -12464,11 +12476,42 @@
         ],
         "type": "object"
       },
+      "DiscoverCACertInputBody1": {
+        "additionalProperties": false,
+        "properties": {
+          "allowPrivateAddress": {
+            "description": "Whether the server may sit on a private network address. Platform administrators only.",
+            "type": "boolean"
+          },
+          "baseUrl": {
+            "description": "Origin of the GitLab instance to dial, for example https://gitlab.example.com.",
+            "minLength": 9,
+            "type": "string"
+          }
+        },
+        "required": [
+          "baseUrl"
+        ],
+        "type": "object"
+      },
       "DiscoverCACertOutputBody": {
         "additionalProperties": false,
         "properties": {
           "caCert": {
             "description": "PEM-encoded CA certificate served by the endpoint",
+            "type": "string"
+          }
+        },
+        "required": [
+          "caCert"
+        ],
+        "type": "object"
+      },
+      "DiscoverCACertOutputBody1": {
+        "additionalProperties": false,
+        "properties": {
+          "caCert": {
+            "description": "PEM-encoded CA certificate served by the endpoint.",
             "type": "string"
           }
         },
@@ -12666,21 +12709,6 @@
           "mounts",
           "envs",
           "dns"
-        ],
-        "type": "object"
-      },
-      "DuplicateWorkflowBody": {
-        "additionalProperties": false,
-        "properties": {
-          "newName": {
-            "description": "Display name for the duplicated workflow",
-            "maxLength": 255,
-            "minLength": 1,
-            "type": "string"
-          }
-        },
-        "required": [
-          "newName"
         ],
         "type": "object"
       },
@@ -14244,12 +14272,21 @@
               "array",
               "null"
             ]
+          },
+          "webAuthnKeyRequiresReplacement": {
+            "description": "Whether the user's registered security key does not meet the required level and must be replaced",
+            "type": "boolean"
+          },
+          "webAuthnMfaLevel": {
+            "description": "Required security key level (hardware or fips); empty when not enforced",
+            "type": "string"
           }
         },
         "required": [
           "enabled",
           "mfaSettings",
-          "enforceWebAuthnMfa"
+          "enforceWebAuthnMfa",
+          "webAuthnKeyRequiresReplacement"
         ],
         "type": "object"
       },
@@ -14487,6 +14524,10 @@
             "description": "Origin of the GitLab instance, for example https://gitlab.example.com.",
             "type": "string"
           },
+          "caCertificate": {
+            "description": "PEM-encoded CA certificate the server's certificate chains to, when tlsVerification is ca-certificate.",
+            "type": "string"
+          },
           "clientId": {
             "description": "Application ID of the OAuth application registered on the server, when members may connect through OAuth.",
             "type": "string"
@@ -14526,6 +14567,14 @@
               "null"
             ]
           },
+          "minimumTlsVersion": {
+            "description": "Lowest TLS version the platform negotiates with the server.",
+            "enum": [
+              "1.2",
+              "1.3"
+            ],
+            "type": "string"
+          },
           "name": {
             "description": "Short name of the server, unique within the organization.",
             "type": "string"
@@ -14533,6 +14582,15 @@
           "redirectUri": {
             "description": "Redirect URI to configure on the OAuth application.",
             "readOnly": true,
+            "type": "string"
+          },
+          "tlsVerification": {
+            "description": "How the server's certificate is verified: against the public roots, against the supplied CA certificate, or not at all.",
+            "enum": [
+              "public",
+              "ca-certificate",
+              "skip"
+            ],
             "type": "string"
           }
         },
@@ -14545,6 +14603,8 @@
           "allowPersonalAccessTokens",
           "methods",
           "allowPrivateAddress",
+          "minimumTlsVersion",
+          "tlsVerification",
           "redirectUri",
           "createdAt"
         ],
@@ -14566,6 +14626,10 @@
             "minLength": 9,
             "type": "string"
           },
+          "caCertificate": {
+            "description": "PEM-encoded CA certificate the server's certificate chains to. Required for ca-certificate verification and not accepted otherwise.",
+            "type": "string"
+          },
           "clientId": {
             "description": "Application ID of the OAuth application registered on the server. Give it together with clientSecret to let members connect through OAuth.",
             "type": "string"
@@ -14574,12 +14638,29 @@
             "description": "Secret of the OAuth application. Stored in the platform vault and never returned.",
             "type": "string"
           },
+          "minimumTlsVersion": {
+            "description": "Lowest TLS version the platform negotiates with the server. Defaults to 1.2.",
+            "enum": [
+              "1.2",
+              "1.3"
+            ],
+            "type": "string"
+          },
           "name": {
             "description": "Short name of the server, unique within the organization.",
             "maxLength": 63,
             "minLength": 1,
             "pattern": "^[a-z0-9][a-z0-9-]*$",
             "patternDescription": "lowercase letters, digits and hyphens, starting with a letter or digit",
+            "type": "string"
+          },
+          "tlsVerification": {
+            "description": "How the server's certificate is verified. Defaults to public, or ca-certificate when one is supplied.",
+            "enum": [
+              "public",
+              "ca-certificate",
+              "skip"
+            ],
             "type": "string"
           }
         },
@@ -14605,6 +14686,10 @@
             "minLength": 9,
             "type": "string"
           },
+          "caCertificate": {
+            "description": "PEM-encoded CA certificate the server's certificate chains to. Only accepted with ca-certificate verification.",
+            "type": "string"
+          },
           "clientId": {
             "description": "New application ID.",
             "minLength": 1,
@@ -14615,12 +14700,29 @@
             "minLength": 1,
             "type": "string"
           },
+          "minimumTlsVersion": {
+            "description": "Lowest TLS version the platform negotiates with the server.",
+            "enum": [
+              "1.2",
+              "1.3"
+            ],
+            "type": "string"
+          },
           "name": {
             "description": "New short name of the server.",
             "maxLength": 63,
             "minLength": 1,
             "pattern": "^[a-z0-9][a-z0-9-]*$",
             "patternDescription": "lowercase letters, digits and hyphens, starting with a letter or digit",
+            "type": "string"
+          },
+          "tlsVerification": {
+            "description": "How the server's certificate is verified. Switching away from ca-certificate discards the stored CA certificate.",
+            "enum": [
+              "public",
+              "ca-certificate",
+              "skip"
+            ],
             "type": "string"
           }
         },
@@ -33939,6 +34041,16 @@
         },
         "type": "object"
       },
+      "StopClusterOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "force": {
+            "description": "Stop the controller through the cloud provider instead of waiting for the cluster agent to shut it down from inside the guest.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "StorageAttachment": {
         "additionalProperties": false,
         "properties": {
@@ -36888,14 +37000,14 @@
           "currentImage": {
             "description": "the image the user workspace is currently running. This will be always be set to the same as Image when the workspace restarts.",
             "examples": [
-              "ghcr.io/parallelworks/usercontainer-theia:latest"
+              "ghcr.io/parallelworks/usercontainer-vscode:latest"
             ],
             "type": "string"
           },
           "image": {
             "description": "the image set for the user workspace",
             "examples": [
-              "ghcr.io/parallelworks/usercontainer-theia:latest"
+              "ghcr.io/parallelworks/usercontainer-vscode:latest"
             ],
             "type": "string"
           },
@@ -37205,7 +37317,8 @@
           "value": {
             "description": "Required security key level",
             "enum": [
-              "hardware"
+              "hardware",
+              "fips"
             ],
             "examples": [
               "hardware"
@@ -57274,6 +57387,63 @@
         ]
       }
     },
+    "/api/organizations/{organization}/gitlab-servers/ca-cert": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDials the GitLab server and returns the CA certificate its TLS chain is issued by, for registrations that verify against a custom CA.",
+        "operationId": "discover-organization-gitlab-server-ca-cert",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscoverCACertInputBody1"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoverCACertOutputBody1"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Discover a GitLab server's CA certificate",
+        "tags": [
+          "GitLab"
+        ]
+      }
+    },
     "/api/organizations/{organization}/gitlab-servers/{server}": {
       "delete": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRemoves a registered GitLab server along with every user's connection to it.",
@@ -64387,7 +64557,8 @@
               "schema": {
                 "description": "Required security key level",
                 "enum": [
-                  "hardware"
+                  "hardware",
+                  "fips"
                 ],
                 "examples": [
                   "hardware"
@@ -74169,6 +74340,15 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StopClusterOptions"
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": "No Content"
@@ -83579,7 +83759,8 @@
               "schema": {
                 "description": "Required security key level",
                 "enum": [
-                  "hardware"
+                  "hardware",
+                  "fips"
                 ],
                 "examples": [
                   "hardware"
@@ -88700,60 +88881,6 @@
           }
         },
         "summary": "Update Workflow",
-        "tags": [
-          "Workflows"
-        ]
-      }
-    },
-    "/api/workflows/{workflow}/duplicate": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nCreates a copy of an existing workflow with a new name.",
-        "operationId": "duplicate-workflow",
-        "parameters": [
-          {
-            "description": "Name of the workflow to duplicate.",
-            "in": "path",
-            "name": "workflow",
-            "required": true,
-            "schema": {
-              "description": "Name of the workflow to duplicate.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DuplicateWorkflowBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WorkflowItem"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Duplicate Workflow",
         "tags": [
           "Workflows"
         ]
