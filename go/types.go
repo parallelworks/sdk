@@ -9059,6 +9059,8 @@ type PostSessionBody struct {
 	UseTLS *bool `json:"useTLS,omitempty"`
 	// Target a specific compute worker by ID (Mode B).
 	WorkerID *string `json:"workerId,omitempty"`
+	// For endpoint sessions, the slug of the workflow run launching the session (PW_RUN_SLUG inside a run). The session inherits that run's icon when the run belongs to the caller and the request is not already authenticated with the run's own token; otherwise it is ignored.
+	WorkflowRun *string `json:"workflowRun,omitempty"`
 }
 
 type PostSkuBody struct {
@@ -10176,6 +10178,8 @@ type PutSessionBody struct {
 	Subdomain *string `json:"subdomain,omitempty"`
 	// Session type. Only "endpoint" is supported.
 	Type string `json:"type"`
+	// Slug of the workflow run launching the endpoint (PW_RUN_SLUG inside a run). The endpoint inherits that run's icon when the run belongs to the caller and the request is not already authenticated with the run's own token; otherwise it is ignored.
+	WorkflowRun *string `json:"workflowRun,omitempty"`
 }
 
 type PutSlackConfigInputBody struct {
