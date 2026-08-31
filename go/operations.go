@@ -300,6 +300,8 @@ type GetErrorLogsParams struct {
 	Skip *int64 `json:"skip,omitempty"`
 	// Case-insensitive search across message, path, user, and request ID
 	Search *string `json:"search,omitempty"`
+	// Only include errors created at or after this time (RFC3339).
+	Since *time.Time `json:"since,omitempty"`
 }
 
 // GetErrorLogs - Get recent error logs
@@ -322,6 +324,8 @@ func (c *Client) GetErrorLogs(ctx context.Context, opts ...GetErrorLogsParams) (
 	addQueryParam(queryValues, "skip", "form", false, params.Skip)
 
 	addQueryParam(queryValues, "search", "form", false, params.Search)
+
+	addQueryParam(queryValues, "since", "form", false, params.Since)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)

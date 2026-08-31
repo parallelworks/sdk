@@ -39340,6 +39340,20 @@
               "description": "Case-insensitive search across message, path, user, and request ID",
               "type": "string"
             }
+          },
+          {
+            "description": "Only include errors created at or after this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "since",
+            "schema": {
+              "description": "Only include errors created at or after this time (RFC3339).",
+              "examples": [
+                "2026-01-01T00:00:00Z"
+              ],
+              "format": "date-time",
+              "type": "string"
+            }
           }
         ],
         "responses": {
