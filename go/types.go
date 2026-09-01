@@ -900,6 +900,13 @@ type AttachClusterDiskBody struct {
 	StorageID string `json:"storageId"`
 }
 
+type AttachableStorage struct {
+	// The id of the storage resource.
+	ID string `json:"id"`
+	// Whether a bucket mount is forced read-only because the caller's or the cluster owner's access to the bucket is read-only.
+	ReadOnly bool `json:"readOnly"`
+}
+
 type AttachmentResponse struct {
 	// MIME type
 	ContentType string `json:"contentType"`
@@ -7343,6 +7350,8 @@ type MountInfoResponse struct {
 	Mounted bool `json:"mounted"`
 	// Name of the cluster or instance the mount points to.
 	Name string `json:"name"`
+	// Why the mount is still pending, such as the cluster not being connected. Empty while mounted or failed.
+	Reason string `json:"reason"`
 	// ID of the cluster or instance the mount points to.
 	ResourceID   string `json:"resourceId"`
 	ResourcePath string `json:"resourcePath"`
@@ -13033,9 +13042,11 @@ type WorkspaceMount struct {
 }
 
 type WorkspaceMountStatus struct {
-	Error         string `json:"error"`
-	Mounted       bool   `json:"mounted"`
-	WorkspacePath string `json:"workspacePath"`
+	Error   string `json:"error"`
+	Mounted bool   `json:"mounted"`
+	// Why the mount is still pending, if it is neither mounted nor failed.
+	Reason        *string `json:"reason,omitempty"`
+	WorkspacePath string  `json:"workspacePath"`
 }
 
 type WorkspaceSettings struct {

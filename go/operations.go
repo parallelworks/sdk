@@ -12298,6 +12298,25 @@ func (c *Client) UpdateClusterAlerts(ctx context.Context, organization string, u
 	return &result, nil
 }
 
+// GetClusterAttachableStorages - Get Cluster Attachable Storages
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the filesystems that can be attached to a cluster, each bucket flagged with whether its mount is forced read-only. Existing clusters have none.
+func (c *Client) GetClusterAttachableStorages(ctx context.Context, organization string, user string, clusterName string) (*[]AttachableStorage, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/attachable-storages"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+
+	var result []AttachableStorage
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetClusterAttachedStorages - Get Cluster Attached Storages
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.

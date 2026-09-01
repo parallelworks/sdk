@@ -2461,6 +2461,27 @@
         ],
         "type": "object"
       },
+      "AttachableStorage": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "The id of the storage resource.",
+            "examples": [
+              "66f1a2b3c4d5e6f7a8b9c0d1"
+            ],
+            "type": "string"
+          },
+          "readOnly": {
+            "description": "Whether a bucket mount is forced read-only because the caller's or the cluster owner's access to the bucket is read-only.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "readOnly"
+        ],
+        "type": "object"
+      },
       "AttachmentResponse": {
         "additionalProperties": false,
         "properties": {
@@ -21689,6 +21710,10 @@
             "description": "Name of the cluster or instance the mount points to.",
             "type": "string"
           },
+          "reason": {
+            "description": "Why the mount is still pending, such as the cluster not being connected. Empty while mounted or failed.",
+            "type": "string"
+          },
           "resourceId": {
             "description": "ID of the cluster or instance the mount points to.",
             "type": "string"
@@ -21720,6 +21745,7 @@
           "url",
           "mounted",
           "error",
+          "reason",
           "deleted"
         ],
         "type": "object"
@@ -38619,6 +38645,10 @@
           },
           "mounted": {
             "type": "boolean"
+          },
+          "reason": {
+            "description": "Why the mount is still pending, if it is neither mounted nor failed.",
+            "type": "string"
           },
           "workspacePath": {
             "type": "string"
@@ -72682,6 +72712,79 @@
           }
         },
         "summary": "Update Cluster Alerts",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/attachable-storages": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the filesystems that can be attached to a cluster, each bucket flagged with whether its mount is forced read-only. Existing clusters have none.",
+        "operationId": "get-cluster-attachable-storages",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The username of the user that owns the cluster",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "The username of the user that owns the cluster",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "The cluster name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AttachableStorage"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Cluster Attachable Storages",
         "tags": [
           "Clusters"
         ]
