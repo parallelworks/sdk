@@ -2704,6 +2704,39 @@ func (c *Client) GetBuckets(ctx context.Context, opts ...GetBucketsParams) (*[]B
 	return &result, nil
 }
 
+// GetChangelog - Get recent changelog entries
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the latest published changelog entries for the Changelog page. Serves the live changelog from parallelworks.com unless the platform is configured to use the changelog bundled into the build.
+func (c *Client) GetChangelog(ctx context.Context) (*GetChangelogOutputBody, error) {
+
+	path := "/api/changelog"
+
+	var result GetChangelogOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetChangelogAuthorAvatar - Get a changelog author's avatar
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the avatar of a person credited in a changelog entry. The platform fetches and caches the image so browsers never load it from another origin.
+func (c *Client) GetChangelogAuthorAvatar(ctx context.Context, author string) (*string, error) {
+
+	path := "/api/changelog/authors/{author}/avatar"
+	path = pathReplace(path, "author", "simple", false, author)
+
+	var result string
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListUserCloudAccounts - List accessible cloud accounts
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -4799,6 +4832,38 @@ func (c *Client) CreateNotification(ctx context.Context, body CreateNotification
 	return &result, nil
 }
 
+// DeleteNotificationsParams contains the parameters for the DeleteNotifications operation.
+// Required parameters are value fields; optional parameters are pointers.
+type DeleteNotificationsParams struct {
+	// Set to true to delete every notification. Omitting it deletes only the notifications that have been read.
+	All *bool `json:"all,omitempty"`
+}
+
+// DeleteNotifications - Delete notifications
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes the read notifications for the currently authenticated user, or every notification when all is true.
+func (c *Client) DeleteNotifications(ctx context.Context, opts ...DeleteNotificationsParams) error {
+
+	path := "/api/notifications"
+	var params DeleteNotificationsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "all", "form", false, params.All)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetNotificationsOptions - Get notification options
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6427,6 +6492,40 @@ func (c *Client) DeleteOrganizationAuthMethod(ctx context.Context, organization 
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// GetOrganizationBillingSettings - Get organization billing settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the organization's billing settings with defaults applied: the allocation accounting system (legacy by default) and the recurring fiscal year start date.
+func (c *Client) GetOrganizationBillingSettings(ctx context.Context, organization string) (*OrgBillingSettings, error) {
+
+	path := "/api/organizations/{organization}/billing-settings"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result OrgBillingSettings
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PatchOrganizationBillingSettings - Update organization billing settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates the organization's billing settings. Only the fields present in the request change.
+func (c *Client) PatchOrganizationBillingSettings(ctx context.Context, organization string, body PatchOrgBillingSettingsInputBody) (*OrgBillingSettings, error) {
+
+	path := "/api/organizations/{organization}/billing-settings"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result OrgBillingSettings
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetOrganizationBootstrapScriptsParams contains the parameters for the GetOrganizationBootstrapScripts operation.
@@ -17213,6 +17312,21 @@ func (c *Client) ScaleDownUserWorkspaces(ctx context.Context) error {
 	path := "/api/user-workspaces/scale-down"
 
 	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// SetUserChangelogSeen - Mark the Changelog page as seen
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Records the newest changelog entry the current user has opened so the Changelog indicator only shows for later releases.
+func (c *Client) SetUserChangelogSeen(ctx context.Context, body SetChangelogSeenInputBody) error {
+
+	path := "/api/user/changelog-seen"
+
+	if err := c.do(ctx, "PUT", path, body, "application/json", nil, "application/json", true); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil

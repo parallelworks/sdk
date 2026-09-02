@@ -2567,6 +2567,10 @@
             "description": "Indicates if the user is a platform billing admin with read-only access to billing data and the admin cloud resource inventory across all organizations.",
             "type": "boolean"
           },
+          "changelogSeen": {
+            "description": "Date (YYYY-MM-DD) of the newest changelog entry the user has opened in the Changelog page; empty when never opened.",
+            "type": "string"
+          },
           "email": {
             "description": "Email address of the user.",
             "examples": [
@@ -6835,6 +6839,110 @@
         ],
         "type": "object"
       },
+      "ChangelogAuthor": {
+        "additionalProperties": false,
+        "properties": {
+          "github": {
+            "description": "GitHub username.",
+            "examples": [
+              "giraffesyo"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "description": "Author handle on the changelog site.",
+            "examples": [
+              "giraffesyo"
+            ],
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "Avatar path, served by the platform.",
+            "examples": [
+              "/api/changelog/authors/giraffesyo/avatar"
+            ],
+            "type": "string"
+          },
+          "linkedin": {
+            "description": "LinkedIn profile slug.",
+            "examples": [
+              "mcquademichael"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name.",
+            "examples": [
+              "Michael McQuade"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "description": "Job title.",
+            "examples": [
+              "Director of Engineering"
+            ],
+            "type": "string"
+          },
+          "twitter": {
+            "description": "Twitter handle.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "ChangelogEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "authors": {
+            "description": "People who contributed to the release.",
+            "items": {
+              "$ref": "#/components/schemas/ChangelogAuthor"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "content": {
+            "description": "Curated release notes as markdown.",
+            "type": "string"
+          },
+          "date": {
+            "description": "Release date (YYYY-MM-DD).",
+            "examples": [
+              "2026-08-24"
+            ],
+            "type": "string"
+          },
+          "slug": {
+            "description": "Changelog entry slug, the release date.",
+            "examples": [
+              "2026-08-24"
+            ],
+            "type": "string"
+          },
+          "version": {
+            "description": "Platform release the entry describes.",
+            "examples": [
+              "v7.92.0"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "date",
+          "version",
+          "content",
+          "authors"
+        ],
+        "type": "object"
+      },
       "ChatCompletionChunk": {
         "additionalProperties": false,
         "properties": {
@@ -7191,6 +7299,10 @@
       "CloudAccountBillingResponse": {
         "additionalProperties": false,
         "properties": {
+          "infraName": {
+            "description": "Name of the billing infrastructure. Only set on list responses.",
+            "type": "string"
+          },
           "provisionedByOrg": {
             "type": "boolean"
           },
@@ -7457,6 +7569,9 @@
       "CloudAccountListItem": {
         "additionalProperties": false,
         "properties": {
+          "billing": {
+            "$ref": "#/components/schemas/CloudAccountBillingResponse"
+          },
           "csp": {
             "type": "string"
           },
@@ -7470,7 +7585,8 @@
         "required": [
           "name",
           "csp",
-          "cspId"
+          "cspId",
+          "billing"
         ],
         "type": "object"
       },
@@ -11869,7 +11985,7 @@
             "type": "string"
           },
           "repository": {
-            "description": "Run the workflow.yaml at the root of a repository: OWNER/REPO or a github.com URL, or the URL of a project on one of the organization's registered GitLab servers, each with an optional @REF. Read as the caller, treated as third-party code.",
+            "description": "Run a repository's workflow.yaml: OWNER/REPO or a github.com URL, or the URL of a project on one of the organization's registered GitLab servers, each with an optional path to a workflow file or the directory holding one, and an optional @REF. Without a path it is the repository root. Read as the caller, treated as third-party code.",
             "type": "string"
           },
           "sessionNames": {
@@ -14441,6 +14557,25 @@
         },
         "required": [
           "billingDetails"
+        ],
+        "type": "object"
+      },
+      "GetChangelogOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "description": "Latest changelog entries, newest first.",
+            "items": {
+              "$ref": "#/components/schemas/ChangelogEntry"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "entries"
         ],
         "type": "object"
       },
@@ -24524,6 +24659,36 @@
         ],
         "type": "object"
       },
+      "OrgBillingSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "allocationSystem": {
+            "description": "Allocation accounting system the organization uses. Legacy is the default.",
+            "enum": [
+              "legacy",
+              "flexible"
+            ],
+            "type": "string"
+          },
+          "defaultBillingUsername": {
+            "description": "Username shown on dashboards and reports for cost records without a username tag. Empty when unset.",
+            "type": "string"
+          },
+          "fiscalYearStartDate": {
+            "description": "Recurring fiscal year start date as MM-DD. Empty when unset.",
+            "examples": [
+              "10-01"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "allocationSystem",
+          "fiscalYearStartDate",
+          "defaultBillingUsername"
+        ],
+        "type": "object"
+      },
       "OrgConnectionPermissionsOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -25762,6 +25927,31 @@
         ],
         "type": "object"
       },
+      "PatchOrgBillingSettingsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "allocationSystem": {
+            "description": "Allocation accounting system the organization uses.",
+            "enum": [
+              "legacy",
+              "flexible"
+            ],
+            "type": "string"
+          },
+          "defaultBillingUsername": {
+            "description": "Username shown on dashboards and reports for cost records without a username tag. An empty string clears it.",
+            "type": "string"
+          },
+          "fiscalYearStartDate": {
+            "description": "Recurring fiscal year start date as MM-DD. An empty string clears it.",
+            "examples": [
+              "10-01"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "PatchProvisionStatusBody": {
         "additionalProperties": false,
         "properties": {
@@ -26595,6 +26785,10 @@
             "description": "Markdown Terms \u0026 Conditions shown to new users during onboarding. Empty disables the prompt.",
             "type": "string"
           },
+          "useBuiltinChangelog": {
+            "description": "Whether the Changelog page serves the changelog bundled into this build instead of fetching the live one from parallelworks.com. Off by default; turn it on for air-gapped deployments.",
+            "type": "boolean"
+          },
           "validLicense": {
             "description": "Indicates if the platform license is valid.",
             "type": "boolean"
@@ -26613,6 +26807,7 @@
           "sentryTracesSampleRate",
           "sentryReplaysSampleRate",
           "stuckRunSweeperEnabled",
+          "useBuiltinChangelog",
           "quicTunnelEnabled",
           "sshResumeEnabled",
           "bucketTokenTtlMinutes",
@@ -33780,6 +33975,22 @@
         ],
         "type": "object"
       },
+      "SetChangelogSeenInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "description": "Date (YYYY-MM-DD) of the newest changelog entry the user has opened.",
+            "examples": [
+              "2026-08-24"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "date"
+        ],
+        "type": "object"
+      },
       "SetComplimentaryInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -35674,6 +35885,10 @@
           "termsAndConditions": {
             "description": "Markdown Terms \u0026 Conditions shown to new users during onboarding. Empty disables the prompt.",
             "type": "string"
+          },
+          "useBuiltinChangelog": {
+            "description": "Whether the Changelog page serves the changelog bundled into this build instead of fetching the live one.",
+            "type": "boolean"
           },
           "workspaceScaleDownMinAgeDays": {
             "description": "Minimum age in days a user workspace container must reach before the hourly scale-down job stops it. 0 scales down regardless of age.",
@@ -44572,6 +44787,99 @@
         ]
       }
     },
+    "/api/changelog": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the latest published changelog entries for the Changelog page. Serves the live changelog from parallelworks.com unless the platform is configured to use the changelog bundled into the build.",
+        "operationId": "get-changelog",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetChangelogOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get recent changelog entries",
+        "tags": [
+          "Platform"
+        ]
+      }
+    },
+    "/api/changelog/authors/{author}/avatar": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the avatar of a person credited in a changelog entry. The platform fetches and caches the image so browsers never load it from another origin.",
+        "operationId": "get-changelog-author-avatar",
+        "parameters": [
+          {
+            "description": "Author id from a changelog entry.",
+            "in": "path",
+            "name": "author",
+            "required": true,
+            "schema": {
+              "description": "Author id from a changelog entry.",
+              "examples": [
+                "giraffesyo"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "contentEncoding": "base64",
+                  "description": "The author's avatar image.",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a changelog author's avatar",
+        "tags": [
+          "Platform"
+        ]
+      }
+    },
     "/api/cloud-accounts": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the cloud accounts the user can access.",
@@ -49791,6 +50099,41 @@
       }
     },
     "/api/notifications": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDeletes the read notifications for the currently authenticated user, or every notification when all is true.",
+        "operationId": "delete-notifications",
+        "parameters": [
+          {
+            "description": "Set to true to delete every notification. Omitting it deletes only the notifications that have been read.",
+            "explode": false,
+            "in": "query",
+            "name": "all",
+            "schema": {
+              "description": "Set to true to delete every notification. Omitting it deletes only the notifications that have been read.",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete notifications",
+        "tags": [
+          "Notifications"
+        ]
+      },
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the notifications for the currently authenticated subject.",
         "operationId": "get-notifications",
@@ -54370,6 +54713,108 @@
         "summary": "Delete organization auth method",
         "tags": [
           "Auth Methods"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/billing-settings": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the organization's billing settings with defaults applied: the allocation accounting system (legacy by default) and the recurring fiscal year start date.",
+        "operationId": "get-organization-billing-settings",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgBillingSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get organization billing settings",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates the organization's billing settings. Only the fields present in the request change.",
+        "operationId": "patch-organization-billing-settings",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchOrgBillingSettingsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgBillingSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update organization billing settings",
+        "tags": [
+          "Organization"
         ]
       }
     },
@@ -88173,6 +88618,41 @@
         "summary": "Scale down user workspaces",
         "tags": [
           "Platform"
+        ]
+      }
+    },
+    "/api/user/changelog-seen": {
+      "put": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRecords the newest changelog entry the current user has opened so the Changelog indicator only shows for later releases.",
+        "operationId": "set-user-changelog-seen",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetChangelogSeenInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Mark the Changelog page as seen",
+        "tags": [
+          "User Settings"
         ]
       }
     },

@@ -942,6 +942,8 @@ type AuthSession struct {
 	AvatarEtag *string `json:"avatarEtag,omitempty"`
 	// Indicates if the user is a platform billing admin with read-only access to billing data and the admin cloud resource inventory across all organizations.
 	BillingAdmin bool `json:"billingAdmin"`
+	// Date (YYYY-MM-DD) of the newest changelog entry the user has opened in the Changelog page; empty when never opened.
+	ChangelogSeen *string `json:"changelogSeen,omitempty"`
 	// Email address of the user.
 	Email string `json:"email"`
 	// User ID.
@@ -2297,6 +2299,36 @@ type CertInfo struct {
 	Subject string `json:"subject"`
 }
 
+type ChangelogAuthor struct {
+	// GitHub username.
+	Github *string `json:"github,omitempty"`
+	// Author handle on the changelog site.
+	ID string `json:"id"`
+	// Avatar path, served by the platform.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// LinkedIn profile slug.
+	Linkedin *string `json:"linkedin,omitempty"`
+	// Display name.
+	Name string `json:"name"`
+	// Job title.
+	Title *string `json:"title,omitempty"`
+	// Twitter handle.
+	Twitter *string `json:"twitter,omitempty"`
+}
+
+type ChangelogEntry struct {
+	// People who contributed to the release.
+	Authors []ChangelogAuthor `json:"authors"`
+	// Curated release notes as markdown.
+	Content string `json:"content"`
+	// Release date (YYYY-MM-DD).
+	Date string `json:"date"`
+	// Changelog entry slug, the release date.
+	Slug string `json:"slug"`
+	// Platform release the entry describes.
+	Version string `json:"version"`
+}
+
 type ChatCompletionChunk struct {
 	// Completion choices
 	Choices []Choice `json:"choices"`
@@ -2559,6 +2591,8 @@ type CleanupPreviewsOutputBody struct {
 }
 
 type CloudAccountBillingResponse struct {
+	// Name of the billing infrastructure. Only set on list responses.
+	InfraName        *string    `json:"infraName,omitempty"`
 	ProvisionedByOrg bool       `json:"provisionedByOrg"`
 	Status           string     `json:"status"`
 	UpdatedAt        *time.Time `json:"updatedAt"`
@@ -2651,9 +2685,10 @@ type CloudAccountDetail struct {
 }
 
 type CloudAccountListItem struct {
-	Csp   string `json:"csp"`
-	CspID string `json:"cspId"`
-	Name  string `json:"name"`
+	Billing CloudAccountBillingResponse `json:"billing"`
+	Csp     string                      `json:"csp"`
+	CspID   string                      `json:"cspId"`
+	Name    string                      `json:"name"`
 }
 
 type CloudAccountNetwork struct {
@@ -4106,7 +4141,7 @@ type CreateWorkflowRunInputBody struct {
 	Inputs map[string]any `json:"inputs,omitempty"`
 	// Slug of a marketplace item to run
 	Marketplace *string `json:"marketplace,omitempty"`
-	// Run the workflow.yaml at the root of a repository: OWNER/REPO or a github.com URL, or the URL of a project on one of the organization's registered GitLab servers, each with an optional @REF. Read as the caller, treated as third-party code.
+	// Run a repository's workflow.yaml: OWNER/REPO or a github.com URL, or the URL of a project on one of the organization's registered GitLab servers, each with an optional path to a workflow file or the directory holding one, and an optional @REF. Without a path it is the repository root. Read as the caller, treated as third-party code.
 	Repository *string `json:"repository,omitempty"`
 	// Session names
 	SessionNames map[string]string `json:"sessionNames,omitempty"`
@@ -5112,6 +5147,11 @@ type GetAccessResponse struct {
 
 type GetBillingDetailsOutputBody struct {
 	BillingDetails BillingDetails `json:"billingDetails"`
+}
+
+type GetChangelogOutputBody struct {
+	// Latest changelog entries, newest first.
+	Entries []ChangelogEntry `json:"entries"`
 }
 
 type GetClusterMetricsOutputBody struct {
@@ -8222,6 +8262,15 @@ type OrgAllocationThreshold struct {
 	Threshold float64 `json:"threshold"`
 }
 
+type OrgBillingSettings struct {
+	// Allocation accounting system the organization uses. Legacy is the default.
+	AllocationSystem string `json:"allocationSystem"`
+	// Username shown on dashboards and reports for cost records without a username tag. Empty when unset.
+	DefaultBillingUsername string `json:"defaultBillingUsername"`
+	// Recurring fiscal year start date as MM-DD. Empty when unset.
+	FiscalYearStartDate string `json:"fiscalYearStartDate"`
+}
+
 type OrgConnectionPermissionsOutputBody struct {
 	Groups                []string `json:"groups"`
 	ShareWithOrganization bool     `json:"shareWithOrganization"`
@@ -8611,6 +8660,15 @@ type PatchOpenstackFlavorsBody struct {
 	Flavors []FlavorCostUpdate `json:"flavors"`
 }
 
+type PatchOrgBillingSettingsInputBody struct {
+	// Allocation accounting system the organization uses.
+	AllocationSystem *string `json:"allocationSystem,omitempty"`
+	// Username shown on dashboards and reports for cost records without a username tag. An empty string clears it.
+	DefaultBillingUsername *string `json:"defaultBillingUsername,omitempty"`
+	// Recurring fiscal year start date as MM-DD. An empty string clears it.
+	FiscalYearStartDate *string `json:"fiscalYearStartDate,omitempty"`
+}
+
 type PatchProvisionStatusBody struct {
 	// Provision status ID to update
 	ProvisionStatusID string `json:"provisionStatusId"`
@@ -8897,6 +8955,8 @@ type PlatformSettingsAdmin struct {
 	StuckRunSweeperEnabled bool `json:"stuckRunSweeperEnabled"`
 	// Markdown Terms & Conditions shown to new users during onboarding. Empty disables the prompt.
 	TermsAndConditions *string `json:"termsAndConditions,omitempty"`
+	// Whether the Changelog page serves the changelog bundled into this build instead of fetching the live one from parallelworks.com. Off by default; turn it on for air-gapped deployments.
+	UseBuiltinChangelog bool `json:"useBuiltinChangelog"`
 	// Indicates if the platform license is valid.
 	ValidLicense *bool `json:"validLicense,omitempty"`
 	// Minimum age in days a user workspace container must reach before the hourly scale-down job stops it. 0 scales down regardless of age. Default 7.
@@ -11285,6 +11345,11 @@ type SetCatalogEntryIconOutputBody struct {
 	ImageURL string `json:"imageUrl"`
 }
 
+type SetChangelogSeenInputBody struct {
+	// Date (YYYY-MM-DD) of the newest changelog entry the user has opened.
+	Date string `json:"date"`
+}
+
 type SetComplimentaryInputBody struct {
 	// Whether the account is complimentary and consumes no license seat
 	Complimentary bool `json:"complimentary"`
@@ -12068,6 +12133,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	StuckRunSweeperEnabled *bool `json:"stuckRunSweeperEnabled,omitempty"`
 	// Markdown Terms & Conditions shown to new users during onboarding. Empty disables the prompt.
 	TermsAndConditions *string `json:"termsAndConditions,omitempty"`
+	// Whether the Changelog page serves the changelog bundled into this build instead of fetching the live one.
+	UseBuiltinChangelog *bool `json:"useBuiltinChangelog,omitempty"`
 	// Minimum age in days a user workspace container must reach before the hourly scale-down job stops it. 0 scales down regardless of age.
 	WorkspaceScaleDownMinAgeDays *int64 `json:"workspaceScaleDownMinAgeDays,omitempty"`
 }

@@ -221,6 +221,22 @@ func (m *ResponseMeta) ServeBlobHeaders() ServeBlobHeaders {
 	}
 }
 
+// GetChangelogAuthorAvatarHeaders holds the headers GetChangelogAuthorAvatar declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetChangelogAuthorAvatarHeaders struct {
+	CacheControl string
+	ContentType  string
+}
+
+// GetChangelogAuthorAvatarHeaders reads the headers GetChangelogAuthorAvatar declares out of the captured
+// response.
+func (m *ResponseMeta) GetChangelogAuthorAvatarHeaders() GetChangelogAuthorAvatarHeaders {
+	return GetChangelogAuthorAvatarHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+		ContentType:  m.Header.Get("Content-Type"),
+	}
+}
+
 // UpdateInstanceStatusHeaders holds the headers UpdateInstanceStatus declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type UpdateInstanceStatusHeaders struct {
