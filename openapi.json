@@ -1930,6 +1930,12 @@
             "readOnly": true,
             "type": "boolean"
           },
+          "resourceGroups": {
+            "description": "Number of resource groups currently billing this allocation",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
           "total": {
             "description": "Total allocation amount",
             "format": "double",
@@ -1959,6 +1965,25 @@
           "name",
           "unit",
           "total"
+        ],
+        "type": "object"
+      },
+      "AllocationHistoryEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "description": "Allocation name",
+            "type": "string"
+          },
+          "end": {
+            "description": "When the resource group stopped using this allocation",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "allocation",
+          "end"
         ],
         "type": "object"
       },
@@ -3573,7 +3598,7 @@
             "type": "string"
           },
           "group": {
-            "description": "The group to which the Machine Learning Workspace will be associated.",
+            "description": "The group to which the Machine Learning Workspace will be associated. Optional when resourceGroup is provided.",
             "examples": [
               "myGroup"
             ],
@@ -3635,6 +3660,13 @@
             ],
             "type": "string"
           },
+          "resourceGroup": {
+            "description": "The resource group the workspace bills against. Takes precedence over group.",
+            "examples": [
+              "my-resource-group"
+            ],
+            "type": "string"
+          },
           "tags": {
             "description": "The tags associated with the Machine Learning Workspace.",
             "examples": [
@@ -3682,8 +3714,7 @@
           "region",
           "tags",
           "description",
-          "network",
-          "group"
+          "network"
         ],
         "type": "object"
       },
@@ -4615,7 +4646,7 @@
             "type": "string"
           },
           "group": {
-            "description": "The group to which the Machine Learning Workspace will be associated.",
+            "description": "The group to which the Machine Learning Workspace will be associated. Optional when resourceGroup is provided.",
             "examples": [
               "myGroup"
             ],
@@ -4693,6 +4724,13 @@
             ],
             "type": "string"
           },
+          "resourceGroup": {
+            "description": "The resource group the workspace bills against. Takes precedence over group.",
+            "examples": [
+              "my-resource-group"
+            ],
+            "type": "string"
+          },
           "tags": {
             "description": "The tags associated with the Machine Learning Workspace.",
             "examples": [
@@ -4740,8 +4778,7 @@
           "region",
           "tags",
           "description",
-          "network",
-          "group"
+          "network"
         ],
         "type": "object"
       },
@@ -6281,7 +6318,7 @@
             "type": "boolean"
           },
           "group": {
-            "description": "The group to which the storage will be associated.",
+            "description": "The group to which the storage will be associated. Optional when resourceGroup is provided.",
             "examples": [
               "myGroup"
             ],
@@ -6298,6 +6335,13 @@
           },
           "region": {
             "description": "Region the storage will be provisioned in. Required unless a Google multi-region or dual-region is specified.",
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "The resource group the storage bills against. Takes precedence over group.",
+            "examples": [
+              "my-resource-group"
+            ],
             "type": "string"
           },
           "tags": {
@@ -6318,8 +6362,7 @@
           }
         },
         "required": [
-          "cloudAccount",
-          "group"
+          "cloudAccount"
         ],
         "type": "object"
       },
@@ -7585,8 +7628,7 @@
         "required": [
           "name",
           "csp",
-          "cspId",
-          "billing"
+          "cspId"
         ],
         "type": "object"
       },
@@ -8322,101 +8364,15 @@
             "description": "The deployment ID",
             "type": "string"
           },
-          "provisionStatus": {
-            "$ref": "#/components/schemas/ClusterDeploymentProvisionStatus",
-            "description": "Step-by-step progress of the deployment"
-          },
           "status": {
             "description": "The current status of the deployment",
             "type": "string"
-          },
-          "storages": {
-            "description": "Storages provisioned by the deployment",
-            "items": {
-              "$ref": "#/components/schemas/ClusterDeploymentStorage"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
           }
         },
         "required": [
           "id",
           "deploymentNumber",
-          "createdAt",
-          "provisionStatus",
-          "storages"
-        ],
-        "type": "object"
-      },
-      "ClusterDeploymentProvisionStatus": {
-        "additionalProperties": false,
-        "properties": {
-          "deletion": {
-            "description": "Progress records for tearing the cluster down",
-            "items": {
-              "$ref": "#/components/schemas/ProvisionStatusResponseRecord"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "provision": {
-            "description": "Progress records for provisioning the cluster",
-            "items": {
-              "$ref": "#/components/schemas/ProvisionStatusResponseRecord"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "scheduler": {
-            "description": "Progress records for the cluster scheduler",
-            "items": {
-              "$ref": "#/components/schemas/ProvisionStatusResponseRecord"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "storage": {
-            "description": "Progress records for provisioning storage",
-            "items": {
-              "$ref": "#/components/schemas/ProvisionStatusResponseRecord"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "ClusterDeploymentStorage": {
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "description": "The ID of the storage resource",
-            "type": "string"
-          },
-          "index": {
-            "description": "The position of the storage among the deployment's storages",
-            "format": "int64",
-            "type": "integer"
-          },
-          "name": {
-            "description": "The name of the storage resource",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "index"
+          "createdAt"
         ],
         "type": "object"
       },
@@ -9727,7 +9683,7 @@
             "type": "string"
           },
           "group": {
-            "description": "Billing group name (required for managed Azure and Bedrock providers)",
+            "description": "Billing group name (managed Azure and Bedrock providers; optional when resourceGroup is provided)",
             "type": "string"
           },
           "model": {
@@ -9756,6 +9712,10 @@
           },
           "region": {
             "description": "Region (managed Azure and Bedrock providers)",
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Resource group the provider bills against. Takes precedence over group.",
             "type": "string"
           }
         },
@@ -14398,6 +14358,13 @@
             "format": "int64",
             "type": "integer"
           },
+          "resourceGroup": {
+            "description": "The resource group the cluster's usage bills against. Only populated by the single-cluster endpoint.",
+            "examples": [
+              "my-resource-group"
+            ],
+            "type": "string"
+          },
           "runningProcesses": {
             "description": "Cloud-cluster only: whether running-processes collection is turned on, which lets anyone with access to the cluster view processes and freeze events on each node's detail page.",
             "type": "boolean"
@@ -15668,7 +15635,7 @@
             "type": "string"
           },
           "group": {
-            "description": "The group the instance bills to.",
+            "description": "The group the instance bills to. Optional when resourceGroup is provided.",
             "type": "string"
           },
           "id": {
@@ -15694,6 +15661,10 @@
           },
           "region": {
             "description": "The gcp region of the instance.",
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "The resource group the instance bills against. Takes precedence over group.",
             "type": "string"
           },
           "runtimeAlert": {
@@ -17337,7 +17308,7 @@
             "type": "boolean"
           },
           "group": {
-            "description": "The group to which the Instance will be associated.",
+            "description": "The group to which the Instance will be associated. Optional when resourceGroup is provided.",
             "examples": [
               "myGroup"
             ],
@@ -17416,6 +17387,13 @@
               "us-west-2"
             ],
             "minLength": 1,
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "The resource group the Instance bills against. Takes precedence over group.",
+            "examples": [
+              "my-resource-group"
+            ],
             "type": "string"
           },
           "runtimeAlert": {
@@ -17522,7 +17500,6 @@
           "displayName",
           "description",
           "tags",
-          "group",
           "region",
           "zone",
           "sizeGb",
@@ -17712,7 +17689,7 @@
             "type": "string"
           },
           "group": {
-            "description": "The group name to which the IP will be associated.",
+            "description": "The group name to which the IP will be associated. Optional when resourceGroup is provided.",
             "examples": [
               "myGroup"
             ],
@@ -17775,6 +17752,13 @@
             ],
             "type": "string"
           },
+          "resourceGroup": {
+            "description": "The resource group the IP bills against. Takes precedence over group.",
+            "examples": [
+              "my-resource-group"
+            ],
+            "type": "string"
+          },
           "tags": {
             "description": "The tags associated with the IP resource.",
             "examples": [
@@ -17806,7 +17790,6 @@
           "region",
           "tags",
           "description",
-          "group",
           "network"
         ],
         "type": "object"
@@ -20003,7 +19986,7 @@
             "type": "string"
           },
           "group": {
-            "description": "The group to which the Machine Learning Workspace will be associated.",
+            "description": "The group to which the Machine Learning Workspace will be associated. Optional when resourceGroup is provided.",
             "examples": [
               "myGroup"
             ],
@@ -20065,6 +20048,13 @@
             ],
             "type": "string"
           },
+          "resourceGroup": {
+            "description": "The resource group the workspace bills against. Takes precedence over group.",
+            "examples": [
+              "my-resource-group"
+            ],
+            "type": "string"
+          },
           "tags": {
             "description": "The tags associated with the Machine Learning Workspace.",
             "examples": [
@@ -20104,8 +20094,7 @@
           "region",
           "tags",
           "description",
-          "network",
-          "group"
+          "network"
         ],
         "type": "object"
       },
@@ -21885,6 +21874,19 @@
         ],
         "type": "object"
       },
+      "MoveResourceInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "resourceGroup": {
+            "description": "Target resource group name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "resourceGroup"
+        ],
+        "type": "object"
+      },
       "Name": {
         "additionalProperties": false,
         "properties": {
@@ -22198,7 +22200,7 @@
             "type": "string"
           },
           "group": {
-            "description": "The group name to which the network interface will be associated.",
+            "description": "The group name to which the network interface will be associated. Optional when resourceGroup is provided.",
             "examples": [
               "myGroup"
             ],
@@ -22277,6 +22279,13 @@
             ],
             "type": "string"
           },
+          "resourceGroup": {
+            "description": "The resource group the network interface bills against. Takes precedence over group.",
+            "examples": [
+              "my-resource-group"
+            ],
+            "type": "string"
+          },
           "tags": {
             "description": "The tags associated with the network interface resource.",
             "examples": [
@@ -22315,7 +22324,6 @@
           "region",
           "tags",
           "description",
-          "group",
           "network"
         ],
         "type": "object"
@@ -25925,31 +25933,6 @@
         "required": [
           "flavors"
         ],
-        "type": "object"
-      },
-      "PatchOrgBillingSettingsInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "allocationSystem": {
-            "description": "Allocation accounting system the organization uses.",
-            "enum": [
-              "legacy",
-              "flexible"
-            ],
-            "type": "string"
-          },
-          "defaultBillingUsername": {
-            "description": "Username shown on dashboards and reports for cost records without a username tag. An empty string clears it.",
-            "type": "string"
-          },
-          "fiscalYearStartDate": {
-            "description": "Recurring fiscal year start date as MM-DD. An empty string clears it.",
-            "examples": [
-              "10-01"
-            ],
-            "type": "string"
-          }
-        },
         "type": "object"
       },
       "PatchProvisionStatusBody": {
@@ -32276,12 +32259,29 @@
       "ResourceGroup": {
         "additionalProperties": false,
         "properties": {
+          "activeResourceCount": {
+            "description": "Number of assigned resources that are not failed",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
           "allocation": {
             "description": "Current allocation name",
             "type": [
               "string",
               "null"
             ]
+          },
+          "failedResourceCount": {
+            "description": "Number of assigned resources in a failed state",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "managed": {
+            "description": "True when the resource group is managed automatically from a group and cannot be edited or deleted",
+            "readOnly": true,
+            "type": "boolean"
           },
           "name": {
             "description": "Resource group name",
@@ -32294,6 +32294,12 @@
               "null"
             ]
           },
+          "resourceCount": {
+            "description": "Number of resources assigned to this resource group",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
           "user": {
             "description": "Owner username",
             "readOnly": true,
@@ -32303,6 +32309,149 @@
         "required": [
           "name",
           "allocation"
+        ],
+        "type": "object"
+      },
+      "ResourceGroupDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "activeResourceCount": {
+            "description": "Number of assigned resources that are not failed",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "allocation": {
+            "description": "Current allocation name",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "allocationAllowed": {
+            "description": "Resource types the current allocation may fund; empty means unrestricted",
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "allocationHistory": {
+            "description": "Previous allocations of this resource group, oldest first",
+            "items": {
+              "$ref": "#/components/schemas/AllocationHistoryEntry"
+            },
+            "readOnly": true,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "allocationTotal": {
+            "description": "Budget total of the current allocation",
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
+          "allocationUnit": {
+            "description": "Unit the current allocation is denominated in",
+            "readOnly": true,
+            "type": "string"
+          },
+          "allocationUsed": {
+            "description": "Amount used of the current allocation (includes billing estimates)",
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
+          "failedResourceCount": {
+            "description": "Number of assigned resources in a failed state",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "managed": {
+            "description": "True when the resource group is managed automatically from a group and cannot be edited or deleted",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "name": {
+            "description": "Resource group name",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "resourceCount": {
+            "description": "Number of resources assigned to this resource group",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "user": {
+            "description": "Owner username",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "allocation"
+        ],
+        "type": "object"
+      },
+      "ResourceGroupResource": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "description": "When the resource was created",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Resource ID",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "Custom icon configured on the resource",
+            "type": "string"
+          },
+          "name": {
+            "description": "Resource name",
+            "type": "string"
+          },
+          "namespace": {
+            "description": "Resource namespace (owner username)",
+            "type": "string"
+          },
+          "provider": {
+            "description": "Cloud provider (aws, google, azure)",
+            "type": "string"
+          },
+          "region": {
+            "description": "Cloud region",
+            "type": "string"
+          },
+          "status": {
+            "description": "Resource status",
+            "type": "string"
+          },
+          "type": {
+            "description": "Resource type (e.g., instance, bucket, cluster)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "type",
+          "provider",
+          "status",
+          "createdAt"
         ],
         "type": "object"
       },
@@ -34616,6 +34765,47 @@
         ],
         "type": "object"
       },
+      "StorageDeployment": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "description": "The deployment creation time.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "deleteStatus": {
+            "description": "The delete status of the deployment.",
+            "type": "string"
+          },
+          "deletedAt": {
+            "description": "The time the deployment deletion completed.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletedBy": {
+            "description": "The user that deleted the deployment.",
+            "type": "string"
+          },
+          "deploymentNumber": {
+            "description": "The deployment number.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": "The deployment ID.",
+            "type": "string"
+          },
+          "status": {
+            "description": "The current status of the deployment.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "createdAt"
+        ],
+        "type": "object"
+      },
       "StorageDetail": {
         "additionalProperties": false,
         "properties": {
@@ -35113,6 +35303,38 @@
             "type": "object"
           }
         },
+        "type": "object"
+      },
+      "StringPolicyOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "level": {
+            "description": "Level of the policy",
+            "examples": [
+              "platform"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the policy",
+            "examples": [
+              "default-billing-username"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "value": {
+            "description": "Value of the policy",
+            "examples": [
+              "shared-hpc"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "level"
+        ],
         "type": "object"
       },
       "SubdomainAvailabilityResponse": {
@@ -35950,6 +36172,10 @@
             "description": "Name of the network the cluster provisions into; cloud clusters only.",
             "type": "string"
           },
+          "resourceGroup": {
+            "description": "Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.",
+            "type": "string"
+          },
           "tags": {
             "description": "Tags; replaces the full list.",
             "items": {
@@ -36587,6 +36813,20 @@
         ],
         "type": "object"
       },
+      "UpdateResourceGroupInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "description": "New allocation name",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "allocation"
+        ],
+        "type": "object"
+      },
       "UpdateResourceGroupPermissionsInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -36662,6 +36902,22 @@
           "replayUnmask",
           "tracesSampleRate",
           "replaysSampleRate"
+        ],
+        "type": "object"
+      },
+      "UpdateStorageBillingInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "resourceGroup": {
+            "description": "Name of the resource group the storage bills against.",
+            "examples": [
+              "my-resource-group"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "resourceGroup"
         ],
         "type": "object"
       },
@@ -54718,7 +54974,7 @@
     },
     "/api/organizations/{organization}/billing-settings": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the organization's billing settings with defaults applied: the allocation accounting system (legacy by default) and the recurring fiscal year start date.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the organization's effective billing settings, resolved from the flexible-allocation-system, fiscal-year-start-date, and default-billing-username policies with defaults applied.",
         "operationId": "get-organization-billing-settings",
         "parameters": [
           {
@@ -54758,61 +55014,6 @@
           }
         },
         "summary": "Get organization billing settings",
-        "tags": [
-          "Organization"
-        ]
-      },
-      "patch": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates the organization's billing settings. Only the fields present in the request change.",
-        "operationId": "patch-organization-billing-settings",
-        "parameters": [
-          {
-            "description": "The name of the organization.",
-            "in": "path",
-            "name": "organization",
-            "required": true,
-            "schema": {
-              "description": "The name of the organization.",
-              "examples": [
-                "parallelworks"
-              ],
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PatchOrgBillingSettingsInputBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrgBillingSettings"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Update organization billing settings",
         "tags": [
           "Organization"
         ]
@@ -65764,6 +65965,71 @@
         ]
       }
     },
+    "/api/organizations/{organization}/policies/default-billing-username": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets default-billing-username policy for the organization: the username shown on dashboards and reports for cost records without a username tag.",
+        "operationId": "set-organization-default-billing-username-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  "shared-hpc"
+                ],
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/StringPolicyOutput"
+                  },
+                  "description": "Map of string policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: default-billing-username",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/organizations/{organization}/policies/disable-password-login": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets disable-password-login policy for the organization.",
@@ -66021,6 +66287,136 @@
           }
         },
         "summary": "Set organization policy: event-retention-days",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/policies/fiscal-year-start-date": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets fiscal-year-start-date policy for the organization as MM-DD. When unset, billing and reports calculate costs over all time.",
+        "operationId": "set-organization-fiscal-year-start-date-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  "shared-hpc"
+                ],
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/StringPolicyOutput"
+                  },
+                  "description": "Map of string policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: fiscal-year-start-date",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/policies/flexible-allocation-system": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets flexible-allocation-system policy for the organization. True opts the organization into the flexible allocation system; the legacy system applies when unset.",
+        "operationId": "set-organization-flexible-allocation-system-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/BooleanPolicyOutput"
+                  },
+                  "description": "Map of boolean policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: flexible-allocation-system",
         "tags": [
           "Policies"
         ]
@@ -73796,7 +74192,7 @@
     },
     "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/deployments/{deploymentNumber}": {
       "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns a cluster deployment with its step-by-step progress and the storages it provisioned.",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns a cluster deployment.",
         "operationId": "get-cluster-deployment",
         "parameters": [
           {
@@ -74160,6 +74556,89 @@
           }
         },
         "summary": "Get cluster scheduler log",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/deployments/{deploymentNumber}/provision-status": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the step-by-step progress records of a cluster deployment.",
+        "operationId": "get-cluster-deployment-provision-status",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The username of the user that owns the cluster",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "The username of the user that owns the cluster",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The cluster name",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "The cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The deployment number or 'latest'",
+            "in": "path",
+            "name": "deploymentNumber",
+            "required": true,
+            "schema": {
+              "description": "The deployment number or 'latest'",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProvisionStatusResponseRecord"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get cluster deployment provision status",
         "tags": [
           "Clusters"
         ]
@@ -80022,6 +80501,67 @@
       }
     },
     "/api/organizations/{organization}/users/{user}/resource-groups/{name}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSoft deletes a resource group.",
+        "operationId": "delete-resource-group",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Resource group name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Resource group name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a resource group",
+        "tags": [
+          "Resource Groups"
+        ]
+      },
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a specific resource group.",
         "operationId": "get-resource-group",
@@ -80068,7 +80608,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResourceGroup"
+                  "$ref": "#/components/schemas/ResourceGroupDetail"
                 }
               }
             },
@@ -80086,6 +80626,84 @@
           }
         },
         "summary": "Get a resource group",
+        "tags": [
+          "Resource Groups"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdates a resource group's allocation.",
+        "operationId": "update-resource-group",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Resource group name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Resource group name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateResourceGroupInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceGroup"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update a resource group",
         "tags": [
           "Resource Groups"
         ]
@@ -80227,6 +80845,165 @@
           }
         },
         "summary": "Update resource group permissions",
+        "tags": [
+          "Resource Groups"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/resource-groups/{name}/resources": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns all active resources assigned to a resource group.",
+        "operationId": "list-resource-group-resources",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Resource group name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Resource group name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ResourceGroupResource"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List resources in a resource group",
+        "tags": [
+          "Resource Groups"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/resource-groups/{name}/resources/{resourceId}/move": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nMoves an off resource to a different resource group.",
+        "operationId": "move-resource-group-resource",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Resource group name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Resource group name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Id of the resource to move",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "schema": {
+              "description": "Id of the resource to move",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveResourceInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Move a resource to another resource group",
         "tags": [
           "Resource Groups"
         ]
@@ -81687,6 +82464,100 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/storage/{name}/deployments": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the provisioning deployments for a storage, sorted by most recent first.",
+        "operationId": "get-storage-deployments",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The page number to return.",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "The page number to return.",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StorageDeployment"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List storage deployments",
+        "tags": [
+          "Storage"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/storage/{name}/deployments/{deploymentNumber}/logs/deletion": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the log written while the storage was torn down. Reads the end of the log by default, or from a byte offset to read only what has since been appended.",
@@ -81916,6 +82787,97 @@
           "Lustre",
           "NFS",
           "Buckets"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/storage/{name}/deployments/{deploymentNumber}/provision-status": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the provision status records for a storage deployment.",
+        "operationId": "get-storage-deployment-provision-status",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The deployment number or 'latest'.",
+            "in": "path",
+            "name": "deploymentNumber",
+            "required": true,
+            "schema": {
+              "description": "The deployment number or 'latest'.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProvisionStatusResponseRecord"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get storage deployment provision status",
+        "tags": [
+          "Storage"
         ]
       }
     },
@@ -82882,6 +83844,118 @@
           }
         },
         "summary": "Delete a storage",
+        "tags": [
+          "Storage",
+          "Disks",
+          "Lustre",
+          "NFS",
+          "Buckets"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/{type}/{name}/billing": {
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReassigns which resource group the storage bills against.",
+        "operationId": "update-storage-billing",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The type of the storage.",
+            "in": "path",
+            "name": "type",
+            "required": true,
+            "schema": {
+              "description": "The type of the storage.",
+              "enum": [
+                "aws-disk",
+                "aws-lustre",
+                "aws-efs",
+                "aws-bucket",
+                "azure-bucket",
+                "azure-disk",
+                "azure-azfiles",
+                "azure-managedlustre",
+                "azure-netappfiles",
+                "google-disk",
+                "google-bucket",
+                "google-filestore",
+                "google-managedlustre",
+                "oracle-bucket",
+                "oracle-oraclefs"
+              ],
+              "examples": [
+                "aws-lustre"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStorageBillingInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update storage billing",
         "tags": [
           "Storage",
           "Disks",
@@ -85131,6 +86205,56 @@
         ]
       }
     },
+    "/api/platform/policies/default-billing-username": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the default-billing-username policy for the platform: the username shown on dashboards and reports for cost records without a username tag.",
+        "operationId": "set-platform-default-billing-username-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  "shared-hpc"
+                ],
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/StringPolicyOutput"
+                  },
+                  "description": "Map of string policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: default-billing-username",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/platform/policies/disable-password-login": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the disable-password-login policy for the platform.",
@@ -85281,6 +86405,106 @@
           }
         },
         "summary": "Set platform policy: event-retention-days",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/fiscal-year-start-date": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the fiscal-year-start-date policy for the platform as MM-DD. When unset, billing and reports calculate costs over all time.",
+        "operationId": "set-platform-fiscal-year-start-date-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  "shared-hpc"
+                ],
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/StringPolicyOutput"
+                  },
+                  "description": "Map of string policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: fiscal-year-start-date",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/flexible-allocation-system": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the flexible-allocation-system policy for the platform. True opts every organization into the flexible allocation system; the legacy system applies when unset.",
+        "operationId": "set-platform-flexible-allocation-system-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/BooleanPolicyOutput"
+                  },
+                  "description": "Map of boolean policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: flexible-allocation-system",
         "tags": [
           "Policies"
         ]
@@ -86888,6 +88112,35 @@
               "enum": [
                 "name",
                 "-name"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only resource groups the user may bill new resources against: their own, or shared with use or admin permission",
+            "explode": false,
+            "in": "query",
+            "name": "usable",
+            "schema": {
+              "description": "Only resource groups the user may bill new resources against: their own, or shared with use or admin permission",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Only resource groups whose current allocation may fund this resource type; groups with no allocation or an unrestricted allocation always match",
+            "explode": false,
+            "in": "query",
+            "name": "allows",
+            "schema": {
+              "description": "Only resource groups whose current allocation may fund this resource type; groups with no allocation or an unrestricted allocation always match",
+              "enum": [
+                "aws",
+                "azure",
+                "google",
+                "oracle",
+                "openstack",
+                "kubernetes",
+                "ai"
               ],
               "type": "string"
             }

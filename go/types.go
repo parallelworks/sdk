@@ -753,6 +753,8 @@ type Allocation struct {
 	Parent *string `json:"parent,omitempty"`
 	// Whether the allocation's unit is rated in USD (false = a raw consumption unit)
 	RatedInUsd *bool `json:"ratedInUsd,omitempty"`
+	// Number of resource groups currently billing this allocation
+	ResourceGroups *int64 `json:"resourceGroups,omitempty"`
 	// Total allocation amount
 	Total float64 `json:"total"`
 	// Allocation type: managed (USD, rated by the billing system) or custom (denominated in a custom unit). Derived from the unit when omitted.
@@ -761,6 +763,13 @@ type Allocation struct {
 	Unit string `json:"unit"`
 	// Amount used
 	Used *float64 `json:"used,omitempty"`
+}
+
+type AllocationHistoryEntry struct {
+	// Allocation name
+	Allocation string `json:"allocation"`
+	// When the resource group stopped using this allocation
+	End time.Time `json:"end"`
 }
 
 type AllocationResourceGroup struct {
@@ -1304,8 +1313,8 @@ type AwsSagemakerDetail struct {
 	Description string `json:"description"`
 	// The endpoint URL to access the Machine Learning Workspace Studio.
 	Endpoint *string `json:"endpoint,omitempty"`
-	// The group to which the Machine Learning Workspace will be associated.
-	Group string `json:"group"`
+	// The group to which the Machine Learning Workspace will be associated. Optional when resourceGroup is provided.
+	Group *string `json:"group,omitempty"`
 	// The unique identifier of the resource.
 	ID *string `json:"id,omitempty"`
 	// The link to the Machine Learning Workspace.
@@ -1320,6 +1329,8 @@ type AwsSagemakerDetail struct {
 	Provisioned *bool `json:"provisioned,omitempty"`
 	// The region where the Machine Learning Workspace will be provisioned.
 	Region string `json:"region"`
+	// The resource group the workspace bills against. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// The tags associated with the Machine Learning Workspace.
 	Tags []string `json:"tags"`
 	// Username of the user that owns the resource
@@ -1646,8 +1657,8 @@ type AzureMachineLearningDetail struct {
 	Description string `json:"description"`
 	// The endpoint URL to access the Machine Learning Workspace Studio.
 	Endpoint *string `json:"endpoint,omitempty"`
-	// The group to which the Machine Learning Workspace will be associated.
-	Group string `json:"group"`
+	// The group to which the Machine Learning Workspace will be associated. Optional when resourceGroup is provided.
+	Group *string `json:"group,omitempty"`
 	// The unique identifier of the resource.
 	ID *string `json:"id,omitempty"`
 	// The link to the Machine Learning Workspace.
@@ -1666,6 +1677,8 @@ type AzureMachineLearningDetail struct {
 	Provisioned *bool `json:"provisioned,omitempty"`
 	// The region where the Machine Learning Workspace will be provisioned.
 	Region string `json:"region"`
+	// The resource group the workspace bills against. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// The tags associated with the Machine Learning Workspace.
 	Tags []string `json:"tags"`
 	// Username of the user that owns the resource
@@ -2181,12 +2194,14 @@ type BucketResource struct {
 	DualRegions []string `json:"dualRegions,omitempty"`
 	// Indicates if versioning will be enabled. For AWS buckets only.
 	EnableVersioning *bool `json:"enableVersioning,omitempty"`
-	// The group to which the storage will be associated.
-	Group string `json:"group"`
+	// The group to which the storage will be associated. Optional when resourceGroup is provided.
+	Group *string `json:"group,omitempty"`
 	// Multi-region location to provision the bucket in. When set, the bucket is provisioned as a multi-region bucket instead of a regional bucket. For Google buckets only.
 	MultiRegion *string `json:"multiRegion,omitempty"`
 	// Region the storage will be provisioned in. Required unless a Google multi-region or dual-region is specified.
 	Region *string `json:"region,omitempty"`
+	// The resource group the storage bills against. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// The tags associated with the storage.
 	Tags []string `json:"tags,omitempty"`
 }
@@ -2685,10 +2700,10 @@ type CloudAccountDetail struct {
 }
 
 type CloudAccountListItem struct {
-	Billing CloudAccountBillingResponse `json:"billing"`
-	Csp     string                      `json:"csp"`
-	CspID   string                      `json:"cspId"`
-	Name    string                      `json:"name"`
+	Billing *CloudAccountBillingResponse `json:"billing,omitempty"`
+	Csp     string                       `json:"csp"`
+	CspID   string                       `json:"cspId"`
+	Name    string                       `json:"name"`
 }
 
 type CloudAccountNetwork struct {
@@ -2936,32 +2951,9 @@ type ClusterDeployment struct {
 	// The deployment number
 	DeploymentNumber int64 `json:"deploymentNumber"`
 	// The deployment ID
-	ID              string                           `json:"id"`
-	ProvisionStatus ClusterDeploymentProvisionStatus `json:"provisionStatus"`
+	ID string `json:"id"`
 	// The current status of the deployment
 	Status *string `json:"status,omitempty"`
-	// Storages provisioned by the deployment
-	Storages []ClusterDeploymentStorage `json:"storages"`
-}
-
-type ClusterDeploymentProvisionStatus struct {
-	// Progress records for tearing the cluster down
-	Deletion []ProvisionStatusResponseRecord `json:"deletion,omitempty"`
-	// Progress records for provisioning the cluster
-	Provision []ProvisionStatusResponseRecord `json:"provision,omitempty"`
-	// Progress records for the cluster scheduler
-	Scheduler []ProvisionStatusResponseRecord `json:"scheduler,omitempty"`
-	// Progress records for provisioning storage
-	Storage []ProvisionStatusResponseRecord `json:"storage,omitempty"`
-}
-
-type ClusterDeploymentStorage struct {
-	// The ID of the storage resource
-	ID string `json:"id"`
-	// The position of the storage among the deployment's storages
-	Index int64 `json:"index"`
-	// The name of the storage resource
-	Name string `json:"name"`
 }
 
 type ClusterDisk struct {
@@ -3380,7 +3372,7 @@ type CreateAiProviderBody struct {
 	CloudAccount *string `json:"cloudAccount,omitempty"`
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
-	// Billing group name (required for managed Azure and Bedrock providers)
+	// Billing group name (managed Azure and Bedrock providers; optional when resourceGroup is provided)
 	Group *string `json:"group,omitempty"`
 	// Initial model deployment (managed Azure providers)
 	Model *string `json:"model,omitempty"`
@@ -3392,6 +3384,8 @@ type CreateAiProviderBody struct {
 	Network *string `json:"network,omitempty"`
 	// Region (managed Azure and Bedrock providers)
 	Region *string `json:"region,omitempty"`
+	// Resource group the provider bills against. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 }
 
 type CreateAPIKeyInputBody struct {
@@ -5109,6 +5103,8 @@ type GeneralCluster struct {
 	Region *string `json:"region,omitempty"`
 	// The number of requested nodes in the cluster.
 	RequestedNodes int64 `json:"requestedNodes"`
+	// The resource group the cluster's usage bills against. Only populated by the single-cluster endpoint.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Cloud-cluster only: whether running-processes collection is turned on, which lets anyone with access to the cluster view processes and freeze events on each node's detail page.
 	RunningProcesses *bool `json:"runningProcesses,omitempty"`
 	// The scheduler type used by the cluster.
@@ -5524,7 +5520,7 @@ type GoogleManagedLustre struct {
 	Description *string `json:"description,omitempty"`
 	// The display name of the instance.
 	DisplayName *string `json:"displayName,omitempty"`
-	// The group the instance bills to.
+	// The group the instance bills to. Optional when resourceGroup is provided.
 	Group *string `json:"group,omitempty"`
 	// Unique identifier of the Google Managed Lustre.
 	ID *string `json:"id,omitempty"`
@@ -5533,7 +5529,9 @@ type GoogleManagedLustre struct {
 	// The throughput in MBps/TiB of the instance.
 	Performance *int64 `json:"performance,omitempty"`
 	// The gcp region of the instance.
-	Region           *string                `json:"region,omitempty"`
+	Region *string `json:"region,omitempty"`
+	// The resource group the instance bills against. Takes precedence over group.
+	ResourceGroup    *string                `json:"resourceGroup,omitempty"`
 	RuntimeAlert     *RuntimeAlertInput     `json:"runtimeAlert,omitempty"`
 	SessionCostLimit *SessionCostLimitInput `json:"sessionCostLimit,omitempty"`
 	// When true, create and delete the cloud filesystem in one shot (legacy behavior). When false (default), the resource supports start/stop like AWS/Azure managed Lustre.
@@ -6081,8 +6079,8 @@ type Instance struct {
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 	// Whether this Instance is favorited by the user.
 	Favorite *bool `json:"favorite,omitempty"`
-	// The group to which the Instance will be associated.
-	Group string `json:"group"`
+	// The group to which the Instance will be associated. Optional when resourceGroup is provided.
+	Group *string `json:"group,omitempty"`
 	// The hostname of the Instance.
 	Hostname string `json:"hostname"`
 	// The unique identifier of the Instance.
@@ -6102,7 +6100,9 @@ type Instance struct {
 	// Optional. When set for a raw CSP image, selects the startup script family (linux vs windows).
 	OsType *string `json:"osType,omitempty"`
 	// The region where the Instance will be provisioned.
-	Region           string                 `json:"region"`
+	Region string `json:"region"`
+	// The resource group the Instance bills against. Takes precedence over group.
+	ResourceGroup    *string                `json:"resourceGroup,omitempty"`
 	RuntimeAlert     *RuntimeAlertInput     `json:"runtimeAlert,omitempty"`
 	SessionCostLimit *SessionCostLimitInput `json:"sessionCostLimit,omitempty"`
 	// Indicates if the Instance is sessionless.
@@ -6195,8 +6195,8 @@ type IP struct {
 	Csp string `json:"csp"`
 	// The description of the IP resource.
 	Description string `json:"description"`
-	// The group name to which the IP will be associated.
-	Group string `json:"group"`
+	// The group name to which the IP will be associated. Optional when resourceGroup is provided.
+	Group *string `json:"group,omitempty"`
 	// The unique identifier of the IP resource.
 	ID *string `json:"id,omitempty"`
 	// The IP address provisioned.
@@ -6211,6 +6211,8 @@ type IP struct {
 	Provisioned *bool `json:"provisioned,omitempty"`
 	// The region where the IP will be provisioned.
 	Region string `json:"region"`
+	// The resource group the IP bills against. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// The tags associated with the IP resource.
 	Tags []string `json:"tags"`
 	// The username of the user that owns this resource.
@@ -6845,8 +6847,8 @@ type MachineLearningWorkspace struct {
 	Description string `json:"description"`
 	// The endpoint URL to access the Machine Learning Workspace Studio.
 	Endpoint *string `json:"endpoint,omitempty"`
-	// The group to which the Machine Learning Workspace will be associated.
-	Group string `json:"group"`
+	// The group to which the Machine Learning Workspace will be associated. Optional when resourceGroup is provided.
+	Group *string `json:"group,omitempty"`
 	// The unique identifier of the resource.
 	ID *string `json:"id,omitempty"`
 	// The link to the Machine Learning Workspace.
@@ -6861,6 +6863,8 @@ type MachineLearningWorkspace struct {
 	Provisioned *bool `json:"provisioned,omitempty"`
 	// The region where the Machine Learning Workspace will be provisioned.
 	Region string `json:"region"`
+	// The resource group the workspace bills against. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// The tags associated with the Machine Learning Workspace.
 	Tags []string `json:"tags"`
 	// Username of the user that owns the resource
@@ -7403,6 +7407,11 @@ type MountInfoResponse struct {
 	WorkspacePath string `json:"workspacePath"`
 }
 
+type MoveResourceInputBody struct {
+	// Target resource group name
+	ResourceGroup string `json:"resourceGroup"`
+}
+
 type Name struct {
 	FamilyName *string `json:"familyName,omitempty"`
 	Formatted  *string `json:"formatted,omitempty"`
@@ -7496,8 +7505,8 @@ type NetworkInterface struct {
 	Csp string `json:"csp"`
 	// The description of the network interface resource.
 	Description string `json:"description"`
-	// The group name to which the network interface will be associated.
-	Group string `json:"group"`
+	// The group name to which the network interface will be associated. Optional when resourceGroup is provided.
+	Group *string `json:"group,omitempty"`
 	// The unique identifier of the network interface resource.
 	ID *string `json:"id,omitempty"`
 	// The MAC address of the network interface. For Azure it is assigned on first attach.
@@ -7516,6 +7525,8 @@ type NetworkInterface struct {
 	PublicIP *string `json:"publicIp,omitempty"`
 	// The region where the network interface will be provisioned.
 	Region string `json:"region"`
+	// The resource group the network interface bills against. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// The tags associated with the network interface resource.
 	Tags []string `json:"tags"`
 	// The username of the user that owns this resource.
@@ -8658,15 +8669,6 @@ type PatchNetworkBody struct {
 type PatchOpenstackFlavorsBody struct {
 	// List of flavor cost updates
 	Flavors []FlavorCostUpdate `json:"flavors"`
-}
-
-type PatchOrgBillingSettingsInputBody struct {
-	// Allocation accounting system the organization uses.
-	AllocationSystem *string `json:"allocationSystem,omitempty"`
-	// Username shown on dashboards and reports for cost records without a username tag. An empty string clears it.
-	DefaultBillingUsername *string `json:"defaultBillingUsername,omitempty"`
-	// Recurring fiscal year start date as MM-DD. An empty string clears it.
-	FiscalYearStartDate *string `json:"fiscalYearStartDate,omitempty"`
 }
 
 type PatchProvisionStatusBody struct {
@@ -10733,12 +10735,68 @@ type ResourceCredential struct {
 }
 
 type ResourceGroup struct {
+	// Number of assigned resources that are not failed
+	ActiveResourceCount *int64 `json:"activeResourceCount,omitempty"`
 	// Current allocation name
 	Allocation *string `json:"allocation"`
+	// Number of assigned resources in a failed state
+	FailedResourceCount *int64 `json:"failedResourceCount,omitempty"`
+	// True when the resource group is managed automatically from a group and cannot be edited or deleted
+	Managed *bool `json:"managed,omitempty"`
 	// Resource group name
 	Name *string `json:"name"`
+	// Number of resources assigned to this resource group
+	ResourceCount *int64 `json:"resourceCount,omitempty"`
 	// Owner username
 	User *string `json:"user,omitempty"`
+}
+
+type ResourceGroupDetail struct {
+	// Number of assigned resources that are not failed
+	ActiveResourceCount *int64 `json:"activeResourceCount,omitempty"`
+	// Current allocation name
+	Allocation *string `json:"allocation"`
+	// Resource types the current allocation may fund; empty means unrestricted
+	AllocationAllowed []string `json:"allocationAllowed,omitempty"`
+	// Previous allocations of this resource group, oldest first
+	AllocationHistory []AllocationHistoryEntry `json:"allocationHistory,omitempty"`
+	// Budget total of the current allocation
+	AllocationTotal *float64 `json:"allocationTotal,omitempty"`
+	// Unit the current allocation is denominated in
+	AllocationUnit *string `json:"allocationUnit,omitempty"`
+	// Amount used of the current allocation (includes billing estimates)
+	AllocationUsed *float64 `json:"allocationUsed,omitempty"`
+	// Number of assigned resources in a failed state
+	FailedResourceCount *int64 `json:"failedResourceCount,omitempty"`
+	// True when the resource group is managed automatically from a group and cannot be edited or deleted
+	Managed *bool `json:"managed,omitempty"`
+	// Resource group name
+	Name *string `json:"name"`
+	// Number of resources assigned to this resource group
+	ResourceCount *int64 `json:"resourceCount,omitempty"`
+	// Owner username
+	User *string `json:"user,omitempty"`
+}
+
+type ResourceGroupResource struct {
+	// When the resource was created
+	CreatedAt time.Time `json:"createdAt"`
+	// Resource ID
+	ID string `json:"id"`
+	// Custom icon configured on the resource
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Resource name
+	Name string `json:"name"`
+	// Resource namespace (owner username)
+	Namespace string `json:"namespace"`
+	// Cloud provider (aws, google, azure)
+	Provider string `json:"provider"`
+	// Cloud region
+	Region *string `json:"region,omitempty"`
+	// Resource status
+	Status string `json:"status"`
+	// Resource type (e.g., instance, bucket, cluster)
+	Type string `json:"type"`
 }
 
 type ResourceQuota struct {
@@ -11582,6 +11640,23 @@ type StorageAttachment struct {
 	User string `json:"user"`
 }
 
+type StorageDeployment struct {
+	// The deployment creation time.
+	CreatedAt time.Time `json:"createdAt"`
+	// The delete status of the deployment.
+	DeleteStatus *string `json:"deleteStatus,omitempty"`
+	// The time the deployment deletion completed.
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
+	// The user that deleted the deployment.
+	DeletedBy *string `json:"deletedBy,omitempty"`
+	// The deployment number.
+	DeploymentNumber *int64 `json:"deploymentNumber,omitempty"`
+	// The deployment ID.
+	ID string `json:"id"`
+	// The current status of the deployment.
+	Status *string `json:"status,omitempty"`
+}
+
 type StorageDetail struct {
 	// Whether the storage is currently attached to a cluster.
 	Attached bool `json:"attached"`
@@ -11730,6 +11805,15 @@ type StorageTypes struct {
 	ManagedLustre map[string]float64 `json:"managed_lustre,omitempty"`
 	// Azure Managed Lustre tiers
 	Managedlustre map[string]float64 `json:"managedlustre,omitempty"`
+}
+
+type StringPolicyOutput struct {
+	// Level of the policy
+	Level string `json:"level"`
+	// Name of the policy
+	Name *string `json:"name,omitempty"`
+	// Value of the policy
+	Value *string `json:"value,omitempty"`
 }
 
 type SubdomainAvailabilityResponse struct {
@@ -12157,6 +12241,8 @@ type UpdateClusterBody struct {
 	Name *string `json:"name,omitempty"`
 	// Name of the network the cluster provisions into; cloud clusters only.
 	Network *string `json:"network,omitempty"`
+	// Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Tags; replaces the full list.
 	Tags []string `json:"tags,omitempty"`
 }
@@ -12373,6 +12459,11 @@ type UpdateReservationBody struct {
 	Reservation string `json:"reservation"`
 }
 
+type UpdateResourceGroupInputBody struct {
+	// New allocation name
+	Allocation string `json:"allocation"`
+}
+
 type UpdateResourceGroupPermissionsInputBody struct {
 	// Map of group names to permissions
 	Groups map[string]map[string]bool `json:"groups"`
@@ -12398,6 +12489,11 @@ type UpdateSentrySettingsBody struct {
 	ReplaysSampleRate float64 `json:"replaysSampleRate"`
 	// Sentry traces sample rate (0.0-1.0).
 	TracesSampleRate float64 `json:"tracesSampleRate"`
+}
+
+type UpdateStorageBillingInputBody struct {
+	// Name of the resource group the storage bills against.
+	ResourceGroup string `json:"resourceGroup"`
 }
 
 type UpdateUserProfileBody struct {

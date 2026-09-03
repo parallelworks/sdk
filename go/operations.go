@@ -6498,7 +6498,7 @@ func (c *Client) DeleteOrganizationAuthMethod(ctx context.Context, organization 
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns the organization's billing settings with defaults applied: the allocation accounting system (legacy by default) and the recurring fiscal year start date.
+// Returns the organization's effective billing settings, resolved from the flexible-allocation-system, fiscal-year-start-date, and default-billing-username policies with defaults applied.
 func (c *Client) GetOrganizationBillingSettings(ctx context.Context, organization string) (*OrgBillingSettings, error) {
 
 	path := "/api/organizations/{organization}/billing-settings"
@@ -6506,23 +6506,6 @@ func (c *Client) GetOrganizationBillingSettings(ctx context.Context, organizatio
 
 	var result OrgBillingSettings
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// PatchOrganizationBillingSettings - Update organization billing settings
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Updates the organization's billing settings. Only the fields present in the request change.
-func (c *Client) PatchOrganizationBillingSettings(ctx context.Context, organization string, body PatchOrgBillingSettingsInputBody) (*OrgBillingSettings, error) {
-
-	path := "/api/organizations/{organization}/billing-settings"
-	path = pathReplace(path, "organization", "simple", false, organization)
-
-	var result OrgBillingSettings
-	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10090,6 +10073,23 @@ func (c *Client) SetOrganizationArchiveCostDataPolicy(ctx context.Context, organ
 	return &result, nil
 }
 
+// SetOrganizationDefaultBillingUsernamePolicy - Set organization policy: default-billing-username
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets default-billing-username policy for the organization: the username shown on dashboards and reports for cost records without a username tag.
+func (c *Client) SetOrganizationDefaultBillingUsernamePolicy(ctx context.Context, organization string, body string) (*map[string]StringPolicyOutput, error) {
+
+	path := "/api/organizations/{organization}/policies/default-billing-username"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result map[string]StringPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetOrganizationDisablePasswordLoginPolicy - Set organization policy: disable-password-login
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -10152,6 +10152,40 @@ func (c *Client) SetOrganizationEventRetentionDaysPolicy(ctx context.Context, or
 	path = pathReplace(path, "organization", "simple", false, organization)
 
 	var result map[string]IntPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetOrganizationFiscalYearStartDatePolicy - Set organization policy: fiscal-year-start-date
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets fiscal-year-start-date policy for the organization as MM-DD. When unset, billing and reports calculate costs over all time.
+func (c *Client) SetOrganizationFiscalYearStartDatePolicy(ctx context.Context, organization string, body string) (*map[string]StringPolicyOutput, error) {
+
+	path := "/api/organizations/{organization}/policies/fiscal-year-start-date"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result map[string]StringPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetOrganizationFlexibleAllocationSystemPolicy - Set organization policy: flexible-allocation-system
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets flexible-allocation-system policy for the organization. True opts the organization into the flexible allocation system; the legacy system applies when unset.
+func (c *Client) SetOrganizationFlexibleAllocationSystemPolicy(ctx context.Context, organization string, body bool) (*map[string]BooleanPolicyOutput, error) {
+
+	path := "/api/organizations/{organization}/policies/flexible-allocation-system"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result map[string]BooleanPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -12515,7 +12549,7 @@ func (c *Client) UpdateClusterDefinition(ctx context.Context, organization strin
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Returns a cluster deployment with its step-by-step progress and the storages it provisioned.
+// Returns a cluster deployment.
 func (c *Client) GetClusterDeployment(ctx context.Context, organization string, user string, clusterName string, deploymentNumber string) (*ClusterDeployment, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/deployments/{deploymentNumber}"
@@ -12627,6 +12661,26 @@ func (c *Client) GetClusterDeploymentSchedulerLog(ctx context.Context, organizat
 	}
 
 	var result Slice
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetClusterDeploymentProvisionStatus - Get cluster deployment provision status
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the step-by-step progress records of a cluster deployment.
+func (c *Client) GetClusterDeploymentProvisionStatus(ctx context.Context, organization string, user string, clusterName string, deploymentNumber string) (*[]ProvisionStatusResponseRecord, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/deployments/{deploymentNumber}/provision-status"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	path = pathReplace(path, "deploymentNumber", "simple", false, deploymentNumber)
+
+	var result []ProvisionStatusResponseRecord
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -14307,7 +14361,44 @@ func (c *Client) CreateResourceGroup(ctx context.Context, organization string, u
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns a specific resource group.
-func (c *Client) GetResourceGroup(ctx context.Context, organization string, user string, name string) (*ResourceGroup, error) {
+func (c *Client) GetResourceGroup(ctx context.Context, organization string, user string, name string) (*ResourceGroupDetail, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/resource-groups/{name}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	var result ResourceGroupDetail
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteResourceGroup - Delete a resource group
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Soft deletes a resource group.
+func (c *Client) DeleteResourceGroup(ctx context.Context, organization string, user string, name string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/resource-groups/{name}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UpdateResourceGroup - Update a resource group
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates a resource group's allocation.
+func (c *Client) UpdateResourceGroup(ctx context.Context, organization string, user string, name string, body UpdateResourceGroupInputBody) (*ResourceGroup, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/resource-groups/{name}"
 	path = pathReplace(path, "organization", "simple", false, organization)
@@ -14315,7 +14406,7 @@ func (c *Client) GetResourceGroup(ctx context.Context, organization string, user
 	path = pathReplace(path, "name", "simple", false, name)
 
 	var result ResourceGroup
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -14353,6 +14444,44 @@ func (c *Client) UpdateResourceGroupPermissions(ctx context.Context, organizatio
 	path = pathReplace(path, "name", "simple", false, name)
 
 	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// ListResourceGroupResources - List resources in a resource group
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns all active resources assigned to a resource group.
+func (c *Client) ListResourceGroupResources(ctx context.Context, organization string, user string, name string) (*[]ResourceGroupResource, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/resource-groups/{name}/resources"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	var result []ResourceGroupResource
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// MoveResourceGroupResource - Move a resource to another resource group
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Moves an off resource to a different resource group.
+func (c *Client) MoveResourceGroupResource(ctx context.Context, organization string, user string, name string, resourceID string, body MoveResourceInputBody) error {
+
+	path := "/api/organizations/{organization}/users/{user}/resource-groups/{name}/resources/{resourceId}/move"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+	path = pathReplace(path, "resourceId", "simple", false, resourceID)
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -14725,6 +14854,42 @@ func (c *Client) GetStorage(ctx context.Context, organization string, user strin
 	return &result, nil
 }
 
+// GetStorageDeploymentsParams contains the parameters for the GetStorageDeployments operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetStorageDeploymentsParams struct {
+	// The page number to return.
+	Page *int64 `json:"page,omitempty"`
+}
+
+// GetStorageDeployments - List storage deployments
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the provisioning deployments for a storage, sorted by most recent first.
+func (c *Client) GetStorageDeployments(ctx context.Context, organization string, user string, name string, opts ...GetStorageDeploymentsParams) (*[]StorageDeployment, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/deployments"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+	var params GetStorageDeploymentsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "page", "form", false, params.Page)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []StorageDeployment
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetStorageDeploymentDeletionLogParams contains the parameters for the GetStorageDeploymentDeletionLog operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetStorageDeploymentDeletionLogParams struct {
@@ -14801,6 +14966,26 @@ func (c *Client) GetStorageDeploymentProvisionLog(ctx context.Context, organizat
 	}
 
 	var result Slice
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetStorageDeploymentProvisionStatus - Get storage deployment provision status
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the provision status records for a storage deployment.
+func (c *Client) GetStorageDeploymentProvisionStatus(ctx context.Context, organization string, user string, name string, deploymentNumber string) (*[]ProvisionStatusResponseRecord, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/deployments/{deploymentNumber}/provision-status"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+	path = pathReplace(path, "deploymentNumber", "simple", false, deploymentNumber)
+
+	var result []ProvisionStatusResponseRecord
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -15083,6 +15268,25 @@ func (c *Client) DeleteStorage(ctx context.Context, organization string, user st
 	path = pathReplace(path, "type", "simple", false, type_)
 
 	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UpdateStorageBilling - Update storage billing
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Reassigns which resource group the storage bills against.
+func (c *Client) UpdateStorageBilling(ctx context.Context, organization string, user string, name string, type_ string, body UpdateStorageBillingInputBody) error {
+
+	path := "/api/organizations/{organization}/users/{user}/{type}/{name}/billing"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+	path = pathReplace(path, "type", "simple", false, type_)
+
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json", true); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -15907,6 +16111,22 @@ func (c *Client) SetPlatformBaseImageCompliancePolicy(ctx context.Context, body 
 	return &result, nil
 }
 
+// SetPlatformDefaultBillingUsernamePolicy - Set platform policy: default-billing-username
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the default-billing-username policy for the platform: the username shown on dashboards and reports for cost records without a username tag.
+func (c *Client) SetPlatformDefaultBillingUsernamePolicy(ctx context.Context, body string) (*map[string]StringPolicyOutput, error) {
+
+	path := "/api/platform/policies/default-billing-username"
+
+	var result map[string]StringPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetPlatformDisablePasswordLoginPolicy - Set platform policy: disable-password-login
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -15949,6 +16169,38 @@ func (c *Client) SetPlatformEventRetentionDaysPolicy(ctx context.Context, body i
 	path := "/api/platform/policies/event-retention-days"
 
 	var result map[string]IntPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformFiscalYearStartDatePolicy - Set platform policy: fiscal-year-start-date
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the fiscal-year-start-date policy for the platform as MM-DD. When unset, billing and reports calculate costs over all time.
+func (c *Client) SetPlatformFiscalYearStartDatePolicy(ctx context.Context, body string) (*map[string]StringPolicyOutput, error) {
+
+	path := "/api/platform/policies/fiscal-year-start-date"
+
+	var result map[string]StringPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformFlexibleAllocationSystemPolicy - Set platform policy: flexible-allocation-system
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the flexible-allocation-system policy for the platform. True opts every organization into the flexible allocation system; the legacy system applies when unset.
+func (c *Client) SetPlatformFlexibleAllocationSystemPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
+
+	path := "/api/platform/policies/flexible-allocation-system"
+
+	var result map[string]BooleanPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -16550,6 +16802,10 @@ type ListUserResourceGroupsParams struct {
 	Allocation *string `json:"allocation,omitempty"`
 	// Sort field and direction
 	Sort *string `json:"sort,omitempty"`
+	// Only resource groups the user may bill new resources against: their own, or shared with use or admin permission
+	Usable *bool `json:"usable,omitempty"`
+	// Only resource groups whose current allocation may fund this resource type; groups with no allocation or an unrestricted allocation always match
+	Allows *string `json:"allows,omitempty"`
 }
 
 // ListUserResourceGroups - List user resource groups
@@ -16574,6 +16830,10 @@ func (c *Client) ListUserResourceGroups(ctx context.Context, opts ...ListUserRes
 	addQueryParam(queryValues, "allocation", "form", false, params.Allocation)
 
 	addQueryParam(queryValues, "sort", "form", false, params.Sort)
+
+	addQueryParam(queryValues, "usable", "form", false, params.Usable)
+
+	addQueryParam(queryValues, "allows", "form", false, params.Allows)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
