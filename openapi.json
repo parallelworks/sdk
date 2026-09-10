@@ -6511,6 +6511,17 @@
             "description": "Connections carry a credential",
             "type": "boolean"
           },
+          "textOnlyModels": {
+            "description": "Model IDs that reject image input; overrides the platform's built-in capability data",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 500,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "tlsVerification": {
             "enum": [
               "public",
@@ -6626,6 +6637,17 @@
               "openai-responses"
             ],
             "type": "string"
+          },
+          "textOnlyModels": {
+            "description": "Model IDs that reject image input; overrides the platform's built-in capability data",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 500,
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "tlsVerification": {
             "enum": [
@@ -6763,6 +6785,16 @@
           "requiresApiKey": {
             "description": "Connections carry a credential",
             "type": "boolean"
+          },
+          "textOnlyModels": {
+            "description": "Model IDs that reject image input; overrides the platform's built-in capability data",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "tlsVerification": {
             "enum": [
@@ -15026,8 +15058,7 @@
             "type": "string"
           },
           "clientId": {
-            "description": "New application ID.",
-            "minLength": 1,
+            "description": "New application ID. An empty value removes the OAuth application.",
             "type": "string"
           },
           "clientSecret": {
@@ -21654,6 +21685,10 @@
           "supports_usage": {
             "type": "boolean"
           },
+          "supports_vision": {
+            "description": "Whether the model accepts image input; absent when the platform has no capability data for it",
+            "type": "boolean"
+          },
           "tool_calling_mode": {
             "enum": [
               "native",
@@ -25219,6 +25254,16 @@
           "requiresApiKey": {
             "description": "Connections carry a credential",
             "type": "boolean"
+          },
+          "textOnlyModels": {
+            "description": "Model IDs that reject image input; overrides the platform's built-in capability data",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "tlsVerification": {
             "enum": [
@@ -50460,6 +50505,29 @@
           "Notifications"
         ]
       },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nMarks every inbox notification as read for the currently authenticated subject.",
+        "operationId": "update-notifications",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update notifications",
+        "tags": [
+          "Notifications"
+        ]
+      },
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates a notification. A platform-admin user broadcasts to a target user, organization, or all users.",
         "operationId": "create-notification",
@@ -66903,7 +66971,7 @@
     },
     "/api/organizations/{organization}/reports/allocations/{allocation}/usage/by-day": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns usage events grouped by day and type for charting and reporting.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns rated usage and cloud costs for an allocation grouped by day and by type, subtype, user, or SKU for charting and reporting.",
         "operationId": "get-allocation-usage-events-summary",
         "parameters": [
           {
@@ -66964,32 +67032,32 @@
             }
           },
           {
-            "description": "Filter: type matches exactly",
+            "description": "Filter: comma-separated types",
             "explode": false,
             "in": "query",
             "name": "type",
             "schema": {
-              "description": "Filter: type matches exactly",
+              "description": "Filter: comma-separated types",
               "type": "string"
             }
           },
           {
-            "description": "Filter: subtype matches exactly",
+            "description": "Filter: comma-separated subtypes",
             "explode": false,
             "in": "query",
             "name": "subtype",
             "schema": {
-              "description": "Filter: subtype matches exactly",
+              "description": "Filter: comma-separated subtypes",
               "type": "string"
             }
           },
           {
-            "description": "Filter: username matches exactly",
+            "description": "Filter: comma-separated usernames",
             "explode": false,
             "in": "query",
             "name": "user",
             "schema": {
-              "description": "Filter: username matches exactly",
+              "description": "Filter: comma-separated usernames",
               "type": "string"
             }
           },
@@ -67004,12 +67072,12 @@
             }
           },
           {
-            "description": "Filter: metadata contains this string (case-insensitive search in JSON)",
+            "description": "Filter: metadata contains this string (case-insensitive search in JSON). Only rated usage carries metadata, so cloud costs are excluded.",
             "explode": false,
             "in": "query",
             "name": "metadata",
             "schema": {
-              "description": "Filter: metadata contains this string (case-insensitive search in JSON)",
+              "description": "Filter: metadata contains this string (case-insensitive search in JSON). Only rated usage carries metadata, so cloud costs are excluded.",
               "type": "string"
             }
           }
@@ -67043,7 +67111,7 @@
             "description": "Error"
           }
         },
-        "summary": "Get summarized usage events for an allocation",
+        "summary": "Get summarized costs for an allocation",
         "tags": [
           "Allocations"
         ]
@@ -67051,7 +67119,7 @@
     },
     "/api/organizations/{organization}/reports/allocations/{allocation}/usage/filter-options": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns distinct values for type, subtype, and user filters.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns distinct type, subtype, user, and SKU values across the allocation's rated usage and cloud costs.",
         "operationId": "get-allocation-usage-events-filter-options",
         "parameters": [
           {
@@ -67100,7 +67168,7 @@
             "description": "Error"
           }
         },
-        "summary": "Get filter options for usage events",
+        "summary": "Get filter options for allocation costs",
         "tags": [
           "Allocations"
         ]

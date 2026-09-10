@@ -2240,9 +2240,11 @@ type BuiltinProviderResponse struct {
 	ModelCount        int64  `json:"modelCount"`
 	Protocol          string `json:"protocol"`
 	// Connections carry a credential
-	RequiresAPIKey  bool    `json:"requiresApiKey"`
-	TLSVerification *string `json:"tlsVerification,omitempty"`
-	ToolCallingMode *string `json:"toolCallingMode,omitempty"`
+	RequiresAPIKey bool `json:"requiresApiKey"`
+	// Model IDs that reject image input; overrides the platform's built-in capability data
+	TextOnlyModels  []string `json:"textOnlyModels,omitempty"`
+	TLSVerification *string  `json:"tlsVerification,omitempty"`
+	ToolCallingMode *string  `json:"toolCallingMode,omitempty"`
 }
 
 type CatalogEntryBody struct {
@@ -2257,8 +2259,10 @@ type CatalogEntryBody struct {
 	Lifecycle         string   `json:"lifecycle"`
 	MinimumTLSVersion string   `json:"minimumTlsVersion"`
 	Protocol          string   `json:"protocol"`
-	TLSVerification   *string  `json:"tlsVerification,omitempty"`
-	ToolCallingMode   *string  `json:"toolCallingMode,omitempty"`
+	// Model IDs that reject image input; overrides the platform's built-in capability data
+	TextOnlyModels  []string `json:"textOnlyModels,omitempty"`
+	TLSVerification *string  `json:"tlsVerification,omitempty"`
+	ToolCallingMode *string  `json:"toolCallingMode,omitempty"`
 }
 
 type CatalogEntryResponse struct {
@@ -2284,7 +2288,9 @@ type CatalogEntryResponse struct {
 	ObjectID          string  `json:"objectId"`
 	Protocol          string  `json:"protocol"`
 	// Connections carry a credential
-	RequiresAPIKey  bool      `json:"requiresApiKey"`
+	RequiresAPIKey bool `json:"requiresApiKey"`
+	// Model IDs that reject image input; overrides the platform's built-in capability data
+	TextOnlyModels  []string  `json:"textOnlyModels,omitempty"`
 	TLSVerification string    `json:"tlsVerification"`
 	ToolCallingMode string    `json:"toolCallingMode"`
 	UpdatedAt       time.Time `json:"updatedAt"`
@@ -5293,7 +5299,7 @@ type GitLabServerPatchBody struct {
 	BaseURL *string `json:"baseUrl,omitempty"`
 	// PEM-encoded CA certificate the server's certificate chains to. Only accepted with ca-certificate verification.
 	CaCertificate *string `json:"caCertificate,omitempty"`
-	// New application ID.
+	// New application ID. An empty value removes the OAuth application.
 	ClientID *string `json:"clientId,omitempty"`
 	// New application secret.
 	ClientSecret *string `json:"clientSecret,omitempty"`
@@ -7335,8 +7341,10 @@ type ModelEntry struct {
 	ReasoningEfforts  []string `json:"reasoning_efforts,omitempty"`
 	SupportsResponses *bool    `json:"supports_responses,omitempty"`
 	SupportsUsage     *bool    `json:"supports_usage,omitempty"`
-	ToolCallingMode   string   `json:"tool_calling_mode"`
-	UsageNotSupported *bool    `json:"usage_not_supported,omitempty"`
+	// Whether the model accepts image input; absent when the platform has no capability data for it
+	SupportsVision    *bool  `json:"supports_vision,omitempty"`
+	ToolCallingMode   string `json:"tool_calling_mode"`
+	UsageNotSupported *bool  `json:"usage_not_supported,omitempty"`
 }
 
 type ModelsResponse struct {
@@ -8454,7 +8462,9 @@ type OrganizationCatalogEntry struct {
 	ObjectID          string  `json:"objectId"`
 	Protocol          string  `json:"protocol"`
 	// Connections carry a credential
-	RequiresAPIKey  bool      `json:"requiresApiKey"`
+	RequiresAPIKey bool `json:"requiresApiKey"`
+	// Model IDs that reject image input; overrides the platform's built-in capability data
+	TextOnlyModels  []string  `json:"textOnlyModels,omitempty"`
 	TLSVerification string    `json:"tlsVerification"`
 	ToolCallingMode string    `json:"toolCallingMode"`
 	UpdatedAt       time.Time `json:"updatedAt"`

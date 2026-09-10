@@ -3,7 +3,6 @@ package parallelworks
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"io"
 	"strings"
 )
@@ -13,8 +12,18 @@ type sseError struct {
 	Error struct {
 		Message string `json:"message"`
 		Type    string `json:"type"`
+		Code    string `json:"code"`
 	} `json:"error"`
 }
+
+// SSEStreamError is a failure forwarded as an SSE error event, so it arrives inside
+// a 200 and carries no HTTP status. Code is empty unless the server set one.
+type SSEStreamError struct {
+	Code    string
+	Message string
+}
+
+func (e *SSEStreamError) Error() string { return e.Message }
 
 // SSEReader reads SSE events from a streaming response body.
 type SSEReader struct {
@@ -48,7 +57,7 @@ func (r *SSEReader) Next() (*ChatCompletionChunk, error) {
 		// Check for SSE error events before parsing as a chunk
 		var errEvent sseError
 		if err := json.Unmarshal([]byte(data), &errEvent); err == nil && errEvent.Error.Message != "" {
-			return nil, fmt.Errorf("%s", errEvent.Error.Message)
+			return nil, &SSEStreamError{Code: errEvent.Error.Code, Message: errEvent.Error.Message}
 		}
 
 		var chunk ChatCompletionChunk

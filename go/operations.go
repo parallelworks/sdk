@@ -4864,6 +4864,21 @@ func (c *Client) DeleteNotifications(ctx context.Context, opts ...DeleteNotifica
 	return nil
 }
 
+// UpdateNotifications - Update notifications
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Marks every inbox notification as read for the currently authenticated subject.
+func (c *Client) UpdateNotifications(ctx context.Context) error {
+
+	path := "/api/notifications"
+
+	if err := c.do(ctx, "PATCH", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetNotificationsOptions - Get notification options
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -10338,23 +10353,23 @@ type GetAllocationUsageEventsSummaryParams struct {
 	EndDate *string `json:"endDate,omitempty"`
 	// Field to group costs by (type, subtype, user, sku)
 	GroupBy *string `json:"groupBy,omitempty"`
-	// Filter: type matches exactly
+	// Filter: comma-separated types
 	Type *string `json:"type,omitempty"`
-	// Filter: subtype matches exactly
+	// Filter: comma-separated subtypes
 	Subtype *string `json:"subtype,omitempty"`
-	// Filter: username matches exactly
+	// Filter: comma-separated usernames
 	User *string `json:"user,omitempty"`
 	// Filter: comma-separated SKU codes
 	Sku *string `json:"sku,omitempty"`
-	// Filter: metadata contains this string (case-insensitive search in JSON)
+	// Filter: metadata contains this string (case-insensitive search in JSON). Only rated usage carries metadata, so cloud costs are excluded.
 	Metadata *string `json:"metadata,omitempty"`
 }
 
-// GetAllocationUsageEventsSummary - Get summarized usage events for an allocation
+// GetAllocationUsageEventsSummary - Get summarized costs for an allocation
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns usage events grouped by day and type for charting and reporting.
+// Returns rated usage and cloud costs for an allocation grouped by day and by type, subtype, user, or SKU for charting and reporting.
 func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organization string, allocation string, params GetAllocationUsageEventsSummaryParams) (*[]map[string]any, error) {
 
 	path := "/api/organizations/{organization}/reports/allocations/{allocation}/usage/by-day"
@@ -10388,11 +10403,11 @@ func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organizati
 	return &result, nil
 }
 
-// GetAllocationUsageEventsFilterOptions - Get filter options for usage events
+// GetAllocationUsageEventsFilterOptions - Get filter options for allocation costs
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns distinct values for type, subtype, and user filters.
+// Returns distinct type, subtype, user, and SKU values across the allocation's rated usage and cloud costs.
 func (c *Client) GetAllocationUsageEventsFilterOptions(ctx context.Context, organization string, allocation string) (*RatedCostsFilterOptions, error) {
 
 	path := "/api/organizations/{organization}/reports/allocations/{allocation}/usage/filter-options"

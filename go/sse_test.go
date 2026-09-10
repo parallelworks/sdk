@@ -1,6 +1,7 @@
 package parallelworks
 
 import (
+	"errors"
 	"io"
 	"strings"
 	"testing"
@@ -33,5 +34,21 @@ func TestSSEReaderDone(t *testing.T) {
 				t.Fatalf("Done() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestSSEReaderErrorEventCarriesCode(t *testing.T) {
+	body := `data: {"error":{"message":"upstream is unreachable","type":"error","code":"server_error"}}` + "\n\n"
+	_, err := NewSSEReader(strings.NewReader(body)).Next()
+
+	var streamErr *SSEStreamError
+	if !errors.As(err, &streamErr) {
+		t.Fatalf("Next() error = %v, want *SSEStreamError", err)
+	}
+	if streamErr.Code != "server_error" {
+		t.Fatalf("Code = %q, want %q", streamErr.Code, "server_error")
+	}
+	if streamErr.Error() != "upstream is unreachable" {
+		t.Fatalf("Error() = %q, want %q", streamErr.Error(), "upstream is unreachable")
 	}
 }
