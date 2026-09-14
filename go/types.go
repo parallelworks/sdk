@@ -680,6 +680,8 @@ type AiProviderResponse struct {
 	RefreshInterval *string `json:"refreshInterval,omitempty"`
 	// AI provider region (for managed providers)
 	Region *string `json:"region,omitempty"`
+	// Resource group the provider bills against
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Current status of the AI provider
 	Status string `json:"status"`
 	// Whether the provider endpoint supports the OpenAI Responses API
@@ -701,7 +703,7 @@ type AiProvidersResponse struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// Billing group the provider is provisioned under (managed providers)
 	Group *string `json:"group,omitempty"`
-	// Whether the provider's billing group is over its allocation and blocks new usage (managed providers)
+	// Whether the provider's billing target is over its allocation and blocks new usage
 	GroupBlocked *bool `json:"groupBlocked,omitempty"`
 	// Whether the tunnel's remote destination is reachable (tunnel providers only).
 	Healthy *bool `json:"healthy,omitempty"`
@@ -715,6 +717,8 @@ type AiProvidersResponse struct {
 	Name string `json:"name"`
 	// AI provider region
 	Region *string `json:"region"`
+	// Resource group the provider bills against
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Current status of the AI provider
 	Status string `json:"status"`
 	// The provider is blocked by platform catalog policy until a platform administrator maps or re-enables its integration
@@ -754,13 +758,18 @@ type Allocation struct {
 	// Whether the allocation's unit is rated in USD (false = a raw consumption unit)
 	RatedInUsd *bool `json:"ratedInUsd,omitempty"`
 	// Number of resource groups currently billing this allocation
-	ResourceGroups *int64 `json:"resourceGroups,omitempty"`
+	ResourceGroups *int64            `json:"resourceGroups,omitempty"`
+	Threshold      *CrossedThreshold `json:"threshold,omitempty"`
 	// Total allocation amount
 	Total float64 `json:"total"`
 	// Allocation type: managed (USD, rated by the billing system) or custom (denominated in a custom unit). Derived from the unit when omitted.
 	Type *string `json:"type,omitempty"`
 	// Unit of measurement
 	Unit string `json:"unit"`
+	// Why new resources cannot bill this allocation: no budget set, or a freeze/shutdown threshold crossed
+	UnusableReason *string `json:"unusableReason,omitempty"`
+	// Whether new resources can bill this allocation right now
+	Usable *bool `json:"usable,omitempty"`
 	// Amount used
 	Used *float64 `json:"used,omitempty"`
 }
@@ -947,6 +956,8 @@ type AuthMethod struct {
 type AuthSession struct {
 	// Indicates if the user is an admin.
 	Admin bool `json:"admin"`
+	// Allocation accounting system the user's organization bills through, resolved from the flexible-allocation-system policy.
+	AllocationSystem string `json:"allocationSystem"`
 	// Cache-buster etag for the user's avatar; empty when no custom avatar is set.
 	AvatarEtag *string `json:"avatarEtag,omitempty"`
 	// Indicates if the user is a platform billing admin with read-only access to billing data and the admin cloud resource inventory across all organizations.
@@ -2099,6 +2110,8 @@ type Bucket struct {
 	Namespace string `json:"namespace"`
 	// Region where the bucket is located
 	Region string `json:"region"`
+	// Name of the resource group the bucket bills against.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Indicates if the bucket is sessionless
 	Sessionless bool `json:"sessionless"`
 	// List of groups with whom the bucket is shared
@@ -3724,6 +3737,21 @@ type CreateInstanceSnapshotBody struct {
 	SnapshotName string `json:"snapshotName"`
 }
 
+type CreateKernelBody struct {
+	// IDs of buckets the kernel's code may read. Scoped credentials are minted into the kernel's environment on every start.
+	Buckets []string `json:"buckets,omitempty"`
+	// Environment to schedule the kernel's worker onto. Cluster targets only.
+	EnvironmentID *string `json:"environmentId,omitempty"`
+	// Kernel name. Auto-generated if omitted.
+	Name *string `json:"name,omitempty"`
+	// Scheduling parameters for the kernel's worker.
+	SchedulingParams map[string]any `json:"schedulingParams,omitempty"`
+	// Cluster or instance the kernel runs on.
+	TargetID string `json:"targetId"`
+	// Run the kernel on this existing compute worker instead of scheduling a new one.
+	WorkerID *string `json:"workerId,omitempty"`
+}
+
 type CreateManagedClusterInputBody struct {
 	// Description of the cluster
 	Description *string `json:"description,omitempty"`
@@ -3965,12 +3993,14 @@ type CreateReportBody struct {
 }
 
 type CreateReservationBody struct {
+	// Name of the allocation the reservation bills under the flexible allocation system. Required unless group is set.
+	Allocation *string `json:"allocation,omitempty"`
 	// Cloud service provider that issued the reservation.
 	Csp string `json:"csp"`
 	// Reservation description.
 	Description *string `json:"description,omitempty"`
-	// Name of the group that can use this reservation.
-	Group string `json:"group"`
+	// Name of the group that can use this reservation. Required unless allocation is set.
+	Group *string `json:"group,omitempty"`
 	// Cloud service provider reservation identifier.
 	ID string `json:"id"`
 	// Instance type the reservation holds capacity for.
@@ -4207,6 +4237,13 @@ type CrossCheckRow struct {
 	PwCost *float64 `json:"pwCost"`
 	// Last update time
 	Updated *time.Time `json:"updated"`
+}
+
+type CrossedThreshold struct {
+	// Actions the organization configured for this threshold
+	Actions []string `json:"actions"`
+	// Usage percent of the crossed threshold
+	Threshold float64 `json:"threshold"`
 }
 
 type CustomResourceTag struct {
@@ -4468,6 +4505,8 @@ type Disk struct {
 	Network *string `json:"network,omitempty"`
 	// Region of the disk
 	Region *string `json:"region,omitempty"`
+	// Name of the resource group the disk bills against.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Size of the disk in GiB
 	SizeGb *int64 `json:"sizeGb,omitempty"`
 	// Current provision status of the disk
@@ -5109,7 +5148,7 @@ type GeneralCluster struct {
 	Region *string `json:"region,omitempty"`
 	// The number of requested nodes in the cluster.
 	RequestedNodes int64 `json:"requestedNodes"`
-	// The resource group the cluster's usage bills against. Only populated by the single-cluster endpoint.
+	// The resource group the cluster's usage bills against.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Cloud-cluster only: whether running-processes collection is turned on, which lets anyone with access to the cluster view processes and freeze events on each node's detail page.
 	RunningProcesses *bool `json:"runningProcesses,omitempty"`
@@ -6264,6 +6303,35 @@ type Jwks struct {
 	Keys []Jwk `json:"keys"`
 }
 
+type KernelResponse struct {
+	// IDs of buckets whose credentials are injected into the kernel.
+	Buckets []string `json:"buckets,omitempty"`
+	// Creation time.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// ID of the environment the kernel's worker was scheduled onto.
+	EnvironmentID *string `json:"environmentId,omitempty"`
+	// Why the kernel failed to start.
+	ErrorMessage *string `json:"errorMessage,omitempty"`
+	// Kernel ID.
+	ID string `json:"id"`
+	// Kernel name.
+	Name *string `json:"name,omitempty"`
+	// Hostname of the compute node the kernel runs on.
+	NodeHostname *string `json:"nodeHostname,omitempty"`
+	// Scheduling parameters used for the kernel's worker.
+	SchedulingParams map[string]any `json:"schedulingParams,omitempty"`
+	// Kernel status.
+	Status *string `json:"status,omitempty"`
+	// ID of the cluster or instance the kernel runs on.
+	TargetID *string `json:"targetId,omitempty"`
+	// Compute the kernel runs on.
+	TargetType *string `json:"targetType,omitempty"`
+	// Base path the kernel's Jupyter server is served at.
+	URL string `json:"url"`
+	// ID of the compute worker running the kernel.
+	WorkerID *string `json:"workerId,omitempty"`
+}
+
 type KubernetesChartsBody struct {
 	// List of Helm charts across all clusters
 	Charts []HelmChart `json:"charts"`
@@ -6822,6 +6890,8 @@ type Lustre struct {
 	Performance *int64 `json:"performance,omitempty"`
 	// Region of the Lustre
 	Region *string `json:"region,omitempty"`
+	// Name of the resource group the Lustre bills against.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Indicates if the Lustre is sessionless
 	Sessionless bool `json:"sessionless"`
 	// List of groups with whom the Lustre is shared
@@ -7584,6 +7654,8 @@ type Nfs struct {
 	Namespace string `json:"namespace"`
 	// Region of the NFS
 	Region *string `json:"region,omitempty"`
+	// Name of the resource group the NFS bills against.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Indicates if the NFS is sessionless
 	Sessionless bool `json:"sessionless"`
 	// List of groups with whom the NFS is shared
@@ -8282,12 +8354,12 @@ type OrgAllocationThreshold struct {
 }
 
 type OrgBillingSettings struct {
+	// Recurring allocation start date as MM-DD. Empty when unset.
+	AllocationStartDate string `json:"allocationStartDate"`
 	// Allocation accounting system the organization uses. Legacy is the default.
 	AllocationSystem string `json:"allocationSystem"`
 	// Username shown on dashboards and reports for cost records without a username tag. Empty when unset.
 	DefaultBillingUsername string `json:"defaultBillingUsername"`
-	// Recurring fiscal year start date as MM-DD. Empty when unset.
-	FiscalYearStartDate string `json:"fiscalYearStartDate"`
 }
 
 type OrgConnectionPermissionsOutputBody struct {
@@ -10562,11 +10634,13 @@ type ReportWorkspaceMountStatusInputBody struct {
 }
 
 type ReservationItem struct {
+	// Name of the allocation the reservation bills under the flexible allocation system
+	Allocation *string `json:"allocation,omitempty"`
 	// Cloud service provider
 	Csp string `json:"csp"`
 	// Reservation description
 	Description *string `json:"description,omitempty"`
-	// Name of the group that can use this reservation
+	// Name of the group that can use this reservation under the legacy allocation system; empty for allocation-only reservations
 	Group string `json:"group"`
 	// Cloud service provider reservation identifier
 	ID string `json:"id"`
@@ -10749,6 +10823,19 @@ type ResourceGroup struct {
 	ActiveResourceCount *int64 `json:"activeResourceCount,omitempty"`
 	// Current allocation name
 	Allocation *string `json:"allocation"`
+	// Whether the current allocation is rated in USD; cloud resources need a USD-rated allocation
+	AllocationRatedInUsd *bool             `json:"allocationRatedInUsd,omitempty"`
+	AllocationThreshold  *CrossedThreshold `json:"allocationThreshold,omitempty"`
+	// Budget total of the current allocation
+	AllocationTotal *float64 `json:"allocationTotal,omitempty"`
+	// Unit the current allocation is denominated in
+	AllocationUnit *string `json:"allocationUnit,omitempty"`
+	// Why the current allocation refuses new resource usage
+	AllocationUnusableReason *string `json:"allocationUnusableReason,omitempty"`
+	// False when the current allocation refuses new resource usage
+	AllocationUsable *bool `json:"allocationUsable,omitempty"`
+	// Amount used of the current allocation (includes billing estimates)
+	AllocationUsed *float64 `json:"allocationUsed,omitempty"`
 	// Number of assigned resources in a failed state
 	FailedResourceCount *int64 `json:"failedResourceCount,omitempty"`
 	// True when the resource group is managed automatically from a group and cannot be edited or deleted
@@ -10770,10 +10857,17 @@ type ResourceGroupDetail struct {
 	AllocationAllowed []string `json:"allocationAllowed,omitempty"`
 	// Previous allocations of this resource group, oldest first
 	AllocationHistory []AllocationHistoryEntry `json:"allocationHistory,omitempty"`
+	// Whether the current allocation is rated in USD; cloud resources need a USD-rated allocation
+	AllocationRatedInUsd *bool             `json:"allocationRatedInUsd,omitempty"`
+	AllocationThreshold  *CrossedThreshold `json:"allocationThreshold,omitempty"`
 	// Budget total of the current allocation
 	AllocationTotal *float64 `json:"allocationTotal,omitempty"`
 	// Unit the current allocation is denominated in
 	AllocationUnit *string `json:"allocationUnit,omitempty"`
+	// Why the current allocation refuses new resource usage
+	AllocationUnusableReason *string `json:"allocationUnusableReason,omitempty"`
+	// False when the current allocation refuses new resource usage
+	AllocationUsable *bool `json:"allocationUsable,omitempty"`
 	// Amount used of the current allocation (includes billing estimates)
 	AllocationUsed *float64 `json:"allocationUsed,omitempty"`
 	// Number of assigned resources in a failed state
@@ -11703,6 +11797,8 @@ type StorageDetail struct {
 	Permissions *StoragePermissions `json:"permissions,omitempty"`
 	// Region the storage is in.
 	Region *string `json:"region,omitempty"`
+	// Name of the resource group the storage bills against.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Whether the storage is sessionless.
 	Sessionless bool `json:"sessionless"`
 	// Size of the storage in GiB.
@@ -11757,6 +11853,8 @@ type StorageListItem struct {
 	Permissions *StoragePermissions `json:"permissions,omitempty"`
 	// Region the storage is in.
 	Region *string `json:"region,omitempty"`
+	// Name of the resource group the storage bills against.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Whether the storage is sessionless.
 	Sessionless bool `json:"sessionless"`
 	// Size of the storage in GiB.
@@ -12457,9 +12555,11 @@ type UpdateReportBody struct {
 }
 
 type UpdateReservationBody struct {
+	// Name of the allocation the reservation bills under the flexible allocation system. The group follows the allocation's mapping unless also set.
+	Allocation *string `json:"allocation,omitempty"`
 	// Reservation description.
 	Description *string `json:"description,omitempty"`
-	// Name of the group that can use this reservation.
+	// Name of the group that can use this reservation. The allocation follows the group's mapping unless also set.
 	Group *string `json:"group,omitempty"`
 	// New reservation identifier. Renames the reservation when it differs from the current one.
 	ID *string `json:"id,omitempty"`
@@ -12778,10 +12878,19 @@ type UserThumbnail struct {
 	Size int64 `json:"size"`
 	// When the blob was first uploaded.
 	UploadedAt time.Time `json:"uploadedAt"`
-	// Names of resources currently using this thumbnail.
-	UsedBy []string `json:"usedBy"`
+	// Resources currently using this thumbnail.
+	UsedBy []UserThumbnailUsage `json:"usedBy"`
 	// Number of resources currently using this thumbnail.
 	UsedCount int64 `json:"usedCount"`
+}
+
+type UserThumbnailUsage struct {
+	// True when deleting the thumbnail clears the icon from this resource.
+	Detachable bool `json:"detachable"`
+	// Display name of the resource.
+	Name string `json:"name"`
+	// Resource type identifier: workflow, managedCluster, infrastructure, compute, storage, pool, marketplaceItem, session, aiCatalog, or organization.
+	ResourceType string `json:"resourceType"`
 }
 
 type UserWorkspace struct {
@@ -13209,6 +13318,15 @@ type WorkspaceEnvironment struct {
 	Mounts        []string `json:"mounts,omitempty"`
 }
 
+type WorkspaceHomeStorage struct {
+	// Space available to the user on the home filesystem in bytes.
+	Available int64 `json:"available"`
+	// Total size of the home filesystem in bytes.
+	Size int64 `json:"size"`
+	// Used space on the home filesystem in bytes.
+	Used int64 `json:"used"`
+}
+
 type WorkspaceMount struct {
 	ClusterPath   string `json:"clusterPath"`
 	WorkspacePath string `json:"workspacePath"`
@@ -13236,8 +13354,9 @@ type WorkspaceSettings struct {
 }
 
 type WorkspaceStatus struct {
-	Details *string `json:"details,omitempty"`
-	Status  string  `json:"status"`
+	Details     *string               `json:"details,omitempty"`
+	HomeStorage *WorkspaceHomeStorage `json:"homeStorage,omitempty"`
+	Status      string                `json:"status"`
 }
 
 // MarketplaceItemBodyVersionsValue - Per-version settings; the shape matches the item's publish body for its subtype, plus a subtype discriminator.

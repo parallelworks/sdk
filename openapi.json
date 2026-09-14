@@ -1720,6 +1720,10 @@
             "description": "AI provider region (for managed providers)",
             "type": "string"
           },
+          "resourceGroup": {
+            "description": "Resource group the provider bills against",
+            "type": "string"
+          },
           "status": {
             "description": "Current status of the AI provider",
             "type": "string"
@@ -1776,7 +1780,7 @@
             "type": "string"
           },
           "groupBlocked": {
-            "description": "Whether the provider's billing group is over its allocation and blocks new usage (managed providers)",
+            "description": "Whether the provider's billing target is over its allocation and blocks new usage",
             "type": "boolean"
           },
           "healthy": {
@@ -1808,6 +1812,10 @@
               "string",
               "null"
             ]
+          },
+          "resourceGroup": {
+            "description": "Resource group the provider bills against",
+            "type": "string"
           },
           "status": {
             "description": "Current status of the AI provider",
@@ -1936,6 +1944,11 @@
             "readOnly": true,
             "type": "integer"
           },
+          "threshold": {
+            "$ref": "#/components/schemas/CrossedThreshold",
+            "description": "Highest organization allocation threshold this allocation has crossed",
+            "readOnly": true
+          },
           "total": {
             "description": "Total allocation amount",
             "format": "double",
@@ -1953,6 +1966,20 @@
           "unit": {
             "description": "Unit of measurement",
             "type": "string"
+          },
+          "unusableReason": {
+            "description": "Why new resources cannot bill this allocation: no budget set, or a freeze/shutdown threshold crossed",
+            "enum": [
+              "no-budget",
+              "over-threshold"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "usable": {
+            "description": "Whether new resources can bill this allocation right now",
+            "readOnly": true,
+            "type": "boolean"
           },
           "used": {
             "description": "Amount used",
@@ -2584,6 +2611,14 @@
             "description": "Indicates if the user is an admin.",
             "type": "boolean"
           },
+          "allocationSystem": {
+            "description": "Allocation accounting system the user's organization bills through, resolved from the flexible-allocation-system policy.",
+            "enum": [
+              "legacy",
+              "flexible"
+            ],
+            "type": "string"
+          },
           "avatarEtag": {
             "description": "Cache-buster etag for the user's avatar; empty when no custom avatar is set.",
             "type": "string"
@@ -2712,6 +2747,7 @@
           "organizationRoles",
           "email",
           "previews",
+          "allocationSystem",
           "sidebarOptions"
         ],
         "type": "object"
@@ -6032,6 +6068,10 @@
           },
           "region": {
             "description": "Region where the bucket is located",
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Name of the resource group the bucket bills against.",
             "type": "string"
           },
           "sessionless": {
@@ -10699,6 +10739,48 @@
         ],
         "type": "object"
       },
+      "CreateKernelBody": {
+        "additionalProperties": false,
+        "properties": {
+          "buckets": {
+            "description": "IDs of buckets the kernel's code may read. Scoped credentials are minted into the kernel's environment on every start.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "environmentId": {
+            "description": "Environment to schedule the kernel's worker onto. Cluster targets only.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Kernel name. Auto-generated if omitted.",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "schedulingParams": {
+            "additionalProperties": {},
+            "description": "Scheduling parameters for the kernel's worker.",
+            "type": "object"
+          },
+          "targetId": {
+            "description": "Cluster or instance the kernel runs on.",
+            "type": "string"
+          },
+          "workerId": {
+            "description": "Run the kernel on this existing compute worker instead of scheduling a new one.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetId"
+        ],
+        "type": "object"
+      },
       "CreateManagedClusterInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -11435,6 +11517,10 @@
       "CreateReservationBody": {
         "additionalProperties": false,
         "properties": {
+          "allocation": {
+            "description": "Name of the allocation the reservation bills under the flexible allocation system. Required unless group is set.",
+            "type": "string"
+          },
           "csp": {
             "description": "Cloud service provider that issued the reservation.",
             "enum": [
@@ -11449,8 +11535,7 @@
             "type": "string"
           },
           "group": {
-            "description": "Name of the group that can use this reservation.",
-            "minLength": 1,
+            "description": "Name of the group that can use this reservation. Required unless allocation is set.",
             "type": "string"
           },
           "id": {
@@ -11468,7 +11553,6 @@
         },
         "required": [
           "id",
-          "group",
           "csp"
         ],
         "type": "object"
@@ -12197,6 +12281,39 @@
         ],
         "type": "object"
       },
+      "CrossedThreshold": {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "description": "Actions the organization configured for this threshold",
+            "examples": [
+              [
+                "freeze"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "threshold": {
+            "description": "Usage percent of the crossed threshold",
+            "examples": [
+              80
+            ],
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "threshold",
+          "actions"
+        ],
+        "type": "object"
+      },
       "CustomResourceTag": {
         "additionalProperties": false,
         "properties": {
@@ -12912,6 +13029,10 @@
           },
           "region": {
             "description": "Region of the disk",
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Name of the resource group the disk bills against.",
             "type": "string"
           },
           "sizeGb": {
@@ -14391,7 +14512,7 @@
             "type": "integer"
           },
           "resourceGroup": {
-            "description": "The resource group the cluster's usage bills against. Only populated by the single-cluster endpoint.",
+            "description": "The resource group the cluster's usage bills against.",
             "examples": [
               "my-resource-group"
             ],
@@ -17928,6 +18049,97 @@
         ],
         "type": "object"
       },
+      "KernelResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "buckets": {
+            "description": "IDs of buckets whose credentials are injected into the kernel.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "description": "Creation time.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "environmentId": {
+            "description": "ID of the environment the kernel's worker was scheduled onto.",
+            "type": "string"
+          },
+          "errorMessage": {
+            "description": "Why the kernel failed to start.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "Kernel ID.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Kernel name.",
+            "type": "string"
+          },
+          "nodeHostname": {
+            "description": "Hostname of the compute node the kernel runs on.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "schedulingParams": {
+            "additionalProperties": {},
+            "description": "Scheduling parameters used for the kernel's worker.",
+            "type": "object"
+          },
+          "status": {
+            "description": "Kernel status.",
+            "enum": [
+              "pending",
+              "queued",
+              "starting",
+              "running",
+              "stopping",
+              "stopped",
+              "error"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "targetId": {
+            "description": "ID of the cluster or instance the kernel runs on.",
+            "type": "string"
+          },
+          "targetType": {
+            "description": "Compute the kernel runs on.",
+            "enum": [
+              "cluster",
+              "instance"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "Base path the kernel's Jupyter server is served at.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "workerId": {
+            "description": "ID of the compute worker running the kernel.",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "url"
+        ],
+        "type": "object"
+      },
       "KubernetesChartsBody": {
         "additionalProperties": false,
         "properties": {
@@ -19903,6 +20115,10 @@
           },
           "region": {
             "description": "Region of the Lustre",
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Name of the resource group the Lustre bills against.",
             "type": "string"
           },
           "sessionless": {
@@ -22463,6 +22679,10 @@
             "description": "Region of the NFS",
             "type": "string"
           },
+          "resourceGroup": {
+            "description": "Name of the resource group the NFS bills against.",
+            "type": "string"
+          },
           "sessionless": {
             "description": "Indicates if the NFS is sessionless",
             "type": "boolean"
@@ -24705,6 +24925,13 @@
       "OrgBillingSettings": {
         "additionalProperties": false,
         "properties": {
+          "allocationStartDate": {
+            "description": "Recurring allocation start date as MM-DD. Empty when unset.",
+            "examples": [
+              "10-01"
+            ],
+            "type": "string"
+          },
           "allocationSystem": {
             "description": "Allocation accounting system the organization uses. Legacy is the default.",
             "enum": [
@@ -24716,18 +24943,11 @@
           "defaultBillingUsername": {
             "description": "Username shown on dashboards and reports for cost records without a username tag. Empty when unset.",
             "type": "string"
-          },
-          "fiscalYearStartDate": {
-            "description": "Recurring fiscal year start date as MM-DD. Empty when unset.",
-            "examples": [
-              "10-01"
-            ],
-            "type": "string"
           }
         },
         "required": [
           "allocationSystem",
-          "fiscalYearStartDate",
+          "allocationStartDate",
           "defaultBillingUsername"
         ],
         "type": "object"
@@ -31784,6 +32004,10 @@
       "ReservationItem": {
         "additionalProperties": false,
         "properties": {
+          "allocation": {
+            "description": "Name of the allocation the reservation bills under the flexible allocation system",
+            "type": "string"
+          },
           "csp": {
             "description": "Cloud service provider",
             "enum": [
@@ -31798,7 +32022,7 @@
             "type": "string"
           },
           "group": {
-            "description": "Name of the group that can use this reservation",
+            "description": "Name of the group that can use this reservation under the legacy allocation system; empty for allocation-only reservations",
             "type": "string"
           },
           "id": {
@@ -32317,6 +32541,47 @@
               "null"
             ]
           },
+          "allocationRatedInUsd": {
+            "description": "Whether the current allocation is rated in USD; cloud resources need a USD-rated allocation",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "allocationThreshold": {
+            "$ref": "#/components/schemas/CrossedThreshold",
+            "description": "Highest organization allocation threshold the current allocation has crossed",
+            "readOnly": true
+          },
+          "allocationTotal": {
+            "description": "Budget total of the current allocation",
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
+          "allocationUnit": {
+            "description": "Unit the current allocation is denominated in",
+            "readOnly": true,
+            "type": "string"
+          },
+          "allocationUnusableReason": {
+            "description": "Why the current allocation refuses new resource usage",
+            "enum": [
+              "no-budget",
+              "over-threshold"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "allocationUsable": {
+            "description": "False when the current allocation refuses new resource usage",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "allocationUsed": {
+            "description": "Amount used of the current allocation (includes billing estimates)",
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
           "failedResourceCount": {
             "description": "Number of assigned resources in a failed state",
             "format": "int64",
@@ -32395,6 +32660,16 @@
               "null"
             ]
           },
+          "allocationRatedInUsd": {
+            "description": "Whether the current allocation is rated in USD; cloud resources need a USD-rated allocation",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "allocationThreshold": {
+            "$ref": "#/components/schemas/CrossedThreshold",
+            "description": "Highest organization allocation threshold the current allocation has crossed",
+            "readOnly": true
+          },
           "allocationTotal": {
             "description": "Budget total of the current allocation",
             "format": "double",
@@ -32405,6 +32680,20 @@
             "description": "Unit the current allocation is denominated in",
             "readOnly": true,
             "type": "string"
+          },
+          "allocationUnusableReason": {
+            "description": "Why the current allocation refuses new resource usage",
+            "enum": [
+              "no-budget",
+              "over-threshold"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "allocationUsable": {
+            "description": "False when the current allocation refuses new resource usage",
+            "readOnly": true,
+            "type": "boolean"
           },
           "allocationUsed": {
             "description": "Amount used of the current allocation (includes billing estimates)",
@@ -34969,6 +35258,10 @@
             "description": "Region the storage is in.",
             "type": "string"
           },
+          "resourceGroup": {
+            "description": "Name of the resource group the storage bills against.",
+            "type": "string"
+          },
           "sessionless": {
             "description": "Whether the storage is sessionless.",
             "type": "boolean"
@@ -35130,6 +35423,10 @@
           },
           "region": {
             "description": "Region the storage is in.",
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Name of the resource group the storage bills against.",
             "type": "string"
           },
           "sessionless": {
@@ -36826,12 +37123,17 @@
       "UpdateReservationBody": {
         "additionalProperties": false,
         "properties": {
+          "allocation": {
+            "description": "Name of the allocation the reservation bills under the flexible allocation system. The group follows the allocation's mapping unless also set.",
+            "minLength": 1,
+            "type": "string"
+          },
           "description": {
             "description": "Reservation description.",
             "type": "string"
           },
           "group": {
-            "description": "Name of the group that can use this reservation.",
+            "description": "Name of the group that can use this reservation. The allocation follows the group's mapping unless also set.",
             "minLength": 1,
             "type": "string"
           },
@@ -37790,9 +38092,9 @@
             "type": "string"
           },
           "usedBy": {
-            "description": "Names of resources currently using this thumbnail.",
+            "description": "Resources currently using this thumbnail.",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/UserThumbnailUsage"
             },
             "type": [
               "array",
@@ -37814,6 +38116,29 @@
           "uploadedAt",
           "usedBy",
           "usedCount"
+        ],
+        "type": "object"
+      },
+      "UserThumbnailUsage": {
+        "additionalProperties": false,
+        "properties": {
+          "detachable": {
+            "description": "True when deleting the thumbnail clears the icon from this resource.",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "Display name of the resource.",
+            "type": "string"
+          },
+          "resourceType": {
+            "description": "Resource type identifier: workflow, managedCluster, infrastructure, compute, storage, pool, marketplaceItem, session, aiCatalog, or organization.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "resourceType",
+          "detachable"
         ],
         "type": "object"
       },
@@ -39137,6 +39462,35 @@
         },
         "type": "object"
       },
+      "WorkspaceHomeStorage": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "description": "Space available to the user on the home filesystem in bytes.",
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "size": {
+            "description": "Total size of the home filesystem in bytes.",
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "used": {
+            "description": "Used space on the home filesystem in bytes.",
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "size",
+          "used",
+          "available"
+        ],
+        "type": "object"
+      },
       "WorkspaceMount": {
         "additionalProperties": false,
         "properties": {
@@ -39223,6 +39577,10 @@
         "properties": {
           "details": {
             "type": "string"
+          },
+          "homeStorage": {
+            "$ref": "#/components/schemas/WorkspaceHomeStorage",
+            "description": "Home directory usage. Absent unless the workspace is running and able to report it."
           },
           "status": {
             "type": "string"
@@ -55042,7 +55400,7 @@
     },
     "/api/organizations/{organization}/billing-settings": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the organization's effective billing settings, resolved from the flexible-allocation-system, fiscal-year-start-date, and default-billing-username policies with defaults applied.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the organization's effective billing settings, resolved from the flexible-allocation-system, allocation-start-date, and default-billing-username policies with defaults applied.",
         "operationId": "get-organization-billing-settings",
         "parameters": [
           {
@@ -65902,6 +66260,71 @@
         ]
       }
     },
+    "/api/organizations/{organization}/policies/allocation-start-date": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets allocation-start-date policy for the organization as MM-DD. When unset, billing and reports calculate costs over all time.",
+        "operationId": "set-organization-allocation-start-date-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  "shared-hpc"
+                ],
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/StringPolicyOutput"
+                  },
+                  "description": "Map of string policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: allocation-start-date",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/organizations/{organization}/policies/allow-public-sessions": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets allow-public-sessions policy for the organization.",
@@ -66355,71 +66778,6 @@
           }
         },
         "summary": "Set organization policy: event-retention-days",
-        "tags": [
-          "Policies"
-        ]
-      }
-    },
-    "/api/organizations/{organization}/policies/fiscal-year-start-date": {
-      "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets fiscal-year-start-date policy for the organization as MM-DD. When unset, billing and reports calculate costs over all time.",
-        "operationId": "set-organization-fiscal-year-start-date-policy",
-        "parameters": [
-          {
-            "description": "The name of the organization.",
-            "in": "path",
-            "name": "organization",
-            "required": true,
-            "schema": {
-              "description": "The name of the organization.",
-              "examples": [
-                "parallelworks"
-              ],
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "description": "Policy value",
-                "examples": [
-                  "shared-hpc"
-                ],
-                "type": "string"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": {
-                    "$ref": "#/components/schemas/StringPolicyOutput"
-                  },
-                  "description": "Map of string policies",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Set organization policy: fiscal-year-start-date",
         "tags": [
           "Policies"
         ]
@@ -66971,7 +67329,7 @@
     },
     "/api/organizations/{organization}/reports/allocations/{allocation}/usage/by-day": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns rated usage and cloud costs for an allocation grouped by day and by type, subtype, user, or SKU for charting and reporting.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns rated usage and cloud costs for an allocation grouped by day and by type, subtype, user, or SKU for charting and reporting. Cloud rows without a user tag are attributed to the organization's default billing username, and live realtime estimates are included on request.",
         "operationId": "get-allocation-usage-events-summary",
         "parameters": [
           {
@@ -67072,13 +67430,23 @@
             }
           },
           {
-            "description": "Filter: metadata contains this string (case-insensitive search in JSON). Only rated usage carries metadata, so cloud costs are excluded.",
+            "description": "Filter: metadata contains this string (case-insensitive search in JSON). Only rated usage carries metadata, so cloud costs and realtime estimates are excluded.",
             "explode": false,
             "in": "query",
             "name": "metadata",
             "schema": {
-              "description": "Filter: metadata contains this string (case-insensitive search in JSON). Only rated usage carries metadata, so cloud costs are excluded.",
+              "description": "Filter: metadata contains this string (case-insensitive search in JSON). Only rated usage carries metadata, so cloud costs and realtime estimates are excluded.",
               "type": "string"
+            }
+          },
+          {
+            "description": "Include live realtime cost estimates alongside invoiced cloud costs.",
+            "explode": false,
+            "in": "query",
+            "name": "realtime",
+            "schema": {
+              "description": "Include live realtime cost estimates alongside invoiced cloud costs.",
+              "type": "boolean"
             }
           }
         ],
@@ -67119,7 +67487,7 @@
     },
     "/api/organizations/{organization}/reports/allocations/{allocation}/usage/filter-options": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns distinct type, subtype, user, and SKU values across the allocation's rated usage and cloud costs.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns distinct type, subtype, user, and SKU values across the allocation's rated usage and cloud costs, including live realtime estimates on request.",
         "operationId": "get-allocation-usage-events-filter-options",
         "parameters": [
           {
@@ -67143,6 +67511,16 @@
             "schema": {
               "description": "Allocation name",
               "type": "string"
+            }
+          },
+          {
+            "description": "Include values that appear only in live realtime cost estimates.",
+            "explode": false,
+            "in": "query",
+            "name": "realtime",
+            "schema": {
+              "description": "Include values that appear only in live realtime cost estimates.",
+              "type": "boolean"
             }
           }
         ],
@@ -79072,6 +79450,350 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/kernels": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the notebook kernels for the specified user.",
+        "operationId": "list-kernels",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/KernelResponse"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List notebook kernels",
+        "tags": [
+          "Notebooks"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStarts a Jupyter kernel on a cluster or instance, scheduling a compute worker for it when needed.",
+        "operationId": "create-kernel",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKernelBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KernelResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create notebook kernel",
+        "tags": [
+          "Notebooks"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/kernels/{kernel}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStops a notebook kernel and the worker it scheduled.",
+        "operationId": "delete-kernel",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kernel ID.",
+            "in": "path",
+            "name": "kernel",
+            "required": true,
+            "schema": {
+              "description": "Kernel ID.",
+              "examples": [
+                "60c72b2f9b1e8d001c8e4f3a"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete notebook kernel",
+        "tags": [
+          "Notebooks"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns a specific notebook kernel by ID.",
+        "operationId": "get-kernel",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kernel ID.",
+            "in": "path",
+            "name": "kernel",
+            "required": true,
+            "schema": {
+              "description": "Kernel ID.",
+              "examples": [
+                "60c72b2f9b1e8d001c8e4f3a"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KernelResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get notebook kernel",
+        "tags": [
+          "Notebooks"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/kernels/{kernel}/restart": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRestarts the Jupyter server backing a notebook kernel.",
+        "operationId": "restart-kernel",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kernel ID.",
+            "in": "path",
+            "name": "kernel",
+            "required": true,
+            "schema": {
+              "description": "Kernel ID.",
+              "examples": [
+                "60c72b2f9b1e8d001c8e4f3a"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KernelResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Restart notebook kernel",
+        "tags": [
+          "Notebooks"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/language": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRetrieves the current language setting for the specified user.",
@@ -86117,6 +86839,56 @@
         ]
       }
     },
+    "/api/platform/policies/allocation-start-date": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the allocation-start-date policy for the platform as MM-DD. When unset, billing and reports calculate costs over all time.",
+        "operationId": "set-platform-allocation-start-date-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  "shared-hpc"
+                ],
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/StringPolicyOutput"
+                  },
+                  "description": "Map of string policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: allocation-start-date",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/platform/policies/allow-public-sessions": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the allow-public-sessions policy for the platform.",
@@ -86473,56 +87245,6 @@
           }
         },
         "summary": "Set platform policy: event-retention-days",
-        "tags": [
-          "Policies"
-        ]
-      }
-    },
-    "/api/platform/policies/fiscal-year-start-date": {
-      "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the fiscal-year-start-date policy for the platform as MM-DD. When unset, billing and reports calculate costs over all time.",
-        "operationId": "set-platform-fiscal-year-start-date-policy",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "description": "Policy value",
-                "examples": [
-                  "shared-hpc"
-                ],
-                "type": "string"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": {
-                    "$ref": "#/components/schemas/StringPolicyOutput"
-                  },
-                  "description": "Map of string policies",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Set platform policy: fiscal-year-start-date",
         "tags": [
           "Policies"
         ]
@@ -90279,7 +91001,7 @@
     },
     "/api/user/thumbnails/{etag}": {
       "delete": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves an image from the authenticated user's thumbnail library. Resources that still reference the image continue to render it via their own refCount.",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves an image from the authenticated user's thumbnail library and detaches it from the owner's resources that use it. Platform and organization admins may remove other users' thumbnails.",
         "operationId": "delete-user-thumbnail",
         "parameters": [
           {
@@ -92552,6 +93274,10 @@
     {
       "description": "Endpoints related to infrastructure provision status",
       "name": "Provision Status"
+    },
+    {
+      "description": "Endpoints related to notebook kernels",
+      "name": "Notebooks"
     },
     {
       "description": "Endpoints related to Kubernetes resource quotas",

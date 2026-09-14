@@ -6513,7 +6513,7 @@ func (c *Client) DeleteOrganizationAuthMethod(ctx context.Context, organization 
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns the organization's effective billing settings, resolved from the flexible-allocation-system, fiscal-year-start-date, and default-billing-username policies with defaults applied.
+// Returns the organization's effective billing settings, resolved from the flexible-allocation-system, allocation-start-date, and default-billing-username policies with defaults applied.
 func (c *Client) GetOrganizationBillingSettings(ctx context.Context, organization string) (*OrgBillingSettings, error) {
 
 	path := "/api/organizations/{organization}/billing-settings"
@@ -10054,6 +10054,23 @@ func (c *Client) GetOrganizationPolicies(ctx context.Context, organization strin
 	return &result, nil
 }
 
+// SetOrganizationAllocationStartDatePolicy - Set organization policy: allocation-start-date
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets allocation-start-date policy for the organization as MM-DD. When unset, billing and reports calculate costs over all time.
+func (c *Client) SetOrganizationAllocationStartDatePolicy(ctx context.Context, organization string, body string) (*map[string]StringPolicyOutput, error) {
+
+	path := "/api/organizations/{organization}/policies/allocation-start-date"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result map[string]StringPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetOrganizationAllowPublicSessionsPolicy - Set organization policy: allow-public-sessions
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -10167,23 +10184,6 @@ func (c *Client) SetOrganizationEventRetentionDaysPolicy(ctx context.Context, or
 	path = pathReplace(path, "organization", "simple", false, organization)
 
 	var result map[string]IntPolicyOutput
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// SetOrganizationFiscalYearStartDatePolicy - Set organization policy: fiscal-year-start-date
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Sets fiscal-year-start-date policy for the organization as MM-DD. When unset, billing and reports calculate costs over all time.
-func (c *Client) SetOrganizationFiscalYearStartDatePolicy(ctx context.Context, organization string, body string) (*map[string]StringPolicyOutput, error) {
-
-	path := "/api/organizations/{organization}/policies/fiscal-year-start-date"
-	path = pathReplace(path, "organization", "simple", false, organization)
-
-	var result map[string]StringPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -10361,15 +10361,17 @@ type GetAllocationUsageEventsSummaryParams struct {
 	User *string `json:"user,omitempty"`
 	// Filter: comma-separated SKU codes
 	Sku *string `json:"sku,omitempty"`
-	// Filter: metadata contains this string (case-insensitive search in JSON). Only rated usage carries metadata, so cloud costs are excluded.
+	// Filter: metadata contains this string (case-insensitive search in JSON). Only rated usage carries metadata, so cloud costs and realtime estimates are excluded.
 	Metadata *string `json:"metadata,omitempty"`
+	// Include live realtime cost estimates alongside invoiced cloud costs.
+	Realtime *bool `json:"realtime,omitempty"`
 }
 
 // GetAllocationUsageEventsSummary - Get summarized costs for an allocation
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns rated usage and cloud costs for an allocation grouped by day and by type, subtype, user, or SKU for charting and reporting.
+// Returns rated usage and cloud costs for an allocation grouped by day and by type, subtype, user, or SKU for charting and reporting. Cloud rows without a user tag are attributed to the organization's default billing username, and live realtime estimates are included on request.
 func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organization string, allocation string, params GetAllocationUsageEventsSummaryParams) (*[]map[string]any, error) {
 
 	path := "/api/organizations/{organization}/reports/allocations/{allocation}/usage/by-day"
@@ -10392,6 +10394,8 @@ func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organizati
 
 	addQueryParam(queryValues, "metadata", "form", false, params.Metadata)
 
+	addQueryParam(queryValues, "realtime", "form", false, params.Realtime)
+
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
 	}
@@ -10403,16 +10407,33 @@ func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organizati
 	return &result, nil
 }
 
+// GetAllocationUsageEventsFilterOptionsParams contains the parameters for the GetAllocationUsageEventsFilterOptions operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAllocationUsageEventsFilterOptionsParams struct {
+	// Include values that appear only in live realtime cost estimates.
+	Realtime *bool `json:"realtime,omitempty"`
+}
+
 // GetAllocationUsageEventsFilterOptions - Get filter options for allocation costs
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns distinct type, subtype, user, and SKU values across the allocation's rated usage and cloud costs.
-func (c *Client) GetAllocationUsageEventsFilterOptions(ctx context.Context, organization string, allocation string) (*RatedCostsFilterOptions, error) {
+// Returns distinct type, subtype, user, and SKU values across the allocation's rated usage and cloud costs, including live realtime estimates on request.
+func (c *Client) GetAllocationUsageEventsFilterOptions(ctx context.Context, organization string, allocation string, opts ...GetAllocationUsageEventsFilterOptionsParams) (*RatedCostsFilterOptions, error) {
 
 	path := "/api/organizations/{organization}/reports/allocations/{allocation}/usage/filter-options"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "allocation", "simple", false, allocation)
+	var params GetAllocationUsageEventsFilterOptionsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "realtime", "form", false, params.Realtime)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
 
 	var result RatedCostsFilterOptions
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
@@ -13971,6 +13992,98 @@ func (c *Client) DeleteIP(ctx context.Context, organization string, user string,
 	return nil
 }
 
+// ListKernels - List notebook kernels
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the notebook kernels for the specified user.
+func (c *Client) ListKernels(ctx context.Context, organization string, user string) (*[]KernelResponse, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/kernels"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+
+	var result []KernelResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreateKernel - Create notebook kernel
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Starts a Jupyter kernel on a cluster or instance, scheduling a compute worker for it when needed.
+func (c *Client) CreateKernel(ctx context.Context, organization string, user string, body CreateKernelBody) (*KernelResponse, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/kernels"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+
+	var result KernelResponse
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetKernel - Get notebook kernel
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns a specific notebook kernel by ID.
+func (c *Client) GetKernel(ctx context.Context, organization string, user string, kernel string) (*KernelResponse, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/kernels/{kernel}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "kernel", "simple", false, kernel)
+
+	var result KernelResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteKernel - Delete notebook kernel
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Stops a notebook kernel and the worker it scheduled.
+func (c *Client) DeleteKernel(ctx context.Context, organization string, user string, kernel string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/kernels/{kernel}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "kernel", "simple", false, kernel)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// RestartKernel - Restart notebook kernel
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Restarts the Jupyter server backing a notebook kernel.
+func (c *Client) RestartKernel(ctx context.Context, organization string, user string, kernel string) (*KernelResponse, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/kernels/{kernel}/restart"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "kernel", "simple", false, kernel)
+
+	var result KernelResponse
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetUserLanguage - Get user language setting
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -16078,6 +16191,22 @@ func (c *Client) GetPlatformPolicies(ctx context.Context) (*map[string]Policy, e
 	return &result, nil
 }
 
+// SetPlatformAllocationStartDatePolicy - Set platform policy: allocation-start-date
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the allocation-start-date policy for the platform as MM-DD. When unset, billing and reports calculate costs over all time.
+func (c *Client) SetPlatformAllocationStartDatePolicy(ctx context.Context, body string) (*map[string]StringPolicyOutput, error) {
+
+	path := "/api/platform/policies/allocation-start-date"
+
+	var result map[string]StringPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetPlatformAllowPublicSessionsPolicy - Set platform policy: allow-public-sessions
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -16184,22 +16313,6 @@ func (c *Client) SetPlatformEventRetentionDaysPolicy(ctx context.Context, body i
 	path := "/api/platform/policies/event-retention-days"
 
 	var result map[string]IntPolicyOutput
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// SetPlatformFiscalYearStartDatePolicy - Set platform policy: fiscal-year-start-date
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Sets the fiscal-year-start-date policy for the platform as MM-DD. When unset, billing and reports calculate costs over all time.
-func (c *Client) SetPlatformFiscalYearStartDatePolicy(ctx context.Context, body string) (*map[string]StringPolicyOutput, error) {
-
-	path := "/api/platform/policies/fiscal-year-start-date"
-
-	var result map[string]StringPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -17723,7 +17836,7 @@ func (c *Client) UploadUserThumbnail(ctx context.Context, body *UploadUserThumbn
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Removes an image from the authenticated user's thumbnail library. Resources that still reference the image continue to render it via their own refCount.
+// Removes an image from the authenticated user's thumbnail library and detaches it from the owner's resources that use it. Platform and organization admins may remove other users' thumbnails.
 func (c *Client) DeleteUserThumbnail(ctx context.Context, etag string) error {
 
 	path := "/api/user/thumbnails/{etag}"
