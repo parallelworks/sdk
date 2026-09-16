@@ -9320,6 +9320,40 @@
         ],
         "type": "object"
       },
+      "ConnectTokenInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "token": {
+            "description": "A GitHub personal access token, classic or fine-grained.",
+            "maxLength": 512,
+            "minLength": 8,
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "type": "object"
+      },
+      "ConnectTokenOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "private": {
+            "description": "Whether the token can read private repositories.",
+            "type": "boolean"
+          },
+          "username": {
+            "description": "The GitHub account the token belongs to.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "private"
+        ],
+        "type": "object"
+      },
       "ConnectWithTokenInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -13802,6 +13836,10 @@
       "ExistingCluster": {
         "additionalProperties": false,
         "properties": {
+          "agentVersion": {
+            "description": "Version the connected agent reported when its tunnel registered; empty when no tunnel is registered",
+            "type": "string"
+          },
           "disconnectedAt": {
             "description": "Set when the user explicitly disconnected this cluster; reconcilers use this to skip auto-reconnect",
             "format": "date-time",
@@ -14150,6 +14188,36 @@
           "dns_zone",
           "debug",
           "no_root_access"
+        ],
+        "type": "object"
+      },
+      "FileOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "type": "object"
+      },
+      "FilesOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/RepoTreeEntry"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "entries"
         ],
         "type": "object"
       },
@@ -14905,9 +14973,44 @@
         ],
         "type": "object"
       },
+      "GitHubAppConfigRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "allowPersonalAccessTokens": {
+            "description": "Whether a user may connect GitHub with a personal access token. Omit to leave unchanged.",
+            "type": "boolean"
+          },
+          "appId": {
+            "description": "GitHub App ID. Omit for a personal-access-token-only deployment.",
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "clientId": {
+            "description": "OAuth Client ID for user authentication. Omit for a personal-access-token-only deployment.",
+            "type": "string"
+          },
+          "clientSecret": {
+            "description": "OAuth Client Secret (only sent when updating)",
+            "type": "string"
+          },
+          "privateKeyPEM": {
+            "description": "Private key in PEM format (only sent when updating)",
+            "type": "string"
+          },
+          "webhookSecret": {
+            "description": "Webhook secret for verifying GitHub webhook payloads (only sent when updating)",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "GitHubAppConfigResponse": {
         "additionalProperties": false,
         "properties": {
+          "allowPersonalAccessTokens": {
+            "type": "boolean"
+          },
           "appId": {
             "format": "int64",
             "type": "integer"
@@ -14938,7 +15041,8 @@
           "clientId",
           "clientSecretConfigured",
           "privateKeyConfigured",
-          "webhookSecretConfigured"
+          "webhookSecretConfigured",
+          "allowPersonalAccessTokens"
         ],
         "type": "object"
       },
@@ -15213,6 +15317,50 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "GitlabProjectListing": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "host": {
+            "description": "Server this project lives on, for $host.",
+            "type": "string"
+          },
+          "path": {
+            "description": "GROUP/.../PROJECT, what follows gitlab/ in a uses: reference.",
+            "type": "string"
+          },
+          "private": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "path",
+          "host",
+          "private"
+        ],
+        "type": "object"
+      },
+      "GitlabProjectsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "projects": {
+            "description": "Matches across every server the caller is connected to.",
+            "items": {
+              "$ref": "#/components/schemas/GitlabProjectListing"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "projects"
+        ],
         "type": "object"
       },
       "GoogleBucket": {
@@ -16220,23 +16368,15 @@
       "Group": {
         "additionalProperties": false,
         "properties": {
-          "allocation": {
-            "description": "The total allocation for this group.",
-            "format": "double",
-            "type": "number"
-          },
-          "allocationUsed": {
-            "description": "The allocation used for this group",
-            "format": "double",
-            "type": "number"
-          },
           "allocations": {
             "$ref": "#/components/schemas/Allocations",
-            "description": "Group allocation information, will only show up for groups you are in. Always shows for admins."
+            "description": "Group allocation information, will only show up for groups you are in. Always shows for admins.",
+            "readOnly": true
           },
           "createdAt": {
             "description": "Group creation time",
             "format": "date-time",
+            "readOnly": true,
             "type": "string"
           },
           "description": {
@@ -16246,6 +16386,7 @@
           "gid": {
             "description": "POSIX group ID, used by user workspaces to create matching system groups.",
             "format": "int64",
+            "readOnly": true,
             "type": "integer"
           },
           "id": {
@@ -16256,6 +16397,7 @@
           "members": {
             "description": "Number of group members",
             "format": "int64",
+            "readOnly": true,
             "type": "integer"
           },
           "name": {
@@ -16462,7 +16604,7 @@
         "type": "object"
       },
       "HealthSnapshot": {
-        "additionalProperties": false,
+        "additionalProperties": true,
         "properties": {
           "domains": {
             "description": "Per-domain certificate summary.",
@@ -16473,6 +16615,10 @@
               "array",
               "null"
             ]
+          },
+          "errors": {
+            "$ref": "#/components/schemas/HealthSnapshotErrors",
+            "description": "Error tracker counts."
           },
           "health": {
             "$ref": "#/components/schemas/HealthSnapshotHealth",
@@ -16503,7 +16649,7 @@
         "type": "object"
       },
       "HealthSnapshotDomain": {
-        "additionalProperties": false,
+        "additionalProperties": true,
         "properties": {
           "acmeFailureCount": {
             "description": "Consecutive ACME failures.",
@@ -16533,8 +16679,19 @@
         ],
         "type": "object"
       },
+      "HealthSnapshotErrors": {
+        "additionalProperties": true,
+        "properties": {
+          "count24h": {
+            "description": "Unhandled errors recorded over the trailing 24 hours. The error log is a capped collection, so once it wraps this is a floor, not an exact total.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "HealthSnapshotHealth": {
-        "additionalProperties": false,
+        "additionalProperties": true,
         "properties": {
           "mongoReachable": {
             "description": "Whether the deployment can reach its database.",
@@ -16552,7 +16709,7 @@
         "type": "object"
       },
       "HealthSnapshotLicense": {
-        "additionalProperties": false,
+        "additionalProperties": true,
         "properties": {
           "expired": {
             "description": "Whether the license is expired beyond the grace period.",
@@ -16570,9 +16727,43 @@
         },
         "type": "object"
       },
-      "HealthSnapshotUsage": {
-        "additionalProperties": false,
+      "HealthSnapshotOrgUsage": {
+        "additionalProperties": true,
         "properties": {
+          "name": {
+            "description": "Organization name.",
+            "type": "string"
+          },
+          "seatsAssigned": {
+            "description": "Users in the organization holding a license seat.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "seatsTotal": {
+            "description": "Seats allocated to the organization, when an allocation exists.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "seatsAssigned"
+        ],
+        "type": "object"
+      },
+      "HealthSnapshotUsage": {
+        "additionalProperties": true,
+        "properties": {
+          "orgs": {
+            "description": "Per-organization seat usage for organizations with a seat allocation.",
+            "items": {
+              "$ref": "#/components/schemas/HealthSnapshotOrgUsage"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "seatsAssigned": {
             "description": "Users holding a license seat.",
             "format": "int64",
@@ -21978,6 +22169,11 @@
       "MonitoredDeploymentSummary": {
         "additionalProperties": false,
         "properties": {
+          "errorCount24h": {
+            "description": "Unhandled errors the deployment recorded over the trailing 24 hours; a floor once its capped error log wraps.",
+            "format": "int64",
+            "type": "integer"
+          },
           "firingAlerts": {
             "description": "Alert rules currently firing for this deployment, evaluated live from the latest snapshot.",
             "items": {
@@ -23627,12 +23823,19 @@
             "format": "date-time",
             "type": "string"
           },
+          "method": {
+            "type": "string"
+          },
+          "tokensAllowed": {
+            "type": "boolean"
+          },
           "username": {
             "type": "string"
           }
         },
         "required": [
-          "appConfigured"
+          "appConfigured",
+          "tokensAllowed"
         ],
         "type": "object"
       },
@@ -25771,6 +25974,28 @@
         ],
         "type": "object"
       },
+      "OwnerListing": {
+        "additionalProperties": false,
+        "properties": {
+          "host": {
+            "description": "GitLab only: the server this namespace is on.",
+            "type": "string"
+          },
+          "kind": {
+            "description": "user, organization or group.",
+            "type": "string"
+          },
+          "name": {
+            "description": "What follows github/ or gitlab/ in a reference.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "kind"
+        ],
+        "type": "object"
+      },
       "OwnerOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -25779,6 +26004,24 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "OwnersOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "owners": {
+            "items": {
+              "$ref": "#/components/schemas/OwnerListing"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "owners"
+        ],
         "type": "object"
       },
       "PartitionInfo": {
@@ -30680,39 +30923,6 @@
         ],
         "type": "object"
       },
-      "PutGitHubAppConfigInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "appId": {
-            "description": "GitHub App ID",
-            "format": "int64",
-            "minimum": 1,
-            "type": "integer"
-          },
-          "clientId": {
-            "description": "OAuth Client ID for user authentication",
-            "minLength": 1,
-            "type": "string"
-          },
-          "clientSecret": {
-            "description": "OAuth Client Secret (only sent when updating)",
-            "type": "string"
-          },
-          "privateKeyPEM": {
-            "description": "Private key in PEM format (only sent when updating)",
-            "type": "string"
-          },
-          "webhookSecret": {
-            "description": "Webhook secret for verifying GitHub webhook payloads (only sent when updating)",
-            "type": "string"
-          }
-        },
-        "required": [
-          "appId",
-          "clientId"
-        ],
-        "type": "object"
-      },
       "PutImageInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -31573,6 +31783,25 @@
         ],
         "type": "object"
       },
+      "RefsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "refs": {
+            "description": "Tags first, newest by version, then branches, then recent commits.",
+            "items": {
+              "$ref": "#/components/schemas/RepoRefName"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "refs"
+        ],
+        "type": "object"
+      },
       "RegionResource": {
         "additionalProperties": false,
         "properties": {
@@ -31871,6 +32100,49 @@
         ],
         "type": "object"
       },
+      "RepoListing": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "description": "Repository name, relative to the owner asked for: OWNER/REPO when no owner was given.",
+            "type": "string"
+          },
+          "private": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "private"
+        ],
+        "type": "object"
+      },
+      "RepoRefName": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "description": "A commit's subject line. Empty for a branch or a tag.",
+            "type": "string"
+          },
+          "kind": {
+            "description": "branch, tag or commit.",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "kind",
+          "detail"
+        ],
+        "type": "object"
+      },
       "RepoResponse": {
         "additionalProperties": false,
         "properties": {
@@ -31910,6 +32182,23 @@
           "description",
           "defaultBranch",
           "updatedAt"
+        ],
+        "type": "object"
+      },
+      "RepoTreeEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "type": {
+            "description": "blob for a file, tree for a directory.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "type"
         ],
         "type": "object"
       },
@@ -31998,6 +32287,24 @@
         },
         "required": [
           "mounts"
+        ],
+        "type": "object"
+      },
+      "ReposOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "repos": {
+            "items": {
+              "$ref": "#/components/schemas/RepoListing"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "repos"
         ],
         "type": "object"
       },
@@ -46974,6 +47281,48 @@
           }
         },
         "summary": "List accessible GitHub repositories",
+        "tags": [
+          "GitHub"
+        ]
+      }
+    },
+    "/api/integrations/github/token": {
+      "put": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nConnects the caller's GitHub account with a personal access token, for a deployment with no GitHub App and for an account the app cannot be installed on. The token is verified against GitHub, stored in the platform's secret store, and never returned.",
+        "operationId": "github-connect-token",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectTokenInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectTokenOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Connect GitHub with a personal access token",
         "tags": [
           "GitHub"
         ]
@@ -86437,7 +86786,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PutGitHubAppConfigInputBody"
+                "$ref": "#/components/schemas/GitHubAppConfigRequest"
               }
             }
           },
@@ -88190,6 +88539,382 @@
         "summary": "Add Provision Status",
         "tags": [
           "Provision Status"
+        ]
+      }
+    },
+    "/api/repo-suggestions/file": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReads a single file from a GitHub or GitLab repository with the caller's connected account, so the editor can complete a referenced workflow's inputs. Only a repository and a path within it are accepted, never a URL.",
+        "operationId": "repo-suggestion-file",
+        "parameters": [
+          {
+            "description": "Repository the file lives in.",
+            "explode": false,
+            "in": "query",
+            "name": "repo",
+            "required": true,
+            "schema": {
+              "description": "Repository the file lives in.",
+              "maxLength": 512,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Branch, tag or commit. Defaults to the repository's default branch.",
+            "explode": false,
+            "in": "query",
+            "name": "ref",
+            "schema": {
+              "description": "Branch, tag or commit. Defaults to the repository's default branch.",
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Path of the file within the repository.",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "required": true,
+            "schema": {
+              "description": "Path of the file within the repository.",
+              "maxLength": 1024,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Read one file from a repository",
+        "tags": [
+          "Workflows"
+        ]
+      }
+    },
+    "/api/repo-suggestions/files": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists the entries directly under one directory of a GitHub or GitLab repository, read with the caller's connected account.",
+        "operationId": "repo-suggestion-files",
+        "parameters": [
+          {
+            "description": "Repository to list files in.",
+            "explode": false,
+            "in": "query",
+            "name": "repo",
+            "required": true,
+            "schema": {
+              "description": "Repository to list files in.",
+              "maxLength": 512,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Branch, tag or commit. Defaults to the repository's default branch.",
+            "explode": false,
+            "in": "query",
+            "name": "ref",
+            "schema": {
+              "description": "Branch, tag or commit. Defaults to the repository's default branch.",
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Directory to list. Defaults to the repository root.",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Directory to list. Defaults to the repository root.",
+              "maxLength": 1024,
+              "type": "string"
+            }
+          },
+          {
+            "description": "List every descendant instead of one directory, for completing a path in one pass.",
+            "explode": false,
+            "in": "query",
+            "name": "recursive",
+            "schema": {
+              "description": "List every descendant instead of one directory, for completing a path in one pass.",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilesOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List a repository directory",
+        "tags": [
+          "Workflows"
+        ]
+      }
+    },
+    "/api/repo-suggestions/gitlab-projects": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSearches the projects the caller can see on every registered GitLab server they are connected to, so the editor can complete a gitlab/ reference that names no host. Each match reports the server it lives on, which is what $host must name.",
+        "operationId": "repo-suggestion-gitlab-projects",
+        "parameters": [
+          {
+            "description": "Substring to match against GROUP/PROJECT paths.",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Substring to match against GROUP/PROJECT paths.",
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Limit to one registered server. Omit to search every server the caller is connected to.",
+            "explode": false,
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "description": "Limit to one registered server. Omit to search every server the caller is connected to.",
+              "maxLength": 253,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitlabProjectsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Search GitLab projects across connected servers",
+        "tags": [
+          "Workflows"
+        ]
+      }
+    },
+    "/api/repo-suggestions/owners": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists the accounts, organizations and GitLab groups the caller can reach, which is what a reference names before it names a repository. Cheaper than listing every repository only to derive the same names from their paths.",
+        "operationId": "repo-suggestion-owners",
+        "parameters": [
+          {
+            "description": "Which provider to list owners for.",
+            "explode": false,
+            "in": "query",
+            "name": "provider",
+            "required": true,
+            "schema": {
+              "description": "Which provider to list owners for.",
+              "enum": [
+                "github",
+                "gitlab"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Substring to match against the owner name.",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Substring to match against the owner name.",
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "description": "GitLab only: limit to one registered server.",
+            "explode": false,
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "description": "GitLab only: limit to one registered server.",
+              "maxLength": 253,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnersOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the owners a reference can name",
+        "tags": [
+          "Workflows"
+        ]
+      }
+    },
+    "/api/repo-suggestions/refs": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists the branches, tags and most recent commits of a GitHub or GitLab repository, read with the caller's connected account so a private repository completes in the editor.",
+        "operationId": "repo-suggestion-refs",
+        "parameters": [
+          {
+            "description": "Repository to list refs for: OWNER/REPO for GitHub, or the URL of a project on a registered GitLab server.",
+            "explode": false,
+            "in": "query",
+            "name": "repo",
+            "required": true,
+            "schema": {
+              "description": "Repository to list refs for: OWNER/REPO for GitHub, or the URL of a project on a registered GitLab server.",
+              "maxLength": 512,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List a repository's branches, tags and recent commits",
+        "tags": [
+          "Workflows"
+        ]
+      }
+    },
+    "/api/repo-suggestions/repos": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists the repositories under a GitHub owner, or the projects under a group on a registered GitLab server, read with the caller's connected account. Private repositories appear for an organization the account belongs to and for the account's own namespace.",
+        "operationId": "repo-suggestion-repos",
+        "parameters": [
+          {
+            "description": "Owner, organization or GitLab group whose repositories to list. Omit for every GitHub repository the caller can reach, across owners.",
+            "explode": false,
+            "in": "query",
+            "name": "owner",
+            "schema": {
+              "description": "Owner, organization or GitLab group whose repositories to list. Omit for every GitHub repository the caller can reach, across owners.",
+              "maxLength": 128,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Host of a registered GitLab server. Omit for GitHub.",
+            "explode": false,
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "description": "Host of a registered GitLab server. Omit for GitHub.",
+              "maxLength": 253,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReposOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List an owner's repositories",
+        "tags": [
+          "Workflows"
         ]
       }
     },

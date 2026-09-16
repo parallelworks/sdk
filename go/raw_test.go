@@ -1,7 +1,7 @@
 package parallelworks
 
 import (
-	"errors"
+	"context"
 	"io"
 	"net/http"
 	"strings"
@@ -93,17 +93,17 @@ func TestStreamReplaysBodyOnRetry(t *testing.T) {
 	}
 }
 
-func TestStreamDoesNotRetryNonNetworkError(t *testing.T) {
+func TestStreamDoesNotRetryCanceledRequest(t *testing.T) {
 	var attempts int
 	rt := roundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		attempts++
-		return nil, errors.New("boom")
+		return nil, context.Canceled
 	})
 
 	if _, err := fastRetryClient(t, rt).Stream(t.Context(), "POST", "/x", strings.NewReader(`{}`), nil, WithStreamRetry()); err == nil {
 		t.Fatal("expected error")
 	}
 	if attempts != 1 {
-		t.Fatalf("expected 1 attempt for non-network error, got %d", attempts)
+		t.Fatalf("expected 1 attempt for a canceled request, got %d", attempts)
 	}
 }

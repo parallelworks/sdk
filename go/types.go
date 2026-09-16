@@ -3252,6 +3252,18 @@ type ConnectStateBody struct {
 	Status string `json:"status"`
 }
 
+type ConnectTokenInputBody struct {
+	// A GitHub personal access token, classic or fine-grained.
+	Token string `json:"token"`
+}
+
+type ConnectTokenOutputBody struct {
+	// Whether the token can read private repositories.
+	Private bool `json:"private"`
+	// The GitHub account the token belongs to.
+	Username string `json:"username"`
+}
+
 type ConnectWithTokenInputBody struct {
 	// A personal access token from the GitLab server with the read_api scope. Stored in the platform vault and never returned.
 	Token string `json:"token"`
@@ -4762,6 +4774,8 @@ type EventsPageBody struct {
 }
 
 type ExistingCluster struct {
+	// Version the connected agent reported when its tunnel registered; empty when no tunnel is registered
+	AgentVersion *string `json:"agentVersion,omitempty"`
 	// Set when the user explicitly disconnected this cluster; reconcilers use this to skip auto-reconnect
 	DisconnectedAt *time.Time `json:"disconnectedAt,omitempty"`
 	// Group name
@@ -4888,6 +4902,14 @@ type Fact struct {
 	UserBootstrap string `json:"user_bootstrap"`
 	// The zone of the instance, if applicable.
 	Zone string `json:"zone"`
+}
+
+type FileOutputBody struct {
+	Content string `json:"content"`
+}
+
+type FilesOutputBody struct {
+	Entries []RepoTreeEntry `json:"entries"`
 }
 
 type FilesystemInfo struct {
@@ -5251,14 +5273,30 @@ type GetUserWorkspaceBootstrapScriptOutputBody struct {
 	Script string `json:"script"`
 }
 
+type GitHubAppConfigRequest struct {
+	// Whether a user may connect GitHub with a personal access token. Omit to leave unchanged.
+	AllowPersonalAccessTokens *bool `json:"allowPersonalAccessTokens,omitempty"`
+	// GitHub App ID. Omit for a personal-access-token-only deployment.
+	AppID *int64 `json:"appId,omitempty"`
+	// OAuth Client ID for user authentication. Omit for a personal-access-token-only deployment.
+	ClientID *string `json:"clientId,omitempty"`
+	// OAuth Client Secret (only sent when updating)
+	ClientSecret *string `json:"clientSecret,omitempty"`
+	// Private key in PEM format (only sent when updating)
+	PrivateKeyPem *string `json:"privateKeyPEM,omitempty"`
+	// Webhook secret for verifying GitHub webhook payloads (only sent when updating)
+	WebhookSecret *string `json:"webhookSecret,omitempty"`
+}
+
 type GitHubAppConfigResponse struct {
-	AppID                   int64  `json:"appId"`
-	AppName                 string `json:"appName"`
-	AppSlug                 string `json:"appSlug"`
-	ClientID                string `json:"clientId"`
-	ClientSecretConfigured  bool   `json:"clientSecretConfigured"`
-	PrivateKeyConfigured    bool   `json:"privateKeyConfigured"`
-	WebhookSecretConfigured bool   `json:"webhookSecretConfigured"`
+	AllowPersonalAccessTokens bool   `json:"allowPersonalAccessTokens"`
+	AppID                     int64  `json:"appId"`
+	AppName                   string `json:"appName"`
+	AppSlug                   string `json:"appSlug"`
+	ClientID                  string `json:"clientId"`
+	ClientSecretConfigured    bool   `json:"clientSecretConfigured"`
+	PrivateKeyConfigured      bool   `json:"privateKeyConfigured"`
+	WebhookSecretConfigured   bool   `json:"webhookSecretConfigured"`
 }
 
 type GitLabConnection struct {
@@ -5348,6 +5386,20 @@ type GitLabServerPatchBody struct {
 	Name *string `json:"name,omitempty"`
 	// How the server's certificate is verified. Switching away from ca-certificate discards the stored CA certificate.
 	TLSVerification *string `json:"tlsVerification,omitempty"`
+}
+
+type GitlabProjectListing struct {
+	Description *string `json:"description,omitempty"`
+	// Server this project lives on, for $host.
+	Host string `json:"host"`
+	// GROUP/.../PROJECT, what follows gitlab/ in a uses: reference.
+	Path    string `json:"path"`
+	Private bool   `json:"private"`
+}
+
+type GitlabProjectsOutputBody struct {
+	// Matches across every server the caller is connected to.
+	Projects []GitlabProjectListing `json:"projects"`
 }
 
 type GoogleBucket struct {
@@ -5703,11 +5755,7 @@ type GoogleSlurmVersionSettings struct {
 }
 
 type Group struct {
-	// The total allocation for this group.
-	Allocation *float64 `json:"allocation,omitempty"`
-	// The allocation used for this group
-	AllocationUsed *float64     `json:"allocationUsed,omitempty"`
-	Allocations    *Allocations `json:"allocations,omitempty"`
+	Allocations *Allocations `json:"allocations,omitempty"`
 	// Group creation time
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// The group description.
@@ -5787,6 +5835,7 @@ type HealthMonitoringSettings struct {
 type HealthSnapshot struct {
 	// Per-domain certificate summary.
 	Domains []HealthSnapshotDomain `json:"domains,omitempty"`
+	Errors  *HealthSnapshotErrors  `json:"errors,omitempty"`
 	Health  HealthSnapshotHealth   `json:"health"`
 	// How often the sender promises to report, in seconds.
 	IntervalSeconds *int64                 `json:"intervalSeconds,omitempty"`
@@ -5794,6 +5843,75 @@ type HealthSnapshot struct {
 	Usage           HealthSnapshotUsage    `json:"usage"`
 	// Deployment version.
 	Version *string `json:"version,omitempty"`
+	// Properties not defined by the schema.
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
+}
+
+// MarshalJSON implements json.Marshaler for HealthSnapshot, inlining
+// AdditionalProperties alongside the schema's declared properties.
+func (t HealthSnapshot) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
+	type shadow HealthSnapshot
+	data, err := json.Marshal(shadow(t))
+	if err != nil {
+		return nil, err
+	}
+	if members, err = mergeObjectMembers(members, data); err != nil {
+		return nil, err
+	}
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"domains", "errors", "health", "intervalSeconds", "license", "usage", "version"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return encodeObject(members)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for HealthSnapshot, collecting
+// properties the schema does not declare into AdditionalProperties.
+func (t *HealthSnapshot) UnmarshalJSON(data []byte) error {
+	t.AdditionalProperties = nil
+	type shadow HealthSnapshot
+	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
+		return err
+	}
+	var obj map[string]json.RawMessage
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return err
+	}
+	deleteDeclaredProperties(obj, []string{"domains", "errors", "health", "intervalSeconds", "license", "usage", "version"})
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
+		}
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
+	}
+	return nil
 }
 
 type HealthSnapshotDomain struct {
@@ -5807,6 +5925,149 @@ type HealthSnapshotDomain struct {
 	Domain string `json:"domain"`
 	// Certificate expiry.
 	NotAfter *time.Time `json:"notAfter,omitempty"`
+	// Properties not defined by the schema.
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
+}
+
+// MarshalJSON implements json.Marshaler for HealthSnapshotDomain, inlining
+// AdditionalProperties alongside the schema's declared properties.
+func (t HealthSnapshotDomain) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
+	type shadow HealthSnapshotDomain
+	data, err := json.Marshal(shadow(t))
+	if err != nil {
+		return nil, err
+	}
+	if members, err = mergeObjectMembers(members, data); err != nil {
+		return nil, err
+	}
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"acmeFailureCount", "acmeStatus", "certSource", "domain", "notAfter"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return encodeObject(members)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for HealthSnapshotDomain, collecting
+// properties the schema does not declare into AdditionalProperties.
+func (t *HealthSnapshotDomain) UnmarshalJSON(data []byte) error {
+	t.AdditionalProperties = nil
+	type shadow HealthSnapshotDomain
+	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
+		return err
+	}
+	var obj map[string]json.RawMessage
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return err
+	}
+	deleteDeclaredProperties(obj, []string{"acmeFailureCount", "acmeStatus", "certSource", "domain", "notAfter"})
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
+		}
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
+	}
+	return nil
+}
+
+type HealthSnapshotErrors struct {
+	// Unhandled errors recorded over the trailing 24 hours. The error log is a capped collection, so once it wraps this is a floor, not an exact total.
+	Count24h *int64 `json:"count24h,omitempty"`
+	// Properties not defined by the schema.
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
+}
+
+// MarshalJSON implements json.Marshaler for HealthSnapshotErrors, inlining
+// AdditionalProperties alongside the schema's declared properties.
+func (t HealthSnapshotErrors) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
+	type shadow HealthSnapshotErrors
+	data, err := json.Marshal(shadow(t))
+	if err != nil {
+		return nil, err
+	}
+	if members, err = mergeObjectMembers(members, data); err != nil {
+		return nil, err
+	}
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"count24h"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return encodeObject(members)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for HealthSnapshotErrors, collecting
+// properties the schema does not declare into AdditionalProperties.
+func (t *HealthSnapshotErrors) UnmarshalJSON(data []byte) error {
+	t.AdditionalProperties = nil
+	type shadow HealthSnapshotErrors
+	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
+		return err
+	}
+	var obj map[string]json.RawMessage
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return err
+	}
+	deleteDeclaredProperties(obj, []string{"count24h"})
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
+		}
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
+	}
+	return nil
 }
 
 type HealthSnapshotHealth struct {
@@ -5814,6 +6075,75 @@ type HealthSnapshotHealth struct {
 	MongoReachable bool `json:"mongoReachable"`
 	// Process start time.
 	StartedAt *time.Time `json:"startedAt,omitempty"`
+	// Properties not defined by the schema.
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
+}
+
+// MarshalJSON implements json.Marshaler for HealthSnapshotHealth, inlining
+// AdditionalProperties alongside the schema's declared properties.
+func (t HealthSnapshotHealth) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
+	type shadow HealthSnapshotHealth
+	data, err := json.Marshal(shadow(t))
+	if err != nil {
+		return nil, err
+	}
+	if members, err = mergeObjectMembers(members, data); err != nil {
+		return nil, err
+	}
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"mongoReachable", "startedAt"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return encodeObject(members)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for HealthSnapshotHealth, collecting
+// properties the schema does not declare into AdditionalProperties.
+func (t *HealthSnapshotHealth) UnmarshalJSON(data []byte) error {
+	t.AdditionalProperties = nil
+	type shadow HealthSnapshotHealth
+	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
+		return err
+	}
+	var obj map[string]json.RawMessage
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return err
+	}
+	deleteDeclaredProperties(obj, []string{"mongoReachable", "startedAt"})
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
+		}
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
+	}
+	return nil
 }
 
 type HealthSnapshotLicense struct {
@@ -5823,9 +6153,158 @@ type HealthSnapshotLicense struct {
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 	// Whether the license is in its grace period.
 	GracePeriod *bool `json:"gracePeriod,omitempty"`
+	// Properties not defined by the schema.
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
+}
+
+// MarshalJSON implements json.Marshaler for HealthSnapshotLicense, inlining
+// AdditionalProperties alongside the schema's declared properties.
+func (t HealthSnapshotLicense) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
+	type shadow HealthSnapshotLicense
+	data, err := json.Marshal(shadow(t))
+	if err != nil {
+		return nil, err
+	}
+	if members, err = mergeObjectMembers(members, data); err != nil {
+		return nil, err
+	}
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"expired", "expiresAt", "gracePeriod"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return encodeObject(members)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for HealthSnapshotLicense, collecting
+// properties the schema does not declare into AdditionalProperties.
+func (t *HealthSnapshotLicense) UnmarshalJSON(data []byte) error {
+	t.AdditionalProperties = nil
+	type shadow HealthSnapshotLicense
+	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
+		return err
+	}
+	var obj map[string]json.RawMessage
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return err
+	}
+	deleteDeclaredProperties(obj, []string{"expired", "expiresAt", "gracePeriod"})
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
+		}
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
+	}
+	return nil
+}
+
+type HealthSnapshotOrgUsage struct {
+	// Organization name.
+	Name string `json:"name"`
+	// Users in the organization holding a license seat.
+	SeatsAssigned int64 `json:"seatsAssigned"`
+	// Seats allocated to the organization, when an allocation exists.
+	SeatsTotal *int64 `json:"seatsTotal,omitempty"`
+	// Properties not defined by the schema.
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
+}
+
+// MarshalJSON implements json.Marshaler for HealthSnapshotOrgUsage, inlining
+// AdditionalProperties alongside the schema's declared properties.
+func (t HealthSnapshotOrgUsage) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
+	type shadow HealthSnapshotOrgUsage
+	data, err := json.Marshal(shadow(t))
+	if err != nil {
+		return nil, err
+	}
+	if members, err = mergeObjectMembers(members, data); err != nil {
+		return nil, err
+	}
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"name", "seatsAssigned", "seatsTotal"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return encodeObject(members)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for HealthSnapshotOrgUsage, collecting
+// properties the schema does not declare into AdditionalProperties.
+func (t *HealthSnapshotOrgUsage) UnmarshalJSON(data []byte) error {
+	t.AdditionalProperties = nil
+	type shadow HealthSnapshotOrgUsage
+	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
+		return err
+	}
+	var obj map[string]json.RawMessage
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return err
+	}
+	deleteDeclaredProperties(obj, []string{"name", "seatsAssigned", "seatsTotal"})
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
+		}
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
+	}
+	return nil
 }
 
 type HealthSnapshotUsage struct {
+	// Per-organization seat usage for organizations with a seat allocation.
+	Orgs []HealthSnapshotOrgUsage `json:"orgs,omitempty"`
 	// Users holding a license seat.
 	SeatsAssigned *int64 `json:"seatsAssigned,omitempty"`
 	// Unassigned seats, when a total is known.
@@ -5834,6 +6313,75 @@ type HealthSnapshotUsage struct {
 	SeatsTotal *int64 `json:"seatsTotal,omitempty"`
 	// Monthly active users over the last 30 days.
 	TotalMau *int64 `json:"totalMAU,omitempty"`
+	// Properties not defined by the schema.
+	AdditionalProperties map[string]any `json:"-" openapi:"additionalProperties"`
+}
+
+// MarshalJSON implements json.Marshaler for HealthSnapshotUsage, inlining
+// AdditionalProperties alongside the schema's declared properties.
+func (t HealthSnapshotUsage) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
+	type shadow HealthSnapshotUsage
+	data, err := json.Marshal(shadow(t))
+	if err != nil {
+		return nil, err
+	}
+	if members, err = mergeObjectMembers(members, data); err != nil {
+		return nil, err
+	}
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"orgs", "seatsAssigned", "seatsFree", "seatsTotal", "totalMAU"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return encodeObject(members)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for HealthSnapshotUsage, collecting
+// properties the schema does not declare into AdditionalProperties.
+func (t *HealthSnapshotUsage) UnmarshalJSON(data []byte) error {
+	t.AdditionalProperties = nil
+	type shadow HealthSnapshotUsage
+	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
+		return err
+	}
+	var obj map[string]json.RawMessage
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return err
+	}
+	deleteDeclaredProperties(obj, []string{"orgs", "seatsAssigned", "seatsFree", "seatsTotal", "totalMAU"})
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]any, len(obj))
+		for key, raw := range obj {
+			var value any
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
+		}
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
+	}
+	return nil
 }
 
 type HeartbeatAccessManagement struct {
@@ -7431,6 +7979,8 @@ type ModifyIndexBody struct {
 }
 
 type MonitoredDeploymentSummary struct {
+	// Unhandled errors the deployment recorded over the trailing 24 hours; a floor once its capped error log wraps.
+	ErrorCount24h *int64 `json:"errorCount24h,omitempty"`
 	// Alert rules currently firing for this deployment, evaluated live from the latest snapshot.
 	FiringAlerts []string `json:"firingAlerts"`
 	// When the deployment first reported.
@@ -7930,6 +8480,8 @@ type OauthStatusResponse struct {
 	AppConfigured bool       `json:"appConfigured"`
 	AppSlug       *string    `json:"appSlug,omitempty"`
 	ConnectedAt   *time.Time `json:"connectedAt,omitempty"`
+	Method        *string    `json:"method,omitempty"`
+	TokensAllowed bool       `json:"tokensAllowed"`
 	Username      *string    `json:"username,omitempty"`
 }
 
@@ -8613,9 +9165,22 @@ type OrphanedWorkflowRunsPreviewBody struct {
 	TotalCount int64 `json:"totalCount"`
 }
 
+type OwnerListing struct {
+	// GitLab only: the server this namespace is on.
+	Host *string `json:"host,omitempty"`
+	// user, organization or group.
+	Kind string `json:"kind"`
+	// What follows github/ or gitlab/ in a reference.
+	Name string `json:"name"`
+}
+
 type OwnerOutputBody struct {
 	// The username of the current organization owner, if set.
 	Username *string `json:"username,omitempty"`
+}
+
+type OwnersOutputBody struct {
+	Owners []OwnerListing `json:"owners"`
 }
 
 type PartitionInfo struct {
@@ -10246,19 +10811,6 @@ type PutBootstrapScriptInputBody struct {
 	Type *string `json:"type,omitempty"`
 }
 
-type PutGitHubAppConfigInputBody struct {
-	// GitHub App ID
-	AppID int64 `json:"appId"`
-	// OAuth Client ID for user authentication
-	ClientID string `json:"clientId"`
-	// OAuth Client Secret (only sent when updating)
-	ClientSecret *string `json:"clientSecret,omitempty"`
-	// Private key in PEM format (only sent when updating)
-	PrivateKeyPem *string `json:"privateKeyPEM,omitempty"`
-	// Webhook secret for verifying GitHub webhook payloads (only sent when updating)
-	WebhookSecret *string `json:"webhookSecret,omitempty"`
-}
-
 type PutImageInputBody struct {
 	// Image architecture
 	Architecture string `json:"architecture"`
@@ -10501,6 +11053,11 @@ type RecordLimits struct {
 	MinFreeBytes int64 `json:"minFreeBytes"`
 }
 
+type RefsOutputBody struct {
+	// Tags first, newest by version, then branches, then recent commits.
+	Refs []RepoRefName `json:"refs"`
+}
+
 type RegionResource struct {
 	Cidr                *string       `json:"cidr,omitempty"`
 	CspID               *string       `json:"cspId,omitempty"`
@@ -10599,6 +11156,21 @@ type ReplicaSetInfo struct {
 	Revision string `json:"revision"`
 }
 
+type RepoListing struct {
+	Description string `json:"description"`
+	// Repository name, relative to the owner asked for: OWNER/REPO when no owner was given.
+	Name    string `json:"name"`
+	Private bool   `json:"private"`
+}
+
+type RepoRefName struct {
+	// A commit's subject line. Empty for a branch or a tag.
+	Detail string `json:"detail"`
+	// branch, tag or commit.
+	Kind string `json:"kind"`
+	Name string `json:"name"`
+}
+
 type RepoResponse struct {
 	DefaultBranch string    `json:"defaultBranch"`
 	Description   string    `json:"description"`
@@ -10608,6 +11180,12 @@ type RepoResponse struct {
 	Name          string    `json:"name"`
 	Private       bool      `json:"private"`
 	UpdatedAt     time.Time `json:"updatedAt"`
+}
+
+type RepoTreeEntry struct {
+	Path string `json:"path"`
+	// blob for a file, tree for a directory.
+	Type string `json:"type"`
 }
 
 type Report struct {
@@ -10631,6 +11209,10 @@ type Report struct {
 
 type ReportWorkspaceMountStatusInputBody struct {
 	Mounts []WorkspaceMountStatus `json:"mounts"`
+}
+
+type ReposOutputBody struct {
+	Repos []RepoListing `json:"repos"`
 }
 
 type ReservationItem struct {

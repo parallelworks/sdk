@@ -3358,6 +3358,22 @@ func (c *Client) GithubRepos(ctx context.Context, params GithubReposParams) (*Li
 	return &result, nil
 }
 
+// GithubConnectToken - Connect GitHub with a personal access token
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Connects the caller's GitHub account with a personal access token, for a deployment with no GitHub App and for an account the app cannot be installed on. The token is verified against GitHub, stored in the platform's secret store, and never returned.
+func (c *Client) GithubConnectToken(ctx context.Context, body ConnectTokenInputBody) (*ConnectTokenOutputBody, error) {
+
+	path := "/api/integrations/github/token"
+
+	var result ConnectTokenOutputBody
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GithubWebhook - GitHub App webhook endpoint
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -15974,7 +15990,7 @@ func (c *Client) GetGithubAppConfig(ctx context.Context) (*GitHubAppConfigRespon
 // > This is a platform-admin only route.
 //
 // Creates or updates the platform-level GitHub App configuration.
-func (c *Client) PutGithubAppConfig(ctx context.Context, body PutGitHubAppConfigInputBody) (*GitHubAppConfigResponse, error) {
+func (c *Client) PutGithubAppConfig(ctx context.Context, body GitHubAppConfigRequest) (*GitHubAppConfigResponse, error) {
 
 	path := "/api/platform/integrations/github"
 
@@ -16677,6 +16693,224 @@ func (c *Client) PatchProvisionStatus(ctx context.Context, infraID string, body 
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// RepoSuggestionFileParams contains the parameters for the RepoSuggestionFile operation.
+// Required parameters are value fields; optional parameters are pointers.
+type RepoSuggestionFileParams struct {
+	// Repository the file lives in.
+	Repo string `json:"repo"`
+	// Branch, tag or commit. Defaults to the repository's default branch.
+	Ref *string `json:"ref,omitempty"`
+	// Path of the file within the repository.
+	Path string `json:"path"`
+}
+
+// RepoSuggestionFile - Read one file from a repository
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Reads a single file from a GitHub or GitLab repository with the caller's connected account, so the editor can complete a referenced workflow's inputs. Only a repository and a path within it are accepted, never a URL.
+func (c *Client) RepoSuggestionFile(ctx context.Context, params RepoSuggestionFileParams) (*FileOutputBody, error) {
+
+	path := "/api/repo-suggestions/file"
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "repo", "form", false, params.Repo)
+
+	addQueryParam(queryValues, "ref", "form", false, params.Ref)
+
+	addQueryParam(queryValues, "path", "form", false, params.Path)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result FileOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RepoSuggestionFilesParams contains the parameters for the RepoSuggestionFiles operation.
+// Required parameters are value fields; optional parameters are pointers.
+type RepoSuggestionFilesParams struct {
+	// Repository to list files in.
+	Repo string `json:"repo"`
+	// Branch, tag or commit. Defaults to the repository's default branch.
+	Ref *string `json:"ref,omitempty"`
+	// Directory to list. Defaults to the repository root.
+	Path *string `json:"path,omitempty"`
+	// List every descendant instead of one directory, for completing a path in one pass.
+	Recursive *bool `json:"recursive,omitempty"`
+}
+
+// RepoSuggestionFiles - List a repository directory
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the entries directly under one directory of a GitHub or GitLab repository, read with the caller's connected account.
+func (c *Client) RepoSuggestionFiles(ctx context.Context, params RepoSuggestionFilesParams) (*FilesOutputBody, error) {
+
+	path := "/api/repo-suggestions/files"
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "repo", "form", false, params.Repo)
+
+	addQueryParam(queryValues, "ref", "form", false, params.Ref)
+
+	addQueryParam(queryValues, "path", "form", false, params.Path)
+
+	addQueryParam(queryValues, "recursive", "form", false, params.Recursive)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result FilesOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RepoSuggestionGitlabProjectsParams contains the parameters for the RepoSuggestionGitlabProjects operation.
+// Required parameters are value fields; optional parameters are pointers.
+type RepoSuggestionGitlabProjectsParams struct {
+	// Substring to match against GROUP/PROJECT paths.
+	Search *string `json:"search,omitempty"`
+	// Limit to one registered server. Omit to search every server the caller is connected to.
+	Host *string `json:"host,omitempty"`
+}
+
+// RepoSuggestionGitlabProjects - Search GitLab projects across connected servers
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Searches the projects the caller can see on every registered GitLab server they are connected to, so the editor can complete a gitlab/ reference that names no host. Each match reports the server it lives on, which is what $host must name.
+func (c *Client) RepoSuggestionGitlabProjects(ctx context.Context, opts ...RepoSuggestionGitlabProjectsParams) (*GitlabProjectsOutputBody, error) {
+
+	path := "/api/repo-suggestions/gitlab-projects"
+	var params RepoSuggestionGitlabProjectsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "search", "form", false, params.Search)
+
+	addQueryParam(queryValues, "host", "form", false, params.Host)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result GitlabProjectsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RepoSuggestionOwnersParams contains the parameters for the RepoSuggestionOwners operation.
+// Required parameters are value fields; optional parameters are pointers.
+type RepoSuggestionOwnersParams struct {
+	// Which provider to list owners for.
+	Provider string `json:"provider"`
+	// Substring to match against the owner name.
+	Search *string `json:"search,omitempty"`
+	// GitLab only: limit to one registered server.
+	Host *string `json:"host,omitempty"`
+}
+
+// RepoSuggestionOwners - List the owners a reference can name
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the accounts, organizations and GitLab groups the caller can reach, which is what a reference names before it names a repository. Cheaper than listing every repository only to derive the same names from their paths.
+func (c *Client) RepoSuggestionOwners(ctx context.Context, params RepoSuggestionOwnersParams) (*OwnersOutputBody, error) {
+
+	path := "/api/repo-suggestions/owners"
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "provider", "form", false, params.Provider)
+
+	addQueryParam(queryValues, "search", "form", false, params.Search)
+
+	addQueryParam(queryValues, "host", "form", false, params.Host)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result OwnersOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RepoSuggestionRefsParams contains the parameters for the RepoSuggestionRefs operation.
+// Required parameters are value fields; optional parameters are pointers.
+type RepoSuggestionRefsParams struct {
+	// Repository to list refs for: OWNER/REPO for GitHub, or the URL of a project on a registered GitLab server.
+	Repo string `json:"repo"`
+}
+
+// RepoSuggestionRefs - List a repository's branches, tags and recent commits
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the branches, tags and most recent commits of a GitHub or GitLab repository, read with the caller's connected account so a private repository completes in the editor.
+func (c *Client) RepoSuggestionRefs(ctx context.Context, params RepoSuggestionRefsParams) (*RefsOutputBody, error) {
+
+	path := "/api/repo-suggestions/refs"
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "repo", "form", false, params.Repo)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result RefsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RepoSuggestionReposParams contains the parameters for the RepoSuggestionRepos operation.
+// Required parameters are value fields; optional parameters are pointers.
+type RepoSuggestionReposParams struct {
+	// Owner, organization or GitLab group whose repositories to list. Omit for every GitHub repository the caller can reach, across owners.
+	Owner *string `json:"owner,omitempty"`
+	// Host of a registered GitLab server. Omit for GitHub.
+	Host *string `json:"host,omitempty"`
+}
+
+// RepoSuggestionRepos - List an owner's repositories
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the repositories under a GitHub owner, or the projects under a group on a registered GitLab server, read with the caller's connected account. Private repositories appear for an organization the account belongs to and for the account's own namespace.
+func (c *Client) RepoSuggestionRepos(ctx context.Context, opts ...RepoSuggestionReposParams) (*ReposOutputBody, error) {
+
+	path := "/api/repo-suggestions/repos"
+	var params RepoSuggestionReposParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "owner", "form", false, params.Owner)
+
+	addQueryParam(queryValues, "host", "form", false, params.Host)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result ReposOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetReportsLegacyQueryParams contains the parameters for the GetReportsLegacyQuery operation.
