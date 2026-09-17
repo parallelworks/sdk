@@ -1206,6 +1206,17 @@ type AwsEfs struct {
 	User string `json:"user"`
 }
 
+type AwsEfsDefinition struct {
+	// EFS filesystem id at AWS.
+	FileSystemID *string `json:"fileSystemId,omitempty"`
+	// Mount targets by subnet.
+	MountTargets map[string]string `json:"mountTargets,omitempty"`
+	// Throughput mode of the filesystem.
+	ThroughputMode *string `json:"throughputMode,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+}
+
 type AwsEfsVersionSettings struct {
 	EfsEncrypted                 *bool   `json:"efs_encrypted,omitempty"`
 	EfsPerformanceMode           *string `json:"efs_performance_mode,omitempty"`
@@ -1431,6 +1442,17 @@ type AwsSlurmVersionSettings struct {
 	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
 	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
 	Zone                    *string `json:"zone,omitempty"`
+}
+
+type AzureAzfilesDefinition struct {
+	// Name of the file share at Azure, which can differ from the platform name.
+	AzfilesName *string `json:"azfilesName,omitempty"`
+	// Azure resource group the storage account belongs to.
+	AzureResourceGroup *string `json:"azureResourceGroup,omitempty"`
+	// Azure storage account hosting the share.
+	StorageAccountName *string `json:"storageAccountName,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
 }
 
 type AzureAzfilesVersionSettings struct {
@@ -1846,6 +1868,17 @@ type AzureNetAppFiles struct {
 	Type string `json:"type"`
 	// User associated with the storage.
 	User string `json:"user"`
+}
+
+type AzureNetappFilesDefinition struct {
+	// Export path of the volume.
+	ExportPath *string `json:"exportPath,omitempty"`
+	// IP address clients mount the volume from.
+	MountIP *string `json:"mountIp,omitempty"`
+	// Service level of the volume.
+	Service *string `json:"service,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
 }
 
 type AzureNetappFilesVersionSettings struct {
@@ -4955,6 +4988,81 @@ type FlavorCostUpdate struct {
 	ID string `json:"id"`
 }
 
+type FleetAgent struct {
+	// CPU architecture reported by the agent.
+	Arch *string `json:"arch,omitempty"`
+	// Whether the agent is below the configured minimum agent version. An agent that never reported a version counts as below it, matching how the tunnel gate treats one. Always false for endpoints, which the gate exempts.
+	BelowMinimum bool `json:"belowMinimum"`
+	// Id of the cluster or endpoint session the agent belongs to.
+	ClusterID string `json:"clusterId"`
+	// Name of the cluster or endpoint session.
+	ClusterName string `json:"clusterName"`
+	// Whether the agent is reporting right now.
+	Connected bool `json:"connected"`
+	// Cluster display name.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Node hostname, for managed cluster node agents.
+	Hostname *string `json:"hostname,omitempty"`
+	// Stable row id: the cluster id, plus the node hostname for managed cluster nodes.
+	ID string `json:"id"`
+	// Custom cluster icon, when one was uploaded.
+	ImageURL *string `json:"imageUrl,omitempty"`
+	// Where the agent runs: a cloud cluster, a standalone instance, an existing cluster, a managed cluster node, or a pw CLI serving an endpoint session.
+	Kind string `json:"kind"`
+	// When the agent last reported.
+	LastSeenAt *time.Time `json:"lastSeenAt,omitempty"`
+	// Organization the cluster belongs to.
+	Organization *string `json:"organization,omitempty"`
+	// Operating system reported by the agent.
+	Os *string `json:"os,omitempty"`
+	// OS release reported by the agent.
+	OsRelease *string `json:"osRelease,omitempty"`
+	// Whether the reported version is older than the platform version.
+	Outdated bool `json:"outdated"`
+	// Resource type the icon is derived from: the cloud provider for cloud clusters and instances, existing, or managed-cluster.
+	ResourceType *string `json:"resourceType,omitempty"`
+	// Scheduler on the cluster, used as the existing-cluster icon.
+	SchedulerType *string `json:"schedulerType,omitempty"`
+	// In-flight agent update state: updating or failed.
+	UpdateStatus *string `json:"updateStatus,omitempty"`
+	// Owner of the cluster.
+	Username *string `json:"username,omitempty"`
+	// Last reported agent version. Empty when the agent has never reported one.
+	Version *string `json:"version,omitempty"`
+}
+
+type FleetSummary struct {
+	// Agents below the configured minimum agent version, including those that never reported one. Endpoints are exempt, matching the tunnel gate.
+	BelowMinimum int64 `json:"belowMinimum"`
+	// Agents reporting right now.
+	Connected int64 `json:"connected"`
+	// Configured minimum agent version. Empty when enforcement is off.
+	MinimumAgentVersion *string `json:"minimumAgentVersion,omitempty"`
+	// Oldest version any reporting agent runs. This is the version gate the fleet has actually reached.
+	OldestVersion *string `json:"oldestVersion,omitempty"`
+	// Agents older than the platform version.
+	Outdated int64 `json:"outdated"`
+	// Version of the platform the agents are compared against.
+	PlatformVersion string `json:"platformVersion"`
+	// Whether the platform version is a version agents can be compared against. False for a local development build, where the drift counts carry no meaning.
+	PlatformVersionComparable bool `json:"platformVersionComparable"`
+	// Agents in the fleet.
+	Total int64 `json:"total"`
+	// Agents that have never reported a version.
+	Unreported int64 `json:"unreported"`
+	// Version distribution across the whole fleet, newest first.
+	Versions []FleetVersionCount `json:"versions"`
+}
+
+type FleetVersionCount struct {
+	// Agents on this version that are reporting right now.
+	Connected int64 `json:"connected"`
+	// Agents on this version.
+	Count int64 `json:"count"`
+	// Reported agent version, or empty for agents that never reported one.
+	Version string `json:"version"`
+}
+
 type ForkMarketplaceItemBody struct {
 	// For remote workflows, convert to local by fetching the YAML.
 	ConvertToLocal *bool `json:"convertToLocal,omitempty"`
@@ -5607,6 +5715,15 @@ type GoogleFilestore struct {
 	User string `json:"user"`
 	// Zone the Google Filestore is in
 	Zone *string `json:"zone,omitempty"`
+}
+
+type GoogleFilestoreDefinition struct {
+	// IP address of the file server.
+	FileserverIP *string `json:"fileserverIp,omitempty"`
+	// Service tier of the instance.
+	FilestoreTier *string `json:"filestoreTier,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
 }
 
 type GoogleFilestoreVersionSettings struct {
@@ -7249,6 +7366,14 @@ type ListAdminProductsOutputBody struct {
 	Products []AdminProduct `json:"products"`
 }
 
+type ListAgentsBody struct {
+	// One page of agents.
+	Agents  []FleetAgent `json:"agents"`
+	Summary FleetSummary `json:"summary"`
+	// Agents matching the filters.
+	Total int64 `json:"total"`
+}
+
 type ListAttachmentsBody struct {
 	Attachments []AttachmentResponse `json:"attachments"`
 }
@@ -8787,6 +8912,17 @@ type OracleFs struct {
 	Type string `json:"type"`
 	// User associated with the storage.
 	User string `json:"user"`
+}
+
+type OracleFsDefinition struct {
+	// Availability domain the file system is in.
+	AvailabilityDomain *string `json:"availabilityDomain,omitempty"`
+	// Export path of the file system.
+	ExportPath *string `json:"exportPath,omitempty"`
+	// IP address of the mount target.
+	MountTargetIP *string `json:"mountTargetIp,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
 }
 
 type OracleOraclefsVersionSettings struct {
@@ -13206,6 +13342,11 @@ type UpdateStorageBillingInputBody struct {
 	ResourceGroup string `json:"resourceGroup"`
 }
 
+type UpdateUserPreferencesInputBody struct {
+	// Preference keys to write. A null value removes the key; keys not present are left unchanged.
+	Preferences map[string]any `json:"preferences"`
+}
+
 type UpdateUserProfileBody struct {
 	// Full name of the user
 	Name string `json:"name"`
@@ -13409,6 +13550,11 @@ type UserPin struct {
 	Type         *string `json:"type,omitempty"`
 }
 
+type UserPreferencesBody struct {
+	// The user's saved UI preferences keyed by view id. Values are opaque JSON owned by the client.
+	Preferences map[string]any `json:"preferences"`
+}
+
 type UserProfile struct {
 	// Cache-buster for the user's avatar image.
 	AvatarEtag *string `json:"avatarEtag,omitempty"`
@@ -13569,6 +13715,8 @@ type WebAuthnAuthPublicKeyOptions struct {
 	AllowCredentials []WebAuthnCredentialDescriptor `json:"allowCredentials,omitempty"`
 	// Base64url-encoded challenge
 	Challenge string `json:"challenge"`
+	// Authenticator types the relying party prefers
+	Hints []string `json:"hints,omitempty"`
 	// Relying party ID
 	RpID *string `json:"rpId,omitempty"`
 	// Timeout in milliseconds
@@ -13625,6 +13773,8 @@ type WebAuthnRegPublicKeyOptions struct {
 	Challenge string `json:"challenge"`
 	// Credentials that may not be re-registered
 	ExcludeCredentials []WebAuthnCredentialDescriptor `json:"excludeCredentials,omitempty"`
+	// Authenticator types the relying party prefers
+	Hints []string `json:"hints,omitempty"`
 	// Acceptable credential algorithms
 	PubKeyCredParams []WebAuthnRegCredParam  `json:"pubKeyCredParams"`
 	Rp               WebAuthnRegRelyingParty `json:"rp"`
@@ -13729,6 +13879,8 @@ type WorkerResponse struct {
 	StoppedAt *time.Time `json:"stoppedAt,omitempty"`
 	// Worker authentication token. Only returned on creation.
 	Token *string `json:"token,omitempty"`
+	// Parallel Works URI for the cluster.
+	URI *string `json:"uri,omitempty"`
 	// User ID.
 	UserID *string `json:"userId,omitempty"`
 }
@@ -14194,7 +14346,7 @@ func (u *MarketplaceItemBodyVersionsValue) UnmarshalJSON(data []byte) error {
 
 // StorageDefinition - The storage's typed configuration.
 
-// Variants: AwsLustreDefinition, AzureManagedLustreDefinition, GoogleManagedLustreDefinition, BucketDefinition, DiskDefinition
+// Variants: AwsLustreDefinition, AzureManagedLustreDefinition, GoogleManagedLustreDefinition, BucketDefinition, DiskDefinition, AwsEfsDefinition, AzureAzfilesDefinition, AzureNetappFilesDefinition, GoogleFilestoreDefinition, OracleFsDefinition
 type StorageDefinition struct {
 	Value any
 
@@ -14263,8 +14415,22 @@ func (u *StorageDefinition) UnmarshalJSON(data []byte) error {
 		}
 		*u = StorageDefinition{Value: v}
 		return nil
+	case "aws-efs":
+		var v AwsEfsDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
 	case "aws-lustre":
 		var v AwsLustreDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "azure-azfiles":
+		var v AzureAzfilesDefinition
 		if err := json.Unmarshal(data, &v); err != nil {
 			return err
 		}
@@ -14291,6 +14457,13 @@ func (u *StorageDefinition) UnmarshalJSON(data []byte) error {
 		}
 		*u = StorageDefinition{Value: v}
 		return nil
+	case "azure-netappfiles":
+		var v AzureNetappFilesDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
 	case "google-bucket":
 		var v BucketDefinition
 		if err := json.Unmarshal(data, &v); err != nil {
@@ -14305,6 +14478,13 @@ func (u *StorageDefinition) UnmarshalJSON(data []byte) error {
 		}
 		*u = StorageDefinition{Value: v}
 		return nil
+	case "google-filestore":
+		var v GoogleFilestoreDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
 	case "google-managedlustre":
 		var v GoogleManagedLustreDefinition
 		if err := json.Unmarshal(data, &v); err != nil {
@@ -14314,6 +14494,13 @@ func (u *StorageDefinition) UnmarshalJSON(data []byte) error {
 		return nil
 	case "oracle-bucket":
 		var v BucketDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "oracle-oraclefs":
+		var v OracleFsDefinition
 		if err := json.Unmarshal(data, &v); err != nil {
 			return err
 		}

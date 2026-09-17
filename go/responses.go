@@ -570,14 +570,16 @@ func (m *ResponseMeta) GetPlatformSettingsHeaders() GetPlatformSettingsHeaders {
 // GetCacRedirectHeaders holds the headers GetCacRedirect declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type GetCacRedirectHeaders struct {
-	Location string
+	Location  string
+	SetCookie string
 }
 
 // GetCacRedirectHeaders reads the headers GetCacRedirect declares out of the captured
 // response.
 func (m *ResponseMeta) GetCacRedirectHeaders() GetCacRedirectHeaders {
 	return GetCacRedirectHeaders{
-		Location: m.Header.Get("Location"),
+		Location:  m.Header.Get("Location"),
+		SetCookie: m.Header.Get("Set-Cookie"),
 	}
 }
 

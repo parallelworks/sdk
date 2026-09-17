@@ -43,6 +43,61 @@ func (c *Client) GetPkiValidationFile(ctx context.Context, filename string) (*st
 	return &result, nil
 }
 
+// ListFleetAgentsParams contains the parameters for the ListFleetAgents operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListFleetAgentsParams struct {
+	// Filter by where the agent runs.
+	Kind *[]string `json:"kind,omitempty"`
+	// Filter by whether the agent is reporting right now.
+	Connected *string `json:"connected,omitempty"`
+	// Only agents older than the platform version.
+	Outdated *bool `json:"outdated,omitempty"`
+	// Case-insensitive match on cluster name, display name, hostname, user, organization, or version.
+	Search *string `json:"search,omitempty"`
+	// Page size.
+	Limit *int64 `json:"limit,omitempty"`
+	// Page offset.
+	Offset *int64 `json:"offset,omitempty"`
+}
+
+// ListFleetAgents - List agents
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns every agent the platform knows about with the version it reports, plus the fleet-wide version distribution
+func (c *Client) ListFleetAgents(ctx context.Context, opts ...ListFleetAgentsParams) (*ListAgentsBody, error) {
+
+	path := "/api/admin/agents"
+	var params ListFleetAgentsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "kind", "form", true, params.Kind)
+
+	addQueryParam(queryValues, "connected", "form", false, params.Connected)
+
+	addQueryParam(queryValues, "outdated", "form", false, params.Outdated)
+
+	addQueryParam(queryValues, "search", "form", false, params.Search)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	addQueryParam(queryValues, "offset", "form", false, params.Offset)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result ListAgentsBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetPlatformAlertsParams contains the parameters for the GetPlatformAlerts operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetPlatformAlertsParams struct {
@@ -17556,9 +17611,10 @@ func (c *Client) DeleteSSHPublicKey(ctx context.Context, id string) error {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Redirects the user to the CAC certificate verification endpoint on port 8443.
-func (c *Client) GetCacRedirect(ctx context.Context) error {
+func (c *Client) GetCacRedirect(ctx context.Context, authID string) error {
 
-	path := "/api/sso/cac/redirect"
+	path := "/api/sso/cac/redirect/{authID}"
+	path = pathReplace(path, "authID", "simple", false, authID)
 
 	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json", true); err != nil {
 		return parseErrorResponse(err)
@@ -18037,6 +18093,38 @@ func (c *Client) DeleteUserFavorite(ctx context.Context, type_ string, id string
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// GetUserPreferences - Get user preferences
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the current user's saved UI preferences, such as list page display options and filters, keyed by view id.
+func (c *Client) GetUserPreferences(ctx context.Context) (*UserPreferencesBody, error) {
+
+	path := "/api/user/preferences"
+
+	var result UserPreferencesBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateUserPreferences - Update user preferences
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Writes the given preference keys for the current user. A null value removes a key; keys not in the request are left unchanged.
+func (c *Client) UpdateUserPreferences(ctx context.Context, body UpdateUserPreferencesInputBody) (*UserPreferencesBody, error) {
+
+	path := "/api/user/preferences"
+
+	var result UserPreferencesBody
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // UpdateUserProfile - Update user profile

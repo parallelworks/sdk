@@ -3313,6 +3313,37 @@
         ],
         "type": "object"
       },
+      "AwsEfsDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "fileSystemId": {
+            "description": "EFS filesystem id at AWS.",
+            "type": "string"
+          },
+          "mountTargets": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Mount targets by subnet.",
+            "type": "object"
+          },
+          "throughputMode": {
+            "description": "Throughput mode of the filesystem.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "aws-efs"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "AwsEfsVersionSettings": {
         "additionalProperties": false,
         "properties": {
@@ -4016,6 +4047,34 @@
         },
         "required": [
           "subtype"
+        ],
+        "type": "object"
+      },
+      "AzureAzfilesDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "azfilesName": {
+            "description": "Name of the file share at Azure, which can differ from the platform name.",
+            "type": "string"
+          },
+          "azureResourceGroup": {
+            "description": "Azure resource group the storage account belongs to.",
+            "type": "string"
+          },
+          "storageAccountName": {
+            "description": "Azure storage account hosting the share.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "azure-azfiles"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
         ],
         "type": "object"
       },
@@ -5198,6 +5257,34 @@
           "provisioned",
           "sessionless",
           "favorite"
+        ],
+        "type": "object"
+      },
+      "AzureNetappFilesDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "exportPath": {
+            "description": "Export path of the volume.",
+            "type": "string"
+          },
+          "mountIp": {
+            "description": "IP address clients mount the volume from.",
+            "type": "string"
+          },
+          "service": {
+            "description": "Service level of the volume.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "azure-netappfiles"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
         ],
         "type": "object"
       },
@@ -14345,6 +14432,201 @@
         ],
         "type": "object"
       },
+      "FleetAgent": {
+        "additionalProperties": false,
+        "properties": {
+          "arch": {
+            "description": "CPU architecture reported by the agent.",
+            "type": "string"
+          },
+          "belowMinimum": {
+            "description": "Whether the agent is below the configured minimum agent version. An agent that never reported a version counts as below it, matching how the tunnel gate treats one. Always false for endpoints, which the gate exempts.",
+            "type": "boolean"
+          },
+          "clusterId": {
+            "description": "Id of the cluster or endpoint session the agent belongs to.",
+            "type": "string"
+          },
+          "clusterName": {
+            "description": "Name of the cluster or endpoint session.",
+            "type": "string"
+          },
+          "connected": {
+            "description": "Whether the agent is reporting right now.",
+            "type": "boolean"
+          },
+          "displayName": {
+            "description": "Cluster display name.",
+            "type": "string"
+          },
+          "hostname": {
+            "description": "Node hostname, for managed cluster node agents.",
+            "type": "string"
+          },
+          "id": {
+            "description": "Stable row id: the cluster id, plus the node hostname for managed cluster nodes.",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "Custom cluster icon, when one was uploaded.",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Where the agent runs: a cloud cluster, a standalone instance, an existing cluster, a managed cluster node, or a pw CLI serving an endpoint session.",
+            "enum": [
+              "cloud",
+              "instance",
+              "existing",
+              "managed",
+              "endpoint"
+            ],
+            "type": "string"
+          },
+          "lastSeenAt": {
+            "description": "When the agent last reported.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "organization": {
+            "description": "Organization the cluster belongs to.",
+            "type": "string"
+          },
+          "os": {
+            "description": "Operating system reported by the agent.",
+            "type": "string"
+          },
+          "osRelease": {
+            "description": "OS release reported by the agent.",
+            "type": "string"
+          },
+          "outdated": {
+            "description": "Whether the reported version is older than the platform version.",
+            "type": "boolean"
+          },
+          "resourceType": {
+            "description": "Resource type the icon is derived from: the cloud provider for cloud clusters and instances, existing, or managed-cluster.",
+            "type": "string"
+          },
+          "schedulerType": {
+            "description": "Scheduler on the cluster, used as the existing-cluster icon.",
+            "type": "string"
+          },
+          "updateStatus": {
+            "description": "In-flight agent update state: updating or failed.",
+            "type": "string"
+          },
+          "username": {
+            "description": "Owner of the cluster.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Last reported agent version. Empty when the agent has never reported one.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "clusterId",
+          "clusterName",
+          "connected",
+          "outdated",
+          "belowMinimum"
+        ],
+        "type": "object"
+      },
+      "FleetSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "belowMinimum": {
+            "description": "Agents below the configured minimum agent version, including those that never reported one. Endpoints are exempt, matching the tunnel gate.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "connected": {
+            "description": "Agents reporting right now.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "minimumAgentVersion": {
+            "description": "Configured minimum agent version. Empty when enforcement is off.",
+            "type": "string"
+          },
+          "oldestVersion": {
+            "description": "Oldest version any reporting agent runs. This is the version gate the fleet has actually reached.",
+            "type": "string"
+          },
+          "outdated": {
+            "description": "Agents older than the platform version.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "platformVersion": {
+            "description": "Version of the platform the agents are compared against.",
+            "type": "string"
+          },
+          "platformVersionComparable": {
+            "description": "Whether the platform version is a version agents can be compared against. False for a local development build, where the drift counts carry no meaning.",
+            "type": "boolean"
+          },
+          "total": {
+            "description": "Agents in the fleet.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "unreported": {
+            "description": "Agents that have never reported a version.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "versions": {
+            "description": "Version distribution across the whole fleet, newest first.",
+            "items": {
+              "$ref": "#/components/schemas/FleetVersionCount"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "total",
+          "connected",
+          "outdated",
+          "belowMinimum",
+          "platformVersion",
+          "platformVersionComparable",
+          "unreported",
+          "versions"
+        ],
+        "type": "object"
+      },
+      "FleetVersionCount": {
+        "additionalProperties": false,
+        "properties": {
+          "connected": {
+            "description": "Agents on this version that are reporting right now.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "count": {
+            "description": "Agents on this version.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "version": {
+            "description": "Reported agent version, or empty for agents that never reported one.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "count",
+          "connected"
+        ],
+        "type": "object"
+      },
       "ForkMarketplaceItemBody": {
         "additionalProperties": false,
         "properties": {
@@ -15917,6 +16199,30 @@
         ],
         "type": "object"
       },
+      "GoogleFilestoreDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "fileserverIp": {
+            "description": "IP address of the file server.",
+            "type": "string"
+          },
+          "filestoreTier": {
+            "description": "Service tier of the instance.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "google-filestore"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "GoogleFilestoreVersionSettings": {
         "additionalProperties": false,
         "properties": {
@@ -16431,8 +16737,8 @@
             "description": "The group name.",
             "maxLength": 63,
             "minLength": 3,
-            "pattern": "^[a-zA-Z0-9-_]+$",
-            "patternDescription": "group name can only contain alphanumeric characters, hyphens, and underscores.",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-_]*$",
+            "patternDescription": "group name must start with a letter or digit and can only contain alphanumeric characters, hyphens, and underscores.",
             "type": [
               "string",
               "null"
@@ -19612,6 +19918,36 @@
         },
         "required": [
           "products"
+        ],
+        "type": "object"
+      },
+      "ListAgentsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "agents": {
+            "description": "One page of agents.",
+            "items": {
+              "$ref": "#/components/schemas/FleetAgent"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "summary": {
+            "$ref": "#/components/schemas/FleetSummary",
+            "description": "Fleet-wide totals, unaffected by the filters."
+          },
+          "total": {
+            "description": "Agents matching the filters.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agents",
+          "total",
+          "summary"
         ],
         "type": "object"
       },
@@ -24779,6 +25115,34 @@
           "provisioned",
           "sessionless",
           "favorite"
+        ],
+        "type": "object"
+      },
+      "OracleFsDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "availabilityDomain": {
+            "description": "Availability domain the file system is in.",
+            "type": "string"
+          },
+          "exportPath": {
+            "description": "Export path of the file system.",
+            "type": "string"
+          },
+          "mountTargetIp": {
+            "description": "IP address of the mount target.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "oracle-oraclefs"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
         ],
         "type": "object"
       },
@@ -35536,14 +35900,19 @@
               "mapping": {
                 "aws-bucket": "#/components/schemas/BucketDefinition",
                 "aws-disk": "#/components/schemas/DiskDefinition",
+                "aws-efs": "#/components/schemas/AwsEfsDefinition",
                 "aws-lustre": "#/components/schemas/AwsLustreDefinition",
+                "azure-azfiles": "#/components/schemas/AzureAzfilesDefinition",
                 "azure-bucket": "#/components/schemas/BucketDefinition",
                 "azure-disk": "#/components/schemas/DiskDefinition",
                 "azure-managedlustre": "#/components/schemas/AzureManagedLustreDefinition",
+                "azure-netappfiles": "#/components/schemas/AzureNetappFilesDefinition",
                 "google-bucket": "#/components/schemas/BucketDefinition",
                 "google-disk": "#/components/schemas/DiskDefinition",
+                "google-filestore": "#/components/schemas/GoogleFilestoreDefinition",
                 "google-managedlustre": "#/components/schemas/GoogleManagedLustreDefinition",
-                "oracle-bucket": "#/components/schemas/BucketDefinition"
+                "oracle-bucket": "#/components/schemas/BucketDefinition",
+                "oracle-oraclefs": "#/components/schemas/OracleFsDefinition"
               },
               "propertyName": "type"
             },
@@ -35562,6 +35931,21 @@
               },
               {
                 "$ref": "#/components/schemas/DiskDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/AwsEfsDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/AzureAzfilesDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/AzureNetappFilesDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/GoogleFilestoreDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/OracleFsDefinition"
               }
             ],
             "title": "StorageDefinition"
@@ -37631,6 +38015,20 @@
         ],
         "type": "object"
       },
+      "UpdateUserPreferencesInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "preferences": {
+            "additionalProperties": {},
+            "description": "Preference keys to write. A null value removes the key; keys not present are left unchanged.",
+            "type": "object"
+          }
+        },
+        "required": [
+          "preferences"
+        ],
+        "type": "object"
+      },
       "UpdateUserProfileBody": {
         "additionalProperties": false,
         "properties": {
@@ -38231,6 +38629,20 @@
         ],
         "type": "object"
       },
+      "UserPreferencesBody": {
+        "additionalProperties": false,
+        "properties": {
+          "preferences": {
+            "additionalProperties": {},
+            "description": "The user's saved UI preferences keyed by view id. Values are opaque JSON owned by the client.",
+            "type": "object"
+          }
+        },
+        "required": [
+          "preferences"
+        ],
+        "type": "object"
+      },
       "UserProfile": {
         "additionalProperties": false,
         "properties": {
@@ -38777,6 +39189,16 @@
             "description": "Base64url-encoded challenge",
             "type": "string"
           },
+          "hints": {
+            "description": "Authenticator types the relying party prefers",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "rpId": {
             "description": "Relying party ID",
             "type": "string"
@@ -38933,6 +39355,16 @@
             "description": "Credentials that may not be re-registered",
             "items": {
               "$ref": "#/components/schemas/WebAuthnCredentialDescriptor"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "hints": {
+            "description": "Authenticator types the relying party prefers",
+            "items": {
+              "type": "string"
             },
             "type": [
               "array",
@@ -39240,6 +39672,11 @@
           },
           "token": {
             "description": "Worker authentication token. Only returned on creation.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "uri": {
+            "description": "Parallel Works URI for the cluster.",
             "readOnly": true,
             "type": "string"
           },
@@ -40097,6 +40534,125 @@
         "summary": "Serve PKI domain control validation file",
         "tags": [
           "Platform"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/agents": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns every agent the platform knows about with the version it reports, plus the fleet-wide version distribution",
+        "operationId": "list-fleet-agents",
+        "parameters": [
+          {
+            "description": "Filter by where the agent runs.",
+            "explode": true,
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "description": "Filter by where the agent runs.",
+              "items": {
+                "enum": [
+                  "cloud",
+                  "instance",
+                  "existing",
+                  "managed",
+                  "endpoint"
+                ],
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Filter by whether the agent is reporting right now.",
+            "explode": false,
+            "in": "query",
+            "name": "connected",
+            "schema": {
+              "description": "Filter by whether the agent is reporting right now.",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only agents older than the platform version.",
+            "explode": false,
+            "in": "query",
+            "name": "outdated",
+            "schema": {
+              "description": "Only agents older than the platform version.",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Case-insensitive match on cluster name, display name, hostname, user, organization, or version.",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Case-insensitive match on cluster name, display name, hostname, user, organization, or version.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size.",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100,
+              "description": "Page size.",
+              "format": "int64",
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page offset.",
+            "explode": false,
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "description": "Page offset.",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAgentsBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List agents",
+        "tags": [
+          "Agent"
         ],
         "x-internal": true
       }
@@ -90578,15 +91134,32 @@
         ]
       }
     },
-    "/api/sso/cac/redirect": {
+    "/api/sso/cac/redirect/{authID}": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRedirects the user to the CAC certificate verification endpoint on port 8443.",
         "operationId": "get-cac-redirect",
+        "parameters": [
+          {
+            "description": "ID of the CAC authentication method",
+            "in": "path",
+            "name": "authID",
+            "required": true,
+            "schema": {
+              "description": "ID of the CAC authentication method",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "204": {
             "description": "No Content",
             "headers": {
               "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Set-Cookie": {
                 "schema": {
                   "type": "string"
                 }
@@ -91759,6 +92332,78 @@
           }
         },
         "summary": "Favorite a resource",
+        "tags": [
+          "User Settings"
+        ]
+      }
+    },
+    "/api/user/preferences": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the current user's saved UI preferences, such as list page display options and filters, keyed by view id.",
+        "operationId": "get-user-preferences",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPreferencesBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get user preferences",
+        "tags": [
+          "User Settings"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nWrites the given preference keys for the current user. A null value removes a key; keys not in the request are left unchanged.",
+        "operationId": "update-user-preferences",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserPreferencesInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPreferencesBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update user preferences",
         "tags": [
           "User Settings"
         ]
