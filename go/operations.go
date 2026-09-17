@@ -364,8 +364,8 @@ type ListAdminEventsParams struct {
 	To *time.Time `json:"to,omitempty"`
 	// Filter by event type (repeatable).
 	Type *[]string `json:"type,omitempty"`
-	// Filter by exact actor username.
-	Actor *string `json:"actor,omitempty"`
+	// Filter by exact actor username (repeatable).
+	Actor *[]string `json:"actor,omitempty"`
 	// Filter by actor type.
 	ActorType *string `json:"actorType,omitempty"`
 	// Filter by target type.
@@ -407,7 +407,7 @@ func (c *Client) ListAdminEvents(ctx context.Context, opts ...ListAdminEventsPar
 
 	addQueryParam(queryValues, "type", "form", true, params.Type)
 
-	addQueryParam(queryValues, "actor", "form", false, params.Actor)
+	addQueryParam(queryValues, "actor", "form", true, params.Actor)
 
 	addQueryParam(queryValues, "actorType", "form", false, params.ActorType)
 
@@ -438,6 +438,24 @@ func (c *Client) ListAdminEvents(ctx context.Context, opts ...ListAdminEventsPar
 	return &result, nil
 }
 
+// ListAdminEventActors - List Platform Event Actors
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// List the distinct actor usernames that appear in audit events across all organizations.
+func (c *Client) ListAdminEventActors(ctx context.Context) (*EventActorsOutputBody, error) {
+
+	path := "/api/admin/events/actors"
+
+	var result EventActorsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ExportAdminEventsParams contains the parameters for the ExportAdminEvents operation.
 // Required parameters are value fields; optional parameters are pointers.
 type ExportAdminEventsParams struct {
@@ -447,8 +465,8 @@ type ExportAdminEventsParams struct {
 	To *time.Time `json:"to,omitempty"`
 	// Filter by event type (repeatable).
 	Type *[]string `json:"type,omitempty"`
-	// Filter by exact actor username.
-	Actor *string `json:"actor,omitempty"`
+	// Filter by exact actor username (repeatable).
+	Actor *[]string `json:"actor,omitempty"`
 	// Filter by actor type.
 	ActorType *string `json:"actorType,omitempty"`
 	// Filter by target type.
@@ -488,7 +506,7 @@ func (c *Client) ExportAdminEvents(ctx context.Context, opts ...ExportAdminEvent
 
 	addQueryParam(queryValues, "type", "form", true, params.Type)
 
-	addQueryParam(queryValues, "actor", "form", false, params.Actor)
+	addQueryParam(queryValues, "actor", "form", true, params.Actor)
 
 	addQueryParam(queryValues, "actorType", "form", false, params.ActorType)
 
@@ -2880,8 +2898,8 @@ type ListResourceEventsParams struct {
 	To *time.Time `json:"to,omitempty"`
 	// Filter by event type (repeatable).
 	Type *[]string `json:"type,omitempty"`
-	// Filter by exact actor username.
-	Actor *string `json:"actor,omitempty"`
+	// Filter by exact actor username (repeatable).
+	Actor *[]string `json:"actor,omitempty"`
 	// Filter by actor type.
 	ActorType *string `json:"actorType,omitempty"`
 	// Filter by target type.
@@ -2923,7 +2941,7 @@ func (c *Client) ListResourceEvents(ctx context.Context, targetType string, targ
 
 	addQueryParam(queryValues, "type", "form", true, params.Type)
 
-	addQueryParam(queryValues, "actor", "form", false, params.Actor)
+	addQueryParam(queryValues, "actor", "form", true, params.Actor)
 
 	addQueryParam(queryValues, "actorType", "form", false, params.ActorType)
 
@@ -2963,8 +2981,8 @@ type ExportResourceEventsParams struct {
 	To *time.Time `json:"to,omitempty"`
 	// Filter by event type (repeatable).
 	Type *[]string `json:"type,omitempty"`
-	// Filter by exact actor username.
-	Actor *string `json:"actor,omitempty"`
+	// Filter by exact actor username (repeatable).
+	Actor *[]string `json:"actor,omitempty"`
 	// Filter by actor type.
 	ActorType *string `json:"actorType,omitempty"`
 	// Filter by target type.
@@ -3002,7 +3020,7 @@ func (c *Client) ExportResourceEvents(ctx context.Context, targetType string, ta
 
 	addQueryParam(queryValues, "type", "form", true, params.Type)
 
-	addQueryParam(queryValues, "actor", "form", false, params.Actor)
+	addQueryParam(queryValues, "actor", "form", true, params.Actor)
 
 	addQueryParam(queryValues, "actorType", "form", false, params.ActorType)
 
@@ -7538,8 +7556,8 @@ type ListOrganizationEventsParams struct {
 	To *time.Time `json:"to,omitempty"`
 	// Filter by event type (repeatable).
 	Type *[]string `json:"type,omitempty"`
-	// Filter by exact actor username.
-	Actor *string `json:"actor,omitempty"`
+	// Filter by exact actor username (repeatable).
+	Actor *[]string `json:"actor,omitempty"`
 	// Filter by actor type.
 	ActorType *string `json:"actorType,omitempty"`
 	// Filter by target type.
@@ -7578,7 +7596,7 @@ func (c *Client) ListOrganizationEvents(ctx context.Context, organization string
 
 	addQueryParam(queryValues, "type", "form", true, params.Type)
 
-	addQueryParam(queryValues, "actor", "form", false, params.Actor)
+	addQueryParam(queryValues, "actor", "form", true, params.Actor)
 
 	addQueryParam(queryValues, "actorType", "form", false, params.ActorType)
 
@@ -7607,6 +7625,23 @@ func (c *Client) ListOrganizationEvents(ctx context.Context, organization string
 	return &result, nil
 }
 
+// ListOrganizationEventActors - List Organization Event Actors
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// List the distinct actor usernames that appear in the organization's audit events. Requires organization admin.
+func (c *Client) ListOrganizationEventActors(ctx context.Context, organization string) (*EventActorsOutputBody, error) {
+
+	path := "/api/organizations/{organization}/events/actors"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result EventActorsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ExportOrganizationEventsParams contains the parameters for the ExportOrganizationEvents operation.
 // Required parameters are value fields; optional parameters are pointers.
 type ExportOrganizationEventsParams struct {
@@ -7616,8 +7651,8 @@ type ExportOrganizationEventsParams struct {
 	To *time.Time `json:"to,omitempty"`
 	// Filter by event type (repeatable).
 	Type *[]string `json:"type,omitempty"`
-	// Filter by exact actor username.
-	Actor *string `json:"actor,omitempty"`
+	// Filter by exact actor username (repeatable).
+	Actor *[]string `json:"actor,omitempty"`
 	// Filter by actor type.
 	ActorType *string `json:"actorType,omitempty"`
 	// Filter by target type.
@@ -7654,7 +7689,7 @@ func (c *Client) ExportOrganizationEvents(ctx context.Context, organization stri
 
 	addQueryParam(queryValues, "type", "form", true, params.Type)
 
-	addQueryParam(queryValues, "actor", "form", false, params.Actor)
+	addQueryParam(queryValues, "actor", "form", true, params.Actor)
 
 	addQueryParam(queryValues, "actorType", "form", false, params.ActorType)
 
@@ -16409,6 +16444,22 @@ func (c *Client) SetPlatformNoRootAccessPolicy(ctx context.Context, body bool) (
 	path := "/api/platform/policies/no-root-access"
 
 	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformWorkspaceRetentionDaysPolicy - Set platform policy: workspace-retention-days
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the workspace-retention-days policy for the platform.
+func (c *Client) SetPlatformWorkspaceRetentionDaysPolicy(ctx context.Context, body int64) (*map[string]IntPolicyOutput, error) {
+
+	path := "/api/platform/policies/workspace-retention-days"
+
+	var result map[string]IntPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}

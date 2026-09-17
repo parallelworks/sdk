@@ -94,13 +94,14 @@ func encodeObject(members []jsonMember) ([]byte, error) {
 }
 
 type AiModelConfig struct {
-	ContextWindow     *int64  `json:"contextWindow,omitempty"`
-	Enabled           bool    `json:"enabled"`
-	InputRate         float64 `json:"inputRate"`
-	ModelName         string  `json:"modelName"`
-	ModelVersion      string  `json:"modelVersion"`
-	OutputRate        float64 `json:"outputRate"`
-	UsageNotSupported *bool   `json:"usageNotSupported,omitempty"`
+	CachedInputRate   *float64 `json:"cachedInputRate,omitempty"`
+	ContextWindow     *int64   `json:"contextWindow,omitempty"`
+	Enabled           bool     `json:"enabled"`
+	InputRate         float64  `json:"inputRate"`
+	ModelName         string   `json:"modelName"`
+	ModelVersion      string   `json:"modelVersion"`
+	OutputRate        float64  `json:"outputRate"`
+	UsageNotSupported *bool    `json:"usageNotSupported,omitempty"`
 }
 
 type AiProviderUsage struct {
@@ -3756,6 +3757,8 @@ type CreateKernelBody struct {
 	EnvironmentID *string `json:"environmentId,omitempty"`
 	// Kernel name. Auto-generated if omitted.
 	Name *string `json:"name,omitempty"`
+	// Run the kernel on the cluster's controller agent directly instead of scheduling a worker. Cluster targets only; starts immediately with no Slurm allocation.
+	RunOnController *bool `json:"runOnController,omitempty"`
 	// Scheduling parameters for the kernel's worker.
 	SchedulingParams map[string]any `json:"schedulingParams,omitempty"`
 	// Cluster or instance the kernel runs on.
@@ -4709,6 +4712,11 @@ type EventActor struct {
 	Type *string `json:"type,omitempty"`
 	// Actor username.
 	Username *string `json:"username,omitempty"`
+}
+
+type EventActorsOutputBody struct {
+	// Distinct actor usernames, sorted.
+	Actors []string `json:"actors"`
 }
 
 type EventHTTP struct {
@@ -7944,6 +7952,7 @@ type MigrationStepResponse struct {
 }
 
 type ModelEntry struct {
+	CachedInputRate   *float64 `json:"cached_input_rate,omitempty"`
 	ContextWindow     *int64   `json:"context_window,omitempty"`
 	Created           int64    `json:"created"`
 	ID                string   `json:"id"`
@@ -8966,6 +8975,8 @@ type OrgMarketplaceItemBody struct {
 }
 
 type OrgModelEntry struct {
+	// USD per input token served from the provider's prompt cache (0 = the input rate)
+	CachedInputRate *float64 `json:"cachedInputRate,omitempty"`
 	// Model context window in tokens (0 = unknown)
 	ContextWindow int64 `json:"contextWindow"`
 	// Whether the model is enabled
@@ -9296,6 +9307,8 @@ type PatchInstanceStatusBody struct {
 }
 
 type PatchModelConfigInputBody struct {
+	// USD per input token served from the provider's prompt cache (0 = the input rate)
+	CachedInputRate *float64 `json:"cachedInputRate,omitempty"`
 	// Model context window in tokens (0 = unknown)
 	ContextWindow *int64 `json:"contextWindow,omitempty"`
 	// Whether the model is enabled
@@ -9934,6 +9947,11 @@ type Project struct {
 	PathWithNamespace string `json:"pathWithNamespace"`
 	Visibility        string `json:"visibility"`
 	WebURL            string `json:"webUrl"`
+}
+
+type PromptTokensDetails struct {
+	// Prompt tokens served from the provider's prompt cache
+	CachedTokens int64 `json:"cached_tokens"`
 }
 
 type ProvisionStatusAttribute struct {
@@ -11330,7 +11348,7 @@ type Resource struct {
 	State string `json:"state"`
 	// All resource tags with normalized keys.
 	Tags map[string]string `json:"tags,omitempty"`
-	// Platform user from the resource tags.
+	// Owning platform username when resolved; otherwise the recorded owner value.
 	Username *string `json:"username,omitempty"`
 	// Availability zone.
 	Zone *string `json:"zone,omitempty"`
@@ -13309,8 +13327,9 @@ type URLResponse struct {
 type Usage struct {
 	// Tokens in the completion
 	CompletionTokens int64 `json:"completion_tokens"`
-	// Tokens in the prompt
-	PromptTokens int64 `json:"prompt_tokens"`
+	// Tokens in the prompt, cached ones included
+	PromptTokens        int64                `json:"prompt_tokens"`
+	PromptTokensDetails *PromptTokensDetails `json:"prompt_tokens_details,omitempty"`
 	// Total tokens used
 	TotalTokens int64 `json:"total_tokens"`
 }

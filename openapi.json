@@ -4,6 +4,10 @@
       "AIModelConfig": {
         "additionalProperties": false,
         "properties": {
+          "cachedInputRate": {
+            "format": "double",
+            "type": "number"
+          },
           "contextWindow": {
             "format": "int64",
             "type": "integer"
@@ -10796,6 +10800,10 @@
             "maxLength": 255,
             "type": "string"
           },
+          "runOnController": {
+            "description": "Run the kernel on the cluster's controller agent directly instead of scheduling a worker. Cluster targets only; starts immediately with no Slurm allocation.",
+            "type": "boolean"
+          },
           "schedulingParams": {
             "additionalProperties": {},
             "description": "Scheduling parameters for the kernel's worker.",
@@ -13654,6 +13662,25 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "EventActorsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "actors": {
+            "description": "Distinct actor usernames, sorted.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "actors"
+        ],
         "type": "object"
       },
       "EventHTTP": {
@@ -18309,7 +18336,8 @@
             "description": "Compute the kernel runs on.",
             "enum": [
               "cluster",
-              "instance"
+              "instance",
+              "controller"
             ],
             "readOnly": true,
             "type": "string"
@@ -22037,6 +22065,10 @@
       "ModelEntry": {
         "additionalProperties": false,
         "properties": {
+          "cached_input_rate": {
+            "format": "double",
+            "type": "number"
+          },
           "context_window": {
             "format": "int64",
             "type": "integer"
@@ -25303,6 +25335,11 @@
       "OrgModelEntry": {
         "additionalProperties": false,
         "properties": {
+          "cachedInputRate": {
+            "description": "USD per input token served from the provider's prompt cache (0 = the input rate)",
+            "format": "double",
+            "type": "number"
+          },
           "contextWindow": {
             "description": "Model context window in tokens (0 = unknown)",
             "format": "int64",
@@ -26369,6 +26406,11 @@
       "PatchModelConfigInputBody": {
         "additionalProperties": false,
         "properties": {
+          "cachedInputRate": {
+            "description": "USD per input token served from the provider's prompt cache (0 = the input rate)",
+            "format": "double",
+            "type": "number"
+          },
           "contextWindow": {
             "description": "Model context window in tokens (0 = unknown)",
             "format": "int64",
@@ -28320,6 +28362,20 @@
           "defaultBranch",
           "visibility",
           "lastActivityAt"
+        ],
+        "type": "object"
+      },
+      "PromptTokensDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "cached_tokens": {
+            "description": "Prompt tokens served from the provider's prompt cache",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cached_tokens"
         ],
         "type": "object"
       },
@@ -32649,7 +32705,7 @@
             "type": "object"
           },
           "username": {
-            "description": "Platform user from the resource tags.",
+            "description": "Owning platform username when resolved; otherwise the recorded owner value.",
             "type": "string"
           },
           "zone": {
@@ -37903,9 +37959,12 @@
             "type": "integer"
           },
           "prompt_tokens": {
-            "description": "Tokens in the prompt",
+            "description": "Tokens in the prompt, cached ones included",
             "format": "int64",
             "type": "integer"
+          },
+          "prompt_tokens_details": {
+            "$ref": "#/components/schemas/PromptTokensDetails"
           },
           "total_tokens": {
             "description": "Total tokens used",
@@ -40561,6 +40620,7 @@
             "name": "search",
             "schema": {
               "description": "Case-insensitive search across message, path, user, and request ID",
+              "maxLength": 255,
               "type": "string"
             }
           },
@@ -40689,13 +40749,19 @@
             }
           },
           {
-            "description": "Filter by exact actor username.",
-            "explode": false,
+            "description": "Filter by exact actor username (repeatable).",
+            "explode": true,
             "in": "query",
             "name": "actor",
             "schema": {
-              "description": "Filter by exact actor username.",
-              "type": "string"
+              "description": "Filter by exact actor username (repeatable).",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
             }
           },
           {
@@ -40834,6 +40900,38 @@
         ]
       }
     },
+    "/api/admin/events/actors": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nList the distinct actor usernames that appear in audit events across all organizations.",
+        "operationId": "list-admin-event-actors",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventActorsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Platform Event Actors",
+        "tags": [
+          "Events"
+        ]
+      }
+    },
     "/api/admin/events/export": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nStream audit events across all organizations as CSV, JSON, or plain text.",
@@ -40889,13 +40987,19 @@
             }
           },
           {
-            "description": "Filter by exact actor username.",
-            "explode": false,
+            "description": "Filter by exact actor username (repeatable).",
+            "explode": true,
             "in": "query",
             "name": "actor",
             "schema": {
-              "description": "Filter by exact actor username.",
-              "type": "string"
+              "description": "Filter by exact actor username (repeatable).",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
             }
           },
           {
@@ -43946,6 +44050,7 @@
             "name": "contentType",
             "schema": {
               "description": "Filter by content type prefix (e.g. image/)",
+              "maxLength": 255,
               "type": "string"
             }
           }
@@ -46229,13 +46334,19 @@
             }
           },
           {
-            "description": "Filter by exact actor username.",
-            "explode": false,
+            "description": "Filter by exact actor username (repeatable).",
+            "explode": true,
             "in": "query",
             "name": "actor",
             "schema": {
-              "description": "Filter by exact actor username.",
-              "type": "string"
+              "description": "Filter by exact actor username (repeatable).",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
             }
           },
           {
@@ -46459,13 +46570,19 @@
             }
           },
           {
-            "description": "Filter by exact actor username.",
-            "explode": false,
+            "description": "Filter by exact actor username (repeatable).",
+            "explode": true,
             "in": "query",
             "name": "actor",
             "schema": {
-              "description": "Filter by exact actor username.",
-              "type": "string"
+              "description": "Filter by exact actor username (repeatable).",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
             }
           },
           {
@@ -58762,13 +58879,19 @@
             }
           },
           {
-            "description": "Filter by exact actor username.",
-            "explode": false,
+            "description": "Filter by exact actor username (repeatable).",
+            "explode": true,
             "in": "query",
             "name": "actor",
             "schema": {
-              "description": "Filter by exact actor username.",
-              "type": "string"
+              "description": "Filter by exact actor username (repeatable).",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
             }
           },
           {
@@ -58897,6 +59020,53 @@
         ]
       }
     },
+    "/api/organizations/{organization}/events/actors": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nList the distinct actor usernames that appear in the organization's audit events. Requires organization admin.",
+        "operationId": "list-organization-event-actors",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventActorsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Organization Event Actors",
+        "tags": [
+          "Events"
+        ]
+      }
+    },
     "/api/organizations/{organization}/events/export": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nStream the organization's audit events as CSV, JSON, or plain text. Requires organization admin.",
@@ -58965,13 +59135,19 @@
             }
           },
           {
-            "description": "Filter by exact actor username.",
-            "explode": false,
+            "description": "Filter by exact actor username (repeatable).",
+            "explode": true,
             "in": "query",
             "name": "actor",
             "schema": {
-              "description": "Filter by exact actor username.",
-              "type": "string"
+              "description": "Filter by exact actor username (repeatable).",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
             }
           },
           {
@@ -68159,6 +68335,7 @@
             "name": "name",
             "schema": {
               "description": "Filter by resource group name (case-insensitive contains)",
+              "maxLength": 255,
               "type": "string"
             }
           },
@@ -87845,6 +88022,57 @@
           }
         },
         "summary": "Set platform policy: no-root-access",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/workspace-retention-days": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the workspace-retention-days policy for the platform.",
+        "operationId": "set-platform-workspace-retention-days-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  6
+                ],
+                "format": "int64",
+                "type": "integer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/IntPolicyOutput"
+                  },
+                  "description": "Map of int policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: workspace-retention-days",
         "tags": [
           "Policies"
         ]
