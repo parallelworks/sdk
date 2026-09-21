@@ -12223,6 +12223,11 @@
         "additionalProperties": false,
         "properties": {
           "redirect": {
+            "description": "Name of the session to open once the run starts.",
+            "type": "string"
+          },
+          "redirectLink": {
+            "description": "Key into the run's links of the link to open once it resolves.",
             "type": "string"
           },
           "run": {
@@ -19962,10 +19967,19 @@
               "array",
               "null"
             ]
+          },
+          "hasMore": {
+            "description": "Whether another page follows",
+            "type": "boolean"
+          },
+          "nextCursor": {
+            "description": "Pass as cursor to read the next page",
+            "type": "string"
           }
         },
         "required": [
-          "attachments"
+          "attachments",
+          "hasMore"
         ],
         "type": "object"
       },
@@ -20440,14 +20454,24 @@
               "null"
             ]
           },
+          "hasMore": {
+            "description": "Whether another page follows",
+            "type": "boolean"
+          },
+          "nextCursor": {
+            "description": "Pass as cursor to read the next page",
+            "type": "string"
+          },
           "total": {
+            "description": "Matching attachments, capped at 10000",
             "format": "int64",
             "type": "integer"
           }
         },
         "required": [
           "attachments",
-          "total"
+          "total",
+          "hasMore"
         ],
         "type": "object"
       },
@@ -32049,6 +32073,352 @@
         ],
         "type": "object"
       },
+      "RealtimeAccuracyCategoryRow": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "Cloud service provider",
+            "type": "string"
+          },
+          "estimated": {
+            "description": "Sum of estimates",
+            "format": "double",
+            "type": "number"
+          },
+          "invoiced": {
+            "description": "Sum of prorated invoice amounts",
+            "format": "double",
+            "type": "number"
+          },
+          "keys": {
+            "description": "Deployment-day keys",
+            "format": "int64",
+            "type": "integer"
+          },
+          "medianRatio": {
+            "description": "Median per-key ratio over measurable keys",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "noInvoiceLine": {
+            "description": "Keys with an estimate but no invoice line",
+            "format": "int64",
+            "type": "integer"
+          },
+          "ratio": {
+            "description": "Estimated divided by invoiced; null without a measurable invoice",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "subtype": {
+            "description": "Cost subtype",
+            "type": "string"
+          },
+          "type": {
+            "description": "Cost type",
+            "type": "string"
+          },
+          "withinTenPct": {
+            "description": "Percentage of measurable keys whose ratio is within 0.9 to 1.1",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "csp",
+          "type",
+          "subtype",
+          "keys",
+          "noInvoiceLine",
+          "estimated",
+          "invoiced",
+          "ratio",
+          "medianRatio",
+          "withinTenPct"
+        ],
+        "type": "object"
+      },
+      "RealtimeAccuracyOutlier": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "Cloud service provider",
+            "type": "string"
+          },
+          "day": {
+            "description": "Calendar day, YYYY-MM-DD",
+            "type": "string"
+          },
+          "deploymentId": {
+            "description": "Deployment the estimate was attributed to",
+            "type": "string"
+          },
+          "error": {
+            "description": "Estimated minus prorated invoice",
+            "format": "double",
+            "type": "number"
+          },
+          "estimated": {
+            "description": "Estimate for the key",
+            "format": "double",
+            "type": "number"
+          },
+          "invoiced": {
+            "description": "Full-day invoice amount; null when no invoice line exists",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "invoicedProrated": {
+            "description": "Invoice amount prorated to the estimated hours",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "ratio": {
+            "description": "Estimated divided by prorated invoice; null without a measurable invoice",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "reprocessed": {
+            "description": "The estimate came from a reprocess",
+            "type": "boolean"
+          },
+          "resourceName": {
+            "description": "One of the resources behind the estimate",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subtype": {
+            "description": "Cost subtype",
+            "type": "string"
+          },
+          "type": {
+            "description": "Cost type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "csp",
+          "day",
+          "deploymentId",
+          "resourceName",
+          "type",
+          "subtype",
+          "estimated",
+          "invoiced",
+          "invoicedProrated",
+          "error",
+          "ratio",
+          "reprocessed"
+        ],
+        "type": "object"
+      },
+      "RealtimeAccuracySummary": {
+        "additionalProperties": false,
+        "properties": {
+          "durationMs": {
+            "description": "How long the last successful rebuild took",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "lastError": {
+            "description": "Error from the most recent failed rebuild, if any",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "refreshedAt": {
+            "description": "When the accuracy data was last rebuilt; null before the first refresh",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "refreshing": {
+            "description": "Whether a rebuild is currently running",
+            "type": "boolean"
+          },
+          "summary": {
+            "description": "One row per CSP",
+            "items": {
+              "$ref": "#/components/schemas/RealtimeAccuracySummaryRow"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "total": {
+            "$ref": "#/components/schemas/RealtimeAccuracySummaryRow",
+            "description": "All CSPs in the window combined; csp is empty"
+          }
+        },
+        "required": [
+          "refreshedAt",
+          "refreshing",
+          "lastError",
+          "durationMs",
+          "summary",
+          "total"
+        ],
+        "type": "object"
+      },
+      "RealtimeAccuracySummaryRow": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "Cloud service provider",
+            "type": "string"
+          },
+          "estimated": {
+            "description": "Sum of estimates",
+            "format": "double",
+            "type": "number"
+          },
+          "invoiced": {
+            "description": "Sum of invoice amounts, prorated to the estimated hours",
+            "format": "double",
+            "type": "number"
+          },
+          "keys": {
+            "description": "Deployment-day-category keys with a frozen estimate",
+            "format": "int64",
+            "type": "integer"
+          },
+          "liveKeys": {
+            "description": "Keys estimated by the running loop",
+            "format": "int64",
+            "type": "integer"
+          },
+          "noInvoiceLine": {
+            "description": "Keys with an estimate but no invoice line",
+            "format": "int64",
+            "type": "integer"
+          },
+          "ratio": {
+            "description": "Estimated divided by invoiced; null without a measurable invoice",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "reprocessedKeys": {
+            "description": "Keys regenerated by a reprocess after the fact",
+            "format": "int64",
+            "type": "integer"
+          },
+          "unestimatedInvoiced": {
+            "description": "Tagged invoice amount for deployments the estimator never covered",
+            "format": "double",
+            "type": "number"
+          },
+          "wape": {
+            "description": "Weighted absolute percentage error over keys with an invoice line",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "withinTenPct": {
+            "description": "Percentage of measurable keys whose ratio is within 0.9 to 1.1",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "csp",
+          "keys",
+          "noInvoiceLine",
+          "liveKeys",
+          "reprocessedKeys",
+          "estimated",
+          "invoiced",
+          "ratio",
+          "wape",
+          "withinTenPct",
+          "unestimatedInvoiced"
+        ],
+        "type": "object"
+      },
+      "RealtimeAccuracyTrendPoint": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "Cloud service provider",
+            "type": "string"
+          },
+          "day": {
+            "description": "Calendar day, YYYY-MM-DD",
+            "type": "string"
+          },
+          "estimated": {
+            "description": "Sum of estimates",
+            "format": "double",
+            "type": "number"
+          },
+          "invoiced": {
+            "description": "Sum of prorated invoice amounts",
+            "format": "double",
+            "type": "number"
+          },
+          "keys": {
+            "description": "Keys contributing to the point",
+            "format": "int64",
+            "type": "integer"
+          },
+          "ratio": {
+            "description": "Estimated divided by invoiced; null without a measurable invoice",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "reprocessed": {
+            "description": "Every key that day came from a reprocess",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "day",
+          "csp",
+          "keys",
+          "estimated",
+          "invoiced",
+          "ratio",
+          "reprocessed"
+        ],
+        "type": "object"
+      },
       "RecommendedResource": {
         "additionalProperties": false,
         "properties": {
@@ -33842,6 +34212,20 @@
         ],
         "type": "object"
       },
+      "RunStep": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Step name.",
+            "type": "string"
+          },
+          "status": {
+            "description": "Step status.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "RunSummary": {
         "additionalProperties": false,
         "properties": {
@@ -34923,7 +35307,7 @@
           "workflowRunningSteps": {
             "description": "Workflow running steps.",
             "items": {
-              "$ref": "#/components/schemas/StepStruct"
+              "$ref": "#/components/schemas/RunStep"
             },
             "readOnly": true,
             "type": [
@@ -35768,20 +36152,6 @@
         "required": [
           "name"
         ],
-        "type": "object"
-      },
-      "StepStruct": {
-        "additionalProperties": false,
-        "properties": {
-          "name": {
-            "description": "Step name.",
-            "type": "string"
-          },
-          "status": {
-            "description": "Step status.",
-            "type": "string"
-          }
-        },
         "type": "object"
       },
       "StopClusterOptions": {
@@ -39887,12 +40257,21 @@
             "additionalProperties": {},
             "type": "object"
           },
+          "links": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/WorkflowRunLink"
+            },
+            "type": "object"
+          },
           "marketplace": {
             "type": "boolean"
           },
           "number": {
             "format": "int64",
             "type": "integer"
+          },
+          "redirect": {
+            "$ref": "#/components/schemas/WorkflowRunRedirect"
           },
           "resolvedYaml": {
             "additionalProperties": true,
@@ -39964,6 +40343,41 @@
         },
         "type": "object"
       },
+      "WorkflowRunLink": {
+        "additionalProperties": false,
+        "properties": {
+          "detach": {
+            "type": "boolean"
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkflowRunRedirect": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "session",
+              "link"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "name"
+        ],
+        "type": "object"
+      },
       "WorkflowRunResponse": {
         "additionalProperties": false,
         "properties": {
@@ -40015,6 +40429,24 @@
           "user",
           "inlineRun",
           "marketplace"
+        ],
+        "type": "object"
+      },
+      "WorkflowRunRunningStepsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "runningSteps": {
+            "items": {
+              "$ref": "#/components/schemas/RunStep"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "runningSteps"
         ],
         "type": "object"
       },
@@ -40832,6 +41264,441 @@
           }
         },
         "summary": "Get billing cross-check data",
+        "tags": [
+          "Billing"
+        ]
+      }
+    },
+    "/api/admin/billing/realtime-accuracy": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns per-CSP accuracy of the flexA realtime cost estimator against invoiced costs, from a periodically refreshed view. Requires platform admin or billing admin.",
+        "operationId": "get-realtime-accuracy-summary",
+        "parameters": [
+          {
+            "description": "Days to include, counted back from today",
+            "explode": false,
+            "in": "query",
+            "name": "window",
+            "schema": {
+              "default": 30,
+              "description": "Days to include, counted back from today",
+              "enum": [
+                14,
+                30,
+                60,
+                90
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Restrict to one cloud service provider",
+            "explode": false,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Restrict to one cloud service provider",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeAccuracySummary"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get realtime estimator accuracy summary",
+        "tags": [
+          "Billing"
+        ]
+      }
+    },
+    "/api/admin/billing/realtime-accuracy/categories": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns estimator accuracy per CSP, cost type and subtype. Requires platform admin or billing admin.",
+        "operationId": "get-realtime-accuracy-categories",
+        "parameters": [
+          {
+            "description": "Days to include, counted back from today",
+            "explode": false,
+            "in": "query",
+            "name": "window",
+            "schema": {
+              "default": 30,
+              "description": "Days to include, counted back from today",
+              "enum": [
+                14,
+                30,
+                60,
+                90
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Restrict to one cloud service provider",
+            "explode": false,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Restrict to one cloud service provider",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RealtimeAccuracyCategoryRow"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get realtime estimator accuracy by category",
+        "tags": [
+          "Billing"
+        ]
+      }
+    },
+    "/api/admin/billing/realtime-accuracy/export": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDownloads the accuracy data with its definitions and a code map, as a Markdown report or as JSON. Requires platform admin or billing admin.",
+        "operationId": "export-realtime-accuracy",
+        "parameters": [
+          {
+            "description": "Days to include, counted back from today",
+            "explode": false,
+            "in": "query",
+            "name": "window",
+            "schema": {
+              "default": 30,
+              "description": "Days to include, counted back from today",
+              "enum": [
+                14,
+                30,
+                60,
+                90
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Restrict to one cloud service provider",
+            "explode": false,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Restrict to one cloud service provider",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Restrict to one cost type, e.g. Compute",
+            "explode": false,
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "description": "Restrict to one cost type, e.g. Compute",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Restrict to one cost subtype, e.g. Instance",
+            "explode": false,
+            "in": "query",
+            "name": "subtype",
+            "schema": {
+              "description": "Restrict to one cost subtype, e.g. Instance",
+              "type": "string"
+            }
+          },
+          {
+            "description": "md = self-describing Markdown report, json = the same data as an object",
+            "explode": false,
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "default": "md",
+              "description": "md = self-describing Markdown report, json = the same data as an object",
+              "enum": [
+                "md",
+                "json"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Export realtime estimator accuracy data",
+        "tags": [
+          "Billing"
+        ]
+      }
+    },
+    "/api/admin/billing/realtime-accuracy/outliers": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the deployment-days where the realtime estimate missed the invoice by the most. Requires platform admin or billing admin.",
+        "operationId": "get-realtime-accuracy-outliers",
+        "parameters": [
+          {
+            "description": "Days to include, counted back from today",
+            "explode": false,
+            "in": "query",
+            "name": "window",
+            "schema": {
+              "default": 30,
+              "description": "Days to include, counted back from today",
+              "enum": [
+                14,
+                30,
+                60,
+                90
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Restrict to one cloud service provider",
+            "explode": false,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Restrict to one cloud service provider",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Restrict to one cost type, e.g. Compute",
+            "explode": false,
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "description": "Restrict to one cost type, e.g. Compute",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Restrict to one cost subtype, e.g. Instance",
+            "explode": false,
+            "in": "query",
+            "name": "subtype",
+            "schema": {
+              "description": "Restrict to one cost subtype, e.g. Instance",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Maximum rows to return",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 25,
+              "description": "Maximum rows to return",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RealtimeAccuracyOutlier"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get realtime estimator accuracy outliers",
+        "tags": [
+          "Billing"
+        ]
+      }
+    },
+    "/api/admin/billing/realtime-accuracy/refresh": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nStarts a background rebuild of the realtime accuracy view. Responds 409 while a rebuild is already running. Requires platform admin or billing admin.",
+        "operationId": "refresh-realtime-accuracy",
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Rebuild realtime estimator accuracy data",
+        "tags": [
+          "Billing"
+        ]
+      }
+    },
+    "/api/admin/billing/realtime-accuracy/trend": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the daily estimate-to-invoice ratio per CSP. Requires platform admin or billing admin.",
+        "operationId": "get-realtime-accuracy-trend",
+        "parameters": [
+          {
+            "description": "Days to include, counted back from today",
+            "explode": false,
+            "in": "query",
+            "name": "window",
+            "schema": {
+              "default": 30,
+              "description": "Days to include, counted back from today",
+              "enum": [
+                14,
+                30,
+                60,
+                90
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Restrict to one cloud service provider",
+            "explode": false,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Restrict to one cloud service provider",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Restrict to one cost type, e.g. Compute",
+            "explode": false,
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "description": "Restrict to one cost type, e.g. Compute",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Restrict to one cost subtype, e.g. Instance",
+            "explode": false,
+            "in": "query",
+            "name": "subtype",
+            "schema": {
+              "description": "Restrict to one cost subtype, e.g. Instance",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RealtimeAccuracyTrendPoint"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get realtime estimator accuracy trend",
         "tags": [
           "Billing"
         ]
@@ -44584,19 +45451,34 @@
               "default": 50,
               "description": "Max attachments to return",
               "format": "int64",
+              "maximum": 100,
+              "minimum": 1,
               "type": "integer"
             }
           },
           {
-            "description": "Pagination offset",
+            "description": "Pagination offset, ignored when a cursor is given",
             "explode": false,
             "in": "query",
             "name": "offset",
             "schema": {
               "default": 0,
-              "description": "Pagination offset",
+              "description": "Pagination offset, ignored when a cursor is given",
               "format": "int64",
+              "maximum": 10000,
+              "minimum": 0,
               "type": "integer"
+            }
+          },
+          {
+            "description": "Cursor from a previous page",
+            "explode": false,
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "description": "Cursor from a previous page",
+              "maxLength": 24,
+              "type": "string"
             }
           },
           {
@@ -44925,6 +45807,31 @@
             "name": "messageId",
             "schema": {
               "description": "Filter by message ID (optional)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cursor from a previous page",
+            "explode": false,
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "description": "Cursor from a previous page",
+              "maxLength": 24,
               "type": "string"
             }
           }
@@ -93598,6 +94505,50 @@
           }
         },
         "summary": "Get Workflow Run File",
+        "tags": [
+          "Workflow Runs"
+        ]
+      }
+    },
+    "/api/workflow-runs/{slug}/running-steps": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReads where each running job of a workflow run has got to.",
+        "operationId": "get-workflow-run-running-steps",
+        "parameters": [
+          {
+            "description": "The slug identifier of the workflow run",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "The slug identifier of the workflow run",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunRunningStepsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Workflow Run Running Steps",
         "tags": [
           "Workflow Runs"
         ]

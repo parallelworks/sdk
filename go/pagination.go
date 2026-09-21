@@ -459,8 +459,6 @@ func (c *Client) ListResourceClustersIter(ctx context.Context, opts ...ListResou
 }
 
 // ListUserAiChatAttachmentsIter returns an iterator over paginated ListUserAiChatAttachments results.
-// It advances offset by the number of items each page returns,
-// and stops on the first page that comes back empty.
 func (c *Client) ListUserAiChatAttachmentsIter(ctx context.Context, opts ...ListUserAiChatAttachmentsParams) *PageIterator[AttachmentResponse] {
 	return &PageIterator[AttachmentResponse]{
 		fetch: func(cursor string) ([]AttachmentResponse, string, error) {
@@ -468,32 +466,18 @@ func (c *Client) ListUserAiChatAttachmentsIter(ctx context.Context, opts ...List
 			if len(opts) > 0 {
 				p = opts[0]
 			}
-			// Where the iterator has reached rides in the cursor. The first page
-			// starts wherever the caller pointed it, so walking on from there
-			// counts from that point rather than from the beginning.
-			at := int64(0)
-			if p.Offset != nil {
-				at = int64(*p.Offset)
-			}
 			if cursor != "" {
-				parsed, err := strconv.ParseInt(cursor, 10, 64)
-				if err != nil {
-					return nil, "", fmt.Errorf("reading the offset to fetch: %w", err)
-				}
-				at = parsed
-				next := int64(at)
-				p.Offset = &next
+				p.Cursor = &cursor
 			}
-
 			result, err := c.ListUserAiChatAttachments(ctx, p)
 			if err != nil {
 				return nil, "", err
 			}
-			items := result.Attachments
-			if len(items) == 0 {
-				return items, "", nil
+			var next string
+			if result.NextCursor != nil {
+				next = *result.NextCursor
 			}
-			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+			return result.Attachments, next, nil
 		},
 	}
 }
@@ -534,6 +518,30 @@ func (c *Client) ListAiChatConversationsIter(ctx context.Context, opts ...ListAi
 				return items, "", nil
 			}
 			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListAiChatAttachmentsIter returns an iterator over paginated ListAiChatAttachments results.
+func (c *Client) ListAiChatAttachmentsIter(ctx context.Context, conversationID string, opts ...ListAiChatAttachmentsParams) *PageIterator[AttachmentResponse] {
+	return &PageIterator[AttachmentResponse]{
+		fetch: func(cursor string) ([]AttachmentResponse, string, error) {
+			p := ListAiChatAttachmentsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			if cursor != "" {
+				p.Cursor = &cursor
+			}
+			result, err := c.ListAiChatAttachments(ctx, conversationID, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var next string
+			if result.NextCursor != nil {
+				next = *result.NextCursor
+			}
+			return result.Attachments, next, nil
 		},
 	}
 }

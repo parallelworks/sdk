@@ -189,6 +189,237 @@ func (c *Client) GetBillingCrosscheck(ctx context.Context) (*[]CrossCheckRow, er
 	return &result, nil
 }
 
+// GetRealtimeAccuracySummaryParams contains the parameters for the GetRealtimeAccuracySummary operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetRealtimeAccuracySummaryParams struct {
+	// Days to include, counted back from today
+	Window *int64 `json:"window,omitempty"`
+	// Restrict to one cloud service provider
+	Csp *string `json:"csp,omitempty"`
+}
+
+// GetRealtimeAccuracySummary - Get realtime estimator accuracy summary
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns per-CSP accuracy of the flexA realtime cost estimator against invoiced costs, from a periodically refreshed view. Requires platform admin or billing admin.
+func (c *Client) GetRealtimeAccuracySummary(ctx context.Context, opts ...GetRealtimeAccuracySummaryParams) (*RealtimeAccuracySummary, error) {
+
+	path := "/api/admin/billing/realtime-accuracy"
+	var params GetRealtimeAccuracySummaryParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "window", "form", false, params.Window)
+
+	addQueryParam(queryValues, "csp", "form", false, params.Csp)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result RealtimeAccuracySummary
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetRealtimeAccuracyCategoriesParams contains the parameters for the GetRealtimeAccuracyCategories operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetRealtimeAccuracyCategoriesParams struct {
+	// Days to include, counted back from today
+	Window *int64 `json:"window,omitempty"`
+	// Restrict to one cloud service provider
+	Csp *string `json:"csp,omitempty"`
+}
+
+// GetRealtimeAccuracyCategories - Get realtime estimator accuracy by category
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns estimator accuracy per CSP, cost type and subtype. Requires platform admin or billing admin.
+func (c *Client) GetRealtimeAccuracyCategories(ctx context.Context, opts ...GetRealtimeAccuracyCategoriesParams) (*[]RealtimeAccuracyCategoryRow, error) {
+
+	path := "/api/admin/billing/realtime-accuracy/categories"
+	var params GetRealtimeAccuracyCategoriesParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "window", "form", false, params.Window)
+
+	addQueryParam(queryValues, "csp", "form", false, params.Csp)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []RealtimeAccuracyCategoryRow
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ExportRealtimeAccuracyParams contains the parameters for the ExportRealtimeAccuracy operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ExportRealtimeAccuracyParams struct {
+	// Days to include, counted back from today
+	Window *int64 `json:"window,omitempty"`
+	// Restrict to one cloud service provider
+	Csp *string `json:"csp,omitempty"`
+	// Restrict to one cost type, e.g. Compute
+	Type *string `json:"type,omitempty"`
+	// Restrict to one cost subtype, e.g. Instance
+	Subtype *string `json:"subtype,omitempty"`
+	// md = self-describing Markdown report, json = the same data as an object
+	Format *string `json:"format,omitempty"`
+}
+
+// ExportRealtimeAccuracy - Export realtime estimator accuracy data
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Downloads the accuracy data with its definitions and a code map, as a Markdown report or as JSON. Requires platform admin or billing admin.
+func (c *Client) ExportRealtimeAccuracy(ctx context.Context, opts ...ExportRealtimeAccuracyParams) error {
+
+	path := "/api/admin/billing/realtime-accuracy/export"
+	var params ExportRealtimeAccuracyParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "window", "form", false, params.Window)
+
+	addQueryParam(queryValues, "csp", "form", false, params.Csp)
+
+	addQueryParam(queryValues, "type", "form", false, params.Type)
+
+	addQueryParam(queryValues, "subtype", "form", false, params.Subtype)
+
+	addQueryParam(queryValues, "format", "form", false, params.Format)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// GetRealtimeAccuracyOutliersParams contains the parameters for the GetRealtimeAccuracyOutliers operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetRealtimeAccuracyOutliersParams struct {
+	// Days to include, counted back from today
+	Window *int64 `json:"window,omitempty"`
+	// Restrict to one cloud service provider
+	Csp *string `json:"csp,omitempty"`
+	// Restrict to one cost type, e.g. Compute
+	Type *string `json:"type,omitempty"`
+	// Restrict to one cost subtype, e.g. Instance
+	Subtype *string `json:"subtype,omitempty"`
+	// Maximum rows to return
+	Limit *int64 `json:"limit,omitempty"`
+}
+
+// GetRealtimeAccuracyOutliers - Get realtime estimator accuracy outliers
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the deployment-days where the realtime estimate missed the invoice by the most. Requires platform admin or billing admin.
+func (c *Client) GetRealtimeAccuracyOutliers(ctx context.Context, opts ...GetRealtimeAccuracyOutliersParams) (*[]RealtimeAccuracyOutlier, error) {
+
+	path := "/api/admin/billing/realtime-accuracy/outliers"
+	var params GetRealtimeAccuracyOutliersParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "window", "form", false, params.Window)
+
+	addQueryParam(queryValues, "csp", "form", false, params.Csp)
+
+	addQueryParam(queryValues, "type", "form", false, params.Type)
+
+	addQueryParam(queryValues, "subtype", "form", false, params.Subtype)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []RealtimeAccuracyOutlier
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RefreshRealtimeAccuracy - Rebuild realtime estimator accuracy data
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Starts a background rebuild of the realtime accuracy view. Responds 409 while a rebuild is already running. Requires platform admin or billing admin.
+func (c *Client) RefreshRealtimeAccuracy(ctx context.Context) error {
+
+	path := "/api/admin/billing/realtime-accuracy/refresh"
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// GetRealtimeAccuracyTrendParams contains the parameters for the GetRealtimeAccuracyTrend operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetRealtimeAccuracyTrendParams struct {
+	// Days to include, counted back from today
+	Window *int64 `json:"window,omitempty"`
+	// Restrict to one cloud service provider
+	Csp *string `json:"csp,omitempty"`
+	// Restrict to one cost type, e.g. Compute
+	Type *string `json:"type,omitempty"`
+	// Restrict to one cost subtype, e.g. Instance
+	Subtype *string `json:"subtype,omitempty"`
+}
+
+// GetRealtimeAccuracyTrend - Get realtime estimator accuracy trend
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the daily estimate-to-invoice ratio per CSP. Requires platform admin or billing admin.
+func (c *Client) GetRealtimeAccuracyTrend(ctx context.Context, opts ...GetRealtimeAccuracyTrendParams) (*[]RealtimeAccuracyTrendPoint, error) {
+
+	path := "/api/admin/billing/realtime-accuracy/trend"
+	var params GetRealtimeAccuracyTrendParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "window", "form", false, params.Window)
+
+	addQueryParam(queryValues, "csp", "form", false, params.Csp)
+
+	addQueryParam(queryValues, "type", "form", false, params.Type)
+
+	addQueryParam(queryValues, "subtype", "form", false, params.Subtype)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []RealtimeAccuracyTrendPoint
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListBillingRunsParams contains the parameters for the ListBillingRuns operation.
 // Required parameters are value fields; optional parameters are pointers.
 type ListBillingRunsParams struct {
@@ -1984,8 +2215,10 @@ func (c *Client) ListAccessibleAiProviders(ctx context.Context) (*[]AccessibleAi
 type ListUserAiChatAttachmentsParams struct {
 	// Max attachments to return
 	Limit *int64 `json:"limit,omitempty"`
-	// Pagination offset
+	// Pagination offset, ignored when a cursor is given
 	Offset *int64 `json:"offset,omitempty"`
+	// Cursor from a previous page
+	Cursor *string `json:"cursor,omitempty"`
 	// Filter by content type prefix (e.g. image/)
 	ContentType *string `json:"contentType,omitempty"`
 }
@@ -2006,6 +2239,8 @@ func (c *Client) ListUserAiChatAttachments(ctx context.Context, opts ...ListUser
 	addQueryParam(queryValues, "limit", "form", false, params.Limit)
 
 	addQueryParam(queryValues, "offset", "form", false, params.Offset)
+
+	addQueryParam(queryValues, "cursor", "form", false, params.Cursor)
 
 	addQueryParam(queryValues, "contentType", "form", false, params.ContentType)
 
@@ -2127,6 +2362,10 @@ func (c *Client) CreateAiChatConversation(ctx context.Context, body CreateConver
 type ListAiChatAttachmentsParams struct {
 	// Filter by message ID (optional)
 	MessageID *string `json:"messageId,omitempty"`
+	// Page size
+	Limit *int64 `json:"limit,omitempty"`
+	// Cursor from a previous page
+	Cursor *string `json:"cursor,omitempty"`
 }
 
 // ListAiChatAttachments - List attachments
@@ -2144,6 +2383,10 @@ func (c *Client) ListAiChatAttachments(ctx context.Context, conversationID strin
 	}
 	queryValues := url.Values{}
 	addQueryParam(queryValues, "messageId", "form", false, params.MessageID)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	addQueryParam(queryValues, "cursor", "form", false, params.Cursor)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
@@ -18657,6 +18900,23 @@ func (c *Client) GetWorkflowRunFile(ctx context.Context, slug string, params Get
 	}
 
 	var result string
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetWorkflowRunRunningSteps - Get Workflow Run Running Steps
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Reads where each running job of a workflow run has got to.
+func (c *Client) GetWorkflowRunRunningSteps(ctx context.Context, slug string) (*WorkflowRunRunningStepsResponse, error) {
+
+	path := "/api/workflow-runs/{slug}/running-steps"
+	path = pathReplace(path, "slug", "simple", false, slug)
+
+	var result WorkflowRunRunningStepsResponse
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
