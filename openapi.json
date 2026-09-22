@@ -1511,6 +1511,460 @@
         ],
         "type": "object"
       },
+      "AgentMachine": {
+        "additionalProperties": false,
+        "properties": {
+          "agentVersion": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "hostname": {
+            "description": "Hostname the daemon reported, when it answered.",
+            "type": "string"
+          },
+          "id": {
+            "description": "Hex ObjectID of the cluster, pool, or instance document.",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "cloud",
+              "existing",
+              "instance"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "description": "Platform username of the resource owner.",
+            "type": "string"
+          },
+          "remoteMaxPermissionMode": {
+            "enum": [
+              "",
+              "read-only",
+              "accept-edits",
+              "bypass-permissions",
+              "plan"
+            ],
+            "type": "string"
+          },
+          "remoteStart": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "connected",
+              "no_daemon",
+              "no_agent",
+              "unreachable",
+              "unsupported_agent"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "owner",
+          "status"
+        ],
+        "type": "object"
+      },
+      "AgentMachineSessionsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "machine": {
+            "$ref": "#/components/schemas/AgentMachine"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/AgentSession"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "machine",
+          "sessions"
+        ],
+        "type": "object"
+      },
+      "AgentMessageAccepted": {
+        "additionalProperties": false,
+        "properties": {
+          "queued": {
+            "description": "True when the message is waiting behind the turn already running.",
+            "type": "boolean"
+          },
+          "turnId": {
+            "description": "Identifies the turn this message runs as; its stream events carry the same id.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "queued",
+          "turnId"
+        ],
+        "type": "object"
+      },
+      "AgentRenameBody": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "What to call the session in the list.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "AgentSession": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "type": "string"
+          },
+          "approvals": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalRequest"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "autoName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effort": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "liveHost": {
+            "type": "string"
+          },
+          "machineId": {
+            "type": "string"
+          },
+          "messages": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "model": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "permissionMode": {
+            "type": "string"
+          },
+          "preview": {
+            "type": "string"
+          },
+          "remoteControl": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "idle",
+              "running",
+              "awaiting_approval",
+              "live_elsewhere"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "workspace": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "machineId",
+          "id",
+          "model",
+          "workspace",
+          "createdAt",
+          "updatedAt",
+          "messages",
+          "preview",
+          "status"
+        ],
+        "type": "object"
+      },
+      "AgentSessionDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "type": "string"
+          },
+          "approvals": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalRequest"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "autoName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effort": {
+            "type": "string"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "lastSeq": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "liveHost": {
+            "type": "string"
+          },
+          "machineId": {
+            "type": "string"
+          },
+          "messages": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "model": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "permissionMode": {
+            "type": "string"
+          },
+          "preview": {
+            "type": "string"
+          },
+          "remoteControl": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "idle",
+              "running",
+              "awaiting_approval",
+              "live_elsewhere"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "workspace": {
+            "type": "string"
+          },
+          "workspaceUntrusted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "machineId",
+          "history",
+          "id",
+          "model",
+          "workspace",
+          "createdAt",
+          "updatedAt",
+          "messages",
+          "preview",
+          "status"
+        ],
+        "type": "object"
+      },
+      "AgentSessionForked": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Session id of the copy.",
+            "type": "string"
+          },
+          "machineId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "machineId",
+          "id"
+        ],
+        "type": "object"
+      },
+      "AgentSessionSettingsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "description": "Allocation to bill; the daemon requires one for org provider models.",
+            "type": "string"
+          },
+          "model": {
+            "description": "Model id to switch the session to.",
+            "type": "string"
+          },
+          "permissionMode": {
+            "description": "Authority the session runs with; the machine refuses anything above its remoteMaxPermissionMode.",
+            "enum": [
+              "read-only",
+              "accept-edits",
+              "bypass-permissions"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AgentSessionsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "machines": {
+            "items": {
+              "$ref": "#/components/schemas/AgentMachine"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "sessions": {
+            "description": "Every reachable machine's sessions, newest first.",
+            "items": {
+              "$ref": "#/components/schemas/AgentSession"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "machines",
+          "sessions"
+        ],
+        "type": "object"
+      },
+      "AgentStreamEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "agentType": {
+            "type": "string"
+          },
+          "approval": {
+            "$ref": "#/components/schemas/ApprovalRequest"
+          },
+          "approvalId": {
+            "type": "string"
+          },
+          "args": {
+            "type": "string"
+          },
+          "background": {
+            "type": "boolean"
+          },
+          "client": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "goalProgress": {
+            "$ref": "#/components/schemas/GoalProgress"
+          },
+          "id": {
+            "type": "string"
+          },
+          "interim": {
+            "type": "boolean"
+          },
+          "isError": {
+            "type": "boolean"
+          },
+          "iters": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "mcp": {
+            "$ref": "#/components/schemas/MCPStatus"
+          },
+          "name": {
+            "type": "string"
+          },
+          "newId": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "seq": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "startLine": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "$ref": "#/components/schemas/SessionState"
+          },
+          "turn": {
+            "$ref": "#/components/schemas/TurnResult"
+          },
+          "turnId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "seq",
+          "type"
+        ],
+        "type": "object"
+      },
       "AiConnectionInventory": {
         "additionalProperties": false,
         "properties": {
@@ -2453,6 +2907,126 @@
           "disabled",
           "secrets",
           "created"
+        ],
+        "type": "object"
+      },
+      "ApprovalAnswer": {
+        "additionalProperties": false,
+        "properties": {
+          "allowDir": {
+            "type": "boolean"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "chat": {
+            "type": "boolean"
+          },
+          "clear": {
+            "type": "boolean"
+          },
+          "denyMessage": {
+            "type": "string"
+          },
+          "feedback": {
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "",
+              "read-only",
+              "accept-edits",
+              "bypass-permissions",
+              "plan"
+            ],
+            "type": "string"
+          },
+          "plan": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "agent": {
+            "type": "string"
+          },
+          "command": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "header": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "confirm",
+              "ask",
+              "plan"
+            ],
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "multiSelect": {
+            "type": "boolean"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/AskOption"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "plan": {
+            "type": "string"
+          },
+          "planPath": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "subagentId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "AskOption": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "label"
         ],
         "type": "object"
       },
@@ -10882,6 +11456,12 @@
             "description": "Environment to schedule the kernel's worker onto. Cluster targets only.",
             "type": "string"
           },
+          "memoryLimit": {
+            "description": "Memory ceiling (GB) for the kernel's processes. Workspace targets only; defaults to half the workspace's own limit and may not exceed it.",
+            "format": "double",
+            "minimum": 0.25,
+            "type": "number"
+          },
           "name": {
             "description": "Kernel name. Auto-generated if omitted.",
             "maxLength": 255,
@@ -10897,7 +11477,7 @@
             "type": "object"
           },
           "targetId": {
-            "description": "Cluster or instance the kernel runs on.",
+            "description": "Cluster or instance the kernel runs on, or \"user-workspace\" to run it on the caller's own workspace.",
             "type": "string"
           },
           "workerId": {
@@ -11810,6 +12390,41 @@
         "required": [
           "title",
           "key"
+        ],
+        "type": "object"
+      },
+      "CreateSessionBody": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "description": "Allocation to bill the session to. Required for org provider models.",
+            "type": "string"
+          },
+          "model": {
+            "description": "Model id; the machine's default is used when empty.",
+            "type": "string"
+          },
+          "permissionMode": {
+            "description": "Authority the session runs with, clamped by the machine to its remoteMaxPermissionMode; the machine's default is used when empty.",
+            "enum": [
+              "",
+              "read-only",
+              "accept-edits",
+              "bypass-permissions"
+            ],
+            "type": "string"
+          },
+          "prompt": {
+            "description": "Starts the first turn immediately when set.",
+            "type": "string"
+          },
+          "workspace": {
+            "description": "Absolute path on the machine to run in. Offer the caller workspaces their existing sessions already use.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace"
         ],
         "type": "object"
       },
@@ -15677,6 +16292,60 @@
         ],
         "type": "object"
       },
+      "GoalProgress": {
+        "additionalProperties": false,
+        "properties": {
+          "condition": {
+            "type": "string"
+          },
+          "elapsedMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "err": {
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "",
+              "achieved",
+              "stopped"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "tokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "turns": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "GoalStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "checking": {
+            "type": "boolean"
+          },
+          "elapsedMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "paused": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "GoogleBucket": {
         "additionalProperties": false,
         "properties": {
@@ -17639,6 +18308,44 @@
         ],
         "type": "object"
       },
+      "HistoryItem": {
+        "additionalProperties": false,
+        "properties": {
+          "fromMain": {
+            "type": "boolean"
+          },
+          "kind": {
+            "enum": [
+              "user",
+              "assistant",
+              "thinking",
+              "tool_call",
+              "tool_result",
+              "notice",
+              "plan_view",
+              "goal_view",
+              "goal_progress"
+            ],
+            "type": "string"
+          },
+          "planBody": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "toolArgs": {
+            "type": "string"
+          },
+          "toolName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
       "IconRef": {
         "additionalProperties": false,
         "properties": {
@@ -18611,6 +19318,12 @@
             "readOnly": true,
             "type": "string"
           },
+          "memoryLimit": {
+            "description": "Memory ceiling (GB) applied to the kernel's processes.",
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
           "name": {
             "description": "Kernel name.",
             "type": "string"
@@ -18648,7 +19361,8 @@
             "enum": [
               "cluster",
               "instance",
-              "controller"
+              "controller",
+              "workspace"
             ],
             "readOnly": true,
             "type": "string"
@@ -20772,6 +21486,29 @@
         ],
         "type": "object"
       },
+      "MCPStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "err": {
+            "type": "string"
+          },
+          "prompts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "server": {
+            "type": "string"
+          },
+          "tools": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "server"
+        ],
+        "type": "object"
+      },
       "MachineLearningWorkspace": {
         "additionalProperties": false,
         "properties": {
@@ -22718,6 +23455,10 @@
         "properties": {
           "resourceGroup": {
             "description": "Target resource group name",
+            "type": "string"
+          },
+          "resourceGroupUser": {
+            "description": "Username of the target resource group's owner. Required only to pick between groups that share a name.",
             "type": "string"
           }
         },
@@ -32727,6 +33468,26 @@
         ],
         "type": "object"
       },
+      "RemotePolicy": {
+        "additionalProperties": false,
+        "properties": {
+          "maxPermissionMode": {
+            "type": "string"
+          },
+          "newSessions": {
+            "type": "boolean"
+          },
+          "start": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "newSessions",
+          "start",
+          "maxPermissionMode"
+        ],
+        "type": "object"
+      },
       "RemoteWorkflowSettings": {
         "additionalProperties": false,
         "properties": {
@@ -33679,6 +34440,11 @@
             "readOnly": true,
             "type": "number"
           },
+          "canAdmin": {
+            "description": "True when the caller may manage this resource group: share it, change its allocation, move or unassign any resource in it, delete it",
+            "readOnly": true,
+            "type": "boolean"
+          },
           "failedResourceCount": {
             "description": "Number of assigned resources in a failed state",
             "format": "int64",
@@ -33797,6 +34563,11 @@
             "format": "double",
             "readOnly": true,
             "type": "number"
+          },
+          "canAdmin": {
+            "description": "True when the caller may manage this resource group: share it, change its allocation, move or unassign any resource in it, delete it",
+            "readOnly": true,
+            "type": "boolean"
           },
           "failedResourceCount": {
             "description": "Number of assigned resources in a failed state",
@@ -35010,6 +35781,19 @@
         ],
         "type": "object"
       },
+      "SendMessageBody": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "description": "The message to send. Empty continues the turn, which is how the terminal wakes background work.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "type": "object"
+      },
       "SentrySettings": {
         "additionalProperties": false,
         "properties": {
@@ -35509,6 +36293,112 @@
           "type",
           "version",
           "port"
+        ],
+        "type": "object"
+      },
+      "SessionState": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation": {
+            "type": "string"
+          },
+          "attribution": {
+            "type": "boolean"
+          },
+          "autoCompactWindow": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "autoName": {
+            "type": "string"
+          },
+          "effectiveEffort": {
+            "type": "string"
+          },
+          "effort": {
+            "type": "string"
+          },
+          "effortActive": {
+            "type": "boolean"
+          },
+          "goal": {
+            "$ref": "#/components/schemas/GoalStatus"
+          },
+          "inputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "model": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "noToolsMode": {
+            "type": "boolean"
+          },
+          "outputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingSubagentWork": {
+            "type": "boolean"
+          },
+          "permissionMode": {
+            "type": "string"
+          },
+          "providerUsageAvailable": {
+            "type": "boolean"
+          },
+          "remoteControl": {
+            "type": "boolean"
+          },
+          "remotePolicy": {
+            "$ref": "#/components/schemas/RemotePolicy"
+          },
+          "remoteUrl": {
+            "type": "string"
+          },
+          "sessionRetentionDays": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "subagentConcurrency": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "subagentDepth": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "subagentModel": {
+            "type": "string"
+          },
+          "subagentsDisabled": {
+            "type": "boolean"
+          },
+          "supportedEfforts": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "toolCallingMode": {
+            "type": "string"
+          },
+          "toolsDisabled": {
+            "type": "boolean"
+          },
+          "usageStatusLine": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "model",
+          "remotePolicy"
         ],
         "type": "object"
       },
@@ -37241,6 +38131,43 @@
               "type": "string"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TurnResult": {
+        "additionalProperties": false,
+        "properties": {
+          "blockedByHook": {
+            "type": "string"
+          },
+          "estimatedCost": {
+            "format": "double",
+            "type": "number"
+          },
+          "inputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "iters": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "model": {
+            "type": "string"
+          },
+          "outputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "type": "object"
@@ -45172,6 +46099,597 @@
         "tags": [
           "Clusters"
         ]
+      }
+    },
+    "/api/agents/machines/{machine}/sessions": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the pw code sessions one machine's daemon reports, with the machine's reachability.",
+        "operationId": "list-agent-machine-sessions",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentMachineSessionsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List pw code sessions on one machine",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStarts a session in the given workspace on the machine. The machine allows this only when its owner turned remoteControl on, and clamps the session to the machine's remoteMaxPermissionMode.",
+        "operationId": "create-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSessionDetail"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Start a pw code session on a machine",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves the session and its transcripts from the machine. Destroying a session is wider than sending it a turn, so the machine's daemon holds it to the same limit: a session that refuses remote drive can only be deleted from the machine itself.",
+        "operationId": "delete-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns one session's transcript and state as its machine's daemon reports them. Live updates stream from /ws/agents/machines/{machine}/sessions/{id}/events.",
+        "operationId": "get-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSessionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a pw code session transcript",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/approvals/{approvalId}": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nAnswers an approval the agent is waiting on. The machine's daemon decides whether the answer is allowed: a session running above the remote permission ceiling can only be answered from the machine itself, and an answer sent from here never grants standing directory access.",
+        "operationId": "answer-agent-session-approval",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Approval id from the session detail or an approval_request event.",
+            "in": "path",
+            "name": "approvalId",
+            "required": true,
+            "schema": {
+              "description": "Approval id from the session detail or an approval_request event.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovalAnswer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Answer a pw code approval request",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/fork": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nCopies the session and its subagent transcripts into a new one on the same machine, leaving the original untouched. Refused while the session is mid-turn, and while another host holds it live.",
+        "operationId": "fork-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSessionForked"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Copy a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/interrupt": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStops the work in flight and nothing else. This one route is not held to the remote permission ceiling: a session that refuses to be driven from here can still be stopped from here.",
+        "operationId": "interrupt-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Stop the turn a pw code session is running",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/messages": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSends a message to the session, starting a turn or queueing behind the one in flight. The machine's daemon decides whether it is allowed: a session running above the remote permission ceiling, or one whose lease another host holds, can only be driven from the machine itself.",
+        "operationId": "send-agent-session-message",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentMessageAccepted"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Send a message to a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/rename": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRenames the session in the machine's store. Refused while the session is mid-turn, and while another host holds it live.",
+        "operationId": "rename-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRenameBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Rename a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/settings": {
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nChanges what a live session runs as, and answers with its new state. The machine's daemon decides whether it is allowed: the session must be live, an org provider model needs an allocation, and a session already running above the remote permission ceiling can only be changed from the machine itself.",
+        "operationId": "update-agent-session-settings",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentSessionSettingsBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionState"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Change a running pw code session's model, allocation or authority",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/sessions": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nAsks every connected cluster and instance you can log in to for its pw code sessions and returns them together with each machine's reachability. Nothing is stored: the answer is what the machines report right now.",
+        "operationId": "list-agent-sessions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSessionsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List pw code sessions across your machines",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
       }
     },
     "/api/ai-usage/breakdown": {
@@ -83705,6 +85223,79 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/resource-groups/{name}/resources/{resourceId}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nLeaves an off resource with no resource group; its owner must assign one before it can start again.",
+        "operationId": "unassign-resource-group-resource",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Resource group name",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Resource group name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Id of the resource to unassign",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "schema": {
+              "description": "Id of the resource to unassign",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Unassign a resource from its resource group",
+        "tags": [
+          "Resource Groups"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/resource-groups/{name}/resources/{resourceId}/move": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nMoves an off resource to a different resource group.",
@@ -91323,12 +92914,22 @@
             }
           },
           {
-            "description": "Only resource groups the user may bill new resources against: their own, or shared with use or admin permission",
+            "description": "Also require this user to be able to bill the group. Narrows the caller's own list, so it reveals nothing they cannot already see.",
             "explode": false,
             "in": "query",
-            "name": "usable",
+            "name": "usableBy",
             "schema": {
-              "description": "Only resource groups the user may bill new resources against: their own, or shared with use or admin permission",
+              "description": "Also require this user to be able to bill the group. Narrows the caller's own list, so it reveals nothing they cannot already see.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Include the groups an organization admin may open but has no share on. For deciding whether to link to a group, not for choosing where to bill.",
+            "explode": false,
+            "in": "query",
+            "name": "openable",
+            "schema": {
+              "description": "Include the groups an organization admin may open but has no share on. For deciding whether to link to a group, not for choosing where to bill.",
               "type": "boolean"
             }
           },
@@ -95633,6 +97234,10 @@
       "name": "Agent"
     },
     {
+      "description": "Browse pw code sessions running on your connected machines",
+      "name": "Agents"
+    },
+    {
       "description": "OpenAI-compatible AI chat endpoints with branching conversations and sharing",
       "name": "AI Chat"
     },
@@ -95900,5 +97505,30 @@
       "description": "Endpoints related to workflows",
       "name": "Workflows"
     }
-  ]
+  ],
+  "webhooks": {
+    "agentSessionEvents": {
+      "get": {
+        "description": "One JSON frame per message on the WebSocket at /ws/agents/machines/{machine}/sessions/{id}/events?after=N. Pass the last seq seen as after to resume; a replay_truncated frame means the transcript must be refetched.",
+        "operationId": "agent-session-events",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentStreamEvent"
+                }
+              }
+            },
+            "description": "A session event frame"
+          }
+        },
+        "summary": "pw code session event feed",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    }
+  }
 }

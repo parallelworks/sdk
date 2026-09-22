@@ -2067,6 +2067,197 @@ func (c *Client) RegisterNode(ctx context.Context, body RegisterNodeByTokenInput
 	return &result, nil
 }
 
+// ListAgentMachineSessions - List pw code sessions on one machine
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the pw code sessions one machine's daemon reports, with the machine's reachability.
+func (c *Client) ListAgentMachineSessions(ctx context.Context, machine string) (*AgentMachineSessionsResponse, error) {
+
+	path := "/api/agents/machines/{machine}/sessions"
+	path = pathReplace(path, "machine", "simple", false, machine)
+
+	var result AgentMachineSessionsResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreateAgentSession - Start a pw code session on a machine
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Starts a session in the given workspace on the machine. The machine allows this only when its owner turned remoteControl on, and clamps the session to the machine's remoteMaxPermissionMode.
+func (c *Client) CreateAgentSession(ctx context.Context, machine string, body CreateSessionBody) (*AgentSessionDetail, error) {
+
+	path := "/api/agents/machines/{machine}/sessions"
+	path = pathReplace(path, "machine", "simple", false, machine)
+
+	var result AgentSessionDetail
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentSession - Get a pw code session transcript
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns one session's transcript and state as its machine's daemon reports them. Live updates stream from /ws/agents/machines/{machine}/sessions/{id}/events.
+func (c *Client) GetAgentSession(ctx context.Context, machine string, id string) (*AgentSessionDetail, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentSessionDetail
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteAgentSession - Delete a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes the session and its transcripts from the machine. Destroying a session is wider than sending it a turn, so the machine's daemon holds it to the same limit: a session that refuses remote drive can only be deleted from the machine itself.
+func (c *Client) DeleteAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// AnswerAgentSessionApproval - Answer a pw code approval request
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Answers an approval the agent is waiting on. The machine's daemon decides whether the answer is allowed: a session running above the remote permission ceiling can only be answered from the machine itself, and an answer sent from here never grants standing directory access.
+func (c *Client) AnswerAgentSessionApproval(ctx context.Context, machine string, id string, approvalID string, body ApprovalAnswer) error {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/approvals/{approvalId}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "approvalId", "simple", false, approvalID)
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// ForkAgentSession - Copy a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Copies the session and its subagent transcripts into a new one on the same machine, leaving the original untouched. Refused while the session is mid-turn, and while another host holds it live.
+func (c *Client) ForkAgentSession(ctx context.Context, machine string, id string) (*AgentSessionForked, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/fork"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentSessionForked
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// InterruptAgentSession - Stop the turn a pw code session is running
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Stops the work in flight and nothing else. This one route is not held to the remote permission ceiling: a session that refuses to be driven from here can still be stopped from here.
+func (c *Client) InterruptAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/interrupt"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// SendAgentSessionMessage - Send a message to a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Sends a message to the session, starting a turn or queueing behind the one in flight. The machine's daemon decides whether it is allowed: a session running above the remote permission ceiling, or one whose lease another host holds, can only be driven from the machine itself.
+func (c *Client) SendAgentSessionMessage(ctx context.Context, machine string, id string, body SendMessageBody) (*AgentMessageAccepted, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/messages"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentMessageAccepted
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RenameAgentSession - Rename a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Renames the session in the machine's store. Refused while the session is mid-turn, and while another host holds it live.
+func (c *Client) RenameAgentSession(ctx context.Context, machine string, id string, body AgentRenameBody) error {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/rename"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UpdateAgentSessionSettings - Change a running pw code session's model, allocation or authority
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Changes what a live session runs as, and answers with its new state. The machine's daemon decides whether it is allowed: the session must be live, an org provider model needs an allocation, and a session already running above the remote permission ceiling can only be changed from the machine itself.
+func (c *Client) UpdateAgentSessionSettings(ctx context.Context, machine string, id string, body AgentSessionSettingsBody) (*SessionState, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/settings"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result SessionState
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListAgentSessions - List pw code sessions across your machines
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Asks every connected cluster and instance you can log in to for its pw code sessions and returns them together with each machine's reachability. Nothing is stored: the answer is what the machines report right now.
+func (c *Client) ListAgentSessions(ctx context.Context) (*AgentSessionsResponse, error) {
+
+	path := "/api/agents/sessions"
+
+	var result AgentSessionsResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetUserAiUsageBreakdownParams contains the parameters for the GetUserAiUsageBreakdown operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetUserAiUsageBreakdownParams struct {
@@ -14945,6 +15136,25 @@ func (c *Client) ListResourceGroupResources(ctx context.Context, organization st
 	return &result, nil
 }
 
+// UnassignResourceGroupResource - Unassign a resource from its resource group
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Leaves an off resource with no resource group; its owner must assign one before it can start again.
+func (c *Client) UnassignResourceGroupResource(ctx context.Context, organization string, user string, name string, resourceID string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/resource-groups/{name}/resources/{resourceId}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+	path = pathReplace(path, "resourceId", "simple", false, resourceID)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // MoveResourceGroupResource - Move a resource to another resource group
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -17513,8 +17723,10 @@ type ListUserResourceGroupsParams struct {
 	Allocation *string `json:"allocation,omitempty"`
 	// Sort field and direction
 	Sort *string `json:"sort,omitempty"`
-	// Only resource groups the user may bill new resources against: their own, or shared with use or admin permission
-	Usable *bool `json:"usable,omitempty"`
+	// Also require this user to be able to bill the group. Narrows the caller's own list, so it reveals nothing they cannot already see.
+	UsableBy *string `json:"usableBy,omitempty"`
+	// Include the groups an organization admin may open but has no share on. For deciding whether to link to a group, not for choosing where to bill.
+	Openable *bool `json:"openable,omitempty"`
 	// Only resource groups whose current allocation may fund this resource type; groups with no allocation or an unrestricted allocation always match
 	Allows *string `json:"allows,omitempty"`
 }
@@ -17542,7 +17754,9 @@ func (c *Client) ListUserResourceGroups(ctx context.Context, opts ...ListUserRes
 
 	addQueryParam(queryValues, "sort", "form", false, params.Sort)
 
-	addQueryParam(queryValues, "usable", "form", false, params.Usable)
+	addQueryParam(queryValues, "usableBy", "form", false, params.UsableBy)
+
+	addQueryParam(queryValues, "openable", "form", false, params.Openable)
 
 	addQueryParam(queryValues, "allows", "form", false, params.Allows)
 

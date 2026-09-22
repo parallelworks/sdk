@@ -613,6 +613,129 @@ type AdminProduct struct {
 	SetupStatus           string                 `json:"setupStatus"`
 }
 
+type AgentMachine struct {
+	AgentVersion *string `json:"agentVersion,omitempty"`
+	Error        *string `json:"error,omitempty"`
+	// Hostname the daemon reported, when it answered.
+	Hostname *string `json:"hostname,omitempty"`
+	// Hex ObjectID of the cluster, pool, or instance document.
+	ID   string `json:"id"`
+	Kind string `json:"kind"`
+	Name string `json:"name"`
+	// Platform username of the resource owner.
+	Owner                   string  `json:"owner"`
+	RemoteMaxPermissionMode *string `json:"remoteMaxPermissionMode,omitempty"`
+	RemoteStart             *bool   `json:"remoteStart,omitempty"`
+	Status                  string  `json:"status"`
+}
+
+type AgentMachineSessionsResponse struct {
+	Machine  AgentMachine   `json:"machine"`
+	Sessions []AgentSession `json:"sessions"`
+}
+
+type AgentMessageAccepted struct {
+	// True when the message is waiting behind the turn already running.
+	Queued bool `json:"queued"`
+	// Identifies the turn this message runs as; its stream events carry the same id.
+	TurnID string `json:"turnId"`
+}
+
+type AgentRenameBody struct {
+	// What to call the session in the list.
+	Name string `json:"name"`
+}
+
+type AgentSession struct {
+	Allocation     *string           `json:"allocation,omitempty"`
+	Approvals      []ApprovalRequest `json:"approvals,omitempty"`
+	AutoName       *string           `json:"autoName,omitempty"`
+	CreatedAt      time.Time         `json:"createdAt"`
+	Effort         *string           `json:"effort,omitempty"`
+	ID             string            `json:"id"`
+	LiveHost       *string           `json:"liveHost,omitempty"`
+	MachineID      string            `json:"machineId"`
+	Messages       int64             `json:"messages"`
+	Model          string            `json:"model"`
+	Name           *string           `json:"name,omitempty"`
+	PermissionMode *string           `json:"permissionMode,omitempty"`
+	Preview        string            `json:"preview"`
+	RemoteControl  *bool             `json:"remoteControl,omitempty"`
+	Status         string            `json:"status"`
+	UpdatedAt      time.Time         `json:"updatedAt"`
+	Workspace      string            `json:"workspace"`
+}
+
+type AgentSessionDetail struct {
+	Allocation         *string           `json:"allocation,omitempty"`
+	Approvals          []ApprovalRequest `json:"approvals,omitempty"`
+	AutoName           *string           `json:"autoName,omitempty"`
+	CreatedAt          time.Time         `json:"createdAt"`
+	Effort             *string           `json:"effort,omitempty"`
+	History            []HistoryItem     `json:"history"`
+	ID                 string            `json:"id"`
+	LastSeq            *int64            `json:"lastSeq,omitempty"`
+	LiveHost           *string           `json:"liveHost,omitempty"`
+	MachineID          string            `json:"machineId"`
+	Messages           int64             `json:"messages"`
+	Model              string            `json:"model"`
+	Name               *string           `json:"name,omitempty"`
+	PermissionMode     *string           `json:"permissionMode,omitempty"`
+	Preview            string            `json:"preview"`
+	RemoteControl      *bool             `json:"remoteControl,omitempty"`
+	Status             string            `json:"status"`
+	UpdatedAt          time.Time         `json:"updatedAt"`
+	Workspace          string            `json:"workspace"`
+	WorkspaceUntrusted *bool             `json:"workspaceUntrusted,omitempty"`
+}
+
+type AgentSessionForked struct {
+	// Session id of the copy.
+	ID        string `json:"id"`
+	MachineID string `json:"machineId"`
+}
+
+type AgentSessionSettingsBody struct {
+	// Allocation to bill; the daemon requires one for org provider models.
+	Allocation *string `json:"allocation,omitempty"`
+	// Model id to switch the session to.
+	Model *string `json:"model,omitempty"`
+	// Authority the session runs with; the machine refuses anything above its remoteMaxPermissionMode.
+	PermissionMode *string `json:"permissionMode,omitempty"`
+}
+
+type AgentSessionsResponse struct {
+	Machines []AgentMachine `json:"machines"`
+	// Every reachable machine's sessions, newest first.
+	Sessions []AgentSession `json:"sessions"`
+}
+
+type AgentStreamEvent struct {
+	AgentType    *string          `json:"agentType,omitempty"`
+	Approval     *ApprovalRequest `json:"approval,omitempty"`
+	ApprovalID   *string          `json:"approvalId,omitempty"`
+	Args         *string          `json:"args,omitempty"`
+	Background   *bool            `json:"background,omitempty"`
+	Client       *string          `json:"client,omitempty"`
+	Color        *string          `json:"color,omitempty"`
+	Content      *string          `json:"content,omitempty"`
+	GoalProgress *GoalProgress    `json:"goalProgress,omitempty"`
+	ID           *string          `json:"id,omitempty"`
+	Interim      *bool            `json:"interim,omitempty"`
+	IsError      *bool            `json:"isError,omitempty"`
+	Iters        *int64           `json:"iters,omitempty"`
+	Mcp          *McpStatus       `json:"mcp,omitempty"`
+	Name         *string          `json:"name,omitempty"`
+	NewID        *string          `json:"newId,omitempty"`
+	Result       *string          `json:"result,omitempty"`
+	Seq          int64            `json:"seq"`
+	StartLine    *int64           `json:"startLine,omitempty"`
+	State        *SessionState    `json:"state,omitempty"`
+	Turn         *TurnResult      `json:"turn,omitempty"`
+	TurnID       *string          `json:"turnId,omitempty"`
+	Type         string           `json:"type"`
+}
+
 type AiConnectionInventory struct {
 	CatalogEntryID *string `json:"catalogEntryId,omitempty"`
 	Compliance     string  `json:"compliance"`
@@ -897,6 +1020,40 @@ type AppResponse struct {
 	Secrets []SecretInfo `json:"secrets"`
 	// What the sub claim contains.
 	SubjectType string `json:"subjectType"`
+}
+
+type ApprovalAnswer struct {
+	AllowDir    *bool   `json:"allowDir,omitempty"`
+	Allowed     *bool   `json:"allowed,omitempty"`
+	Chat        *bool   `json:"chat,omitempty"`
+	Clear       *bool   `json:"clear,omitempty"`
+	DenyMessage *string `json:"denyMessage,omitempty"`
+	Feedback    *string `json:"feedback,omitempty"`
+	Mode        *string `json:"mode,omitempty"`
+	Plan        *string `json:"plan,omitempty"`
+	Text        *string `json:"text,omitempty"`
+}
+
+type ApprovalRequest struct {
+	Agent       *string     `json:"agent,omitempty"`
+	Command     *string     `json:"command,omitempty"`
+	CreatedAt   time.Time   `json:"createdAt"`
+	Header      *string     `json:"header,omitempty"`
+	ID          string      `json:"id"`
+	Kind        string      `json:"kind"`
+	Mode        *string     `json:"mode,omitempty"`
+	MultiSelect *bool       `json:"multiSelect,omitempty"`
+	Options     []AskOption `json:"options,omitempty"`
+	Plan        *string     `json:"plan,omitempty"`
+	PlanPath    *string     `json:"planPath,omitempty"`
+	Question    *string     `json:"question,omitempty"`
+	Reason      *string     `json:"reason,omitempty"`
+	SubagentID  *string     `json:"subagentId,omitempty"`
+}
+
+type AskOption struct {
+	Description *string `json:"description,omitempty"`
+	Label       string  `json:"label"`
 }
 
 type AssignedOrganization struct {
@@ -3788,13 +3945,15 @@ type CreateKernelBody struct {
 	Buckets []string `json:"buckets,omitempty"`
 	// Environment to schedule the kernel's worker onto. Cluster targets only.
 	EnvironmentID *string `json:"environmentId,omitempty"`
+	// Memory ceiling (GB) for the kernel's processes. Workspace targets only; defaults to half the workspace's own limit and may not exceed it.
+	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
 	// Kernel name. Auto-generated if omitted.
 	Name *string `json:"name,omitempty"`
 	// Run the kernel on the cluster's controller agent directly instead of scheduling a worker. Cluster targets only; starts immediately with no Slurm allocation.
 	RunOnController *bool `json:"runOnController,omitempty"`
 	// Scheduling parameters for the kernel's worker.
 	SchedulingParams map[string]any `json:"schedulingParams,omitempty"`
-	// Cluster or instance the kernel runs on.
+	// Cluster or instance the kernel runs on, or "user-workspace" to run it on the caller's own workspace.
 	TargetID string `json:"targetId"`
 	// Run the kernel on this existing compute worker instead of scheduling a new one.
 	WorkerID *string `json:"workerId,omitempty"`
@@ -4095,6 +4254,19 @@ type CreateSSHPublicKeyInputBody struct {
 	Key string `json:"key"`
 	// Display name for the key.
 	Title string `json:"title"`
+}
+
+type CreateSessionBody struct {
+	// Allocation to bill the session to. Required for org provider models.
+	Allocation *string `json:"allocation,omitempty"`
+	// Model id; the machine's default is used when empty.
+	Model *string `json:"model,omitempty"`
+	// Authority the session runs with, clamped by the machine to its remoteMaxPermissionMode; the machine's default is used when empty.
+	PermissionMode *string `json:"permissionMode,omitempty"`
+	// Starts the first turn immediately when set.
+	Prompt *string `json:"prompt,omitempty"`
+	// Absolute path on the machine to run in. Offer the caller workspaces their existing sessions already use.
+	Workspace string `json:"workspace"`
 }
 
 type CreateSkuRuleBody struct {
@@ -5521,6 +5693,23 @@ type GitlabProjectsOutputBody struct {
 	Projects []GitlabProjectListing `json:"projects"`
 }
 
+type GoalProgress struct {
+	Condition *string `json:"condition,omitempty"`
+	ElapsedMs *int64  `json:"elapsedMs,omitempty"`
+	Err       *string `json:"err,omitempty"`
+	Outcome   *string `json:"outcome,omitempty"`
+	Reason    *string `json:"reason,omitempty"`
+	Tokens    *int64  `json:"tokens,omitempty"`
+	Turns     *int64  `json:"turns,omitempty"`
+}
+
+type GoalStatus struct {
+	Active    *bool  `json:"active,omitempty"`
+	Checking  *bool  `json:"checking,omitempty"`
+	ElapsedMs *int64 `json:"elapsedMs,omitempty"`
+	Paused    *bool  `json:"paused,omitempty"`
+}
+
 type GoogleBucket struct {
 	// The requesting user's access level for this bucket.
 	AccessMode string `json:"accessMode"`
@@ -6688,6 +6877,15 @@ type HelmReleaseValuesResponseBody struct {
 	Values string `json:"values"`
 }
 
+type HistoryItem struct {
+	FromMain *bool   `json:"fromMain,omitempty"`
+	Kind     string  `json:"kind"`
+	PlanBody *string `json:"planBody,omitempty"`
+	Text     *string `json:"text,omitempty"`
+	ToolArgs *string `json:"toolArgs,omitempty"`
+	ToolName *string `json:"toolName,omitempty"`
+}
+
 type IconRef struct {
 	// SHA256 hex of a blob already in the caller's thumbnail library. Mutually exclusive with presetUrl.
 	Etag *string `json:"etag,omitempty"`
@@ -6990,6 +7188,8 @@ type KernelResponse struct {
 	ErrorMessage *string `json:"errorMessage,omitempty"`
 	// Kernel ID.
 	ID string `json:"id"`
+	// Memory ceiling (GB) applied to the kernel's processes.
+	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
 	// Kernel name.
 	Name *string `json:"name,omitempty"`
 	// Hostname of the compute node the kernel runs on.
@@ -7607,6 +7807,13 @@ type Lustre struct {
 	Zone *string `json:"zone,omitempty"`
 }
 
+type McpStatus struct {
+	Err     *string `json:"err,omitempty"`
+	Prompts *int64  `json:"prompts,omitempty"`
+	Server  string  `json:"server"`
+	Tools   *int64  `json:"tools,omitempty"`
+}
+
 type MachineLearningWorkspace struct {
 	// The creation timestamp of the Machine Learning Workspace.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
@@ -8184,6 +8391,8 @@ type MountInfoResponse struct {
 type MoveResourceInputBody struct {
 	// Target resource group name
 	ResourceGroup string `json:"resourceGroup"`
+	// Username of the target resource group's owner. Required only to pick between groups that share a name.
+	ResourceGroupUser *string `json:"resourceGroupUser,omitempty"`
 }
 
 type Name struct {
@@ -11370,6 +11579,12 @@ type RegisterNodeOutputBody struct {
 	Organization string `json:"organization"`
 }
 
+type RemotePolicy struct {
+	MaxPermissionMode string `json:"maxPermissionMode"`
+	NewSessions       bool   `json:"newSessions"`
+	Start             bool   `json:"start"`
+}
+
 type RemoteWorkflowSettings struct {
 	// Branch name.
 	Branch *string `json:"branch,omitempty"`
@@ -11690,6 +11905,8 @@ type ResourceGroup struct {
 	AllocationUsable *bool `json:"allocationUsable,omitempty"`
 	// Amount used of the current allocation (includes billing estimates)
 	AllocationUsed *float64 `json:"allocationUsed,omitempty"`
+	// True when the caller may manage this resource group: share it, change its allocation, move or unassign any resource in it, delete it
+	CanAdmin *bool `json:"canAdmin,omitempty"`
 	// Number of assigned resources in a failed state
 	FailedResourceCount *int64 `json:"failedResourceCount,omitempty"`
 	// True when the resource group is managed automatically from a group and cannot be edited or deleted
@@ -11724,6 +11941,8 @@ type ResourceGroupDetail struct {
 	AllocationUsable *bool `json:"allocationUsable,omitempty"`
 	// Amount used of the current allocation (includes billing estimates)
 	AllocationUsed *float64 `json:"allocationUsed,omitempty"`
+	// True when the caller may manage this resource group: share it, change its allocation, move or unassign any resource in it, delete it
+	CanAdmin *bool `json:"canAdmin,omitempty"`
 	// Number of assigned resources in a failed state
 	FailedResourceCount *int64 `json:"failedResourceCount,omitempty"`
 	// True when the resource group is managed automatically from a group and cannot be edited or deleted
@@ -12170,6 +12389,11 @@ type SecretResponse struct {
 	ID string `json:"id"`
 }
 
+type SendMessageBody struct {
+	// The message to send. Empty continues the turn, which is how the terminal wakes background work.
+	Text string `json:"text"`
+}
+
 type SentrySettings struct {
 	// Whether custom DSNs are configured (false means using Parallel Works defaults).
 	CustomDsn bool `json:"customDsn"`
@@ -12344,6 +12568,37 @@ type SessionSoftware struct {
 	Type string `json:"type"`
 	// Software version.
 	Version string `json:"version"`
+}
+
+type SessionState struct {
+	Allocation             *string      `json:"allocation,omitempty"`
+	Attribution            *bool        `json:"attribution,omitempty"`
+	AutoCompactWindow      *int64       `json:"autoCompactWindow,omitempty"`
+	AutoName               *string      `json:"autoName,omitempty"`
+	EffectiveEffort        *string      `json:"effectiveEffort,omitempty"`
+	Effort                 *string      `json:"effort,omitempty"`
+	EffortActive           *bool        `json:"effortActive,omitempty"`
+	Goal                   *GoalStatus  `json:"goal,omitempty"`
+	InputTokens            *int64       `json:"inputTokens,omitempty"`
+	Model                  string       `json:"model"`
+	Name                   *string      `json:"name,omitempty"`
+	NoToolsMode            *bool        `json:"noToolsMode,omitempty"`
+	OutputTokens           *int64       `json:"outputTokens,omitempty"`
+	PendingSubagentWork    *bool        `json:"pendingSubagentWork,omitempty"`
+	PermissionMode         *string      `json:"permissionMode,omitempty"`
+	ProviderUsageAvailable *bool        `json:"providerUsageAvailable,omitempty"`
+	RemoteControl          *bool        `json:"remoteControl,omitempty"`
+	RemotePolicy           RemotePolicy `json:"remotePolicy"`
+	RemoteURL              *string      `json:"remoteUrl,omitempty"`
+	SessionRetentionDays   *int64       `json:"sessionRetentionDays,omitempty"`
+	SubagentConcurrency    *int64       `json:"subagentConcurrency,omitempty"`
+	SubagentDepth          *int64       `json:"subagentDepth,omitempty"`
+	SubagentModel          *string      `json:"subagentModel,omitempty"`
+	SubagentsDisabled      *bool        `json:"subagentsDisabled,omitempty"`
+	SupportedEfforts       []string     `json:"supportedEfforts,omitempty"`
+	ToolCallingMode        *string      `json:"toolCallingMode,omitempty"`
+	ToolsDisabled          *bool        `json:"toolsDisabled,omitempty"`
+	UsageStatusLine        *string      `json:"usageStatusLine,omitempty"`
 }
 
 type SetActiveInputBody struct {
@@ -13054,6 +13309,16 @@ type TunnelShared struct {
 	Public *bool `json:"public,omitempty"`
 	// Shared team IDs.
 	Teams []string `json:"teams,omitempty"`
+}
+
+type TurnResult struct {
+	BlockedByHook *string  `json:"blockedByHook,omitempty"`
+	EstimatedCost *float64 `json:"estimatedCost,omitempty"`
+	InputTokens   *int64   `json:"inputTokens,omitempty"`
+	Iters         *int64   `json:"iters,omitempty"`
+	Model         *string  `json:"model,omitempty"`
+	OutputTokens  *int64   `json:"outputTokens,omitempty"`
+	Skills        []string `json:"skills,omitempty"`
 }
 
 type Unit struct {
