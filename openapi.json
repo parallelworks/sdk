@@ -1693,6 +1693,10 @@
             ],
             "type": "string"
           },
+          "turnStartedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
           "updatedAt": {
             "format": "date-time",
             "type": "string"
@@ -1787,6 +1791,10 @@
               "awaiting_approval",
               "live_elsewhere"
             ],
+            "type": "string"
+          },
+          "turnStartedAt": {
+            "format": "date-time",
             "type": "string"
           },
           "updatedAt": {
@@ -9257,7 +9265,13 @@
           "tier1": {
             "type": "boolean"
           },
+          "useNodeGroup": {
+            "type": "boolean"
+          },
           "usePlacementGroup": {
+            "type": "boolean"
+          },
+          "workloadPolicy": {
             "type": "boolean"
           },
           "zone": {
@@ -9375,6 +9389,14 @@
           },
           "cspId": {
             "description": "The cloud provider's identifier for the node",
+            "type": "string"
+          },
+          "failureCause": {
+            "description": "Why the node failed, as one of our own causes (e.g. capacity_not_granted)",
+            "type": "string"
+          },
+          "failureMessage": {
+            "description": "The cloud provider's own explanation for the failure",
             "type": "string"
           },
           "id": {
@@ -9698,7 +9720,13 @@
           "tier1": {
             "type": "boolean"
           },
+          "useNodeGroup": {
+            "type": "boolean"
+          },
           "usePlacementGroup": {
+            "type": "boolean"
+          },
+          "workloadPolicy": {
             "type": "boolean"
           },
           "zone": {
@@ -17264,7 +17292,13 @@
           "tier1": {
             "type": "boolean"
           },
+          "useNodeGroup": {
+            "type": "boolean"
+          },
           "usePlacementGroup": {
+            "type": "boolean"
+          },
+          "workloadPolicy": {
             "type": "boolean"
           },
           "zone": {
@@ -17448,6 +17482,7 @@
           "allocation": {
             "description": "The allocation for the group.",
             "format": "double",
+            "minimum": 0,
             "type": [
               "number",
               "null"
@@ -17456,6 +17491,7 @@
           "allocationUsed": {
             "description": "The allocation used by the group. When provided, must be non-negative and should not exceed the 'allocation' value.",
             "format": "double",
+            "minimum": 0,
             "type": "number"
           }
         },

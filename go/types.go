@@ -662,6 +662,7 @@ type AgentSession struct {
 	Preview        string            `json:"preview"`
 	RemoteControl  *bool             `json:"remoteControl,omitempty"`
 	Status         string            `json:"status"`
+	TurnStartedAt  *time.Time        `json:"turnStartedAt,omitempty"`
 	UpdatedAt      time.Time         `json:"updatedAt"`
 	Workspace      string            `json:"workspace"`
 }
@@ -684,6 +685,7 @@ type AgentSessionDetail struct {
 	Preview            string            `json:"preview"`
 	RemoteControl      *bool             `json:"remoteControl,omitempty"`
 	Status             string            `json:"status"`
+	TurnStartedAt      *time.Time        `json:"turnStartedAt,omitempty"`
 	UpdatedAt          time.Time         `json:"updatedAt"`
 	Workspace          string            `json:"workspace"`
 	WorkspaceUntrusted *bool             `json:"workspaceUntrusted,omitempty"`
@@ -3214,7 +3216,9 @@ type ClusterGoogleSlurmPartition struct {
 	ReservationID     *string                `json:"reservationId,omitempty"`
 	SuspendTime       *int64                 `json:"suspendTime,omitempty"`
 	Tier1             *bool                  `json:"tier1,omitempty"`
+	UseNodeGroup      *bool                  `json:"useNodeGroup,omitempty"`
 	UsePlacementGroup *bool                  `json:"usePlacementGroup,omitempty"`
+	WorkloadPolicy    *bool                  `json:"workloadPolicy,omitempty"`
 	Zone              *string                `json:"zone,omitempty"`
 	Zones             []string               `json:"zones,omitempty"`
 }
@@ -3243,6 +3247,10 @@ type ClusterNodeResponse struct {
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// The cloud provider's identifier for the node
 	CspID *string `json:"cspId,omitempty"`
+	// Why the node failed, as one of our own causes (e.g. capacity_not_granted)
+	FailureCause *string `json:"failureCause,omitempty"`
+	// The cloud provider's own explanation for the failure
+	FailureMessage *string `json:"failureMessage,omitempty"`
 	// The node ID
 	ID string `json:"id"`
 	// The node hostname
@@ -3353,7 +3361,9 @@ type ClusterUpdatePartition struct {
 	ReservationID         *string             `json:"reservationId,omitempty"`
 	SuspendTime           *int64              `json:"suspendTime,omitempty"`
 	Tier1                 *bool               `json:"tier1,omitempty"`
+	UseNodeGroup          *bool               `json:"useNodeGroup,omitempty"`
 	UsePlacementGroup     *bool               `json:"usePlacementGroup,omitempty"`
+	WorkloadPolicy        *bool               `json:"workloadPolicy,omitempty"`
 	Zone                  *string             `json:"zone,omitempty"`
 	Zones                 []string            `json:"zones,omitempty"`
 }
@@ -6040,7 +6050,9 @@ type GoogleSlurmPartition struct {
 	ReservationID     *string       `json:"reservationId,omitempty"`
 	SuspendTime       *int64        `json:"suspendTime,omitempty"`
 	Tier1             *bool         `json:"tier1,omitempty"`
+	UseNodeGroup      *bool         `json:"useNodeGroup,omitempty"`
 	UsePlacementGroup *bool         `json:"usePlacementGroup,omitempty"`
+	WorkloadPolicy    *bool         `json:"workloadPolicy,omitempty"`
 	Zone              *string       `json:"zone,omitempty"`
 	Zones             []string      `json:"zones,omitempty"`
 }
