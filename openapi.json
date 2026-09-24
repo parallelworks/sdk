@@ -47247,14 +47247,16 @@
         "operationId": "listAIChatConversations",
         "parameters": [
           {
-            "description": "Max conversations to return",
+            "description": "Max conversations to return (1-100)",
             "explode": false,
             "in": "query",
             "name": "limit",
             "schema": {
               "default": 50,
-              "description": "Max conversations to return",
+              "description": "Max conversations to return (1-100)",
               "format": "int64",
+              "maximum": 100,
+              "minimum": 1,
               "type": "integer"
             }
           },
@@ -47267,6 +47269,7 @@
               "default": 0,
               "description": "Pagination offset",
               "format": "int64",
+              "minimum": 0,
               "type": "integer"
             }
           }

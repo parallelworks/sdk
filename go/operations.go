@@ -2498,7 +2498,7 @@ func (c *Client) DownloadAiChatAttachmentDirect(ctx context.Context, attachmentI
 // ListAiChatConversationsParams contains the parameters for the ListAiChatConversations operation.
 // Required parameters are value fields; optional parameters are pointers.
 type ListAiChatConversationsParams struct {
-	// Max conversations to return
+	// Max conversations to return (1-100)
 	Limit *int64 `json:"limit,omitempty"`
 	// Pagination offset
 	Offset *int64 `json:"offset,omitempty"`
