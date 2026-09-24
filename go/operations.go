@@ -420,6 +420,43 @@ func (c *Client) GetRealtimeAccuracyTrend(ctx context.Context, opts ...GetRealti
 	return &result, nil
 }
 
+// GetRealtimeAccuracyUncoveredParams contains the parameters for the GetRealtimeAccuracyUncovered operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetRealtimeAccuracyUncoveredParams struct {
+	// Days to include, counted back from today
+	Window *int64 `json:"window,omitempty"`
+	// Restrict to one cloud service provider
+	Csp *string `json:"csp,omitempty"`
+}
+
+// GetRealtimeAccuracyUncovered - Get invoiced categories the realtime estimator does not cover
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns tagged invoice spend per CSP, cost type and subtype that the realtime estimator produced no estimate for: a coverage gap rather than a pricing error. Requires platform admin or billing admin.
+func (c *Client) GetRealtimeAccuracyUncovered(ctx context.Context, opts ...GetRealtimeAccuracyUncoveredParams) (*[]RealtimeAccuracyUncoveredRow, error) {
+
+	path := "/api/admin/billing/realtime-accuracy/uncovered"
+	var params GetRealtimeAccuracyUncoveredParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "window", "form", false, params.Window)
+
+	addQueryParam(queryValues, "csp", "form", false, params.Csp)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []RealtimeAccuracyUncoveredRow
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListBillingRunsParams contains the parameters for the ListBillingRuns operation.
 // Required parameters are value fields; optional parameters are pointers.
 type ListBillingRunsParams struct {
@@ -10598,7 +10635,7 @@ func (c *Client) GetOrganizationPolicies(ctx context.Context, organization strin
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Sets allocation-start-date policy for the organization as MM-DD. When unset, billing and reports calculate costs over all time.
+// Sets allocation-start-date policy for the organization as MM-DD. Allocation usage resets on the most recent occurrence of this date each year. When unset, allocations count spend over all time.
 func (c *Client) SetOrganizationAllocationStartDatePolicy(ctx context.Context, organization string, body string) (*map[string]StringPolicyOutput, error) {
 
 	path := "/api/organizations/{organization}/policies/allocation-start-date"
@@ -16754,7 +16791,7 @@ func (c *Client) GetPlatformPolicies(ctx context.Context) (*map[string]Policy, e
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Sets the allocation-start-date policy for the platform as MM-DD. When unset, billing and reports calculate costs over all time.
+// Sets the allocation-start-date policy for the platform as MM-DD. Allocation usage resets on the most recent occurrence of this date each year. When unset, allocations count spend over all time.
 func (c *Client) SetPlatformAllocationStartDatePolicy(ctx context.Context, body string) (*map[string]StringPolicyOutput, error) {
 
 	path := "/api/platform/policies/allocation-start-date"

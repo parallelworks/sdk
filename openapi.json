@@ -1927,6 +1927,9 @@
           "interim": {
             "type": "boolean"
           },
+          "interrupted": {
+            "type": "boolean"
+          },
           "isError": {
             "type": "boolean"
           },
@@ -28713,6 +28716,10 @@
           "logs": {
             "description": "The pod logs as a string",
             "type": "string"
+          },
+          "truncated": {
+            "description": "Set when the byte limit cut this page short. Poll again with lastSinceTime and lastLogHash to continue from where it stopped.",
+            "type": "boolean"
           }
         },
         "required": [
@@ -33109,10 +33116,15 @@
             "format": "int64",
             "type": "integer"
           },
-          "unestimatedInvoiced": {
-            "description": "Tagged invoice amount for deployments the estimator never covered",
+          "uncoveredInvoiced": {
+            "description": "Tagged invoice amount on keys the estimator produced no estimate for",
             "format": "double",
             "type": "number"
+          },
+          "uncoveredKeys": {
+            "description": "Keys with an invoice line and no estimate",
+            "format": "int64",
+            "type": "integer"
           },
           "wape": {
             "description": "Weighted absolute percentage error over keys with an invoice line",
@@ -33142,7 +33154,8 @@
           "ratio",
           "wape",
           "withinTenPct",
-          "unestimatedInvoiced"
+          "uncoveredInvoiced",
+          "uncoveredKeys"
         ],
         "type": "object"
       },
@@ -33193,6 +33206,47 @@
           "invoiced",
           "ratio",
           "reprocessed"
+        ],
+        "type": "object"
+      },
+      "RealtimeAccuracyUncoveredRow": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "Cloud service provider",
+            "type": "string"
+          },
+          "invoiced": {
+            "description": "Invoiced amount with no estimate behind it",
+            "format": "double",
+            "type": "number"
+          },
+          "keys": {
+            "description": "Deployment-day keys with an invoice line and no estimate",
+            "format": "int64",
+            "type": "integer"
+          },
+          "lines": {
+            "description": "Invoice lines behind those keys",
+            "format": "int64",
+            "type": "integer"
+          },
+          "subtype": {
+            "description": "Cost subtype",
+            "type": "string"
+          },
+          "type": {
+            "description": "Cost type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "csp",
+          "type",
+          "subtype",
+          "invoiced",
+          "keys",
+          "lines"
         ],
         "type": "object"
       },
@@ -42662,6 +42716,74 @@
           }
         },
         "summary": "Get realtime estimator accuracy trend",
+        "tags": [
+          "Billing"
+        ]
+      }
+    },
+    "/api/admin/billing/realtime-accuracy/uncovered": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns tagged invoice spend per CSP, cost type and subtype that the realtime estimator produced no estimate for: a coverage gap rather than a pricing error. Requires platform admin or billing admin.",
+        "operationId": "get-realtime-accuracy-uncovered",
+        "parameters": [
+          {
+            "description": "Days to include, counted back from today",
+            "explode": false,
+            "in": "query",
+            "name": "window",
+            "schema": {
+              "default": 30,
+              "description": "Days to include, counted back from today",
+              "enum": [
+                14,
+                30,
+                60,
+                90
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Restrict to one cloud service provider",
+            "explode": false,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "Restrict to one cloud service provider",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RealtimeAccuracyUncoveredRow"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get invoiced categories the realtime estimator does not cover",
         "tags": [
           "Billing"
         ]
@@ -69807,7 +69929,7 @@
     },
     "/api/organizations/{organization}/policies/allocation-start-date": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets allocation-start-date policy for the organization as MM-DD. When unset, billing and reports calculate costs over all time.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets allocation-start-date policy for the organization as MM-DD. Allocation usage resets on the most recent occurrence of this date each year. When unset, allocations count spend over all time.",
         "operationId": "set-organization-allocation-start-date-policy",
         "parameters": [
           {
@@ -90460,7 +90582,7 @@
     },
     "/api/platform/policies/allocation-start-date": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the allocation-start-date policy for the platform as MM-DD. When unset, billing and reports calculate costs over all time.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the allocation-start-date policy for the platform as MM-DD. Allocation usage resets on the most recent occurrence of this date each year. When unset, allocations count spend over all time.",
         "operationId": "set-platform-allocation-start-date-policy",
         "requestBody": {
           "content": {
