@@ -613,6 +613,34 @@ type AdminProduct struct {
 	SetupStatus           string                 `json:"setupStatus"`
 }
 
+type AgentCommandArgs struct {
+	// Everything typed after the command name.
+	Args *string `json:"args,omitempty"`
+}
+
+type AgentCommandBody struct {
+	// Everything typed after the command name.
+	Args *string `json:"args,omitempty"`
+	// The command without its slash, e.g. status.
+	Name string `json:"name"`
+}
+
+type AgentCommandOutput struct {
+	// What the command printed.
+	Output string `json:"output"`
+}
+
+type AgentCompactBody struct {
+	// What the summary should keep.
+	Focus *string `json:"focus,omitempty"`
+}
+
+type AgentCompacted struct {
+	// False when there was nothing to summarize.
+	Compacted bool   `json:"compacted"`
+	Output    string `json:"output"`
+}
+
 type AgentMachine struct {
 	AgentVersion *string `json:"agentVersion,omitempty"`
 	Error        *string `json:"error,omitempty"`
@@ -641,6 +669,25 @@ type AgentMessageAccepted struct {
 	TurnID string `json:"turnId"`
 }
 
+type AgentPalette struct {
+	// Built-in commands, skills, and custom commands, in palette order.
+	Commands []AgentSlashCommand `json:"commands"`
+	// Prompts the session's MCP servers offer, invoked as /mcp__<server>__<prompt>.
+	McpPrompts []AgentSlashCommand `json:"mcpPrompts"`
+	// Names among the commands that are skills or custom commands, which run as a message rather than a command.
+	Prompts []string `json:"prompts"`
+}
+
+type AgentPlanResult struct {
+	// What to do with the answer: show output, show the plan, send args as a turn, open the plan file (terminal only), or nothing.
+	Action string  `json:"action"`
+	Output *string `json:"output,omitempty"`
+	// The session's plan, for show.
+	PlanBody *string `json:"planBody,omitempty"`
+	// The file on the machine holding the plan.
+	PlanPath *string `json:"planPath,omitempty"`
+}
+
 type AgentRenameBody struct {
 	// What to call the session in the list.
 	Name string `json:"name"`
@@ -665,6 +712,11 @@ type AgentSession struct {
 	TurnStartedAt  *time.Time        `json:"turnStartedAt,omitempty"`
 	UpdatedAt      time.Time         `json:"updatedAt"`
 	Workspace      string            `json:"workspace"`
+}
+
+type AgentSessionCleared struct {
+	// The fresh session the conversation continues as.
+	ID string `json:"id"`
 }
 
 type AgentSessionDetail struct {
@@ -710,6 +762,12 @@ type AgentSessionsResponse struct {
 	Machines []AgentMachine `json:"machines"`
 	// Every reachable machine's sessions, newest first.
 	Sessions []AgentSession `json:"sessions"`
+}
+
+type AgentSlashCommand struct {
+	Description *string `json:"description,omitempty"`
+	Name        string  `json:"name"`
+	Usage       *string `json:"usage,omitempty"`
 }
 
 type AgentStreamEvent struct {
@@ -768,7 +826,8 @@ type AiProviderResponse struct {
 	// Email of the connected ChatGPT account (codex provider)
 	AccountEmail *string `json:"accountEmail,omitempty"`
 	// Login of the connected GitHub account (copilot provider)
-	AccountLogin *string `json:"accountLogin,omitempty"`
+	AccountLogin        *string           `json:"accountLogin,omitempty"`
+	AllocationThreshold *CrossedThreshold `json:"allocationThreshold,omitempty"`
 	// Admin allowlist from the catalog entry; empty allows every model the provider reports
 	AllowedModels []string `json:"allowedModels,omitempty"`
 	// Attached storage bucket infrastructure ID
@@ -791,6 +850,8 @@ type AiProviderResponse struct {
 	Endpoint *string `json:"endpoint,omitempty"`
 	// Billing group the provider is provisioned under (managed providers)
 	Group *string `json:"group,omitempty"`
+	// Whether the provider's billing target is over its allocation and blocks new usage
+	GroupBlocked *bool `json:"groupBlocked,omitempty"`
 	// Unique identifier for the resource
 	ID string `json:"id"`
 	// Current icon configured on the provider's catalog entry
@@ -822,6 +883,7 @@ type AiProviderResponse struct {
 }
 
 type AiProvidersResponse struct {
+	AllocationThreshold *CrossedThreshold `json:"allocationThreshold,omitempty"`
 	// Platform catalog entry governing this provider
 	CatalogEntryID *string `json:"catalogEntryId,omitempty"`
 	// Cloud service provider
@@ -929,13 +991,6 @@ type AllocationSummary struct {
 	Used  float64 `json:"used"`
 }
 
-type AllocationThreshold struct {
-	// The actions configured for this threshold.
-	Actions []string `json:"actions"`
-	// The allocation usage percentage the cluster's group has crossed.
-	Threshold float64 `json:"threshold"`
-}
-
 type Allocations struct {
 	// Estimated used allocation
 	EstimatedUsed *float64 `json:"estimatedUsed,omitempty"`
@@ -986,7 +1041,9 @@ type AppBody struct {
 	Name string `json:"name"`
 	// Permitted redirect URIs for the authorization code flow.
 	RedirectUris []string `json:"redirectUris,omitempty"`
-	// Scopes the application may request.
+	// Whether the user's session must have completed two-step verification. Turning it on revokes the credentials issued to sessions that had not.
+	RequireMfa *bool `json:"requireMfa,omitempty"`
+	// Scopes the application may request. Omit it when registering and the application may request openid only; list every scope it needs, including openid.
 	Scopes []string `json:"scopes,omitempty"`
 	// What the sub claim contains. Defaults to userId.
 	SubjectType *string `json:"subjectType,omitempty"`
@@ -1017,6 +1074,8 @@ type AppResponse struct {
 	Name string `json:"name"`
 	// Permitted redirect URIs for the authorization code flow.
 	RedirectUris []string `json:"redirectUris"`
+	// Whether the user's session must have completed two-step verification.
+	RequireMfa bool `json:"requireMfa"`
 	// Scopes the application may request.
 	Scopes []string `json:"scopes"`
 	// Client secret metadata. Never includes the secret itself.
@@ -3471,8 +3530,33 @@ type ConnectWithTokenInputBody struct {
 	Token string `json:"token"`
 }
 
+type ConnectedApp struct {
+	// Client ID of the application
+	ClientID string `json:"clientId"`
+	// When the user first granted access
+	GrantedAt *time.Time `json:"grantedAt,omitempty"`
+	// When the application last signed the user in
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+	// Display name of the application
+	Name string `json:"name"`
+	// Scopes the user granted it
+	Scopes []string `json:"scopes"`
+}
+
 type ConnectionPathInputBody struct {
 	CatalogEntryID string `json:"catalogEntryId"`
+}
+
+type ConsentDecisionInputBody struct {
+	// True to grant the application access, false to deny it
+	Approve bool `json:"approve"`
+	// The requestId the pending consent endpoint returned; the decision applies only to that request
+	RequestID string `json:"requestId"`
+}
+
+type ConsentDecisionOutputBody struct {
+	// Where to send the browser to complete the flow
+	RedirectURI string `json:"redirectUri"`
 }
 
 type ConversationResponse struct {
@@ -3540,6 +3624,27 @@ type CoreWeaveUserExt struct {
 	SunkPosixUsername          *string  `json:"sunkPosixUsername,omitempty"`
 	SunkPreferredHomeDirectory *string  `json:"sunkPreferredHomeDirectory,omitempty"`
 	SunkSSHKeys                []string `json:"sunkSshKeys,omitempty"`
+}
+
+type CostDashboardFilters struct {
+	// Cloud provider.
+	Csp *string `json:"csp,omitempty"`
+	// Group name.
+	Group *string `json:"group,omitempty"`
+	// Pool name.
+	Pool *string `json:"pool,omitempty"`
+	// Prorate costs across the selected range.
+	Prorated *bool `json:"prorated,omitempty"`
+	// Use realtime cost data instead of billed cost.
+	Realtime *bool `json:"realtime,omitempty"`
+	// Session name.
+	Session *string `json:"session,omitempty"`
+	// Time range preset.
+	Time *string `json:"time,omitempty"`
+	// Resource type.
+	Type *string `json:"type,omitempty"`
+	// Username.
+	User *string `json:"user,omitempty"`
 }
 
 type CostFilterOptions struct {
@@ -4537,6 +4642,41 @@ type DailyActiveUsers struct {
 	Date string `json:"date"`
 }
 
+type Dashboard struct {
+	CreatedAt time.Time `json:"createdAt"`
+	// Dashboard id.
+	ID string `json:"id"`
+	// Display name.
+	Name      string    `json:"name"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	// Widgets on the grid.
+	Widgets []DashboardWidget `json:"widgets"`
+}
+
+type DashboardBody struct {
+	// Display name.
+	Name string `json:"name"`
+	// Widgets on the grid. Replaces the stored list.
+	Widgets []DashboardWidget `json:"widgets"`
+}
+
+type DashboardWidget struct {
+	// Height in grid rows.
+	H int64 `json:"h"`
+	// Widget instance id, unique within the dashboard.
+	ID string `json:"id"`
+	// Options from the widget's settings form.
+	Settings map[string]any `json:"settings,omitempty"`
+	// Widget kind.
+	Type string `json:"type"`
+	// Width in grid columns.
+	W int64 `json:"w"`
+	// Grid column of the widget's left edge.
+	X int64 `json:"x"`
+	// Grid row of the widget's top edge.
+	Y int64 `json:"y"`
+}
+
 type DeleteDeploymentBody struct {
 	// Deployment id; matches resources tagged with it as session-id or pw-deployment-id.
 	DeploymentID string `json:"deploymentId"`
@@ -5432,8 +5572,8 @@ type GeneralCluster struct {
 	// The number of active nodes in the cluster.
 	ActiveNodes int64 `json:"activeNodes"`
 	// The agent version currently reported for this cluster. Empty when no agent is reporting.
-	AgentVersion        *string              `json:"agentVersion,omitempty"`
-	AllocationThreshold *AllocationThreshold `json:"allocationThreshold,omitempty"`
+	AgentVersion        *string           `json:"agentVersion,omitempty"`
+	AllocationThreshold *CrossedThreshold `json:"allocationThreshold,omitempty"`
 	// Whether the requesting user may change this cluster's configuration.
 	CanEdit *bool `json:"canEdit,omitempty"`
 	// The SSH connection string for the resource.
@@ -7598,6 +7738,11 @@ type ListAttachmentsBody struct {
 	NextCursor *string `json:"nextCursor,omitempty"`
 }
 
+type ListConnectedAppsOutputBody struct {
+	// Applications the user has granted access to
+	Apps []ConnectedApp `json:"apps"`
+}
+
 type ListConversationsBody struct {
 	Conversations []ConversationSummary `json:"conversations"`
 	Total         int64                 `json:"total"`
@@ -8905,16 +9050,34 @@ type Oidc struct {
 }
 
 type OpenIDConfiguration struct {
+	// URL of the authorization endpoint
+	AuthorizationEndpoint string `json:"authorization_endpoint"`
 	// JSON array containing a list of claim names
 	ClaimsSupported []string `json:"claims_supported"`
+	// JSON array containing the supported PKCE code challenge methods
+	CodeChallengeMethodsSupported []string `json:"code_challenge_methods_supported"`
+	// JSON array containing the supported grant types
+	GrantTypesSupported []string `json:"grant_types_supported"`
 	// JSON array containing signing algorithms supported for ID tokens
 	IDTokenSigningAlgValuesSupported []string `json:"id_token_signing_alg_values_supported"`
 	// The authorization server's issuer identifier
 	Issuer string `json:"issuer"`
 	// URL of the JSON Web Key Set
 	JwksURI string `json:"jwks_uri"`
+	// JSON array containing the supported response modes
+	ResponseModesSupported []string `json:"response_modes_supported"`
+	// JSON array containing the supported response types
+	ResponseTypesSupported []string `json:"response_types_supported"`
+	// JSON array containing the supported scopes
+	ScopesSupported []string `json:"scopes_supported"`
 	// JSON array containing a list of subject identifier types
 	SubjectTypesSupported []string `json:"subject_types_supported"`
+	// URL of the token endpoint
+	TokenEndpoint string `json:"token_endpoint"`
+	// JSON array containing the supported client authentication methods
+	TokenEndpointAuthMethodsSupported []string `json:"token_endpoint_auth_methods_supported"`
+	// URL of the userinfo endpoint
+	UserinfoEndpoint string `json:"userinfo_endpoint"`
 }
 
 type OpenstackFlavor struct {
@@ -9763,6 +9926,23 @@ type PatchSkuBody struct {
 type PatchWebhookBody struct {
 	// Whether the webhook should be enabled.
 	Enabled *bool `json:"enabled"`
+}
+
+type PendingConsentOutputBody struct {
+	// Client ID of the application asking for access
+	ClientID string `json:"clientId"`
+	// Description the organization gave the application
+	Description *string `json:"description,omitempty"`
+	// Display name of the application
+	Name string `json:"name"`
+	// Organization that registered the application
+	Organization *string `json:"organization,omitempty"`
+	// Where the user will be sent after deciding
+	RedirectURI string `json:"redirectUri"`
+	// Identifies this exact request; the decision must present it back
+	RequestID string `json:"requestId"`
+	// Scopes the application is asking for
+	Scopes []string `json:"scopes"`
 }
 
 type PermissionEntry struct {
@@ -13178,6 +13358,23 @@ type TimeSeriesPoint struct {
 	OutputTokens int64     `json:"outputTokens"`
 	Timestamp    time.Time `json:"timestamp"`
 	TotalCost    float64   `json:"totalCost"`
+}
+
+type TokenBody struct {
+	// Opaque access token for the userinfo endpoint
+	AccessToken *string `json:"access_token,omitempty"`
+	// OAuth error code
+	Error *string `json:"error,omitempty"`
+	// Human-readable error detail
+	ErrorDescription *string `json:"error_description,omitempty"`
+	// Access token lifetime in seconds
+	ExpiresIn *int64 `json:"expires_in,omitempty"`
+	// Signed ID token
+	IDToken *string `json:"id_token,omitempty"`
+	// Space-delimited scopes actually granted
+	Scope *string `json:"scope,omitempty"`
+	// Always Bearer
+	TokenType *string `json:"token_type,omitempty"`
 }
 
 type Tool struct {

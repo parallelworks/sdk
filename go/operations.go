@@ -2191,6 +2191,60 @@ func (c *Client) AnswerAgentSessionApproval(ctx context.Context, machine string,
 	return nil
 }
 
+// ClearAgentSession - Start a pw code session over
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Runs /clear: the conversation continues as a fresh session, whose id this answers with. Refused while a turn runs.
+func (c *Client) ClearAgentSession(ctx context.Context, machine string, id string) (*AgentSessionCleared, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/clear"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentSessionCleared
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RunAgentSessionCommand - Run a built-in slash command in a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Runs a built-in command such as /status, /model, or /cost and answers with its output. /clear, /compact, /goal, and /plan have routes of their own; skills and custom commands are sent as messages.
+func (c *Client) RunAgentSessionCommand(ctx context.Context, machine string, id string, body AgentCommandBody) (*AgentCommandOutput, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/commands"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentCommandOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CompactAgentSession - Summarize a pw code session's context
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Runs /compact, optionally focused on what to keep. Refused while a turn runs.
+func (c *Client) CompactAgentSession(ctx context.Context, machine string, id string, body AgentCompactBody) (*AgentCompacted, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/compact"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentCompacted
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ForkAgentSession - Copy a pw code session
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -2204,6 +2258,24 @@ func (c *Client) ForkAgentSession(ctx context.Context, machine string, id string
 
 	var result AgentSessionForked
 	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetAgentSessionGoal - Set, show, or clear a pw code session's goal
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Runs /goal with the same arguments the terminal takes. Setting or resuming a goal starts a turn on the session.
+func (c *Client) SetAgentSessionGoal(ctx context.Context, machine string, id string, body AgentCommandArgs) (*AgentCommandOutput, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/goal"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentCommandOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -2238,6 +2310,42 @@ func (c *Client) SendAgentSessionMessage(ctx context.Context, machine string, id
 	path = pathReplace(path, "id", "simple", false, id)
 
 	var result AgentMessageAccepted
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentSessionPalette - List a pw code session's slash commands
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the built-in commands, skills, custom commands, and MCP prompts the session can run, as the terminal's / palette shows them.
+func (c *Client) GetAgentSessionPalette(ctx context.Context, machine string, id string) (*AgentPalette, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/palette"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentPalette
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RunAgentSessionPlan - Run /plan in a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Runs /plan and answers with what the caller owes next: prose to show, the session's plan, a request to send as a turn, a plan file only the terminal can open, or nothing.
+func (c *Client) RunAgentSessionPlan(ctx context.Context, machine string, id string, body AgentCommandArgs) (*AgentPlanResult, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/plan"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentPlanResult
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -2520,16 +2628,15 @@ func (c *Client) DeleteAiChatAttachmentDirect(ctx context.Context, attachmentID 
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Download an attachment by its ID. User must own the attachment.
-func (c *Client) DownloadAiChatAttachmentDirect(ctx context.Context, attachmentID string) (*string, error) {
+func (c *Client) DownloadAiChatAttachmentDirect(ctx context.Context, attachmentID string) error {
 
 	path := "/api/aichat/attachments/{attachmentId}/download"
 	path = pathReplace(path, "attachmentId", "simple", false, attachmentID)
 
-	var result string
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
 	}
-	return &result, nil
+	return nil
 }
 
 // ListAiChatConversationsParams contains the parameters for the ListAiChatConversations operation.
@@ -2666,17 +2773,16 @@ func (c *Client) UploadAiChatAttachment(ctx context.Context, conversationID stri
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Download an attachment file.
-func (c *Client) DownloadAiChatAttachment(ctx context.Context, conversationID string, attachmentID string) (*string, error) {
+func (c *Client) DownloadAiChatAttachment(ctx context.Context, conversationID string, attachmentID string) error {
 
 	path := "/api/aichat/conversations/{conversationId}/attachments/{attachmentId}"
 	path = pathReplace(path, "conversationId", "simple", false, conversationID)
 	path = pathReplace(path, "attachmentId", "simple", false, attachmentID)
 
-	var result string
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
 	}
-	return &result, nil
+	return nil
 }
 
 // DeleteAiChatAttachment - Delete attachment
@@ -5566,6 +5672,153 @@ func (c *Client) GetOidcConfiguration(ctx context.Context) (*OpenIDConfiguration
 	return &result, nil
 }
 
+// GetOidcAuthorizeParams contains the parameters for the GetOidcAuthorize operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetOidcAuthorizeParams struct {
+	// The client ID of the application requesting authorization
+	ClientID *string `json:"client_id,omitempty"`
+	// Where to send the authorization code; must match a registered value
+	RedirectURI *string `json:"redirect_uri,omitempty"`
+	// Must be code
+	ResponseType *string `json:"response_type,omitempty"`
+	// Space-delimited scopes; must include openid
+	Scope *string `json:"scope,omitempty"`
+	// Opaque value returned unchanged to the application
+	State *string `json:"state,omitempty"`
+	// Value bound into the ID token to detect replay
+	Nonce *string `json:"nonce,omitempty"`
+	// PKCE challenge (RFC 7636); required for SPA and native applications
+	CodeChallenge *string `json:"code_challenge,omitempty"`
+	// Must be S256
+	CodeChallengeMethod *string `json:"code_challenge_method,omitempty"`
+	// Space-delimited list of none, login, or consent
+	Prompt *string `json:"prompt,omitempty"`
+	// Maximum age in seconds of the user's authentication
+	MaxAge *string `json:"max_age,omitempty"`
+}
+
+// GetOidcAuthorize - OIDC authorization endpoint
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Starts the authorization code flow. Sends the browser to sign in when there is no session, asks for consent when the application requires it, and redirects to the application with an authorization code.
+func (c *Client) GetOidcAuthorize(ctx context.Context, opts ...GetOidcAuthorizeParams) error {
+
+	path := "/api/oidc/authorize"
+	var params GetOidcAuthorizeParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "client_id", "form", false, params.ClientID)
+
+	addQueryParam(queryValues, "redirect_uri", "form", false, params.RedirectURI)
+
+	addQueryParam(queryValues, "response_type", "form", false, params.ResponseType)
+
+	addQueryParam(queryValues, "scope", "form", false, params.Scope)
+
+	addQueryParam(queryValues, "state", "form", false, params.State)
+
+	addQueryParam(queryValues, "nonce", "form", false, params.Nonce)
+
+	addQueryParam(queryValues, "code_challenge", "form", false, params.CodeChallenge)
+
+	addQueryParam(queryValues, "code_challenge_method", "form", false, params.CodeChallengeMethod)
+
+	addQueryParam(queryValues, "prompt", "form", false, params.Prompt)
+
+	addQueryParam(queryValues, "max_age", "form", false, params.MaxAge)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// GetOidcAuthorizeResume - Resume an OIDC authorization request
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Continues an authorization request that was paused for sign-in. The request is replayed from a short-lived cookie and validated again from the start.
+func (c *Client) GetOidcAuthorizeResume(ctx context.Context) error {
+
+	path := "/api/oidc/authorize/resume"
+
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// ListOidcConnectedApps - List connected applications
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the applications the user has granted access to their identity.
+func (c *Client) ListOidcConnectedApps(ctx context.Context) (*ListConnectedAppsOutputBody, error) {
+
+	path := "/api/oidc/connected-apps"
+
+	var result ListConnectedAppsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RevokeOidcConnectedApp - Disconnect an application
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Revokes the user's consent for an application along with its authorization codes and access tokens.
+func (c *Client) RevokeOidcConnectedApp(ctx context.Context, clientID string) error {
+
+	path := "/api/oidc/connected-apps/{clientId}"
+	path = pathReplace(path, "clientId", "simple", false, clientID)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// GetOidcConsent - Get the pending consent request
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Describes the authorization request waiting on the user's decision, for the consent screen to render.
+func (c *Client) GetOidcConsent(ctx context.Context) (*PendingConsentOutputBody, error) {
+
+	path := "/api/oidc/consent"
+
+	var result PendingConsentOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PostOidcConsent - Decide a pending consent request
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Approves or denies the pending authorization request and returns where to send the browser.
+func (c *Client) PostOidcConsent(ctx context.Context, body ConsentDecisionInputBody) (*ConsentDecisionOutputBody, error) {
+
+	path := "/api/oidc/consent"
+
+	var result ConsentDecisionOutputBody
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetOidcSectorIdentifier - Get OIDC sector_identifier_uri document
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -5578,6 +5831,24 @@ func (c *Client) GetOidcSectorIdentifier(ctx context.Context, authMethodID strin
 
 	var result []string
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PostOidcToken - OIDC token endpoint
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Redeems an authorization code for an ID token and an opaque access token (RFC 6749 section 4.1.3).
+//
+// The body is `application/x-www-form-urlencoded` with `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.
+func (c *Client) PostOidcToken(ctx context.Context, body *map[string]any) (*TokenBody, error) {
+
+	path := "/api/oidc/token"
+
+	var result TokenBody
+	if err := c.do(ctx, "POST", path, body, "application/x-www-form-urlencoded", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5607,6 +5878,38 @@ func (c *Client) GetOidcTokenDirect(ctx context.Context, params GetOidcTokenDire
 
 	var result string
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetOidcUserinfo - OIDC userinfo endpoint
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the claims released by an application's access token. Authenticated with the opaque access token from the token endpoint, not a platform credential.
+func (c *Client) GetOidcUserinfo(ctx context.Context) (*map[string]any, error) {
+
+	path := "/api/oidc/userinfo"
+
+	var result map[string]any
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PostOidcUserinfo - OIDC userinfo endpoint
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the claims released by an application's access token. Authenticated with the opaque access token from the token endpoint, not a platform credential.
+func (c *Client) PostOidcUserinfo(ctx context.Context) (*map[string]any, error) {
+
+	path := "/api/oidc/userinfo"
+
+	var result map[string]any
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -18555,6 +18858,138 @@ func (c *Client) SetUserChangelogSeen(ctx context.Context, body SetChangelogSeen
 	return nil
 }
 
+// GetUserCostDashboardFilters - Get saved cost dashboard filters
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the filters the current user saved for a cost dashboard. An empty object means nothing is saved.
+func (c *Client) GetUserCostDashboardFilters(ctx context.Context, dashboard string) (*CostDashboardFilters, error) {
+
+	path := "/api/user/cost-dashboards/{dashboard}/filters"
+	path = pathReplace(path, "dashboard", "simple", false, dashboard)
+
+	var result CostDashboardFilters
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ReplaceUserCostDashboardFilters - Save cost dashboard filters
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Replaces the filters the current user has saved for a cost dashboard.
+func (c *Client) ReplaceUserCostDashboardFilters(ctx context.Context, dashboard string, body CostDashboardFilters) (*CostDashboardFilters, error) {
+
+	path := "/api/user/cost-dashboards/{dashboard}/filters"
+	path = pathReplace(path, "dashboard", "simple", false, dashboard)
+
+	var result CostDashboardFilters
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteUserCostDashboardFilters - Clear saved cost dashboard filters
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Forgets the filters the current user saved for a cost dashboard.
+func (c *Client) DeleteUserCostDashboardFilters(ctx context.Context, dashboard string) error {
+
+	path := "/api/user/cost-dashboards/{dashboard}/filters"
+	path = pathReplace(path, "dashboard", "simple", false, dashboard)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// ListUserDashboards - List dashboards
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the current user's saved dashboards, oldest first. An empty list means the home page shows the default layout.
+func (c *Client) ListUserDashboards(ctx context.Context) (*[]Dashboard, error) {
+
+	path := "/api/user/dashboards"
+
+	var result []Dashboard
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreateUserDashboard - Create dashboard
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Saves a new dashboard of widgets for the current user.
+func (c *Client) CreateUserDashboard(ctx context.Context, body DashboardBody) (*Dashboard, error) {
+
+	path := "/api/user/dashboards"
+
+	var result Dashboard
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetUserDashboard - Get dashboard
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns one of the current user's dashboards.
+func (c *Client) GetUserDashboard(ctx context.Context, id string) (*Dashboard, error) {
+
+	path := "/api/user/dashboards/{id}"
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result Dashboard
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ReplaceUserDashboard - Replace dashboard
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Replaces the name and widgets of one of the current user's dashboards.
+func (c *Client) ReplaceUserDashboard(ctx context.Context, id string, body DashboardBody) (*Dashboard, error) {
+
+	path := "/api/user/dashboards/{id}"
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result Dashboard
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteUserDashboard - Delete dashboard
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes one of the current user's dashboards.
+func (c *Client) DeleteUserDashboard(ctx context.Context, id string) error {
+
+	path := "/api/user/dashboards/{id}"
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // SetUserFavorite - Favorite a resource
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -19138,7 +19573,7 @@ type GetWorkflowRunFileParams struct {
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Retrieves a file from a workflow run's output directory.
+// Retrieves a file from a workflow run's output directory. A step's log, `logs/<job>/step_<n>/logs.out`, rotates when it reaches 10 MiB: its earlier output moves to `logs.out.1` and only that one backup is kept, so at most the last 10 to 20 MiB of a step's output is retained. Request `logs.out.1` to read the output from before the latest rotation.
 func (c *Client) GetWorkflowRunFile(ctx context.Context, slug string, params GetWorkflowRunFileParams) (*string, error) {
 
 	path := "/api/workflow-runs/{slug}/files"

@@ -329,6 +329,96 @@ func (m *ResponseMeta) GetMarketplaceIconHeaders() GetMarketplaceIconHeaders {
 	}
 }
 
+// GetOidcAuthorizeHeaders holds the headers GetOidcAuthorize declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetOidcAuthorizeHeaders struct {
+	Location  string
+	SetCookie string
+}
+
+// GetOidcAuthorizeHeaders reads the headers GetOidcAuthorize declares out of the captured
+// response.
+func (m *ResponseMeta) GetOidcAuthorizeHeaders() GetOidcAuthorizeHeaders {
+	return GetOidcAuthorizeHeaders{
+		Location:  m.Header.Get("Location"),
+		SetCookie: m.Header.Get("Set-Cookie"),
+	}
+}
+
+// GetOidcAuthorizeResumeHeaders holds the headers GetOidcAuthorizeResume declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetOidcAuthorizeResumeHeaders struct {
+	Location  string
+	SetCookie string
+}
+
+// GetOidcAuthorizeResumeHeaders reads the headers GetOidcAuthorizeResume declares out of the captured
+// response.
+func (m *ResponseMeta) GetOidcAuthorizeResumeHeaders() GetOidcAuthorizeResumeHeaders {
+	return GetOidcAuthorizeResumeHeaders{
+		Location:  m.Header.Get("Location"),
+		SetCookie: m.Header.Get("Set-Cookie"),
+	}
+}
+
+// PostOidcConsentHeaders holds the headers PostOidcConsent declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type PostOidcConsentHeaders struct {
+	SetCookie string
+}
+
+// PostOidcConsentHeaders reads the headers PostOidcConsent declares out of the captured
+// response.
+func (m *ResponseMeta) PostOidcConsentHeaders() PostOidcConsentHeaders {
+	return PostOidcConsentHeaders{
+		SetCookie: m.Header.Get("Set-Cookie"),
+	}
+}
+
+// PostOidcTokenHeaders holds the headers PostOidcToken declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type PostOidcTokenHeaders struct {
+	CacheControl    string
+	WwwAuthenticate string
+}
+
+// PostOidcTokenHeaders reads the headers PostOidcToken declares out of the captured
+// response.
+func (m *ResponseMeta) PostOidcTokenHeaders() PostOidcTokenHeaders {
+	return PostOidcTokenHeaders{
+		CacheControl:    m.Header.Get("Cache-Control"),
+		WwwAuthenticate: m.Header.Get("WWW-Authenticate"),
+	}
+}
+
+// GetOidcUserinfoHeaders holds the headers GetOidcUserinfo declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetOidcUserinfoHeaders struct {
+	CacheControl string
+}
+
+// GetOidcUserinfoHeaders reads the headers GetOidcUserinfo declares out of the captured
+// response.
+func (m *ResponseMeta) GetOidcUserinfoHeaders() GetOidcUserinfoHeaders {
+	return GetOidcUserinfoHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// PostOidcUserinfoHeaders holds the headers PostOidcUserinfo declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type PostOidcUserinfoHeaders struct {
+	CacheControl string
+}
+
+// PostOidcUserinfoHeaders reads the headers PostOidcUserinfo declares out of the captured
+// response.
+func (m *ResponseMeta) PostOidcUserinfoHeaders() PostOidcUserinfoHeaders {
+	return PostOidcUserinfoHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
 // GetManagedClusterIconHeaders holds the headers GetManagedClusterIcon declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type GetManagedClusterIconHeaders struct {
@@ -611,6 +701,20 @@ type PostLdapLoginHeaders struct {
 func (m *ResponseMeta) PostLdapLoginHeaders() PostLdapLoginHeaders {
 	return PostLdapLoginHeaders{
 		Location:  m.Header.Get("Location"),
+		SetCookie: m.Header.Get("Set-Cookie"),
+	}
+}
+
+// PostLogoutHeaders holds the headers PostLogout declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type PostLogoutHeaders struct {
+	SetCookie string
+}
+
+// PostLogoutHeaders reads the headers PostLogout declares out of the captured
+// response.
+func (m *ResponseMeta) PostLogoutHeaders() PostLogoutHeaders {
+	return PostLogoutHeaders{
 		SetCookie: m.Header.Get("Set-Cookie"),
 	}
 }

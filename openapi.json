@@ -1511,6 +1511,74 @@
         ],
         "type": "object"
       },
+      "AgentCommandArgs": {
+        "additionalProperties": false,
+        "properties": {
+          "args": {
+            "description": "Everything typed after the command name.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AgentCommandBody": {
+        "additionalProperties": false,
+        "properties": {
+          "args": {
+            "description": "Everything typed after the command name.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The command without its slash, e.g. status.",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "AgentCommandOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "output": {
+            "description": "What the command printed.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "output"
+        ],
+        "type": "object"
+      },
+      "AgentCompactBody": {
+        "additionalProperties": false,
+        "properties": {
+          "focus": {
+            "description": "What the summary should keep.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AgentCompacted": {
+        "additionalProperties": false,
+        "properties": {
+          "compacted": {
+            "description": "False when there was nothing to summarize.",
+            "type": "boolean"
+          },
+          "output": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "output",
+          "compacted"
+        ],
+        "type": "object"
+      },
       "AgentMachine": {
         "additionalProperties": false,
         "properties": {
@@ -1616,6 +1684,78 @@
         ],
         "type": "object"
       },
+      "AgentPalette": {
+        "additionalProperties": false,
+        "properties": {
+          "commands": {
+            "description": "Built-in commands, skills, and custom commands, in palette order.",
+            "items": {
+              "$ref": "#/components/schemas/AgentSlashCommand"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "mcpPrompts": {
+            "description": "Prompts the session's MCP servers offer, invoked as /mcp__\u003cserver\u003e__\u003cprompt\u003e.",
+            "items": {
+              "$ref": "#/components/schemas/AgentSlashCommand"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "prompts": {
+            "description": "Names among the commands that are skills or custom commands, which run as a message rather than a command.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "commands",
+          "mcpPrompts",
+          "prompts"
+        ],
+        "type": "object"
+      },
+      "AgentPlanResult": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "What to do with the answer: show output, show the plan, send args as a turn, open the plan file (terminal only), or nothing.",
+            "enum": [
+              "answer",
+              "show",
+              "turn",
+              "open",
+              "quiet"
+            ],
+            "type": "string"
+          },
+          "output": {
+            "type": "string"
+          },
+          "planBody": {
+            "description": "The session's plan, for show.",
+            "type": "string"
+          },
+          "planPath": {
+            "description": "The file on the machine holding the plan.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "type": "object"
+      },
       "AgentRenameBody": {
         "additionalProperties": false,
         "properties": {
@@ -1715,6 +1855,19 @@
           "messages",
           "preview",
           "status"
+        ],
+        "type": "object"
+      },
+      "AgentSessionCleared": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "The fresh session the conversation continues as.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
         ],
         "type": "object"
       },
@@ -1888,6 +2041,24 @@
         "required": [
           "machines",
           "sessions"
+        ],
+        "type": "object"
+      },
+      "AgentSlashCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
         ],
         "type": "object"
       },
@@ -2095,6 +2266,10 @@
             "description": "Login of the connected GitHub account (copilot provider)",
             "type": "string"
           },
+          "allocationThreshold": {
+            "$ref": "#/components/schemas/CrossedThreshold",
+            "description": "Highest organization allocation threshold the billing group has crossed (legacy allocation system only)"
+          },
           "allowedModels": {
             "description": "Admin allowlist from the catalog entry; empty allows every model the provider reports",
             "items": {
@@ -2156,6 +2331,10 @@
           "group": {
             "description": "Billing group the provider is provisioned under (managed providers)",
             "type": "string"
+          },
+          "groupBlocked": {
+            "description": "Whether the provider's billing target is over its allocation and blocks new usage",
+            "type": "boolean"
           },
           "id": {
             "description": "Unique identifier for the resource",
@@ -2232,6 +2411,10 @@
       "AiProvidersResponse": {
         "additionalProperties": false,
         "properties": {
+          "allocationThreshold": {
+            "$ref": "#/components/schemas/CrossedThreshold",
+            "description": "Highest organization allocation threshold the billing group has crossed (legacy allocation system only)"
+          },
           "catalogEntryId": {
             "description": "Platform catalog entry governing this provider",
             "type": "string"
@@ -2551,39 +2734,6 @@
         ],
         "type": "object"
       },
-      "AllocationThreshold": {
-        "additionalProperties": false,
-        "properties": {
-          "actions": {
-            "description": "The actions configured for this threshold.",
-            "examples": [
-              [
-                "freeze"
-              ]
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "threshold": {
-            "description": "The allocation usage percentage the cluster's group has crossed.",
-            "examples": [
-              95
-            ],
-            "format": "double",
-            "type": "number"
-          }
-        },
-        "required": [
-          "threshold",
-          "actions"
-        ],
-        "type": "object"
-      },
       "Allocations": {
         "additionalProperties": false,
         "properties": {
@@ -2773,8 +2923,12 @@
               "null"
             ]
           },
+          "requireMfa": {
+            "description": "Whether the user's session must have completed two-step verification. Turning it on revokes the credentials issued to sessions that had not.",
+            "type": "boolean"
+          },
           "scopes": {
-            "description": "Scopes the application may request.",
+            "description": "Scopes the application may request. Omit it when registering and the application may request openid only; list every scope it needs, including openid.",
             "items": {
               "type": "string"
             },
@@ -2875,6 +3029,10 @@
               "null"
             ]
           },
+          "requireMfa": {
+            "description": "Whether the user's session must have completed two-step verification.",
+            "type": "boolean"
+          },
           "scopes": {
             "description": "Scopes the application may request.",
             "items": {
@@ -2915,6 +3073,7 @@
           "consent",
           "subjectType",
           "allowedGroups",
+          "requireMfa",
           "disabled",
           "secrets",
           "created"
@@ -10067,6 +10226,45 @@
         ],
         "type": "object"
       },
+      "ConnectedApp": {
+        "additionalProperties": false,
+        "properties": {
+          "clientId": {
+            "description": "Client ID of the application",
+            "type": "string"
+          },
+          "grantedAt": {
+            "description": "When the user first granted access",
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "description": "When the application last signed the user in",
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name of the application",
+            "type": "string"
+          },
+          "scopes": {
+            "description": "Scopes the user granted it",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "clientId",
+          "name",
+          "scopes"
+        ],
+        "type": "object"
+      },
       "ConnectionPathInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -10076,6 +10274,37 @@
         },
         "required": [
           "catalogEntryId"
+        ],
+        "type": "object"
+      },
+      "ConsentDecisionInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "approve": {
+            "description": "True to grant the application access, false to deny it",
+            "type": "boolean"
+          },
+          "requestId": {
+            "description": "The requestId the pending consent endpoint returned; the decision applies only to that request",
+            "type": "string"
+          }
+        },
+        "required": [
+          "approve",
+          "requestId"
+        ],
+        "type": "object"
+      },
+      "ConsentDecisionOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "redirectUri": {
+            "description": "Where to send the browser to complete the flow",
+            "type": "string"
+          }
+        },
+        "required": [
+          "redirectUri"
         ],
         "type": "object"
       },
@@ -10291,6 +10520,60 @@
               "array",
               "null"
             ]
+          }
+        },
+        "type": "object"
+      },
+      "CostDashboardFilters": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "Cloud provider.",
+            "examples": [
+              "aws"
+            ],
+            "type": "string"
+          },
+          "group": {
+            "description": "Group name.",
+            "examples": [
+              "hpc-team"
+            ],
+            "type": "string"
+          },
+          "pool": {
+            "description": "Pool name.",
+            "type": "string"
+          },
+          "prorated": {
+            "description": "Prorate costs across the selected range.",
+            "type": "boolean"
+          },
+          "realtime": {
+            "description": "Use realtime cost data instead of billed cost.",
+            "type": "boolean"
+          },
+          "session": {
+            "description": "Session name.",
+            "type": "string"
+          },
+          "time": {
+            "description": "Time range preset.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Resource type.",
+            "examples": [
+              "cluster"
+            ],
+            "type": "string"
+          },
+          "user": {
+            "description": "Username.",
+            "examples": [
+              "Jake.Thayne"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -13263,6 +13546,142 @@
         ],
         "type": "object"
       },
+      "Dashboard": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Dashboard id.",
+            "examples": [
+              "64c0d3b8f0a2c9a1b3d4e5f6"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name.",
+            "examples": [
+              "Home"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "widgets": {
+            "description": "Widgets on the grid.",
+            "items": {
+              "$ref": "#/components/schemas/DashboardWidget"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "widgets",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "DashboardBody": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Display name.",
+            "examples": [
+              "Home"
+            ],
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "widgets": {
+            "description": "Widgets on the grid. Replaces the stored list.",
+            "items": {
+              "$ref": "#/components/schemas/DashboardWidget"
+            },
+            "maxItems": 50,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "widgets"
+        ],
+        "type": "object"
+      },
+      "DashboardWidget": {
+        "additionalProperties": false,
+        "properties": {
+          "h": {
+            "description": "Height in grid rows.",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "id": {
+            "description": "Widget instance id, unique within the dashboard.",
+            "examples": [
+              "compute1"
+            ],
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "settings": {
+            "additionalProperties": {},
+            "description": "Options from the widget's settings form.",
+            "type": "object"
+          },
+          "type": {
+            "description": "Widget kind.",
+            "examples": [
+              "compute"
+            ],
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "w": {
+            "description": "Width in grid columns.",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "x": {
+            "description": "Grid column of the widget's left edge.",
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "y": {
+            "description": "Grid row of the widget's top edge.",
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "x",
+          "y",
+          "w",
+          "h"
+        ],
+        "type": "object"
+      },
       "DeleteDeploymentBody": {
         "additionalProperties": false,
         "properties": {
@@ -15402,7 +15821,7 @@
             "type": "string"
           },
           "allocationThreshold": {
-            "$ref": "#/components/schemas/AllocationThreshold",
+            "$ref": "#/components/schemas/CrossedThreshold",
             "description": "The allocation threshold for the cluster's group (only for cloud clusters)."
           },
           "canEdit": {
@@ -20739,6 +21158,25 @@
         ],
         "type": "object"
       },
+      "ListConnectedAppsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "apps": {
+            "description": "Applications the user has granted access to",
+            "items": {
+              "$ref": "#/components/schemas/ConnectedApp"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "apps"
+        ],
+        "type": "object"
+      },
       "ListConversationsBody": {
         "additionalProperties": false,
         "properties": {
@@ -25147,8 +25585,32 @@
       "OpenIDConfiguration": {
         "additionalProperties": false,
         "properties": {
+          "authorization_endpoint": {
+            "description": "URL of the authorization endpoint",
+            "type": "string"
+          },
           "claims_supported": {
             "description": "JSON array containing a list of claim names",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "code_challenge_methods_supported": {
+            "description": "JSON array containing the supported PKCE code challenge methods",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "grant_types_supported": {
+            "description": "JSON array containing the supported grant types",
             "items": {
               "type": "string"
             },
@@ -25175,6 +25637,36 @@
             "description": "URL of the JSON Web Key Set",
             "type": "string"
           },
+          "response_modes_supported": {
+            "description": "JSON array containing the supported response modes",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "response_types_supported": {
+            "description": "JSON array containing the supported response types",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "scopes_supported": {
+            "description": "JSON array containing the supported scopes",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "subject_types_supported": {
             "description": "JSON array containing a list of subject identifier types",
             "items": {
@@ -25184,13 +25676,40 @@
               "array",
               "null"
             ]
+          },
+          "token_endpoint": {
+            "description": "URL of the token endpoint",
+            "type": "string"
+          },
+          "token_endpoint_auth_methods_supported": {
+            "description": "JSON array containing the supported client authentication methods",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "userinfo_endpoint": {
+            "description": "URL of the userinfo endpoint",
+            "type": "string"
           }
         },
         "required": [
           "issuer",
+          "authorization_endpoint",
+          "token_endpoint",
+          "userinfo_endpoint",
           "jwks_uri",
+          "scopes_supported",
+          "response_types_supported",
+          "response_modes_supported",
+          "grant_types_supported",
           "subject_types_supported",
           "id_token_signing_alg_values_supported",
+          "token_endpoint_auth_methods_supported",
+          "code_challenge_methods_supported",
           "claims_supported"
         ],
         "type": "object"
@@ -27846,6 +28365,53 @@
         },
         "required": [
           "enabled"
+        ],
+        "type": "object"
+      },
+      "PendingConsentOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "clientId": {
+            "description": "Client ID of the application asking for access",
+            "type": "string"
+          },
+          "description": {
+            "description": "Description the organization gave the application",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name of the application",
+            "type": "string"
+          },
+          "organization": {
+            "description": "Organization that registered the application",
+            "type": "string"
+          },
+          "redirectUri": {
+            "description": "Where the user will be sent after deciding",
+            "type": "string"
+          },
+          "requestId": {
+            "description": "Identifies this exact request; the decision must present it back",
+            "type": "string"
+          },
+          "scopes": {
+            "description": "Scopes the application is asking for",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "requestId",
+          "clientId",
+          "name",
+          "scopes",
+          "redirectUri"
         ],
         "type": "object"
       },
@@ -38164,6 +38730,41 @@
         ],
         "type": "object"
       },
+      "TokenBody": {
+        "additionalProperties": false,
+        "properties": {
+          "access_token": {
+            "description": "Opaque access token for the userinfo endpoint",
+            "type": "string"
+          },
+          "error": {
+            "description": "OAuth error code",
+            "type": "string"
+          },
+          "error_description": {
+            "description": "Human-readable error detail",
+            "type": "string"
+          },
+          "expires_in": {
+            "description": "Access token lifetime in seconds",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id_token": {
+            "description": "Signed ID token",
+            "type": "string"
+          },
+          "scope": {
+            "description": "Space-delimited scopes actually granted",
+            "type": "string"
+          },
+          "token_type": {
+            "description": "Always Bearer",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Tool": {
         "additionalProperties": true,
         "properties": {
@@ -46530,6 +47131,191 @@
         "x-internal": true
       }
     },
+    "/api/agents/machines/{machine}/sessions/{id}/clear": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /clear: the conversation continues as a fresh session, whose id this answers with. Refused while a turn runs.",
+        "operationId": "clear-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSessionCleared"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Start a pw code session over",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/commands": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns a built-in command such as /status, /model, or /cost and answers with its output. /clear, /compact, /goal, and /plan have routes of their own; skills and custom commands are sent as messages.",
+        "operationId": "run-agent-session-command",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentCommandBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentCommandOutput"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Run a built-in slash command in a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/compact": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /compact, optionally focused on what to keep. Refused while a turn runs.",
+        "operationId": "compact-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentCompactBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentCompacted"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Summarize a pw code session's context",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/agents/machines/{machine}/sessions/{id}/fork": {
       "post": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nCopies the session and its subagent transcripts into a new one on the same machine, leaving the original untouched. Refused while the session is mid-turn, and while another host holds it live.",
@@ -46579,6 +47365,71 @@
           }
         },
         "summary": "Copy a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/goal": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /goal with the same arguments the terminal takes. Setting or resuming a goal starts a turn on the session.",
+        "operationId": "set-agent-session-goal",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentCommandArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentCommandOutput"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set, show, or clear a pw code session's goal",
         "tags": [
           "Agents"
         ],
@@ -46692,6 +47543,126 @@
           }
         },
         "summary": "Send a message to a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/palette": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists the built-in commands, skills, custom commands, and MCP prompts the session can run, as the terminal's / palette shows them.",
+        "operationId": "get-agent-session-palette",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPalette"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List a pw code session's slash commands",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/plan": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /plan and answers with what the caller owes next: prose to show, the session's plan, a request to send as a turn, a plan file only the terminal can open, or nothing.",
+        "operationId": "run-agent-session-plan",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentCommandArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPlanResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Run /plan in a pw code session",
         "tags": [
           "Agents"
         ],
@@ -47312,14 +48283,6 @@
         ],
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "contentEncoding": "base64",
-                  "type": "string"
-                }
-              }
-            },
             "description": "OK",
             "headers": {
               "Content-Disposition": {
@@ -47698,14 +48661,6 @@
         ],
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "contentEncoding": "base64",
-                  "type": "string"
-                }
-              }
-            },
             "description": "OK",
             "headers": {
               "Content-Disposition": {
@@ -54823,6 +55778,330 @@
         ]
       }
     },
+    "/api/oidc/authorize": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nStarts the authorization code flow. Sends the browser to sign in when there is no session, asks for consent when the application requires it, and redirects to the application with an authorization code.",
+        "operationId": "get-oidc-authorize",
+        "parameters": [
+          {
+            "description": "The client ID of the application requesting authorization",
+            "explode": false,
+            "in": "query",
+            "name": "client_id",
+            "schema": {
+              "description": "The client ID of the application requesting authorization",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Where to send the authorization code; must match a registered value",
+            "explode": false,
+            "in": "query",
+            "name": "redirect_uri",
+            "schema": {
+              "description": "Where to send the authorization code; must match a registered value",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Must be code",
+            "explode": false,
+            "in": "query",
+            "name": "response_type",
+            "schema": {
+              "description": "Must be code",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Space-delimited scopes; must include openid",
+            "explode": false,
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "description": "Space-delimited scopes; must include openid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Opaque value returned unchanged to the application",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "Opaque value returned unchanged to the application",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Value bound into the ID token to detect replay",
+            "explode": false,
+            "in": "query",
+            "name": "nonce",
+            "schema": {
+              "description": "Value bound into the ID token to detect replay",
+              "type": "string"
+            }
+          },
+          {
+            "description": "PKCE challenge (RFC 7636); required for SPA and native applications",
+            "explode": false,
+            "in": "query",
+            "name": "code_challenge",
+            "schema": {
+              "description": "PKCE challenge (RFC 7636); required for SPA and native applications",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Must be S256",
+            "explode": false,
+            "in": "query",
+            "name": "code_challenge_method",
+            "schema": {
+              "description": "Must be S256",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Space-delimited list of none, login, or consent",
+            "explode": false,
+            "in": "query",
+            "name": "prompt",
+            "schema": {
+              "description": "Space-delimited list of none, login, or consent",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Maximum age in seconds of the user's authentication",
+            "explode": false,
+            "in": "query",
+            "name": "max_age",
+            "schema": {
+              "description": "Maximum age in seconds of the user's authentication",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "OIDC authorization endpoint",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/oidc/authorize/resume": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nContinues an authorization request that was paused for sign-in. The request is replayed from a short-lived cookie and validated again from the start.",
+        "operationId": "get-oidc-authorize-resume",
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Resume an OIDC authorization request",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/oidc/connected-apps": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists the applications the user has granted access to their identity.",
+        "operationId": "list-oidc-connected-apps",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListConnectedAppsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List connected applications",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/oidc/connected-apps/{clientId}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRevokes the user's consent for an application along with its authorization codes and access tokens.",
+        "operationId": "revoke-oidc-connected-app",
+        "parameters": [
+          {
+            "description": "Client ID of the application to disconnect",
+            "in": "path",
+            "name": "clientId",
+            "required": true,
+            "schema": {
+              "description": "Client ID of the application to disconnect",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Disconnect an application",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/oidc/consent": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDescribes the authorization request waiting on the user's decision, for the consent screen to render.",
+        "operationId": "get-oidc-consent",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingConsentOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get the pending consent request",
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nApproves or denies the pending authorization request and returns where to send the browser.",
+        "operationId": "post-oidc-consent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentDecisionInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDecisionOutputBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Decide a pending consent request",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
     "/api/oidc/sso/{authMethodId}/sector-identifier": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the JSON array of redirect URIs that an upstream OIDC provider fetches when this URL is registered as `sector_identifier_uri` (OIDC Core 1.0 § 5).",
@@ -54873,6 +56152,64 @@
         ]
       }
     },
+    "/api/oidc/token": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRedeems an authorization code for an ID token and an opaque access token (RFC 6749 section 4.1.3).\n\nThe body is `application/x-www-form-urlencoded` with `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.",
+        "operationId": "post-oidc-token",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "contentMediaType": "application/octet-stream",
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "OIDC token endpoint",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
     "/api/oidc/token/direct": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nMints an identity token for the logged-in user against a registered application, without a browser redirect. This is the exec-credential pattern used by kubectl.",
@@ -54913,6 +56250,84 @@
           }
         },
         "summary": "Get an identity token by direct grant",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/oidc/userinfo": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the claims released by an application's access token. Authenticated with the opaque access token from the token endpoint, not a platform credential.",
+        "operationId": "get-oidc-userinfo",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "OIDC userinfo endpoint",
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the claims released by an application's access token. Authenticated with the opaque access token from the token endpoint, not a platform credential.",
+        "operationId": "post-oidc-userinfo",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "OIDC userinfo endpoint",
         "tags": [
           "Authentication"
         ]
@@ -94053,7 +95468,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -94893,6 +96315,367 @@
           }
         },
         "summary": "Mark the Changelog page as seen",
+        "tags": [
+          "User Settings"
+        ]
+      }
+    },
+    "/api/user/cost-dashboards/{dashboard}/filters": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nForgets the filters the current user saved for a cost dashboard.",
+        "operationId": "delete-user-cost-dashboard-filters",
+        "parameters": [
+          {
+            "description": "Which cost dashboard the filters belong to: the user's own cost page or the organization admin cost page.",
+            "in": "path",
+            "name": "dashboard",
+            "required": true,
+            "schema": {
+              "description": "Which cost dashboard the filters belong to: the user's own cost page or the organization admin cost page.",
+              "enum": [
+                "cost",
+                "admin-cost"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Clear saved cost dashboard filters",
+        "tags": [
+          "User Settings"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the filters the current user saved for a cost dashboard. An empty object means nothing is saved.",
+        "operationId": "get-user-cost-dashboard-filters",
+        "parameters": [
+          {
+            "description": "Which cost dashboard the filters belong to: the user's own cost page or the organization admin cost page.",
+            "in": "path",
+            "name": "dashboard",
+            "required": true,
+            "schema": {
+              "description": "Which cost dashboard the filters belong to: the user's own cost page or the organization admin cost page.",
+              "enum": [
+                "cost",
+                "admin-cost"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostDashboardFilters"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get saved cost dashboard filters",
+        "tags": [
+          "User Settings"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReplaces the filters the current user has saved for a cost dashboard.",
+        "operationId": "replace-user-cost-dashboard-filters",
+        "parameters": [
+          {
+            "description": "Which cost dashboard the filters belong to: the user's own cost page or the organization admin cost page.",
+            "in": "path",
+            "name": "dashboard",
+            "required": true,
+            "schema": {
+              "description": "Which cost dashboard the filters belong to: the user's own cost page or the organization admin cost page.",
+              "enum": [
+                "cost",
+                "admin-cost"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CostDashboardFilters"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostDashboardFilters"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Save cost dashboard filters",
+        "tags": [
+          "User Settings"
+        ]
+      }
+    },
+    "/api/user/dashboards": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the current user's saved dashboards, oldest first. An empty list means the home page shows the default layout.",
+        "operationId": "list-user-dashboards",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Dashboard"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List dashboards",
+        "tags": [
+          "User Settings"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSaves a new dashboard of widgets for the current user.",
+        "operationId": "create-user-dashboard",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DashboardBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create dashboard",
+        "tags": [
+          "User Settings"
+        ]
+      }
+    },
+    "/api/user/dashboards/{id}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDeletes one of the current user's dashboards.",
+        "operationId": "delete-user-dashboard",
+        "parameters": [
+          {
+            "description": "Dashboard id.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Dashboard id.",
+              "examples": [
+                "64c0d3b8f0a2c9a1b3d4e5f6"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete dashboard",
+        "tags": [
+          "User Settings"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns one of the current user's dashboards.",
+        "operationId": "get-user-dashboard",
+        "parameters": [
+          {
+            "description": "Dashboard id.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Dashboard id.",
+              "examples": [
+                "64c0d3b8f0a2c9a1b3d4e5f6"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get dashboard",
+        "tags": [
+          "User Settings"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReplaces the name and widgets of one of the current user's dashboards.",
+        "operationId": "replace-user-dashboard",
+        "parameters": [
+          {
+            "description": "Dashboard id.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Dashboard id.",
+              "examples": [
+                "64c0d3b8f0a2c9a1b3d4e5f6"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DashboardBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Replace dashboard",
         "tags": [
           "User Settings"
         ]
@@ -96223,7 +98006,7 @@
     },
     "/api/workflow-runs/{slug}/files": {
       "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRetrieves a file from a workflow run's output directory.",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRetrieves a file from a workflow run's output directory. A step's log, `logs/\u003cjob\u003e/step_\u003cn\u003e/logs.out`, rotates when it reaches 10 MiB: its earlier output moves to `logs.out.1` and only that one backup is kept, so at most the last 10 to 20 MiB of a step's output is retained. Request `logs.out.1` to read the output from before the latest rotation.",
         "operationId": "get-workflow-run-file",
         "parameters": [
           {
