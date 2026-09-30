@@ -67,4 +67,4 @@ SDK versions match the Parallel Works platform version. Minor and patch releases
 
 ## License
 
-MIT License - see [LICENSE](./LICENSE) for details.
+Apache License 2.0 - see [LICENSE](./LICENSE) for details.
