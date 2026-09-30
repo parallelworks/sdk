@@ -137,4 +137,4 @@ For full API documentation, visit [https://parallelworks.com/docs](https://paral
 
 ## License
 
-MIT
+Apache-2.0

@@ -67,5 +67,5 @@
     "directory": "typescript"
   },
   "author": "Parallel Works <support@parallelworks.com>",
-  "license": "MIT"
+  "license": "Apache-2.0"
 }
