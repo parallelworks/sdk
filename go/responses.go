@@ -87,6 +87,20 @@ func (m *ResponseMeta) GetPkiValidationFileHeaders() GetPkiValidationFileHeaders
 	}
 }
 
+// RegisterNodeHeaders holds the headers RegisterNode declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type RegisterNodeHeaders struct {
+	CacheControl string
+}
+
+// RegisterNodeHeaders reads the headers RegisterNode declares out of the captured
+// response.
+func (m *ResponseMeta) RegisterNodeHeaders() RegisterNodeHeaders {
+	return RegisterNodeHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
 // DownloadAiChatAttachmentDirectHeaders holds the headers DownloadAiChatAttachmentDirect declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type DownloadAiChatAttachmentDirectHeaders struct {
@@ -131,6 +145,20 @@ func (m *ResponseMeta) DownloadAiChatAttachmentHeaders() DownloadAiChatAttachmen
 	}
 }
 
+// CreateApikeyHeaders holds the headers CreateApikey declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type CreateApikeyHeaders struct {
+	CacheControl string
+}
+
+// CreateApikeyHeaders reads the headers CreateApikey declares out of the captured
+// response.
+func (m *ResponseMeta) CreateApikeyHeaders() CreateApikeyHeaders {
+	return CreateApikeyHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
 // GetAuthSsoOidcCallbackHeaders holds the headers GetAuthSsoOidcCallback declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type GetAuthSsoOidcCallbackHeaders struct {
@@ -160,6 +188,34 @@ func (m *ResponseMeta) GetAuthSsoOidcRedirectHeaders() GetAuthSsoOidcRedirectHea
 	return GetAuthSsoOidcRedirectHeaders{
 		Location:  m.Header.Get("Location"),
 		SetCookie: m.Header.Get("Set-Cookie"),
+	}
+}
+
+// GetAuthTokenHeaders holds the headers GetAuthToken declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetAuthTokenHeaders struct {
+	CacheControl string
+}
+
+// GetAuthTokenHeaders reads the headers GetAuthToken declares out of the captured
+// response.
+func (m *ResponseMeta) GetAuthTokenHeaders() GetAuthTokenHeaders {
+	return GetAuthTokenHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// GetAuthTokenOidcHeaders holds the headers GetAuthTokenOidc declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetAuthTokenOidcHeaders struct {
+	CacheControl string
+}
+
+// GetAuthTokenOidcHeaders reads the headers GetAuthTokenOidc declares out of the captured
+// response.
+func (m *ResponseMeta) GetAuthTokenOidcHeaders() GetAuthTokenOidcHeaders {
+	return GetAuthTokenOidcHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
 	}
 }
 
@@ -391,6 +447,20 @@ func (m *ResponseMeta) PostOidcTokenHeaders() PostOidcTokenHeaders {
 	}
 }
 
+// GetOidcTokenDirectHeaders holds the headers GetOidcTokenDirect declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetOidcTokenDirectHeaders struct {
+	CacheControl string
+}
+
+// GetOidcTokenDirectHeaders reads the headers GetOidcTokenDirect declares out of the captured
+// response.
+func (m *ResponseMeta) GetOidcTokenDirectHeaders() GetOidcTokenDirectHeaders {
+	return GetOidcTokenDirectHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
 // GetOidcUserinfoHeaders holds the headers GetOidcUserinfo declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type GetOidcUserinfoHeaders struct {
@@ -438,6 +508,76 @@ func (m *ResponseMeta) GetManagedClusterIconHeaders() GetManagedClusterIconHeade
 		ETag:                m.Header.Get("ETag"),
 		Location:            m.Header.Get("Location"),
 		XContentTypeOptions: m.Header.Get("X-Content-Type-Options"),
+	}
+}
+
+// GenerateNodeTokenHeaders holds the headers GenerateNodeToken declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GenerateNodeTokenHeaders struct {
+	CacheControl string
+}
+
+// GenerateNodeTokenHeaders reads the headers GenerateNodeToken declares out of the captured
+// response.
+func (m *ResponseMeta) GenerateNodeTokenHeaders() GenerateNodeTokenHeaders {
+	return GenerateNodeTokenHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// CreateOrgOidcAppSecretHeaders holds the headers CreateOrgOidcAppSecret declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type CreateOrgOidcAppSecretHeaders struct {
+	CacheControl string
+}
+
+// CreateOrgOidcAppSecretHeaders reads the headers CreateOrgOidcAppSecret declares out of the captured
+// response.
+func (m *ResponseMeta) CreateOrgOidcAppSecretHeaders() CreateOrgOidcAppSecretHeaders {
+	return CreateOrgOidcAppSecretHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// RotateOrgOidcAppSecretHeaders holds the headers RotateOrgOidcAppSecret declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type RotateOrgOidcAppSecretHeaders struct {
+	CacheControl string
+}
+
+// RotateOrgOidcAppSecretHeaders reads the headers RotateOrgOidcAppSecret declares out of the captured
+// response.
+func (m *ResponseMeta) RotateOrgOidcAppSecretHeaders() RotateOrgOidcAppSecretHeaders {
+	return RotateOrgOidcAppSecretHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// RevealOrgOidcAppSecretHeaders holds the headers RevealOrgOidcAppSecret declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type RevealOrgOidcAppSecretHeaders struct {
+	CacheControl string
+}
+
+// RevealOrgOidcAppSecretHeaders reads the headers RevealOrgOidcAppSecret declares out of the captured
+// response.
+func (m *ResponseMeta) RevealOrgOidcAppSecretHeaders() RevealOrgOidcAppSecretHeaders {
+	return RevealOrgOidcAppSecretHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// CreateScimTokenHeaders holds the headers CreateScimToken declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type CreateScimTokenHeaders struct {
+	CacheControl string
+}
+
+// CreateScimTokenHeaders reads the headers CreateScimToken declares out of the captured
+// response.
+func (m *ResponseMeta) CreateScimTokenHeaders() CreateScimTokenHeaders {
+	return CreateScimTokenHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
 	}
 }
 
@@ -521,6 +661,34 @@ func (m *ResponseMeta) GetTokenGoogleBucketHeaders() GetTokenGoogleBucketHeaders
 	}
 }
 
+// GetAzureMachineLearningWorkspaceHeaders holds the headers GetAzureMachineLearningWorkspace declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetAzureMachineLearningWorkspaceHeaders struct {
+	CacheControl string
+}
+
+// GetAzureMachineLearningWorkspaceHeaders reads the headers GetAzureMachineLearningWorkspace declares out of the captured
+// response.
+func (m *ResponseMeta) GetAzureMachineLearningWorkspaceHeaders() GetAzureMachineLearningWorkspaceHeaders {
+	return GetAzureMachineLearningWorkspaceHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// GetPresignedURLMachineLearningWorkspaceHeaders holds the headers GetPresignedURLMachineLearningWorkspace declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetPresignedURLMachineLearningWorkspaceHeaders struct {
+	CacheControl string
+}
+
+// GetPresignedURLMachineLearningWorkspaceHeaders reads the headers GetPresignedURLMachineLearningWorkspace declares out of the captured
+// response.
+func (m *ResponseMeta) GetPresignedURLMachineLearningWorkspaceHeaders() GetPresignedURLMachineLearningWorkspaceHeaders {
+	return GetPresignedURLMachineLearningWorkspaceHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
 // GetUserSessionCredentialsHeaders holds the headers GetUserSessionCredentials declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type GetUserSessionCredentialsHeaders struct {
@@ -562,6 +730,20 @@ func (m *ResponseMeta) CreateSSHPrivateKeyHeaders() CreateSSHPrivateKeyHeaders {
 		SSHPrivateKey: m.Header.Get("SSHPrivateKey"),
 		Type:          m.Header.Get("Type"),
 		User:          m.Header.Get("User"),
+	}
+}
+
+// CreateWorkerHeaders holds the headers CreateWorker declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type CreateWorkerHeaders struct {
+	CacheControl string
+}
+
+// CreateWorkerHeaders reads the headers CreateWorker declares out of the captured
+// response.
+func (m *ResponseMeta) CreateWorkerHeaders() CreateWorkerHeaders {
+	return CreateWorkerHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
 	}
 }
 
@@ -732,6 +914,20 @@ func (m *ResponseMeta) PostMfaLoginHeaders() PostMfaLoginHeaders {
 	return PostMfaLoginHeaders{
 		Location:  m.Header.Get("Location"),
 		SetCookie: m.Header.Get("Set-Cookie"),
+	}
+}
+
+// PostAddMfaOtpHeaders holds the headers PostAddMfaOtp declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type PostAddMfaOtpHeaders struct {
+	CacheControl string
+}
+
+// PostAddMfaOtpHeaders reads the headers PostAddMfaOtp declares out of the captured
+// response.
+func (m *ResponseMeta) PostAddMfaOtpHeaders() PostAddMfaOtpHeaders {
+	return PostAddMfaOtpHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
 	}
 }
 

@@ -7039,6 +7039,15 @@ type HistoryItem struct {
 	ToolName *string `json:"toolName,omitempty"`
 }
 
+type HostForwardSetting struct {
+	// Exact hostname to match against the TLS SNI. No wildcards or ports.
+	Host string `json:"host"`
+	// Send a PROXY protocol v2 header before the TLS bytes so the backend sees the real client IP. The backend must accept PROXY protocol or every connection fails.
+	ProxyProtocol *bool `json:"proxyProtocol,omitempty"`
+	// Backend to pipe matching connections to: a DNS name or IP with an optional port (default 443). The backend terminates TLS with its own certificate.
+	Target string `json:"target"`
+}
+
 type IconRef struct {
 	// SHA256 hex of a blob already in the caller's thumbnail library. Mutually exclusive with presetUrl.
 	Etag *string `json:"etag,omitempty"`
@@ -7330,7 +7339,23 @@ type Jwks struct {
 	Keys []Jwk `json:"keys"`
 }
 
+type KernelEvent struct {
+	// When the step was recorded.
+	At time.Time `json:"at"`
+	// What happened.
+	Message string `json:"message"`
+	// Kernel status at this step.
+	Status string `json:"status"`
+}
+
+type KernelHostsOutputBody struct {
+	// The subset of the given targets whose agent holds a tunnel on an ingress pod right now.
+	Connected []string `json:"connected"`
+}
+
 type KernelResponse struct {
+	// Whether the compute hosting the kernel holds a tunnel on an ingress pod. False means nothing can reach the kernel whatever its status says.
+	AgentConnected *bool `json:"agentConnected,omitempty"`
 	// IDs of buckets whose credentials are injected into the kernel.
 	Buckets []string `json:"buckets,omitempty"`
 	// Creation time.
@@ -7339,6 +7364,8 @@ type KernelResponse struct {
 	EnvironmentID *string `json:"environmentId,omitempty"`
 	// Why the kernel failed to start.
 	ErrorMessage *string `json:"errorMessage,omitempty"`
+	// What the kernel did while starting, oldest first.
+	Events []KernelEvent `json:"events,omitempty"`
 	// Kernel ID.
 	ID string `json:"id"`
 	// Memory ceiling (GB) applied to the kernel's processes.
@@ -10133,6 +10160,8 @@ type PlatformSettingsAdmin struct {
 	GcsHmacRotationMaxAgeHours int64 `json:"gcsHmacRotationMaxAgeHours"`
 	// Minutes between GCS HMAC rotation sweeps. Default 60.
 	GcsHmacRotationSweepMinutes int64 `json:"gcsHmacRotationSweepMinutes"`
+	// TLS passthrough rules: connections whose SNI exactly matches a rule's host are piped, still encrypted, to its target.
+	HostForwards []HostForwardSetting `json:"hostForwards"`
 	// The expiration date of the platform license, if valid.
 	LicenseExpiresAt *time.Time `json:"licenseExpiresAt,omitempty"`
 	// License-level feature previews (e.g. selfService).
@@ -10525,6 +10554,17 @@ type ProvisionStatusChild struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+type ProvisionStatusChildInput struct {
+	// Base64 encoded error message
+	ErrorMessage *string `json:"errorMessage,omitempty"`
+	// The child provision status ID
+	ID string `json:"id"`
+	// The child provision status label, used only when the child is first recorded
+	Label *string `json:"label,omitempty"`
+	// The child provision status
+	Status string `json:"status"`
+}
+
 type ProvisionStatusChildResponse struct {
 	// Nested child records grouped by role.
 	Children []ProvisionStatusChildResponse `json:"children,omitempty"`
@@ -10596,6 +10636,8 @@ type ProvisionStatusStruct struct {
 	ChildID *string `json:"childId,omitempty"`
 	// The child provision status label
 	ChildLabel *string `json:"childLabel,omitempty"`
+	// Child records to create or update in one call, as an alternative to childAction/childId
+	Children []ProvisionStatusChildInput `json:"children,omitempty"`
 	// Base64 encoded error message
 	ErrorMessage string `json:"errorMessage"`
 	// The provision status ID
@@ -13635,6 +13677,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	GcsHmacRotationMaxAgeHours *int64 `json:"gcsHmacRotationMaxAgeHours,omitempty"`
 	// Minutes between GCS HMAC rotation sweeps.
 	GcsHmacRotationSweepMinutes *int64 `json:"gcsHmacRotationSweepMinutes,omitempty"`
+	// TLS passthrough rules, replacing the current list. Empty list removes all rules.
+	HostForwards []HostForwardSetting `json:"hostForwards,omitempty"`
 	// The maintenance message to show.
 	MaintenanceMessage *string `json:"maintenanceMessage,omitempty"`
 	// Whether to enable maintenance mode.

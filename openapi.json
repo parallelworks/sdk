@@ -18807,6 +18807,28 @@
         ],
         "type": "object"
       },
+      "HostForwardSetting": {
+        "additionalProperties": false,
+        "properties": {
+          "host": {
+            "description": "Exact hostname to match against the TLS SNI. No wildcards or ports.",
+            "type": "string"
+          },
+          "proxyProtocol": {
+            "description": "Send a PROXY protocol v2 header before the TLS bytes so the backend sees the real client IP. The backend must accept PROXY protocol or every connection fails.",
+            "type": "boolean"
+          },
+          "target": {
+            "description": "Backend to pipe matching connections to: a DNS name or IP with an optional port (default 443). The backend terminates TLS with its own certificate.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "target"
+        ],
+        "type": "object"
+      },
       "IconRef": {
         "additionalProperties": false,
         "properties": {
@@ -19746,9 +19768,60 @@
         ],
         "type": "object"
       },
+      "KernelEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "description": "When the step was recorded.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "message": {
+            "description": "What happened.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "status": {
+            "description": "Kernel status at this step.",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "at",
+          "status",
+          "message"
+        ],
+        "type": "object"
+      },
+      "KernelHostsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "connected": {
+            "description": "The subset of the given targets whose agent holds a tunnel on an ingress pod right now.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "connected"
+        ],
+        "type": "object"
+      },
       "KernelResponse": {
         "additionalProperties": false,
         "properties": {
+          "agentConnected": {
+            "description": "Whether the compute hosting the kernel holds a tunnel on an ingress pod. False means nothing can reach the kernel whatever its status says.",
+            "readOnly": true,
+            "type": "boolean"
+          },
           "buckets": {
             "description": "IDs of buckets whose credentials are injected into the kernel.",
             "items": {
@@ -19773,6 +19846,17 @@
             "description": "Why the kernel failed to start.",
             "readOnly": true,
             "type": "string"
+          },
+          "events": {
+            "description": "What the kernel did while starting, oldest first.",
+            "items": {
+              "$ref": "#/components/schemas/KernelEvent"
+            },
+            "readOnly": true,
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "id": {
             "description": "Kernel ID.",
@@ -28979,6 +29063,16 @@
             "format": "int64",
             "type": "integer"
           },
+          "hostForwards": {
+            "description": "TLS passthrough rules: connections whose SNI exactly matches a rule's host are piped, still encrypted, to its target.",
+            "items": {
+              "$ref": "#/components/schemas/HostForwardSetting"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "licenseExpiresAt": {
             "description": "The expiration date of the platform license, if valid.",
             "format": "date-time",
@@ -29086,7 +29180,8 @@
           "gcsHmacRotationMaxAgeHours",
           "gcsHmacRotationGraceHours",
           "gcsHmacRotationSweepMinutes",
-          "workspaceScaleDownMinAgeDays"
+          "workspaceScaleDownMinAgeDays",
+          "hostForwards"
         ],
         "type": "object"
       },
@@ -30184,6 +30279,42 @@
         ],
         "type": "object"
       },
+      "ProvisionStatusChildInput": {
+        "additionalProperties": false,
+        "properties": {
+          "errorMessage": {
+            "description": "Base64 encoded error message",
+            "type": "string"
+          },
+          "id": {
+            "description": "The child provision status ID",
+            "type": "string"
+          },
+          "label": {
+            "description": "The child provision status label, used only when the child is first recorded",
+            "type": "string"
+          },
+          "status": {
+            "description": "The child provision status",
+            "enum": [
+              "pending",
+              "provisioning",
+              "provisioned",
+              "failed",
+              "skipped",
+              "deleting",
+              "deleted",
+              "warning"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ],
+        "type": "object"
+      },
       "ProvisionStatusChildResponse": {
         "additionalProperties": false,
         "properties": {
@@ -30420,6 +30551,16 @@
           "childLabel": {
             "description": "The child provision status label",
             "type": "string"
+          },
+          "children": {
+            "description": "Child records to create or update in one call, as an alternative to childAction/childId",
+            "items": {
+              "$ref": "#/components/schemas/ProvisionStatusChildInput"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "errorMessage": {
             "description": "Base64 encoded error message",
@@ -39111,6 +39252,14 @@
             "minimum": 1,
             "type": "integer"
           },
+          "hostForwards": {
+            "description": "TLS passthrough rules, replacing the current list. Empty list removes all rules.",
+            "items": {
+              "$ref": "#/components/schemas/HostForwardSetting"
+            },
+            "maxItems": 64,
+            "type": "array"
+          },
           "maintenanceMessage": {
             "description": "The maintenance message to show.",
             "type": "string"
@@ -46845,7 +46994,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -49255,7 +49411,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -49485,7 +49648,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -49529,7 +49699,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -56236,7 +56413,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -69713,7 +69897,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -70923,7 +71114,14 @@
                 }
               }
             },
-            "description": "Created"
+            "description": "Created",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -70990,7 +71188,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -71117,7 +71322,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -73138,7 +73350,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -84537,6 +84756,87 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/kernel-hosts": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns which of the given clusters and instances can host a notebook kernel right now.",
+        "operationId": "list-kernel-hosts",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "IDs of the clusters and instances to ask about.",
+            "explode": false,
+            "in": "query",
+            "name": "targets",
+            "schema": {
+              "description": "IDs of the clusters and instances to ask about.",
+              "examples": [
+                [
+                  "60c72b2f9b1e8d001c8e4f3a"
+                ]
+              ],
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KernelHostsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List compute that can host a kernel",
+        "tags": [
+          "Notebooks"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/kernels": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the notebook kernels for the specified user.",
@@ -85403,7 +85703,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -85542,7 +85849,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -89363,7 +89677,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {
@@ -95629,7 +95950,14 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "content": {

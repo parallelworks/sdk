@@ -14872,6 +14872,41 @@ func (c *Client) DeleteIP(ctx context.Context, organization string, user string,
 	return nil
 }
 
+// ListKernelHostsParams contains the parameters for the ListKernelHosts operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListKernelHostsParams struct {
+	// IDs of the clusters and instances to ask about.
+	Targets *[]string `json:"targets,omitempty"`
+}
+
+// ListKernelHosts - List compute that can host a kernel
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns which of the given clusters and instances can host a notebook kernel right now.
+func (c *Client) ListKernelHosts(ctx context.Context, organization string, user string, opts ...ListKernelHostsParams) (*KernelHostsOutputBody, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/kernel-hosts"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	var params ListKernelHostsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "targets", "form", false, params.Targets)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result KernelHostsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListKernels - List notebook kernels
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
