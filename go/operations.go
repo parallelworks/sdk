@@ -13714,6 +13714,44 @@ func (c *Client) SetElasticClusterIcon(ctx context.Context, organization string,
 	return &result, nil
 }
 
+// ListClusterKernels - List notebook kernels on a cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns every user's notebook kernels running on the cluster, with their owners. Available to whoever may manage the cluster.
+func (c *Client) ListClusterKernels(ctx context.Context, organization string, user string, clusterName string) (*[]KernelResponse, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/kernels"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+
+	var result []KernelResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteClusterKernel - Stop a notebook kernel on a cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Stops and removes any user's notebook kernel running on the cluster. Available to whoever may manage the cluster.
+func (c *Client) DeleteClusterKernel(ctx context.Context, organization string, user string, clusterName string, kernel string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/kernels/{kernel}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+	path = pathReplace(path, "kernel", "simple", false, kernel)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetClusterNodesParams contains the parameters for the GetClusterNodes operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetClusterNodesParams struct {
@@ -14817,6 +14855,44 @@ func (c *Client) DeleteInstance(ctx context.Context, organization string, user s
 	return nil
 }
 
+// ListInstanceKernels - List notebook kernels on an instance
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns every user's notebook kernels running on the instance, with their owners. Available to whoever may manage the instance.
+func (c *Client) ListInstanceKernels(ctx context.Context, organization string, user string, instanceName string) (*[]KernelResponse, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/instances/{instanceName}/kernels"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "instanceName", "simple", false, instanceName)
+
+	var result []KernelResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteInstanceKernel - Stop a notebook kernel on an instance
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Stops and removes any user's notebook kernel running on the instance. Available to whoever may manage the instance.
+func (c *Client) DeleteInstanceKernel(ctx context.Context, organization string, user string, instanceName string, kernel string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/instances/{instanceName}/kernels/{kernel}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "instanceName", "simple", false, instanceName)
+	path = pathReplace(path, "kernel", "simple", false, kernel)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // CreateInstanceSnapshot - Create Instance Snapshot
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -15362,6 +15438,129 @@ func (c *Client) DisableOrgUserPreview(ctx context.Context, organization string,
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// ListPythonEnvironments - List Python environments
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the Python environments notebook kernels can run in: the platform default plus the user's own.
+func (c *Client) ListPythonEnvironments(ctx context.Context, organization string, user string) (*[]PythonEnvironmentResponse, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/python-environments"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+
+	var result []PythonEnvironmentResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreatePythonEnvironment - Create Python environment
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Saves a Python environment for notebook kernels: a version and packages to build on the compute, or an interpreter already there.
+func (c *Client) CreatePythonEnvironment(ctx context.Context, organization string, user string, body CreatePythonEnvironmentBody) (*PythonEnvironmentResponse, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/python-environments"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+
+	var result PythonEnvironmentResponse
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DiscoverPythonEnvironmentsParams contains the parameters for the DiscoverPythonEnvironments operation.
+// Required parameters are value fields; optional parameters are pointers.
+type DiscoverPythonEnvironmentsParams struct {
+	// Cluster or instance whose agent looks for interpreters, or "user-workspace" for the caller's own workspace.
+	TargetID string `json:"targetId"`
+}
+
+// DiscoverPythonEnvironments - Discover Python interpreters on a compute target
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Asks the target's agent, as the caller, which Python interpreters are already there: conda environments, virtualenvs under the caller's home, and the system python. Each is probed for its version and for ipykernel.
+func (c *Client) DiscoverPythonEnvironments(ctx context.Context, organization string, user string, params DiscoverPythonEnvironmentsParams) (*[]DiscoveredPythonEnv, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/python-environments/discovered"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "targetId", "form", false, params.TargetID)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []DiscoveredPythonEnv
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetPythonEnvironment - Get Python environment
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns a Python environment by ID.
+func (c *Client) GetPythonEnvironment(ctx context.Context, organization string, user string, environment string) (*PythonEnvironmentResponse, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/python-environments/{environment}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "environment", "simple", false, environment)
+
+	var result PythonEnvironmentResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeletePythonEnvironment - Delete Python environment
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Deletes a Python environment no running kernel uses.
+func (c *Client) DeletePythonEnvironment(ctx context.Context, organization string, user string, environment string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/python-environments/{environment}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "environment", "simple", false, environment)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UpdatePythonEnvironment - Update Python environment
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Edits a Python environment. Kernels already running keep what they started with.
+func (c *Client) UpdatePythonEnvironment(ctx context.Context, organization string, user string, environment string, body UpdatePythonEnvironmentBody) (*PythonEnvironmentResponse, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/python-environments/{environment}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "environment", "simple", false, environment)
+
+	var result PythonEnvironmentResponse
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // ResetOnboarding - Reset user onboarding

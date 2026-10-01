@@ -1,5 +1,17 @@
 {
   "components": {
+    "responses": {
+      "Problem": {
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        },
+        "description": "An error as RFC 9457 problem details, for a request sent with Accept: application/problem+json."
+      }
+    },
     "schemas": {
       "AIModelConfig": {
         "additionalProperties": false,
@@ -11784,6 +11796,10 @@
             "maxLength": 255,
             "type": "string"
           },
+          "pythonEnvironmentId": {
+            "description": "Python environment the notebook's cells run in. Omit, or pass platform-default, for the platform's own toolkit.",
+            "type": "string"
+          },
           "runOnController": {
             "description": "Run the kernel on the cluster's controller agent directly instead of scheduling a worker. Cluster targets only; starts immediately with no Slurm allocation.",
             "type": "boolean"
@@ -12457,6 +12473,50 @@
         "required": [
           "domain",
           "role"
+        ],
+        "type": "object"
+      },
+      "CreatePythonEnvironmentBody": {
+        "additionalProperties": false,
+        "properties": {
+          "interpreterPath": {
+            "description": "Absolute path of a python interpreter on the target, with ipykernel installed. Existing only.",
+            "maxLength": 4096,
+            "type": "string"
+          },
+          "kind": {
+            "description": "managed builds a Python with uv on the target; existing runs an interpreter already there.",
+            "enum": [
+              "managed",
+              "existing"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Environment name, unique per user.",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "packages": {
+            "description": "pip requirement strings to install. Managed only; ipykernel is always added.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 200,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "pythonVersion": {
+            "description": "Interpreter version to build, e.g. 3.12. Managed only.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "kind"
         ],
         "type": "object"
       },
@@ -14180,6 +14240,44 @@
         ],
         "type": "object"
       },
+      "DiscoveredPythonEnv": {
+        "additionalProperties": false,
+        "properties": {
+          "hasIpykernel": {
+            "description": "Whether ipykernel is importable, which a kernel needs.",
+            "type": "boolean"
+          },
+          "interpreterPath": {
+            "description": "Absolute path of the interpreter on the target.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Environment name, as conda or the directory calls it.",
+            "type": "string"
+          },
+          "pythonVersion": {
+            "description": "Python version the interpreter reported.",
+            "type": "string"
+          },
+          "source": {
+            "description": "Where it was found.",
+            "enum": [
+              "conda",
+              "venv",
+              "managed",
+              "system"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "interpreterPath",
+          "source",
+          "hasIpykernel"
+        ],
+        "type": "object"
+      },
       "Disk": {
         "additionalProperties": false,
         "properties": {
@@ -14657,7 +14755,7 @@
         "additionalProperties": false,
         "properties": {
           "code": {
-            "description": "A stable machine-readable error code when one is available.",
+            "description": "Stable, machine-readable error code, for clients to show a localized message. Every error carries one. Documented at /problems/.",
             "type": "string"
           },
           "error": {
@@ -14678,6 +14776,11 @@
             "description": "A human-readable message describing the error.",
             "type": "string",
             "x-ms-primary-error-message": true
+          },
+          "params": {
+            "additionalProperties": {},
+            "description": "Values the code's localized message shows.",
+            "type": "object"
           }
         },
         "required": [
@@ -15375,6 +15478,52 @@
           "dns_zone",
           "debug",
           "no_root_access"
+        ],
+        "type": "object"
+      },
+      "FieldError": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "Stable name of the rule, for clients to show a localized message. New codes can appear: fall back to a generic message for one you don't know.",
+            "type": "string"
+          },
+          "detail": {
+            "description": "English explanation, for developers and logs.",
+            "type": "string"
+          },
+          "in": {
+            "description": "Where parameter is.",
+            "enum": [
+              "query",
+              "path",
+              "header",
+              "cookie"
+            ],
+            "type": "string"
+          },
+          "parameter": {
+            "description": "Name of the invalid request parameter.",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {},
+            "description": "Values the rule's localized message shows.",
+            "type": "object"
+          },
+          "pointer": {
+            "description": "JSON Pointer to the invalid body field, as a URI fragment such as #/items/0/name.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The rule's problem type.",
+            "format": "uri-reference",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "code"
         ],
         "type": "object"
       },
@@ -19814,6 +19963,25 @@
         ],
         "type": "object"
       },
+      "KernelOwner": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Owner's user ID.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "username": {
+            "description": "Owner's username.",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
       "KernelResponse": {
         "additionalProperties": false,
         "properties": {
@@ -19831,6 +19999,11 @@
               "array",
               "null"
             ]
+          },
+          "canStop": {
+            "description": "Whether the caller may stop this kernel: it is theirs, or they administer the compute. Set on a cluster's or instance's kernel list.",
+            "readOnly": true,
+            "type": "boolean"
           },
           "createdAt": {
             "description": "Creation time.",
@@ -19863,6 +20036,12 @@
             "readOnly": true,
             "type": "string"
           },
+          "lastUsedAt": {
+            "description": "When the kernel last served a request from its notebook.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
           "memoryLimit": {
             "description": "Memory ceiling (GB) applied to the kernel's processes.",
             "format": "double",
@@ -19877,6 +20056,16 @@
             "description": "Hostname of the compute node the kernel runs on.",
             "readOnly": true,
             "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/KernelOwner",
+            "description": "User the kernel runs as.",
+            "readOnly": true
+          },
+          "pythonEnvironment": {
+            "$ref": "#/components/schemas/PythonEnvironmentRef",
+            "description": "Python environment the notebook's cells run in.",
+            "readOnly": true
           },
           "schedulingParams": {
             "additionalProperties": {},
@@ -25495,6 +25684,10 @@
             "$ref": "#/components/schemas/SchedulerNotificationSettings",
             "description": "Scheduler-related notification settings."
           },
+          "tandem": {
+            "$ref": "#/components/schemas/TandemNotificationSettings",
+            "description": "Tandem issue tracker notification settings. Omit to keep the current ones."
+          },
           "workflow": {
             "$ref": "#/components/schemas/WorkflowNotificationSettings",
             "description": "Workflow-related notification settings."
@@ -30001,6 +30194,57 @@
         ],
         "type": "object"
       },
+      "Problem": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "Stable name of the problem type, for clients to show a localized message. New codes can appear: fall back to the status for one you don't know. Absent for about:blank: derive it from the status.",
+            "type": "string"
+          },
+          "detail": {
+            "description": "English explanation of this occurrence, for developers and logs.",
+            "type": "string"
+          },
+          "errors": {
+            "description": "For a validation problem, each invalid field and the rule it failed.",
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "instance": {
+            "description": "Identifies this occurrence of the problem.",
+            "format": "uri-reference",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {},
+            "description": "Values the code's localized message shows.",
+            "type": "object"
+          },
+          "status": {
+            "description": "The HTTP status code.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "title": {
+            "description": "Short English summary of the problem type, for developers.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Identifies the problem type and resolves to its documentation. about:blank means nothing beyond the status.",
+            "format": "uri-reference",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "ProcessSample": {
         "additionalProperties": false,
         "properties": {
@@ -33220,6 +33464,99 @@
           "volumeAttributesClass",
           "reason",
           "createdAt"
+        ],
+        "type": "object"
+      },
+      "PythonEnvironmentRef": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Environment ID, or platform-default.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "kind": {
+            "description": "How the kernel's Python is provided.",
+            "enum": [
+              "managed",
+              "existing"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Environment name when the kernel started.",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind"
+        ],
+        "type": "object"
+      },
+      "PythonEnvironmentResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "builtin": {
+            "description": "Provided by the platform; cannot be edited or deleted.",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "createdAt": {
+            "description": "Creation time.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "Environment ID.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "interpreterPath": {
+            "description": "Absolute path of the interpreter an existing environment runs, on the compute target.",
+            "type": "string"
+          },
+          "kind": {
+            "description": "How the kernel's Python is provided.",
+            "enum": [
+              "managed",
+              "existing"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Environment name.",
+            "type": "string"
+          },
+          "packages": {
+            "description": "pip requirements a managed environment installs. ipykernel is always added.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "pythonVersion": {
+            "description": "Interpreter version a managed environment is built with, e.g. 3.12.",
+            "type": "string"
+          },
+          "specHash": {
+            "description": "Identifies a managed environment's contents; the agent keys its build by it.",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "builtin"
         ],
         "type": "object"
       },
@@ -38614,6 +38951,29 @@
         ],
         "type": "object"
       },
+      "TandemNotificationSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "assigned": {
+            "$ref": "#/components/schemas/NotificationChannelSettings",
+            "description": "Settings for being assigned an issue."
+          },
+          "commented": {
+            "$ref": "#/components/schemas/NotificationChannelSettings",
+            "description": "Settings for comments on issues assigned to you."
+          },
+          "decision_requested": {
+            "$ref": "#/components/schemas/NotificationChannelSettings",
+            "description": "Settings for an agent asking you a decision."
+          }
+        },
+        "required": [
+          "decision_requested",
+          "assigned",
+          "commented"
+        ],
+        "type": "object"
+      },
       "Theme": {
         "additionalProperties": false,
         "properties": {
@@ -39934,6 +40294,38 @@
               "type": "string"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UpdatePythonEnvironmentBody": {
+        "additionalProperties": false,
+        "properties": {
+          "interpreterPath": {
+            "description": "Absolute path of a python interpreter on the target. Existing only.",
+            "maxLength": 4096,
+            "type": "string"
+          },
+          "name": {
+            "description": "Environment name, unique per user.",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "packages": {
+            "description": "pip requirement strings to install; replaces the list. Managed only.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 200,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "pythonVersion": {
+            "description": "Interpreter version to build, e.g. 3.12. Managed only.",
+            "type": "string"
           }
         },
         "type": "object"
@@ -42628,7 +43020,7 @@
       "name": "Parallel Works",
       "url": "https://parallelworks.com/contact"
     },
-    "description": "## Introduction\n\nThe Parallel Works ACTIVATE API follows [RESTful](https://en.wikipedia.org/wiki/Representational_State_Transfer) principles, providing predictable, resource-oriented URLs and using standard HTTP response codes to indicate request success or failure. Error responses follow a consistent, structured format for easier handling.\n\n### Authentication\n\nThe API supports several authentication methods:\n\n- **Cookie-based authentication** - Used automatically when accessing the API through the ACTIVATE web UI.\n- **Bearer tokens** - Tokens (JWTs) generated from your account settings.\n- **Basic authentication** - Use your API key (also found in your account settings) as the username and leave the password blank. You must base64 encode the resulting string yourself and include it in the Authorization header as: Authorization: Basic \u003cbase64-encoded value\u003e\n\n\u003e Choose the method that best fits your use case. Only one method should be used per request.\n\n### Request Structure\n\nThe API is designed to operate on **single resources per request**. In general, bulk operations are not supported.\n\n### Endpoint Categories\n\nEndpoints are grouped into two main categories:\n\n- **User-centric operations**  \n  These return data specific to the authenticated user. They are commonly used when building user-facing applications like the ACTIVATE web UI.\n\n- **System-level operations**  \n  These return consistent results regardless of the authenticated user. They are ideal for backend services and integrations that don't require user context, such as syncing with external systems.\n\n",
+    "description": "## Introduction\n\nThe Parallel Works ACTIVATE API follows [RESTful](https://en.wikipedia.org/wiki/Representational_State_Transfer) principles, providing predictable, resource-oriented URLs and using standard HTTP response codes to indicate request success or failure. Error responses follow a consistent, structured format for easier handling.\n\n### Authentication\n\nThe API supports several authentication methods:\n\n- **Cookie-based authentication** - Used automatically when accessing the API through the ACTIVATE web UI.\n- **Bearer tokens** - Tokens (JWTs) generated from your account settings.\n- **Basic authentication** - Use your API key (also found in your account settings) as the username and leave the password blank. You must base64 encode the resulting string yourself and include it in the Authorization header as: Authorization: Basic \u003cbase64-encoded value\u003e\n\n\u003e Choose the method that best fits your use case. Only one method should be used per request.\n\n### Request Structure\n\nThe API is designed to operate on **single resources per request**. In general, bulk operations are not supported.\n\n### Endpoint Categories\n\nEndpoints are grouped into two main categories:\n\n- **User-centric operations**  \n  These return data specific to the authenticated user. They are commonly used when building user-facing applications like the ACTIVATE web UI.\n\n- **System-level operations**  \n  These return consistent results regardless of the authenticated user. They are ideal for backend services and integrations that don't require user context, such as syncing with external systems.\n\n### Errors\n\nEvery error response has a stable `code`, such as `not_found` or `product_disabled`, to branch on or to show a message for. The `message` is English and meant for developers and logs; it can change between releases. Codes never change.\n\nSend `Accept: application/problem+json` to get errors as [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) problem details (the `Problem` schema) instead: a validation failure then lists each invalid field and the rule it failed. Each problem type is documented at its `type` URI under `/problems/`.\n\n",
     "termsOfService": "https://parallelworks.com/terms/EULA.pdf",
     "title": "Parallel Works API",
     "version": "1.0.0"
@@ -80800,6 +81192,158 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/kernels": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns every user's notebook kernels running on the cluster, with their owners. Available to whoever may manage the cluster.",
+        "operationId": "list-cluster-kernels",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster the kernels run on.",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Cluster the kernels run on.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/KernelResponse"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List notebook kernels on a cluster",
+        "tags": [
+          "Notebooks"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/kernels/{kernel}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStops and removes any user's notebook kernel running on the cluster. Available to whoever may manage the cluster.",
+        "operationId": "delete-cluster-kernel",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster the kernel runs on.",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "Cluster the kernel runs on.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kernel ID.",
+            "in": "path",
+            "name": "kernel",
+            "required": true,
+            "schema": {
+              "description": "Kernel ID.",
+              "examples": [
+                "60c72b2f9b1e8d001c8e4f3a"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Stop a notebook kernel on a cluster",
+        "tags": [
+          "Notebooks"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/nodes": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the list of nodes for a compute cluster.",
@@ -84538,6 +85082,158 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/instances/{instanceName}/kernels": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns every user's notebook kernels running on the instance, with their owners. Available to whoever may manage the instance.",
+        "operationId": "list-instance-kernels",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Instance the kernels run on.",
+            "in": "path",
+            "name": "instanceName",
+            "required": true,
+            "schema": {
+              "description": "Instance the kernels run on.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/KernelResponse"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List notebook kernels on an instance",
+        "tags": [
+          "Notebooks"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/instances/{instanceName}/kernels/{kernel}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStops and removes any user's notebook kernel running on the instance. Available to whoever may manage the instance.",
+        "operationId": "delete-instance-kernel",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Instance the kernel runs on.",
+            "in": "path",
+            "name": "instanceName",
+            "required": true,
+            "schema": {
+              "description": "Instance the kernel runs on.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kernel ID.",
+            "in": "path",
+            "name": "kernel",
+            "required": true,
+            "schema": {
+              "description": "Kernel ID.",
+              "examples": [
+                "60c72b2f9b1e8d001c8e4f3a"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Stop a notebook kernel on an instance",
+        "tags": [
+          "Notebooks"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/instances/{instanceName}/snapshot": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates a root disk snapshot from an instance",
@@ -86566,6 +87262,435 @@
         "summary": "Enable a preview for an organization user",
         "tags": [
           "Previews"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/python-environments": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the Python environments notebook kernels can run in: the platform default plus the user's own.",
+        "operationId": "list-python-environments",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PythonEnvironmentResponse"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Python environments",
+        "tags": [
+          "Notebooks"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSaves a Python environment for notebook kernels: a version and packages to build on the compute, or an interpreter already there.",
+        "operationId": "create-python-environment",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePythonEnvironmentBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PythonEnvironmentResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create Python environment",
+        "tags": [
+          "Notebooks"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/python-environments/discovered": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nAsks the target's agent, as the caller, which Python interpreters are already there: conda environments, virtualenvs under the caller's home, and the system python. Each is probed for its version and for ipykernel.",
+        "operationId": "discover-python-environments",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster or instance whose agent looks for interpreters, or \"user-workspace\" for the caller's own workspace.",
+            "explode": false,
+            "in": "query",
+            "name": "targetId",
+            "required": true,
+            "schema": {
+              "description": "Cluster or instance whose agent looks for interpreters, or \"user-workspace\" for the caller's own workspace.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DiscoveredPythonEnv"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Discover Python interpreters on a compute target",
+        "tags": [
+          "Notebooks"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/python-environments/{environment}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDeletes a Python environment no running kernel uses.",
+        "operationId": "delete-python-environment",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Environment ID, or platform-default.",
+            "in": "path",
+            "name": "environment",
+            "required": true,
+            "schema": {
+              "description": "Environment ID, or platform-default.",
+              "examples": [
+                "60c72b2f9b1e8d001c8e4f3a"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete Python environment",
+        "tags": [
+          "Notebooks"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns a Python environment by ID.",
+        "operationId": "get-python-environment",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Environment ID, or platform-default.",
+            "in": "path",
+            "name": "environment",
+            "required": true,
+            "schema": {
+              "description": "Environment ID, or platform-default.",
+              "examples": [
+                "60c72b2f9b1e8d001c8e4f3a"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PythonEnvironmentResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Python environment",
+        "tags": [
+          "Notebooks"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nEdits a Python environment. Kernels already running keep what they started with.",
+        "operationId": "update-python-environment",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Environment ID.",
+            "in": "path",
+            "name": "environment",
+            "required": true,
+            "schema": {
+              "description": "Environment ID.",
+              "examples": [
+                "60c72b2f9b1e8d001c8e4f3a"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePythonEnvironmentBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PythonEnvironmentResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update Python environment",
+        "tags": [
+          "Notebooks"
         ]
       }
     },

@@ -4065,6 +4065,8 @@ type CreateKernelBody struct {
 	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
 	// Kernel name. Auto-generated if omitted.
 	Name *string `json:"name,omitempty"`
+	// Python environment the notebook's cells run in. Omit, or pass platform-default, for the platform's own toolkit.
+	PythonEnvironmentID *string `json:"pythonEnvironmentId,omitempty"`
 	// Run the kernel on the cluster's controller agent directly instead of scheduling a worker. Cluster targets only; starts immediately with no Slurm allocation.
 	RunOnController *bool `json:"runOnController,omitempty"`
 	// Scheduling parameters for the kernel's worker.
@@ -4289,6 +4291,19 @@ type CreatePlatformDomainInputBody struct {
 	PrivateKey *string `json:"privateKey,omitempty"`
 	// platform domains serve the app and frame sessions; sessions domains host session subdomains
 	Role string `json:"role"`
+}
+
+type CreatePythonEnvironmentBody struct {
+	// Absolute path of a python interpreter on the target, with ipykernel installed. Existing only.
+	InterpreterPath *string `json:"interpreterPath,omitempty"`
+	// managed builds a Python with uv on the target; existing runs an interpreter already there.
+	Kind string `json:"kind"`
+	// Environment name, unique per user.
+	Name string `json:"name"`
+	// pip requirement strings to install. Managed only; ipykernel is always added.
+	Packages []string `json:"packages,omitempty"`
+	// Interpreter version to build, e.g. 3.12. Managed only.
+	PythonVersion *string `json:"pythonVersion,omitempty"`
 }
 
 type CreateQuotaBody struct {
@@ -4854,6 +4869,19 @@ type DiscoverCaCertOutputBody1 struct {
 	CaCert string `json:"caCert"`
 }
 
+type DiscoveredPythonEnv struct {
+	// Whether ipykernel is importable, which a kernel needs.
+	HasIpykernel bool `json:"hasIpykernel"`
+	// Absolute path of the interpreter on the target.
+	InterpreterPath string `json:"interpreterPath"`
+	// Environment name, as conda or the directory calls it.
+	Name string `json:"name"`
+	// Python version the interpreter reported.
+	PythonVersion *string `json:"pythonVersion,omitempty"`
+	// Where it was found.
+	Source string `json:"source"`
+}
+
 type Disk struct {
 	// Cloud service provider of the disk
 	Csp string `json:"csp"`
@@ -5014,7 +5042,7 @@ type EnvironmentField struct {
 }
 
 type Error struct {
-	// A stable machine-readable error code when one is available.
+	// Stable, machine-readable error code, for clients to show a localized message. Every error carries one. Documented at /problems/.
 	Code *string `json:"code,omitempty"`
 	// Will always be true, indicating this is an error response.
 	Error bool `json:"error"`
@@ -5022,6 +5050,8 @@ type Error struct {
 	Errors []string `json:"errors,omitempty"`
 	// A human-readable message describing the error.
 	Message string `json:"message"`
+	// Values the code's localized message shows.
+	Params map[string]any `json:"params,omitempty"`
 }
 
 type ErrorLogItem struct {
@@ -5269,6 +5299,23 @@ type Fact struct {
 	UserBootstrap string `json:"user_bootstrap"`
 	// The zone of the instance, if applicable.
 	Zone string `json:"zone"`
+}
+
+type FieldError struct {
+	// Stable name of the rule, for clients to show a localized message. New codes can appear: fall back to a generic message for one you don't know.
+	Code string `json:"code"`
+	// English explanation, for developers and logs.
+	Detail *string `json:"detail,omitempty"`
+	// Where parameter is.
+	In *string `json:"in,omitempty"`
+	// Name of the invalid request parameter.
+	Parameter *string `json:"parameter,omitempty"`
+	// Values the rule's localized message shows.
+	Params map[string]any `json:"params,omitempty"`
+	// JSON Pointer to the invalid body field, as a URI fragment such as #/items/0/name.
+	Pointer *string `json:"pointer,omitempty"`
+	// The rule's problem type.
+	Type string `json:"type"`
 }
 
 type FileOutputBody struct {
@@ -7353,11 +7400,20 @@ type KernelHostsOutputBody struct {
 	Connected []string `json:"connected"`
 }
 
+type KernelOwner struct {
+	// Owner's user ID.
+	ID string `json:"id"`
+	// Owner's username.
+	Username *string `json:"username,omitempty"`
+}
+
 type KernelResponse struct {
 	// Whether the compute hosting the kernel holds a tunnel on an ingress pod. False means nothing can reach the kernel whatever its status says.
 	AgentConnected *bool `json:"agentConnected,omitempty"`
 	// IDs of buckets whose credentials are injected into the kernel.
 	Buckets []string `json:"buckets,omitempty"`
+	// Whether the caller may stop this kernel: it is theirs, or they administer the compute. Set on a cluster's or instance's kernel list.
+	CanStop *bool `json:"canStop,omitempty"`
 	// Creation time.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// ID of the environment the kernel's worker was scheduled onto.
@@ -7368,12 +7424,16 @@ type KernelResponse struct {
 	Events []KernelEvent `json:"events,omitempty"`
 	// Kernel ID.
 	ID string `json:"id"`
+	// When the kernel last served a request from its notebook.
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
 	// Memory ceiling (GB) applied to the kernel's processes.
 	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
 	// Kernel name.
 	Name *string `json:"name,omitempty"`
 	// Hostname of the compute node the kernel runs on.
-	NodeHostname *string `json:"nodeHostname,omitempty"`
+	NodeHostname      *string               `json:"nodeHostname,omitempty"`
+	Owner             *KernelOwner          `json:"owner,omitempty"`
+	PythonEnvironment *PythonEnvironmentRef `json:"pythonEnvironment,omitempty"`
 	// Scheduling parameters used for the kernel's worker.
 	SchedulingParams map[string]any `json:"schedulingParams,omitempty"`
 	// Kernel status.
@@ -9013,6 +9073,7 @@ type NotificationOption struct {
 type NotificationSettings struct {
 	Platform  PlatformNotificationSettings  `json:"platform"`
 	Scheduler SchedulerNotificationSettings `json:"scheduler"`
+	Tandem    *TandemNotificationSettings   `json:"tandem,omitempty"`
 	Workflow  WorkflowNotificationSettings  `json:"workflow"`
 }
 
@@ -10481,6 +10542,25 @@ type PrivacySettingsBody struct {
 	Platform bool `json:"platform"`
 }
 
+type Problem struct {
+	// Stable name of the problem type, for clients to show a localized message. New codes can appear: fall back to the status for one you don't know. Absent for about:blank: derive it from the status.
+	Code *string `json:"code,omitempty"`
+	// English explanation of this occurrence, for developers and logs.
+	Detail *string `json:"detail,omitempty"`
+	// For a validation problem, each invalid field and the rule it failed.
+	Errors []FieldError `json:"errors,omitempty"`
+	// Identifies this occurrence of the problem.
+	Instance *string `json:"instance,omitempty"`
+	// Values the code's localized message shows.
+	Params map[string]any `json:"params,omitempty"`
+	// The HTTP status code.
+	Status *int64 `json:"status,omitempty"`
+	// Short English summary of the problem type, for developers.
+	Title *string `json:"title,omitempty"`
+	// Identifies the problem type and resolves to its documentation. about:blank means nothing beyond the status.
+	Type string `json:"type"`
+}
+
 type ProcessSample struct {
 	Cmdline          *string `json:"cmdline,omitempty"`
 	Comm             string  `json:"comm"`
@@ -11536,6 +11616,36 @@ type PvResponse struct {
 	StorageClass string `json:"storageClass"`
 	// Volume attributes class
 	VolumeAttributesClass string `json:"volumeAttributesClass"`
+}
+
+type PythonEnvironmentRef struct {
+	// Environment ID, or platform-default.
+	ID string `json:"id"`
+	// How the kernel's Python is provided.
+	Kind string `json:"kind"`
+	// Environment name when the kernel started.
+	Name string `json:"name"`
+}
+
+type PythonEnvironmentResponse struct {
+	// Provided by the platform; cannot be edited or deleted.
+	Builtin bool `json:"builtin"`
+	// Creation time.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// Environment ID.
+	ID string `json:"id"`
+	// Absolute path of the interpreter an existing environment runs, on the compute target.
+	InterpreterPath *string `json:"interpreterPath,omitempty"`
+	// How the kernel's Python is provided.
+	Kind string `json:"kind"`
+	// Environment name.
+	Name string `json:"name"`
+	// pip requirements a managed environment installs. ipykernel is always added.
+	Packages []string `json:"packages,omitempty"`
+	// Interpreter version a managed environment is built with, e.g. 3.12.
+	PythonVersion *string `json:"pythonVersion,omitempty"`
+	// Identifies a managed environment's contents; the agent keys its build by it.
+	SpecHash *string `json:"specHash,omitempty"`
 }
 
 type QuotaResponse struct {
@@ -13329,6 +13439,12 @@ type TagRecommendationsBody struct {
 	Tags []string `json:"tags"`
 }
 
+type TandemNotificationSettings struct {
+	Assigned          NotificationChannelSettings `json:"assigned"`
+	Commented         NotificationChannelSettings `json:"commented"`
+	DecisionRequested NotificationChannelSettings `json:"decision_requested"`
+}
+
 type Theme struct {
 	// Primary accent color for buttons, links, and active states. Overrides element when set.
 	AccentColor *string `json:"accentColor,omitempty"`
@@ -13922,6 +14038,17 @@ type UpdateProxyWhitelistInputBody struct {
 	ProxyScope *string `json:"proxyScope,omitempty"`
 	// Replaces the proxy whitelist; entries are hosts, IP addresses, or CIDR ranges
 	ProxyWhitelist []string `json:"proxyWhitelist,omitempty"`
+}
+
+type UpdatePythonEnvironmentBody struct {
+	// Absolute path of a python interpreter on the target. Existing only.
+	InterpreterPath *string `json:"interpreterPath,omitempty"`
+	// Environment name, unique per user.
+	Name *string `json:"name,omitempty"`
+	// pip requirement strings to install; replaces the list. Managed only.
+	Packages []string `json:"packages,omitempty"`
+	// Interpreter version to build, e.g. 3.12. Managed only.
+	PythonVersion *string `json:"pythonVersion,omitempty"`
 }
 
 type UpdateQuotaBody struct {
