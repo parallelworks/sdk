@@ -1591,6 +1591,33 @@
         ],
         "type": "object"
       },
+      "AgentDirectionBody": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "description": "What to tell the running turn.",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "type": "object"
+      },
+      "AgentDirectionDelivered": {
+        "additionalProperties": false,
+        "properties": {
+          "delivered": {
+            "description": "False when no turn was running to take the text; send it as a message instead.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "delivered"
+        ],
+        "type": "object"
+      },
       "AgentMachine": {
         "additionalProperties": false,
         "properties": {
@@ -2960,6 +2987,19 @@
         },
         "required": [
           "name"
+        ],
+        "type": "object"
+      },
+      "AppIconSettingsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "appIconUrl": {
+            "description": "URL of the uploaded app icon. Empty when the built-in icon is used.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "appIconUrl"
         ],
         "type": "object"
       },
@@ -12453,6 +12493,11 @@
             "minLength": 1,
             "type": "string"
           },
+          "fallbackDomain": {
+            "description": "Platform host to send session visitors to when the session host has no CNAME record (sessions domains only)",
+            "maxLength": 253,
+            "type": "string"
+          },
           "organization": {
             "description": "Owning organization id; the domain becomes that organization's branded login host",
             "type": "string"
@@ -14471,6 +14516,109 @@
           "mounts",
           "envs",
           "dns"
+        ],
+        "type": "object"
+      },
+      "DurableClaimOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "fencing": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "jobId": {
+            "type": "string"
+          },
+          "leaseExpiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "leaseId": {
+            "type": "string"
+          },
+          "payload": {},
+          "taskId": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "leaseExpiresAt",
+          "username",
+          "jobId",
+          "token",
+          "payload",
+          "taskId",
+          "leaseId",
+          "fencing"
+        ],
+        "type": "object"
+      },
+      "DurableCompleteBody": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "exitCode": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "fencing": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "leaseId": {
+            "type": "string"
+          },
+          "taskId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "exitCode",
+          "taskId",
+          "leaseId",
+          "fencing"
+        ],
+        "type": "object"
+      },
+      "DurableHeartbeatOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "leaseExpiresAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "leaseExpiresAt"
+        ],
+        "type": "object"
+      },
+      "DurableLeaseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "fencing": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "leaseId": {
+            "type": "string"
+          },
+          "taskId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "taskId",
+          "leaseId",
+          "fencing"
         ],
         "type": "object"
       },
@@ -28845,6 +28993,10 @@
             "description": "Lowercase host name; a leading *. label registers a wildcard platform domain",
             "type": "string"
           },
+          "fallbackDomain": {
+            "description": "Platform host session visitors are sent to when the session host has no CNAME record",
+            "type": "string"
+          },
           "frameAncestor": {
             "description": "True when this deployment platform host frames every session; organization canonical origins do not",
             "readOnly": true,
@@ -28941,6 +29093,10 @@
             "$ref": "#/components/schemas/NotificationChannelSettings",
             "description": "Settings for general platform notifications."
           },
+          "imageRetirement": {
+            "$ref": "#/components/schemas/NotificationChannelSettings",
+            "description": "Settings for image retirement notifications."
+          },
           "orphansAlert": {
             "$ref": "#/components/schemas/NotificationChannelSettings",
             "description": "Settings for orphans alert notifications."
@@ -28948,6 +29104,10 @@
           "runtimeAlert": {
             "$ref": "#/components/schemas/NotificationChannelSettings",
             "description": "Settings for runtime alert notifications."
+          },
+          "workspaceAlert": {
+            "$ref": "#/components/schemas/NotificationChannelSettings",
+            "description": "Settings for user workspace failure alert notifications."
           }
         },
         "required": [
@@ -29217,6 +29377,14 @@
             "description": "ACME directory URL for automatic Let's Encrypt certificates. Empty uses Let's Encrypt production.",
             "type": "string"
           },
+          "appIconUrl": {
+            "description": "URL of the uploaded app icon. Empty uses the built-in icon.",
+            "type": "string"
+          },
+          "appName": {
+            "description": "Name of the installed app. Empty uses the platform name.",
+            "type": "string"
+          },
           "bucketTokenTtlMinutes": {
             "description": "Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Default 720 (12 hours).",
             "format": "int64",
@@ -29232,6 +29400,10 @@
           },
           "dockerWorkspaceSettings": {
             "$ref": "#/components/schemas/DockerWorkspaceSettings"
+          },
+          "durableExecutionEnabled": {
+            "description": "Whether jobs with runs-on are submitted to and cleaned up on their compute environments. On by default; turning it off rejects new runs-on runs and fails the ones not yet started, while started jobs finish.",
+            "type": "boolean"
           },
           "enableOnboarding": {
             "description": "Indicates if the onboarding flow is enabled for new users.",
@@ -29365,6 +29537,7 @@
           "sentryTracesSampleRate",
           "sentryReplaysSampleRate",
           "stuckRunSweeperEnabled",
+          "durableExecutionEnabled",
           "useBuiltinChangelog",
           "quicTunnelEnabled",
           "sshResumeEnabled",
@@ -33316,6 +33489,11 @@
             "type": "boolean",
             "writeOnly": true
           },
+          "pooled": {
+            "description": "Join this endpoint's connection pool instead of taking the name over: processes that PUT an already-pooled endpoint with this flag keep the current key generation, so their tunnels serve together and requests load-balance across them.",
+            "type": "boolean",
+            "writeOnly": true
+          },
           "slug": {
             "description": "Session slug for URL path.",
             "type": "string"
@@ -37105,6 +37283,11 @@
             "readOnly": true,
             "type": "boolean"
           },
+          "pooled": {
+            "description": "Whether this endpoint's serving processes form a load-balanced connection pool.",
+            "readOnly": true,
+            "type": "boolean"
+          },
           "remoteHost": {
             "description": "Remote host.",
             "format": "hostname",
@@ -39560,6 +39743,11 @@
             "description": "ACME directory URL for automatic certificates. Empty uses Let's Encrypt production.",
             "type": "string"
           },
+          "appName": {
+            "description": "Name of the installed app. Empty uses the platform name.",
+            "maxLength": 45,
+            "type": "string"
+          },
           "bucketTokenTtlMinutes": {
             "description": "Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Minimum 15 (Vault's STS floor); maximum 720, since an Azure SAS must expire before its cached signing key does.",
             "format": "int64",
@@ -39578,6 +39766,10 @@
           "dockerWorkspaceSettings": {
             "$ref": "#/components/schemas/DockerWorkspaceSettings",
             "description": "Docker workspace settings."
+          },
+          "durableExecutionEnabled": {
+            "description": "Whether jobs with runs-on are submitted to and cleaned up on their compute environments.",
+            "type": "boolean"
           },
           "enableOnboarding": {
             "description": "Whether to enable the onboarding flow.",
@@ -40265,6 +40457,11 @@
           "default": {
             "description": "Make this the default domain for its role, or step it down",
             "type": "boolean"
+          },
+          "fallbackDomain": {
+            "description": "Platform host to send session visitors to when the session host has no CNAME record (sessions domains only); an empty string clears it",
+            "maxLength": 253,
+            "type": "string"
           },
           "organization": {
             "description": "Owning organization id; an empty string clears the owner",
@@ -41506,6 +41703,14 @@
             ],
             "type": "string"
           },
+          "restarts": {
+            "description": "how many times the workspace container has restarted since it was created",
+            "examples": [
+              0
+            ],
+            "format": "int32",
+            "type": "integer"
+          },
           "runningVersion": {
             "description": "the resolved version number of the image the workspace is actually running. Read from the image tag for pinned deployments, or resolved from the running image digest via the workspace's API for 'latest'-tag deployments.",
             "examples": [
@@ -41524,6 +41729,32 @@
             "description": "the safe username of the user associated with the workspace",
             "examples": [
               "jakethayne"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "description": "the container status reported by kubernetes or docker",
+            "enum": [
+              "Off",
+              "Starting",
+              "Running",
+              "Stopped",
+              "Pulling",
+              "Terminating",
+              "Restarting",
+              "Paused",
+              "Failed",
+              "Unknown"
+            ],
+            "examples": [
+              "Running"
+            ],
+            "type": "string"
+          },
+          "statusDetails": {
+            "description": "the reason behind the status, such as the crash or scheduling error, if any",
+            "examples": [
+              "CrashLoopBackOff: last exit OOMKilled (exit code 137), 5 restarts"
             ],
             "type": "string"
           },
@@ -41553,7 +41784,7 @@
             "type": "string"
           },
           "workspaceId": {
-            "description": "unique identifier for the user workspace, same as name for docker workspaces",
+            "description": "unique identifier for the user workspace: the container id for docker workspaces, the pod uid for k8s workspaces",
             "examples": [
               "pw-user-jakethayne"
             ],
@@ -41567,7 +41798,8 @@
           "createdAt",
           "type",
           "active",
-          "safeToKill"
+          "safeToKill",
+          "status"
         ],
         "type": "object"
       },
@@ -42981,6 +43213,18 @@
             "description": "Home directory usage. Absent unless the workspace is running and able to report it."
           },
           "status": {
+            "enum": [
+              "Off",
+              "Starting",
+              "Running",
+              "Stopped",
+              "Pulling",
+              "Terminating",
+              "Restarting",
+              "Paused",
+              "Failed",
+              "Unknown"
+            ],
             "type": "string"
           }
         },
@@ -47864,6 +48108,71 @@
         "x-internal": true
       }
     },
+    "/api/agents/machines/{machine}/sessions/{id}/direction": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nHands text to the turn in flight, which the model reads at its next step rather than after the turn ends, the way typing into a busy pw code terminal does. Not delivered means no turn was running to take it; send it as a message instead.",
+        "operationId": "steer-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentDirectionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDirectionDelivered"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Steer a pw code session's running turn",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/agents/machines/{machine}/sessions/{id}/fork": {
       "post": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nCopies the session and its subagent transcripts into a new one on the same machine, leaving the original untouched. Refused while the session is mid-turn, and while another host holds it live.",
@@ -50922,6 +51231,151 @@
         "tags": [
           "Disks"
         ]
+      }
+    },
+    "/api/eos/claim": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGrants the calling worker the lease on the task it was started for, with what its executor needs to run it.",
+        "operationId": "claim-durable-task",
+        "parameters": [
+          {
+            "description": "Bearer worker token",
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "description": "Bearer worker token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurableClaimOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Claim a durable task",
+        "tags": [
+          "Workflow Runs"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/eos/complete": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRecords the result of the calling worker's task and ends it.",
+        "operationId": "complete-durable-task",
+        "parameters": [
+          {
+            "description": "Bearer worker token",
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "description": "Bearer worker token",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DurableCompleteBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Complete a durable task",
+        "tags": [
+          "Workflow Runs"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/eos/heartbeat": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRenews the calling worker's lease on its task.",
+        "operationId": "heartbeat-durable-task",
+        "parameters": [
+          {
+            "description": "Bearer worker token",
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "description": "Bearer worker token",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DurableLeaseBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurableHeartbeatOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Renew a durable task lease",
+        "tags": [
+          "Workflow Runs"
+        ],
+        "x-internal": true
       }
     },
     "/api/events/resources/{targetType}/{targetId}": {
@@ -61307,6 +61761,16 @@
             "schema": {
               "description": "Cloud account name",
               "type": "string"
+            }
+          },
+          {
+            "description": "Skip credential validation. Use when the cloud account is permanently unreachable and networks will be cleaned up out-of-band.",
+            "explode": false,
+            "in": "query",
+            "name": "force",
+            "schema": {
+              "description": "Skip credential validation. Use when the cloud account is permanently unreachable and networks will be cleaned up out-of-band.",
+              "type": "boolean"
             }
           }
         ],
@@ -96371,6 +96835,94 @@
           }
         },
         "summary": "Update admin platform settings",
+        "tags": [
+          "Platform"
+        ]
+      }
+    },
+    "/api/settings/admin/app-icon": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns the installed app to the built-in icon.",
+        "operationId": "delete-app-icon",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppIconSettingsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Remove the app icon",
+        "tags": [
+          "Platform"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nSets the icon of the installed app. PNG, JPEG, GIF or WebP, at least 192x192 pixels.",
+        "operationId": "upload-app-icon",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "image/*"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "description": "Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppIconSettingsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Upload the app icon",
         "tags": [
           "Platform"
         ]

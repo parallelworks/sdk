@@ -641,6 +641,16 @@ type AgentCompacted struct {
 	Output    string `json:"output"`
 }
 
+type AgentDirectionBody struct {
+	// What to tell the running turn.
+	Text string `json:"text"`
+}
+
+type AgentDirectionDelivered struct {
+	// False when no turn was running to take the text; send it as a message instead.
+	Delivered bool `json:"delivered"`
+}
+
 type AgentMachine struct {
 	AgentVersion *string `json:"agentVersion,omitempty"`
 	Error        *string `json:"error,omitempty"`
@@ -1047,6 +1057,11 @@ type AppBody struct {
 	Scopes []string `json:"scopes,omitempty"`
 	// What the sub claim contains. Defaults to userId.
 	SubjectType *string `json:"subjectType,omitempty"`
+}
+
+type AppIconSettingsOutputBody struct {
+	// URL of the uploaded app icon. Empty when the built-in icon is used.
+	AppIconURL string `json:"appIconUrl"`
 }
 
 type AppResponse struct {
@@ -4285,6 +4300,8 @@ type CreatePlatformDomainInputBody struct {
 	Default *bool `json:"default,omitempty"`
 	// Host name to register; a leading *. label registers a wildcard platform domain
 	Domain string `json:"domain"`
+	// Platform host to send session visitors to when the session host has no CNAME record (sessions domains only)
+	FallbackDomain *string `json:"fallbackDomain,omitempty"`
 	// Owning organization id; the domain becomes that organization's branded login host
 	Organization *string `json:"organization,omitempty"`
 	// PEM private key matching the certificate; never returned by the API
@@ -4947,6 +4964,35 @@ type DockerWorkspaceSettings struct {
 	K8sMounts []string `json:"k8sMounts"`
 	// A list of mounts to be used in docker workspaces.
 	Mounts []string `json:"mounts"`
+}
+
+type DurableClaimOutputBody struct {
+	Fencing        int64     `json:"fencing"`
+	JobID          string    `json:"jobId"`
+	LeaseExpiresAt time.Time `json:"leaseExpiresAt"`
+	LeaseID        string    `json:"leaseId"`
+	Payload        any       `json:"payload"`
+	TaskID         string    `json:"taskId"`
+	Token          string    `json:"token"`
+	Username       string    `json:"username"`
+}
+
+type DurableCompleteBody struct {
+	Error    *string `json:"error,omitempty"`
+	ExitCode int64   `json:"exitCode"`
+	Fencing  int64   `json:"fencing"`
+	LeaseID  string  `json:"leaseId"`
+	TaskID   string  `json:"taskId"`
+}
+
+type DurableHeartbeatOutputBody struct {
+	LeaseExpiresAt time.Time `json:"leaseExpiresAt"`
+}
+
+type DurableLeaseBody struct {
+	Fencing int64  `json:"fencing"`
+	LeaseID string `json:"leaseId"`
+	TaskID  string `json:"taskId"`
 }
 
 type EffectiveProduct struct {
@@ -10085,6 +10131,8 @@ type PlatformDomain struct {
 	Default *bool `json:"default,omitempty"`
 	// Lowercase host name; a leading *. label registers a wildcard platform domain
 	Domain string `json:"domain"`
+	// Platform host session visitors are sent to when the session host has no CNAME record
+	FallbackDomain *string `json:"fallbackDomain,omitempty"`
 	// True when this deployment platform host frames every session; organization canonical origins do not
 	FrameAncestor *bool `json:"frameAncestor,omitempty"`
 	// The unique identifier of the registry entry
@@ -10111,11 +10159,13 @@ type PlatformMauResponse struct {
 }
 
 type PlatformNotificationSettings struct {
-	BillingAlert *NotificationChannelSettings `json:"billingAlert,omitempty"`
-	CostAlert    NotificationChannelSettings  `json:"costAlert"`
-	General      NotificationChannelSettings  `json:"general"`
-	OrphansAlert *NotificationChannelSettings `json:"orphansAlert,omitempty"`
-	RuntimeAlert NotificationChannelSettings  `json:"runtimeAlert"`
+	BillingAlert    *NotificationChannelSettings `json:"billingAlert,omitempty"`
+	CostAlert       NotificationChannelSettings  `json:"costAlert"`
+	General         NotificationChannelSettings  `json:"general"`
+	ImageRetirement *NotificationChannelSettings `json:"imageRetirement,omitempty"`
+	OrphansAlert    *NotificationChannelSettings `json:"orphansAlert,omitempty"`
+	RuntimeAlert    NotificationChannelSettings  `json:"runtimeAlert"`
+	WorkspaceAlert  *NotificationChannelSettings `json:"workspaceAlert,omitempty"`
 }
 
 type PlatformSettings struct {
@@ -10204,6 +10254,10 @@ type PlatformSettingsAdmin struct {
 	AcmeContactEmail *string `json:"acmeContactEmail,omitempty"`
 	// ACME directory URL for automatic Let's Encrypt certificates. Empty uses Let's Encrypt production.
 	AcmeDirectoryURL *string `json:"acmeDirectoryUrl,omitempty"`
+	// URL of the uploaded app icon. Empty uses the built-in icon.
+	AppIconURL *string `json:"appIconUrl,omitempty"`
+	// Name of the installed app. Empty uses the platform name.
+	AppName *string `json:"appName,omitempty"`
 	// Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Default 720 (12 hours).
 	BucketTokenTTLMinutes int64 `json:"bucketTokenTtlMinutes"`
 	// Indicates if k8s PVC should be created for workspaces.
@@ -10211,6 +10265,8 @@ type PlatformSettingsAdmin struct {
 	// Indicates if user files should be deleted when their account is deleted.
 	DeleteUserFilesOnDelete *bool                    `json:"deleteUserFilesOnDelete,omitempty"`
 	DockerWorkspaceSettings *DockerWorkspaceSettings `json:"dockerWorkspaceSettings,omitempty"`
+	// Whether jobs with runs-on are submitted to and cleaned up on their compute environments. On by default; turning it off rejects new runs-on runs and fails the ones not yet started, while started jobs finish.
+	DurableExecutionEnabled bool `json:"durableExecutionEnabled"`
 	// Indicates if the onboarding flow is enabled for new users.
 	EnableOnboarding bool `json:"enableOnboarding"`
 	// Whether GCS bucket HMAC keys are rotated automatically. Off by default: agents older than 7.78.0 never pick up a rotated key, so pair this with minimumAgentVersion.
@@ -11567,6 +11623,8 @@ type PutSessionBody struct {
 	Keep *bool `json:"keep,omitempty"`
 	// Expose this endpoint as an OpenAI-compatible chat model, reachable via the platform's OpenAI API and listed as an AI provider.
 	OpenAi *bool `json:"openAI,omitempty"`
+	// Join this endpoint's connection pool instead of taking the name over: processes that PUT an already-pooled endpoint with this flag keep the current key generation, so their tunnels serve together and requests load-balance across them.
+	Pooled *bool `json:"pooled,omitempty"`
 	// Session slug for URL path.
 	Slug *string `json:"slug,omitempty"`
 	// Strip the session URL prefix before forwarding to the local app (for apps that serve at root and can't set a base path).
@@ -12821,6 +12879,8 @@ type Session struct {
 	NodeHostname *string `json:"nodeHostname,omitempty"`
 	// Indicates if this is an OpenAI session.
 	OpenAi *bool `json:"openAI,omitempty"`
+	// Whether this endpoint's serving processes form a load-balanced connection pool.
+	Pooled *bool `json:"pooled,omitempty"`
 	// Remote host.
 	RemoteHost *string `json:"remoteHost,omitempty"`
 	// Port on compute resource.
@@ -13774,6 +13834,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	AcmeContactEmail *string `json:"acmeContactEmail,omitempty"`
 	// ACME directory URL for automatic certificates. Empty uses Let's Encrypt production.
 	AcmeDirectoryURL *string `json:"acmeDirectoryUrl,omitempty"`
+	// Name of the installed app. Empty uses the platform name.
+	AppName *string `json:"appName,omitempty"`
 	// Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Minimum 15 (Vault's STS floor); maximum 720, since an Azure SAS must expire before its cached signing key does.
 	BucketTokenTTLMinutes *int64 `json:"bucketTokenTtlMinutes,omitempty"`
 	// Whether to create a PVC for k8s workspaces.
@@ -13781,6 +13843,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	// Whether to delete user files on account deletion.
 	DeleteUserFilesOnDelete *bool                    `json:"deleteUserFilesOnDelete,omitempty"`
 	DockerWorkspaceSettings *DockerWorkspaceSettings `json:"dockerWorkspaceSettings,omitempty"`
+	// Whether jobs with runs-on are submitted to and cleaned up on their compute environments.
+	DurableExecutionEnabled *bool `json:"durableExecutionEnabled,omitempty"`
 	// Whether to enable the onboarding flow.
 	EnableOnboarding *bool `json:"enableOnboarding,omitempty"`
 	// Whether to enable the forgot password feature.
@@ -14027,6 +14091,8 @@ type UpdatePlatformDomainBody struct {
 	Certificate *string `json:"certificate,omitempty"`
 	// Make this the default domain for its role, or step it down
 	Default *bool `json:"default,omitempty"`
+	// Platform host to send session visitors to when the session host has no CNAME record (sessions domains only); an empty string clears it
+	FallbackDomain *string `json:"fallbackDomain,omitempty"`
 	// Owning organization id; an empty string clears the owner
 	Organization *string `json:"organization,omitempty"`
 	// PEM private key matching the certificate; never returned by the API
@@ -14438,19 +14504,25 @@ type UserWorkspace struct {
 	NotSafeToKillReason *string `json:"notSafeToKillReason,omitempty"`
 	// the organization of the user associated with the workspace
 	Organization *string `json:"organization,omitempty"`
+	// how many times the workspace container has restarted since it was created
+	Restarts *int32 `json:"restarts,omitempty"`
 	// the resolved version number of the image the workspace is actually running. Read from the image tag for pinned deployments, or resolved from the running image digest via the workspace's API for 'latest'-tag deployments.
 	RunningVersion *string `json:"runningVersion,omitempty"`
 	// whether the user workspace can be safely killed without disrupting the user
 	SafeToKill bool `json:"safeToKill"`
 	// the safe username of the user associated with the workspace
 	SafeUsername *string `json:"safeUsername,omitempty"`
+	// the container status reported by kubernetes or docker
+	Status string `json:"status"`
+	// the reason behind the status, such as the crash or scheduling error, if any
+	StatusDetails *string `json:"statusDetails,omitempty"`
 	// type of the user workspace
 	Type string `json:"type"`
 	// the username of the user associated with the workspace
 	User *string `json:"user,omitempty"`
 	// the userhost where the docker workspace is running, if applicable
 	Userhost *string `json:"userhost,omitempty"`
-	// unique identifier for the user workspace, same as name for docker workspaces
+	// unique identifier for the user workspace: the container id for docker workspaces, the pod uid for k8s workspaces
 	WorkspaceID *string `json:"workspaceId,omitempty"`
 }
 
@@ -15894,6 +15966,11 @@ func (u *ClusterDefinition) UnmarshalJSON(data []byte) error {
 		}
 		return nil
 	}
+}
+
+type UploadAppIconBody struct {
+	// Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).
+	File FormFile `json:"file"`
 }
 
 type UploadUserThumbnailBody struct {

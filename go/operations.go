@@ -2245,6 +2245,24 @@ func (c *Client) CompactAgentSession(ctx context.Context, machine string, id str
 	return &result, nil
 }
 
+// SteerAgentSession - Steer a pw code session's running turn
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Hands text to the turn in flight, which the model reads at its next step rather than after the turn ends, the way typing into a busy pw code terminal does. Not delivered means no turn was running to take it; send it as a message instead.
+func (c *Client) SteerAgentSession(ctx context.Context, machine string, id string, body AgentDirectionBody) (*AgentDirectionDelivered, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/direction"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentDirectionDelivered
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ForkAgentSession - Copy a pw code session
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -3516,6 +3534,92 @@ func (c *Client) GetDisks(ctx context.Context, opts ...GetDisksParams) (*[]Disk,
 
 	var result []Disk
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ClaimDurableTaskParams contains the parameters for the ClaimDurableTask operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ClaimDurableTaskParams struct {
+	// Bearer worker token
+	Authorization *string `json:"Authorization,omitempty"`
+}
+
+// ClaimDurableTask - Claim a durable task
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Grants the calling worker the lease on the task it was started for, with what its executor needs to run it.
+func (c *Client) ClaimDurableTask(ctx context.Context, opts ...ClaimDurableTaskParams) (*DurableClaimOutputBody, error) {
+
+	path := "/api/eos/claim"
+	var params ClaimDurableTaskParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	headers := make(http.Header)
+	setHeader(headers, "Authorization", false, params.Authorization)
+
+	var result DurableClaimOutputBody
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true, headers); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CompleteDurableTaskParams contains the parameters for the CompleteDurableTask operation.
+// Required parameters are value fields; optional parameters are pointers.
+type CompleteDurableTaskParams struct {
+	// Bearer worker token
+	Authorization *string `json:"Authorization,omitempty"`
+}
+
+// CompleteDurableTask - Complete a durable task
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Records the result of the calling worker's task and ends it.
+func (c *Client) CompleteDurableTask(ctx context.Context, body DurableCompleteBody, opts ...CompleteDurableTaskParams) error {
+
+	path := "/api/eos/complete"
+	var params CompleteDurableTaskParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	headers := make(http.Header)
+	setHeader(headers, "Authorization", false, params.Authorization)
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true, headers); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// HeartbeatDurableTaskParams contains the parameters for the HeartbeatDurableTask operation.
+// Required parameters are value fields; optional parameters are pointers.
+type HeartbeatDurableTaskParams struct {
+	// Bearer worker token
+	Authorization *string `json:"Authorization,omitempty"`
+}
+
+// HeartbeatDurableTask - Renew a durable task lease
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Renews the calling worker's lease on its task.
+func (c *Client) HeartbeatDurableTask(ctx context.Context, body DurableLeaseBody, opts ...HeartbeatDurableTaskParams) (*DurableHeartbeatOutputBody, error) {
+
+	path := "/api/eos/heartbeat"
+	var params HeartbeatDurableTaskParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	headers := make(http.Header)
+	setHeader(headers, "Authorization", false, params.Authorization)
+
+	var result DurableHeartbeatOutputBody
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true, headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -7492,16 +7596,33 @@ func (c *Client) GetOrganizationCloudAccount(ctx context.Context, organization s
 	return &result, nil
 }
 
+// DeleteOrganizationCloudAccountParams contains the parameters for the DeleteOrganizationCloudAccount operation.
+// Required parameters are value fields; optional parameters are pointers.
+type DeleteOrganizationCloudAccountParams struct {
+	// Skip credential validation. Use when the cloud account is permanently unreachable and networks will be cleaned up out-of-band.
+	Force *bool `json:"force,omitempty"`
+}
+
 // DeleteOrganizationCloudAccount - Delete organization cloud account
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Delete a cloud account by name.
-func (c *Client) DeleteOrganizationCloudAccount(ctx context.Context, organization string, name string) error {
+func (c *Client) DeleteOrganizationCloudAccount(ctx context.Context, organization string, name string, opts ...DeleteOrganizationCloudAccountParams) error {
 
 	path := "/api/organizations/{organization}/cloud-accounts/{name}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
+	var params DeleteOrganizationCloudAccountParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "force", "form", false, params.Force)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
 
 	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
 		return parseErrorResponse(err)
@@ -18504,6 +18625,42 @@ func (c *Client) UpdateAdminPlatformSettings(ctx context.Context, body UpdateAdm
 
 	var result PlatformSettingsAdmin
 	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UploadAppIcon - Upload the app icon
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Sets the icon of the installed app. PNG, JPEG, GIF or WebP, at least 192x192 pixels.
+func (c *Client) UploadAppIcon(ctx context.Context, body *UploadAppIconBody) (*AppIconSettingsOutputBody, error) {
+
+	path := "/api/settings/admin/app-icon"
+
+	var result AppIconSettingsOutputBody
+	if err := c.do(ctx, "PUT", path, body, "multipart/form-data", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteAppIcon - Remove the app icon
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns the installed app to the built-in icon.
+func (c *Client) DeleteAppIcon(ctx context.Context) (*AppIconSettingsOutputBody, error) {
+
+	path := "/api/settings/admin/app-icon"
+
+	var result AppIconSettingsOutputBody
+	if err := c.do(ctx, "DELETE", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
