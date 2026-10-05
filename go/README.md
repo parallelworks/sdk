@@ -131,6 +131,21 @@ if errors.Is(err, parallelworks.ErrNotFound) {
 }
 ```
 
+`WithProblemDetails` asks for errors as [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) problem details, with the detail in the given language. `AsProblem` reads any API error, including an older server's error envelope, as a `*ProblemError` with a stable `Code()`, the server's `Detail()`, each invalid field in `Problem.Errors`, and `TypeURL`, the page documenting the problem:
+
+```go
+client := parallelworks.NewClient(url, parallelworks.WithProblemDetails(parallelworks.AcceptLanguageFromEnv()))
+
+_, err := client.ListWorkflows(ctx)
+if p, ok := parallelworks.AsProblem(err); ok {
+    fmt.Println(p.Code(), p.Detail())
+    for _, fe := range p.Problem.Errors {
+        fmt.Println(" ", fe.String())
+    }
+    fmt.Println(p.TypeURL(client.BaseURL()))
+}
+```
+
 ## Documentation
 
 For full API documentation, visit [https://parallelworks.com/docs](https://parallelworks.com/docs).

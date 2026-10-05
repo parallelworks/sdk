@@ -106,6 +106,22 @@ export function BucketList() {
 }
 ```
 
+## Errors
+
+The client asks for errors as [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) problem details. Outside a browser it sends `Accept-Language` from the locale environment (`LC_ALL`, `LC_MESSAGES`, `LANG`), or from the `acceptLanguage` option. `toApiError` reads any error, including an older server's error envelope, as an `ApiError` with a stable `code`, `params`, the invalid `fields`, and the server's detail as `message`:
+
+```ts
+import { Client, problemTypeUrl, toApiError } from '@parallelworks/client'
+
+const { error } = await client.GET('/api/buckets')
+if (error) {
+  const problem = toApiError(error)
+  console.error(problem.code, problem.message)
+  for (const field of problem.fields) console.error(`  ${field.path}: ${field.detail}`)
+  console.error(problemTypeUrl(problem, 'https://activate.parallel.works'))
+}
+```
+
 ## Documentation
 
 For full API documentation, visit [https://parallelworks.com/docs](https://parallelworks.com/docs).

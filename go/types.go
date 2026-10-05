@@ -1034,6 +1034,15 @@ type AllowedInstanceTypesOutputBody struct {
 	Source string `json:"source"`
 }
 
+type App struct {
+	IconURL string `json:"iconUrl"`
+	// Stable identifier of the app
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// Where the app opens: a path on the platform, or an http(s) URL for an app on another domain
+	URL string `json:"url"`
+}
+
 type AppBody struct {
 	// Groups whose members may use the application. Empty means everyone in the organization.
 	AllowedGroups []string `json:"allowedGroups,omitempty"`
@@ -1126,6 +1135,10 @@ type ApprovalRequest struct {
 	Question    *string     `json:"question,omitempty"`
 	Reason      *string     `json:"reason,omitempty"`
 	SubagentID  *string     `json:"subagentId,omitempty"`
+}
+
+type AppsOutputBody struct {
+	Apps []App `json:"apps"`
 }
 
 type AskOption struct {
@@ -2216,6 +2229,91 @@ type AzureSlurmVersionSettings struct {
 	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
 	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
 	Zone                    *string `json:"zone,omitempty"`
+}
+
+type BackgroundJob struct {
+	// Attempts started so far.
+	Attempt int64 `json:"attempt"`
+	// When the latest attempt started.
+	AttemptedAt *time.Time `json:"attemptedAt,omitempty"`
+	// When the job was queued.
+	CreatedAt time.Time `json:"createdAt"`
+	// One entry per failed attempt, oldest first.
+	Errors []BackgroundJobError `json:"errors"`
+	// When the job finished.
+	FinalizedAt *time.Time `json:"finalizedAt,omitempty"`
+	// Job id.
+	ID string `json:"id"`
+	// Type of job.
+	Kind string `json:"kind"`
+	// Attempts allowed before the job is discarded.
+	MaxAttempts int64 `json:"maxAttempts"`
+	// Queue the job is on.
+	Queue string `json:"queue"`
+	// When the job is, or was, due to run.
+	ScheduledAt time.Time `json:"scheduledAt"`
+	// Where the job is in its life: waiting (pending, available, scheduled, retryable), running, or finished (completed, cancelled, discarded). A discarded job ran out of attempts.
+	State string             `json:"state"`
+	Task  *BackgroundJobTask `json:"task,omitempty"`
+}
+
+type BackgroundJobError struct {
+	// When the attempt failed.
+	At time.Time `json:"at"`
+	// Which attempt failed, starting at 1.
+	Attempt int64 `json:"attempt"`
+	// The failure.
+	Error string `json:"error"`
+}
+
+type BackgroundJobQueue struct {
+	// Jobs ready to run.
+	Available int64 `json:"available"`
+	// Jobs completed in the last minute.
+	CompletedLastMinute int64 `json:"completedLastMinute"`
+	// Queue name.
+	Name string `json:"name"`
+	// How long the oldest ready job has waited. A growing value means workers are not keeping up.
+	OldestAvailableSeconds float64 `json:"oldestAvailableSeconds"`
+	// Whether workers have stopped taking jobs from the queue.
+	Paused bool `json:"paused"`
+	// Jobs waiting to run again after a failed attempt.
+	Retryable int64 `json:"retryable"`
+	// Jobs running right now.
+	Running int64 `json:"running"`
+	// Jobs due to run later.
+	Scheduled int64 `json:"scheduled"`
+}
+
+type BackgroundJobTask struct {
+	// What the task does to the resource.
+	Action string `json:"action"`
+	// Task family: storage, compute, sessionless or kubernetes.
+	JobType string `json:"jobType"`
+	// Id of the resource the task acts on.
+	ResourceID *string `json:"resourceId,omitempty"`
+	// Kind of resource the task acts on.
+	ResourceType string `json:"resourceType"`
+}
+
+type BackgroundJobWorker struct {
+	// Host the worker runs on.
+	Hostname string `json:"hostname"`
+	// Worker id.
+	ID string `json:"id"`
+	// Whether this worker also rescues jobs from stopped workers and prunes history.
+	Leader bool `json:"leader"`
+	// Jobs the worker is running right now.
+	Running int64 `json:"running"`
+	// When the worker started.
+	StartedAt time.Time `json:"startedAt"`
+}
+
+type BackgroundJobsOverviewOutputBody struct {
+	// Every queue with its depth, by name.
+	Queues []BackgroundJobQueue `json:"queues"`
+	// Workers taking jobs right now.
+	Workers []BackgroundJobWorker `json:"workers"`
 }
 
 type BaseImageComplianceBody struct {
@@ -5350,7 +5448,7 @@ type Fact struct {
 type FieldError struct {
 	// Stable name of the rule, for clients to show a localized message. New codes can appear: fall back to a generic message for one you don't know.
 	Code string `json:"code"`
-	// English explanation, for developers and logs.
+	// Explanation, in the language the Content-Language header names; English without it.
 	Detail *string `json:"detail,omitempty"`
 	// Where parameter is.
 	In *string `json:"in,omitempty"`
@@ -5782,6 +5880,11 @@ type GetNodeMetricsOutputBody struct {
 type GetOrgSidebarOutputBody struct {
 	// The organization's configured default sidebar item IDs, or null when the organization has not set a custom default (users fall back to platform defaults).
 	DefaultSidebar []string `json:"defaultSidebar"`
+}
+
+type GetReadmeOutputBody struct {
+	// The file's contents, truncated at 100KB.
+	Markdown string `json:"markdown"`
 }
 
 type GetTermsBody struct {
@@ -7871,6 +7974,13 @@ type ListAttachmentsBody struct {
 	NextCursor *string `json:"nextCursor,omitempty"`
 }
 
+type ListBackgroundJobsOutputBody struct {
+	// One page of jobs, oldest first.
+	Jobs []BackgroundJob `json:"jobs"`
+	// Pass as after to fetch the next page. Absent on the last page.
+	Next *string `json:"next,omitempty"`
+}
+
 type ListConnectedAppsOutputBody struct {
 	// Applications the user has granted access to
 	Apps []ConnectedApp `json:"apps"`
@@ -8358,6 +8468,8 @@ type MarketplaceItemBody struct {
 	Featured bool `json:"featured"`
 	// Marketplace item ID
 	ID string `json:"id"`
+	// Platform route to retry the icon through when the provider refuses an anonymous read.
+	ImageFallbackURL *string `json:"imageFallbackUrl,omitempty"`
 	// Image URL for the item
 	ImageURL *string `json:"imageUrl,omitempty"`
 	// Published name of the item
@@ -8392,6 +8504,8 @@ type MarketplaceListItem struct {
 	Featured bool `json:"featured"`
 	// Marketplace item ID
 	ID string `json:"id"`
+	// Platform route to retry the icon through when the provider refuses an anonymous read.
+	ImageFallbackURL *string `json:"imageFallbackUrl,omitempty"`
 	// Image URL for the item
 	ImageURL *string `json:"imageUrl,omitempty"`
 	// Published name of the item
@@ -9629,6 +9743,8 @@ type OrgMarketplaceItemBody struct {
 	Description *string `json:"description,omitempty"`
 	// Icon URL
 	Icon *string `json:"icon,omitempty"`
+	// Platform route to retry the icon through when the provider refuses an anonymous read.
+	IconFallback *string `json:"iconFallback,omitempty"`
 	// Marketplace item ID
 	ID string `json:"id"`
 	// Published name of the item
@@ -10256,6 +10372,8 @@ type PlatformSettingsAdmin struct {
 	AcmeDirectoryURL *string `json:"acmeDirectoryUrl,omitempty"`
 	// URL of the uploaded app icon. Empty uses the built-in icon.
 	AppIconURL *string `json:"appIconUrl,omitempty"`
+	// Whether browsers offer to install ACTIVATE as an app.
+	AppInstallable bool `json:"appInstallable"`
 	// Name of the installed app. Empty uses the platform name.
 	AppName *string `json:"appName,omitempty"`
 	// Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Default 720 (12 hours).
@@ -10601,7 +10719,7 @@ type PrivacySettingsBody struct {
 type Problem struct {
 	// Stable name of the problem type, for clients to show a localized message. New codes can appear: fall back to the status for one you don't know. Absent for about:blank: derive it from the status.
 	Code *string `json:"code,omitempty"`
-	// English explanation of this occurrence, for developers and logs.
+	// Explanation of this occurrence, in the language the Content-Language header names. Without that header it is English, for developers and logs: show your own message for code instead.
 	Detail *string `json:"detail,omitempty"`
 	// For a validation problem, each invalid field and the rule it failed.
 	Errors []FieldError `json:"errors,omitempty"`
@@ -11915,6 +12033,8 @@ type RecommendedResource struct {
 	Description *string `json:"description,omitempty"`
 	// Icon URL
 	Icon *string `json:"icon,omitempty"`
+	// Platform route to retry the icon through when the provider refuses an anonymous read.
+	IconFallback *string `json:"iconFallback,omitempty"`
 	// Marketplace item ID
 	ID string `json:"id"`
 	// Display name
@@ -12860,6 +12980,8 @@ type Session struct {
 	Healthy *bool `json:"healthy,omitempty"`
 	// The unique identifier of the resource.
 	ID *string `json:"id,omitempty"`
+	// Platform route to retry the icon through when the provider refuses an anonymous read.
+	ImageFallbackURL *string `json:"imageFallbackUrl,omitempty"`
 	// Icon shown in the UI for the session. Inherited from the launching workflow by default; customizable via the session icon endpoint.
 	ImageURL *string `json:"imageUrl,omitempty"`
 	// Internal session URL.
@@ -13834,6 +13956,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	AcmeContactEmail *string `json:"acmeContactEmail,omitempty"`
 	// ACME directory URL for automatic certificates. Empty uses Let's Encrypt production.
 	AcmeDirectoryURL *string `json:"acmeDirectoryUrl,omitempty"`
+	// Whether browsers offer to install ACTIVATE as an app.
+	AppInstallable *bool `json:"appInstallable,omitempty"`
 	// Name of the installed app. Empty uses the platform name.
 	AppName *string `json:"appName,omitempty"`
 	// Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Minimum 15 (Vault's STS floor); maximum 720, since an Azure SAS must expire before its cached signing key does.
@@ -14761,6 +14885,8 @@ type WorkflowItem struct {
 	Favorite bool `json:"favorite"`
 	// Id of the workflow.
 	ID string `json:"id"`
+	// Platform route to retry the icon through when the provider refuses an anonymous read, which is what a private repository does. Empty unless the icon is a repository thumbnail.
+	ImageFallbackURL *string `json:"imageFallbackUrl,omitempty"`
 	// URL of the workflow icon.
 	ImageURL *string `json:"imageUrl,omitempty"`
 	// ID of the marketplace item if installed from marketplace.
@@ -14801,24 +14927,25 @@ type WorkflowPermissionResponse struct {
 }
 
 type WorkflowRunDetailResponse struct {
-	CompletedAt  *time.Time                 `json:"completedAt,omitempty"`
-	CreatedAt    *time.Time                 `json:"createdAt,omitempty"`
-	DisplayName  *string                    `json:"displayName,omitempty"`
-	ExecutedJobs map[string]any             `json:"executedJobs,omitempty"`
-	ID           string                     `json:"id"`
-	ImageURL     *string                    `json:"imageUrl,omitempty"`
-	InlineRun    bool                       `json:"inlineRun"`
-	Inputs       map[string]any             `json:"inputs,omitempty"`
-	Links        map[string]WorkflowRunLink `json:"links,omitempty"`
-	Marketplace  bool                       `json:"marketplace"`
-	Number       *int64                     `json:"number,omitempty"`
-	Redirect     *WorkflowRunRedirect       `json:"redirect,omitempty"`
-	ResolvedYaml map[string]any             `json:"resolvedYaml,omitempty"`
-	Slug         *string                    `json:"slug,omitempty"`
-	Status       *string                    `json:"status,omitempty"`
-	StatusReason *string                    `json:"statusReason,omitempty"`
-	User         string                     `json:"user"`
-	WorkflowName *string                    `json:"workflowName,omitempty"`
+	CompletedAt      *time.Time                 `json:"completedAt,omitempty"`
+	CreatedAt        *time.Time                 `json:"createdAt,omitempty"`
+	DisplayName      *string                    `json:"displayName,omitempty"`
+	ExecutedJobs     map[string]any             `json:"executedJobs,omitempty"`
+	ID               string                     `json:"id"`
+	ImageFallbackURL *string                    `json:"imageFallbackUrl,omitempty"`
+	ImageURL         *string                    `json:"imageUrl,omitempty"`
+	InlineRun        bool                       `json:"inlineRun"`
+	Inputs           map[string]any             `json:"inputs,omitempty"`
+	Links            map[string]WorkflowRunLink `json:"links,omitempty"`
+	Marketplace      bool                       `json:"marketplace"`
+	Number           *int64                     `json:"number,omitempty"`
+	Redirect         *WorkflowRunRedirect       `json:"redirect,omitempty"`
+	ResolvedYaml     map[string]any             `json:"resolvedYaml,omitempty"`
+	Slug             *string                    `json:"slug,omitempty"`
+	Status           *string                    `json:"status,omitempty"`
+	StatusReason     *string                    `json:"statusReason,omitempty"`
+	User             string                     `json:"user"`
+	WorkflowName     *string                    `json:"workflowName,omitempty"`
 }
 
 type WorkflowRunInfo struct {
@@ -14850,19 +14977,20 @@ type WorkflowRunRedirect struct {
 }
 
 type WorkflowRunResponse struct {
-	CompletedAt  *time.Time `json:"completedAt,omitempty"`
-	CreatedAt    *time.Time `json:"createdAt,omitempty"`
-	DisplayName  *string    `json:"displayName,omitempty"`
-	ID           string     `json:"id"`
-	ImageURL     *string    `json:"imageUrl,omitempty"`
-	InlineRun    bool       `json:"inlineRun"`
-	Marketplace  bool       `json:"marketplace"`
-	Number       *int64     `json:"number,omitempty"`
-	Slug         *string    `json:"slug,omitempty"`
-	Status       *string    `json:"status,omitempty"`
-	StatusReason *string    `json:"statusReason,omitempty"`
-	User         string     `json:"user"`
-	WorkflowName *string    `json:"workflowName,omitempty"`
+	CompletedAt      *time.Time `json:"completedAt,omitempty"`
+	CreatedAt        *time.Time `json:"createdAt,omitempty"`
+	DisplayName      *string    `json:"displayName,omitempty"`
+	ID               string     `json:"id"`
+	ImageFallbackURL *string    `json:"imageFallbackUrl,omitempty"`
+	ImageURL         *string    `json:"imageUrl,omitempty"`
+	InlineRun        bool       `json:"inlineRun"`
+	Marketplace      bool       `json:"marketplace"`
+	Number           *int64     `json:"number,omitempty"`
+	Slug             *string    `json:"slug,omitempty"`
+	Status           *string    `json:"status,omitempty"`
+	StatusReason     *string    `json:"statusReason,omitempty"`
+	User             string     `json:"user"`
+	WorkflowName     *string    `json:"workflowName,omitempty"`
 }
 
 type WorkflowRunRunningStepsResponse struct {

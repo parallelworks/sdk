@@ -173,6 +173,145 @@ func (c *Client) DeletePlatformAlert(ctx context.Context, id string) error {
 	return nil
 }
 
+// ListBackgroundJobsParams contains the parameters for the ListBackgroundJobs operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListBackgroundJobsParams struct {
+	// Only jobs on this queue.
+	Queue *string `json:"queue,omitempty"`
+	// Only jobs in these states.
+	State *[]string `json:"state,omitempty"`
+	// Continue after this job id, from the next field of the previous page.
+	After *string `json:"after,omitempty"`
+	// Page size.
+	Limit *int64 `json:"limit,omitempty"`
+}
+
+// ListBackgroundJobs - List background jobs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns background jobs, waiting, running and finished, oldest first
+func (c *Client) ListBackgroundJobs(ctx context.Context, opts ...ListBackgroundJobsParams) (*ListBackgroundJobsOutputBody, error) {
+
+	path := "/api/admin/background-jobs"
+	var params ListBackgroundJobsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "queue", "form", false, params.Queue)
+
+	addQueryParam(queryValues, "state", "form", true, params.State)
+
+	addQueryParam(queryValues, "after", "form", false, params.After)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result ListBackgroundJobsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetBackgroundJobsOverview - Get background job queues and workers
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns the depth of every background job queue and the workers taking jobs from them
+func (c *Client) GetBackgroundJobsOverview(ctx context.Context) (*BackgroundJobsOverviewOutputBody, error) {
+
+	path := "/api/admin/background-jobs/overview"
+
+	var result BackgroundJobsOverviewOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PauseBackgroundJobQueue - Pause a background job queue
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Stops workers taking jobs from the queue. Running jobs finish and new jobs keep queueing
+func (c *Client) PauseBackgroundJobQueue(ctx context.Context, queue string) error {
+
+	path := "/api/admin/background-jobs/queues/{queue}/pause"
+	path = pathReplace(path, "queue", "simple", false, queue)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// ResumeBackgroundJobQueue - Resume a background job queue
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Lets workers take jobs from a paused queue again
+func (c *Client) ResumeBackgroundJobQueue(ctx context.Context, queue string) error {
+
+	path := "/api/admin/background-jobs/queues/{queue}/resume"
+	path = pathReplace(path, "queue", "simple", false, queue)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// CancelBackgroundJob - Cancel a background job
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Cancels a waiting job, or asks the worker running it to stop. A finished job is returned unchanged
+func (c *Client) CancelBackgroundJob(ctx context.Context, jobID string) (*BackgroundJob, error) {
+
+	path := "/api/admin/background-jobs/{jobId}/cancel"
+	path = pathReplace(path, "jobId", "simple", false, jobID)
+
+	var result BackgroundJob
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RetryBackgroundJob - Retry a background job
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Runs a job again as soon as possible. A cancelled or discarded job gets one more attempt; a waiting job has its schedule brought forward
+func (c *Client) RetryBackgroundJob(ctx context.Context, jobID string) (*BackgroundJob, error) {
+
+	path := "/api/admin/background-jobs/{jobId}/retry"
+	path = pathReplace(path, "jobId", "simple", false, jobID)
+
+	var result BackgroundJob
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetBillingCrosscheck - Get billing cross-check data
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -18321,14 +18460,51 @@ func (c *Client) GetReportsLegacyQueryFilterOptions(ctx context.Context, opts ..
 	return &result, nil
 }
 
-// GetRepositoryThumbnailParams contains the parameters for the GetRepositoryThumbnail operation.
+// GetRepositoryReadmeParams contains the parameters for the GetRepositoryReadme operation.
 // Required parameters are value fields; optional parameters are pointers.
-type GetRepositoryThumbnailParams struct {
-	// HOST/GROUP/PROJECT of a project on a registered GitLab server.
+type GetRepositoryReadmeParams struct {
+	// OWNER/REPO or the URL of a GitHub repository, or HOST/GROUP/PROJECT of a project on a registered GitLab server.
 	Repo string `json:"repo"`
 	// Branch, tag or commit.
 	Ref string `json:"ref"`
-	// Path of the image within the repository.
+	// Path of the file within the repository.
+	Path string `json:"path"`
+}
+
+// GetRepositoryReadme - Read a workflow README from a repository
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Reads a markdown file from a GitHub repository or a project on one of the organization's registered GitLab servers, as the current user, so a private repository's README renders. Only a repository and a path within it are accepted, never a URL.
+func (c *Client) GetRepositoryReadme(ctx context.Context, params GetRepositoryReadmeParams) (*GetReadmeOutputBody, error) {
+
+	path := "/api/repositories/readme"
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "repo", "form", false, params.Repo)
+
+	addQueryParam(queryValues, "ref", "form", false, params.Ref)
+
+	addQueryParam(queryValues, "path", "form", false, params.Path)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result GetReadmeOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetRepositoryThumbnailParams contains the parameters for the GetRepositoryThumbnail operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetRepositoryThumbnailParams struct {
+	// OWNER/REPO or the URL of a GitHub repository, or HOST/GROUP/PROJECT of a project on a registered GitLab server.
+	Repo string `json:"repo"`
+	// Branch, tag or commit.
+	Ref string `json:"ref"`
+	// Path of the file within the repository.
 	Path string `json:"path"`
 }
 
@@ -18336,7 +18512,7 @@ type GetRepositoryThumbnailParams struct {
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Streams an image file from a project on one of the organization's registered GitLab servers, read as the current user. GitHub thumbnails are served from GitHub directly.
+// Streams an image file from a GitHub repository or a project on one of the organization's registered GitLab servers, read as the current user.
 func (c *Client) GetRepositoryThumbnail(ctx context.Context, params GetRepositoryThumbnailParams) error {
 
 	path := "/api/repositories/thumbnail"
@@ -19232,6 +19408,22 @@ func (c *Client) ScaleDownUserWorkspaces(ctx context.Context) error {
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// ListUserApps - List your apps
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the platform's apps you can open, such as ACTIVATE itself and Tandem, for the app launcher.
+func (c *Client) ListUserApps(ctx context.Context) (*AppsOutputBody, error) {
+
+	path := "/api/user/apps"
+
+	var result AppsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // SetUserChangelogSeen - Mark the Changelog page as seen

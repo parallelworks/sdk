@@ -89,6 +89,22 @@ async def main():
 asyncio.run(main())
 ```
 
+## Errors
+
+The client asks for errors as [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) problem details, in the language of the locale environment (`LC_ALL`, `LC_MESSAGES`, `LANG`). `raise_for_problem` raises any failed response, including an older server's error envelope, as a `ProblemError` with a stable `code`, `params`, the server's `detail`, and the invalid fields in `errors`:
+
+```python
+from parallelworks_client import Client, ProblemError, raise_for_problem
+
+with Client.from_credential(os.environ["PW_API_KEY"]).sync() as client:
+    try:
+        raise_for_problem(client.get("/api/buckets"))
+    except ProblemError as problem:
+        print(problem.code, problem.detail)
+        for field in problem.errors:
+            print(f"  {field}")
+```
+
 ## Documentation
 
 For full API documentation, visit [https://parallelworks.com/docs](https://parallelworks.com/docs).

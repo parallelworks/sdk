@@ -1,3 +1,4 @@
+import { type ApiError, problemMiddleware } from '@parallelworks/problem'
 import createClient, {
   type ClientOptions as OpenAPIClientOptions,
   type Middleware,
@@ -6,10 +7,60 @@ import type { paths } from './types/api'
 
 export type { paths }
 export type { components, operations } from './types/api'
+export {
+  ApiError,
+  codeForStatus,
+  FieldError,
+  fromResponseBody,
+  problemMediaType,
+  toApiError,
+} from '@parallelworks/problem'
 
 type OpenAPIFetchClient = ReturnType<typeof createClient<paths>>
 
-export interface ClientOptions extends Omit<OpenAPIClientOptions, 'baseUrl'> {}
+export interface ClientOptions extends Omit<OpenAPIClientOptions, 'baseUrl'> {
+  /**
+   * The Accept-Language for error details. Outside a browser it defaults to
+   * the locale environment (see `acceptLanguageFromEnv`).
+   */
+  acceptLanguage?: string
+}
+
+/**
+ * The language of the POSIX locale environment (LC_ALL, then LC_MESSAGES,
+ * then LANG) as a language tag: `ja_JP.UTF-8` is `ja-JP`. Undefined when none
+ * is set or the locale is C or POSIX.
+ */
+export function acceptLanguageFromEnv(
+  env: Record<string, string | undefined> = (
+    globalThis as { process?: { env?: Record<string, string | undefined> } }
+  ).process?.env ?? {}
+): string | undefined {
+  const locale = env['LC_ALL'] || env['LC_MESSAGES'] || env['LANG']
+  const tag = locale?.split('.')[0]?.split('@')[0]
+  if (!tag || tag === 'C' || tag === 'POSIX' || !/^[\w-]+$/.test(tag)) {
+    return undefined
+  }
+  return tag.replace(/_/g, '-')
+}
+
+/**
+ * The absolute URL documenting an error's problem type, resolved against the
+ * API's base URL. Undefined for `about:blank`, which documents nothing.
+ */
+export function problemTypeUrl(
+  error: ApiError,
+  baseUrl: string
+): string | undefined {
+  if (error.type === 'about:blank') {
+    return undefined
+  }
+  try {
+    return new URL(error.type, baseUrl).toString()
+  } catch {
+    return undefined
+  }
+}
 
 /** Prefix for Parallel Works API keys */
 export const API_KEY_PREFIX = 'pwt_'
@@ -273,23 +324,30 @@ export class Client {
    * @returns Configured openapi-fetch client instance
    */
   build(): OpenAPIFetchClient {
+    const { acceptLanguage: language, ...options } = this.options
+    const acceptLanguage =
+      language ??
+      (typeof document === 'undefined' ? acceptLanguageFromEnv() : undefined)
     const client = createClient<paths>({
       baseUrl: this.baseUrl,
-      ...this.options,
+      ...options,
       headers: {
-        ...this.options.headers,
+        ...(acceptLanguage && { 'Accept-Language': acceptLanguage }),
+        ...options.headers,
         ...(this.authHeader && { Authorization: this.authHeader }),
       },
     })
+    client.use(problemMiddleware)
 
     // Attach HTTP status code to error response bodies so consumers
     // (e.g. SWR hooks) can distinguish 404s from other errors.
     // openapi-fetch parses the body after middleware, so we replace the
     // response with one whose body includes the status field.
-    // Also guarantee `message` is populated — upstream infrastructure (WAFs,
-    // proxies) can return non-2xx with an empty body, which would otherwise
-    // short-circuit openapi-fetch (it returns `error: undefined` when
-    // Content-Length is 0) and leave consumers with no error to react to.
+    // Also guarantee `message` is populated, from a problem's detail when it
+    // has one: upstream infrastructure (WAFs, proxies) can return non-2xx with
+    // an empty body, which would otherwise short-circuit openapi-fetch (it
+    // returns `error: undefined` when Content-Length is 0) and leave consumers
+    // with no error to react to.
     const statusMiddleware: Middleware = {
       async onResponse({ response }) {
         if (!response.ok) {
@@ -301,6 +359,7 @@ export class Client {
           record['status'] = response.status
           if (typeof record['message'] !== 'string' || !record['message']) {
             record['message'] =
+              (typeof record['detail'] === 'string' && record['detail']) ||
               response.statusText ||
               `Request failed with status ${response.status}`
           }

@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING
 
 import httpx
 
+from parallelworks_client.problem import PROBLEM_MEDIA_TYPE, accept_language_from_env
+
 if TYPE_CHECKING:
     from typing import Self
 
@@ -143,6 +145,19 @@ class ClientConfig:
     base_url: str
     auth_header: str
     timeout: float = 30.0
+
+
+def _default_headers(config: ClientConfig) -> dict[str, str]:
+    headers = {
+        "Accept": f"application/json, {PROBLEM_MEDIA_TYPE}",
+        "Authorization": config.auth_header,
+        "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
+    }
+    language = accept_language_from_env()
+    if language:
+        headers["Accept-Language"] = language
+    return headers
 
 
 class Client:
@@ -303,21 +318,13 @@ class Client:
 
         return cls.with_credential(host, credential, timeout=timeout)
 
-    def _get_headers(self) -> dict[str, str]:
-        """Get the default headers for requests."""
-        return {
-            "Authorization": self._config.auth_header,
-            "Content-Type": "application/json",
-            "User-Agent": USER_AGENT,
-        }
-
     # Async client methods
 
     async def __aenter__(self) -> Self:
         """Enter async context manager."""
         self._async_client = httpx.AsyncClient(
             base_url=self._config.base_url,
-            headers=self._get_headers(),
+            headers=_default_headers(self._config),
             timeout=self._config.timeout,
         )
         return self
@@ -378,19 +385,11 @@ class SyncClient:
         self._config = config
         self._client: httpx.Client | None = None
 
-    def _get_headers(self) -> dict[str, str]:
-        """Get the default headers for requests."""
-        return {
-            "Authorization": self._config.auth_header,
-            "Content-Type": "application/json",
-            "User-Agent": USER_AGENT,
-        }
-
     def __enter__(self) -> SyncClient:
         """Enter sync context manager."""
         self._client = httpx.Client(
             base_url=self._config.base_url,
-            headers=self._get_headers(),
+            headers=_default_headers(self._config),
             timeout=self._config.timeout,
         )
         return self

@@ -2898,6 +2898,36 @@
         ],
         "type": "object"
       },
+      "App": {
+        "additionalProperties": false,
+        "properties": {
+          "iconUrl": {
+            "type": "string"
+          },
+          "id": {
+            "description": "Stable identifier of the app",
+            "enum": [
+              "activate",
+              "tandem"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "description": "Where the app opens: a path on the platform, or an http(s) URL for an app on another domain",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "url",
+          "iconUrl"
+        ],
+        "type": "object"
+      },
       "AppBody": {
         "additionalProperties": false,
         "properties": {
@@ -3234,6 +3264,21 @@
           "id",
           "kind",
           "createdAt"
+        ],
+        "type": "object"
+      },
+      "AppsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "apps": {
+            "items": {
+              "$ref": "#/components/schemas/App"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "apps"
         ],
         "type": "object"
       },
@@ -6404,6 +6449,264 @@
         },
         "required": [
           "subtype"
+        ],
+        "type": "object"
+      },
+      "BackgroundJob": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt": {
+            "description": "Attempts started so far.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "attemptedAt": {
+            "description": "When the latest attempt started.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "When the job was queued.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "errors": {
+            "description": "One entry per failed attempt, oldest first.",
+            "items": {
+              "$ref": "#/components/schemas/BackgroundJobError"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "finalizedAt": {
+            "description": "When the job finished.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Job id.",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Type of job.",
+            "type": "string"
+          },
+          "maxAttempts": {
+            "description": "Attempts allowed before the job is discarded.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "queue": {
+            "description": "Queue the job is on.",
+            "type": "string"
+          },
+          "scheduledAt": {
+            "description": "When the job is, or was, due to run.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "description": "Where the job is in its life: waiting (pending, available, scheduled, retryable), running, or finished (completed, cancelled, discarded). A discarded job ran out of attempts.",
+            "enum": [
+              "pending",
+              "available",
+              "scheduled",
+              "running",
+              "retryable",
+              "completed",
+              "cancelled",
+              "discarded"
+            ],
+            "type": "string"
+          },
+          "task": {
+            "$ref": "#/components/schemas/BackgroundJobTask",
+            "description": "What the job does, for cloud provisioning tasks."
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "queue",
+          "state",
+          "attempt",
+          "maxAttempts",
+          "createdAt",
+          "scheduledAt",
+          "errors"
+        ],
+        "type": "object"
+      },
+      "BackgroundJobError": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "description": "When the attempt failed.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "attempt": {
+            "description": "Which attempt failed, starting at 1.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "error": {
+            "description": "The failure.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "at",
+          "attempt",
+          "error"
+        ],
+        "type": "object"
+      },
+      "BackgroundJobQueue": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "description": "Jobs ready to run.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "completedLastMinute": {
+            "description": "Jobs completed in the last minute.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Queue name.",
+            "type": "string"
+          },
+          "oldestAvailableSeconds": {
+            "description": "How long the oldest ready job has waited. A growing value means workers are not keeping up.",
+            "format": "double",
+            "type": "number"
+          },
+          "paused": {
+            "description": "Whether workers have stopped taking jobs from the queue.",
+            "type": "boolean"
+          },
+          "retryable": {
+            "description": "Jobs waiting to run again after a failed attempt.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "running": {
+            "description": "Jobs running right now.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "scheduled": {
+            "description": "Jobs due to run later.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "available",
+          "scheduled",
+          "retryable",
+          "running",
+          "oldestAvailableSeconds",
+          "completedLastMinute",
+          "paused"
+        ],
+        "type": "object"
+      },
+      "BackgroundJobTask": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "What the task does to the resource.",
+            "type": "string"
+          },
+          "jobType": {
+            "description": "Task family: storage, compute, sessionless or kubernetes.",
+            "type": "string"
+          },
+          "resourceId": {
+            "description": "Id of the resource the task acts on.",
+            "type": "string"
+          },
+          "resourceType": {
+            "description": "Kind of resource the task acts on.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "jobType",
+          "resourceType",
+          "action"
+        ],
+        "type": "object"
+      },
+      "BackgroundJobWorker": {
+        "additionalProperties": false,
+        "properties": {
+          "hostname": {
+            "description": "Host the worker runs on.",
+            "type": "string"
+          },
+          "id": {
+            "description": "Worker id.",
+            "type": "string"
+          },
+          "leader": {
+            "description": "Whether this worker also rescues jobs from stopped workers and prunes history.",
+            "type": "boolean"
+          },
+          "running": {
+            "description": "Jobs the worker is running right now.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "startedAt": {
+            "description": "When the worker started.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "hostname",
+          "startedAt",
+          "running",
+          "leader"
+        ],
+        "type": "object"
+      },
+      "BackgroundJobsOverviewOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "queues": {
+            "description": "Every queue with its depth, by name.",
+            "items": {
+              "$ref": "#/components/schemas/BackgroundJobQueue"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "workers": {
+            "description": "Workers taking jobs right now.",
+            "items": {
+              "$ref": "#/components/schemas/BackgroundJobWorker"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "queues",
+          "workers"
         ],
         "type": "object"
       },
@@ -15637,7 +15940,7 @@
             "type": "string"
           },
           "detail": {
-            "description": "English explanation, for developers and logs.",
+            "description": "Explanation, in the language the Content-Language header names; English without it.",
             "type": "string"
           },
           "in": {
@@ -16563,6 +16866,19 @@
         },
         "required": [
           "defaultSidebar"
+        ],
+        "type": "object"
+      },
+      "GetReadmeOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "markdown": {
+            "description": "The file's contents, truncated at 100KB.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "markdown"
         ],
         "type": "object"
       },
@@ -21579,6 +21895,29 @@
         ],
         "type": "object"
       },
+      "ListBackgroundJobsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "jobs": {
+            "description": "One page of jobs, oldest first.",
+            "items": {
+              "$ref": "#/components/schemas/BackgroundJob"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "next": {
+            "description": "Pass as after to fetch the next page. Absent on the last page.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "jobs"
+        ],
+        "type": "object"
+      },
       "ListConnectedAppsOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -23206,6 +23545,10 @@
             "description": "Marketplace item ID",
             "type": "string"
           },
+          "imageFallbackUrl": {
+            "description": "Platform route to retry the icon through when the provider refuses an anonymous read.",
+            "type": "string"
+          },
           "imageUrl": {
             "description": "Image URL for the item",
             "type": "string"
@@ -23408,6 +23751,10 @@
           },
           "id": {
             "description": "Marketplace item ID",
+            "type": "string"
+          },
+          "imageFallbackUrl": {
+            "description": "Platform route to retry the icon through when the provider refuses an anonymous read.",
             "type": "string"
           },
           "imageUrl": {
@@ -27417,6 +27764,10 @@
             "description": "Icon URL",
             "type": "string"
           },
+          "iconFallback": {
+            "description": "Platform route to retry the icon through when the provider refuses an anonymous read.",
+            "type": "string"
+          },
           "id": {
             "description": "Marketplace item ID",
             "type": "string"
@@ -29381,6 +29732,10 @@
             "description": "URL of the uploaded app icon. Empty uses the built-in icon.",
             "type": "string"
           },
+          "appInstallable": {
+            "description": "Whether browsers offer to install ACTIVATE as an app.",
+            "type": "boolean"
+          },
           "appName": {
             "description": "Name of the installed app. Empty uses the platform name.",
             "type": "string"
@@ -29547,7 +29902,8 @@
           "gcsHmacRotationGraceHours",
           "gcsHmacRotationSweepMinutes",
           "workspaceScaleDownMinAgeDays",
-          "hostForwards"
+          "hostForwards",
+          "appInstallable"
         ],
         "type": "object"
       },
@@ -30375,7 +30731,7 @@
             "type": "string"
           },
           "detail": {
-            "description": "English explanation of this occurrence, for developers and logs.",
+            "description": "Explanation of this occurrence, in the language the Content-Language header names. Without that header it is English, for developers and logs: show your own message for code instead.",
             "type": "string"
           },
           "errors": {
@@ -34491,6 +34847,10 @@
             "description": "Icon URL",
             "type": "string"
           },
+          "iconFallback": {
+            "description": "Platform route to retry the icon through when the provider refuses an anonymous read.",
+            "type": "string"
+          },
           "id": {
             "description": "Marketplace item ID",
             "type": "string"
@@ -37223,6 +37583,11 @@
             "readOnly": true,
             "type": "string"
           },
+          "imageFallbackUrl": {
+            "description": "Platform route to retry the icon through when the provider refuses an anonymous read.",
+            "readOnly": true,
+            "type": "string"
+          },
           "imageUrl": {
             "description": "Icon shown in the UI for the session. Inherited from the launching workflow by default; customizable via the session icon endpoint.",
             "readOnly": true,
@@ -39742,6 +40107,10 @@
           "acmeDirectoryUrl": {
             "description": "ACME directory URL for automatic certificates. Empty uses Let's Encrypt production.",
             "type": "string"
+          },
+          "appInstallable": {
+            "description": "Whether browsers offer to install ACTIVATE as an app.",
+            "type": "boolean"
           },
           "appName": {
             "description": "Name of the installed app. Empty uses the platform name.",
@@ -42504,6 +42873,10 @@
             "description": "Id of the workflow.",
             "type": "string"
           },
+          "imageFallbackUrl": {
+            "description": "Platform route to retry the icon through when the provider refuses an anonymous read, which is what a private repository does. Empty unless the icon is a repository thumbnail.",
+            "type": "string"
+          },
           "imageUrl": {
             "description": "URL of the workflow icon.",
             "type": "string"
@@ -42640,6 +43013,9 @@
             "type": "object"
           },
           "id": {
+            "type": "string"
+          },
+          "imageFallbackUrl": {
             "type": "string"
           },
           "imageUrl": {
@@ -42788,6 +43164,9 @@
             "type": "string"
           },
           "id": {
+            "type": "string"
+          },
+          "imageFallbackUrl": {
             "type": "string"
           },
           "imageUrl": {
@@ -43636,6 +44015,312 @@
         "tags": [
           "Platform Alerts"
         ]
+      }
+    },
+    "/api/admin/background-jobs": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns background jobs, waiting, running and finished, oldest first",
+        "operationId": "list-background-jobs",
+        "parameters": [
+          {
+            "description": "Only jobs on this queue.",
+            "explode": false,
+            "in": "query",
+            "name": "queue",
+            "schema": {
+              "description": "Only jobs on this queue.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only jobs in these states.",
+            "explode": true,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "Only jobs in these states.",
+              "items": {
+                "enum": [
+                  "pending",
+                  "available",
+                  "scheduled",
+                  "running",
+                  "retryable",
+                  "completed",
+                  "cancelled",
+                  "discarded"
+                ],
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Continue after this job id, from the next field of the previous page.",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Continue after this job id, from the next field of the previous page.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size.",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size.",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListBackgroundJobsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List background jobs",
+        "tags": [
+          "Maintenance"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/background-jobs/overview": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns the depth of every background job queue and the workers taking jobs from them",
+        "operationId": "get-background-jobs-overview",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackgroundJobsOverviewOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get background job queues and workers",
+        "tags": [
+          "Maintenance"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/background-jobs/queues/{queue}/pause": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nStops workers taking jobs from the queue. Running jobs finish and new jobs keep queueing",
+        "operationId": "pause-background-job-queue",
+        "parameters": [
+          {
+            "description": "Queue name.",
+            "in": "path",
+            "name": "queue",
+            "required": true,
+            "schema": {
+              "description": "Queue name.",
+              "examples": [
+                "create"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Pause a background job queue",
+        "tags": [
+          "Maintenance"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/background-jobs/queues/{queue}/resume": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nLets workers take jobs from a paused queue again",
+        "operationId": "resume-background-job-queue",
+        "parameters": [
+          {
+            "description": "Queue name.",
+            "in": "path",
+            "name": "queue",
+            "required": true,
+            "schema": {
+              "description": "Queue name.",
+              "examples": [
+                "create"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Resume a background job queue",
+        "tags": [
+          "Maintenance"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/background-jobs/{jobId}/cancel": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nCancels a waiting job, or asks the worker running it to stop. A finished job is returned unchanged",
+        "operationId": "cancel-background-job",
+        "parameters": [
+          {
+            "description": "Job id.",
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "description": "Job id.",
+              "examples": [
+                "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackgroundJob"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Cancel a background job",
+        "tags": [
+          "Maintenance"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/background-jobs/{jobId}/retry": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nRuns a job again as soon as possible. A cancelled or discarded job gets one more attempt; a waiting job has its schedule brought forward",
+        "operationId": "retry-background-job",
+        "parameters": [
+          {
+            "description": "Job id.",
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "description": "Job id.",
+              "examples": [
+                "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackgroundJob"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Retry a background job",
+        "tags": [
+          "Maintenance"
+        ],
+        "x-internal": true
       }
     },
     "/api/admin/billing/crosscheck": {
@@ -96167,19 +96852,19 @@
         "x-internal": true
       }
     },
-    "/api/repositories/thumbnail": {
+    "/api/repositories/readme": {
       "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStreams an image file from a project on one of the organization's registered GitLab servers, read as the current user. GitHub thumbnails are served from GitHub directly.",
-        "operationId": "get-repository-thumbnail",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReads a markdown file from a GitHub repository or a project on one of the organization's registered GitLab servers, as the current user, so a private repository's README renders. Only a repository and a path within it are accepted, never a URL.",
+        "operationId": "get-repository-readme",
         "parameters": [
           {
-            "description": "HOST/GROUP/PROJECT of a project on a registered GitLab server.",
+            "description": "OWNER/REPO or the URL of a GitHub repository, or HOST/GROUP/PROJECT of a project on a registered GitLab server.",
             "explode": false,
             "in": "query",
             "name": "repo",
             "required": true,
             "schema": {
-              "description": "HOST/GROUP/PROJECT of a project on a registered GitLab server.",
+              "description": "OWNER/REPO or the URL of a GitHub repository, or HOST/GROUP/PROJECT of a project on a registered GitLab server.",
               "type": "string"
             }
           },
@@ -96195,13 +96880,80 @@
             }
           },
           {
-            "description": "Path of the image within the repository.",
+            "description": "Path of the file within the repository.",
             "explode": false,
             "in": "query",
             "name": "path",
             "required": true,
             "schema": {
-              "description": "Path of the image within the repository.",
+              "description": "Path of the file within the repository.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetReadmeOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Read a workflow README from a repository",
+        "tags": [
+          "Workflows"
+        ]
+      }
+    },
+    "/api/repositories/thumbnail": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStreams an image file from a GitHub repository or a project on one of the organization's registered GitLab servers, read as the current user.",
+        "operationId": "get-repository-thumbnail",
+        "parameters": [
+          {
+            "description": "OWNER/REPO or the URL of a GitHub repository, or HOST/GROUP/PROJECT of a project on a registered GitLab server.",
+            "explode": false,
+            "in": "query",
+            "name": "repo",
+            "required": true,
+            "schema": {
+              "description": "OWNER/REPO or the URL of a GitHub repository, or HOST/GROUP/PROJECT of a project on a registered GitLab server.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Branch, tag or commit.",
+            "explode": false,
+            "in": "query",
+            "name": "ref",
+            "required": true,
+            "schema": {
+              "description": "Branch, tag or commit.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Path of the file within the repository.",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "required": true,
+            "schema": {
+              "description": "Path of the file within the repository.",
               "type": "string"
             }
           }
@@ -98285,6 +99037,38 @@
           }
         },
         "summary": "Scale down user workspaces",
+        "tags": [
+          "Platform"
+        ]
+      }
+    },
+    "/api/user/apps": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists the platform's apps you can open, such as ACTIVATE itself and Tandem, for the app launcher.",
+        "operationId": "list-user-apps",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List your apps",
         "tags": [
           "Platform"
         ]

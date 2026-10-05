@@ -90,6 +90,7 @@ if should_generate python; then
     trap 'rm -rf "$PY_BACKUP"' EXIT
     cp ./python/parallelworks_client/__init__.py "$PY_BACKUP/__init__.py"
     cp ./python/parallelworks_client/auth.py "$PY_BACKUP/auth.py"
+    cp ./python/parallelworks_client/problem.py "$PY_BACKUP/problem.py"
 
     # Use uv to run openapi-python-client
     uvx openapi-python-client generate \
@@ -101,6 +102,7 @@ if should_generate python; then
     # Restore hand-written files that the generator overwrites
     mv "$PY_BACKUP/__init__.py" ./python/parallelworks_client/__init__.py
     mv "$PY_BACKUP/auth.py" ./python/parallelworks_client/auth.py
+    mv "$PY_BACKUP/problem.py" ./python/parallelworks_client/problem.py
 
     echo "Python SDK generated"
     echo ""
