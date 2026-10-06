@@ -5462,6 +5462,27 @@ type FieldError struct {
 	Type string `json:"type"`
 }
 
+type FileEntry struct {
+	Mode     string    `json:"mode"`
+	Modified time.Time `json:"modified"`
+	Name     string    `json:"name"`
+	Size     int64     `json:"size"`
+	Symlink  *bool     `json:"symlink,omitempty"`
+	Type     string    `json:"type"`
+}
+
+type FileListing struct {
+	Entries []FileEntry `json:"entries"`
+	// Pass as cursor to read the next page; absent on the last page.
+	NextCursor *string `json:"nextCursor,omitempty"`
+	// Absolute path of the listed directory on the target.
+	Path string `json:"path"`
+	// The root the path is relative to, as configured (for example ~).
+	Root string `json:"root"`
+	// The directory holds more entries than a listing reads.
+	Truncated *bool `json:"truncated,omitempty"`
+}
+
 type FileOutputBody struct {
 	Content string `json:"content"`
 }
@@ -5767,6 +5788,8 @@ type GeneralCluster struct {
 	AllocationThreshold *CrossedThreshold `json:"allocationThreshold,omitempty"`
 	// Whether the requesting user may change this cluster's configuration.
 	CanEdit *bool `json:"canEdit,omitempty"`
+	// Features the cluster's connected agent supports, such as files. Absent when no agent is connected.
+	Capabilities []string `json:"capabilities,omitempty"`
 	// The SSH connection string for the resource.
 	ConnectionString *string `json:"connectionString,omitempty"`
 	// The cloud service provider for the resource.
@@ -7342,6 +7365,8 @@ type InstallationResponse struct {
 type Instance struct {
 	// The architecture of the Instance.
 	Architecture *string `json:"architecture,omitempty"`
+	// Features the instance's connected agent supports, such as files. Absent when no agent is connected.
+	Capabilities []string `json:"capabilities,omitempty"`
 	// The cloud service provider for the Instance.
 	Csp string `json:"csp"`
 	// The cloud service provider's unique identifier for the instance.
@@ -12337,6 +12362,8 @@ type Resource struct {
 	OrphanReason *string `json:"orphanReason,omitempty"`
 	// When the resource was first detected as orphaned.
 	OrphanedAt *time.Time `json:"orphanedAt,omitempty"`
+	// Whether a platform install created the resource (deployment, network, or another install's tags); false for resources created outside the platform.
+	PlatformManaged bool `json:"platformManaged"`
 	// Private IP address.
 	PrivateIP *string `json:"privateIp,omitempty"`
 	// Public IP address.
@@ -14852,6 +14879,8 @@ type WorkerResponse struct {
 	Sessions []string `json:"sessions,omitempty"`
 	// Port of the worker's SSH server on the compute node. Present when the worker accepts SSH sessions through its own tunnel.
 	SSHServerPort *int64 `json:"sshServerPort,omitempty"`
+	// Named pw ssh target (pw://username/cluster/worker) for reaching the worker's compute node.
+	SSHTarget *string `json:"sshTarget,omitempty"`
 	// Worker status.
 	Status *string `json:"status,omitempty"`
 	// Time when worker stopped.

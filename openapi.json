@@ -15978,6 +15978,80 @@
         ],
         "type": "object"
       },
+      "FileEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "type": "string"
+          },
+          "modified": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "symlink": {
+            "type": "boolean"
+          },
+          "type": {
+            "enum": [
+              "file",
+              "directory",
+              "other"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "size",
+          "modified",
+          "mode"
+        ],
+        "type": "object"
+      },
+      "FileListing": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/FileEntry"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "nextCursor": {
+            "description": "Pass as cursor to read the next page; absent on the last page.",
+            "type": "string"
+          },
+          "path": {
+            "description": "Absolute path of the listed directory on the target.",
+            "type": "string"
+          },
+          "root": {
+            "description": "The root the path is relative to, as configured (for example ~).",
+            "type": "string"
+          },
+          "truncated": {
+            "description": "The directory holds more entries than a listing reads.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "root",
+          "path",
+          "entries"
+        ],
+        "type": "object"
+      },
       "FileOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -16427,6 +16501,19 @@
           "canEdit": {
             "description": "Whether the requesting user may change this cluster's configuration.",
             "type": "boolean"
+          },
+          "capabilities": {
+            "description": "Features the cluster's connected agent supports, such as files. Absent when no agent is connected.",
+            "items": {
+              "enum": [
+                "files"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "connectionString": {
             "description": "The SSH connection string for the resource.",
@@ -19732,6 +19819,20 @@
               "x86_64"
             ],
             "type": "string"
+          },
+          "capabilities": {
+            "description": "Features the instance's connected agent supports, such as files. Absent when no agent is connected.",
+            "items": {
+              "enum": [
+                "files"
+              ],
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "csp": {
             "description": "The cloud service provider for the Instance.",
@@ -35826,6 +35927,10 @@
             "format": "date-time",
             "type": "string"
           },
+          "platformManaged": {
+            "description": "Whether a platform install created the resource (deployment, network, or another install's tags); false for resources created outside the platform.",
+            "type": "boolean"
+          },
           "privateIp": {
             "description": "Private IP address.",
             "type": "string"
@@ -35894,7 +35999,8 @@
           "spot",
           "state",
           "startTime",
-          "lastSeenAt"
+          "lastSeenAt",
+          "platformManaged"
         ],
         "type": "object"
       },
@@ -42786,6 +42892,11 @@
             "readOnly": true,
             "type": "integer"
           },
+          "sshTarget": {
+            "description": "Named pw ssh target (pw://username/cluster/worker) for reaching the worker's compute node.",
+            "readOnly": true,
+            "type": "string"
+          },
           "status": {
             "description": "Worker status.",
             "enum": [
@@ -47607,6 +47718,20 @@
             "schema": {
               "description": "Only resources flagged as orphaned.",
               "type": "boolean"
+            }
+          },
+          {
+            "description": "Only resources created by the platform (platform) or outside it (external).",
+            "explode": false,
+            "in": "query",
+            "name": "managed",
+            "schema": {
+              "description": "Only resources created by the platform (platform) or outside it (external).",
+              "enum": [
+                "platform",
+                "external"
+              ],
+              "type": "string"
             }
           },
           {
@@ -84511,6 +84636,113 @@
         "summary": "Set whether a user's account is complimentary",
         "tags": [
           "Users"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/compute/{targetId}/files": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists a folder on a connected cluster or instance as the caller's Linux account, one page at a time.",
+        "operationId": "list-compute-files",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of the cluster or instance.",
+            "in": "path",
+            "name": "targetId",
+            "required": true,
+            "schema": {
+              "description": "ID of the cluster or instance.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Folder to list, relative to the root. Empty lists the root.",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Folder to list, relative to the root. Empty lists the root.",
+              "examples": [
+                "data/run1"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The nextCursor of the previous page.",
+            "explode": false,
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "description": "The nextCursor of the previous page.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Entries per page. Defaults to 1000.",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "description": "Entries per page. Defaults to 1000.",
+              "format": "int64",
+              "maximum": 1000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileListing"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List files on a cluster or instance",
+        "tags": [
+          "Clusters",
+          "Instances"
         ]
       }
     },

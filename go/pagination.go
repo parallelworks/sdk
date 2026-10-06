@@ -966,6 +966,30 @@ func (c *Client) ListOrganizationUsersIter(ctx context.Context, organization str
 	}
 }
 
+// ListComputeFilesIter returns an iterator over paginated ListComputeFiles results.
+func (c *Client) ListComputeFilesIter(ctx context.Context, organization string, user string, targetID string, opts ...ListComputeFilesParams) *PageIterator[FileEntry] {
+	return &PageIterator[FileEntry]{
+		fetch: func(cursor string) ([]FileEntry, string, error) {
+			p := ListComputeFilesParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			if cursor != "" {
+				p.Cursor = &cursor
+			}
+			result, err := c.ListComputeFiles(ctx, organization, user, targetID, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var next string
+			if result.NextCursor != nil {
+				next = *result.NextCursor
+			}
+			return result.Entries, next, nil
+		},
+	}
+}
+
 // ListWorkersIter returns an iterator over paginated ListWorkers results.
 // It advances skip by the number of items each page returns,
 // and stops on the first page that comes back empty.

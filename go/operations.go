@@ -1905,6 +1905,8 @@ type ListResourcesParams struct {
 	Organization *string `json:"organization,omitempty"`
 	// Only resources flagged as orphaned.
 	Orphan *bool `json:"orphan,omitempty"`
+	// Only resources created by the platform (platform) or outside it (external).
+	Managed *string `json:"managed,omitempty"`
 	// Only resources that still exist in the cloud (hides terminated/deleted).
 	Live *bool `json:"live,omitempty"`
 	// Only resources last seen within this preset window.
@@ -1943,6 +1945,8 @@ func (c *Client) ListResources(ctx context.Context, opts ...ListResourcesParams)
 	addQueryParam(queryValues, "organization", "form", false, params.Organization)
 
 	addQueryParam(queryValues, "orphan", "form", false, params.Orphan)
+
+	addQueryParam(queryValues, "managed", "form", false, params.Managed)
 
 	addQueryParam(queryValues, "live", "form", false, params.Live)
 
@@ -14630,6 +14634,50 @@ func (c *Client) SetUserComplimentary(ctx context.Context, organization string, 
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// ListComputeFilesParams contains the parameters for the ListComputeFiles operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListComputeFilesParams struct {
+	// Folder to list, relative to the root. Empty lists the root.
+	Path *string `json:"path,omitempty"`
+	// The nextCursor of the previous page.
+	Cursor *string `json:"cursor,omitempty"`
+	// Entries per page. Defaults to 1000.
+	Limit *int64 `json:"limit,omitempty"`
+}
+
+// ListComputeFiles - List files on a cluster or instance
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists a folder on a connected cluster or instance as the caller's Linux account, one page at a time.
+func (c *Client) ListComputeFiles(ctx context.Context, organization string, user string, targetID string, opts ...ListComputeFilesParams) (*FileListing, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/compute/{targetId}/files"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "targetId", "simple", false, targetID)
+	var params ListComputeFilesParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "path", "form", false, params.Path)
+
+	addQueryParam(queryValues, "cursor", "form", false, params.Cursor)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result FileListing
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // CreateDiskSnapshot - Create Disk Snapshot
