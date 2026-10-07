@@ -6066,6 +6066,97 @@ func (c *Client) PostOidcConsent(ctx context.Context, body ConsentDecisionInputB
 	return &result, nil
 }
 
+// GetOidcEndSessionParams contains the parameters for the GetOidcEndSession operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetOidcEndSessionParams struct {
+	// The ID token previously issued to the application, identifying the client and user this request speaks for
+	IDTokenHint *string `json:"id_token_hint,omitempty"`
+	// Client ID of the application; must match the hint when both are sent
+	ClientID *string `json:"client_id,omitempty"`
+	// Where to send the browser afterwards; must match a registered post-logout value
+	PostLogoutRedirectURI *string `json:"post_logout_redirect_uri,omitempty"`
+	// Opaque value returned unchanged to the application
+	State *string `json:"state,omitempty"`
+}
+
+// GetOidcEndSession - OIDC end session endpoint
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Ends the platform session behind an application sign-in (OIDC RP-Initiated Logout). Requires an `id_token_hint` this provider issued. `post_logout_redirect_uri` must match a registered post-logout value; an unregistered one is refused. Omitting it sends the browser to the platform sign-in page.
+func (c *Client) GetOidcEndSession(ctx context.Context, opts ...GetOidcEndSessionParams) error {
+
+	path := "/api/oidc/end_session"
+	var params GetOidcEndSessionParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "id_token_hint", "form", false, params.IDTokenHint)
+
+	addQueryParam(queryValues, "client_id", "form", false, params.ClientID)
+
+	addQueryParam(queryValues, "post_logout_redirect_uri", "form", false, params.PostLogoutRedirectURI)
+
+	addQueryParam(queryValues, "state", "form", false, params.State)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// PostOidcEndSession - OIDC end session endpoint (form post)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Accepts the RP-Initiated Logout parameters as an `application/x-www-form-urlencoded` body and answers 303 See Other to the GET endpoint with the same parameters, where the request is validated and the session ended. The browser only sends the platform session cookie on that top-level GET.
+func (c *Client) PostOidcEndSession(ctx context.Context, body map[string]any) error {
+
+	path := "/api/oidc/end_session"
+
+	if err := c.do(ctx, "POST", path, body, "application/x-www-form-urlencoded", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// PostOidcIntrospect - OAuth token introspection endpoint
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Reports whether a token is live and the authorization it carries (RFC 7662). The body is `application/x-www-form-urlencoded` with `token`. Only a confidential client may call it, with its client secret, and only about tokens issued to it.
+func (c *Client) PostOidcIntrospect(ctx context.Context, body *map[string]any) (*IntrospectBody, error) {
+
+	path := "/api/oidc/introspect"
+
+	var result IntrospectBody
+	if err := c.do(ctx, "POST", path, body, "application/x-www-form-urlencoded", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PostOidcRevoke - OAuth token revocation endpoint
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Invalidates an access or refresh token the application holds (RFC 7009). The body is `application/x-www-form-urlencoded` with `token` and the same client authentication as the token endpoint. Revoking a refresh token also revokes every token issued from it.
+func (c *Client) PostOidcRevoke(ctx context.Context, body *map[string]any) (*TokenBody, error) {
+
+	path := "/api/oidc/revoke"
+
+	var result TokenBody
+	if err := c.do(ctx, "POST", path, body, "application/x-www-form-urlencoded", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetOidcSectorIdentifier - Get OIDC sector_identifier_uri document
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6087,9 +6178,9 @@ func (c *Client) GetOidcSectorIdentifier(ctx context.Context, authMethodID strin
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Redeems an authorization code for an ID token and an opaque access token (RFC 6749 section 4.1.3).
+// Redeems an authorization code, or rotates a refresh token, for an ID token and an opaque access token (RFC 6749 sections 4.1.3 and 6).
 //
-// The body is `application/x-www-form-urlencoded` with `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.
+// The body is `application/x-www-form-urlencoded`. To redeem a code, send `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. To refresh, send `grant_type=refresh_token`, a `refresh_token` issued for the `offline_access` scope, and an optional `scope` that can narrow but never widen the original grant; the response carries a new refresh token, and presenting a spent one again revokes every token descended from it. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.
 func (c *Client) PostOidcToken(ctx context.Context, body *map[string]any) (*TokenBody, error) {
 
 	path := "/api/oidc/token"
@@ -8846,13 +8937,13 @@ func (c *Client) CreateOrganizationGitlabServer(ctx context.Context, organizatio
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Dials the GitLab server and returns the CA certificate its TLS chain is issued by, for registrations that verify against a custom CA.
-func (c *Client) DiscoverOrganizationGitlabServerCaCert(ctx context.Context, organization string, body DiscoverCaCertInputBody1) (*DiscoverCaCertOutputBody1, error) {
+// Dials the GitLab server and returns the CA certificate its TLS chain is issued by, its SHA-256 fingerprint, and whether the chain is publicly trusted, for registrations that verify against a custom CA.
+func (c *Client) DiscoverOrganizationGitlabServerCaCert(ctx context.Context, organization string, body DiscoverCaCertInputBody1) (*DiscoveredCa, error) {
 
 	path := "/api/organizations/{organization}/gitlab-servers/ca-cert"
 	path = pathReplace(path, "organization", "simple", false, organization)
 
-	var result DiscoverCaCertOutputBody1
+	var result DiscoveredCa
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -9169,13 +9260,13 @@ func (c *Client) CreateKubernetesCluster(ctx context.Context, organization strin
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Automatically resolves the CA certificate for the provided Kubernetes API endpoint.
-func (c *Client) DiscoverKubernetesCaCert(ctx context.Context, organization string, body DiscoverCaCertInputBody) (*DiscoverCaCertOutputBody, error) {
+// Returns the CA certificate the Kubernetes API endpoint presents, its SHA-256 fingerprint, and whether the chain is publicly trusted.
+func (c *Client) DiscoverKubernetesCaCert(ctx context.Context, organization string, body DiscoverCaCertInputBody) (*DiscoveredCa, error) {
 
 	path := "/api/organizations/{organization}/kubernetes/ca-cert"
 	path = pathReplace(path, "organization", "simple", false, organization)
 
-	var result DiscoverCaCertOutputBody
+	var result DiscoveredCa
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -11027,7 +11118,7 @@ func (c *Client) GetOrgOidcApp(ctx context.Context, organization string, clientI
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Updates a registered application. Requires an organization administrator.
-func (c *Client) UpdateOrgOidcApp(ctx context.Context, organization string, clientID string, body AppBody) (*AppResponse, error) {
+func (c *Client) UpdateOrgOidcApp(ctx context.Context, organization string, clientID string, body AppUpdateBody) (*AppResponse, error) {
 
 	path := "/api/organizations/{organization}/oidc/apps/{clientId}"
 	path = pathReplace(path, "organization", "simple", false, organization)

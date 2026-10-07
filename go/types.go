@@ -653,11 +653,14 @@ type AgentDirectionDelivered struct {
 
 type AgentMachine struct {
 	AgentVersion *string `json:"agentVersion,omitempty"`
-	Error        *string `json:"error,omitempty"`
+	// Machine id the pw code daemon reported, when it answered. A local computer with the same id as a resource is the same host and is listed only as the resource.
+	DaemonID *string `json:"daemonId,omitempty"`
+	Error    *string `json:"error,omitempty"`
 	// Hostname the daemon reported, when it answered.
 	Hostname *string `json:"hostname,omitempty"`
-	// Hex ObjectID of the cluster, pool, or instance document.
-	ID   string `json:"id"`
+	// Hex ObjectID of the cluster, pool, or instance document; for a local computer, the id its pw code daemon registered.
+	ID string `json:"id"`
+	// local is a computer whose pw code daemon connected itself; the others are resources reached through their pw agent.
 	Kind string `json:"kind"`
 	Name string `json:"name"`
 	// Platform username of the resource owner.
@@ -1056,13 +1059,15 @@ type AppBody struct {
 	Kind *string `json:"kind,omitempty"`
 	// Whether the application is scoped to one organization or the whole platform. Defaults to organization.
 	Level *string `json:"level,omitempty"`
-	// The display name of the application.
+	// The display name of the application. Required when registering; omit it on an update to keep the stored name.
 	Name string `json:"name"`
+	// Permitted destinations after an RP-initiated logout.
+	PostLogoutRedirectUris []string `json:"postLogoutRedirectUris,omitempty"`
 	// Permitted redirect URIs for the authorization code flow.
 	RedirectUris []string `json:"redirectUris,omitempty"`
 	// Whether the user's session must have completed two-step verification. Turning it on revokes the credentials issued to sessions that had not.
 	RequireMfa *bool `json:"requireMfa,omitempty"`
-	// Scopes the application may request. Omit it when registering and the application may request openid only; list every scope it needs, including openid.
+	// Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed.
 	Scopes []string `json:"scopes,omitempty"`
 	// What the sub claim contains. Defaults to userId.
 	SubjectType *string `json:"subjectType,omitempty"`
@@ -1094,11 +1099,17 @@ type AppResponse struct {
 	Kind string `json:"kind"`
 	// Whether the application is scoped to one organization or the whole platform.
 	Level string `json:"level"`
+	// Whether the caller may edit the application, manage its secrets, or delete it.
+	Manageable bool `json:"manageable"`
+	// Whether this entry is a Kubernetes cluster derived from the cluster itself. Managed entries are read-only.
+	Managed bool `json:"managed"`
 	// The display name of the application.
 	Name string `json:"name"`
+	// Permitted destinations after an RP-initiated logout.
+	PostLogoutRedirectUris []string `json:"postLogoutRedirectUris"`
 	// Permitted redirect URIs for the authorization code flow.
 	RedirectUris []string `json:"redirectUris"`
-	// Whether the user's session must have completed two-step verification.
+	// Whether a sign-in to this application requires two-step verification.
 	RequireMfa bool `json:"requireMfa"`
 	// Scopes the application may request.
 	Scopes []string `json:"scopes"`
@@ -1108,16 +1119,44 @@ type AppResponse struct {
 	SubjectType string `json:"subjectType"`
 }
 
+type AppUpdateBody struct {
+	// Groups whose members may use the application. Empty means everyone in the organization.
+	AllowedGroups []string `json:"allowedGroups,omitempty"`
+	// Whether the user sees a consent screen. Defaults to none.
+	Consent *string `json:"consent,omitempty"`
+	// What the application is for.
+	Description *string `json:"description,omitempty"`
+	// Whether the application is disabled.
+	Disabled *bool `json:"disabled,omitempty"`
+	// The application kind. Defaults to web.
+	Kind *string `json:"kind,omitempty"`
+	// Whether the application is scoped to one organization or the whole platform. Defaults to organization.
+	Level *string `json:"level,omitempty"`
+	// The display name of the application. Required when registering; omit it on an update to keep the stored name.
+	Name *string `json:"name,omitempty"`
+	// Permitted destinations after an RP-initiated logout.
+	PostLogoutRedirectUris []string `json:"postLogoutRedirectUris,omitempty"`
+	// Permitted redirect URIs for the authorization code flow.
+	RedirectUris []string `json:"redirectUris,omitempty"`
+	// Whether the user's session must have completed two-step verification. Turning it on revokes the credentials issued to sessions that had not.
+	RequireMfa *bool `json:"requireMfa,omitempty"`
+	// Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed.
+	Scopes []string `json:"scopes,omitempty"`
+	// What the sub claim contains. Defaults to userId.
+	SubjectType *string `json:"subjectType,omitempty"`
+}
+
 type ApprovalAnswer struct {
-	AllowDir    *bool   `json:"allowDir,omitempty"`
-	Allowed     *bool   `json:"allowed,omitempty"`
-	Chat        *bool   `json:"chat,omitempty"`
-	Clear       *bool   `json:"clear,omitempty"`
-	DenyMessage *string `json:"denyMessage,omitempty"`
-	Feedback    *string `json:"feedback,omitempty"`
-	Mode        *string `json:"mode,omitempty"`
-	Plan        *string `json:"plan,omitempty"`
-	Text        *string `json:"text,omitempty"`
+	AllowDir    *bool    `json:"allowDir,omitempty"`
+	AllowRules  []string `json:"allowRules,omitempty"`
+	Allowed     *bool    `json:"allowed,omitempty"`
+	Chat        *bool    `json:"chat,omitempty"`
+	Clear       *bool    `json:"clear,omitempty"`
+	DenyMessage *string  `json:"denyMessage,omitempty"`
+	Feedback    *string  `json:"feedback,omitempty"`
+	Mode        *string  `json:"mode,omitempty"`
+	Plan        *string  `json:"plan,omitempty"`
+	Text        *string  `json:"text,omitempty"`
 }
 
 type ApprovalRequest struct {
@@ -4965,6 +5004,8 @@ type DesktopSessionSettings struct {
 type DiscoverCaCertInputBody struct {
 	// Kubernetes API endpoint to dial
 	Endpoint string `json:"endpoint"`
+	// SHA-256 fingerprint the discovered CA certificate must have, as hex with or without colons. Discovery fails when the endpoint presents a different CA.
+	ExpectedFingerprint *string `json:"expectedFingerprint,omitempty"`
 }
 
 type DiscoverCaCertInputBody1 struct {
@@ -4972,16 +5013,25 @@ type DiscoverCaCertInputBody1 struct {
 	AllowPrivateAddress *bool `json:"allowPrivateAddress,omitempty"`
 	// Origin of the GitLab instance to dial, for example https://gitlab.example.com.
 	BaseURL string `json:"baseUrl"`
+	// SHA-256 fingerprint the discovered CA certificate must have, as hex with or without colons. Discovery fails when the endpoint presents a different CA.
+	ExpectedFingerprint *string `json:"expectedFingerprint,omitempty"`
 }
 
-type DiscoverCaCertOutputBody struct {
-	// PEM-encoded CA certificate served by the endpoint
-	CaCert string `json:"caCert"`
-}
-
-type DiscoverCaCertOutputBody1 struct {
+type DiscoveredCa struct {
 	// PEM-encoded CA certificate served by the endpoint.
 	CaCert string `json:"caCert"`
+	// SHA-256 fingerprint of the CA certificate as colon-separated uppercase hex.
+	Fingerprint string `json:"fingerprint"`
+	// Issuer of the CA certificate.
+	Issuer string `json:"issuer"`
+	// End of the CA certificate's validity.
+	NotAfter time.Time `json:"notAfter"`
+	// Start of the CA certificate's validity.
+	NotBefore time.Time `json:"notBefore"`
+	// Subject of the CA certificate.
+	Subject string `json:"subject"`
+	// Whether the endpoint's certificate chain verifies against the platform's trusted roots. When true, no custom CA certificate is needed.
+	Verified bool `json:"verified"`
 }
 
 type DiscoveredPythonEnv struct {
@@ -7490,6 +7540,31 @@ type IntPolicyOutput struct {
 	Value *int64 `json:"value,omitempty"`
 }
 
+type IntrospectBody struct {
+	// Whether the token is live
+	Active *bool `json:"active,omitempty"`
+	// Audience of the token
+	Aud []string `json:"aud,omitempty"`
+	// Client the token was issued to
+	ClientID *string `json:"client_id,omitempty"`
+	// OAuth error code
+	Error *string `json:"error,omitempty"`
+	// Human-readable error detail
+	ErrorDescription *string `json:"error_description,omitempty"`
+	// Expiry as Unix time
+	Exp *int64 `json:"exp,omitempty"`
+	// Issued-at as Unix time
+	Iat *int64 `json:"iat,omitempty"`
+	// Issuer of the token
+	Iss *string `json:"iss,omitempty"`
+	// Space-delimited scopes the token carries
+	Scope *string `json:"scope,omitempty"`
+	// Subject of the token
+	Sub *string `json:"sub,omitempty"`
+	// Bearer for access tokens; omitted for refresh tokens
+	TokenType *string `json:"token_type,omitempty"`
+}
+
 type IP struct {
 	// The resource to which this IP is attached.
 	AttachedTo *string `json:"attachedTo,omitempty"`
@@ -9329,10 +9404,16 @@ type OpenIDConfiguration struct {
 	ClaimsSupported []string `json:"claims_supported"`
 	// JSON array containing the supported PKCE code challenge methods
 	CodeChallengeMethodsSupported []string `json:"code_challenge_methods_supported"`
+	// URL of the RP-initiated logout endpoint
+	EndSessionEndpoint string `json:"end_session_endpoint"`
 	// JSON array containing the supported grant types
 	GrantTypesSupported []string `json:"grant_types_supported"`
 	// JSON array containing signing algorithms supported for ID tokens
 	IDTokenSigningAlgValuesSupported []string `json:"id_token_signing_alg_values_supported"`
+	// URL of the token introspection endpoint
+	IntrospectionEndpoint string `json:"introspection_endpoint"`
+	// Client authentication methods the introspection endpoint accepts
+	IntrospectionEndpointAuthMethodsSupported []string `json:"introspection_endpoint_auth_methods_supported"`
 	// The authorization server's issuer identifier
 	Issuer string `json:"issuer"`
 	// URL of the JSON Web Key Set
@@ -9341,6 +9422,10 @@ type OpenIDConfiguration struct {
 	ResponseModesSupported []string `json:"response_modes_supported"`
 	// JSON array containing the supported response types
 	ResponseTypesSupported []string `json:"response_types_supported"`
+	// URL of the token revocation endpoint
+	RevocationEndpoint string `json:"revocation_endpoint"`
+	// Client authentication methods the revocation endpoint accepts
+	RevocationEndpointAuthMethodsSupported []string `json:"revocation_endpoint_auth_methods_supported"`
 	// JSON array containing the supported scopes
 	ScopesSupported []string `json:"scopes_supported"`
 	// JSON array containing a list of subject identifier types
@@ -12152,6 +12237,11 @@ type RemotePolicy struct {
 	Start             bool   `json:"start"`
 }
 
+type RemoteTunnel struct {
+	Detail *string `json:"detail,omitempty"`
+	State  string  `json:"state"`
+}
+
 type RemoteWorkflowSettings struct {
 	// Branch name.
 	Branch *string `json:"branch,omitempty"`
@@ -12935,6 +13025,8 @@ type SchedulerQueuesResponse struct {
 }
 
 type SecretInfo struct {
+	// Whether the secret still authenticates. An expired one is kept for the record until the next rotation prunes it.
+	Active bool `json:"active"`
 	// When the secret was created.
 	Created *time.Time `json:"created,omitempty"`
 	// When a rotated secret stops working.
@@ -13144,34 +13236,35 @@ type SessionSoftware struct {
 }
 
 type SessionState struct {
-	Allocation             *string      `json:"allocation,omitempty"`
-	Attribution            *bool        `json:"attribution,omitempty"`
-	AutoCompactWindow      *int64       `json:"autoCompactWindow,omitempty"`
-	AutoName               *string      `json:"autoName,omitempty"`
-	EffectiveEffort        *string      `json:"effectiveEffort,omitempty"`
-	Effort                 *string      `json:"effort,omitempty"`
-	EffortActive           *bool        `json:"effortActive,omitempty"`
-	Goal                   *GoalStatus  `json:"goal,omitempty"`
-	InputTokens            *int64       `json:"inputTokens,omitempty"`
-	Model                  string       `json:"model"`
-	Name                   *string      `json:"name,omitempty"`
-	NoToolsMode            *bool        `json:"noToolsMode,omitempty"`
-	OutputTokens           *int64       `json:"outputTokens,omitempty"`
-	PendingSubagentWork    *bool        `json:"pendingSubagentWork,omitempty"`
-	PermissionMode         *string      `json:"permissionMode,omitempty"`
-	ProviderUsageAvailable *bool        `json:"providerUsageAvailable,omitempty"`
-	RemoteControl          *bool        `json:"remoteControl,omitempty"`
-	RemotePolicy           RemotePolicy `json:"remotePolicy"`
-	RemoteURL              *string      `json:"remoteUrl,omitempty"`
-	SessionRetentionDays   *int64       `json:"sessionRetentionDays,omitempty"`
-	SubagentConcurrency    *int64       `json:"subagentConcurrency,omitempty"`
-	SubagentDepth          *int64       `json:"subagentDepth,omitempty"`
-	SubagentModel          *string      `json:"subagentModel,omitempty"`
-	SubagentsDisabled      *bool        `json:"subagentsDisabled,omitempty"`
-	SupportedEfforts       []string     `json:"supportedEfforts,omitempty"`
-	ToolCallingMode        *string      `json:"toolCallingMode,omitempty"`
-	ToolsDisabled          *bool        `json:"toolsDisabled,omitempty"`
-	UsageStatusLine        *string      `json:"usageStatusLine,omitempty"`
+	Allocation             *string       `json:"allocation,omitempty"`
+	Attribution            *bool         `json:"attribution,omitempty"`
+	AutoCompactWindow      *int64        `json:"autoCompactWindow,omitempty"`
+	AutoName               *string       `json:"autoName,omitempty"`
+	EffectiveEffort        *string       `json:"effectiveEffort,omitempty"`
+	Effort                 *string       `json:"effort,omitempty"`
+	EffortActive           *bool         `json:"effortActive,omitempty"`
+	Goal                   *GoalStatus   `json:"goal,omitempty"`
+	InputTokens            *int64        `json:"inputTokens,omitempty"`
+	Model                  string        `json:"model"`
+	Name                   *string       `json:"name,omitempty"`
+	NoToolsMode            *bool         `json:"noToolsMode,omitempty"`
+	OutputTokens           *int64        `json:"outputTokens,omitempty"`
+	PendingSubagentWork    *bool         `json:"pendingSubagentWork,omitempty"`
+	PermissionMode         *string       `json:"permissionMode,omitempty"`
+	ProviderUsageAvailable *bool         `json:"providerUsageAvailable,omitempty"`
+	RemoteControl          *bool         `json:"remoteControl,omitempty"`
+	RemotePolicy           RemotePolicy  `json:"remotePolicy"`
+	RemoteTunnel           *RemoteTunnel `json:"remoteTunnel,omitempty"`
+	RemoteURL              *string       `json:"remoteUrl,omitempty"`
+	SessionRetentionDays   *int64        `json:"sessionRetentionDays,omitempty"`
+	SubagentConcurrency    *int64        `json:"subagentConcurrency,omitempty"`
+	SubagentDepth          *int64        `json:"subagentDepth,omitempty"`
+	SubagentModel          *string       `json:"subagentModel,omitempty"`
+	SubagentsDisabled      *bool         `json:"subagentsDisabled,omitempty"`
+	SupportedEfforts       []string      `json:"supportedEfforts,omitempty"`
+	ToolCallingMode        *string       `json:"toolCallingMode,omitempty"`
+	ToolsDisabled          *bool         `json:"toolsDisabled,omitempty"`
+	UsageStatusLine        *string       `json:"usageStatusLine,omitempty"`
 }
 
 type SetActiveInputBody struct {
@@ -13738,6 +13831,8 @@ type TokenBody struct {
 	ExpiresIn *int64 `json:"expires_in,omitempty"`
 	// Signed ID token
 	IDToken *string `json:"id_token,omitempty"`
+	// Opaque refresh token, issued when the offline_access scope was granted
+	RefreshToken *string `json:"refresh_token,omitempty"`
 	// Space-delimited scopes actually granted
 	Scope *string `json:"scope,omitempty"`
 	// Always Bearer

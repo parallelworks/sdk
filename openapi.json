@@ -1624,6 +1624,10 @@
           "agentVersion": {
             "type": "string"
           },
+          "daemonId": {
+            "description": "Machine id the pw code daemon reported, when it answered. A local computer with the same id as a resource is the same host and is listed only as the resource.",
+            "type": "string"
+          },
           "error": {
             "type": "string"
           },
@@ -1632,14 +1636,16 @@
             "type": "string"
           },
           "id": {
-            "description": "Hex ObjectID of the cluster, pool, or instance document.",
+            "description": "Hex ObjectID of the cluster, pool, or instance document; for a local computer, the id its pw code daemon registered.",
             "type": "string"
           },
           "kind": {
+            "description": "local is a computer whose pw code daemon connected itself; the others are resources reached through their pw agent.",
             "enum": [
               "cloud",
               "existing",
-              "instance"
+              "instance",
+              "local"
             ],
             "type": "string"
           },
@@ -2977,10 +2983,20 @@
             "type": "string"
           },
           "name": {
-            "description": "The display name of the application.",
+            "description": "The display name of the application. Required when registering; omit it on an update to keep the stored name.",
             "maxLength": 128,
             "minLength": 1,
             "type": "string"
+          },
+          "postLogoutRedirectUris": {
+            "description": "Permitted destinations after an RP-initiated logout.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "redirectUris": {
             "description": "Permitted redirect URIs for the authorization code flow.",
@@ -2997,7 +3013,7 @@
             "type": "boolean"
           },
           "scopes": {
-            "description": "Scopes the application may request. Omit it when registering and the application may request openid only; list every scope it needs, including openid.",
+            "description": "Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed.",
             "items": {
               "type": "string"
             },
@@ -3085,7 +3101,8 @@
               "web",
               "spa",
               "native",
-              "service"
+              "service",
+              "kubernetes"
             ],
             "type": "string"
           },
@@ -3097,9 +3114,27 @@
             ],
             "type": "string"
           },
+          "manageable": {
+            "description": "Whether the caller may edit the application, manage its secrets, or delete it.",
+            "type": "boolean"
+          },
+          "managed": {
+            "description": "Whether this entry is a Kubernetes cluster derived from the cluster itself. Managed entries are read-only.",
+            "type": "boolean"
+          },
           "name": {
             "description": "The display name of the application.",
             "type": "string"
+          },
+          "postLogoutRedirectUris": {
+            "description": "Permitted destinations after an RP-initiated logout.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "redirectUris": {
             "description": "Permitted redirect URIs for the authorization code flow.",
@@ -3112,7 +3147,7 @@
             ]
           },
           "requireMfa": {
-            "description": "Whether the user's session must have completed two-step verification.",
+            "description": "Whether a sign-in to this application requires two-step verification.",
             "type": "boolean"
           },
           "scopes": {
@@ -3151,15 +3186,117 @@
           "kind",
           "level",
           "redirectUris",
+          "postLogoutRedirectUris",
           "scopes",
           "consent",
           "subjectType",
           "allowedGroups",
           "requireMfa",
           "disabled",
+          "managed",
+          "manageable",
           "secrets",
           "created"
         ],
+        "type": "object"
+      },
+      "AppUpdateBody": {
+        "additionalProperties": false,
+        "properties": {
+          "allowedGroups": {
+            "description": "Groups whose members may use the application. Empty means everyone in the organization.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "consent": {
+            "description": "Whether the user sees a consent screen. Defaults to none.",
+            "enum": [
+              "none",
+              "required"
+            ],
+            "type": "string"
+          },
+          "description": {
+            "description": "What the application is for.",
+            "maxLength": 512,
+            "type": "string"
+          },
+          "disabled": {
+            "description": "Whether the application is disabled.",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "The application kind. Defaults to web.",
+            "enum": [
+              "web",
+              "spa",
+              "native",
+              "service"
+            ],
+            "type": "string"
+          },
+          "level": {
+            "description": "Whether the application is scoped to one organization or the whole platform. Defaults to organization.",
+            "enum": [
+              "organization",
+              "platform"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "The display name of the application. Required when registering; omit it on an update to keep the stored name.",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "postLogoutRedirectUris": {
+            "description": "Permitted destinations after an RP-initiated logout.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "redirectUris": {
+            "description": "Permitted redirect URIs for the authorization code flow.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "requireMfa": {
+            "description": "Whether the user's session must have completed two-step verification. Turning it on revokes the credentials issued to sessions that had not.",
+            "type": "boolean"
+          },
+          "scopes": {
+            "description": "Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "subjectType": {
+            "description": "What the sub claim contains. Defaults to userId.",
+            "enum": [
+              "userId",
+              "username"
+            ],
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "ApprovalAnswer": {
@@ -3167,6 +3304,15 @@
         "properties": {
           "allowDir": {
             "type": "boolean"
+          },
+          "allowRules": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "allowed": {
             "type": "boolean"
@@ -14537,6 +14683,10 @@
               "https://k8s.example.com:6443"
             ],
             "type": "string"
+          },
+          "expectedFingerprint": {
+            "description": "SHA-256 fingerprint the discovered CA certificate must have, as hex with or without colons. Discovery fails when the endpoint presents a different CA.",
+            "type": "string"
           }
         },
         "required": [
@@ -14555,6 +14705,10 @@
             "description": "Origin of the GitLab instance to dial, for example https://gitlab.example.com.",
             "minLength": 9,
             "type": "string"
+          },
+          "expectedFingerprint": {
+            "description": "SHA-256 fingerprint the discovered CA certificate must have, as hex with or without colons. Discovery fails when the endpoint presents a different CA.",
+            "type": "string"
           }
         },
         "required": [
@@ -14562,29 +14716,48 @@
         ],
         "type": "object"
       },
-      "DiscoverCACertOutputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "caCert": {
-            "description": "PEM-encoded CA certificate served by the endpoint",
-            "type": "string"
-          }
-        },
-        "required": [
-          "caCert"
-        ],
-        "type": "object"
-      },
-      "DiscoverCACertOutputBody1": {
+      "DiscoveredCA": {
         "additionalProperties": false,
         "properties": {
           "caCert": {
             "description": "PEM-encoded CA certificate served by the endpoint.",
             "type": "string"
+          },
+          "fingerprint": {
+            "description": "SHA-256 fingerprint of the CA certificate as colon-separated uppercase hex.",
+            "type": "string"
+          },
+          "issuer": {
+            "description": "Issuer of the CA certificate.",
+            "type": "string"
+          },
+          "notAfter": {
+            "description": "End of the CA certificate's validity.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "notBefore": {
+            "description": "Start of the CA certificate's validity.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "subject": {
+            "description": "Subject of the CA certificate.",
+            "type": "string"
+          },
+          "verified": {
+            "description": "Whether the endpoint's certificate chain verifies against the platform's trusted roots. When true, no custom CA certificate is needed.",
+            "type": "boolean"
           }
         },
         "required": [
-          "caCert"
+          "caCert",
+          "verified",
+          "fingerprint",
+          "subject",
+          "issuer",
+          "notBefore",
+          "notAfter"
         ],
         "type": "object"
       },
@@ -20246,6 +20419,64 @@
         "required": [
           "level"
         ],
+        "type": "object"
+      },
+      "IntrospectBody": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "description": "Whether the token is live",
+            "type": "boolean"
+          },
+          "aud": {
+            "description": "Audience of the token",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "client_id": {
+            "description": "Client the token was issued to",
+            "type": "string"
+          },
+          "error": {
+            "description": "OAuth error code",
+            "type": "string"
+          },
+          "error_description": {
+            "description": "Human-readable error detail",
+            "type": "string"
+          },
+          "exp": {
+            "description": "Expiry as Unix time",
+            "format": "int64",
+            "type": "integer"
+          },
+          "iat": {
+            "description": "Issued-at as Unix time",
+            "format": "int64",
+            "type": "integer"
+          },
+          "iss": {
+            "description": "Issuer of the token",
+            "type": "string"
+          },
+          "scope": {
+            "description": "Space-delimited scopes the token carries",
+            "type": "string"
+          },
+          "sub": {
+            "description": "Subject of the token",
+            "type": "string"
+          },
+          "token_type": {
+            "description": "Bearer for access tokens; omitted for refresh tokens",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "Ip": {
@@ -26482,6 +26713,10 @@
               "null"
             ]
           },
+          "end_session_endpoint": {
+            "description": "URL of the RP-initiated logout endpoint",
+            "type": "string"
+          },
           "grant_types_supported": {
             "description": "JSON array containing the supported grant types",
             "items": {
@@ -26494,6 +26729,20 @@
           },
           "id_token_signing_alg_values_supported": {
             "description": "JSON array containing signing algorithms supported for ID tokens",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "introspection_endpoint": {
+            "description": "URL of the token introspection endpoint",
+            "type": "string"
+          },
+          "introspection_endpoint_auth_methods_supported": {
+            "description": "Client authentication methods the introspection endpoint accepts",
             "items": {
               "type": "string"
             },
@@ -26522,6 +26771,20 @@
           },
           "response_types_supported": {
             "description": "JSON array containing the supported response types",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "revocation_endpoint": {
+            "description": "URL of the token revocation endpoint",
+            "type": "string"
+          },
+          "revocation_endpoint_auth_methods_supported": {
+            "description": "Client authentication methods the revocation endpoint accepts",
             "items": {
               "type": "string"
             },
@@ -26574,6 +26837,9 @@
           "authorization_endpoint",
           "token_endpoint",
           "userinfo_endpoint",
+          "end_session_endpoint",
+          "revocation_endpoint",
+          "introspection_endpoint",
           "jwks_uri",
           "scopes_supported",
           "response_types_supported",
@@ -26582,6 +26848,8 @@
           "subject_types_supported",
           "id_token_signing_alg_values_supported",
           "token_endpoint_auth_methods_supported",
+          "revocation_endpoint_auth_methods_supported",
+          "introspection_endpoint_auth_methods_supported",
           "code_challenge_methods_supported",
           "claims_supported"
         ],
@@ -35265,6 +35533,26 @@
         ],
         "type": "object"
       },
+      "RemoteTunnel": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "connected",
+              "connecting",
+              "off"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "type": "object"
+      },
       "RemoteWorkflowSettings": {
         "additionalProperties": false,
         "properties": {
@@ -37507,6 +37795,10 @@
       "SecretInfo": {
         "additionalProperties": false,
         "properties": {
+          "active": {
+            "description": "Whether the secret still authenticates. An expired one is kept for the record until the next rotation prunes it.",
+            "type": "boolean"
+          },
           "created": {
             "description": "When the secret was created.",
             "format": "date-time",
@@ -37527,7 +37819,8 @@
           }
         },
         "required": [
-          "id"
+          "id",
+          "active"
         ],
         "type": "object"
       },
@@ -38147,6 +38440,9 @@
           },
           "remotePolicy": {
             "$ref": "#/components/schemas/RemotePolicy"
+          },
+          "remoteTunnel": {
+            "$ref": "#/components/schemas/RemoteTunnel"
           },
           "remoteUrl": {
             "type": "string"
@@ -39907,6 +40203,10 @@
           },
           "id_token": {
             "description": "Signed ID token",
+            "type": "string"
+          },
+          "refresh_token": {
+            "description": "Opaque refresh token, issued when the offline_access scope was granted",
             "type": "string"
           },
           "scope": {
@@ -57935,6 +58235,243 @@
         ]
       }
     },
+    "/api/oidc/end_session": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nEnds the platform session behind an application sign-in (OIDC RP-Initiated Logout). Requires an `id_token_hint` this provider issued. `post_logout_redirect_uri` must match a registered post-logout value; an unregistered one is refused. Omitting it sends the browser to the platform sign-in page.",
+        "operationId": "get-oidc-end-session",
+        "parameters": [
+          {
+            "description": "The ID token previously issued to the application, identifying the client and user this request speaks for",
+            "explode": false,
+            "in": "query",
+            "name": "id_token_hint",
+            "schema": {
+              "description": "The ID token previously issued to the application, identifying the client and user this request speaks for",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client ID of the application; must match the hint when both are sent",
+            "explode": false,
+            "in": "query",
+            "name": "client_id",
+            "schema": {
+              "description": "Client ID of the application; must match the hint when both are sent",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Where to send the browser afterwards; must match a registered post-logout value",
+            "explode": false,
+            "in": "query",
+            "name": "post_logout_redirect_uri",
+            "schema": {
+              "description": "Where to send the browser afterwards; must match a registered post-logout value",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Opaque value returned unchanged to the application",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "Opaque value returned unchanged to the application",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "OIDC end session endpoint",
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAccepts the RP-Initiated Logout parameters as an `application/x-www-form-urlencoded` body and answers 303 See Other to the GET endpoint with the same parameters, where the request is validated and the session ended. The browser only sends the platform session cookie on that top-level GET.",
+        "operationId": "post-oidc-end-session",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "contentMediaType": "application/octet-stream",
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "OIDC end session endpoint (form post)",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/oidc/introspect": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReports whether a token is live and the authorization it carries (RFC 7662). The body is `application/x-www-form-urlencoded` with `token`. Only a confidential client may call it, with its client secret, and only about tokens issued to it.",
+        "operationId": "post-oidc-introspect",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "contentMediaType": "application/octet-stream",
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntrospectBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "OAuth token introspection endpoint",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/oidc/revoke": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nInvalidates an access or refresh token the application holds (RFC 7009). The body is `application/x-www-form-urlencoded` with `token` and the same client authentication as the token endpoint. Revoking a refresh token also revokes every token issued from it.",
+        "operationId": "post-oidc-revoke",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "contentMediaType": "application/octet-stream",
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "OAuth token revocation endpoint",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
     "/api/oidc/sso/{authMethodId}/sector-identifier": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the JSON array of redirect URIs that an upstream OIDC provider fetches when this URL is registered as `sector_identifier_uri` (OIDC Core 1.0 § 5).",
@@ -57987,7 +58524,7 @@
     },
     "/api/oidc/token": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRedeems an authorization code for an ID token and an opaque access token (RFC 6749 section 4.1.3).\n\nThe body is `application/x-www-form-urlencoded` with `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRedeems an authorization code, or rotates a refresh token, for an ID token and an opaque access token (RFC 6749 sections 4.1.3 and 6).\n\nThe body is `application/x-www-form-urlencoded`. To redeem a code, send `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. To refresh, send `grant_type=refresh_token`, a `refresh_token` issued for the `offline_access` scope, and an optional `scope` that can narrow but never widen the original grant; the response carries a new refresh token, and presenting a spent one again revokes every token descended from it. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.",
         "operationId": "post-oidc-token",
         "requestBody": {
           "content": {
@@ -65782,7 +66319,7 @@
     },
     "/api/organizations/{organization}/gitlab-servers/ca-cert": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDials the GitLab server and returns the CA certificate its TLS chain is issued by, for registrations that verify against a custom CA.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDials the GitLab server and returns the CA certificate its TLS chain is issued by, its SHA-256 fingerprint, and whether the chain is publicly trusted, for registrations that verify against a custom CA.",
         "operationId": "discover-organization-gitlab-server-ca-cert",
         "parameters": [
           {
@@ -65814,7 +66351,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DiscoverCACertOutputBody1"
+                  "$ref": "#/components/schemas/DiscoveredCA"
                 }
               }
             },
@@ -66769,7 +67306,7 @@
     },
     "/api/organizations/{organization}/kubernetes/ca-cert": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAutomatically resolves the CA certificate for the provided Kubernetes API endpoint.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the CA certificate the Kubernetes API endpoint presents, its SHA-256 fingerprint, and whether the chain is publicly trusted.",
         "operationId": "discover-kubernetes-ca-cert",
         "parameters": [
           {
@@ -66801,7 +67338,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DiscoverCACertOutputBody"
+                  "$ref": "#/components/schemas/DiscoveredCA"
                 }
               }
             },
@@ -72708,7 +73245,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AppBody"
+                "$ref": "#/components/schemas/AppUpdateBody"
               }
             }
           },

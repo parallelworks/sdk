@@ -431,6 +431,68 @@ func (m *ResponseMeta) PostOidcConsentHeaders() PostOidcConsentHeaders {
 	}
 }
 
+// GetOidcEndSessionHeaders holds the headers GetOidcEndSession declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetOidcEndSessionHeaders struct {
+	Location  string
+	SetCookie string
+}
+
+// GetOidcEndSessionHeaders reads the headers GetOidcEndSession declares out of the captured
+// response.
+func (m *ResponseMeta) GetOidcEndSessionHeaders() GetOidcEndSessionHeaders {
+	return GetOidcEndSessionHeaders{
+		Location:  m.Header.Get("Location"),
+		SetCookie: m.Header.Get("Set-Cookie"),
+	}
+}
+
+// PostOidcEndSessionHeaders holds the headers PostOidcEndSession declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type PostOidcEndSessionHeaders struct {
+	Location string
+}
+
+// PostOidcEndSessionHeaders reads the headers PostOidcEndSession declares out of the captured
+// response.
+func (m *ResponseMeta) PostOidcEndSessionHeaders() PostOidcEndSessionHeaders {
+	return PostOidcEndSessionHeaders{
+		Location: m.Header.Get("Location"),
+	}
+}
+
+// PostOidcIntrospectHeaders holds the headers PostOidcIntrospect declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type PostOidcIntrospectHeaders struct {
+	CacheControl    string
+	WwwAuthenticate string
+}
+
+// PostOidcIntrospectHeaders reads the headers PostOidcIntrospect declares out of the captured
+// response.
+func (m *ResponseMeta) PostOidcIntrospectHeaders() PostOidcIntrospectHeaders {
+	return PostOidcIntrospectHeaders{
+		CacheControl:    m.Header.Get("Cache-Control"),
+		WwwAuthenticate: m.Header.Get("WWW-Authenticate"),
+	}
+}
+
+// PostOidcRevokeHeaders holds the headers PostOidcRevoke declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type PostOidcRevokeHeaders struct {
+	CacheControl    string
+	WwwAuthenticate string
+}
+
+// PostOidcRevokeHeaders reads the headers PostOidcRevoke declares out of the captured
+// response.
+func (m *ResponseMeta) PostOidcRevokeHeaders() PostOidcRevokeHeaders {
+	return PostOidcRevokeHeaders{
+		CacheControl:    m.Header.Get("Cache-Control"),
+		WwwAuthenticate: m.Header.Get("WWW-Authenticate"),
+	}
+}
+
 // PostOidcTokenHeaders holds the headers PostOidcToken declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type PostOidcTokenHeaders struct {
