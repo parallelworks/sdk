@@ -883,6 +883,8 @@ type AiProviderResponse struct {
 	Region *string `json:"region,omitempty"`
 	// Resource group the provider bills against
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the provider bills against
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// Current status of the AI provider
 	Status string `json:"status"`
 	// Whether the provider endpoint supports the OpenAI Responses API
@@ -921,6 +923,8 @@ type AiProvidersResponse struct {
 	Region *string `json:"region"`
 	// Resource group the provider bills against
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the provider bills against
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// Current status of the AI provider
 	Status string `json:"status"`
 	// The provider is blocked by platform catalog policy until a platform administrator maps or re-enables its integration
@@ -1640,6 +1644,8 @@ type AwsSagemakerDetail struct {
 	Region string `json:"region"`
 	// The resource group the workspace bills against. Takes precedence over group.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the workspace bills against.
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// The tags associated with the Machine Learning Workspace.
 	Tags []string `json:"tags"`
 	// Username of the user that owns the resource
@@ -1664,7 +1670,9 @@ type AwsSlurmDefinition struct {
 	DebugMode      *bool                   `json:"debugMode,omitempty"`
 	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
 	Disks          []ClusterControllerDisk `json:"disks,omitempty"`
-	HealthCheck    *string                 `json:"healthCheck,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
+	HealthCheck  *string `json:"healthCheck,omitempty"`
 	// Id of the attached IP address or network interface. Clusters saved before network-interface support hold the raw IP address instead.
 	IPAddress  *string                    `json:"ipAddress,omitempty"`
 	Partitions []ClusterAwsSlurmPartition `json:"partitions,omitempty"`
@@ -1999,6 +2007,8 @@ type AzureMachineLearningDetail struct {
 	Region string `json:"region"`
 	// The resource group the workspace bills against. Takes precedence over group.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the workspace bills against.
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// The tags associated with the Machine Learning Workspace.
 	Tags []string `json:"tags"`
 	// Username of the user that owns the resource
@@ -2199,7 +2209,9 @@ type AzureSlurmDefinition struct {
 	DebugMode      *bool                   `json:"debugMode,omitempty"`
 	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
 	Disks          []ClusterControllerDisk `json:"disks,omitempty"`
-	HealthCheck    *string                 `json:"healthCheck,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
+	HealthCheck  *string `json:"healthCheck,omitempty"`
 	// Id of the attached IP address or network interface. Clusters saved before network-interface support hold the raw IP address instead.
 	IPAddress *string `json:"ipAddress,omitempty"`
 	// Mount point of the controller's local disk; only applies when the controller instance type has a local disk.
@@ -2517,6 +2529,8 @@ type Bucket struct {
 	Region string `json:"region"`
 	// Name of the resource group the bucket bills against.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the bucket bills against.
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// Indicates if the bucket is sessionless
 	Sessionless bool `json:"sessionless"`
 	// List of groups with whom the bucket is shared
@@ -3584,6 +3598,8 @@ type ClusterUpdateVariables struct {
 	// New controller instance type. May only change while the cluster's controller is stopped.
 	ControllerInstanceType *string                 `json:"controllerInstanceType,omitempty"`
 	DesktopSession         *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory. Applies to the next listing.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
 	// Slurm partition definitions
 	Partitions []ClusterUpdatePartition `json:"partitions,omitempty"`
 	// Record every node's running processes and what preceded a freeze. The agents start or stop collecting on their next heartbeat.
@@ -3881,7 +3897,7 @@ type CreateAiProviderBody struct {
 type CreateAPIKeyInputBody struct {
 	// Budget allocation name (required for AI keys)
 	Allocation *string `json:"allocation,omitempty"`
-	// Duration in days before the key expires (platform keys)
+	// Days before the key expires (platform keys). Empty or 0 creates a key that does not expire, unless the organization's maximum API key lifetime requires one.
 	Duration *string `json:"duration,omitempty"`
 	// Display name for the API key
 	Title string `json:"title"`
@@ -3937,7 +3953,9 @@ type CreateAwsSlurmClusterBody struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// Name of the cluster this one was duplicated from; recorded in the audit trail.
 	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
-	HealthCheck    *string `json:"healthCheck,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
+	HealthCheck  *string `json:"healthCheck,omitempty"`
 	// Id of the attached IP address or network interface. Clusters saved before network-interface support hold the raw IP address instead.
 	IPAddress *string `json:"ipAddress,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
@@ -3983,7 +4001,9 @@ type CreateAzureSlurmClusterBody struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// Name of the cluster this one was duplicated from; recorded in the audit trail.
 	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
-	HealthCheck    *string `json:"healthCheck,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
+	HealthCheck  *string `json:"healthCheck,omitempty"`
 	// Id of the attached IP address or network interface. Clusters saved before network-interface support hold the raw IP address instead.
 	IPAddress *string `json:"ipAddress,omitempty"`
 	// Mount point of the controller's local disk; only applies when the controller instance type has a local disk.
@@ -4130,6 +4150,8 @@ type CreateExistingClusterBody struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// Name of the cluster this one was duplicated from; recorded in the audit trail.
 	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
 	// Jump (bastion) host; omit to connect directly.
 	JumpNodeHost *string `json:"jumpNodeHost,omitempty"`
 	// Jump (bastion) user.
@@ -4172,7 +4194,9 @@ type CreateGoogleSlurmClusterBody struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// Name of the cluster this one was duplicated from; recorded in the audit trail.
 	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
-	HealthCheck    *string `json:"healthCheck,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
+	HealthCheck  *string `json:"healthCheck,omitempty"`
 	// Id of the attached IP address or network interface. Clusters saved before network-interface support hold the raw IP address instead.
 	IPAddress *string `json:"ipAddress,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
@@ -4318,7 +4342,9 @@ type CreateOpenstackSlurmClusterBody struct {
 	// Display name; defaults to the cluster name.
 	DisplayName *string `json:"displayName,omitempty"`
 	// Name of the cluster this one was duplicated from; recorded in the audit trail.
-	DuplicatedFrom    *string `json:"duplicatedFrom,omitempty"`
+	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath      *string `json:"explorerPath,omitempty"`
 	FloatingIPNetwork *string `json:"floatingIpNetwork,omitempty"`
 	HealthCheck       *string `json:"healthCheck,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
@@ -4365,7 +4391,9 @@ type CreateOracleSlurmClusterBody struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// Name of the cluster this one was duplicated from; recorded in the audit trail.
 	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
-	HealthCheck    *string `json:"healthCheck,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
+	HealthCheck  *string `json:"healthCheck,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
 	Name       string                        `json:"name"`
 	Partitions []ClusterOracleSlurmPartition `json:"partitions,omitempty"`
@@ -4651,7 +4679,7 @@ type CreateWorkflowBody struct {
 	// Resource name
 	Name   string                  `json:"name"`
 	Remote *RemoteWorkflowSettings `json:"remote,omitempty"`
-	// Where a remote workflow lives (required for remote type); must match the host of remote.repo.
+	// Where a remote workflow lives; read from the host of remote.repo when omitted, and must match it when given.
 	Subtype *string `json:"subtype,omitempty"`
 	// Resource tags
 	Tags []string `json:"tags,omitempty"`
@@ -5074,6 +5102,8 @@ type Disk struct {
 	Region *string `json:"region,omitempty"`
 	// Name of the resource group the disk bills against.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the disk bills against.
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// Size of the disk in GiB
 	SizeGb *int64 `json:"sizeGb,omitempty"`
 	// Current provision status of the disk
@@ -5392,6 +5422,8 @@ type ExistingClusterDefinition struct {
 	// How the platform authenticates to the cluster.
 	AuthMethod     *string                 `json:"authMethod,omitempty"`
 	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
 	// Jump (bastion) host; omit to connect directly.
 	JumpNodeHost *string `json:"jumpNodeHost,omitempty"`
 	// Jump (bastion) user.
@@ -5599,6 +5631,8 @@ type FleetAgent struct {
 	Kind string `json:"kind"`
 	// When the agent last reported.
 	LastSeenAt *time.Time `json:"lastSeenAt,omitempty"`
+	// Whether the agent authenticated with a legacy cluster credential within the last 30 days.
+	LegacyCredential bool `json:"legacyCredential"`
 	// Organization the cluster belongs to.
 	Organization *string `json:"organization,omitempty"`
 	// Operating system reported by the agent.
@@ -5624,6 +5658,10 @@ type FleetSummary struct {
 	BelowMinimum int64 `json:"belowMinimum"`
 	// Agents reporting right now.
 	Connected int64 `json:"connected"`
+	// Agents that authenticated with a legacy cluster credential within the last 30 days.
+	LegacyCredential int64 `json:"legacyCredential"`
+	// Whether the platform still issues legacy cluster credentials. While true, every cloud cluster agent holds one.
+	LegacyCredentialsIssued bool `json:"legacyCredentialsIssued"`
 	// Configured minimum agent version. Empty when enforcement is off.
 	MinimumAgentVersion *string `json:"minimumAgentVersion,omitempty"`
 	// Oldest version any reporting agent runs. This is the version gate the fleet has actually reached.
@@ -5878,6 +5916,8 @@ type GeneralCluster struct {
 	RequestedNodes int64 `json:"requestedNodes"`
 	// The resource group the cluster's usage bills against.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the cluster bills against.
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// Cloud-cluster only: whether running-processes collection is turned on, which lets anyone with access to the cluster view processes and freeze events on each node's detail page.
 	RunningProcesses *bool `json:"runningProcesses,omitempty"`
 	// The scheduler type used by the cluster.
@@ -6418,7 +6458,9 @@ type GoogleSlurmDefinition struct {
 	DebugMode      *bool                   `json:"debugMode,omitempty"`
 	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
 	Disks          []ClusterControllerDisk `json:"disks,omitempty"`
-	HealthCheck    *string                 `json:"healthCheck,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
+	HealthCheck  *string `json:"healthCheck,omitempty"`
 	// Id of the attached IP address or network interface. Clusters saved before network-interface support hold the raw IP address instead.
 	IPAddress  *string                       `json:"ipAddress,omitempty"`
 	Partitions []ClusterGoogleSlurmPartition `json:"partitions,omitempty"`
@@ -7454,9 +7496,11 @@ type Instance struct {
 	// The region where the Instance will be provisioned.
 	Region string `json:"region"`
 	// The resource group the Instance bills against. Takes precedence over group.
-	ResourceGroup    *string                `json:"resourceGroup,omitempty"`
-	RuntimeAlert     *RuntimeAlertInput     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionCostLimitInput `json:"sessionCostLimit,omitempty"`
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the Instance bills against.
+	ResourceGroupOwner *string                `json:"resourceGroupOwner,omitempty"`
+	RuntimeAlert       *RuntimeAlertInput     `json:"runtimeAlert,omitempty"`
+	SessionCostLimit   *SessionCostLimitInput `json:"sessionCostLimit,omitempty"`
 	// Indicates if the Instance is sessionless.
 	Sessionless *string `json:"sessionless,omitempty"`
 	// The root disk size of the Instance in GB.
@@ -7590,6 +7634,8 @@ type IP struct {
 	Region string `json:"region"`
 	// The resource group the IP bills against. Takes precedence over group.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the IP bills against.
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// The tags associated with the IP resource.
 	Tags []string `json:"tags"`
 	// The username of the user that owns this resource.
@@ -7693,8 +7739,17 @@ type KernelResponse struct {
 	TargetType *string `json:"targetType,omitempty"`
 	// Base path the kernel's Jupyter server is served at.
 	URL string `json:"url"`
+	// Path the kernel's ipywidget libraries are served at without a session cookie, for the notebook's sandboxed widget frames. Set only on the owner's own requests.
+	WidgetsURL *string `json:"widgetsUrl,omitempty"`
 	// ID of the compute worker running the kernel.
 	WorkerID *string `json:"workerId,omitempty"`
+}
+
+type KeyCluster struct {
+	// Cluster display name.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Cluster name.
+	Name string `json:"name"`
 }
 
 type KubernetesChartsBody struct {
@@ -8286,6 +8341,8 @@ type Lustre struct {
 	Region *string `json:"region,omitempty"`
 	// Name of the resource group the Lustre bills against.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the Lustre bills against.
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// Indicates if the Lustre is sessionless
 	Sessionless bool `json:"sessionless"`
 	// List of groups with whom the Lustre is shared
@@ -8342,6 +8399,8 @@ type MachineLearningWorkspace struct {
 	Region string `json:"region"`
 	// The resource group the workspace bills against. Takes precedence over group.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the workspace bills against.
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// The tags associated with the Machine Learning Workspace.
 	Tags []string `json:"tags"`
 	// Username of the user that owns the resource
@@ -9015,6 +9074,8 @@ type NetworkInterface struct {
 	Region string `json:"region"`
 	// The resource group the network interface bills against. Takes precedence over group.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the network interface bills against.
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// The tags associated with the network interface resource.
 	Tags []string `json:"tags"`
 	// The username of the user that owns this resource.
@@ -9066,6 +9127,8 @@ type Nfs struct {
 	Region *string `json:"region,omitempty"`
 	// Name of the resource group the NFS bills against.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the NFS bills against.
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// Indicates if the NFS is sessionless
 	Sessionless bool `json:"sessionless"`
 	// List of groups with whom the NFS is shared
@@ -9478,8 +9541,10 @@ type OpenstackSlurmDefinition struct {
 	ControllerImage        *string `json:"controllerImage,omitempty"`
 	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
 	// Admin-set provisioning debug flag.
-	DebugMode         *bool                            `json:"debugMode,omitempty"`
-	DesktopSession    *DesktopSessionSettings          `json:"desktopSession,omitempty"`
+	DebugMode      *bool                   `json:"debugMode,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath      *string                          `json:"explorerPath,omitempty"`
 	FloatingIPNetwork *string                          `json:"floatingIpNetwork,omitempty"`
 	HealthCheck       *string                          `json:"healthCheck,omitempty"`
 	NetworkID         *string                          `json:"networkId,omitempty"`
@@ -9702,11 +9767,13 @@ type OracleSlurmDefinition struct {
 	// OCPU count when the controller instance type is a flexible shape.
 	ControllerOcpus *int64 `json:"controllerOcpus,omitempty"`
 	// Admin-set provisioning debug flag.
-	DebugMode      *bool                         `json:"debugMode,omitempty"`
-	DesktopSession *DesktopSessionSettings       `json:"desktopSession,omitempty"`
-	HealthCheck    *string                       `json:"healthCheck,omitempty"`
-	Partitions     []ClusterOracleSlurmPartition `json:"partitions,omitempty"`
-	Region         *string                       `json:"region,omitempty"`
+	DebugMode      *bool                   `json:"debugMode,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string                       `json:"explorerPath,omitempty"`
+	HealthCheck  *string                       `json:"healthCheck,omitempty"`
+	Partitions   []ClusterOracleSlurmPartition `json:"partitions,omitempty"`
+	Region       *string                       `json:"region,omitempty"`
 	// Root disk size in GiB.
 	RootSize *int64 `json:"rootSize,omitempty"`
 	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
@@ -9891,6 +9958,28 @@ type OrgProviderModelWindow struct {
 	Effective int64 `json:"effective"`
 	// Where the window comes from: admin (configured), detected (provider-reported), or catalog (built-in); absent when unknown
 	Source *string `json:"source,omitempty"`
+}
+
+type OrgRotation struct {
+	// Members whose running workspace received the new key.
+	Delivered int64 `json:"delivered"`
+	// Members whose key could not be rotated.
+	Failed     int64      `json:"failed"`
+	FinishedAt *time.Time `json:"finishedAt,omitempty"`
+	// Hours each replaced key kept working.
+	GracePeriodHours int64 `json:"gracePeriodHours"`
+	// Members whose workspace gets the new key at its next start.
+	PendingRestart int64 `json:"pendingRestart"`
+	// When the last rotation was requested; absent if none ever was.
+	RequestedAt *time.Time `json:"requestedAt,omitempty"`
+	// Whether the rotation is still going through members.
+	Running bool `json:"running"`
+	// Members left alone because their workspace image is too old for managed keys.
+	SkippedImage int64 `json:"skippedImage"`
+	// Members the requester may not manage, such as platform admins.
+	SkippedNotManageable int64 `json:"skippedNotManageable"`
+	// Members in the organization when the rotation started.
+	Total int64 `json:"total"`
 }
 
 type OrgUsageSummaryResponse struct {
@@ -10668,7 +10757,7 @@ type PostSessionAccessBody struct {
 	Access bool `json:"access"`
 	// Group ID to grant or revoke access to. Omit when sharing with the entire organization.
 	GroupID *string `json:"groupId,omitempty"`
-	// Set to true to share with (or unshare from) the entire organization instead of a single group.
+	// Set to true to share with (or unshare from) the entire organization instead of a single group. Sharing requires the allow-organization-session-sharing policy to allow it.
 	Organization *bool `json:"organization,omitempty"`
 }
 
@@ -12777,6 +12866,26 @@ type RoleBindingEntry struct {
 	Subjects []RbacSubject `json:"subjects"`
 }
 
+type RotateBody struct {
+	// Hours the old key keeps working. 0, the default, stops it at once.
+	GracePeriodHours *int64 `json:"gracePeriodHours,omitempty"`
+}
+
+type RotateOrgInputBody struct {
+	// The organization's name, typed exactly to confirm.
+	Confirm string `json:"confirm"`
+	// Hours each old key keeps working. 0, the default, stops them at once.
+	GracePeriodHours *int64 `json:"gracePeriodHours,omitempty"`
+}
+
+type RotateResult struct {
+	// delivered when the running workspace received the key; pending_restart when it gets the key at its next start.
+	Delivery string `json:"delivery"`
+	// The workspace image has no version, so whether it installs the key could not be checked.
+	ImageVersionUnknown *bool           `json:"imageVersionUnknown,omitempty"`
+	Key                 WorkspaceSSHKey `json:"key"`
+}
+
 type RotateSecretInputBody struct {
 	// How long the replaced secret keeps working. Defaults to 24 hours; 0 revokes the previous secrets immediately.
 	OverlapHours *int64 `json:"overlapHours,omitempty"`
@@ -12909,6 +13018,15 @@ type ScimUser struct {
 	Schemas                                                        []string          `json:"schemas"`
 	UrnCoreweaveParamsScimSchemasExtensionCoreweave20CoreWeaveUser *CoreWeaveUserExt `json:"urn:coreweave:params:scim:schemas:extension:coreweave:2.0:CoreWeaveUser,omitempty"`
 	UserName                                                       string            `json:"userName"`
+}
+
+type SSHKeyInfo struct {
+	// The public key algorithm.
+	Algorithm string `json:"algorithm"`
+	// SHA256 fingerprint of the public key.
+	Fingerprint string `json:"fingerprint"`
+	// The public key in authorized_keys format.
+	PublicKey string `json:"publicKey"`
 }
 
 type SSHPublicKey struct {
@@ -13574,6 +13692,8 @@ type StorageDetail struct {
 	Region *string `json:"region,omitempty"`
 	// Name of the resource group the storage bills against.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the storage bills against.
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// Whether the storage is sessionless.
 	Sessionless bool `json:"sessionless"`
 	// Size of the storage in GiB.
@@ -13630,6 +13750,8 @@ type StorageListItem struct {
 	Region *string `json:"region,omitempty"`
 	// Name of the resource group the storage bills against.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the owner of the resource group the storage bills against.
+	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
 	// Whether the storage is sessionless.
 	Sessionless bool `json:"sessionless"`
 	// Size of the storage in GiB.
@@ -14217,6 +14339,13 @@ type UpdateHealthMonitoringSettingsInputBody struct {
 	Enabled bool `json:"enabled"`
 	// Receiver endpoint. Leave empty for the Parallel Works default.
 	URL *string `json:"url,omitempty"`
+}
+
+type UpdateInstancePermissionsInputBody struct {
+	// Map of group names to permissions
+	Groups map[string]map[string]bool `json:"groups"`
+	// Map of permission names to whether to share with entire organization
+	Organization map[string]bool `json:"organization"`
 }
 
 type UpdateManagedClusterInputBody struct {
@@ -15062,14 +15191,20 @@ type WorkflowRunDetailResponse struct {
 	Inputs           map[string]any             `json:"inputs,omitempty"`
 	Links            map[string]WorkflowRunLink `json:"links,omitempty"`
 	Marketplace      bool                       `json:"marketplace"`
-	Number           *int64                     `json:"number,omitempty"`
-	Redirect         *WorkflowRunRedirect       `json:"redirect,omitempty"`
-	ResolvedYaml     map[string]any             `json:"resolvedYaml,omitempty"`
-	Slug             *string                    `json:"slug,omitempty"`
-	Status           *string                    `json:"status,omitempty"`
-	StatusReason     *string                    `json:"statusReason,omitempty"`
-	User             string                     `json:"user"`
-	WorkflowName     *string                    `json:"workflowName,omitempty"`
+	// ID of the marketplace item the run came from.
+	MarketplaceItem *string `json:"marketplaceItem,omitempty"`
+	// Current slug of the marketplace item the run came from, set when the run has no workflow of its own to link to.
+	MarketplaceSlug *string              `json:"marketplaceSlug,omitempty"`
+	Number          *int64               `json:"number,omitempty"`
+	Redirect        *WorkflowRunRedirect `json:"redirect,omitempty"`
+	ResolvedYaml    map[string]any       `json:"resolvedYaml,omitempty"`
+	Slug            *string              `json:"slug,omitempty"`
+	Status          *string              `json:"status,omitempty"`
+	StatusReason    *string              `json:"statusReason,omitempty"`
+	User            string               `json:"user"`
+	WorkflowName    *string              `json:"workflowName,omitempty"`
+	// Current name of the run's workflow, for linking to it. workflowName is the name it ran as, which its files live under.
+	WorkflowSlug *string `json:"workflowSlug,omitempty"`
 }
 
 type WorkflowRunInfo struct {
@@ -15109,12 +15244,18 @@ type WorkflowRunResponse struct {
 	ImageURL         *string    `json:"imageUrl,omitempty"`
 	InlineRun        bool       `json:"inlineRun"`
 	Marketplace      bool       `json:"marketplace"`
-	Number           *int64     `json:"number,omitempty"`
-	Slug             *string    `json:"slug,omitempty"`
-	Status           *string    `json:"status,omitempty"`
-	StatusReason     *string    `json:"statusReason,omitempty"`
-	User             string     `json:"user"`
-	WorkflowName     *string    `json:"workflowName,omitempty"`
+	// ID of the marketplace item the run came from.
+	MarketplaceItem *string `json:"marketplaceItem,omitempty"`
+	// Current slug of the marketplace item the run came from, set when the run has no workflow of its own to link to.
+	MarketplaceSlug *string `json:"marketplaceSlug,omitempty"`
+	Number          *int64  `json:"number,omitempty"`
+	Slug            *string `json:"slug,omitempty"`
+	Status          *string `json:"status,omitempty"`
+	StatusReason    *string `json:"statusReason,omitempty"`
+	User            string  `json:"user"`
+	WorkflowName    *string `json:"workflowName,omitempty"`
+	// Current name of the run's workflow, for linking to it. workflowName is the name it ran as, which its files live under.
+	WorkflowSlug *string `json:"workflowSlug,omitempty"`
 }
 
 type WorkflowRunRunningStepsResponse struct {
@@ -15215,6 +15356,23 @@ type WorkspaceMountStatus struct {
 	// Why the mount is still pending, if it is neither mounted nor failed.
 	Reason        *string `json:"reason,omitempty"`
 	WorkspacePath string  `json:"workspacePath"`
+}
+
+type WorkspaceSSHKey struct {
+	// Existing clusters that sign in with the workspace key. Where the public key was added by hand, add the new one after a rotation.
+	Clusters []KeyCluster `json:"clusters"`
+	// When the current key was generated.
+	CreatedAt *time.Time  `json:"createdAt,omitempty"`
+	Current   *SSHKeyInfo `json:"current,omitempty"`
+	// Type of the next generated key, from the workspace-ssh-key-type policy.
+	KeyType string `json:"keyType"`
+	// When the workspace's self-generated pw_id_rsa key stopped, or stops, being trusted.
+	LegacyRetiredAt *time.Time `json:"legacyRetiredAt,omitempty"`
+	// False until the platform generates the user's key, which happens at their next workspace start.
+	Managed  bool        `json:"managed"`
+	Previous *SSHKeyInfo `json:"previous,omitempty"`
+	// When the previous key stops being trusted.
+	PreviousExpiresAt *time.Time `json:"previousExpiresAt,omitempty"`
 }
 
 type WorkspaceSettings struct {
@@ -15701,6 +15859,7 @@ func (u ClusterCreate) Base() *ClusterCreateBase {
 			DesktopSession: v.DesktopSession,
 			DisplayName:    v.DisplayName,
 			DuplicatedFrom: v.DuplicatedFrom,
+			ExplorerPath:   v.ExplorerPath,
 			Name:           v.Name,
 			RunTimeAlert:   v.RunTimeAlert,
 			Tags:           v.Tags,
@@ -15711,6 +15870,7 @@ func (u ClusterCreate) Base() *ClusterCreateBase {
 			DesktopSession: v.DesktopSession,
 			DisplayName:    v.DisplayName,
 			DuplicatedFrom: v.DuplicatedFrom,
+			ExplorerPath:   v.ExplorerPath,
 			Name:           v.Name,
 			RunTimeAlert:   v.RunTimeAlert,
 			Tags:           v.Tags,
@@ -15721,6 +15881,7 @@ func (u ClusterCreate) Base() *ClusterCreateBase {
 			DesktopSession: v.DesktopSession,
 			DisplayName:    v.DisplayName,
 			DuplicatedFrom: v.DuplicatedFrom,
+			ExplorerPath:   v.ExplorerPath,
 			Name:           v.Name,
 			RunTimeAlert:   v.RunTimeAlert,
 			Tags:           v.Tags,
@@ -15731,6 +15892,7 @@ func (u ClusterCreate) Base() *ClusterCreateBase {
 			DesktopSession: v.DesktopSession,
 			DisplayName:    v.DisplayName,
 			DuplicatedFrom: v.DuplicatedFrom,
+			ExplorerPath:   v.ExplorerPath,
 			Name:           v.Name,
 			RunTimeAlert:   v.RunTimeAlert,
 			Tags:           v.Tags,
@@ -15741,6 +15903,7 @@ func (u ClusterCreate) Base() *ClusterCreateBase {
 			DesktopSession: v.DesktopSession,
 			DisplayName:    v.DisplayName,
 			DuplicatedFrom: v.DuplicatedFrom,
+			ExplorerPath:   v.ExplorerPath,
 			Name:           v.Name,
 			RunTimeAlert:   v.RunTimeAlert,
 			Tags:           v.Tags,
@@ -15751,6 +15914,7 @@ func (u ClusterCreate) Base() *ClusterCreateBase {
 			DesktopSession: v.DesktopSession,
 			DisplayName:    v.DisplayName,
 			DuplicatedFrom: v.DuplicatedFrom,
+			ExplorerPath:   v.ExplorerPath,
 			Name:           v.Name,
 			RunTimeAlert:   v.RunTimeAlert,
 			Tags:           v.Tags,
@@ -16113,26 +16277,32 @@ func (u ClusterDefinition) Base() *ClusterDefinitionBase {
 	case ExistingClusterDefinition:
 		return &ClusterDefinitionBase{
 			DesktopSession: v.DesktopSession,
+			ExplorerPath:   v.ExplorerPath,
 		}
 	case AwsSlurmDefinition:
 		return &ClusterDefinitionBase{
 			DesktopSession: v.DesktopSession,
+			ExplorerPath:   v.ExplorerPath,
 		}
 	case GoogleSlurmDefinition:
 		return &ClusterDefinitionBase{
 			DesktopSession: v.DesktopSession,
+			ExplorerPath:   v.ExplorerPath,
 		}
 	case AzureSlurmDefinition:
 		return &ClusterDefinitionBase{
 			DesktopSession: v.DesktopSession,
+			ExplorerPath:   v.ExplorerPath,
 		}
 	case OracleSlurmDefinition:
 		return &ClusterDefinitionBase{
 			DesktopSession: v.DesktopSession,
+			ExplorerPath:   v.ExplorerPath,
 		}
 	case OpenstackSlurmDefinition:
 		return &ClusterDefinitionBase{
 			DesktopSession: v.DesktopSession,
+			ExplorerPath:   v.ExplorerPath,
 		}
 	}
 	return nil
@@ -16246,6 +16416,8 @@ type ClusterCreateBase struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// Name of the cluster this one was duplicated from; recorded in the audit trail.
 	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
 	Name         string        `json:"name"`
 	RunTimeAlert *RunTimeAlert `json:"runTimeAlert,omitempty"`
@@ -16278,4 +16450,6 @@ type AttachedStorageWriteBase struct {
 // changes when they do.
 type ClusterDefinitionBase struct {
 	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
 }

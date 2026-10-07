@@ -52,6 +52,8 @@ type ListFleetAgentsParams struct {
 	Connected *string `json:"connected,omitempty"`
 	// Only agents older than the platform version.
 	Outdated *bool `json:"outdated,omitempty"`
+	// Only agents that authenticated with a legacy cluster credential within the last 30 days.
+	LegacyCredential *bool `json:"legacyCredential,omitempty"`
 	// Case-insensitive match on cluster name, display name, hostname, user, organization, or version.
 	Search *string `json:"search,omitempty"`
 	// Page size.
@@ -80,6 +82,8 @@ func (c *Client) ListFleetAgents(ctx context.Context, opts ...ListFleetAgentsPar
 	addQueryParam(queryValues, "connected", "form", false, params.Connected)
 
 	addQueryParam(queryValues, "outdated", "form", false, params.Outdated)
+
+	addQueryParam(queryValues, "legacyCredential", "form", false, params.LegacyCredential)
 
 	addQueryParam(queryValues, "search", "form", false, params.Search)
 
@@ -2511,6 +2515,24 @@ func (c *Client) RunAgentSessionPlan(ctx context.Context, machine string, id str
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
+}
+
+// WithdrawAgentSessionMessage - Take back a queued message
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes a message waiting behind the running turn before its own turn starts. Refused with 409 once that turn has started.
+func (c *Client) WithdrawAgentSessionMessage(ctx context.Context, machine string, id string, turnID string) error {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/queued/{turnId}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "turnId", "simple", false, turnID)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
 }
 
 // RenameAgentSession - Rename a pw code session
@@ -10706,7 +10728,7 @@ func (c *Client) SetManagedClusterIcon(ctx context.Context, organization string,
 // GetManagedClusterMetricsParams contains the parameters for the GetManagedClusterMetrics operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetManagedClusterMetricsParams struct {
-	// Number of hours of history to retrieve (default: 24)
+	// Number of hours of history to retrieve (1-168)
 	Hours *int64 `json:"hours,omitempty"`
 }
 
@@ -10815,7 +10837,7 @@ func (c *Client) UpgradeManagedNodeAgent(ctx context.Context, organization strin
 // GetManagedClusterNodeMetricsParams contains the parameters for the GetManagedClusterNodeMetrics operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetManagedClusterNodeMetricsParams struct {
-	// Number of hours of history to retrieve (default: 24)
+	// Number of hours of history to retrieve (1-168)
 	Hours *int64 `json:"hours,omitempty"`
 }
 
@@ -11306,6 +11328,23 @@ func (c *Client) SetOrganizationAllocationStartDatePolicy(ctx context.Context, o
 	return &result, nil
 }
 
+// SetOrganizationAllowOrganizationSessionSharingPolicy - Set organization policy: allow-organization-session-sharing
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets whether members can share sessions with the entire organization. Allowed when unset; false revokes sessions currently shared with the organization.
+func (c *Client) SetOrganizationAllowOrganizationSessionSharingPolicy(ctx context.Context, organization string, body bool) (*map[string]BooleanPolicyOutput, error) {
+
+	path := "/api/organizations/{organization}/policies/allow-organization-session-sharing"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetOrganizationAllowPublicSessionsPolicy - Set organization policy: allow-public-sessions
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -11504,6 +11543,23 @@ func (c *Client) SetOrganizationNoRootAccessPolicy(ctx context.Context, organiza
 	path = pathReplace(path, "organization", "simple", false, organization)
 
 	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetOrganizationWorkspaceSSHKeyTypePolicy - Set organization policy: workspace-ssh-key-type
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the type of newly generated workspace SSH keys for the organization: ecdsa-p256 (the default), rsa-4096, rsa-3072 or ed25519. Existing keys change type at their next rotation.
+func (c *Client) SetOrganizationWorkspaceSSHKeyTypePolicy(ctx context.Context, organization string, body string) (*map[string]StringPolicyOutput, error) {
+
+	path := "/api/organizations/{organization}/policies/workspace-ssh-key-type"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result map[string]StringPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -12312,6 +12368,40 @@ func (c *Client) ResetOrganizationSidebar(ctx context.Context, organization stri
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// RotateOrganizationWorkspaceSSHKeys - Rotate every member's workspace SSH key
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Starts replacing the workspace SSH key of every member the caller may manage, skipping workspaces whose image is too old. confirm must be the organization's name. Requires the org:admin role.
+func (c *Client) RotateOrganizationWorkspaceSSHKeys(ctx context.Context, organization string, body RotateOrgInputBody) (*OrgRotation, error) {
+
+	path := "/api/organizations/{organization}/ssh-keys/rotate"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result OrgRotation
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetOrganizationWorkspaceSSHKeyRotation - Get the organization's SSH key rotation
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the progress of the last rotation of every member's workspace SSH key. Requires the org:admin role.
+func (c *Client) GetOrganizationWorkspaceSSHKeyRotation(ctx context.Context, organization string) (*OrgRotation, error) {
+
+	path := "/api/organizations/{organization}/ssh-keys/rotation"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result OrgRotation
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetOrganizationTheme - Get current organization theme
@@ -14525,7 +14615,7 @@ func (c *Client) StopCluster(ctx context.Context, organization string, user stri
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Applies partition, user bootstrap and desktop session variable changes to a running cluster through the agent tunnel.
+// Applies partition, user bootstrap, desktop session and explorer directory variable changes to a running cluster through the agent tunnel.
 func (c *Client) UpdateClusterWhileRunning(ctx context.Context, organization string, user string, clusterName string, body UpdateWhileRunningBody) (*UpdateWhileRunningResult, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/update-while-running"
@@ -15287,6 +15377,43 @@ func (c *Client) DeleteInstanceKernel(ctx context.Context, organization string, 
 	path = pathReplace(path, "kernel", "simple", false, kernel)
 
 	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// GetInstancePermissions - Get Instance Permissions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the groups an instance is shared with and at what access level
+func (c *Client) GetInstancePermissions(ctx context.Context, organization string, user string, instanceName string) (*SubjectPermissions, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/instances/{instanceName}/permissions"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "instanceName", "simple", false, instanceName)
+
+	var result SubjectPermissions
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateInstancePermissions - Update Instance Permissions
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces the groups an instance is shared with and their access levels
+func (c *Client) UpdateInstancePermissions(ctx context.Context, organization string, user string, instanceName string, body UpdateInstancePermissionsInputBody) error {
+
+	path := "/api/organizations/{organization}/users/{user}/instances/{instanceName}/permissions"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "instanceName", "simple", false, instanceName)
+
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json", true); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -16207,7 +16334,7 @@ func (c *Client) ReplaceUserSession(ctx context.Context, organization string, us
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Delete the session with the provided name for the specified user.
+// Delete the session with the provided name for the specified user. Platform admins can delete any user's session, which is recorded in the audit log.
 func (c *Client) DeleteUserSession(ctx context.Context, organization string, user string, name string) error {
 
 	path := "/api/organizations/{organization}/users/{user}/sessions/{name}"
@@ -16244,7 +16371,7 @@ func (c *Client) UpdateUserSession(ctx context.Context, organization string, use
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Update session access by name and user, allowing access to specific groups.
+// Update session access by name and user, allowing access to specific groups or the entire organization. Sharing with the entire organization is refused when the allow-organization-session-sharing policy disallows it.
 func (c *Client) UpdateUserSessionAccess(ctx context.Context, organization string, user string, name string, body PostSessionAccessBody) error {
 
 	path := "/api/organizations/{organization}/users/{user}/sessions/{name}/access"
@@ -16476,6 +16603,42 @@ func (c *Client) UpdateSnapshotPermissions(ctx context.Context, organization str
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// GetUserWorkspaceSSHKey - Get a user's workspace SSH key
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the public half of a user's platform-managed workspace SSH key. Requires the org:users role.
+func (c *Client) GetUserWorkspaceSSHKey(ctx context.Context, organization string, user string) (*WorkspaceSSHKey, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/ssh-key"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+
+	var result WorkspaceSSHKey
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RotateUserWorkspaceSSHKey - Rotate a user's workspace SSH key
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces a user's workspace SSH key. Requires the org:users role.
+func (c *Client) RotateUserWorkspaceSSHKey(ctx context.Context, organization string, user string, body RotateBody) (*RotateResult, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/ssh-key/rotate"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+
+	var result RotateResult
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // CreateSSHPrivateKey - Create SSH Private Key
@@ -17739,6 +17902,22 @@ func (c *Client) SetPlatformAllocationStartDatePolicy(ctx context.Context, body 
 	return &result, nil
 }
 
+// SetPlatformAllowOrganizationSessionSharingPolicy - Set platform policy: allow-organization-session-sharing
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets whether users in every organization can share sessions with their entire organization. Allowed when unset; false revokes sessions currently shared with an organization.
+func (c *Client) SetPlatformAllowOrganizationSessionSharingPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
+
+	path := "/api/platform/policies/allow-organization-session-sharing"
+
+	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetPlatformAllowPublicSessionsPolicy - Set platform policy: allow-public-sessions
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -17941,6 +18120,22 @@ func (c *Client) SetPlatformWorkspaceRetentionDaysPolicy(ctx context.Context, bo
 	path := "/api/platform/policies/workspace-retention-days"
 
 	var result map[string]IntPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformWorkspaceSSHKeyTypePolicy - Set platform policy: workspace-ssh-key-type
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the type of newly generated workspace SSH keys for the platform: ecdsa-p256 (the default), rsa-4096, rsa-3072 or ed25519. Existing keys change type at their next rotation.
+func (c *Client) SetPlatformWorkspaceSSHKeyTypePolicy(ctx context.Context, body string) (*map[string]StringPolicyOutput, error) {
+
+	path := "/api/platform/policies/workspace-ssh-key-type"
+
+	var result map[string]StringPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -19024,6 +19219,38 @@ func (c *Client) GetSnapshots(ctx context.Context) (*[]Snapshot, error) {
 
 	var result []Snapshot
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetWorkspaceSSHKey - Get your workspace SSH key
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the public half of the platform-managed SSH key your workspace uses. The private key is never returned.
+func (c *Client) GetWorkspaceSSHKey(ctx context.Context) (*WorkspaceSSHKey, error) {
+
+	path := "/api/ssh-key"
+
+	var result WorkspaceSSHKey
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RotateWorkspaceSSHKey - Rotate your workspace SSH key
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Replaces your workspace SSH key. A running workspace receives the new key within seconds; a stopped one at its next start. The old key stops working at once unless gracePeriodHours keeps it for up to 24 hours.
+func (c *Client) RotateWorkspaceSSHKey(ctx context.Context, body RotateBody) (*RotateResult, error) {
+
+	path := "/api/ssh-key/rotate"
+
+	var result RotateResult
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil

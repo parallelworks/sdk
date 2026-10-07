@@ -2417,6 +2417,11 @@
             "description": "Resource group the provider bills against",
             "type": "string"
           },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the provider bills against",
+            "readOnly": true,
+            "type": "string"
+          },
           "status": {
             "description": "Current status of the AI provider",
             "type": "string"
@@ -2512,6 +2517,11 @@
           },
           "resourceGroup": {
             "description": "Resource group the provider bills against",
+            "type": "string"
+          },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the provider bills against",
+            "readOnly": true,
             "type": "string"
           },
           "status": {
@@ -4725,6 +4735,11 @@
             ],
             "type": "string"
           },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the workspace bills against.",
+            "readOnly": true,
+            "type": "string"
+          },
           "tags": {
             "description": "The tags associated with the Machine Learning Workspace.",
             "examples": [
@@ -4816,6 +4831,11 @@
               "array",
               "null"
             ]
+          },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.",
+            "pattern": "^($|/|~|__HOME__)",
+            "type": "string"
           },
           "healthCheck": {
             "type": "string"
@@ -5817,6 +5837,11 @@
             ],
             "type": "string"
           },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the workspace bills against.",
+            "readOnly": true,
+            "type": "string"
+          },
           "tags": {
             "description": "The tags associated with the Machine Learning Workspace.",
             "examples": [
@@ -6378,6 +6403,11 @@
               "array",
               "null"
             ]
+          },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.",
+            "pattern": "^($|/|~|__HOME__)",
+            "type": "string"
           },
           "healthCheck": {
             "type": "string"
@@ -7408,6 +7438,11 @@
           },
           "resourceGroup": {
             "description": "Name of the resource group the bucket bills against.",
+            "type": "string"
+          },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the bucket bills against.",
+            "readOnly": true,
             "type": "string"
           },
           "sessionless": {
@@ -10421,6 +10456,11 @@
             "$ref": "#/components/schemas/DesktopSessionSettings",
             "description": "Desktop session settings. Applied to sessions started after the update; running sessions keep their current settings."
           },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory. Applies to the next listing.",
+            "pattern": "^($|/|~|__HOME__)",
+            "type": "string"
+          },
           "partitions": {
             "description": "Slurm partition definitions",
             "items": {
@@ -11322,7 +11362,10 @@
             "type": "string"
           },
           "duration": {
-            "description": "Duration in days before the key expires (platform keys)",
+            "description": "Days before the key expires (platform keys). Empty or 0 creates a key that does not expire, unless the organization's maximum API key lifetime requires one.",
+            "maxLength": 5,
+            "pattern": "^[0-9]*$",
+            "patternDescription": "whole number of days",
             "type": "string"
           },
           "title": {
@@ -11478,6 +11521,11 @@
             "description": "Name of the cluster this one was duplicated from; recorded in the audit trail.",
             "type": "string"
           },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.",
+            "pattern": "^($|/|~|__HOME__)",
+            "type": "string"
+          },
           "healthCheck": {
             "type": "string"
           },
@@ -11616,6 +11664,11 @@
           },
           "duplicatedFrom": {
             "description": "Name of the cluster this one was duplicated from; recorded in the audit trail.",
+            "type": "string"
+          },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.",
+            "pattern": "^($|/|~|__HOME__)",
             "type": "string"
           },
           "healthCheck": {
@@ -12018,6 +12071,11 @@
             "description": "Name of the cluster this one was duplicated from; recorded in the audit trail.",
             "type": "string"
           },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.",
+            "pattern": "^($|/|~|__HOME__)",
+            "type": "string"
+          },
           "jumpNodeHost": {
             "description": "Jump (bastion) host; omit to connect directly.",
             "type": "string"
@@ -12138,6 +12196,11 @@
           },
           "duplicatedFrom": {
             "description": "Name of the cluster this one was duplicated from; recorded in the audit trail.",
+            "type": "string"
+          },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.",
+            "pattern": "^($|/|~|__HOME__)",
             "type": "string"
           },
           "healthCheck": {
@@ -12592,6 +12655,11 @@
             "description": "Name of the cluster this one was duplicated from; recorded in the audit trail.",
             "type": "string"
           },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.",
+            "pattern": "^($|/|~|__HOME__)",
+            "type": "string"
+          },
           "floatingIpNetwork": {
             "type": "string"
           },
@@ -12724,6 +12792,11 @@
           },
           "duplicatedFrom": {
             "description": "Name of the cluster this one was duplicated from; recorded in the audit trail.",
+            "type": "string"
+          },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.",
+            "pattern": "^($|/|~|__HOME__)",
             "type": "string"
           },
           "healthCheck": {
@@ -13188,6 +13261,7 @@
           "duration": {
             "description": "Days until the token expires; omit or 0 for no expiration",
             "format": "int64",
+            "minimum": 0,
             "type": "integer"
           },
           "name": {
@@ -13595,7 +13669,7 @@
             "description": "Remote workflow configuration (required for remote type)"
           },
           "subtype": {
-            "description": "Where a remote workflow lives (required for remote type); must match the host of remote.repo.",
+            "description": "Where a remote workflow lives; read from the host of remote.repo when omitted, and must match it when given.",
             "enum": [
               "github",
               "gitlab"
@@ -14856,6 +14930,11 @@
             "description": "Name of the resource group the disk bills against.",
             "type": "string"
           },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the disk bills against.",
+            "readOnly": true,
+            "type": "string"
+          },
           "sizeGb": {
             "description": "Size of the disk in GiB",
             "format": "int64",
@@ -15829,6 +15908,11 @@
             "$ref": "#/components/schemas/DesktopSessionSettings",
             "description": "Desktop session settings."
           },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.",
+            "pattern": "^($|/|~|__HOME__)",
+            "type": "string"
+          },
           "jumpNodeHost": {
             "description": "Jump (bastion) host; omit to connect directly.",
             "type": "string"
@@ -16407,6 +16491,10 @@
             "format": "date-time",
             "type": "string"
           },
+          "legacyCredential": {
+            "description": "Whether the agent authenticated with a legacy cluster credential within the last 30 days.",
+            "type": "boolean"
+          },
           "organization": {
             "description": "Organization the cluster belongs to.",
             "type": "string"
@@ -16451,7 +16539,8 @@
           "clusterName",
           "connected",
           "outdated",
-          "belowMinimum"
+          "belowMinimum",
+          "legacyCredential"
         ],
         "type": "object"
       },
@@ -16467,6 +16556,15 @@
             "description": "Agents reporting right now.",
             "format": "int64",
             "type": "integer"
+          },
+          "legacyCredential": {
+            "description": "Agents that authenticated with a legacy cluster credential within the last 30 days.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "legacyCredentialsIssued": {
+            "description": "Whether the platform still issues legacy cluster credentials. While true, every cloud cluster agent holds one.",
+            "type": "boolean"
           },
           "minimumAgentVersion": {
             "description": "Configured minimum agent version. Empty when enforcement is off.",
@@ -16518,6 +16616,8 @@
           "platformVersion",
           "platformVersionComparable",
           "unreported",
+          "legacyCredential",
+          "legacyCredentialsIssued",
           "versions"
         ],
         "type": "object"
@@ -16826,6 +16926,11 @@
             "examples": [
               "my-resource-group"
             ],
+            "type": "string"
+          },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the cluster bills against.",
+            "readOnly": true,
             "type": "string"
           },
           "runningProcesses": {
@@ -18456,6 +18561,11 @@
               "array",
               "null"
             ]
+          },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.",
+            "pattern": "^($|/|~|__HOME__)",
+            "type": "string"
           },
           "healthCheck": {
             "type": "string"
@@ -20154,6 +20264,11 @@
             ],
             "type": "string"
           },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the Instance bills against.",
+            "readOnly": true,
+            "type": "string"
+          },
           "runtimeAlert": {
             "$ref": "#/components/schemas/RuntimeAlertInput",
             "description": "Runtime alert configuration."
@@ -20575,6 +20690,11 @@
             ],
             "type": "string"
           },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the IP bills against.",
+            "readOnly": true,
+            "type": "string"
+          },
           "tags": {
             "description": "The tags associated with the IP resource.",
             "examples": [
@@ -20902,6 +21022,11 @@
             "readOnly": true,
             "type": "string"
           },
+          "widgetsUrl": {
+            "description": "Path the kernel's ipywidget libraries are served at without a session cookie, for the notebook's sandboxed widget frames. Set only on the owner's own requests.",
+            "readOnly": true,
+            "type": "string"
+          },
           "workerId": {
             "description": "ID of the compute worker running the kernel.",
             "readOnly": true,
@@ -20911,6 +21036,23 @@
         "required": [
           "id",
           "url"
+        ],
+        "type": "object"
+      },
+      "KeyCluster": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "description": "Cluster display name.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Cluster name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
         ],
         "type": "object"
       },
@@ -22986,6 +23128,11 @@
             "description": "Name of the resource group the Lustre bills against.",
             "type": "string"
           },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the Lustre bills against.",
+            "readOnly": true,
+            "type": "string"
+          },
           "sessionless": {
             "description": "Indicates if the Lustre is sessionless",
             "type": "boolean"
@@ -23188,6 +23335,11 @@
             "examples": [
               "my-resource-group"
             ],
+            "type": "string"
+          },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the workspace bills against.",
+            "readOnly": true,
             "type": "string"
           },
           "tags": {
@@ -25446,6 +25598,11 @@
             ],
             "type": "string"
           },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the network interface bills against.",
+            "readOnly": true,
+            "type": "string"
+          },
           "tags": {
             "description": "The tags associated with the network interface resource.",
             "examples": [
@@ -25590,6 +25747,11 @@
           },
           "resourceGroup": {
             "description": "Name of the resource group the NFS bills against.",
+            "type": "string"
+          },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the NFS bills against.",
+            "readOnly": true,
             "type": "string"
           },
           "sessionless": {
@@ -27039,6 +27201,11 @@
             "$ref": "#/components/schemas/DesktopSessionSettings",
             "description": "Desktop session settings."
           },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.",
+            "pattern": "^($|/|~|__HOME__)",
+            "type": "string"
+          },
           "floatingIpNetwork": {
             "type": "string"
           },
@@ -27675,6 +27842,11 @@
             "$ref": "#/components/schemas/DesktopSessionSettings",
             "description": "Desktop session settings."
           },
+          "explorerPath": {
+            "description": "Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.",
+            "pattern": "^($|/|~|__HOME__)",
+            "type": "string"
+          },
           "healthCheck": {
             "type": "string"
           },
@@ -28233,6 +28405,70 @@
         },
         "required": [
           "effective"
+        ],
+        "type": "object"
+      },
+      "OrgRotation": {
+        "additionalProperties": false,
+        "properties": {
+          "delivered": {
+            "description": "Members whose running workspace received the new key.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "failed": {
+            "description": "Members whose key could not be rotated.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "gracePeriodHours": {
+            "description": "Hours each replaced key kept working.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingRestart": {
+            "description": "Members whose workspace gets the new key at its next start.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "requestedAt": {
+            "description": "When the last rotation was requested; absent if none ever was.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "running": {
+            "description": "Whether the rotation is still going through members.",
+            "type": "boolean"
+          },
+          "skippedImage": {
+            "description": "Members left alone because their workspace image is too old for managed keys.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "skippedNotManageable": {
+            "description": "Members the requester may not manage, such as platform admins.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "description": "Members in the organization when the rotation started.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "gracePeriodHours",
+          "running",
+          "total",
+          "delivered",
+          "pendingRestart",
+          "skippedImage",
+          "skippedNotManageable",
+          "failed"
         ],
         "type": "object"
       },
@@ -30662,7 +30898,7 @@
             "type": "string"
           },
           "organization": {
-            "description": "Set to true to share with (or unshare from) the entire organization instead of a single group.",
+            "description": "Set to true to share with (or unshare from) the entire organization instead of a single group. Sharing requires the allow-organization-session-sharing policy to allow it.",
             "type": "boolean"
           }
         },
@@ -36494,7 +36730,8 @@
             "description": "Why the current allocation refuses new resource usage",
             "enum": [
               "no-budget",
-              "over-threshold"
+              "over-threshold",
+              "owner-no-access"
             ],
             "readOnly": true,
             "type": "string"
@@ -36618,7 +36855,8 @@
             "description": "Why the current allocation refuses new resource usage",
             "enum": [
               "no-budget",
-              "over-threshold"
+              "over-threshold",
+              "owner-no-access"
             ],
             "readOnly": true,
             "type": "string"
@@ -36964,6 +37202,69 @@
           "subjects",
           "roleRef",
           "roleKind"
+        ],
+        "type": "object"
+      },
+      "RotateBody": {
+        "additionalProperties": false,
+        "properties": {
+          "gracePeriodHours": {
+            "default": 0,
+            "description": "Hours the old key keeps working. 0, the default, stops it at once.",
+            "format": "int64",
+            "maximum": 24,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "RotateOrgInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "confirm": {
+            "description": "The organization's name, typed exactly to confirm.",
+            "examples": [
+              "parallelworks"
+            ],
+            "type": "string"
+          },
+          "gracePeriodHours": {
+            "default": 0,
+            "description": "Hours each old key keeps working. 0, the default, stops them at once.",
+            "format": "int64",
+            "maximum": 24,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "confirm"
+        ],
+        "type": "object"
+      },
+      "RotateResult": {
+        "additionalProperties": false,
+        "properties": {
+          "delivery": {
+            "description": "delivered when the running workspace received the key; pending_restart when it gets the key at its next start.",
+            "enum": [
+              "delivered",
+              "pending_restart"
+            ],
+            "type": "string"
+          },
+          "imageVersionUnknown": {
+            "description": "The workspace image has no version, so whether it installs the key could not be checked.",
+            "type": "boolean"
+          },
+          "key": {
+            "$ref": "#/components/schemas/WorkspaceSSHKey"
+          }
+        },
+        "required": [
+          "key",
+          "delivery"
         ],
         "type": "object"
       },
@@ -37376,6 +37677,38 @@
           "meta",
           "userName",
           "active"
+        ],
+        "type": "object"
+      },
+      "SSHKeyInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "algorithm": {
+            "description": "The public key algorithm.",
+            "examples": [
+              "ecdsa-sha2-nistp256"
+            ],
+            "type": "string"
+          },
+          "fingerprint": {
+            "description": "SHA256 fingerprint of the public key.",
+            "examples": [
+              "SHA256:Hk3l7Ry5wq0n2gWz8x3cS2bS5nO1Cq9t1n0h3L2xQ4E"
+            ],
+            "type": "string"
+          },
+          "publicKey": {
+            "description": "The public key in authorized_keys format.",
+            "examples": [
+              "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTY... pw_alice"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "publicKey",
+          "algorithm",
+          "fingerprint"
         ],
         "type": "object"
       },
@@ -39357,6 +39690,11 @@
             "description": "Name of the resource group the storage bills against.",
             "type": "string"
           },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the storage bills against.",
+            "readOnly": true,
+            "type": "string"
+          },
           "sessionless": {
             "description": "Whether the storage is sessionless.",
             "type": "boolean"
@@ -39522,6 +39860,11 @@
           },
           "resourceGroup": {
             "description": "Name of the resource group the storage bills against.",
+            "type": "string"
+          },
+          "resourceGroupOwner": {
+            "description": "Username of the owner of the resource group the storage bills against.",
+            "readOnly": true,
             "type": "string"
           },
           "sessionless": {
@@ -40892,6 +41235,33 @@
         ],
         "type": "object"
       },
+      "UpdateInstancePermissionsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "groups": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "boolean"
+              },
+              "type": "object"
+            },
+            "description": "Map of group names to permissions",
+            "type": "object"
+          },
+          "organization": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "description": "Map of permission names to whether to share with entire organization",
+            "type": "object"
+          }
+        },
+        "required": [
+          "organization",
+          "groups"
+        ],
+        "type": "object"
+      },
       "UpdateManagedClusterInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -41608,7 +41978,7 @@
         "properties": {
           "variables": {
             "$ref": "#/components/schemas/ClusterUpdateVariables",
-            "description": "Cluster variables to apply to the running cluster. Only partition, user bootstrap, desktop session and running-processes variables may change; the controller instance type may change only while the controller is stopped."
+            "description": "Cluster variables to apply to the running cluster. Only partition, user bootstrap, desktop session, running-processes and explorer directory variables may change; the controller instance type may change only while the controller is stopped."
           }
         },
         "required": [
@@ -43448,6 +43818,14 @@
           "marketplace": {
             "type": "boolean"
           },
+          "marketplaceItem": {
+            "description": "ID of the marketplace item the run came from.",
+            "type": "string"
+          },
+          "marketplaceSlug": {
+            "description": "Current slug of the marketplace item the run came from, set when the run has no workflow of its own to link to.",
+            "type": "string"
+          },
           "number": {
             "format": "int64",
             "type": "integer"
@@ -43472,6 +43850,10 @@
             "type": "string"
           },
           "workflowName": {
+            "type": "string"
+          },
+          "workflowSlug": {
+            "description": "Current name of the run's workflow, for linking to it. workflowName is the name it ran as, which its files live under.",
             "type": "string"
           }
         },
@@ -43589,6 +43971,14 @@
           "marketplace": {
             "type": "boolean"
           },
+          "marketplaceItem": {
+            "description": "ID of the marketplace item the run came from.",
+            "type": "string"
+          },
+          "marketplaceSlug": {
+            "description": "Current slug of the marketplace item the run came from, set when the run has no workflow of its own to link to.",
+            "type": "string"
+          },
           "number": {
             "format": "int64",
             "type": "integer"
@@ -43606,6 +43996,10 @@
             "type": "string"
           },
           "workflowName": {
+            "type": "string"
+          },
+          "workflowSlug": {
+            "description": "Current name of the run's workflow, for linking to it. workflowName is the name it ran as, which its files live under.",
             "type": "string"
           }
         },
@@ -43951,6 +44345,64 @@
         ],
         "type": "object"
       },
+      "WorkspaceSSHKey": {
+        "additionalProperties": false,
+        "properties": {
+          "clusters": {
+            "description": "Existing clusters that sign in with the workspace key. Where the public key was added by hand, add the new one after a rotation.",
+            "items": {
+              "$ref": "#/components/schemas/KeyCluster"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "description": "When the current key was generated.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "current": {
+            "$ref": "#/components/schemas/SSHKeyInfo",
+            "description": "The key the workspace uses."
+          },
+          "keyType": {
+            "description": "Type of the next generated key, from the workspace-ssh-key-type policy.",
+            "enum": [
+              "ecdsa-p256",
+              "rsa-4096",
+              "rsa-3072",
+              "ed25519"
+            ],
+            "type": "string"
+          },
+          "legacyRetiredAt": {
+            "description": "When the workspace's self-generated pw_id_rsa key stopped, or stops, being trusted.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "managed": {
+            "description": "False until the platform generates the user's key, which happens at their next workspace start.",
+            "type": "boolean"
+          },
+          "previous": {
+            "$ref": "#/components/schemas/SSHKeyInfo",
+            "description": "The key replaced by the last rotation, still trusted until previousExpiresAt."
+          },
+          "previousExpiresAt": {
+            "description": "When the previous key stops being trusted.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "managed",
+          "keyType",
+          "clusters"
+        ],
+        "type": "object"
+      },
       "WorkspaceSettings": {
         "additionalProperties": false,
         "properties": {
@@ -44216,6 +44668,16 @@
             "name": "outdated",
             "schema": {
               "description": "Only agents older than the platform version.",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Only agents that authenticated with a legacy cluster credential within the last 30 days.",
+            "explode": false,
+            "in": "query",
+            "name": "legacyCredential",
+            "schema": {
+              "description": "Only agents that authenticated with a legacy cluster credential within the last 30 days.",
               "type": "boolean"
             }
           },
@@ -49630,6 +50092,65 @@
           }
         },
         "summary": "Run /plan in a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/queued/{turnId}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves a message waiting behind the running turn before its own turn starts. Refused with 409 once that turn has started.",
+        "operationId": "withdraw-agent-session-message",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The turn id the message was accepted as.",
+            "in": "path",
+            "name": "turnId",
+            "required": true,
+            "schema": {
+              "description": "The turn id the message was accepted as.",
+              "pattern": "^tn-[0-9a-f]+$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Take back a queued message",
         "tags": [
           "Agents"
         ],
@@ -72022,14 +72543,16 @@
             }
           },
           {
-            "description": "Number of hours of history to retrieve (default: 24)",
+            "description": "Number of hours of history to retrieve (1-168)",
             "explode": false,
             "in": "query",
             "name": "hours",
             "schema": {
               "default": 24,
-              "description": "Number of hours of history to retrieve (default: 24)",
+              "description": "Number of hours of history to retrieve (1-168)",
               "format": "int64",
+              "maximum": 168,
+              "minimum": 1,
               "type": "integer"
             }
           }
@@ -72367,14 +72890,16 @@
             }
           },
           {
-            "description": "Number of hours of history to retrieve (default: 24)",
+            "description": "Number of hours of history to retrieve (1-168)",
             "explode": false,
             "in": "query",
             "name": "hours",
             "schema": {
               "default": 24,
-              "description": "Number of hours of history to retrieve (default: 24)",
+              "description": "Number of hours of history to retrieve (1-168)",
               "format": "int64",
+              "maximum": 168,
+              "minimum": 1,
               "type": "integer"
             }
           }
@@ -73826,6 +74351,71 @@
         ]
       }
     },
+    "/api/organizations/{organization}/policies/allow-organization-session-sharing": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets whether members can share sessions with the entire organization. Allowed when unset; false revokes sessions currently shared with the organization.",
+        "operationId": "set-organization-allow-organization-session-sharing-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/BooleanPolicyOutput"
+                  },
+                  "description": "Map of boolean policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: allow-organization-session-sharing",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/organizations/{organization}/policies/allow-public-sessions": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets allow-public-sessions policy for the organization.",
@@ -74605,6 +75195,71 @@
           }
         },
         "summary": "Set organization policy: no-root-access",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/policies/workspace-ssh-key-type": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the type of newly generated workspace SSH keys for the organization: ecdsa-p256 (the default), rsa-4096, rsa-3072 or ed25519. Existing keys change type at their next rotation.",
+        "operationId": "set-organization-workspace-ssh-key-type-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  "shared-hpc"
+                ],
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/StringPolicyOutput"
+                  },
+                  "description": "Map of string policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: workspace-ssh-key-type",
         "tags": [
           "Policies"
         ]
@@ -76611,6 +77266,110 @@
         "summary": "Update organization default sidebar",
         "tags": [
           "Organization"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/ssh-keys/rotate": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nStarts replacing the workspace SSH key of every member the caller may manage, skipping workspaces whose image is too old. confirm must be the organization's name. Requires the org:admin role.",
+        "operationId": "rotate-organization-workspace-ssh-keys",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RotateOrgInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgRotation"
+                }
+              }
+            },
+            "description": "Accepted"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Rotate every member's workspace SSH key",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/ssh-keys/rotation": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the progress of the last rotation of every member's workspace SSH key. Requires the org:admin role.",
+        "operationId": "get-organization-workspace-ssh-key-rotation",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgRotation"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get the organization's SSH key rotation",
+        "tags": [
+          "Users"
         ]
       }
     },
@@ -84390,7 +85149,7 @@
     },
     "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/update-while-running": {
       "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nApplies partition, user bootstrap and desktop session variable changes to a running cluster through the agent tunnel.",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nApplies partition, user bootstrap, desktop session and explorer directory variable changes to a running cluster through the agent tunnel.",
         "operationId": "update-cluster-while-running",
         "parameters": [
           {
@@ -87149,6 +87908,147 @@
         "summary": "Stop a notebook kernel on an instance",
         "tags": [
           "Notebooks"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/instances/{instanceName}/permissions": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the groups an instance is shared with and at what access level",
+        "operationId": "get-instance-permissions",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the instance.",
+            "in": "path",
+            "name": "instanceName",
+            "required": true,
+            "schema": {
+              "description": "The name of the instance.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectPermissions"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Instance Permissions",
+        "tags": [
+          "Instances"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces the groups an instance is shared with and their access levels",
+        "operationId": "update-instance-permissions",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the instance.",
+            "in": "path",
+            "name": "instanceName",
+            "required": true,
+            "schema": {
+              "description": "The name of the instance.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInstancePermissionsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update Instance Permissions",
+        "tags": [
+          "Instances"
         ]
       }
     },
@@ -90378,7 +91278,7 @@
     },
     "/api/organizations/{organization}/users/{user}/sessions/{name}": {
       "delete": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDelete the session with the provided name for the specified user.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDelete the session with the provided name for the specified user. Platform admins can delete any user's session, which is recorded in the audit log.",
         "operationId": "delete-user-session",
         "parameters": [
           {
@@ -90663,7 +91563,7 @@
     },
     "/api/organizations/{organization}/users/{user}/sessions/{name}/access": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdate session access by name and user, allowing access to specific groups.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nUpdate session access by name and user, allowing access to specific groups or the entire organization. Sharing with the entire organization is refused when the allow-organization-session-sharing policy disallows it.",
         "operationId": "update-user-session-access",
         "parameters": [
           {
@@ -91573,6 +92473,136 @@
         "summary": "Update snapshot permissions",
         "tags": [
           "Snapshots"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/ssh-key": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the public half of a user's platform-managed workspace SSH key. Requires the org:users role.",
+        "operationId": "get-user-workspace-ssh-key",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceSSHKey"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a user's workspace SSH key",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/ssh-key/rotate": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces a user's workspace SSH key. Requires the org:users role.",
+        "operationId": "rotate-user-workspace-ssh-key",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RotateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RotateResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Rotate a user's workspace SSH key",
+        "tags": [
+          "Users"
         ]
       }
     },
@@ -95413,6 +96443,56 @@
         ]
       }
     },
+    "/api/platform/policies/allow-organization-session-sharing": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets whether users in every organization can share sessions with their entire organization. Allowed when unset; false revokes sessions currently shared with an organization.",
+        "operationId": "set-platform-allow-organization-session-sharing-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/BooleanPolicyOutput"
+                  },
+                  "description": "Map of boolean policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: allow-organization-session-sharing",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/platform/policies/allow-public-sessions": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the allow-public-sessions policy for the platform.",
@@ -96071,6 +97151,56 @@
           }
         },
         "summary": "Set platform policy: workspace-retention-days",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/workspace-ssh-key-type": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the type of newly generated workspace SSH keys for the platform: ecdsa-p256 (the default), rsa-4096, rsa-3072 or ed25519. Existing keys change type at their next rotation.",
+        "operationId": "set-platform-workspace-ssh-key-type-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  "shared-hpc"
+                ],
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/StringPolicyOutput"
+                  },
+                  "description": "Map of string policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: workspace-ssh-key-type",
         "tags": [
           "Policies"
         ]
@@ -98548,6 +99678,80 @@
         "summary": "List snapshots",
         "tags": [
           "Snapshots"
+        ]
+      }
+    },
+    "/api/ssh-key": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the public half of the platform-managed SSH key your workspace uses. The private key is never returned.",
+        "operationId": "get-workspace-ssh-key",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceSSHKey"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get your workspace SSH key",
+        "tags": [
+          "User Settings"
+        ]
+      }
+    },
+    "/api/ssh-key/rotate": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReplaces your workspace SSH key. A running workspace receives the new key within seconds; a stopped one at its next start. The old key stops working at once unless gracePeriodHours keeps it for up to 24 hours.",
+        "operationId": "rotate-workspace-ssh-key",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RotateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RotateResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Rotate your workspace SSH key",
+        "tags": [
+          "User Settings"
         ]
       }
     },
