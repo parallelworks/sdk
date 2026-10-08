@@ -15630,13 +15630,29 @@
         },
         "type": "object"
       },
+      "EventActorOption": {
+        "additionalProperties": false,
+        "properties": {
+          "avatarUrl": {
+            "description": "Avatar image URL; absent when no user record matches the username.",
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "type": "object"
+      },
       "EventActorsOutputBody": {
         "additionalProperties": false,
         "properties": {
           "actors": {
-            "description": "Distinct actor usernames, sorted.",
+            "description": "Distinct actors, sorted by username.",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/EventActorOption"
             },
             "type": [
               "array",
@@ -30619,7 +30635,7 @@
             ]
           },
           "userHost": {
-            "description": "Host for user workspaces. Send null to clear.",
+            "description": "Host for user workspaces. Only a platform admin can set a new value. Send null to clear.",
             "type": [
               "string",
               "null"
@@ -43017,7 +43033,7 @@
             ]
           },
           "userhost": {
-            "description": "User host. Send null to revert to inherited.",
+            "description": "User host. Only a platform admin can set a new value. Send null to revert to inherited.",
             "type": [
               "string",
               "null"
@@ -44212,7 +44228,7 @@
             ]
           },
           "userHost": {
-            "description": "Host for user workspaces. Send null to clear.",
+            "description": "Host for user workspaces. Only a platform admin can set a new value. Send null to clear.",
             "type": [
               "string",
               "null"
@@ -46360,6 +46376,36 @@
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nList the distinct actor usernames that appear in audit events across all organizations.",
         "operationId": "list-admin-event-actors",
+        "parameters": [
+          {
+            "description": "Only actors with events at or after this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "Only actors with events at or after this time (RFC3339).",
+              "examples": [
+                "2026-01-01T00:00:00Z"
+              ],
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only actors with events at or before this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Only actors with events at or before this time (RFC3339).",
+              "examples": [
+                "2026-01-31T23:59:59Z"
+              ],
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -53240,6 +53286,93 @@
           }
         },
         "summary": "List Resource Events",
+        "tags": [
+          "Events"
+        ]
+      }
+    },
+    "/api/events/resources/{targetType}/{targetId}/actors": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nList the distinct actor usernames that appear in a single resource's audit events. Requires view access to the resource.",
+        "operationId": "list-resource-event-actors",
+        "parameters": [
+          {
+            "description": "Target resource type.",
+            "in": "path",
+            "name": "targetType",
+            "required": true,
+            "schema": {
+              "description": "Target resource type.",
+              "enum": [
+                "cluster",
+                "storage",
+                "user"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Target resource id (hex ObjectID).",
+            "in": "path",
+            "name": "targetId",
+            "required": true,
+            "schema": {
+              "description": "Target resource id (hex ObjectID).",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only actors with events at or after this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "Only actors with events at or after this time (RFC3339).",
+              "examples": [
+                "2026-01-01T00:00:00Z"
+              ],
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only actors with events at or before this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Only actors with events at or before this time (RFC3339).",
+              "examples": [
+                "2026-01-31T23:59:59Z"
+              ],
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventActorsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Resource Event Actors",
         "tags": [
           "Events"
         ]
@@ -66504,6 +66637,34 @@
               "examples": [
                 "parallelworks"
               ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only actors with events at or after this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "Only actors with events at or after this time (RFC3339).",
+              "examples": [
+                "2026-01-01T00:00:00Z"
+              ],
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only actors with events at or before this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Only actors with events at or before this time (RFC3339).",
+              "examples": [
+                "2026-01-31T23:59:59Z"
+              ],
+              "format": "date-time",
               "type": "string"
             }
           }

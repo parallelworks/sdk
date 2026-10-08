@@ -5327,9 +5327,15 @@ type EventActor struct {
 	Username *string `json:"username,omitempty"`
 }
 
+type EventActorOption struct {
+	// Avatar image URL; absent when no user record matches the username.
+	AvatarURL *string `json:"avatarUrl,omitempty"`
+	Username  string  `json:"username"`
+}
+
 type EventActorsOutputBody struct {
-	// Distinct actor usernames, sorted.
-	Actors []string `json:"actors"`
+	// Distinct actors, sorted by username.
+	Actors []EventActorOption `json:"actors"`
 }
 
 type EventHTTP struct {
@@ -10673,7 +10679,7 @@ type PlatformWorkspaceDefaultsPatchBody struct {
 	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
 	// Memory request (GB). Send null to clear.
 	MemoryRequest *float64 `json:"memoryRequest,omitempty"`
-	// Host for user workspaces. Send null to clear.
+	// Host for user workspaces. Only a platform admin can set a new value. Send null to clear.
 	UserHost *string `json:"userHost,omitempty"`
 	// Container image for user workspaces. Send null to clear.
 	WorkspaceImage *string `json:"workspaceImage,omitempty"`
@@ -14918,7 +14924,7 @@ type UserWorkspacePatchBody struct {
 	UserWorkspaceImage *string `json:"userWorkspaceImage,omitempty"`
 	// User workspace type override. Send null to revert to inherited.
 	UserWorkspaceType *string `json:"userWorkspaceType,omitempty"`
-	// User host. Send null to revert to inherited.
+	// User host. Only a platform admin can set a new value. Send null to revert to inherited.
 	Userhost *string `json:"userhost,omitempty"`
 }
 
@@ -15321,7 +15327,7 @@ type WorkspaceDefaultsPatchBody struct {
 	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
 	// Memory request (GB). Send null to clear.
 	MemoryRequest *float64 `json:"memoryRequest,omitempty"`
-	// Host for user workspaces. Send null to clear.
+	// Host for user workspaces. Only a platform admin can set a new value. Send null to clear.
 	UserHost *string `json:"userHost,omitempty"`
 	// Container image for user workspaces. Send null to clear.
 	WorkspaceImage *string `json:"workspaceImage,omitempty"`

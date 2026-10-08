@@ -904,6 +904,15 @@ func (c *Client) ListAdminEvents(ctx context.Context, opts ...ListAdminEventsPar
 	return &result, nil
 }
 
+// ListAdminEventActorsParams contains the parameters for the ListAdminEventActors operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListAdminEventActorsParams struct {
+	// Only actors with events at or after this time (RFC3339).
+	From *time.Time `json:"from,omitempty"`
+	// Only actors with events at or before this time (RFC3339).
+	To *time.Time `json:"to,omitempty"`
+}
+
 // ListAdminEventActors - List Platform Event Actors
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -911,9 +920,21 @@ func (c *Client) ListAdminEvents(ctx context.Context, opts ...ListAdminEventsPar
 // > This is a platform-admin only route.
 //
 // List the distinct actor usernames that appear in audit events across all organizations.
-func (c *Client) ListAdminEventActors(ctx context.Context) (*EventActorsOutputBody, error) {
+func (c *Client) ListAdminEventActors(ctx context.Context, opts ...ListAdminEventActorsParams) (*EventActorsOutputBody, error) {
 
 	path := "/api/admin/events/actors"
+	var params ListAdminEventActorsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "from", "form", false, params.From)
+
+	addQueryParam(queryValues, "to", "form", false, params.To)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
 
 	var result EventActorsOutputBody
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
@@ -3867,6 +3888,45 @@ func (c *Client) ListResourceEvents(ctx context.Context, targetType string, targ
 	}
 
 	var result EventsPageBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListResourceEventActorsParams contains the parameters for the ListResourceEventActors operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListResourceEventActorsParams struct {
+	// Only actors with events at or after this time (RFC3339).
+	From *time.Time `json:"from,omitempty"`
+	// Only actors with events at or before this time (RFC3339).
+	To *time.Time `json:"to,omitempty"`
+}
+
+// ListResourceEventActors - List Resource Event Actors
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// List the distinct actor usernames that appear in a single resource's audit events. Requires view access to the resource.
+func (c *Client) ListResourceEventActors(ctx context.Context, targetType string, targetID string, opts ...ListResourceEventActorsParams) (*EventActorsOutputBody, error) {
+
+	path := "/api/events/resources/{targetType}/{targetId}/actors"
+	path = pathReplace(path, "targetType", "simple", false, targetType)
+	path = pathReplace(path, "targetId", "simple", false, targetID)
+	var params ListResourceEventActorsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "from", "form", false, params.From)
+
+	addQueryParam(queryValues, "to", "form", false, params.To)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result EventActorsOutputBody
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -8831,15 +8891,36 @@ func (c *Client) ListOrganizationEvents(ctx context.Context, organization string
 	return &result, nil
 }
 
+// ListOrganizationEventActorsParams contains the parameters for the ListOrganizationEventActors operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListOrganizationEventActorsParams struct {
+	// Only actors with events at or after this time (RFC3339).
+	From *time.Time `json:"from,omitempty"`
+	// Only actors with events at or before this time (RFC3339).
+	To *time.Time `json:"to,omitempty"`
+}
+
 // ListOrganizationEventActors - List Organization Event Actors
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // List the distinct actor usernames that appear in the organization's audit events. Requires organization admin.
-func (c *Client) ListOrganizationEventActors(ctx context.Context, organization string) (*EventActorsOutputBody, error) {
+func (c *Client) ListOrganizationEventActors(ctx context.Context, organization string, opts ...ListOrganizationEventActorsParams) (*EventActorsOutputBody, error) {
 
 	path := "/api/organizations/{organization}/events/actors"
 	path = pathReplace(path, "organization", "simple", false, organization)
+	var params ListOrganizationEventActorsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "from", "form", false, params.From)
+
+	addQueryParam(queryValues, "to", "form", false, params.To)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
 
 	var result EventActorsOutputBody
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
