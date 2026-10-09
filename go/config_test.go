@@ -1,9 +1,11 @@
 package parallelworks
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestIdentityCredential(t *testing.T) {
@@ -206,6 +208,27 @@ func TestSaveAndLoad(t *testing.T) {
 	}
 	if loaded.Identities["test"].ApiKey != "pwt_abc.def" {
 		t.Errorf("ApiKey = %q, want %q", loaded.Identities["test"].ApiKey, "pwt_abc.def")
+	}
+}
+
+// The CLI rewrites the file through this type, so it must keep a token's reported expiry.
+func TestSaveAndLoad_KeepsTokenExpiry(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "pw", ".credentials")
+	expiresAt := time.Date(2026, 10, 10, 12, 0, 0, 0, time.UTC)
+	cfg := &CredentialConfig{
+		Identities:      map[string]Identity{"test": {Token: "pwut_abc.def", Server: "example.com", Name: "test", ExpiresAt: &expiresAt}},
+		CurrentIdentity: "test",
+	}
+	if err := cfg.SaveTo(path); err != nil {
+		t.Fatalf("SaveTo failed: %v", err)
+	}
+	loaded, err := LoadCredentialConfigFrom(path)
+	if err != nil {
+		t.Fatalf("LoadCredentialConfigFrom failed: %v", err)
+	}
+	got := loaded.Identities["test"].ExpiresAt
+	if got == nil || !got.Equal(expiresAt) {
+		t.Errorf("ExpiresAt = %v, want %v", got, expiresAt)
 	}
 }
 
@@ -539,6 +562,35 @@ func TestUpsertContext(t *testing.T) {
 		}
 		if cfg.Identities["renamed"].ApiKey != "pwt_new.key" {
 			t.Errorf("ApiKey should be updated, got %q", cfg.Identities["renamed"].ApiKey)
+		}
+	})
+
+	t.Run("replacing a pw auth login drops its sign-in state", func(t *testing.T) {
+		cfg := &CredentialConfig{
+			Identities: map[string]Identity{
+				"work": {Token: "pwoa_old", CanonicalName: "user:alice@example.com", OAuth: json.RawMessage(`{"clientId":"pw-cli"}`)},
+			},
+		}
+		if err := cfg.UpsertContext("work", "user:alice@example.com", "example.com", "org1", "pwt_new.key"); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if cfg.Identities["work"].OAuth != nil {
+			t.Errorf("OAuth = %s, want it cleared with the credential it renewed", cfg.Identities["work"].OAuth)
+		}
+	})
+
+	t.Run("replacing a token drops the expiry reported for the old one", func(t *testing.T) {
+		expiresAt := time.Now().Add(20 * time.Hour)
+		cfg := &CredentialConfig{
+			Identities: map[string]Identity{
+				"work": {Token: "pwut_old.raw", CanonicalName: "user:alice@example.com", ExpiresAt: &expiresAt},
+			},
+		}
+		if err := cfg.UpsertContext("", "user:alice@example.com", "example.com", "org1", "pwut_new.raw"); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if got := cfg.Identities["work"].ExpiresAt; got != nil {
+			t.Errorf("ExpiresAt = %v, want it cleared with the token it described", got)
 		}
 	})
 

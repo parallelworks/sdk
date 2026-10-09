@@ -150,6 +150,10 @@
             "description": "The unique identifier for the API key.",
             "type": "string"
           },
+          "impersonatedBy": {
+            "description": "Username of the administrator who created the key while signed in as this user.",
+            "type": "string"
+          },
           "keyHint": {
             "description": "Truncated preview of the key for identification.",
             "type": "string"
@@ -1831,7 +1835,14 @@
               "null"
             ]
           },
+          "archivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
           "autoName": {
+            "type": "string"
+          },
+          "branch": {
             "type": "string"
           },
           "createdAt": {
@@ -1842,6 +1853,13 @@
             "type": "string"
           },
           "id": {
+            "type": "string"
+          },
+          "inputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastError": {
             "type": "string"
           },
           "liveHost": {
@@ -1860,7 +1878,15 @@
           "name": {
             "type": "string"
           },
+          "outputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
           "permissionMode": {
+            "type": "string"
+          },
+          "pinnedAt": {
+            "format": "date-time",
             "type": "string"
           },
           "preview": {
@@ -1931,7 +1957,14 @@
               "null"
             ]
           },
+          "archivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
           "autoName": {
+            "type": "string"
+          },
+          "branch": {
             "type": "string"
           },
           "createdAt": {
@@ -1951,6 +1984,13 @@
             ]
           },
           "id": {
+            "type": "string"
+          },
+          "inputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastError": {
             "type": "string"
           },
           "lastSeq": {
@@ -1973,7 +2013,15 @@
           "name": {
             "type": "string"
           },
+          "outputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
           "permissionMode": {
+            "type": "string"
+          },
+          "pinnedAt": {
+            "format": "date-time",
             "type": "string"
           },
           "preview": {
@@ -2086,6 +2134,38 @@
         "required": [
           "machines",
           "sessions"
+        ],
+        "type": "object"
+      },
+      "AgentShellBody": {
+        "additionalProperties": false,
+        "properties": {
+          "command": {
+            "description": "The command, without the leading !.",
+            "maxLength": 65536,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "command"
+        ],
+        "type": "object"
+      },
+      "AgentShellOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "output": {
+            "description": "What the command printed, stdout and stderr together.",
+            "type": "string"
+          },
+          "stop": {
+            "description": "Why the owner's hook asked that the model not react to the run. Send no follow-up message when it is set.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "output"
         ],
         "type": "object"
       },
@@ -2958,7 +3038,7 @@
             ]
           },
           "consent": {
-            "description": "Whether the user sees a consent screen. Defaults to none.",
+            "description": "Whether the user sees a consent screen. Defaults to none. Always none for a service application, which shows no consent screen.",
             "enum": [
               "none",
               "required"
@@ -3023,7 +3103,7 @@
             "type": "boolean"
           },
           "scopes": {
-            "description": "Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed.",
+            "description": "Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed. A service application gets no refresh tokens, so offline_access is dropped from its list.",
             "items": {
               "type": "string"
             },
@@ -3224,7 +3304,7 @@
             ]
           },
           "consent": {
-            "description": "Whether the user sees a consent screen. Defaults to none.",
+            "description": "Whether the user sees a consent screen. Defaults to none. Always none for a service application, which shows no consent screen.",
             "enum": [
               "none",
               "required"
@@ -3289,7 +3369,7 @@
             "type": "boolean"
           },
           "scopes": {
-            "description": "Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed.",
+            "description": "Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed. A service application gets no refresh tokens, so offline_access is dropped from its list.",
             "items": {
               "type": "string"
             },
@@ -10695,6 +10775,32 @@
         ],
         "type": "object"
       },
+      "ConfirmHostKeyBody": {
+        "additionalProperties": false,
+        "properties": {
+          "host": {
+            "description": "The login node the key belongs to, as configured on the cluster. Required for the login target.",
+            "type": "string"
+          },
+          "key": {
+            "description": "The host public key (authorized_keys line) the owner accepted.",
+            "type": "string"
+          },
+          "target": {
+            "description": "Which host the key belongs to.",
+            "enum": [
+              "login",
+              "jump"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "target",
+          "key"
+        ],
+        "type": "object"
+      },
       "ConnectStateBody": {
         "additionalProperties": false,
         "properties": {
@@ -10774,6 +10880,16 @@
             "description": "Client ID of the application",
             "type": "string"
           },
+          "devices": {
+            "description": "For the pw CLI and the ACTIVATE mobile app, each device it is signed in on; each can be signed out on its own",
+            "items": {
+              "$ref": "#/components/schemas/ConnectedDevice"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "grantedAt": {
             "description": "When the user first granted access",
             "format": "date-time",
@@ -10797,12 +10913,58 @@
               "array",
               "null"
             ]
+          },
+          "signInDisabled": {
+            "description": "Whether a platform administrator turned off sign-in for this application, which stops its existing sign-ins too",
+            "type": "boolean"
           }
         },
         "required": [
           "clientId",
           "name",
           "scopes"
+        ],
+        "type": "object"
+      },
+      "ConnectedDevice": {
+        "additionalProperties": false,
+        "properties": {
+          "current": {
+            "description": "Whether this device made the request",
+            "type": "boolean"
+          },
+          "deviceName": {
+            "description": "Name the device reported; nothing verifies it",
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": "When the device is signed out unless it is used before then",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Identifies this device's sign-in",
+            "type": "string"
+          },
+          "ipAddress": {
+            "description": "Address the device signed in from",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "description": "When the device last used the platform",
+            "format": "date-time",
+            "type": "string"
+          },
+          "signedInAt": {
+            "description": "When the device signed in",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "signedInAt",
+          "current"
         ],
         "type": "object"
       },
@@ -11362,7 +11524,7 @@
             "type": "string"
           },
           "duration": {
-            "description": "Days before the key expires (platform keys). Empty or 0 creates a key that does not expire, unless the organization's maximum API key lifetime requires one.",
+            "description": "Days before the key expires, at most the organization's maximum API key lifetime, which is 730 days when no policy sets it. Empty or 0 creates a key that does not expire, which only an Unlimited policy allows.",
             "maxLength": 5,
             "pattern": "^[0-9]*$",
             "patternDescription": "whole number of days",
@@ -11407,6 +11569,10 @@
           },
           "id": {
             "description": "The unique identifier for the API key.",
+            "type": "string"
+          },
+          "impersonatedBy": {
+            "description": "Username of the administrator who created the key while signed in as this user.",
             "type": "string"
           },
           "key": {
@@ -11903,6 +12069,10 @@
       "CreateClusterInputBody": {
         "additionalProperties": false,
         "properties": {
+          "allowPrivateAddress": {
+            "description": "Lets the endpoint be on a private network. Only a platform administrator can turn this on, and while it is on only a platform administrator can change the endpoint or CA certificate.",
+            "type": "boolean"
+          },
           "caCert": {
             "description": "PEM-encoded CA certificate. Leave empty when the cluster uses a publicly trusted certificate.",
             "type": "string"
@@ -14310,6 +14480,39 @@
         ],
         "type": "object"
       },
+      "DecideDeviceRequestInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "approve": {
+            "description": "True to sign the device in; false to refuse it",
+            "type": "boolean"
+          },
+          "userCode": {
+            "description": "The code shown by the device, with or without its dash",
+            "maxLength": 32,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "userCode",
+          "approve"
+        ],
+        "type": "object"
+      },
+      "DecideDeviceRequestOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "approved": {
+            "description": "Whether the device is now signed in once it next polls",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "approved"
+        ],
+        "type": "object"
+      },
       "DeleteDeploymentBody": {
         "additionalProperties": false,
         "properties": {
@@ -14746,6 +14949,78 @@
             "type": "boolean"
           }
         },
+        "type": "object"
+      },
+      "DeviceAuthorizationBody": {
+        "additionalProperties": false,
+        "properties": {
+          "device_code": {
+            "description": "Code the device polls the token endpoint with",
+            "type": "string"
+          },
+          "error": {
+            "description": "OAuth error code",
+            "type": "string"
+          },
+          "error_description": {
+            "description": "Human-readable error detail",
+            "type": "string"
+          },
+          "error_uri": {
+            "description": "Page that explains the error",
+            "type": "string"
+          },
+          "expires_in": {
+            "description": "Seconds until both codes expire",
+            "format": "int64",
+            "type": "integer"
+          },
+          "interval": {
+            "description": "Seconds to wait between polls",
+            "format": "int64",
+            "type": "integer"
+          },
+          "user_code": {
+            "description": "Code the user enters at the verification URI",
+            "type": "string"
+          },
+          "verification_uri": {
+            "description": "Page where the user enters the code",
+            "type": "string"
+          },
+          "verification_uri_complete": {
+            "description": "The verification page with the code filled in",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DeviceCodeBody": {
+        "additionalProperties": false,
+        "properties": {
+          "userCode": {
+            "description": "The code shown by the device, with or without its dash",
+            "maxLength": 32,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "userCode"
+        ],
+        "type": "object"
+      },
+      "DeviceRequestBody": {
+        "additionalProperties": false,
+        "properties": {
+          "clientName": {
+            "description": "Name of the application asking to sign in",
+            "type": "string"
+          }
+        },
+        "required": [
+          "clientName"
+        ],
         "type": "object"
       },
       "DiscoverCACertInputBody": {
@@ -15858,6 +16133,10 @@
             "description": "Group name",
             "type": "string"
           },
+          "hostKeys": {
+            "$ref": "#/components/schemas/ExistingClusterHostKeys",
+            "description": "SSH host keys the workspace verifies the cluster against"
+          },
           "id": {
             "description": "Cluster ID",
             "readOnly": true,
@@ -15903,7 +16182,8 @@
           "remoteHost",
           "key",
           "tunnelConnected",
-          "variables"
+          "variables",
+          "hostKeys"
         ],
         "type": "object"
       },
@@ -15969,6 +16249,81 @@
         },
         "required": [
           "type"
+        ],
+        "type": "object"
+      },
+      "ExistingClusterHostKeys": {
+        "additionalProperties": false,
+        "properties": {
+          "jump": {
+            "description": "Host keys the owner accepted for the jump host.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "login": {
+            "description": "Host keys the owner accepted, per login node; a node with no entry has none recorded.",
+            "items": {
+              "$ref": "#/components/schemas/ExistingClusterLoginHostKeys"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "policy": {
+            "description": "off skips verification; otherwise, when the list is empty, warn connects unverified and enforce refuses.",
+            "enum": [
+              "off",
+              "warn",
+              "enforce"
+            ],
+            "type": "string"
+          },
+          "pwServer": {
+            "description": "Keys pw ssh --proxy-command connections reach: the agent's own SSH server when the platform tunnels the cluster, otherwise the login node's sshd.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "login",
+          "jump",
+          "pwServer",
+          "policy"
+        ],
+        "type": "object"
+      },
+      "ExistingClusterLoginHostKeys": {
+        "additionalProperties": false,
+        "properties": {
+          "host": {
+            "description": "The login node, as configured on the cluster.",
+            "type": "string"
+          },
+          "keys": {
+            "description": "Host public keys the owner accepted for this login node.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "host",
+          "keys"
         ],
         "type": "object"
       },
@@ -16964,6 +17319,16 @@
             "description": "True when SSH to this cluster routes through the platform. False when it is dialed directly, which a cluster on a public address does unless an administrator has whitelisted it.",
             "type": "boolean"
           },
+          "sshHostKeys": {
+            "description": "Cloud and managed clusters: the sshd host public keys the controller or login node's agent reported, which SSH clients verify the server against.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "status": {
             "description": "The status of the resource.",
             "enum": [
@@ -17054,6 +17419,23 @@
         ],
         "type": "object"
       },
+      "GenerateNodeTokenBody": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresInMinutes": {
+            "description": "Minutes until the token expires, at most 24 hours. Defaults to 60 for a reusable token and 1440 for a single-use one.",
+            "format": "int64",
+            "maximum": 1440,
+            "minimum": 5,
+            "type": "integer"
+          },
+          "reusable": {
+            "description": "Register any number of nodes until the token expires or is revoked, instead of one node",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "GenerateNodeTokenOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -17066,9 +17448,21 @@
             "format": "date-time",
             "type": "string"
           },
+          "hint": {
+            "description": "Short preview of the token",
+            "type": "string"
+          },
+          "id": {
+            "description": "Token id, for revoking it",
+            "type": "string"
+          },
           "organization": {
             "description": "Organization name",
             "type": "string"
+          },
+          "reusable": {
+            "description": "Whether the token registers any number of nodes until it expires",
+            "type": "boolean"
           },
           "token": {
             "description": "Node registration token",
@@ -17077,6 +17471,9 @@
         },
         "required": [
           "token",
+          "id",
+          "hint",
+          "reusable",
           "expiresAt",
           "organization",
           "cluster"
@@ -19368,6 +19765,16 @@
             "$ref": "#/components/schemas/SchedulerInfo",
             "description": "Scheduler information"
           },
+          "sshHostKeys": {
+            "description": "The node's sshd host public keys (authorized_keys lines), which SSH clients verify the node against.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "systemInfo": {
             "$ref": "#/components/schemas/SystemInfo",
             "description": "Static system information"
@@ -21517,6 +21924,10 @@
       "KubernetesSingleClusterResponse": {
         "additionalProperties": false,
         "properties": {
+          "allowPrivateAddress": {
+            "description": "Whether a platform administrator allowed the endpoint to be on a private network",
+            "type": "boolean"
+          },
           "caCert": {
             "description": "Base64-encoded CA certificate",
             "examples": [
@@ -21583,7 +21994,8 @@
           "name",
           "endpoint",
           "caCert",
-          "type"
+          "type",
+          "allowPrivateAddress"
         ],
         "type": "object"
       },
@@ -22031,12 +22443,16 @@
       "Ldap": {
         "additionalProperties": false,
         "properties": {
+          "allowPrivateAddress": {
+            "description": "Lets the LDAP server be on a private network. Only a platform administrator can turn this on, and while it is on only a platform administrator can change the server or weaken its TLS settings.",
+            "type": "boolean"
+          },
           "baseDN": {
             "description": "Base DN for LDAP authentication",
             "type": "string"
           },
           "caCert": {
-            "description": "CA certificate used to verify the LDAP server",
+            "description": "CA certificate used to verify the LDAP server. On update, an omitted value keeps the stored certificate and an empty value removes it",
             "type": "string"
           },
           "clientCert": {
@@ -22129,12 +22545,16 @@
       "LdapConnectionTest": {
         "additionalProperties": false,
         "properties": {
+          "allowPrivateAddress": {
+            "description": "Lets the LDAP server be on a private network. Only a platform administrator can turn this on, and while it is on only a platform administrator can change the server or weaken its TLS settings.",
+            "type": "boolean"
+          },
           "baseDN": {
             "description": "Base DN for LDAP authentication",
             "type": "string"
           },
           "caCert": {
-            "description": "CA certificate used to verify the LDAP server",
+            "description": "CA certificate used to verify the LDAP server. On update, an omitted value keeps the stored certificate and an empty value removes it",
             "type": "string"
           },
           "clientCert": {
@@ -23050,6 +23470,14 @@
       "LoginSessionResponse": {
         "additionalProperties": false,
         "properties": {
+          "client": {
+            "description": "Set to pw-cli for a device signed in to the pw CLI, or pw-mobile for one signed in to the ACTIVATE mobile app. Only listed for another user's sessions; your own are under connected applications.",
+            "enum": [
+              "pw-cli",
+              "pw-mobile"
+            ],
+            "type": "string"
+          },
           "createdAt": {
             "description": "When the session was created.",
             "format": "date-time",
@@ -23058,6 +23486,10 @@
           "current": {
             "description": "Whether this is the session making the request.",
             "type": "boolean"
+          },
+          "deviceName": {
+            "description": "For a pw CLI or mobile app sign-in, the name the device reported; nothing verifies it.",
+            "type": "string"
           },
           "expiresAt": {
             "description": "When the session expires.",
@@ -26472,6 +26904,45 @@
         ],
         "type": "object"
       },
+      "NodeToken": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "description": "When the token was created",
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "description": "Username of the user who created the token",
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": "When the token expires",
+            "format": "date-time",
+            "type": "string"
+          },
+          "hint": {
+            "description": "Short preview of the token",
+            "type": "string"
+          },
+          "id": {
+            "description": "Token id",
+            "type": "string"
+          },
+          "reusable": {
+            "description": "Whether the token registers any number of nodes until it expires",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "hint",
+          "reusable",
+          "createdAt",
+          "expiresAt"
+        ],
+        "type": "object"
+      },
       "NodesBody": {
         "additionalProperties": false,
         "properties": {
@@ -26744,6 +27215,10 @@
               "null"
             ]
           },
+          "allowPrivateAddress": {
+            "description": "Lets the issuer and endpoint hosts be on a private network. Only a platform administrator can turn this on, and while it is on only a platform administrator can change the issuer or endpoints.",
+            "type": "boolean"
+          },
           "authorizationEndpoint": {
             "description": "Authorization endpoint of the OIDC authentication method",
             "type": "string"
@@ -26891,6 +27366,10 @@
               "null"
             ]
           },
+          "device_authorization_endpoint": {
+            "description": "URL of the device authorization endpoint (RFC 8628), open to the pw CLI only",
+            "type": "string"
+          },
           "end_session_endpoint": {
             "description": "URL of the RP-initiated logout endpoint",
             "type": "string"
@@ -27018,6 +27497,7 @@
           "end_session_endpoint",
           "revocation_endpoint",
           "introspection_endpoint",
+          "device_authorization_endpoint",
           "jwks_uri",
           "scopes_supported",
           "response_types_supported",
@@ -29768,6 +30248,10 @@
       "PendingConsentOutputBody": {
         "additionalProperties": false,
         "properties": {
+          "cliSignIn": {
+            "$ref": "#/components/schemas/PendingNativeSignIn",
+            "description": "Present when the request is a pw CLI sign-in, which is confirmed every time"
+          },
           "clientId": {
             "description": "Client ID of the application asking for access",
             "type": "string"
@@ -29775,6 +30259,10 @@
           "description": {
             "description": "Description the organization gave the application",
             "type": "string"
+          },
+          "mobileSignIn": {
+            "$ref": "#/components/schemas/PendingNativeSignIn",
+            "description": "Present when the request is an ACTIVATE mobile app sign-in, which is confirmed every time"
           },
           "name": {
             "description": "Display name of the application",
@@ -29809,6 +30297,19 @@
           "name",
           "scopes",
           "redirectUri"
+        ],
+        "type": "object"
+      },
+      "PendingNativeSignIn": {
+        "additionalProperties": false,
+        "properties": {
+          "account": {
+            "description": "Username of the account the app will be signed in to",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account"
         ],
         "type": "object"
       },
@@ -30157,7 +30658,7 @@
             "type": "boolean"
           },
           "maxApiKeyTtlDays": {
-            "description": "The maximum number of days an API key or SCIM token can be valid for, resolved from the max-api-key-ttl policy. Omitted when no cap applies. Only returned if the user is authenticated.",
+            "description": "The maximum number of days an API key can be valid for, resolved from the max-api-key-ttl policy, or 730 when no policy is set. Omitted when the policy is Unlimited. Only returned if the user is authenticated.",
             "format": "int64",
             "type": "integer"
           },
@@ -30262,6 +30763,15 @@
             "description": "Indicates if the platform is a single organization platform.",
             "type": "boolean"
           },
+          "sshHostKeyVerification": {
+            "description": "Whether SSH clients verify server host keys: off (the default), warn (connect to unrecorded hosts and report them), or enforce (refuse them).",
+            "enum": [
+              "off",
+              "warn",
+              "enforce"
+            ],
+            "type": "string"
+          },
           "sshResumeEnabled": {
             "description": "Indicates if the platform advertises resumable SSH sessions; hpcconnect relaxes generated ssh keepalives when set.",
             "type": "boolean"
@@ -30333,6 +30843,7 @@
           "forgotPasswordEnabled",
           "quicTunnelEnabled",
           "sshResumeEnabled",
+          "sshHostKeyVerification",
           "customDomainsEnabled",
           "enableOnboarding"
         ],
@@ -30479,6 +30990,15 @@
             "format": "double",
             "type": "number"
           },
+          "sshHostKeyVerification": {
+            "description": "Whether SSH clients verify server host keys: off (the default) skips verification; warn connects to a host with no recorded key and reports it; enforce refuses that host. Under warn and enforce a recorded key that differs from the presented one always fails.",
+            "enum": [
+              "off",
+              "warn",
+              "enforce"
+            ],
+            "type": "string"
+          },
           "sshResumeEnabled": {
             "description": "Whether to advertise resumable SSH sessions, letting tunneled connections to supporting agents survive tunnel drops and ingress restarts. Off by default; turning it off instantly falls new connections back to plain bridging.",
             "type": "boolean"
@@ -30517,6 +31037,7 @@
           "useBuiltinChangelog",
           "quicTunnelEnabled",
           "sshResumeEnabled",
+          "sshHostKeyVerification",
           "bucketTokenTtlMinutes",
           "gcsHmacRotationEnabled",
           "gcsHmacRotationMaxAgeHours",
@@ -37738,6 +38259,10 @@
           "id": {
             "type": "string"
           },
+          "impersonatedBy": {
+            "description": "Username of the administrator who added the key while signed in as this user.",
+            "type": "string"
+          },
           "key": {
             "type": "string"
           },
@@ -39374,6 +39899,45 @@
         ],
         "type": "object"
       },
+      "SshHostKeys": {
+        "additionalProperties": false,
+        "properties": {
+          "hostKeys": {
+            "description": "Recorded host public keys (authorized_keys lines) or SHA256 fingerprints for the login target; any match is accepted.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "jumpHostKeys": {
+            "description": "Recorded keys for the cluster's jump host, when the cluster connects through one.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "policy": {
+            "description": "off skips verification; otherwise, when hostKeys is empty, warn connects unverified and enforce refuses.",
+            "enum": [
+              "off",
+              "warn",
+              "enforce"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "hostKeys",
+          "policy"
+        ],
+        "type": "object"
+      },
       "SshPrivateKey": {
         "additionalProperties": false,
         "properties": {
@@ -39390,6 +39954,11 @@
           },
           "id": {
             "description": "The unique identifier of the SSH key",
+            "readOnly": true,
+            "type": "string"
+          },
+          "impersonatedBy": {
+            "description": "Username of the administrator who added the key while signed in as this user",
             "readOnly": true,
             "type": "string"
           },
@@ -40544,7 +41113,7 @@
         "additionalProperties": false,
         "properties": {
           "access_token": {
-            "description": "Opaque access token for the userinfo endpoint",
+            "description": "Opaque access token for the userinfo endpoint; for a token exchange, the issued token itself",
             "type": "string"
           },
           "error": {
@@ -40555,13 +41124,21 @@
             "description": "Human-readable error detail",
             "type": "string"
           },
+          "error_uri": {
+            "description": "Page that explains the error",
+            "type": "string"
+          },
           "expires_in": {
-            "description": "Access token lifetime in seconds",
+            "description": "Lifetime in seconds of the access token, or of the issued token for a token exchange",
             "format": "int64",
             "type": "integer"
           },
           "id_token": {
             "description": "Signed ID token",
+            "type": "string"
+          },
+          "issued_token_type": {
+            "description": "Type of the issued token, set only for a token exchange (RFC 8693 section 2.2.1)",
             "type": "string"
           },
           "refresh_token": {
@@ -40573,7 +41150,7 @@
             "type": "string"
           },
           "token_type": {
-            "description": "Always Bearer",
+            "description": "Bearer, or N_A for a token exchange whose issued token is not an access token",
             "type": "string"
           }
         },
@@ -41012,6 +41589,15 @@
             "description": "Whether to enable single org platform.",
             "type": "boolean"
           },
+          "sshHostKeyVerification": {
+            "description": "Whether SSH clients verify server host keys: off, warn or enforce.",
+            "enum": [
+              "off",
+              "warn",
+              "enforce"
+            ],
+            "type": "string"
+          },
           "sshResumeEnabled": {
             "description": "Whether to advertise resumable SSH sessions to clients.",
             "type": "boolean"
@@ -41105,6 +41691,10 @@
       "UpdateClusterInputBody": {
         "additionalProperties": false,
         "properties": {
+          "allowPrivateAddress": {
+            "description": "Lets the endpoint be on a private network. Only a platform administrator can turn this on, and while it is on only a platform administrator can change the endpoint or CA certificate.",
+            "type": "boolean"
+          },
           "caCert": {
             "description": "Base64-encoded CA certificate. Leave empty when the cluster uses a publicly trusted certificate.",
             "type": "string"
@@ -48900,7 +49490,7 @@
     },
     "/api/admin/resources/delete-deployment": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nDeletes every live cloud resource tagged with the deployment id (as session-id or pw-deployment-id). Resources with a live platform record are deleted through it; the rest are swept directly in the cloud by gaia. Always dry-run first.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDeletes every live cloud resource tagged with the deployment id (as session-id or pw-deployment-id). Resources with a live platform record are deleted through it; the rest are swept directly in the cloud by gaia. Platform administrators can delete any deployment; organization administrators can delete one whose resources all belong to their organization. Always dry-run first.",
         "operationId": "delete-deployment-resources",
         "requestBody": {
           "content": {
@@ -50320,6 +50910,71 @@
           }
         },
         "summary": "Change a running pw code session's model, allocation or authority",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/shell": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns a command in the session's workspace, as typing ! in the terminal does, and answers with its output. The command and output join the conversation; send an empty message to have the model react to them. The machine refuses a command its owner could not approve from a remote origin or that its PreToolUse hooks deny, and stops one that runs longer than about 20 seconds.",
+        "operationId": "run-agent-session-shell",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentShellBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentShellOutput"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Run a ! shell command in a pw code session",
         "tags": [
           "Agents"
         ],
@@ -52047,57 +52702,6 @@
           }
         },
         "summary": "Generate a user token",
-        "tags": [
-          "Authentication"
-        ]
-      }
-    },
-    "/api/auth/token/oidc": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGet an OIDC token for the logged in user to access a Kubernetes cluster.",
-        "operationId": "get-auth-token-oidc",
-        "parameters": [
-          {
-            "description": "Name of the Kubernetes cluster",
-            "explode": false,
-            "in": "query",
-            "name": "clusterName",
-            "schema": {
-              "description": "Name of the Kubernetes cluster",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": "OK",
-            "headers": {
-              "Cache-Control": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Get OIDC token",
         "tags": [
           "Authentication"
         ]
@@ -54482,6 +55086,60 @@
           }
         },
         "summary": "Report Cluster Connect State",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/internal/usercontainer/clusters/{clusterId}/host-keys": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRecords a host key the cluster owner accepted in the workspace's connect prompt and returns the cluster's host keys. Owner only.",
+        "operationId": "confirm-cluster-host-key",
+        "parameters": [
+          {
+            "description": "The cluster (pool) id.",
+            "in": "path",
+            "name": "clusterId",
+            "required": true,
+            "schema": {
+              "description": "The cluster (pool) id.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmHostKeyBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExistingClusterHostKeys"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Confirm Cluster Host Key",
         "tags": [
           "Clusters"
         ]
@@ -58810,6 +59468,53 @@
         ]
       }
     },
+    "/api/oidc/connected-apps/{clientId}/devices/{deviceId}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nEnds one device's sign-in to the pw CLI or the ACTIVATE mobile app, revoking its tokens at once, and leaves the user's other devices signed in. The device IDs are listed under `devices` on the app's connected application.",
+        "operationId": "sign-out-oidc-connected-device",
+        "parameters": [
+          {
+            "description": "Client ID of the application; only the pw CLI and the ACTIVATE mobile app have devices",
+            "in": "path",
+            "name": "clientId",
+            "required": true,
+            "schema": {
+              "description": "Client ID of the application; only the pw CLI and the ACTIVATE mobile app have devices",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of the device sign-in to end",
+            "in": "path",
+            "name": "deviceId",
+            "required": true,
+            "schema": {
+              "description": "ID of the device sign-in to end",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Sign a device out of the pw CLI or the ACTIVATE mobile app",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
     "/api/oidc/consent": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDescribes the authorization request waiting on the user's decision, for the consent screen to render.",
@@ -58884,6 +59589,149 @@
           }
         },
         "summary": "Decide a pending consent request",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/oidc/device/decision": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nApproves or denies the pw CLI sign-in a user code belongs to. An approval signs the device in as the calling user when it next polls. Only a browser session can call this.",
+        "operationId": "decide-oidc-device-request",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecideDeviceRequestInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecideDeviceRequestOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Approve or deny a pw CLI device sign-in",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/oidc/device/lookup": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nChecks that a user code belongs to a pending pw CLI sign-in and names the application asking, so the user can confirm it before approving. The code is sent in the body so it stays out of URLs and logs. Only a browser session can call this, and failed codes are rate limited.",
+        "operationId": "lookup-oidc-device-request",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceCodeBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceRequestBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Describe a pw CLI device sign-in",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/oidc/device_authorization": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nStarts a pw CLI sign-in on a device without a usable browser (RFC 8628). The body is `application/x-www-form-urlencoded` with `client_id`, an optional `scope`, and an optional `device_name` naming the host. The response carries a `user_code` the user enters at `verification_uri` and a `device_code` the device polls the token endpoint with, using `grant_type=urn:ietf:params:oauth:grant-type:device_code`. Codes expire after 10 minutes and are single use.",
+        "operationId": "post-oidc-device-authorization",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "contentMediaType": "application/octet-stream",
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceAuthorizationBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [],
+        "summary": "OAuth device authorization endpoint",
         "tags": [
           "Authentication"
         ]
@@ -59062,6 +59910,7 @@
             "description": "Error"
           }
         },
+        "security": [],
         "summary": "OAuth token introspection endpoint",
         "tags": [
           "Authentication"
@@ -59099,6 +59948,11 @@
                   "type": "string"
                 }
               },
+              "Pragma": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "WWW-Authenticate": {
                 "schema": {
                   "type": [
@@ -59120,6 +59974,7 @@
             "description": "Error"
           }
         },
+        "security": [],
         "summary": "OAuth token revocation endpoint",
         "tags": [
           "Authentication"
@@ -59178,7 +60033,7 @@
     },
     "/api/oidc/token": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRedeems an authorization code, or rotates a refresh token, for an ID token and an opaque access token (RFC 6749 sections 4.1.3 and 6).\n\nThe body is `application/x-www-form-urlencoded`. To redeem a code, send `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. To refresh, send `grant_type=refresh_token`, a `refresh_token` issued for the `offline_access` scope, and an optional `scope` that can narrow but never widen the original grant; the response carries a new refresh token, and presenting a spent one again revokes every token descended from it. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRedeems an authorization code, or rotates a refresh token, for an ID token and an opaque access token (RFC 6749 sections 4.1.3 and 6).\n\nThe body is `application/x-www-form-urlencoded`. To redeem a code, send `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. To refresh, send `grant_type=refresh_token`, a `refresh_token` issued for the `offline_access` scope, and an optional `scope` that can narrow but never widen the original grant; the response carries a new refresh token, and presenting a spent one again revokes every token descended from it. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.\n\nThe pw CLI polls here with `grant_type=urn:ietf:params:oauth:grant-type:device_code` and the `device_code` from the device authorization endpoint, and is told `authorization_pending`, `slow_down`, `expired_token`, or `access_denied` until the user decides.\n\nA service application or Kubernetes cluster gets an ID token for a user through the token exchange grant (RFC 8693), the exec-credential pattern kubectl uses. Send `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`, the application's `client_id` (or `audience`), `subject_token` set to the user's platform API key or pw CLI access token (a Kubernetes cluster also accepts the user's platform token; an ACTIVATE mobile app access token is refused), `subject_token_type=urn:ietf:params:oauth:token-type:access_token`, and optionally `requested_token_type=urn:ietf:params:oauth:token-type:id_token` and a narrowing `scope`. These clients hold no secret, so none is sent. The response carries the ID token in `access_token`, with `issued_token_type=urn:ietf:params:oauth:token-type:id_token` and `token_type=N_A`. Any other kind of application is refused with `unauthorized_client`, or with `invalid_target` when only `audience` names it.",
         "operationId": "post-oidc-token",
         "requestBody": {
           "content": {
@@ -59207,6 +60062,11 @@
                   "type": "string"
                 }
               },
+              "Pragma": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "WWW-Authenticate": {
                 "schema": {
                   "type": [
@@ -59228,59 +60088,8 @@
             "description": "Error"
           }
         },
+        "security": [],
         "summary": "OIDC token endpoint",
-        "tags": [
-          "Authentication"
-        ]
-      }
-    },
-    "/api/oidc/token/direct": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nMints an identity token for the logged-in user against a registered application, without a browser redirect. This is the exec-credential pattern used by kubectl.",
-        "operationId": "get-oidc-token-direct",
-        "parameters": [
-          {
-            "description": "The client ID of the application to mint a token for",
-            "explode": false,
-            "in": "query",
-            "name": "clientId",
-            "required": true,
-            "schema": {
-              "description": "The client ID of the application to mint a token for",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": "OK",
-            "headers": {
-              "Cache-Control": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Get an identity token by direct grant",
         "tags": [
           "Authentication"
         ]
@@ -72748,7 +73557,7 @@
     },
     "/api/organizations/{organization}/managed-clusters/{cluster}/node-token": {
       "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGenerates a token for registering a node with the cluster.",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGenerates a token for registering nodes with the cluster. A single-use token registers one node and expires in 24 hours by default; a reusable token registers any number of nodes until it expires (1 hour by default, at most 24 hours) or is revoked.",
         "operationId": "generate-node-token",
         "parameters": [
           {
@@ -72775,6 +73584,15 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateNodeTokenBody"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -72805,6 +73623,129 @@
           }
         },
         "summary": "Generate Node Token",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/managed-clusters/{cluster}/node-tokens": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists the cluster's unexpired node registration tokens.",
+        "operationId": "list-node-tokens",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name",
+            "in": "path",
+            "name": "cluster",
+            "required": true,
+            "schema": {
+              "description": "Cluster name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NodeToken"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Node Tokens",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/managed-clusters/{cluster}/node-tokens/{id}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRevokes a node registration token so it registers no more nodes.",
+        "operationId": "revoke-node-token",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cluster name",
+            "in": "path",
+            "name": "cluster",
+            "required": true,
+            "schema": {
+              "description": "Cluster name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Token id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Token id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Revoke Node Token",
         "tags": [
           "Clusters"
         ]
@@ -74768,6 +75709,71 @@
           }
         },
         "summary": "Set organization policy: default-billing-username",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/policies/disable-device-login": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets whether members can sign in to the pw CLI with a device code. Allowed when unset; true leaves only browser sign-in, which needs a browser on the same computer.",
+        "operationId": "set-organization-disable-device-login-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/BooleanPolicyOutput"
+                  },
+                  "description": "Map of boolean policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: disable-device-login",
         "tags": [
           "Policies"
         ]
@@ -83788,6 +84794,63 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/host-keys": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nClears the SSH host keys accepted for a user-added cluster, so the next connect asks to trust the keys its login and jump hosts present. Use it after a cluster's host keys change legitimately.",
+        "operationId": "forget-cluster-host-keys",
+        "parameters": [
+          {
+            "description": "The organization name.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The organization name.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The username of the cluster owner.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "The username of the cluster owner.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The cluster name.",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "The cluster name.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Forget Cluster Host Keys",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/icon": {
       "delete": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves a Compute V3 or Pool cluster's icon and releases the underlying blob.",
@@ -89054,7 +90117,7 @@
         ]
       },
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nLists the active login sessions for the specified user. IP addresses are only included when listing your own sessions.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nLists the active login sessions for the specified user. IP addresses are only included when listing your own sessions. Another user's list also includes each device they are signed in to the pw CLI on, marked with `client: pw-cli`; your own devices are listed under connected applications.",
         "operationId": "list-user-login-sessions",
         "parameters": [
           {
@@ -89120,7 +90183,7 @@
     },
     "/api/organizations/{organization}/users/{user}/login-sessions/{id}": {
       "delete": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRevokes a single login session for the specified user. Only callable via browser session authentication.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRevokes a single login session for the specified user. A pw CLI device in another user's list is signed out along with every token issued to it. Only callable via browser session authentication.",
         "operationId": "revoke-user-login-session",
         "parameters": [
           {
@@ -92829,6 +93892,16 @@
                   "description": "The unique identifier of the SSH key",
                   "readOnly": true,
                   "type": "string"
+                }
+              },
+              "ImpersonatedBy": {
+                "schema": {
+                  "description": "Username of the administrator who added the key while signed in as this user",
+                  "readOnly": true,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 }
               },
               "KeyFile": {
@@ -96860,6 +97933,56 @@
         ]
       }
     },
+    "/api/platform/policies/disable-device-login": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets whether users in every organization can sign in to the pw CLI with a device code. Allowed when unset; true leaves only browser sign-in.",
+        "operationId": "set-platform-disable-device-login-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/BooleanPolicyOutput"
+                  },
+                  "description": "Map of boolean policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: disable-device-login",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/platform/policies/disable-password-login": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the disable-password-login policy for the platform.",
@@ -96905,6 +98028,106 @@
           }
         },
         "summary": "Set platform policy: disable-password-login",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/disable-pw-cli-sign-in": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets whether anyone can sign in through the pw CLI. Allowed when unset; true refuses new sign-ins and stops existing ones, which work again once it is false or removed. API keys are not affected.",
+        "operationId": "set-platform-disable-pw-cli-sign-in-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/BooleanPolicyOutput"
+                  },
+                  "description": "Map of boolean policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: disable-pw-cli-sign-in",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/disable-pw-mobile-sign-in": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets whether anyone can sign in through the ACTIVATE mobile app. Allowed when unset; true refuses new sign-ins and stops existing ones, which work again once it is false or removed. API keys are not affected.",
+        "operationId": "set-platform-disable-pw-mobile-sign-in-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Policy value",
+                "examples": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/BooleanPolicyOutput"
+                  },
+                  "description": "Map of boolean policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: disable-pw-mobile-sign-in",
         "tags": [
           "Policies"
         ]
@@ -100103,6 +101326,51 @@
         "summary": "Delete an SSH public key",
         "tags": [
           "User Settings"
+        ]
+      }
+    },
+    "/api/ssh/host-keys": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the SSH host keys recorded for a resource the caller may connect to, so a client can verify the server it reaches.",
+        "operationId": "get-ssh-host-keys",
+        "parameters": [
+          {
+            "description": "The SSH resource, as accepted by pw ssh: workspace, pw://\u003cuser\u003e/\u003ccluster\u003e, or worker/\u003cid\u003e.",
+            "explode": false,
+            "in": "query",
+            "name": "resource",
+            "required": true,
+            "schema": {
+              "description": "The SSH resource, as accepted by pw ssh: workspace, pw://\u003cuser\u003e/\u003ccluster\u003e, or worker/\u003cid\u003e.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SshHostKeys"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get SSH host keys",
+        "tags": [
+          "Clusters"
         ]
       }
     },
@@ -104031,7 +105299,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "description": "'OK' when everything is ready",
+                  "description": "'OK' when the service is up",
                   "examples": [
                     "OK"
                   ],

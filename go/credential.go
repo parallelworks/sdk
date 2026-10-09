@@ -10,6 +10,12 @@ import (
 const (
 	// APIKeyPrefix is the prefix for Parallel Works API keys
 	APIKeyPrefix = "pwt_"
+	// OpaqueAccessTokenPrefix marks an opaque OAuth access token, such as the one
+	// `pw auth login` saves; it is sent as a Bearer token like a JWT.
+	OpaqueAccessTokenPrefix = "pwoa_"
+	// UserTokenPrefix marks an opaque user token. It names its platform host as
+	// an API key does, and is sent as a Bearer token like a JWT.
+	UserTokenPrefix = "pwut_"
 )
 
 // ErrInvalidCredential is returned when a credential cannot be parsed
@@ -23,22 +29,32 @@ func IsAPIKey(credential string) bool {
 	return strings.HasPrefix(strings.TrimSpace(credential), APIKeyPrefix)
 }
 
-// IsToken returns true if the credential appears to be a JWT token.
-// JWTs have three base64-encoded parts separated by dots.
+// IsToken returns true if the credential is sent as a Bearer token: a JWT, whose
+// three base64-encoded parts are separated by dots, an opaque OAuth access token,
+// or an opaque user token.
 func IsToken(credential string) bool {
 	credential = strings.TrimSpace(credential)
+	if strings.HasPrefix(credential, OpaqueAccessTokenPrefix) || strings.HasPrefix(credential, UserTokenPrefix) {
+		return true
+	}
 	parts := strings.Split(credential, ".")
 	return len(parts) == 3 && !strings.HasPrefix(credential, APIKeyPrefix)
 }
 
-// ExtractPlatformHost extracts the platform host from an API key or JWT token.
+// ExtractPlatformHost extracts the platform host from an API key or token.
 //
-// For API keys (pwt_xxxx.yyyy): decodes the first part after pwt_ to get the host
+// For API keys (pwt_xxxx.yyyy) and opaque user tokens (pwut_xxxx.yyyy): decodes the first part after the prefix
 // For JWT tokens: decodes the payload (second segment) and reads platform_host field
 func ExtractPlatformHost(credential string) (string, error) {
 	credential = strings.TrimSpace(credential)
 	if IsAPIKey(credential) {
-		return extractHostFromAPIKey(credential)
+		return extractEncodedHost(credential, APIKeyPrefix)
+	}
+	if strings.HasPrefix(credential, UserTokenPrefix) {
+		return extractEncodedHost(credential, UserTokenPrefix)
+	}
+	if strings.HasPrefix(credential, OpaqueAccessTokenPrefix) {
+		return "", ErrNoPlatformHost
 	}
 	if IsToken(credential) {
 		return extractHostFromToken(credential)
@@ -46,11 +62,10 @@ func ExtractPlatformHost(credential string) (string, error) {
 	return "", ErrInvalidCredential
 }
 
-// extractHostFromAPIKey extracts platform host from an API key.
-// API key format: pwt_<base64_host>.<key>
-func extractHostFromAPIKey(apiKey string) (string, error) {
-	// Remove pwt_ prefix
-	withoutPrefix := strings.TrimPrefix(apiKey, APIKeyPrefix)
+// extractEncodedHost extracts the platform host from a credential of the form
+// <prefix><base64_host>.<key>.
+func extractEncodedHost(credential, prefix string) (string, error) {
+	withoutPrefix := strings.TrimPrefix(credential, prefix)
 
 	// Split by dot
 	parts := strings.SplitN(withoutPrefix, ".", 2)
@@ -124,7 +139,7 @@ func extractHostFromToken(token string) (string, error) {
 // NewClientFromCredential creates a new client using only a credential.
 // The platform host is automatically extracted from the credential.
 //
-// For API keys: host is decoded from the first part after pwt_
+// For API keys and opaque user tokens: host is decoded from the first part after the prefix
 // For JWT tokens: host is read from the platform_host claim
 //
 // Example:
@@ -144,7 +159,7 @@ func NewClientFromCredential(credential string, opts ...ClientOption) (*Client, 
 
 	credential = strings.TrimSpace(credential)
 
-	// Use Bearer for JWT tokens, Basic for API keys (any format)
+	// Use Bearer for tokens, Basic for API keys (any format)
 	var auth AuthProvider
 	if IsToken(credential) {
 		auth = &BearerAuth{Token: credential}

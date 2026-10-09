@@ -205,20 +205,6 @@ func (m *ResponseMeta) GetAuthTokenHeaders() GetAuthTokenHeaders {
 	}
 }
 
-// GetAuthTokenOidcHeaders holds the headers GetAuthTokenOidc declares. A header the spec
-// types as something other than a string is nil when the response omits it.
-type GetAuthTokenOidcHeaders struct {
-	CacheControl string
-}
-
-// GetAuthTokenOidcHeaders reads the headers GetAuthTokenOidc declares out of the captured
-// response.
-func (m *ResponseMeta) GetAuthTokenOidcHeaders() GetAuthTokenOidcHeaders {
-	return GetAuthTokenOidcHeaders{
-		CacheControl: m.Header.Get("Cache-Control"),
-	}
-}
-
 // GetWhoamiHeaders holds the headers GetWhoami declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type GetWhoamiHeaders struct {
@@ -431,6 +417,22 @@ func (m *ResponseMeta) PostOidcConsentHeaders() PostOidcConsentHeaders {
 	}
 }
 
+// PostOidcDeviceAuthorizationHeaders holds the headers PostOidcDeviceAuthorization declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type PostOidcDeviceAuthorizationHeaders struct {
+	CacheControl    string
+	WwwAuthenticate string
+}
+
+// PostOidcDeviceAuthorizationHeaders reads the headers PostOidcDeviceAuthorization declares out of the captured
+// response.
+func (m *ResponseMeta) PostOidcDeviceAuthorizationHeaders() PostOidcDeviceAuthorizationHeaders {
+	return PostOidcDeviceAuthorizationHeaders{
+		CacheControl:    m.Header.Get("Cache-Control"),
+		WwwAuthenticate: m.Header.Get("WWW-Authenticate"),
+	}
+}
+
 // GetOidcEndSessionHeaders holds the headers GetOidcEndSession declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type GetOidcEndSessionHeaders struct {
@@ -481,6 +483,7 @@ func (m *ResponseMeta) PostOidcIntrospectHeaders() PostOidcIntrospectHeaders {
 // types as something other than a string is nil when the response omits it.
 type PostOidcRevokeHeaders struct {
 	CacheControl    string
+	Pragma          string
 	WwwAuthenticate string
 }
 
@@ -489,6 +492,7 @@ type PostOidcRevokeHeaders struct {
 func (m *ResponseMeta) PostOidcRevokeHeaders() PostOidcRevokeHeaders {
 	return PostOidcRevokeHeaders{
 		CacheControl:    m.Header.Get("Cache-Control"),
+		Pragma:          m.Header.Get("Pragma"),
 		WwwAuthenticate: m.Header.Get("WWW-Authenticate"),
 	}
 }
@@ -497,6 +501,7 @@ func (m *ResponseMeta) PostOidcRevokeHeaders() PostOidcRevokeHeaders {
 // types as something other than a string is nil when the response omits it.
 type PostOidcTokenHeaders struct {
 	CacheControl    string
+	Pragma          string
 	WwwAuthenticate string
 }
 
@@ -505,21 +510,8 @@ type PostOidcTokenHeaders struct {
 func (m *ResponseMeta) PostOidcTokenHeaders() PostOidcTokenHeaders {
 	return PostOidcTokenHeaders{
 		CacheControl:    m.Header.Get("Cache-Control"),
+		Pragma:          m.Header.Get("Pragma"),
 		WwwAuthenticate: m.Header.Get("WWW-Authenticate"),
-	}
-}
-
-// GetOidcTokenDirectHeaders holds the headers GetOidcTokenDirect declares. A header the spec
-// types as something other than a string is nil when the response omits it.
-type GetOidcTokenDirectHeaders struct {
-	CacheControl string
-}
-
-// GetOidcTokenDirectHeaders reads the headers GetOidcTokenDirect declares out of the captured
-// response.
-func (m *ResponseMeta) GetOidcTokenDirectHeaders() GetOidcTokenDirectHeaders {
-	return GetOidcTokenDirectHeaders{
-		CacheControl: m.Header.Get("Cache-Control"),
 	}
 }
 
@@ -768,30 +760,32 @@ func (m *ResponseMeta) GetUserSessionCredentialsHeaders() GetUserSessionCredenti
 // CreateSSHPrivateKeyHeaders holds the headers CreateSSHPrivateKey declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type CreateSSHPrivateKeyHeaders struct {
-	CreatedAt     string
-	Description   string
-	ID            string
-	KeyFile       string
-	Name          string
-	PublicKey     string
-	SSHPrivateKey string
-	Type          string
-	User          string
+	CreatedAt      string
+	Description    string
+	ID             string
+	ImpersonatedBy string
+	KeyFile        string
+	Name           string
+	PublicKey      string
+	SSHPrivateKey  string
+	Type           string
+	User           string
 }
 
 // CreateSSHPrivateKeyHeaders reads the headers CreateSSHPrivateKey declares out of the captured
 // response.
 func (m *ResponseMeta) CreateSSHPrivateKeyHeaders() CreateSSHPrivateKeyHeaders {
 	return CreateSSHPrivateKeyHeaders{
-		CreatedAt:     m.Header.Get("CreatedAt"),
-		Description:   m.Header.Get("Description"),
-		ID:            m.Header.Get("Id"),
-		KeyFile:       m.Header.Get("KeyFile"),
-		Name:          m.Header.Get("Name"),
-		PublicKey:     m.Header.Get("PublicKey"),
-		SSHPrivateKey: m.Header.Get("SSHPrivateKey"),
-		Type:          m.Header.Get("Type"),
-		User:          m.Header.Get("User"),
+		CreatedAt:      m.Header.Get("CreatedAt"),
+		Description:    m.Header.Get("Description"),
+		ID:             m.Header.Get("Id"),
+		ImpersonatedBy: m.Header.Get("ImpersonatedBy"),
+		KeyFile:        m.Header.Get("KeyFile"),
+		Name:           m.Header.Get("Name"),
+		PublicKey:      m.Header.Get("PublicKey"),
+		SSHPrivateKey:  m.Header.Get("SSHPrivateKey"),
+		Type:           m.Header.Get("Type"),
+		User:           m.Header.Get("User"),
 	}
 }
 

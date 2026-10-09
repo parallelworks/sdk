@@ -17,6 +17,10 @@ if TYPE_CHECKING:
 # Prefix for Parallel Works API keys
 API_KEY_PREFIX = "pwt_"
 
+# Prefix for opaque user tokens. Like an API key, a user token names its
+# platform host; like a JWT, it is sent as a Bearer token.
+USER_TOKEN_PREFIX = "pwut_"
+
 USER_AGENT = "parallelworks-python-sdk/0"
 
 
@@ -43,30 +47,34 @@ def is_api_key(credential: str) -> bool:
 
 def is_token(credential: str) -> bool:
     """
-    Check if a credential is a JWT token.
+    Check if a credential is a token, sent as a Bearer token.
 
-    JWTs have three base64-encoded parts separated by dots.
+    Tokens are opaque user tokens (starting with "pwut_") or JWTs, which have
+    three base64-encoded parts separated by dots.
 
     Args:
         credential: The credential string to check
 
     Returns:
-        True if the credential appears to be a JWT token
+        True if the credential appears to be a token
     """
     credential = credential.strip()
+    if credential.startswith(USER_TOKEN_PREFIX):
+        return True
     parts = credential.split(".")
     return len(parts) == 3 and not credential.startswith(API_KEY_PREFIX)
 
 
 def extract_platform_host(credential: str) -> str:
     """
-    Extract the platform host from an API key or JWT token.
+    Extract the platform host from an API key or token.
 
-    For API keys (pwt_xxxx.yyyy): decodes the first part after pwt_ to get the host
+    For API keys (pwt_xxxx.yyyy) and opaque user tokens (pwut_xxxx.yyyy): decodes
+    the first part after the prefix to get the host
     For JWT tokens: decodes the payload (second segment) and reads platform_host field
 
     Args:
-        credential: The API key or JWT token
+        credential: The API key or token
 
     Returns:
         The platform host (e.g., "activate.parallel.works")
@@ -76,21 +84,22 @@ def extract_platform_host(credential: str) -> str:
     """
     credential = credential.strip()
     if is_api_key(credential):
-        return _extract_host_from_api_key(credential)
+        return _extract_encoded_host(credential, API_KEY_PREFIX)
+    if credential.startswith(USER_TOKEN_PREFIX):
+        return _extract_encoded_host(credential, USER_TOKEN_PREFIX)
     if is_token(credential):
         return _extract_host_from_token(credential)
     raise CredentialError("Invalid credential format")
 
 
-def _extract_host_from_api_key(api_key: str) -> str:
-    """Extract platform host from an API key."""
-    # Remove pwt_ prefix
-    without_prefix = api_key[len(API_KEY_PREFIX) :]
+def _extract_encoded_host(credential: str, prefix: str) -> str:
+    """Extract platform host from a credential of the form <prefix><base64 host>.<key>."""
+    without_prefix = credential[len(prefix) :]
 
     # Split by dot
     parts = without_prefix.split(".", 1)
     if len(parts) < 2:
-        raise CredentialError("Invalid API key format")
+        raise CredentialError("Invalid credential format")
 
     # Decode the first part (host) - try URL-safe then standard base64
     encoded_host = parts[0]
@@ -104,10 +113,10 @@ def _extract_host_from_api_key(api_key: str) -> str:
         try:
             host = base64.b64decode(parts[0]).decode()
         except Exception as e:
-            raise CredentialError(f"Could not decode API key host: {e}") from e
+            raise CredentialError(f"Could not decode credential host: {e}") from e
 
     if not host:
-        raise CredentialError("No platform host in API key")
+        raise CredentialError("No platform host in credential")
 
     return host
 
@@ -266,7 +275,7 @@ class Client:
         Create a client with automatic credential type detection.
 
         Automatically detects whether the credential is an API key (starts with "pwt_")
-        or a JWT token and configures the appropriate authentication method.
+        or a token and configures the appropriate authentication method.
 
         Args:
             base_url: The Parallel Works platform URL (e.g., "https://activate.parallel.works")
@@ -293,7 +302,7 @@ class Client:
         Create a client using only a credential.
 
         The platform host is automatically extracted from the credential:
-        - For API keys: host is decoded from the first part after pwt_
+        - For API keys and opaque user tokens: host is decoded from the first part after the prefix
         - For JWT tokens: host is read from the platform_host claim
 
         Args:

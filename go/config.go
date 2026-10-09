@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 )
 
 const (
@@ -37,6 +38,12 @@ type Identity struct {
 	Name          string `json:"name"`
 	CanonicalName string `json:"canonicalName,omitempty"` // user:<username>@<server>
 	Organization  string `json:"organization"`
+	// OAuth is the state of a `pw auth login` sign-in, kept opaque here so
+	// rewriting the file through this type does not drop it.
+	OAuth json.RawMessage `json:"oauth,omitempty"`
+	// ExpiresAt is when an opaque Token expires, as the platform reported it;
+	// a JWT carries its own expiry.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 }
 
 // Credential returns the API key or JWT token from this identity.
@@ -434,6 +441,8 @@ func (c *CredentialConfig) UpsertContext(contextName, canonicalName, server, org
 		if existing, exists := c.Identities[contextName]; exists {
 			existing.ApiKey = apiKey
 			existing.Token = token
+			existing.OAuth = nil
+			existing.ExpiresAt = nil
 			existing.Server = server
 			existing.Organization = org
 			existing.Name = contextName
@@ -466,6 +475,8 @@ func (c *CredentialConfig) UpsertContext(contextName, canonicalName, server, org
 		existing := c.Identities[existingName]
 		existing.ApiKey = apiKey
 		existing.Token = token
+		existing.OAuth = nil
+		existing.ExpiresAt = nil
 		existing.Server = server
 		existing.Organization = org
 		c.Identities[existingName] = existing

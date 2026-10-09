@@ -141,6 +141,8 @@ type APIKeyResponse struct {
 	Expiration *time.Time `json:"expiration,omitempty"`
 	// The unique identifier for the API key.
 	ID string `json:"id"`
+	// Username of the administrator who created the key while signed in as this user.
+	ImpersonatedBy *string `json:"impersonatedBy,omitempty"`
 	// Truncated preview of the key for identification.
 	KeyHint *string `json:"keyHint,omitempty"`
 	// When the key was last used.
@@ -709,16 +711,22 @@ type AgentRenameBody struct {
 type AgentSession struct {
 	Allocation     *string           `json:"allocation,omitempty"`
 	Approvals      []ApprovalRequest `json:"approvals,omitempty"`
+	ArchivedAt     *time.Time        `json:"archivedAt,omitempty"`
 	AutoName       *string           `json:"autoName,omitempty"`
+	Branch         *string           `json:"branch,omitempty"`
 	CreatedAt      time.Time         `json:"createdAt"`
 	Effort         *string           `json:"effort,omitempty"`
 	ID             string            `json:"id"`
+	InputTokens    *int64            `json:"inputTokens,omitempty"`
+	LastError      *string           `json:"lastError,omitempty"`
 	LiveHost       *string           `json:"liveHost,omitempty"`
 	MachineID      string            `json:"machineId"`
 	Messages       int64             `json:"messages"`
 	Model          string            `json:"model"`
 	Name           *string           `json:"name,omitempty"`
+	OutputTokens   *int64            `json:"outputTokens,omitempty"`
 	PermissionMode *string           `json:"permissionMode,omitempty"`
+	PinnedAt       *time.Time        `json:"pinnedAt,omitempty"`
 	Preview        string            `json:"preview"`
 	RemoteControl  *bool             `json:"remoteControl,omitempty"`
 	Status         string            `json:"status"`
@@ -735,18 +743,24 @@ type AgentSessionCleared struct {
 type AgentSessionDetail struct {
 	Allocation         *string           `json:"allocation,omitempty"`
 	Approvals          []ApprovalRequest `json:"approvals,omitempty"`
+	ArchivedAt         *time.Time        `json:"archivedAt,omitempty"`
 	AutoName           *string           `json:"autoName,omitempty"`
+	Branch             *string           `json:"branch,omitempty"`
 	CreatedAt          time.Time         `json:"createdAt"`
 	Effort             *string           `json:"effort,omitempty"`
 	History            []HistoryItem     `json:"history"`
 	ID                 string            `json:"id"`
+	InputTokens        *int64            `json:"inputTokens,omitempty"`
+	LastError          *string           `json:"lastError,omitempty"`
 	LastSeq            *int64            `json:"lastSeq,omitempty"`
 	LiveHost           *string           `json:"liveHost,omitempty"`
 	MachineID          string            `json:"machineId"`
 	Messages           int64             `json:"messages"`
 	Model              string            `json:"model"`
 	Name               *string           `json:"name,omitempty"`
+	OutputTokens       *int64            `json:"outputTokens,omitempty"`
 	PermissionMode     *string           `json:"permissionMode,omitempty"`
+	PinnedAt           *time.Time        `json:"pinnedAt,omitempty"`
 	Preview            string            `json:"preview"`
 	RemoteControl      *bool             `json:"remoteControl,omitempty"`
 	Status             string            `json:"status"`
@@ -1053,7 +1067,7 @@ type App struct {
 type AppBody struct {
 	// Groups whose members may use the application. Empty means everyone in the organization.
 	AllowedGroups []string `json:"allowedGroups,omitempty"`
-	// Whether the user sees a consent screen. Defaults to none.
+	// Whether the user sees a consent screen. Defaults to none. Always none for a service application, which shows no consent screen.
 	Consent *string `json:"consent,omitempty"`
 	// What the application is for.
 	Description *string `json:"description,omitempty"`
@@ -1071,7 +1085,7 @@ type AppBody struct {
 	RedirectUris []string `json:"redirectUris,omitempty"`
 	// Whether the user's session must have completed two-step verification. Turning it on revokes the credentials issued to sessions that had not.
 	RequireMfa *bool `json:"requireMfa,omitempty"`
-	// Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed.
+	// Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed. A service application gets no refresh tokens, so offline_access is dropped from its list.
 	Scopes []string `json:"scopes,omitempty"`
 	// What the sub claim contains. Defaults to userId.
 	SubjectType *string `json:"subjectType,omitempty"`
@@ -1126,7 +1140,7 @@ type AppResponse struct {
 type AppUpdateBody struct {
 	// Groups whose members may use the application. Empty means everyone in the organization.
 	AllowedGroups []string `json:"allowedGroups,omitempty"`
-	// Whether the user sees a consent screen. Defaults to none.
+	// Whether the user sees a consent screen. Defaults to none. Always none for a service application, which shows no consent screen.
 	Consent *string `json:"consent,omitempty"`
 	// What the application is for.
 	Description *string `json:"description,omitempty"`
@@ -1144,7 +1158,7 @@ type AppUpdateBody struct {
 	RedirectUris []string `json:"redirectUris,omitempty"`
 	// Whether the user's session must have completed two-step verification. Turning it on revokes the credentials issued to sessions that had not.
 	RequireMfa *bool `json:"requireMfa,omitempty"`
-	// Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed.
+	// Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed. A service application gets no refresh tokens, so offline_access is dropped from its list.
 	Scopes []string `json:"scopes,omitempty"`
 	// What the sub claim contains. Defaults to userId.
 	SubjectType *string `json:"subjectType,omitempty"`
@@ -3674,6 +3688,15 @@ type ConfigRegion struct {
 	Region string `json:"region"`
 }
 
+type ConfirmHostKeyBody struct {
+	// The login node the key belongs to, as configured on the cluster. Required for the login target.
+	Host *string `json:"host,omitempty"`
+	// The host public key (authorized_keys line) the owner accepted.
+	Key string `json:"key"`
+	// Which host the key belongs to.
+	Target string `json:"target"`
+}
+
 type ConnectStateBody struct {
 	// Failure detail when status is failed.
 	Error *string `json:"error,omitempty"`
@@ -3701,6 +3724,8 @@ type ConnectWithTokenInputBody struct {
 type ConnectedApp struct {
 	// Client ID of the application
 	ClientID string `json:"clientId"`
+	// For the pw CLI and the ACTIVATE mobile app, each device it is signed in on; each can be signed out on its own
+	Devices []ConnectedDevice `json:"devices,omitempty"`
 	// When the user first granted access
 	GrantedAt *time.Time `json:"grantedAt,omitempty"`
 	// When the application last signed the user in
@@ -3709,6 +3734,25 @@ type ConnectedApp struct {
 	Name string `json:"name"`
 	// Scopes the user granted it
 	Scopes []string `json:"scopes"`
+	// Whether a platform administrator turned off sign-in for this application, which stops its existing sign-ins too
+	SignInDisabled *bool `json:"signInDisabled,omitempty"`
+}
+
+type ConnectedDevice struct {
+	// Whether this device made the request
+	Current bool `json:"current"`
+	// Name the device reported; nothing verifies it
+	DeviceName *string `json:"deviceName,omitempty"`
+	// When the device is signed out unless it is used before then
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	// Identifies this device's sign-in
+	ID string `json:"id"`
+	// Address the device signed in from
+	IPAddress *string `json:"ipAddress,omitempty"`
+	// When the device last used the platform
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+	// When the device signed in
+	SignedInAt time.Time `json:"signedInAt"`
 }
 
 type ConnectionPathInputBody struct {
@@ -3897,7 +3941,7 @@ type CreateAiProviderBody struct {
 type CreateAPIKeyInputBody struct {
 	// Budget allocation name (required for AI keys)
 	Allocation *string `json:"allocation,omitempty"`
-	// Days before the key expires (platform keys). Empty or 0 creates a key that does not expire, unless the organization's maximum API key lifetime requires one.
+	// Days before the key expires, at most the organization's maximum API key lifetime, which is 730 days when no policy sets it. Empty or 0 creates a key that does not expire, which only an Unlimited policy allows.
 	Duration *string `json:"duration,omitempty"`
 	// Display name for the API key
 	Title string `json:"title"`
@@ -3914,6 +3958,8 @@ type CreateAPIKeyOutputBody struct {
 	Expiration *time.Time `json:"expiration,omitempty"`
 	// The unique identifier for the API key.
 	ID string `json:"id"`
+	// Username of the administrator who created the key while signed in as this user.
+	ImpersonatedBy *string `json:"impersonatedBy,omitempty"`
 	// The full API key (only shown once)
 	Key string `json:"key"`
 	// Truncated preview of the key for identification.
@@ -4095,6 +4141,8 @@ type CreateCloudAccountBody struct {
 }
 
 type CreateClusterInputBody struct {
+	// Lets the endpoint be on a private network. Only a platform administrator can turn this on, and while it is on only a platform administrator can change the endpoint or CA certificate.
+	AllowPrivateAddress *bool `json:"allowPrivateAddress,omitempty"`
 	// PEM-encoded CA certificate. Leave empty when the cluster uses a publicly trusted certificate.
 	CaCert *string `json:"caCert,omitempty"`
 	// Kubernetes API endpoint
@@ -4874,6 +4922,18 @@ type DashboardWidget struct {
 	Y int64 `json:"y"`
 }
 
+type DecideDeviceRequestInputBody struct {
+	// True to sign the device in; false to refuse it
+	Approve bool `json:"approve"`
+	// The code shown by the device, with or without its dash
+	UserCode string `json:"userCode"`
+}
+
+type DecideDeviceRequestOutputBody struct {
+	// Whether the device is now signed in once it next polls
+	Approved bool `json:"approved"`
+}
+
 type DeleteDeploymentBody struct {
 	// Deployment id; matches resources tagged with it as session-id or pw-deployment-id.
 	DeploymentID string `json:"deploymentId"`
@@ -5027,6 +5087,37 @@ type DesktopSessionSettings struct {
 	OverlayPaths    []string `json:"overlayPaths,omitempty"`
 	SifPath         *string  `json:"sifPath,omitempty"`
 	UseApptainer    *bool    `json:"useApptainer,omitempty"`
+}
+
+type DeviceAuthorizationBody struct {
+	// Code the device polls the token endpoint with
+	DeviceCode *string `json:"device_code,omitempty"`
+	// OAuth error code
+	Error *string `json:"error,omitempty"`
+	// Human-readable error detail
+	ErrorDescription *string `json:"error_description,omitempty"`
+	// Page that explains the error
+	ErrorURI *string `json:"error_uri,omitempty"`
+	// Seconds until both codes expire
+	ExpiresIn *int64 `json:"expires_in,omitempty"`
+	// Seconds to wait between polls
+	Interval *int64 `json:"interval,omitempty"`
+	// Code the user enters at the verification URI
+	UserCode *string `json:"user_code,omitempty"`
+	// Page where the user enters the code
+	VerificationURI *string `json:"verification_uri,omitempty"`
+	// The verification page with the code filled in
+	VerificationURIComplete *string `json:"verification_uri_complete,omitempty"`
+}
+
+type DeviceCodeBody struct {
+	// The code shown by the device, with or without its dash
+	UserCode string `json:"userCode"`
+}
+
+type DeviceRequestBody struct {
+	// Name of the application asking to sign in
+	ClientName string `json:"clientName"`
 }
 
 type DiscoverCaCertInputBody struct {
@@ -5406,7 +5497,8 @@ type ExistingCluster struct {
 	// Set when the user explicitly disconnected this cluster; reconcilers use this to skip auto-reconnect
 	DisconnectedAt *time.Time `json:"disconnectedAt,omitempty"`
 	// Group name
-	Group *string `json:"group,omitempty"`
+	Group    *string                 `json:"group,omitempty"`
+	HostKeys ExistingClusterHostKeys `json:"hostKeys"`
 	// Cluster ID
 	ID string `json:"id"`
 	// SSH key name
@@ -5444,6 +5536,24 @@ type ExistingClusterDefinition struct {
 	SSHKey *string `json:"sshKey,omitempty"`
 	// Type discriminator.
 	Type string `json:"type"`
+}
+
+type ExistingClusterHostKeys struct {
+	// Host keys the owner accepted for the jump host.
+	Jump []string `json:"jump"`
+	// Host keys the owner accepted, per login node; a node with no entry has none recorded.
+	Login []ExistingClusterLoginHostKeys `json:"login"`
+	// off skips verification; otherwise, when the list is empty, warn connects unverified and enforce refuses.
+	Policy string `json:"policy"`
+	// Keys pw ssh --proxy-command connections reach: the agent's own SSH server when the platform tunnels the cluster, otherwise the login node's sshd.
+	PwServer []string `json:"pwServer"`
+}
+
+type ExistingClusterLoginHostKeys struct {
+	// The login node, as configured on the cluster.
+	Host string `json:"host"`
+	// Host public keys the owner accepted for this login node.
+	Keys []string `json:"keys"`
 }
 
 type ExistingClusterLoginNode struct {
@@ -5930,6 +6040,8 @@ type GeneralCluster struct {
 	SchedulerType *string `json:"schedulerType,omitempty"`
 	// True when SSH to this cluster routes through the platform. False when it is dialed directly, which a cluster on a public address does unless an administrator has whitelisted it.
 	ShouldPlatformProxy bool `json:"shouldPlatformProxy"`
+	// Cloud and managed clusters: the sshd host public keys the controller or login node's agent reported, which SSH clients verify the server against.
+	SSHHostKeys []string `json:"sshHostKeys,omitempty"`
 	// The status of the resource.
 	Status string `json:"status"`
 	// Human-readable explanation of the cluster's current status, present when the last provision was skipped or failed.
@@ -5944,13 +6056,26 @@ type GeneralCluster struct {
 	User *string `json:"user,omitempty"`
 }
 
+type GenerateNodeTokenBody struct {
+	// Minutes until the token expires, at most 24 hours. Defaults to 60 for a reusable token and 1440 for a single-use one.
+	ExpiresInMinutes *int64 `json:"expiresInMinutes,omitempty"`
+	// Register any number of nodes until the token expires or is revoked, instead of one node
+	Reusable *bool `json:"reusable,omitempty"`
+}
+
 type GenerateNodeTokenOutputBody struct {
 	// Cluster name
 	Cluster string `json:"cluster"`
 	// Token expiration time
 	ExpiresAt time.Time `json:"expiresAt"`
+	// Short preview of the token
+	Hint string `json:"hint"`
+	// Token id, for revoking it
+	ID string `json:"id"`
 	// Organization name
 	Organization string `json:"organization"`
+	// Whether the token registers any number of nodes until it expires
+	Reusable bool `json:"reusable"`
 	// Node registration token
 	Token string `json:"token"`
 }
@@ -7208,9 +7333,11 @@ type HeartbeatInputBody struct {
 	// Operating system
 	Os string `json:"os"`
 	// OS release name (e.g., Ubuntu 22.04)
-	OsRelease  *string        `json:"osRelease,omitempty"`
-	Scheduler  *SchedulerInfo `json:"scheduler,omitempty"`
-	SystemInfo *SystemInfo    `json:"systemInfo,omitempty"`
+	OsRelease *string        `json:"osRelease,omitempty"`
+	Scheduler *SchedulerInfo `json:"scheduler,omitempty"`
+	// The node's sshd host public keys (authorized_keys lines), which SSH clients verify the node against.
+	SSHHostKeys []string    `json:"sshHostKeys,omitempty"`
+	SystemInfo  *SystemInfo `json:"systemInfo,omitempty"`
 }
 
 type HeartbeatOutputBody struct {
@@ -7867,6 +7994,8 @@ type KubernetesServicesMetadata struct {
 }
 
 type KubernetesSingleClusterResponse struct {
+	// Whether a platform administrator allowed the endpoint to be on a private network
+	AllowPrivateAddress bool `json:"allowPrivateAddress"`
 	// Base64-encoded CA certificate
 	CaCert            string                 `json:"caCert"`
 	CostTrackingRates *CostTrackingRatesBody `json:"costTrackingRates,omitempty"`
@@ -8000,9 +8129,11 @@ type LanguageInputBody struct {
 }
 
 type Ldap struct {
+	// Lets the LDAP server be on a private network. Only a platform administrator can turn this on, and while it is on only a platform administrator can change the server or weaken its TLS settings.
+	AllowPrivateAddress *bool `json:"allowPrivateAddress,omitempty"`
 	// Base DN for LDAP authentication
 	BaseDn *string `json:"baseDN,omitempty"`
-	// CA certificate used to verify the LDAP server
+	// CA certificate used to verify the LDAP server. On update, an omitted value keeps the stored certificate and an empty value removes it
 	CaCert *string `json:"caCert,omitempty"`
 	// Client certificate for LDAP authentication
 	ClientCert *string `json:"clientCert,omitempty"`
@@ -8041,9 +8172,11 @@ type Ldap struct {
 }
 
 type LdapConnectionTest struct {
+	// Lets the LDAP server be on a private network. Only a platform administrator can turn this on, and while it is on only a platform administrator can change the server or weaken its TLS settings.
+	AllowPrivateAddress *bool `json:"allowPrivateAddress,omitempty"`
 	// Base DN for LDAP authentication
 	BaseDn *string `json:"baseDN,omitempty"`
-	// CA certificate used to verify the LDAP server
+	// CA certificate used to verify the LDAP server. On update, an omitted value keeps the stored certificate and an empty value removes it
 	CaCert *string `json:"caCert,omitempty"`
 	// Client certificate for LDAP authentication
 	ClientCert *string `json:"clientCert,omitempty"`
@@ -8304,10 +8437,14 @@ type LoginBannerResponse struct {
 }
 
 type LoginSessionResponse struct {
+	// Set to pw-cli for a device signed in to the pw CLI, or pw-mobile for one signed in to the ACTIVATE mobile app. Only listed for another user's sessions; your own are under connected applications.
+	Client *string `json:"client,omitempty"`
 	// When the session was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Whether this is the session making the request.
 	Current bool `json:"current"`
+	// For a pw CLI or mobile app sign-in, the name the device reported; nothing verifies it.
+	DeviceName *string `json:"deviceName,omitempty"`
 	// When the session expires.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 	// The unique identifier for the login session.
@@ -9330,6 +9467,21 @@ type NodeSystem struct {
 	Uptime         float64           `json:"uptime"`
 }
 
+type NodeToken struct {
+	// When the token was created
+	CreatedAt time.Time `json:"createdAt"`
+	// Username of the user who created the token
+	CreatedBy *string `json:"createdBy,omitempty"`
+	// When the token expires
+	ExpiresAt time.Time `json:"expiresAt"`
+	// Short preview of the token
+	Hint string `json:"hint"`
+	// Token id
+	ID string `json:"id"`
+	// Whether the token registers any number of nodes until it expires
+	Reusable bool `json:"reusable"`
+}
+
 type NodesBody struct {
 	// List of cluster errors, if any
 	Errors   []ClusterError `json:"errors,omitempty"`
@@ -9418,6 +9570,8 @@ type OauthStatusResponse struct {
 type Oidc struct {
 	// Whether to allow new user creation
 	AllowNewUserCreation *bool `json:"allowNewUserCreation,omitempty"`
+	// Lets the issuer and endpoint hosts be on a private network. Only a platform administrator can turn this on, and while it is on only a platform administrator can change the issuer or endpoints.
+	AllowPrivateAddress *bool `json:"allowPrivateAddress,omitempty"`
 	// Authorization endpoint of the OIDC authentication method
 	AuthorizationEndpoint *string `json:"authorizationEndpoint,omitempty"`
 	// Client ID of the OIDC authentication method
@@ -9473,6 +9627,8 @@ type OpenIDConfiguration struct {
 	ClaimsSupported []string `json:"claims_supported"`
 	// JSON array containing the supported PKCE code challenge methods
 	CodeChallengeMethodsSupported []string `json:"code_challenge_methods_supported"`
+	// URL of the device authorization endpoint (RFC 8628), open to the pw CLI only
+	DeviceAuthorizationEndpoint string `json:"device_authorization_endpoint"`
 	// URL of the RP-initiated logout endpoint
 	EndSessionEndpoint string `json:"end_session_endpoint"`
 	// JSON array containing the supported grant types
@@ -10384,10 +10540,12 @@ type PatchWebhookBody struct {
 }
 
 type PendingConsentOutputBody struct {
+	CliSignIn *PendingNativeSignIn `json:"cliSignIn,omitempty"`
 	// Client ID of the application asking for access
 	ClientID string `json:"clientId"`
 	// Description the organization gave the application
-	Description *string `json:"description,omitempty"`
+	Description  *string              `json:"description,omitempty"`
+	MobileSignIn *PendingNativeSignIn `json:"mobileSignIn,omitempty"`
 	// Display name of the application
 	Name string `json:"name"`
 	// Organization that registered the application
@@ -10398,6 +10556,11 @@ type PendingConsentOutputBody struct {
 	RequestID string `json:"requestId"`
 	// Scopes the application is asking for
 	Scopes []string `json:"scopes"`
+}
+
+type PendingNativeSignIn struct {
+	// Username of the account the app will be signed in to
+	Account string `json:"account"`
 }
 
 type PermissionEntry struct {
@@ -10510,7 +10673,7 @@ type PlatformSettings struct {
 	MaintenanceMessage *string `json:"maintenanceMessage,omitempty"`
 	// Indicates if the platform is in maintenance mode, preventing certain actions.
 	MaintenanceMode *bool `json:"maintenanceMode,omitempty"`
-	// The maximum number of days an API key or SCIM token can be valid for, resolved from the max-api-key-ttl policy. Omitted when no cap applies. Only returned if the user is authenticated.
+	// The maximum number of days an API key can be valid for, resolved from the max-api-key-ttl policy, or 730 when no policy is set. Omitted when the policy is Unlimited. Only returned if the user is authenticated.
 	MaxAPIKeyTTLDays *int64 `json:"maxApiKeyTtlDays,omitempty"`
 	// Indicates if the platform needs a license update (no license, expired, or in grace period). Only returned when true.
 	NeedsLicense *bool `json:"needsLicense,omitempty"`
@@ -10553,6 +10716,8 @@ type PlatformSettings struct {
 	SingleOrgName *string `json:"singleOrgName,omitempty"`
 	// Indicates if the platform is a single organization platform.
 	SingleOrgPlatform *bool `json:"singleOrgPlatform,omitempty"`
+	// Whether SSH clients verify server host keys: off (the default), warn (connect to unrecorded hosts and report them), or enforce (refuse them).
+	SSHHostKeyVerification string `json:"sshHostKeyVerification"`
 	// Indicates if the platform advertises resumable SSH sessions; hpcconnect relaxes generated ssh keepalives when set.
 	SSHResumeEnabled bool `json:"sshResumeEnabled"`
 	// The URL to the platform status page, if set.
@@ -10630,6 +10795,8 @@ type PlatformSettingsAdmin struct {
 	SentryReplaysSampleRate float64 `json:"sentryReplaysSampleRate"`
 	// Sentry traces sample rate (0.0-1.0).
 	SentryTracesSampleRate float64 `json:"sentryTracesSampleRate"`
+	// Whether SSH clients verify server host keys: off (the default) skips verification; warn connects to a host with no recorded key and reports it; enforce refuses that host. Under warn and enforce a recorded key that differs from the presented one always fails.
+	SSHHostKeyVerification string `json:"sshHostKeyVerification"`
 	// Whether to advertise resumable SSH sessions, letting tunneled connections to supporting agents survive tunnel drops and ingress restarts. Off by default; turning it off instantly falls new connections back to plain bridging.
 	SSHResumeEnabled bool `json:"sshResumeEnabled"`
 	// Whether the stuck-run sweeper is enabled. When on, workflow runs whose executor stops sending heartbeats are automatically finalized. On by default; turn it off only if a deployment cannot keep executor heartbeats flowing.
@@ -13038,8 +13205,10 @@ type SSHKeyInfo struct {
 type SSHPublicKey struct {
 	CreatedAt time.Time `json:"createdAt"`
 	ID        string    `json:"id"`
-	Key       string    `json:"key"`
-	Title     string    `json:"title"`
+	// Username of the administrator who added the key while signed in as this user.
+	ImpersonatedBy *string `json:"impersonatedBy,omitempty"`
+	Key            string  `json:"key"`
+	Title          string  `json:"title"`
 }
 
 type SchedulerCommandBody struct {
@@ -13584,6 +13753,15 @@ type SnapshotComplianceItem struct {
 	User *string `json:"user,omitempty"`
 }
 
+type SSHHostKeys struct {
+	// Recorded host public keys (authorized_keys lines) or SHA256 fingerprints for the login target; any match is accepted.
+	HostKeys []string `json:"hostKeys"`
+	// Recorded keys for the cluster's jump host, when the cluster connects through one.
+	JumpHostKeys []string `json:"jumpHostKeys,omitempty"`
+	// off skips verification; otherwise, when hostKeys is empty, warn connects unverified and enforce refuses.
+	Policy string `json:"policy"`
+}
+
 type SSHPrivateKey struct {
 	// The creation date of the SSH key
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
@@ -13591,6 +13769,8 @@ type SSHPrivateKey struct {
 	Description *string `json:"description,omitempty"`
 	// The unique identifier of the SSH key
 	ID *string `json:"id,omitempty"`
+	// Username of the administrator who added the key while signed in as this user
+	ImpersonatedBy *string `json:"impersonatedBy,omitempty"`
 	// The path to the key in the user workspace
 	KeyFile *string `json:"keyFile,omitempty"`
 	// The name of the SSH key
@@ -13949,21 +14129,25 @@ type TimeSeriesPoint struct {
 }
 
 type TokenBody struct {
-	// Opaque access token for the userinfo endpoint
+	// Opaque access token for the userinfo endpoint; for a token exchange, the issued token itself
 	AccessToken *string `json:"access_token,omitempty"`
 	// OAuth error code
 	Error *string `json:"error,omitempty"`
 	// Human-readable error detail
 	ErrorDescription *string `json:"error_description,omitempty"`
-	// Access token lifetime in seconds
+	// Page that explains the error
+	ErrorURI *string `json:"error_uri,omitempty"`
+	// Lifetime in seconds of the access token, or of the issued token for a token exchange
 	ExpiresIn *int64 `json:"expires_in,omitempty"`
 	// Signed ID token
 	IDToken *string `json:"id_token,omitempty"`
+	// Type of the issued token, set only for a token exchange (RFC 8693 section 2.2.1)
+	IssuedTokenType *string `json:"issued_token_type,omitempty"`
 	// Opaque refresh token, issued when the offline_access scope was granted
 	RefreshToken *string `json:"refresh_token,omitempty"`
 	// Space-delimited scopes actually granted
 	Scope *string `json:"scope,omitempty"`
-	// Always Bearer
+	// Bearer, or N_A for a token exchange whose issued token is not an access token
 	TokenType *string `json:"token_type,omitempty"`
 }
 
@@ -14265,6 +14449,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	SingleOrgName *string `json:"singleOrgName,omitempty"`
 	// Whether to enable single org platform.
 	SingleOrgPlatform *bool `json:"singleOrgPlatform,omitempty"`
+	// Whether SSH clients verify server host keys: off, warn or enforce.
+	SSHHostKeyVerification *string `json:"sshHostKeyVerification,omitempty"`
 	// Whether to advertise resumable SSH sessions to clients.
 	SSHResumeEnabled *bool `json:"sshResumeEnabled,omitempty"`
 	// Whether the stuck-run sweeper is enabled.
@@ -14302,6 +14488,8 @@ type UpdateClusterBody struct {
 }
 
 type UpdateClusterInputBody struct {
+	// Lets the endpoint be on a private network. Only a platform administrator can turn this on, and while it is on only a platform administrator can change the endpoint or CA certificate.
+	AllowPrivateAddress *bool `json:"allowPrivateAddress,omitempty"`
 	// Base64-encoded CA certificate. Leave empty when the cluster uses a publicly trusted certificate.
 	CaCert *string `json:"caCert,omitempty"`
 	// Kubernetes API endpoint

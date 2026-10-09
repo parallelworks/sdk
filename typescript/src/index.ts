@@ -65,6 +65,12 @@ export function problemTypeUrl(
 /** Prefix for Parallel Works API keys */
 export const API_KEY_PREFIX = 'pwt_'
 
+/**
+ * Prefix for opaque user tokens. Like an API key, a user token names its
+ * platform host; like a JWT, it is sent as a Bearer token.
+ */
+export const USER_TOKEN_PREFIX = 'pwut_'
+
 /** Error thrown when credential parsing fails */
 export class CredentialError extends Error {
   constructor(message: string) {
@@ -86,33 +92,41 @@ export function isApiKey(credential: string): boolean {
 }
 
 /**
- * Check if a credential is a JWT token.
+ * Check if a credential is a token, sent as a Bearer token.
  *
- * JWTs have three base64-encoded parts separated by dots.
+ * Tokens are opaque user tokens (starting with "pwut_") or JWTs, which have
+ * three base64-encoded parts separated by dots.
  *
  * @param credential - The credential string to check
- * @returns True if the credential appears to be a JWT token
+ * @returns True if the credential appears to be a token
  */
 export function isToken(credential: string): boolean {
   const trimmed = credential.trim()
+  if (trimmed.startsWith(USER_TOKEN_PREFIX)) {
+    return true
+  }
   const parts = trimmed.split('.')
   return parts.length === 3 && !trimmed.startsWith(API_KEY_PREFIX)
 }
 
 /**
- * Extract the platform host from an API key or JWT token.
+ * Extract the platform host from an API key or token.
  *
- * For API keys (pwt_xxxx.yyyy): decodes the first part after pwt_ to get the host
+ * For API keys (pwt_xxxx.yyyy) and opaque user tokens (pwut_xxxx.yyyy): decodes
+ * the first part after the prefix to get the host
  * For JWT tokens: decodes the payload (second segment) and reads platform_host field
  *
- * @param credential - The API key or JWT token
+ * @param credential - The API key or token
  * @returns The platform host (e.g., "activate.parallel.works")
  * @throws CredentialError if the credential format is invalid
  */
 export function extractPlatformHost(credential: string): string {
   credential = credential.trim()
   if (isApiKey(credential)) {
-    return extractHostFromApiKey(credential)
+    return extractEncodedHost(credential, API_KEY_PREFIX)
+  }
+  if (credential.startsWith(USER_TOKEN_PREFIX)) {
+    return extractEncodedHost(credential, USER_TOKEN_PREFIX)
   }
   if (isToken(credential)) {
     return extractHostFromToken(credential)
@@ -120,14 +134,13 @@ export function extractPlatformHost(credential: string): string {
   throw new CredentialError('Invalid credential format')
 }
 
-function extractHostFromApiKey(apiKey: string): string {
-  // Remove pwt_ prefix
-  const withoutPrefix = apiKey.slice(API_KEY_PREFIX.length)
+function extractEncodedHost(credential: string, prefix: string): string {
+  const withoutPrefix = credential.slice(prefix.length)
 
   // Split by dot
   const dotIndex = withoutPrefix.indexOf('.')
   if (dotIndex === -1) {
-    throw new CredentialError('Invalid API key format')
+    throw new CredentialError('Invalid credential format')
   }
 
   const encodedHost = withoutPrefix.slice(0, dotIndex)
@@ -152,12 +165,12 @@ function extractHostFromApiKey(apiKey: string): string {
         host = Buffer.from(encodedHost, 'base64').toString()
       }
     } catch (e) {
-      throw new CredentialError(`Could not decode API key host: ${e}`)
+      throw new CredentialError(`Could not decode credential host: ${e}`)
     }
   }
 
   if (!host) {
-    throw new CredentialError('No platform host in API key')
+    throw new CredentialError('No platform host in credential')
   }
 
   return host
@@ -238,7 +251,7 @@ export class Client {
    * Create a client using only a credential.
    *
    * The platform host is automatically extracted from the credential:
-   * - For API keys: host is decoded from the first part after pwt_
+   * - For API keys and opaque user tokens: host is decoded from the first part after the prefix
    * - For JWT tokens: host is read from the platform_host claim
    *
    * @param credential - Your API key or JWT token
@@ -306,7 +319,7 @@ export class Client {
    * Authenticate with automatic credential type detection
    *
    * Automatically detects whether the credential is an API key (starts with "pwt_")
-   * or a JWT token and configures the appropriate authentication method.
+   * or a token and configures the appropriate authentication method.
    *
    * @param credential - Your API key or JWT token
    * @returns Configured API client ready to make requests

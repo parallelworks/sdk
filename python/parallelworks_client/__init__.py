@@ -2,6 +2,7 @@
 
 from parallelworks_client.auth import (
     API_KEY_PREFIX,
+    USER_TOKEN_PREFIX,
     Client,
     CredentialError,
     SyncClient,
@@ -23,6 +24,7 @@ __all__ = [
     "FieldError",
     "ProblemError",
     "SyncClient",
+    "USER_TOKEN_PREFIX",
     "accept_language_from_env",
     "extract_platform_host",
     "is_api_key",

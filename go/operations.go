@@ -2114,9 +2114,7 @@ func (c *Client) ListResourceCredentials(ctx context.Context, opts ...ListResour
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// > This is a platform-admin only route.
-//
-// Deletes every live cloud resource tagged with the deployment id (as session-id or pw-deployment-id). Resources with a live platform record are deleted through it; the rest are swept directly in the cloud by gaia. Always dry-run first.
+// Deletes every live cloud resource tagged with the deployment id (as session-id or pw-deployment-id). Resources with a live platform record are deleted through it; the rest are swept directly in the cloud by gaia. Platform administrators can delete any deployment; organization administrators can delete one whose resources all belong to their organization. Always dry-run first.
 func (c *Client) DeleteDeploymentResources(ctx context.Context, body DeleteDeploymentBody) (*DeleteDeploymentResponse, error) {
 
 	path := "/api/admin/resources/delete-deployment"
@@ -3352,39 +3350,6 @@ func (c *Client) GetAuthToken(ctx context.Context, opts ...GetAuthTokenParams) (
 	return &result, nil
 }
 
-// GetAuthTokenOidcParams contains the parameters for the GetAuthTokenOidc operation.
-// Required parameters are value fields; optional parameters are pointers.
-type GetAuthTokenOidcParams struct {
-	// Name of the Kubernetes cluster
-	ClusterName *string `json:"clusterName,omitempty"`
-}
-
-// GetAuthTokenOidc - Get OIDC token
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Get an OIDC token for the logged in user to access a Kubernetes cluster.
-func (c *Client) GetAuthTokenOidc(ctx context.Context, opts ...GetAuthTokenOidcParams) (*string, error) {
-
-	path := "/api/auth/token/oidc"
-	var params GetAuthTokenOidcParams
-	if len(opts) > 0 {
-		params = opts[0]
-	}
-	queryValues := url.Values{}
-	addQueryParam(queryValues, "clusterName", "form", false, params.ClusterName)
-
-	if len(queryValues) > 0 {
-		path += "?" + encodeQuery(queryValues)
-	}
-
-	var result string
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
 // GetWhoami - Identify the currently authenticated subject
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -4422,6 +4387,23 @@ func (c *Client) ReportClusterConnectState(ctx context.Context, clusterID string
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// ConfirmClusterHostKey - Confirm Cluster Host Key
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Records a host key the cluster owner accepted in the workspace's connect prompt and returns the cluster's host keys. Owner only.
+func (c *Client) ConfirmClusterHostKey(ctx context.Context, clusterID string, body ConfirmHostKeyBody) (*ExistingClusterHostKeys, error) {
+
+	path := "/api/internal/usercontainer/clusters/{clusterId}/host-keys"
+	path = pathReplace(path, "clusterId", "simple", false, clusterID)
+
+	var result ExistingClusterHostKeys
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetExistingClusters - Get existing clusters
@@ -6116,6 +6098,23 @@ func (c *Client) RevokeOidcConnectedApp(ctx context.Context, clientID string) er
 	return nil
 }
 
+// SignOutOidcConnectedDevice - Sign a device out of the pw CLI or the ACTIVATE mobile app
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Ends one device's sign-in to the pw CLI or the ACTIVATE mobile app, revoking its tokens at once, and leaves the user's other devices signed in. The device IDs are listed under `devices` on the app's connected application.
+func (c *Client) SignOutOidcConnectedDevice(ctx context.Context, clientID string, deviceID string) error {
+
+	path := "/api/oidc/connected-apps/{clientId}/devices/{deviceId}"
+	path = pathReplace(path, "clientId", "simple", false, clientID)
+	path = pathReplace(path, "deviceId", "simple", false, deviceID)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetOidcConsent - Get the pending consent request
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -6143,6 +6142,54 @@ func (c *Client) PostOidcConsent(ctx context.Context, body ConsentDecisionInputB
 
 	var result ConsentDecisionOutputBody
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DecideOidcDeviceRequest - Approve or deny a pw CLI device sign-in
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Approves or denies the pw CLI sign-in a user code belongs to. An approval signs the device in as the calling user when it next polls. Only a browser session can call this.
+func (c *Client) DecideOidcDeviceRequest(ctx context.Context, body DecideDeviceRequestInputBody) (*DecideDeviceRequestOutputBody, error) {
+
+	path := "/api/oidc/device/decision"
+
+	var result DecideDeviceRequestOutputBody
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// LookupOidcDeviceRequest - Describe a pw CLI device sign-in
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Checks that a user code belongs to a pending pw CLI sign-in and names the application asking, so the user can confirm it before approving. The code is sent in the body so it stays out of URLs and logs. Only a browser session can call this, and failed codes are rate limited.
+func (c *Client) LookupOidcDeviceRequest(ctx context.Context, body DeviceCodeBody) (*DeviceRequestBody, error) {
+
+	path := "/api/oidc/device/lookup"
+
+	var result DeviceRequestBody
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PostOidcDeviceAuthorization - OAuth device authorization endpoint
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Starts a pw CLI sign-in on a device without a usable browser (RFC 8628). The body is `application/x-www-form-urlencoded` with `client_id`, an optional `scope`, and an optional `device_name` naming the host. The response carries a `user_code` the user enters at `verification_uri` and a `device_code` the device polls the token endpoint with, using `grant_type=urn:ietf:params:oauth:grant-type:device_code`. Codes expire after 10 minutes and are single use.
+func (c *Client) PostOidcDeviceAuthorization(ctx context.Context, body *map[string]any) (*DeviceAuthorizationBody, error) {
+
+	path := "/api/oidc/device_authorization"
+
+	var result DeviceAuthorizationBody
+	if err := c.do(ctx, "POST", path, body, "application/x-www-form-urlencoded", &result, "application/json", false); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6217,7 +6264,7 @@ func (c *Client) PostOidcIntrospect(ctx context.Context, body *map[string]any) (
 	path := "/api/oidc/introspect"
 
 	var result IntrospectBody
-	if err := c.do(ctx, "POST", path, body, "application/x-www-form-urlencoded", &result, "application/json", true); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/x-www-form-urlencoded", &result, "application/json", false); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6233,7 +6280,7 @@ func (c *Client) PostOidcRevoke(ctx context.Context, body *map[string]any) (*Tok
 	path := "/api/oidc/revoke"
 
 	var result TokenBody
-	if err := c.do(ctx, "POST", path, body, "application/x-www-form-urlencoded", &result, "application/json", true); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/x-www-form-urlencoded", &result, "application/json", false); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6263,41 +6310,16 @@ func (c *Client) GetOidcSectorIdentifier(ctx context.Context, authMethodID strin
 // Redeems an authorization code, or rotates a refresh token, for an ID token and an opaque access token (RFC 6749 sections 4.1.3 and 6).
 //
 // The body is `application/x-www-form-urlencoded`. To redeem a code, send `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. To refresh, send `grant_type=refresh_token`, a `refresh_token` issued for the `offline_access` scope, and an optional `scope` that can narrow but never widen the original grant; the response carries a new refresh token, and presenting a spent one again revokes every token descended from it. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.
+//
+// The pw CLI polls here with `grant_type=urn:ietf:params:oauth:grant-type:device_code` and the `device_code` from the device authorization endpoint, and is told `authorization_pending`, `slow_down`, `expired_token`, or `access_denied` until the user decides.
+//
+// A service application or Kubernetes cluster gets an ID token for a user through the token exchange grant (RFC 8693), the exec-credential pattern kubectl uses. Send `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`, the application's `client_id` (or `audience`), `subject_token` set to the user's platform API key or pw CLI access token (a Kubernetes cluster also accepts the user's platform token; an ACTIVATE mobile app access token is refused), `subject_token_type=urn:ietf:params:oauth:token-type:access_token`, and optionally `requested_token_type=urn:ietf:params:oauth:token-type:id_token` and a narrowing `scope`. These clients hold no secret, so none is sent. The response carries the ID token in `access_token`, with `issued_token_type=urn:ietf:params:oauth:token-type:id_token` and `token_type=N_A`. Any other kind of application is refused with `unauthorized_client`, or with `invalid_target` when only `audience` names it.
 func (c *Client) PostOidcToken(ctx context.Context, body *map[string]any) (*TokenBody, error) {
 
 	path := "/api/oidc/token"
 
 	var result TokenBody
-	if err := c.do(ctx, "POST", path, body, "application/x-www-form-urlencoded", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetOidcTokenDirectParams contains the parameters for the GetOidcTokenDirect operation.
-// Required parameters are value fields; optional parameters are pointers.
-type GetOidcTokenDirectParams struct {
-	// The client ID of the application to mint a token for
-	ClientID string `json:"clientId"`
-}
-
-// GetOidcTokenDirect - Get an identity token by direct grant
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Mints an identity token for the logged-in user against a registered application, without a browser redirect. This is the exec-credential pattern used by kubectl.
-func (c *Client) GetOidcTokenDirect(ctx context.Context, params GetOidcTokenDirectParams) (*string, error) {
-
-	path := "/api/oidc/token/direct"
-	queryValues := url.Values{}
-	addQueryParam(queryValues, "clientId", "form", false, params.ClientID)
-
-	if len(queryValues) > 0 {
-		path += "?" + encodeQuery(queryValues)
-	}
-
-	var result string
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/x-www-form-urlencoded", &result, "application/json", false); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -10845,18 +10867,54 @@ func (c *Client) GetManagedClusterMetrics(ctx context.Context, organization stri
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Generates a token for registering a node with the cluster.
-func (c *Client) GenerateNodeToken(ctx context.Context, organization string, cluster string) (*GenerateNodeTokenOutputBody, error) {
+// Generates a token for registering nodes with the cluster. A single-use token registers one node and expires in 24 hours by default; a reusable token registers any number of nodes until it expires (1 hour by default, at most 24 hours) or is revoked.
+func (c *Client) GenerateNodeToken(ctx context.Context, organization string, cluster string, body *GenerateNodeTokenBody) (*GenerateNodeTokenOutputBody, error) {
 
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}/node-token"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 
 	var result GenerateNodeTokenOutputBody
-	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
+}
+
+// ListNodeTokens - List Node Tokens
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the cluster's unexpired node registration tokens.
+func (c *Client) ListNodeTokens(ctx context.Context, organization string, cluster string) (*[]NodeToken, error) {
+
+	path := "/api/organizations/{organization}/managed-clusters/{cluster}/node-tokens"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "cluster", "simple", false, cluster)
+
+	var result []NodeToken
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RevokeNodeToken - Revoke Node Token
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Revokes a node registration token so it registers no more nodes.
+func (c *Client) RevokeNodeToken(ctx context.Context, organization string, cluster string, id string) error {
+
+	path := "/api/organizations/{organization}/managed-clusters/{cluster}/node-tokens/{id}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "cluster", "simple", false, cluster)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
 }
 
 // DeleteManagedClusterNode - Delete Managed Cluster Node
@@ -11471,6 +11529,23 @@ func (c *Client) SetOrganizationDefaultBillingUsernamePolicy(ctx context.Context
 	path = pathReplace(path, "organization", "simple", false, organization)
 
 	var result map[string]StringPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetOrganizationDisableDeviceLoginPolicy - Set organization policy: disable-device-login
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets whether members can sign in to the pw CLI with a device code. Allowed when unset; true leaves only browser sign-in, which needs a browser on the same computer.
+func (c *Client) SetOrganizationDisableDeviceLoginPolicy(ctx context.Context, organization string, body bool) (*map[string]BooleanPolicyOutput, error) {
+
+	path := "/api/organizations/{organization}/policies/disable-device-login"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result map[string]BooleanPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -14203,6 +14278,24 @@ func (c *Client) DetachClusterDisk(ctx context.Context, organization string, use
 	return nil
 }
 
+// ForgetClusterHostKeys - Forget Cluster Host Keys
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Clears the SSH host keys accepted for a user-added cluster, so the next connect asks to trust the keys its login and jump hosts present. Use it after a cluster's host keys change legitimately.
+func (c *Client) ForgetClusterHostKeys(ctx context.Context, organization string, user string, clusterName string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/host-keys"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // DeleteElasticClusterIcon - Delete Elastic Cluster Icon
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -15722,7 +15815,7 @@ func (c *Client) SetUserLanguage(ctx context.Context, organization string, user 
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Lists the active login sessions for the specified user. IP addresses are only included when listing your own sessions.
+// Lists the active login sessions for the specified user. IP addresses are only included when listing your own sessions. Another user's list also includes each device they are signed in to the pw CLI on, marked with `client: pw-cli`; your own devices are listed under connected applications.
 func (c *Client) ListUserLoginSessions(ctx context.Context, organization string, user string) (*[]LoginSessionResponse, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/login-sessions"
@@ -15757,7 +15850,7 @@ func (c *Client) RevokeUserLoginSessions(ctx context.Context, organization strin
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Revokes a single login session for the specified user. Only callable via browser session authentication.
+// Revokes a single login session for the specified user. A pw CLI device in another user's list is signed out along with every token issued to it. Only callable via browser session authentication.
 func (c *Client) RevokeUserLoginSession(ctx context.Context, organization string, user string, id string) error {
 
 	path := "/api/organizations/{organization}/users/{user}/login-sessions/{id}"
@@ -18063,6 +18156,22 @@ func (c *Client) SetPlatformDefaultBillingUsernamePolicy(ctx context.Context, bo
 	return &result, nil
 }
 
+// SetPlatformDisableDeviceLoginPolicy - Set platform policy: disable-device-login
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets whether users in every organization can sign in to the pw CLI with a device code. Allowed when unset; true leaves only browser sign-in.
+func (c *Client) SetPlatformDisableDeviceLoginPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
+
+	path := "/api/platform/policies/disable-device-login"
+
+	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetPlatformDisablePasswordLoginPolicy - Set platform policy: disable-password-login
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -18071,6 +18180,38 @@ func (c *Client) SetPlatformDefaultBillingUsernamePolicy(ctx context.Context, bo
 func (c *Client) SetPlatformDisablePasswordLoginPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
 
 	path := "/api/platform/policies/disable-password-login"
+
+	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformDisablePwCliSignInPolicy - Set platform policy: disable-pw-cli-sign-in
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets whether anyone can sign in through the pw CLI. Allowed when unset; true refuses new sign-ins and stops existing ones, which work again once it is false or removed. API keys are not affected.
+func (c *Client) SetPlatformDisablePwCliSignInPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
+
+	path := "/api/platform/policies/disable-pw-cli-sign-in"
+
+	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformDisablePwMobileSignInPolicy - Set platform policy: disable-pw-mobile-sign-in
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets whether anyone can sign in through the ACTIVATE mobile app. Allowed when unset; true refuses new sign-ins and stops existing ones, which work again once it is false or removed. API keys are not affected.
+func (c *Client) SetPlatformDisablePwMobileSignInPolicy(ctx context.Context, body bool) (*map[string]BooleanPolicyOutput, error) {
+
+	path := "/api/platform/policies/disable-pw-mobile-sign-in"
 
 	var result map[string]BooleanPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
@@ -19415,6 +19556,35 @@ func (c *Client) DeleteSSHPublicKey(ctx context.Context, id string) error {
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// GetSSHHostKeysParams contains the parameters for the GetSSHHostKeys operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetSSHHostKeysParams struct {
+	// The SSH resource, as accepted by pw ssh: workspace, pw://<user>/<cluster>, or worker/<id>.
+	Resource string `json:"resource"`
+}
+
+// GetSSHHostKeys - Get SSH host keys
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the SSH host keys recorded for a resource the caller may connect to, so a client can verify the server it reaches.
+func (c *Client) GetSSHHostKeys(ctx context.Context, params GetSSHHostKeysParams) (*SSHHostKeys, error) {
+
+	path := "/api/ssh/host-keys"
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "resource", "form", false, params.Resource)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result SSHHostKeys
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetCacRedirect - Redirect to CAC verification
