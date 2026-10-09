@@ -27,6 +27,21 @@ See the [examples](./examples) directory for complete runnable examples.
 
 ## Authentication
 
+### Signed In With `pw auth`
+
+For scripts you run yourself, sign in once with `pw auth`, then create the client from the pw credentials file:
+
+```python
+from parallelworks_client import Client
+
+with Client.from_credential_config().sync() as client:
+    response = client.get("/api/buckets")
+```
+
+The credential is picked as the `pw` CLI picks it: `PW_API_KEY`, then the `context` argument, `PW_CONTEXT`, and the current context. A signed-in context stays signed in: the client runs `pw auth token --print -o json` for an access token, reads its lifetime from the response (an RFC 6749 token response), and runs it again a minute before the token expires, the way a Kubernetes exec credential plugin or an AWS `credential_process` works, so only the `pw` CLI ever rotates the sign-in's refresh token. `cli_command` and `cli_timeout` set the `pw` executable (default `pw` on `PATH`) and how long one run may take (default 60 seconds). A `pw` found through a relative `PATH` entry, such as the current directory, is refused, as Go refuses it. Without `pw`, requests raise `SignInExpiredError`.
+
+For unattended jobs such as CI, use an API key in `PW_API_KEY` instead.
+
 ### Automatic Host Detection
 
 API keys (`pwt_...`) and JWT tokens contain the platform host encoded within them. Use `from_credential` to automatically extract it:
@@ -39,6 +54,10 @@ client = Client.from_credential("pwt_Y2xvdWQucGFyYWxsZWwud29ya3M.xxxxx")
 # JWT token - host read from platform_host claim
 client = Client.from_credential("eyJhbGci...")
 # Connects to the host in the token's platform_host claim
+
+# Access token (pwoa_...), which names no host: PW_PLATFORM_HOST, else the
+# server of the credentials file's selected context
+client = Client.from_credential(token)
 ```
 
 ### Explicit Host
@@ -46,16 +65,16 @@ client = Client.from_credential("eyJhbGci...")
 If you prefer to specify the host explicitly:
 
 ```python
-# API Key (Basic Auth) - best for long-running integrations
+# API Key (Basic Auth) - best for unattended jobs such as CI
 client = Client.with_api_key(
     "https://cloud.parallel.works",
     "pwt_..."
 )
 
-# JWT Token (Bearer) - best for scripts, expires in 24h
+# Bearer token, sent as is and never renewed
 client = Client.with_token(
     "https://cloud.parallel.works",
-    "eyJhbGci..."
+    token
 )
 
 # Auto-detect credential type

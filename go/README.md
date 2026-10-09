@@ -30,6 +30,18 @@ workflows, err := client.ListWorkflows(context.Background())
 
 ## Authentication
 
+### Signed In With `pw auth`
+
+For programs you run yourself, sign in once with `pw auth`, then create the client from the pw credentials file:
+
+```go
+client, err := parallelworks.NewClientFromCredentialConfig()
+```
+
+The credential is picked as the `pw` CLI picks it: `PW_API_KEY`, then `WithContext`, `PW_CONTEXT`, and the current context. A signed-in context stays signed in: the client runs `pw auth token --print -o json` for an access token, reads its lifetime from the response (an RFC 6749 token response), and runs it again a minute before the token expires, the way a Kubernetes exec credential plugin or an AWS `credential_process` works, so only the `pw` CLI ever rotates the sign-in's refresh token. `WithCLICommand` and `WithCLITimeout` set the `pw` executable (default `pw` on `PATH`) and how long one run may take (default one minute). Without `pw` on `PATH`, requests fail with `ErrSignInExpired`.
+
+For unattended jobs such as CI, use an API key in `PW_API_KEY` instead.
+
 ### Automatic Host Detection
 
 API keys (`pwt_...`) and JWT tokens contain the platform host encoded within them. Use `NewClientFromCredential` to automatically extract it:
@@ -42,6 +54,10 @@ client, _ := parallelworks.NewClientFromCredential("pwt_Y2xvdWQucGFyYWxsZWwud29y
 // JWT token — host read from platform_host claim
 client, _ := parallelworks.NewClientFromCredential("eyJhbGci...")
 // Connects to the host in the token's platform_host claim
+
+// Access token (pwoa_...), which names no host: PW_PLATFORM_HOST, else the
+// server of the credentials file's selected context
+client, _ := parallelworks.NewClientFromCredential(token)
 ```
 
 ### Explicit Host
@@ -57,11 +73,11 @@ client := parallelworks.NewClient(
     }),
 )
 
-// JWT Token (Bearer)
+// Bearer token, sent as is and never renewed
 client := parallelworks.NewClient(
     "https://cloud.parallel.works",
     parallelworks.WithAuth(&parallelworks.BearerAuth{
-        Token: "eyJhbGci...",
+        Token: token,
     }),
 )
 ```

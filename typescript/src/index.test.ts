@@ -2,13 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   acceptLanguageFromEnv,
   Client,
-  extractPlatformHost,
-  isApiKey,
-  isToken,
   problemMediaType,
   problemTypeUrl,
   toApiError,
-  USER_TOKEN_PREFIX,
 } from './index'
 
 function respond(status: number, body: string, contentType: string) {
@@ -148,28 +144,5 @@ describe('acceptLanguageFromEnv', () => {
     [{ LC_ALL: 'fr_FR.UTF-8', LC_MESSAGES: 'ko_KR.UTF-8' }, 'fr-FR'],
   ])('%o is %s', (env, want) => {
     expect(acceptLanguageFromEnv(env)).toBe(want)
-  })
-})
-
-describe('opaque user tokens', () => {
-  const token = `${USER_TOKEN_PREFIX}${btoa('activate.parallel.works')}.${btoa('raw')}`
-
-  it('is a token, not an API key', () => {
-    expect(isToken(token)).toBe(true)
-    expect(isApiKey(token)).toBe(false)
-  })
-
-  it('names its platform host', () => {
-    expect(extractPlatformHost(token)).toBe('activate.parallel.works')
-    expect(() => extractPlatformHost(`${USER_TOKEN_PREFIX}no-dot`)).toThrow()
-  })
-
-  it('is sent as a Bearer token to the host it names', async () => {
-    const { fetch, requests } = respond(200, '[]', 'application/json')
-    const client = Client.fromCredential(token, { fetch })
-    await client.GET('/api/workflows')
-    const request = requests[0]!
-    expect(new URL(request.url).host).toBe('activate.parallel.works')
-    expect(request.headers.get('Authorization')).toBe(`Bearer ${token}`)
   })
 })

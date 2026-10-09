@@ -2589,6 +2589,24 @@ func (c *Client) UpdateAgentSessionSettings(ctx context.Context, machine string,
 	return &result, nil
 }
 
+// RunAgentSessionShell - Run a ! shell command in a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Runs a command in the session's workspace, as typing ! in the terminal does, and answers with its output. The command and output join the conversation; send an empty message to have the model react to them. The machine refuses a command its owner could not approve from a remote origin or that its PreToolUse hooks deny, and stops one that runs longer than about 20 seconds.
+func (c *Client) RunAgentSessionShell(ctx context.Context, machine string, id string, body AgentShellBody) (*AgentShellOutput, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/shell"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentShellOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListAgentSessions - List pw code sessions across your machines
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -3329,6 +3347,10 @@ type GetAuthTokenParams struct {
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Generates a token for the authenticated user. The token can be used for API authentication.
+//
+// This route is deprecated: sign in with `pw auth login` instead, and use an API key for automation.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetAuthToken(ctx context.Context, opts ...GetAuthTokenParams) (*string, error) {
 
 	path := "/api/auth/token"

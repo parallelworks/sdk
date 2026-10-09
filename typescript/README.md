@@ -31,6 +31,21 @@ See the [examples](./examples) directory for complete runnable examples.
 
 ## Authentication
 
+### Signed In With `pw auth` (Node.js)
+
+For scripts you run yourself, sign in once with `pw auth`, then create the client from the pw credentials file:
+
+```typescript
+import { Client } from '@parallelworks/client'
+
+const client = Client.fromCredentialConfig()
+const { data } = await client.GET('/api/buckets')
+```
+
+The credential is picked as the `pw` CLI picks it: `PW_API_KEY`, then the `context` option, `PW_CONTEXT`, and the current context. A signed-in context stays signed in: the client runs `pw auth token --print -o json` for an access token, reads its lifetime from the response (an RFC 6749 token response), and runs it again a minute before the token expires, the way a Kubernetes exec credential plugin or an AWS `credential_process` works, so only the `pw` CLI ever rotates the sign-in's refresh token. `cliCommand` and `cliTimeoutMs` set the `pw` executable (default `pw` on `PATH`) and how long one run may take (default one minute). A `pw` found through a relative `PATH` entry, such as the current directory, is refused, as Go refuses it. Without `pw`, requests reject with `SignInExpiredError`. This needs Node.js 20.16 or later.
+
+For unattended jobs such as CI, use an API key in `PW_API_KEY` instead.
+
 ### Automatic Host Detection
 
 API keys (`pwt_...`) and JWT tokens contain the platform host encoded within them. Use `fromCredential` to automatically extract it:
@@ -43,6 +58,10 @@ const client = Client.fromCredential('pwt_Y2xvdWQucGFyYWxsZWwud29ya3M.xxxxx')
 // JWT token - host read from platform_host claim
 const client = Client.fromCredential('eyJhbGci...')
 // Connects to the host in the token's platform_host claim
+
+// Access token (pwoa_...), which names no host: PW_PLATFORM_HOST, else the
+// server of the credentials file's selected context (Node.js)
+const client = Client.fromCredential(token)
 ```
 
 ### Explicit Host
@@ -50,13 +69,13 @@ const client = Client.fromCredential('eyJhbGci...')
 If you prefer to specify the host explicitly:
 
 ```typescript
-// API Key (Basic Auth) - best for long-running integrations
+// API Key (Basic Auth) - best for unattended jobs such as CI
 const client = new Client('https://cloud.parallel.works')
   .withApiKey('pwt_...')
 
-// JWT Token (Bearer) - best for scripts, expires in 24h
+// Bearer token, sent as is and never renewed
 const client = new Client('https://cloud.parallel.works')
-  .withToken('eyJhbGci...')
+  .withToken(token)
 
 // Auto-detect credential type
 const client = new Client('https://cloud.parallel.works')

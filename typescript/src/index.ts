@@ -3,7 +3,17 @@ import createClient, {
   type ClientOptions as OpenAPIClientOptions,
   type Middleware,
 } from 'openapi-fetch'
+import {
+  CLIAuth,
+  hostForUnnamedCredential,
+  loadCredentialConfig,
+  type ResolveOptions,
+  resolveIdentity,
+  type TokenProvider,
+} from './credentials'
 import type { paths } from './types/api'
+
+export * from './credentials'
 
 export type { paths }
 export type { components, operations } from './types/api'
@@ -24,6 +34,19 @@ export interface ClientOptions extends Omit<OpenAPIClientOptions, 'baseUrl'> {
    * the locale environment (see `acceptLanguageFromEnv`).
    */
   acceptLanguage?: string
+}
+
+export interface CredentialConfigOptions extends ClientOptions, ResolveOptions {
+  /** The pw executable that renews a `pw auth` sign-in, looked up on PATH. */
+  cliCommand?: string | undefined
+  /** Bounds each run of the pw CLI that renews a `pw auth` sign-in. */
+  cliTimeoutMs?: number | undefined
+}
+
+function withScheme(host: string): string {
+  return host.startsWith('http://') || host.startsWith('https://')
+    ? host
+    : `https://${host}`
 }
 
 /**
@@ -66,16 +89,34 @@ export function problemTypeUrl(
 export const API_KEY_PREFIX = 'pwt_'
 
 /**
- * Prefix for opaque user tokens. Like an API key, a user token names its
- * platform host; like a JWT, it is sent as a Bearer token.
+ * Prefix for opaque access tokens, such as the one `pw auth` saves. Sent as a
+ * Bearer token; it names no platform host.
  */
-export const USER_TOKEN_PREFIX = 'pwut_'
+export const OPAQUE_ACCESS_TOKEN_PREFIX = 'pwoa_'
 
 /** Error thrown when credential parsing fails */
 export class CredentialError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'CredentialError'
+  }
+}
+
+/** Raised when a credential names no platform host and nothing else supplies one. */
+export class NoPlatformHostError extends CredentialError {
+  constructor(message = 'could not extract platform host from credential') {
+    super(message)
+    this.name = 'NoPlatformHostError'
+  }
+}
+
+/** Raised when the pw CLI cannot provide a token for a `pw auth` sign-in and no earlier one is still valid. */
+export class SignInExpiredError extends CredentialError {
+  constructor(cause: unknown) {
+    super(
+      `the pw CLI could not provide a token for the pw auth sign-in; run pw auth again, or install pw: ${cause instanceof Error ? cause.message : String(cause)}`
+    )
+    this.name = 'SignInExpiredError'
   }
 }
 
@@ -92,17 +133,15 @@ export function isApiKey(credential: string): boolean {
 }
 
 /**
- * Check if a credential is a token, sent as a Bearer token.
- *
- * Tokens are opaque user tokens (starting with "pwut_") or JWTs, which have
- * three base64-encoded parts separated by dots.
+ * Check if a credential is sent as a Bearer token: a JWT, whose three
+ * base64-encoded parts are separated by dots, or an opaque access token.
  *
  * @param credential - The credential string to check
  * @returns True if the credential appears to be a token
  */
 export function isToken(credential: string): boolean {
   const trimmed = credential.trim()
-  if (trimmed.startsWith(USER_TOKEN_PREFIX)) {
+  if (trimmed.startsWith(OPAQUE_ACCESS_TOKEN_PREFIX)) {
     return true
   }
   const parts = trimmed.split('.')
@@ -110,23 +149,23 @@ export function isToken(credential: string): boolean {
 }
 
 /**
- * Extract the platform host from an API key or token.
+ * Extract the platform host from an API key or JWT token.
  *
- * For API keys (pwt_xxxx.yyyy) and opaque user tokens (pwut_xxxx.yyyy): decodes
- * the first part after the prefix to get the host
+ * For API keys (pwt_xxxx.yyyy): decodes the first part after pwt_ to get the host
  * For JWT tokens: decodes the payload (second segment) and reads platform_host field
  *
- * @param credential - The API key or token
+ * @param credential - The API key or JWT token
  * @returns The platform host (e.g., "activate.parallel.works")
+ * @throws NoPlatformHostError for an opaque access token, which names no host
  * @throws CredentialError if the credential format is invalid
  */
 export function extractPlatformHost(credential: string): string {
   credential = credential.trim()
   if (isApiKey(credential)) {
-    return extractEncodedHost(credential, API_KEY_PREFIX)
+    return extractHostFromApiKey(credential)
   }
-  if (credential.startsWith(USER_TOKEN_PREFIX)) {
-    return extractEncodedHost(credential, USER_TOKEN_PREFIX)
+  if (credential.startsWith(OPAQUE_ACCESS_TOKEN_PREFIX)) {
+    throw new NoPlatformHostError()
   }
   if (isToken(credential)) {
     return extractHostFromToken(credential)
@@ -134,13 +173,14 @@ export function extractPlatformHost(credential: string): string {
   throw new CredentialError('Invalid credential format')
 }
 
-function extractEncodedHost(credential: string, prefix: string): string {
-  const withoutPrefix = credential.slice(prefix.length)
+function extractHostFromApiKey(apiKey: string): string {
+  // Remove pwt_ prefix
+  const withoutPrefix = apiKey.slice(API_KEY_PREFIX.length)
 
   // Split by dot
   const dotIndex = withoutPrefix.indexOf('.')
   if (dotIndex === -1) {
-    throw new CredentialError('Invalid credential format')
+    throw new CredentialError('Invalid API key format')
   }
 
   const encodedHost = withoutPrefix.slice(0, dotIndex)
@@ -165,12 +205,12 @@ function extractEncodedHost(credential: string, prefix: string): string {
         host = Buffer.from(encodedHost, 'base64').toString()
       }
     } catch (e) {
-      throw new CredentialError(`Could not decode credential host: ${e}`)
+      throw new CredentialError(`Could not decode API key host: ${e}`)
     }
   }
 
   if (!host) {
-    throw new CredentialError('No platform host in credential')
+    throw new CredentialError('No platform host in API key')
   }
 
   return host
@@ -222,13 +262,12 @@ function extractHostFromToken(token: string): string {
  * ```ts
  * import { Client } from '@parallelworks/client'
  *
- * // Using API Key (Basic Auth) - recommended for integrations
+ * // Signed in with `pw auth`: the client asks the pw CLI to renew the token
+ * const client = Client.fromCredentialConfig()
+ *
+ * // Using API Key (Basic Auth) - for unattended jobs such as CI
  * const client = new Client('https://activate.parallel.works')
  *   .withApiKey('pwt_...')
- *
- * // Using Bearer Token (JWT) - for scripts
- * const client = new Client('https://activate.parallel.works')
- *   .withToken('eyJ...')
  *
  * // Or let the client extract the host from your credential
  * const client = Client.fromCredential(process.env.PW_API_KEY!)
@@ -240,7 +279,8 @@ function extractHostFromToken(token: string): string {
 export class Client {
   private baseUrl: string
   private options: ClientOptions
-  private authHeader?: string
+  private authHeader: string | undefined
+  private tokenProvider: TokenProvider | undefined
 
   constructor(baseUrl: string, options: ClientOptions = {}) {
     this.baseUrl = baseUrl
@@ -251,10 +291,12 @@ export class Client {
    * Create a client using only a credential.
    *
    * The platform host is automatically extracted from the credential:
-   * - For API keys and opaque user tokens: host is decoded from the first part after the prefix
+   * - For API keys: host is decoded from the first part after pwt_
    * - For JWT tokens: host is read from the platform_host claim
+   * - For access tokens (pwoa_), which name no host: PW_PLATFORM_HOST, else
+   *   the server of the credentials file's selected context (Node.js only)
    *
-   * @param credential - Your API key or JWT token
+   * @param credential - Your API key or token
    * @param options - Additional client options
    * @returns Configured API client ready to make requests
    * @throws CredentialError if the credential format is invalid
@@ -269,14 +311,72 @@ export class Client {
     credential: string,
     options: ClientOptions = {}
   ): OpenAPIFetchClient {
-    let host = extractPlatformHost(credential)
-
-    // Ensure https:// prefix
-    if (!host.startsWith('http://') && !host.startsWith('https://')) {
-      host = `https://${host}`
+    let host: string
+    try {
+      host = extractPlatformHost(credential)
+    } catch (e) {
+      const fallback =
+        e instanceof NoPlatformHostError
+          ? hostForUnnamedCredential()
+          : undefined
+      if (!fallback) {
+        throw e
+      }
+      host = fallback
     }
+    return new Client(withScheme(host), options).withCredential(credential)
+  }
 
-    return new Client(host, options).withCredential(credential)
+  /**
+   * Create a client from the pw credentials file (Node.js only), picking the
+   * credential as the CLI and the Go SDK do: PW_API_KEY, then the `context`
+   * option, PW_CONTEXT, and the file's current context.
+   *
+   * A context signed in with `pw auth` stays signed in: when its access token
+   * nears expiry the client runs `pw auth token --print` for a renewed one
+   * (see `CLIAuth`), so sign in once and let scripts run. Unattended jobs such
+   * as CI should use an API key in PW_API_KEY instead.
+   *
+   * @example
+   * ```ts
+   * const client = Client.fromCredentialConfig()
+   * const { data } = await client.GET('/api/buckets')
+   * ```
+   */
+  static fromCredentialConfig(
+    options: CredentialConfigOptions = {}
+  ): OpenAPIFetchClient {
+    const {
+      context,
+      platformHost,
+      cliCommand,
+      cliTimeoutMs,
+      ...clientOptions
+    } = options
+    const config = loadCredentialConfig()
+    const { context: name, identity } = resolveIdentity(config, {
+      context,
+      platformHost,
+    })
+    const client = new Client(withScheme(identity.server), clientOptions)
+    if (identity.apikey) {
+      return isToken(identity.apikey)
+        ? client.withToken(identity.apikey)
+        : client.withApiKey(identity.apikey)
+    }
+    if (!identity.token) {
+      throw new CredentialError('you must first authenticate using "pw auth"')
+    }
+    if (identity.oauth) {
+      return client.withTokenProvider(
+        new CLIAuth({
+          command: cliCommand,
+          context: name,
+          timeoutMs: cliTimeoutMs,
+        })
+      )
+    }
+    return client.withToken(identity.token)
   }
 
   /**
@@ -297,21 +397,23 @@ export class Client {
         ? btoa(`${apiKey}:`)
         : Buffer.from(`${apiKey}:`).toString('base64')
     this.authHeader = `Basic ${encoded}`
+    this.tokenProvider = undefined
     return this.build()
   }
 
   /**
-   * Authenticate with a Bearer Token (JWT)
+   * Authenticate with a Bearer token, sent as is and never renewed.
    *
-   * Best for scripts and CLI tools. Tokens expire after 24 hours.
-   * Tokens can be generated from your ACTIVATE account settings.
+   * For a script, sign in once with `pw auth` and use `fromCredentialConfig`,
+   * which renews the token; for an unattended job such as CI, use an API key.
    *
-   * @param token - Your JWT token from account settings
+   * @param token - A token, such as one `pw auth token --print` printed
    * @returns Configured API client ready to make requests
    */
   withToken(token: string): OpenAPIFetchClient {
     // Trim whitespace to handle env vars with trailing newlines
     this.authHeader = `Bearer ${token.trim()}`
+    this.tokenProvider = undefined
     return this.build()
   }
 
@@ -321,7 +423,7 @@ export class Client {
    * Automatically detects whether the credential is an API key (starts with "pwt_")
    * or a token and configures the appropriate authentication method.
    *
-   * @param credential - Your API key or JWT token
+   * @param credential - Your API key or token
    * @returns Configured API client ready to make requests
    */
   withCredential(credential: string): OpenAPIFetchClient {
@@ -329,6 +431,19 @@ export class Client {
       return this.withApiKey(credential)
     }
     return this.withToken(credential)
+  }
+
+  /**
+   * Authenticate each request with a Bearer token the provider supplies, such
+   * as a `CLIAuth` that renews a `pw auth` sign-in.
+   *
+   * @param provider - Supplies the current token
+   * @returns Configured API client ready to make requests
+   */
+  withTokenProvider(provider: TokenProvider): OpenAPIFetchClient {
+    this.authHeader = undefined
+    this.tokenProvider = provider
+    return this.build()
   }
 
   /**
@@ -350,6 +465,18 @@ export class Client {
         ...(this.authHeader && { Authorization: this.authHeader }),
       },
     })
+    const provider = this.tokenProvider
+    if (provider) {
+      client.use({
+        async onRequest({ request }) {
+          request.headers.set(
+            'Authorization',
+            `Bearer ${await provider.token()}`
+          )
+          return request
+        },
+      })
+    }
     client.use(problemMiddleware)
 
     // Attach HTTP status code to error response bodies so consumers

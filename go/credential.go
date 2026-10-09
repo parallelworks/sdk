@@ -13,9 +13,6 @@ const (
 	// OpaqueAccessTokenPrefix marks an opaque OAuth access token, such as the one
 	// `pw auth login` saves; it is sent as a Bearer token like a JWT.
 	OpaqueAccessTokenPrefix = "pwoa_"
-	// UserTokenPrefix marks an opaque user token. It names its platform host as
-	// an API key does, and is sent as a Bearer token like a JWT.
-	UserTokenPrefix = "pwut_"
 )
 
 // ErrInvalidCredential is returned when a credential cannot be parsed
@@ -30,28 +27,24 @@ func IsAPIKey(credential string) bool {
 }
 
 // IsToken returns true if the credential is sent as a Bearer token: a JWT, whose
-// three base64-encoded parts are separated by dots, an opaque OAuth access token,
-// or an opaque user token.
+// three base64-encoded parts are separated by dots, or an opaque OAuth access token.
 func IsToken(credential string) bool {
 	credential = strings.TrimSpace(credential)
-	if strings.HasPrefix(credential, OpaqueAccessTokenPrefix) || strings.HasPrefix(credential, UserTokenPrefix) {
+	if strings.HasPrefix(credential, OpaqueAccessTokenPrefix) {
 		return true
 	}
 	parts := strings.Split(credential, ".")
 	return len(parts) == 3 && !strings.HasPrefix(credential, APIKeyPrefix)
 }
 
-// ExtractPlatformHost extracts the platform host from an API key or token.
+// ExtractPlatformHost extracts the platform host from an API key or JWT token.
 //
-// For API keys (pwt_xxxx.yyyy) and opaque user tokens (pwut_xxxx.yyyy): decodes the first part after the prefix
+// For API keys (pwt_xxxx.yyyy): decodes the first part after pwt_ to get the host
 // For JWT tokens: decodes the payload (second segment) and reads platform_host field
 func ExtractPlatformHost(credential string) (string, error) {
 	credential = strings.TrimSpace(credential)
 	if IsAPIKey(credential) {
-		return extractEncodedHost(credential, APIKeyPrefix)
-	}
-	if strings.HasPrefix(credential, UserTokenPrefix) {
-		return extractEncodedHost(credential, UserTokenPrefix)
+		return extractHostFromAPIKey(credential)
 	}
 	if strings.HasPrefix(credential, OpaqueAccessTokenPrefix) {
 		return "", ErrNoPlatformHost
@@ -62,10 +55,11 @@ func ExtractPlatformHost(credential string) (string, error) {
 	return "", ErrInvalidCredential
 }
 
-// extractEncodedHost extracts the platform host from a credential of the form
-// <prefix><base64_host>.<key>.
-func extractEncodedHost(credential, prefix string) (string, error) {
-	withoutPrefix := strings.TrimPrefix(credential, prefix)
+// extractHostFromAPIKey extracts platform host from an API key.
+// API key format: pwt_<base64_host>.<key>
+func extractHostFromAPIKey(apiKey string) (string, error) {
+	// Remove pwt_ prefix
+	withoutPrefix := strings.TrimPrefix(apiKey, APIKeyPrefix)
 
 	// Split by dot
 	parts := strings.SplitN(withoutPrefix, ".", 2)
@@ -139,8 +133,10 @@ func extractHostFromToken(token string) (string, error) {
 // NewClientFromCredential creates a new client using only a credential.
 // The platform host is automatically extracted from the credential.
 //
-// For API keys and opaque user tokens: host is decoded from the first part after the prefix
+// For API keys: host is decoded from the first part after pwt_
 // For JWT tokens: host is read from the platform_host claim
+// For access tokens (pwoa_), which name no host: PW_PLATFORM_HOST, else the
+// server of the credentials file's selected context
 //
 // Example:
 //
@@ -148,6 +144,9 @@ func extractHostFromToken(token string) (string, error) {
 //	// Automatically connects to activate.parallel.works
 func NewClientFromCredential(credential string, opts ...ClientOption) (*Client, error) {
 	host, err := ExtractPlatformHost(credential)
+	if errors.Is(err, ErrNoPlatformHost) {
+		host, err = unnamedCredentialHost(nil, "")
+	}
 	if err != nil {
 		return nil, err
 	}

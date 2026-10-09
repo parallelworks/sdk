@@ -41,9 +41,6 @@ type Identity struct {
 	// OAuth is the state of a `pw auth login` sign-in, kept opaque here so
 	// rewriting the file through this type does not drop it.
 	OAuth json.RawMessage `json:"oauth,omitempty"`
-	// ExpiresAt is when an opaque Token expires, as the platform reported it;
-	// a JWT carries its own expiry.
-	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 }
 
 // Credential returns the API key or JWT token from this identity.
@@ -229,6 +226,8 @@ func (c *CredentialConfig) SaveTo(path string) error {
 type resolveOptions struct {
 	context      string
 	platformHost string
+	cliCommand   string
+	cliTimeout   time.Duration
 }
 
 // ResolveOption configures identity resolution.
@@ -248,6 +247,22 @@ func WithPlatformHost(host string) ResolveOption {
 	}
 }
 
+// WithCLICommand sets the pw executable that renews a `pw auth` sign-in
+// (default DefaultCLICommand, looked up on PATH).
+func WithCLICommand(command string) ResolveOption {
+	return func(o *resolveOptions) {
+		o.cliCommand = command
+	}
+}
+
+// WithCLITimeout bounds each run of the pw CLI that renews a `pw auth`
+// sign-in (default DefaultCLITimeout).
+func WithCLITimeout(timeout time.Duration) ResolveOption {
+	return func(o *resolveOptions) {
+		o.cliTimeout = timeout
+	}
+}
+
 // ResolveIdentity returns the active identity using this priority:
 //  1. PW_API_KEY env var → construct identity from credential
 //  2. context option (from WithContext / --context flag)
@@ -258,52 +273,63 @@ func (c *CredentialConfig) ResolveIdentity(opts ...ResolveOption) (*Identity, er
 	for _, opt := range opts {
 		opt(&o)
 	}
+	_, identity, err := c.resolve(o)
+	return identity, err
+}
 
-	// Priority 1: PW_API_KEY env var
+// resolve also names the context the identity came from, empty for PW_API_KEY.
+func (c *CredentialConfig) resolve(o resolveOptions) (string, *Identity, error) {
 	if credential := os.Getenv("PW_API_KEY"); credential != "" {
-		return c.identityFromCredential(credential, o.platformHost)
+		identity, err := c.identityFromCredential(credential, o)
+		return "", identity, err
 	}
 
-	// Determine context name: flag → env → config default
-	contextName := c.CurrentIdentity
-	if envCtx := os.Getenv("PW_CONTEXT"); envCtx != "" {
-		contextName = envCtx
-	}
-	if o.context != "" {
-		contextName = o.context
-	}
-
+	contextName := c.selectedContext(o.context)
 	if contextName == "" {
-		return nil, ErrNoContextConfigured
+		return "", nil, ErrNoContextConfigured
 	}
 
 	identity, exists := c.Identities[contextName]
 	if !exists {
-		return nil, fmt.Errorf("context %q not found", contextName)
+		return "", nil, fmt.Errorf("context %q not found", contextName)
 	}
 
-	// Apply platform host override
 	if o.platformHost != "" {
 		identity.Server = o.platformHost
 	}
 
-	return &identity, nil
+	return contextName, &identity, nil
+}
+
+// selectedContext is the context the CLI uses too: the override, then
+// PW_CONTEXT, then the current context.
+func (c *CredentialConfig) selectedContext(override string) string {
+	if override != "" {
+		return override
+	}
+	if envCtx := os.Getenv("PW_CONTEXT"); envCtx != "" {
+		return envCtx
+	}
+	return c.CurrentIdentity
 }
 
 // identityFromCredential constructs an identity from a raw credential string.
-func (c *CredentialConfig) identityFromCredential(credential string, platformHostOverride string) (*Identity, error) {
-	host, err := ExtractPlatformHost(credential)
-	if err != nil {
-		// If we can't extract the host, use the override or return error
-		if platformHostOverride != "" {
-			host = platformHostOverride
-		} else {
+// A token that names no platform, such as an access token `pw auth token
+// --print` printed, is sent to PW_PLATFORM_HOST, else the selected context's server.
+func (c *CredentialConfig) identityFromCredential(credential string, o resolveOptions) (*Identity, error) {
+	host := o.platformHost
+	if host == "" {
+		extracted, err := ExtractPlatformHost(credential)
+		switch {
+		case err == nil:
+			host = extracted
+		case errors.Is(err, ErrNoPlatformHost):
+			if host, err = unnamedCredentialHost(c, o.context); err != nil {
+				return nil, err
+			}
+		default:
 			return nil, err
 		}
-	}
-
-	if platformHostOverride != "" {
-		host = platformHostOverride
 	}
 
 	id := &Identity{
@@ -315,6 +341,24 @@ func (c *CredentialConfig) identityFromCredential(credential string, platformHos
 		id.ApiKey = credential
 	}
 	return id, nil
+}
+
+// unnamedCredentialHost is PW_PLATFORM_HOST, else the selected context's server; cfg nil loads the file only if needed.
+func unnamedCredentialHost(cfg *CredentialConfig, context string) (string, error) {
+	if host := os.Getenv("PW_PLATFORM_HOST"); host != "" {
+		return host, nil
+	}
+	if cfg == nil {
+		loaded, err := LoadCredentialConfig()
+		if err != nil {
+			return "", err
+		}
+		cfg = loaded
+	}
+	if host := cfg.Identities[cfg.selectedContext(context)].Server; host != "" {
+		return host, nil
+	}
+	return "", ErrNoPlatformHost
 }
 
 // Contexts returns a sorted list of all contexts.
@@ -442,7 +486,6 @@ func (c *CredentialConfig) UpsertContext(contextName, canonicalName, server, org
 			existing.ApiKey = apiKey
 			existing.Token = token
 			existing.OAuth = nil
-			existing.ExpiresAt = nil
 			existing.Server = server
 			existing.Organization = org
 			existing.Name = contextName
@@ -476,7 +519,6 @@ func (c *CredentialConfig) UpsertContext(contextName, canonicalName, server, org
 		existing.ApiKey = apiKey
 		existing.Token = token
 		existing.OAuth = nil
-		existing.ExpiresAt = nil
 		existing.Server = server
 		existing.Organization = org
 		c.Identities[existingName] = existing
@@ -516,6 +558,7 @@ func (c *CredentialConfig) countContextsByCanonicalName(canonicalName string) in
 
 // NewClientFromCredentialConfig creates an authenticated client from the credentials file.
 // Respects PW_API_KEY, PW_CONTEXT env vars, and flag overrides via ResolveOption.
+// A context signed in with `pw auth` is renewed through the pw CLI (see CLIAuth).
 //
 // ResolveOption values (WithContext, WithPlatformHost) are extracted from opts
 // and used for identity resolution. Remaining ClientOption values configure the client.
@@ -532,12 +575,17 @@ func NewClientFromCredentialConfig(opts ...any) (*Client, error) {
 		}
 	}
 
+	var o resolveOptions
+	for _, opt := range resolveOpts {
+		opt(&o)
+	}
+
 	cfg, err := LoadCredentialConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	identity, err := cfg.ResolveIdentity(resolveOpts...)
+	contextName, identity, err := cfg.resolve(o)
 	if err != nil {
 		return nil, err
 	}
@@ -547,11 +595,13 @@ func NewClientFromCredentialConfig(opts ...any) (*Client, error) {
 		return nil, ErrNoCredentials
 	}
 
-	// Use Bearer for JWT tokens, Basic for API keys (any format)
 	var auth AuthProvider
-	if IsToken(credential) {
+	switch {
+	case identity.ApiKey == "" && len(identity.OAuth) > 0:
+		auth = &CLIAuth{Command: o.cliCommand, Context: contextName, Timeout: o.cliTimeout}
+	case IsToken(credential):
 		auth = &BearerAuth{Token: credential}
-	} else {
+	default:
 		auth = &BasicAuth{Username: credential, Password: ""}
 	}
 

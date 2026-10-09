@@ -11524,14 +11524,21 @@
             "type": "string"
           },
           "duration": {
-            "description": "Days before the key expires, at most the organization's maximum API key lifetime, which is 730 days when no policy sets it. Empty or 0 creates a key that does not expire, which only an Unlimited policy allows.",
+            "description": "Days before the key expires, at most the organization's maximum API key lifetime, which is 730 days when no policy sets it. Empty or 0 creates a key that does not expire, which only an Unlimited policy allows. Not allowed with expiresIn.",
             "maxLength": 5,
             "pattern": "^[0-9]*$",
             "patternDescription": "whole number of days",
             "type": "string"
           },
+          "expiresIn": {
+            "description": "Seconds before the key expires, as in OAuth 2.0 expires_in, for lifetimes that are not whole days. At least 900 (15 minutes) and at most the organization's maximum API key lifetime. Not allowed with duration.",
+            "format": "int64",
+            "maximum": 8639913600,
+            "minimum": 900,
+            "type": "integer"
+          },
           "title": {
-            "description": "Display name for the API key",
+            "description": "Display name for the API key, unique among your keys. When omitted, the key is named token-YYYYMMDD-HHMMSS-xxxx, the time in UTC with a random suffix.",
             "minLength": 1,
             "type": "string"
           },
@@ -11545,9 +11552,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "title"
-        ],
         "type": "object"
       },
       "CreateAPIKeyOutputBody": {
@@ -52654,7 +52658,8 @@
     },
     "/api/auth/token": {
       "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGenerates a token for the authenticated user. The token can be used for API authentication.",
+        "deprecated": true,
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGenerates a token for the authenticated user. The token can be used for API authentication.\n\nThis route is deprecated: sign in with `pw auth login` instead, and use an API key for automation.",
         "operationId": "get-auth-token",
         "parameters": [
           {

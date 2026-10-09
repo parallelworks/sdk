@@ -34,7 +34,6 @@ func TestIsToken(t *testing.T) {
 		{"  header.payload.signature  ", true}, // trims whitespace
 		{"pwt_abc.def.ghi", false},             // API key with 3 parts
 		{"pwoa_0123abcd", true},                // opaque OAuth access token
-		{"pwut_aG9zdA==.cmF3", true},           // opaque user token
 		{"no-dots", false},
 		{"one.dot", false},
 		{"", false},
@@ -198,40 +197,5 @@ func TestNewClientFromCredential_TokenAuth(t *testing.T) {
 	expected := "Bearer " + token
 	if got := req.Header.Get("Authorization"); got != expected {
 		t.Errorf("got Authorization %q, want %q", got, expected)
-	}
-}
-
-func TestExtractPlatformHost_UserToken(t *testing.T) {
-	token := UserTokenPrefix + base64.StdEncoding.EncodeToString([]byte("cloud.parallel.works")) + "." + base64.StdEncoding.EncodeToString([]byte("raw"))
-
-	host, err := ExtractPlatformHost(token)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if host != "cloud.parallel.works" {
-		t.Errorf("got %q, want %q", host, "cloud.parallel.works")
-	}
-	if _, err := ExtractPlatformHost(UserTokenPrefix + "no-dot"); err == nil {
-		t.Error("expected an error for a user token without a host part")
-	}
-}
-
-func TestNewClientFromCredential_UserTokenAuth(t *testing.T) {
-	token := UserTokenPrefix + base64.StdEncoding.EncodeToString([]byte("activate.parallel.works")) + "." + base64.StdEncoding.EncodeToString([]byte("raw"))
-
-	client, err := NewClientFromCredential(token)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if got := client.PlatformHost(); got != "activate.parallel.works" {
-		t.Errorf("got host %q, want %q", got, "activate.parallel.works")
-	}
-
-	req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, "https://example.com", nil)
-	if err := client.auth.Apply(req); err != nil {
-		t.Fatalf("auth.Apply failed: %v", err)
-	}
-	if got := req.Header.Get("Authorization"); got != "Bearer "+token {
-		t.Errorf("got Authorization %q, want %q", got, "Bearer "+token)
 	}
 }

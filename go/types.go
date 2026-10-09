@@ -791,6 +791,18 @@ type AgentSessionsResponse struct {
 	Sessions []AgentSession `json:"sessions"`
 }
 
+type AgentShellBody struct {
+	// The command, without the leading !.
+	Command string `json:"command"`
+}
+
+type AgentShellOutput struct {
+	// What the command printed, stdout and stderr together.
+	Output string `json:"output"`
+	// Why the owner's hook asked that the model not react to the run. Send no follow-up message when it is set.
+	Stop *string `json:"stop,omitempty"`
+}
+
 type AgentSlashCommand struct {
 	Description *string `json:"description,omitempty"`
 	Name        string  `json:"name"`
@@ -3941,10 +3953,12 @@ type CreateAiProviderBody struct {
 type CreateAPIKeyInputBody struct {
 	// Budget allocation name (required for AI keys)
 	Allocation *string `json:"allocation,omitempty"`
-	// Days before the key expires, at most the organization's maximum API key lifetime, which is 730 days when no policy sets it. Empty or 0 creates a key that does not expire, which only an Unlimited policy allows.
+	// Days before the key expires, at most the organization's maximum API key lifetime, which is 730 days when no policy sets it. Empty or 0 creates a key that does not expire, which only an Unlimited policy allows. Not allowed with expiresIn.
 	Duration *string `json:"duration,omitempty"`
-	// Display name for the API key
-	Title string `json:"title"`
+	// Seconds before the key expires, as in OAuth 2.0 expires_in, for lifetimes that are not whole days. At least 900 (15 minutes) and at most the organization's maximum API key lifetime. Not allowed with duration.
+	ExpiresIn *int64 `json:"expiresIn,omitempty"`
+	// Display name for the API key, unique among your keys. When omitted, the key is named token-YYYYMMDD-HHMMSS-xxxx, the time in UTC with a random suffix.
+	Title *string `json:"title,omitempty"`
 	// Key type
 	Type *string `json:"type,omitempty"`
 }
