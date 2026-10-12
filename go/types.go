@@ -1204,6 +1204,7 @@ type ApprovalRequest struct {
 	Question    *string     `json:"question,omitempty"`
 	Reason      *string     `json:"reason,omitempty"`
 	SubagentID  *string     `json:"subagentId,omitempty"`
+	Tool        *string     `json:"tool,omitempty"`
 }
 
 type AppsOutputBody struct {
@@ -3186,8 +3187,12 @@ type CloudAccountNetwork struct {
 	ProvisioningMode *string               `json:"provisioningMode,omitempty"`
 	RdmaProfile      *string               `json:"rdmaProfile,omitempty"`
 	Regions          []ConfigRegion        `json:"regions"`
-	Status           string                `json:"status"`
-	UpdatedAt        time.Time             `json:"updatedAt"`
+	// True when the network can be provisioned again: it was deleted, or its failed attempt's cloud resources were rolled back
+	Retryable        bool      `json:"retryable"`
+	Status           string    `json:"status"`
+	TransitGatewayID *string   `json:"transitGatewayId,omitempty"`
+	UpdatedAt        time.Time `json:"updatedAt"`
+	Zone             *string   `json:"zone,omitempty"`
 }
 
 type CloudAccountNetworkSummary struct {
@@ -3196,7 +3201,9 @@ type CloudAccountNetworkSummary struct {
 	ProvisioningMode *string        `json:"provisioningMode,omitempty"`
 	RdmaProfile      *string        `json:"rdmaProfile,omitempty"`
 	Regions          []ConfigRegion `json:"regions"`
-	Status           string         `json:"status"`
+	// True when the network can be provisioned again: it was deleted, or its failed attempt's cloud resources were rolled back
+	Retryable bool   `json:"retryable"`
+	Status    string `json:"status"`
 }
 
 type CloudAccountPermissionsEntry struct {
@@ -4177,11 +4184,15 @@ type CreateConversationInputBody struct {
 }
 
 type CreateDiskSnapshotBody struct {
+	// Store the snapshot in the multi-region location covering the source region, making it usable in every region there (Google only)
+	MultiRegion *bool `json:"multiRegion,omitempty"`
 	// Name of the snapshot
 	SnapshotName string `json:"snapshotName"`
 }
 
 type CreateEnvironmentBody struct {
+	// Whether an account must be supplied to submit. Slurm only, ignored when fields are supplied.
+	AccountRequired *bool `json:"accountRequired,omitempty"`
 	// Default wall time.
 	DefaultTime *string `json:"defaultTime,omitempty"`
 	// Default values for fields.
@@ -4190,7 +4201,7 @@ type CreateEnvironmentBody struct {
 	Description *string `json:"description,omitempty"`
 	// Display name.
 	DisplayName *string `json:"displayName,omitempty"`
-	// Custom form fields.
+	// Custom form fields. Omit to use the scheduler's default schema.
 	Fields []EnvironmentField `json:"fields,omitempty"`
 	// Maximum wall time.
 	MaxTime *string `json:"maxTime,omitempty"`
@@ -4198,6 +4209,8 @@ type CreateEnvironmentBody struct {
 	Name string `json:"name"`
 	// Scheduler partition name.
 	PartitionName string `json:"partitionName"`
+	// Whether a QoS must be supplied to submit. Slurm only, ignored when fields are supplied.
+	QosRequired *bool `json:"qosRequired,omitempty"`
 	// Scheduler type.
 	SchedulerType string `json:"schedulerType"`
 }
@@ -4290,6 +4303,8 @@ type CreateIndexBody struct {
 }
 
 type CreateInstanceSnapshotBody struct {
+	// Store the snapshot in the multi-region location covering the source region, making it usable in every region there (Google only)
+	MultiRegion *bool `json:"multiRegion,omitempty"`
 	// Name of the snapshot
 	SnapshotName string `json:"snapshotName"`
 }
@@ -4652,6 +4667,8 @@ type CreateSkuRuleBody struct {
 type CreateSnapshotBody struct {
 	// Mount point of the inline disk to snapshot; omit to snapshot the cluster root disk
 	MountPoint *string `json:"mountPoint,omitempty"`
+	// Store the snapshot in the multi-region location covering the source region, making it usable in every region there (Google only)
+	MultiRegion *bool `json:"multiRegion,omitempty"`
 	// Name of the snapshot
 	SnapshotName string `json:"snapshotName"`
 }
@@ -13554,7 +13571,6 @@ type SessionState struct {
 	InputTokens            *int64        `json:"inputTokens,omitempty"`
 	Model                  string        `json:"model"`
 	Name                   *string       `json:"name,omitempty"`
-	NoToolsMode            *bool         `json:"noToolsMode,omitempty"`
 	OutputTokens           *int64        `json:"outputTokens,omitempty"`
 	PendingSubagentWork    *bool         `json:"pendingSubagentWork,omitempty"`
 	PermissionMode         *string       `json:"permissionMode,omitempty"`

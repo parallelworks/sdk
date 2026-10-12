@@ -3494,6 +3494,9 @@
           },
           "subagentId": {
             "type": "string"
+          },
+          "tool": {
+            "type": "string"
           }
         },
         "required": [
@@ -9225,11 +9228,21 @@
               "null"
             ]
           },
+          "retryable": {
+            "description": "True when the network can be provisioned again: it was deleted, or its failed attempt's cloud resources were rolled back",
+            "type": "boolean"
+          },
           "status": {
+            "type": "string"
+          },
+          "transitGatewayId": {
             "type": "string"
           },
           "updatedAt": {
             "format": "date-time",
+            "type": "string"
+          },
+          "zone": {
             "type": "string"
           }
         },
@@ -9245,6 +9258,7 @@
           "id",
           "name",
           "status",
+          "retryable",
           "regions"
         ],
         "type": "object"
@@ -9273,6 +9287,10 @@
               "null"
             ]
           },
+          "retryable": {
+            "description": "True when the network can be provisioned again: it was deleted, or its failed attempt's cloud resources were rolled back",
+            "type": "boolean"
+          },
           "status": {
             "type": "string"
           }
@@ -9281,6 +9299,7 @@
           "id",
           "name",
           "status",
+          "retryable",
           "regions"
         ],
         "type": "object"
@@ -12140,6 +12159,10 @@
       "CreateDiskSnapshotBody": {
         "additionalProperties": false,
         "properties": {
+          "multiRegion": {
+            "description": "Store the snapshot in the multi-region location covering the source region, making it usable in every region there (Google only)",
+            "type": "boolean"
+          },
           "snapshotName": {
             "description": "Name of the snapshot",
             "maxLength": 51,
@@ -12157,6 +12180,10 @@
       "CreateEnvironmentBody": {
         "additionalProperties": false,
         "properties": {
+          "accountRequired": {
+            "description": "Whether an account must be supplied to submit. Slurm only, ignored when fields are supplied.",
+            "type": "boolean"
+          },
           "defaultTime": {
             "description": "Default wall time.",
             "type": "string"
@@ -12175,7 +12202,7 @@
             "type": "string"
           },
           "fields": {
-            "description": "Custom form fields.",
+            "description": "Custom form fields. Omit to use the scheduler's default schema.",
             "items": {
               "$ref": "#/components/schemas/EnvironmentField"
             },
@@ -12197,6 +12224,10 @@
           "partitionName": {
             "description": "Scheduler partition name.",
             "type": "string"
+          },
+          "qosRequired": {
+            "description": "Whether a QoS must be supplied to submit. Slurm only, ignored when fields are supplied.",
+            "type": "boolean"
           },
           "schedulerType": {
             "description": "Scheduler type.",
@@ -12479,6 +12510,10 @@
       "CreateInstanceSnapshotBody": {
         "additionalProperties": false,
         "properties": {
+          "multiRegion": {
+            "description": "Store the snapshot in the multi-region location covering the source region, making it usable in every region there (Google only)",
+            "type": "boolean"
+          },
           "snapshotName": {
             "description": "Name of the snapshot",
             "maxLength": 51,
@@ -13568,6 +13603,10 @@
           "mountPoint": {
             "description": "Mount point of the inline disk to snapshot; omit to snapshot the cluster root disk",
             "type": "string"
+          },
+          "multiRegion": {
+            "description": "Store the snapshot in the multi-region location covering the source region, making it usable in every region there (Google only)",
+            "type": "boolean"
           },
           "snapshotName": {
             "description": "Name of the snapshot",
@@ -39296,9 +39335,6 @@
           },
           "name": {
             "type": "string"
-          },
-          "noToolsMode": {
-            "type": "boolean"
           },
           "outputTokens": {
             "format": "int64",
@@ -65611,6 +65647,83 @@
           }
         },
         "summary": "Update network regions",
+        "tags": [
+          "Cloud Accounts"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/cloud-accounts/{name}/networks/{networkName}/retry": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nProvisions a failed network again on the same record once its cloud resources have been rolled back, using the submitted settings.",
+        "operationId": "retry-organization-cloud-account-network",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the cloud account",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Name of the cloud account",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the network",
+            "in": "path",
+            "name": "networkName",
+            "required": true,
+            "schema": {
+              "description": "Name of the network",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNetworkBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudAccountNetwork"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Retry a failed network",
         "tags": [
           "Cloud Accounts"
         ]
@@ -103860,6 +103973,7 @@
                   "running",
                   "completed",
                   "error",
+                  "canceling",
                   "canceled"
                 ],
                 "type": "string"

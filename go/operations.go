@@ -8274,6 +8274,25 @@ func (c *Client) UpdateOrganizationCloudAccountNetwork(ctx context.Context, orga
 	return nil
 }
 
+// RetryOrganizationCloudAccountNetwork - Retry a failed network
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Provisions a failed network again on the same record once its cloud resources have been rolled back, using the submitted settings.
+func (c *Client) RetryOrganizationCloudAccountNetwork(ctx context.Context, organization string, name string, networkName string, body CreateNetworkBody) (*CloudAccountNetwork, error) {
+
+	path := "/api/organizations/{organization}/cloud-accounts/{name}/networks/{networkName}/retry"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "name", "simple", false, name)
+	path = pathReplace(path, "networkName", "simple", false, networkName)
+
+	var result CloudAccountNetwork
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetOpenstackFlavors - Get OpenStack flavors
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
