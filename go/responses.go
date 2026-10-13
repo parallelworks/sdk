@@ -479,6 +479,78 @@ func (m *ResponseMeta) PostOidcIntrospectHeaders() PostOidcIntrospectHeaders {
 	}
 }
 
+// RegisterOauthClientHeaders holds the headers RegisterOauthClient declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type RegisterOauthClientHeaders struct {
+	CacheControl    string
+	Pragma          string
+	WwwAuthenticate string
+}
+
+// RegisterOauthClientHeaders reads the headers RegisterOauthClient declares out of the captured
+// response.
+func (m *ResponseMeta) RegisterOauthClientHeaders() RegisterOauthClientHeaders {
+	return RegisterOauthClientHeaders{
+		CacheControl:    m.Header.Get("Cache-Control"),
+		Pragma:          m.Header.Get("Pragma"),
+		WwwAuthenticate: m.Header.Get("WWW-Authenticate"),
+	}
+}
+
+// GetOauthClientRegistrationHeaders holds the headers GetOauthClientRegistration declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetOauthClientRegistrationHeaders struct {
+	CacheControl    string
+	Pragma          string
+	WwwAuthenticate string
+}
+
+// GetOauthClientRegistrationHeaders reads the headers GetOauthClientRegistration declares out of the captured
+// response.
+func (m *ResponseMeta) GetOauthClientRegistrationHeaders() GetOauthClientRegistrationHeaders {
+	return GetOauthClientRegistrationHeaders{
+		CacheControl:    m.Header.Get("Cache-Control"),
+		Pragma:          m.Header.Get("Pragma"),
+		WwwAuthenticate: m.Header.Get("WWW-Authenticate"),
+	}
+}
+
+// UpdateOauthClientRegistrationHeaders holds the headers UpdateOauthClientRegistration declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type UpdateOauthClientRegistrationHeaders struct {
+	CacheControl    string
+	Pragma          string
+	WwwAuthenticate string
+}
+
+// UpdateOauthClientRegistrationHeaders reads the headers UpdateOauthClientRegistration declares out of the captured
+// response.
+func (m *ResponseMeta) UpdateOauthClientRegistrationHeaders() UpdateOauthClientRegistrationHeaders {
+	return UpdateOauthClientRegistrationHeaders{
+		CacheControl:    m.Header.Get("Cache-Control"),
+		Pragma:          m.Header.Get("Pragma"),
+		WwwAuthenticate: m.Header.Get("WWW-Authenticate"),
+	}
+}
+
+// DeleteOauthClientRegistrationHeaders holds the headers DeleteOauthClientRegistration declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type DeleteOauthClientRegistrationHeaders struct {
+	CacheControl    string
+	Pragma          string
+	WwwAuthenticate string
+}
+
+// DeleteOauthClientRegistrationHeaders reads the headers DeleteOauthClientRegistration declares out of the captured
+// response.
+func (m *ResponseMeta) DeleteOauthClientRegistrationHeaders() DeleteOauthClientRegistrationHeaders {
+	return DeleteOauthClientRegistrationHeaders{
+		CacheControl:    m.Header.Get("Cache-Control"),
+		Pragma:          m.Header.Get("Pragma"),
+		WwwAuthenticate: m.Header.Get("WWW-Authenticate"),
+	}
+}
+
 // PostOidcRevokeHeaders holds the headers PostOidcRevoke declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type PostOidcRevokeHeaders struct {
@@ -814,6 +886,36 @@ type GetDeploymentIdentityHeaders struct {
 func (m *ResponseMeta) GetDeploymentIdentityHeaders() GetDeploymentIdentityHeaders {
 	return GetDeploymentIdentityHeaders{
 		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// CreateGithubAppManifestHeaders holds the headers CreateGithubAppManifest declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type CreateGithubAppManifestHeaders struct {
+	SetCookie string
+}
+
+// CreateGithubAppManifestHeaders reads the headers CreateGithubAppManifest declares out of the captured
+// response.
+func (m *ResponseMeta) CreateGithubAppManifestHeaders() CreateGithubAppManifestHeaders {
+	return CreateGithubAppManifestHeaders{
+		SetCookie: m.Header.Get("Set-Cookie"),
+	}
+}
+
+// GithubAppManifestCallbackHeaders holds the headers GithubAppManifestCallback declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GithubAppManifestCallbackHeaders struct {
+	Location  string
+	SetCookie string
+}
+
+// GithubAppManifestCallbackHeaders reads the headers GithubAppManifestCallback declares out of the captured
+// response.
+func (m *ResponseMeta) GithubAppManifestCallbackHeaders() GithubAppManifestCallbackHeaders {
+	return GithubAppManifestCallbackHeaders{
+		Location:  m.Header.Get("Location"),
+		SetCookie: m.Header.Get("Set-Cookie"),
 	}
 }
 

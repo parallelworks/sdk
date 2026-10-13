@@ -67,6 +67,11 @@
               "null"
             ]
           },
+          "observedAt": {
+            "description": "When the provider last reported these limits, for providers that report them only on responses",
+            "format": "date-time",
+            "type": "string"
+          },
           "plan": {
             "description": "Provider plan or service tier",
             "type": "string"
@@ -1660,11 +1665,29 @@
             "description": "Platform username of the resource owner.",
             "type": "string"
           },
+          "permissionModes": {
+            "description": "Modes the machine's pw code daemon accepts. Absent when the daemon predates the list, in which case it accepts read-only, accept-edits, bypass-permissions and plan.",
+            "items": {
+              "enum": [
+                "read-only",
+                "accept-edits",
+                "auto",
+                "bypass-permissions",
+                "plan"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "remoteMaxPermissionMode": {
             "enum": [
               "",
               "read-only",
               "accept-edits",
+              "auto",
               "bypass-permissions",
               "plan"
             ],
@@ -1681,6 +1704,10 @@
               "unreachable",
               "unsupported_agent"
             ],
+            "type": "string"
+          },
+          "storeId": {
+            "description": "Session store the pw code daemon reported, when it answered. Machines with the same store list the same sessions, which are listed once.",
             "type": "string"
           }
         },
@@ -2101,6 +2128,7 @@
             "enum": [
               "read-only",
               "accept-edits",
+              "auto",
               "bypass-permissions"
             ],
             "type": "string"
@@ -2121,7 +2149,7 @@
             ]
           },
           "sessions": {
-            "description": "Every reachable machine's sessions, newest first.",
+            "description": "Every reachable machine's sessions, newest first. A session machines sharing a store all list appears once.",
             "items": {
               "$ref": "#/components/schemas/AgentSession"
             },
@@ -2214,6 +2242,9 @@
           "content": {
             "type": "string"
           },
+          "decision": {
+            "$ref": "#/components/schemas/ToolDecision"
+          },
           "goalProgress": {
             "$ref": "#/components/schemas/GoalProgress"
           },
@@ -2240,6 +2271,9 @@
             "type": "string"
           },
           "newId": {
+            "type": "string"
+          },
+          "noteId": {
             "type": "string"
           },
           "result": {
@@ -2435,10 +2469,6 @@
               "null"
             ]
           },
-          "emulatedToolCalling": {
-            "description": "Whether emulated tool calling is enabled; only present for providers on emulated catalog entries",
-            "type": "boolean"
-          },
           "enabledModels": {
             "description": "List of model IDs enabled for the chat interface",
             "items": {
@@ -2452,6 +2482,10 @@
           "endpoint": {
             "description": "Custom provider endpoint URL",
             "type": "string"
+          },
+          "foldHistory": {
+            "description": "Whether the gateway folds the conversation into the final user message, for providers that read only that message",
+            "type": "boolean"
           },
           "group": {
             "description": "Billing group the provider is provisioned under (managed providers)",
@@ -2523,6 +2557,15 @@
             ],
             "type": "string"
           },
+          "toolCallingMode": {
+            "description": "How tool calls reach the provider; only present for providers on emulated catalog entries, which can change it",
+            "enum": [
+              "native",
+              "emulated",
+              "none"
+            ],
+            "type": "string"
+          },
           "user": {
             "description": "The username of the user that owns this resource",
             "type": "string"
@@ -2534,7 +2577,8 @@
           "user",
           "csp",
           "status",
-          "ingested"
+          "ingested",
+          "foldHistory"
         ],
         "type": "object"
       },
@@ -3139,6 +3183,24 @@
         ],
         "type": "object"
       },
+      "AppManifestResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "manifest": {
+            "description": "The App's manifest, as JSON",
+            "type": "string"
+          },
+          "url": {
+            "description": "GitHub's page for registering the App. POST the manifest to it as a form field named manifest.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "manifest"
+        ],
+        "type": "object"
+      },
       "AppResponse": {
         "additionalProperties": false,
         "properties": {
@@ -3424,6 +3486,7 @@
               "",
               "read-only",
               "accept-edits",
+              "auto",
               "bypass-permissions",
               "plan"
             ],
@@ -6766,6 +6829,10 @@
             "format": "date-time",
             "type": "string"
           },
+          "snoozeReason": {
+            "description": "Why the job was put off, while it waits to run again.",
+            "type": "string"
+          },
           "state": {
             "description": "Where the job is in its life: waiting (pending, available, scheduled, retryable), running, or finished (completed, cancelled, discarded). A discarded job ran out of attempts.",
             "enum": [
@@ -8865,6 +8932,126 @@
         "required": [
           "removed",
           "usersCleaned"
+        ],
+        "type": "object"
+      },
+      "ClientInformation": {
+        "additionalProperties": false,
+        "properties": {
+          "client_id": {
+            "description": "The client identifier",
+            "type": "string"
+          },
+          "client_id_issued_at": {
+            "description": "When the client identifier was issued, in seconds since the Unix epoch",
+            "format": "int64",
+            "type": "integer"
+          },
+          "client_name": {
+            "description": "The name the client registered, shown to the user it acts for",
+            "type": "string"
+          },
+          "error": {
+            "description": "OAuth error code",
+            "type": "string"
+          },
+          "error_description": {
+            "description": "Human-readable error detail",
+            "type": "string"
+          },
+          "grant_types": {
+            "description": "The grant types the client may use",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "jwks": {
+            "$ref": "#/components/schemas/JSONWebKeySet",
+            "description": "The client's public key"
+          },
+          "registration_access_token": {
+            "description": "Bearer credential for the client configuration endpoint. Each request there returns a new one and retires the one presented.",
+            "type": "string"
+          },
+          "registration_client_uri": {
+            "description": "The client configuration endpoint, for reading, updating and deleting this registration",
+            "type": "string"
+          },
+          "response_types": {
+            "description": "Always empty: the client uses no redirect-based flow",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "software_id": {
+            "description": "The software the client registered as",
+            "type": "string"
+          },
+          "software_version": {
+            "description": "The version of that software",
+            "type": "string"
+          },
+          "token_endpoint_auth_method": {
+            "description": "How the client authenticates at the token endpoint; always private_key_jwt",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClientMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "client_id": {
+            "description": "Required on update: the client's identifier",
+            "type": "string"
+          },
+          "client_name": {
+            "description": "Name shown to the user the client acts for",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "grant_types": {
+            "description": "Grant types the client uses",
+            "items": {
+              "enum": [
+                "urn:ietf:params:oauth:grant-type:token-exchange"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "jwks": {
+            "$ref": "#/components/schemas/JSONWebKeySet",
+            "description": "The client's public key: exactly one EC P-256 key for ES256"
+          },
+          "software_id": {
+            "description": "Identifier of the client software",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "software_version": {
+            "description": "Version of the client software",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "token_endpoint_auth_method": {
+            "description": "How the client authenticates at the token endpoint",
+            "enum": [
+              "private_key_jwt"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "jwks"
         ],
         "type": "object"
       },
@@ -11655,6 +11842,17 @@
         ],
         "type": "object"
       },
+      "CreateAppManifestInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "organization": {
+            "description": "GitHub organization to create the App in. Omit to create it on your personal account.",
+            "maxLength": 39,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CreateAwsSlurmClusterBody": {
         "additionalProperties": false,
         "properties": {
@@ -13564,6 +13762,7 @@
               "",
               "read-only",
               "accept-edits",
+              "auto",
               "bypass-permissions"
             ],
             "type": "string"
@@ -16803,6 +17002,30 @@
         ],
         "type": "object"
       },
+      "FilesystemRefreshInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "clusterId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "clusterId"
+        ],
+        "type": "object"
+      },
+      "FilesystemRefreshResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "queued": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "queued"
+        ],
+        "type": "object"
+      },
       "FlatError": {
         "additionalProperties": false,
         "properties": {
@@ -16977,7 +17200,7 @@
             "type": "integer"
           },
           "legacyCredentialsIssued": {
-            "description": "Whether the platform still issues legacy cluster credentials. While true, every cloud cluster agent holds one.",
+            "description": "Whether new cluster sessions still get legacy cluster credentials. While true, every cloud cluster agent holds one.",
             "type": "boolean"
           },
           "minimumAgentVersion": {
@@ -18135,6 +18358,31 @@
         },
         "type": "object"
       },
+      "GithubOrganization": {
+        "additionalProperties": false,
+        "properties": {
+          "avatarUrl": {
+            "description": "The organization's avatar",
+            "type": "string"
+          },
+          "found": {
+            "description": "Whether GitHub has an organization by this name",
+            "type": "boolean"
+          },
+          "login": {
+            "description": "The organization's name on GitHub",
+            "type": "string"
+          },
+          "name": {
+            "description": "The organization's display name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "found"
+        ],
+        "type": "object"
+      },
       "GitlabProjectListing": {
         "additionalProperties": false,
         "properties": {
@@ -18201,6 +18449,10 @@
             "type": "string"
           },
           "reason": {
+            "type": "string"
+          },
+          "resumeAt": {
+            "format": "date-time",
             "type": "string"
           },
           "tokens": {
@@ -20221,6 +20473,9 @@
       "HistoryItem": {
         "additionalProperties": false,
         "properties": {
+          "decision": {
+            "$ref": "#/components/schemas/ToolDecision"
+          },
           "fromMain": {
             "type": "boolean"
           },
@@ -21193,6 +21448,57 @@
           "tags",
           "description",
           "network"
+        ],
+        "type": "object"
+      },
+      "JSONWebKey": {
+        "additionalProperties": false,
+        "properties": {
+          "alg": {
+            "type": "string"
+          },
+          "crv": {
+            "type": "string"
+          },
+          "kid": {
+            "type": "string"
+          },
+          "kty": {
+            "type": "string"
+          },
+          "use": {
+            "type": "string"
+          },
+          "x": {
+            "type": "string"
+          },
+          "y": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kty",
+          "crv",
+          "x",
+          "y"
+        ],
+        "type": "object"
+      },
+      "JSONWebKeySet": {
+        "additionalProperties": false,
+        "properties": {
+          "keys": {
+            "items": {
+              "$ref": "#/components/schemas/JSONWebKey"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "keys"
         ],
         "type": "object"
       },
@@ -27459,6 +27765,10 @@
             "description": "URL of the JSON Web Key Set",
             "type": "string"
           },
+          "registration_endpoint": {
+            "description": "URL of the dynamic client registration endpoint (RFC 7591), which requires an initial access token",
+            "type": "string"
+          },
           "response_modes_supported": {
             "description": "JSON array containing the supported response modes",
             "items": {
@@ -27527,6 +27837,16 @@
               "null"
             ]
           },
+          "token_endpoint_auth_signing_alg_values_supported": {
+            "description": "JSON array containing the algorithms the token endpoint accepts for private_key_jwt client assertions",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "userinfo_endpoint": {
             "description": "URL of the userinfo endpoint",
             "type": "string"
@@ -27541,6 +27861,7 @@
           "revocation_endpoint",
           "introspection_endpoint",
           "device_authorization_endpoint",
+          "registration_endpoint",
           "jwks_uri",
           "scopes_supported",
           "response_types_supported",
@@ -27549,6 +27870,7 @@
           "subject_types_supported",
           "id_token_signing_alg_values_supported",
           "token_endpoint_auth_methods_supported",
+          "token_endpoint_auth_signing_alg_values_supported",
           "revocation_endpoint_auth_methods_supported",
           "introspection_endpoint_auth_methods_supported",
           "code_challenge_methods_supported",
@@ -28590,13 +28912,13 @@
             "description": "Display name of the AI provider",
             "type": "string"
           },
-          "emulatedToolCalling": {
-            "description": "Whether emulated tool calling is enabled; only present for connections on emulated catalog entries",
-            "type": "boolean"
-          },
           "endpoint": {
             "description": "Provider endpoint URL",
             "type": "string"
+          },
+          "foldHistory": {
+            "description": "Whether the gateway folds the conversation into the final user message, for providers that read only that message",
+            "type": "boolean"
           },
           "id": {
             "description": "Unique identifier",
@@ -28627,6 +28949,15 @@
             ],
             "type": "string"
           },
+          "toolCallingMode": {
+            "description": "How tool calls reach the provider; only present for connections on emulated catalog entries, which can change it",
+            "enum": [
+              "native",
+              "emulated",
+              "none"
+            ],
+            "type": "string"
+          },
           "type": {
             "description": "AI provider type",
             "type": "string"
@@ -28635,7 +28966,8 @@
         "required": [
           "id",
           "name",
-          "type"
+          "type",
+          "foldHistory"
         ],
         "type": "object"
       },
@@ -29169,6 +29501,11 @@
       "Organization": {
         "additionalProperties": false,
         "properties": {
+          "createdAt": {
+            "description": "When the organization was created.",
+            "format": "date-time",
+            "type": "string"
+          },
           "displayName": {
             "description": "The organization display name.",
             "type": "string"
@@ -39314,6 +39651,10 @@
           "autoName": {
             "type": "string"
           },
+          "backgroundShells": {
+            "format": "int64",
+            "type": "integer"
+          },
           "effectiveEffort": {
             "type": "string"
           },
@@ -41240,6 +41581,75 @@
         ],
         "type": "object"
       },
+      "ToolDecision": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "by": {
+            "enum": [
+              "user",
+              "auto-reviewer"
+            ],
+            "type": "string"
+          },
+          "callId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "enum": [
+              "",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "reviewing",
+              "approved",
+              "denied",
+              "timed_out",
+              "failed",
+              "aborted"
+            ],
+            "type": "string"
+          },
+          "userAuthorization": {
+            "enum": [
+              "",
+              "unknown",
+              "low",
+              "medium",
+              "high"
+            ],
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "callId",
+          "by",
+          "status",
+          "at"
+        ],
+        "type": "object"
+      },
       "TunnelShared": {
         "additionalProperties": false,
         "properties": {
@@ -41404,16 +41814,25 @@
             "maxLength": 100,
             "type": "string"
           },
-          "emulatedToolCalling": {
-            "description": "Whether emulated tool calling is enabled (providers on emulated catalog entries only)",
-            "type": "boolean"
-          },
           "enabledModels": {
             "description": "List of model IDs enabled for the chat interface",
             "items": {
               "type": "string"
             },
             "type": "array"
+          },
+          "foldHistory": {
+            "description": "Whether the gateway folds the conversation into the final user message",
+            "type": "boolean"
+          },
+          "toolCallingMode": {
+            "description": "How tool calls reach the provider (providers on emulated catalog entries only)",
+            "enum": [
+              "native",
+              "emulated",
+              "none"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -42110,9 +42529,18 @@
             "maxLength": 100,
             "type": "string"
           },
-          "emulatedToolCalling": {
-            "description": "Whether emulated tool calling is enabled (connections on emulated catalog entries only)",
+          "foldHistory": {
+            "description": "Whether the gateway folds the conversation into the final user message",
             "type": "boolean"
+          },
+          "toolCallingMode": {
+            "description": "How tool calls reach the provider (connections on emulated catalog entries only)",
+            "enum": [
+              "native",
+              "emulated",
+              "none"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -59958,6 +60386,268 @@
         ]
       }
     },
+    "/api/oidc/register": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRegisters a platform workload, such as the pw agent on an existing cluster or a workspace, as an OAuth client of its own (RFC 7591). Authenticate with an initial access token the platform issued to the workload, as a Bearer credential. Each one registers one client, once, within 10 minutes of being issued. The token, not the request, decides which user the client acts for, and a new registration for the same workload replaces the previous one.\n\nThe body is JSON client metadata. Send `jwks` with exactly one EC P-256 public key for ES256; private key members are refused. `token_endpoint_auth_method` is `private_key_jwt` and `grant_types` is `urn:ietf:params:oauth:grant-type:token-exchange`; omitted, they take those values. `client_name`, `software_id` and `software_version` are optional; `client_name` names the client to the user it acts for. `redirect_uris` and `jwks_uri` are refused. Other metadata is ignored.\n\nThe response carries the `client_id`, the registered metadata, and a `registration_access_token` for the `registration_client_uri` (RFC 7592). Errors use the RFC 7591 shape: `invalid_client_metadata` or `invalid_redirect_uri` with status 400, and `invalid_token` with status 401 for an initial access token that is not valid, has expired, or was already used.",
+        "operationId": "register-oauth-client",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClientMetadata"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientInformation"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Pragma": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [],
+        "summary": "OAuth dynamic client registration endpoint",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/oidc/register/{clientId}": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nDeregisters the client (RFC 7592 section 2.3). Its client ID, its registration access token and every token issued to it stop working at once. Authenticate with the client's registration access token as a Bearer credential. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403.",
+        "operationId": "delete-oauth-client-registration",
+        "parameters": [
+          {
+            "description": "The client_id the registration returned",
+            "in": "path",
+            "name": "clientId",
+            "required": true,
+            "schema": {
+              "description": "The client_id the registration returned",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientInformation"
+                }
+              }
+            },
+            "description": "No Content",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Pragma": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [],
+        "summary": "Delete a dynamically registered OAuth client",
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the client's current registration (RFC 7592 section 2.1). Authenticate with the client's registration access token as a Bearer credential. Each successful request returns a new registration access token and retires the one presented, so store the new one before making another request. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403.",
+        "operationId": "get-oauth-client-registration",
+        "parameters": [
+          {
+            "description": "The client_id the registration returned",
+            "in": "path",
+            "name": "clientId",
+            "required": true,
+            "schema": {
+              "description": "The client_id the registration returned",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientInformation"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Pragma": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [],
+        "summary": "Read a dynamically registered OAuth client",
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces the client's metadata (RFC 7592 section 2.2); this is how the client rotates its key, by sending a new `jwks`. Send every field as returned by the last response, with `client_id`, and leave out `registration_access_token`, `registration_client_uri` and `client_id_issued_at` or repeat their current values. Omitted fields are cleared. The same metadata rules as registration apply. Authenticate with the client's registration access token as a Bearer credential. Each successful request returns a new registration access token and retires the one presented, so store the new one before making another request. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403.",
+        "operationId": "update-oauth-client-registration",
+        "parameters": [
+          {
+            "description": "The client_id the registration returned",
+            "in": "path",
+            "name": "clientId",
+            "required": true,
+            "schema": {
+              "description": "The client_id the registration returned",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClientMetadata"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientInformation"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Pragma": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [],
+        "summary": "Update a dynamically registered OAuth client",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
     "/api/oidc/revoke": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nInvalidates an access or refresh token the application holds (RFC 7009). The body is `application/x-www-form-urlencoded` with `token` and the same client authentication as the token endpoint. Revoking a refresh token also revokes every token issued from it.",
@@ -60074,7 +60764,7 @@
     },
     "/api/oidc/token": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRedeems an authorization code, or rotates a refresh token, for an ID token and an opaque access token (RFC 6749 sections 4.1.3 and 6).\n\nThe body is `application/x-www-form-urlencoded`. To redeem a code, send `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. To refresh, send `grant_type=refresh_token`, a `refresh_token` issued for the `offline_access` scope, and an optional `scope` that can narrow but never widen the original grant; the response carries a new refresh token, and presenting a spent one again revokes every token descended from it. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.\n\nThe pw CLI polls here with `grant_type=urn:ietf:params:oauth:grant-type:device_code` and the `device_code` from the device authorization endpoint, and is told `authorization_pending`, `slow_down`, `expired_token`, or `access_denied` until the user decides.\n\nA service application or Kubernetes cluster gets an ID token for a user through the token exchange grant (RFC 8693), the exec-credential pattern kubectl uses. Send `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`, the application's `client_id` (or `audience`), `subject_token` set to the user's platform API key or pw CLI access token (a Kubernetes cluster also accepts the user's platform token; an ACTIVATE mobile app access token is refused), `subject_token_type=urn:ietf:params:oauth:token-type:access_token`, and optionally `requested_token_type=urn:ietf:params:oauth:token-type:id_token` and a narrowing `scope`. These clients hold no secret, so none is sent. The response carries the ID token in `access_token`, with `issued_token_type=urn:ietf:params:oauth:token-type:id_token` and `token_type=N_A`. Any other kind of application is refused with `unauthorized_client`, or with `invalid_target` when only `audience` names it.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRedeems an authorization code, or rotates a refresh token, for an ID token and an opaque access token (RFC 6749 sections 4.1.3 and 6).\n\nThe body is `application/x-www-form-urlencoded`. To redeem a code, send `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. To refresh, send `grant_type=refresh_token`, a `refresh_token` issued for the `offline_access` scope, and an optional `scope` that can narrow but never widen the original grant; the response carries a new refresh token, and presenting a spent one again revokes every token descended from it. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.\n\nThe pw CLI polls here with `grant_type=urn:ietf:params:oauth:grant-type:device_code` and the `device_code` from the device authorization endpoint, and is told `authorization_pending`, `slow_down`, `expired_token`, or `access_denied` until the user decides.\n\nA service application or Kubernetes cluster gets an ID token for a user through the token exchange grant (RFC 8693), the exec-credential pattern kubectl uses. Send `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`, the application's `client_id` (or `audience`), `subject_token` set to the user's platform API key or pw CLI access token (a Kubernetes cluster also accepts the user's platform token; an ACTIVATE mobile app access token is refused), `subject_token_type=urn:ietf:params:oauth:token-type:access_token`, and optionally `requested_token_type=urn:ietf:params:oauth:token-type:id_token` and a narrowing `scope`. These clients hold no secret, so none is sent. The response carries the ID token in `access_token`, with `issued_token_type=urn:ietf:params:oauth:token-type:id_token` and `token_type=N_A`. Any other kind of application is refused with `unauthorized_client`, or with `invalid_target` when only `audience` names it.\n\nA client registered at the registration endpoint authenticates with `private_key_jwt` (RFC 7523 section 2.2): send `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer` and a `client_assertion` JWT signed with ES256 by its registered key, with no other client credential. The JWT's `iss` and `sub` are the `client_id`, `aud` is the issuer identifier from the discovery document and nothing else, `exp` is at most 5 minutes away, and `jti` is unique, since each assertion is accepted once. A `client_id` sent beside it must match. A failed authentication is `invalid_client` with status 401.",
         "operationId": "post-oidc-token",
         "requestBody": {
           "content": {
@@ -84912,6 +85602,79 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/filesystem-refresh": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRequests a connected cluster agent to reconcile its attached filesystems.",
+        "operationId": "refresh-cluster-filesystems",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilesystemRefreshInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilesystemRefreshResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Refresh cluster filesystems",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/host-keys": {
       "delete": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nClears the SSH host keys accepted for a user-added cluster, so the next connect asks to trust the keys its login and jump hosts present. Use it after a cluster's host keys change legitimately.",
@@ -97372,6 +98135,160 @@
           }
         },
         "summary": "Configure GitHub App",
+        "tags": [
+          "GitHub"
+        ]
+      }
+    },
+    "/api/platform/integrations/github/manifest": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns GitHub's page for registering the platform's GitHub App and the App's manifest, with every URL, permission and event filled in. POST the manifest there as a form field; GitHub returns the admin to the platform, which stores the new App.",
+        "operationId": "create-github-app-manifest",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppManifestInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppManifestResponse"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Start creating the GitHub App",
+        "tags": [
+          "GitHub"
+        ]
+      }
+    },
+    "/api/platform/integrations/github/manifest/callback": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nGitHub sends the admin here after the App is registered. Exchanges GitHub's code for the App's credentials, stores them, and redirects to the GitHub integration page.",
+        "operationId": "github-app-manifest-callback",
+        "parameters": [
+          {
+            "description": "Temporary code from GitHub",
+            "explode": false,
+            "in": "query",
+            "name": "code",
+            "schema": {
+              "description": "Temporary code from GitHub",
+              "type": "string"
+            }
+          },
+          {
+            "description": "State parameter for CSRF validation",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "State parameter for CSRF validation",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Finish creating the GitHub App",
+        "tags": [
+          "GitHub"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/platform/integrations/github/organizations/{organization}": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReports whether GitHub has an organization by this name, with its display name and avatar, so an admin can confirm where the GitHub App will be created.",
+        "operationId": "lookup-github-organization",
+        "parameters": [
+          {
+            "description": "GitHub organization name",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "GitHub organization name",
+              "maxLength": 39,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubOrganization"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Look up a GitHub organization",
         "tags": [
           "GitHub"
         ]

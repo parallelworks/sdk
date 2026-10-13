@@ -6292,6 +6292,77 @@ func (c *Client) PostOidcIntrospect(ctx context.Context, body *map[string]any) (
 	return &result, nil
 }
 
+// RegisterOauthClient - OAuth dynamic client registration endpoint
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Registers a platform workload, such as the pw agent on an existing cluster or a workspace, as an OAuth client of its own (RFC 7591). Authenticate with an initial access token the platform issued to the workload, as a Bearer credential. Each one registers one client, once, within 10 minutes of being issued. The token, not the request, decides which user the client acts for, and a new registration for the same workload replaces the previous one.
+//
+// The body is JSON client metadata. Send `jwks` with exactly one EC P-256 public key for ES256; private key members are refused. `token_endpoint_auth_method` is `private_key_jwt` and `grant_types` is `urn:ietf:params:oauth:grant-type:token-exchange`; omitted, they take those values. `client_name`, `software_id` and `software_version` are optional; `client_name` names the client to the user it acts for. `redirect_uris` and `jwks_uri` are refused. Other metadata is ignored.
+//
+// The response carries the `client_id`, the registered metadata, and a `registration_access_token` for the `registration_client_uri` (RFC 7592). Errors use the RFC 7591 shape: `invalid_client_metadata` or `invalid_redirect_uri` with status 400, and `invalid_token` with status 401 for an initial access token that is not valid, has expired, or was already used.
+func (c *Client) RegisterOauthClient(ctx context.Context, body *ClientMetadata) (*ClientInformation, error) {
+
+	path := "/api/oidc/register"
+
+	var result ClientInformation
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", false); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetOauthClientRegistration - Read a dynamically registered OAuth client
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the client's current registration (RFC 7592 section 2.1). Authenticate with the client's registration access token as a Bearer credential. Each successful request returns a new registration access token and retires the one presented, so store the new one before making another request. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403.
+func (c *Client) GetOauthClientRegistration(ctx context.Context, clientID string) (*ClientInformation, error) {
+
+	path := "/api/oidc/register/{clientId}"
+	path = pathReplace(path, "clientId", "simple", false, clientID)
+
+	var result ClientInformation
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", false); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateOauthClientRegistration - Update a dynamically registered OAuth client
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces the client's metadata (RFC 7592 section 2.2); this is how the client rotates its key, by sending a new `jwks`. Send every field as returned by the last response, with `client_id`, and leave out `registration_access_token`, `registration_client_uri` and `client_id_issued_at` or repeat their current values. Omitted fields are cleared. The same metadata rules as registration apply. Authenticate with the client's registration access token as a Bearer credential. Each successful request returns a new registration access token and retires the one presented, so store the new one before making another request. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403.
+func (c *Client) UpdateOauthClientRegistration(ctx context.Context, clientID string, body *ClientMetadata) (*ClientInformation, error) {
+
+	path := "/api/oidc/register/{clientId}"
+	path = pathReplace(path, "clientId", "simple", false, clientID)
+
+	var result ClientInformation
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", false); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteOauthClientRegistration - Delete a dynamically registered OAuth client
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deregisters the client (RFC 7592 section 2.3). Its client ID, its registration access token and every token issued to it stop working at once. Authenticate with the client's registration access token as a Bearer credential. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403.
+func (c *Client) DeleteOauthClientRegistration(ctx context.Context, clientID string) (*ClientInformation, error) {
+
+	path := "/api/oidc/register/{clientId}"
+	path = pathReplace(path, "clientId", "simple", false, clientID)
+
+	var result ClientInformation
+	if err := c.do(ctx, "DELETE", path, nil, "", &result, "application/json", false); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // PostOidcRevoke - OAuth token revocation endpoint
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -6336,6 +6407,8 @@ func (c *Client) GetOidcSectorIdentifier(ctx context.Context, authMethodID strin
 // The pw CLI polls here with `grant_type=urn:ietf:params:oauth:grant-type:device_code` and the `device_code` from the device authorization endpoint, and is told `authorization_pending`, `slow_down`, `expired_token`, or `access_denied` until the user decides.
 //
 // A service application or Kubernetes cluster gets an ID token for a user through the token exchange grant (RFC 8693), the exec-credential pattern kubectl uses. Send `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`, the application's `client_id` (or `audience`), `subject_token` set to the user's platform API key or pw CLI access token (a Kubernetes cluster also accepts the user's platform token; an ACTIVATE mobile app access token is refused), `subject_token_type=urn:ietf:params:oauth:token-type:access_token`, and optionally `requested_token_type=urn:ietf:params:oauth:token-type:id_token` and a narrowing `scope`. These clients hold no secret, so none is sent. The response carries the ID token in `access_token`, with `issued_token_type=urn:ietf:params:oauth:token-type:id_token` and `token_type=N_A`. Any other kind of application is refused with `unauthorized_client`, or with `invalid_target` when only `audience` names it.
+//
+// A client registered at the registration endpoint authenticates with `private_key_jwt` (RFC 7523 section 2.2): send `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer` and a `client_assertion` JWT signed with ES256 by its registered key, with no other client credential. The JWT's `iss` and `sub` are the `client_id`, `aud` is the issuer identifier from the discovery document and nothing else, `exp` is at most 5 minutes away, and `jti` is unique, since each assertion is accepted once. A `client_id` sent beside it must match. A failed authentication is `invalid_client` with status 401.
 func (c *Client) PostOidcToken(ctx context.Context, body *map[string]any) (*TokenBody, error) {
 
 	path := "/api/oidc/token"
@@ -14319,6 +14392,25 @@ func (c *Client) DetachClusterDisk(ctx context.Context, organization string, use
 	return nil
 }
 
+// RefreshClusterFilesystems - Refresh cluster filesystems
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Requests a connected cluster agent to reconcile its attached filesystems.
+func (c *Client) RefreshClusterFilesystems(ctx context.Context, organization string, user string, clusterName string, body FilesystemRefreshInputBody) (*FilesystemRefreshResponse, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/filesystem-refresh"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+
+	var result FilesystemRefreshResponse
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ForgetClusterHostKeys - Forget Cluster Host Keys
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -17910,6 +18002,81 @@ func (c *Client) DeleteGithubAppConfig(ctx context.Context) error {
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// CreateGithubAppManifest - Start creating the GitHub App
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns GitHub's page for registering the platform's GitHub App and the App's manifest, with every URL, permission and event filled in. POST the manifest there as a form field; GitHub returns the admin to the platform, which stores the new App.
+func (c *Client) CreateGithubAppManifest(ctx context.Context, body CreateAppManifestInputBody) (*AppManifestResponse, error) {
+
+	path := "/api/platform/integrations/github/manifest"
+
+	var result AppManifestResponse
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GithubAppManifestCallbackParams contains the parameters for the GithubAppManifestCallback operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GithubAppManifestCallbackParams struct {
+	// Temporary code from GitHub
+	Code *string `json:"code,omitempty"`
+	// State parameter for CSRF validation
+	State *string `json:"state,omitempty"`
+}
+
+// GithubAppManifestCallback - Finish creating the GitHub App
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// GitHub sends the admin here after the App is registered. Exchanges GitHub's code for the App's credentials, stores them, and redirects to the GitHub integration page.
+func (c *Client) GithubAppManifestCallback(ctx context.Context, opts ...GithubAppManifestCallbackParams) error {
+
+	path := "/api/platform/integrations/github/manifest/callback"
+	var params GithubAppManifestCallbackParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "code", "form", false, params.Code)
+
+	addQueryParam(queryValues, "state", "form", false, params.State)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// LookupGithubOrganization - Look up a GitHub organization
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Reports whether GitHub has an organization by this name, with its display name and avatar, so an admin can confirm where the GitHub App will be created.
+func (c *Client) LookupGithubOrganization(ctx context.Context, organization string) (*GithubOrganization, error) {
+
+	path := "/api/platform/integrations/github/organizations/{organization}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result GithubOrganization
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetHealthMonitoringSettings - Get health monitoring settings

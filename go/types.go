@@ -107,6 +107,8 @@ type AiModelConfig struct {
 type AiProviderUsage struct {
 	// Usage limits reported by the provider
 	Limits []AiProviderUsageLimit `json:"limits"`
+	// When the provider last reported these limits, for providers that report them only on responses
+	ObservedAt *time.Time `json:"observedAt,omitempty"`
 	// Provider plan or service tier
 	Plan *string `json:"plan,omitempty"`
 }
@@ -666,10 +668,14 @@ type AgentMachine struct {
 	Kind string `json:"kind"`
 	Name string `json:"name"`
 	// Platform username of the resource owner.
-	Owner                   string  `json:"owner"`
-	RemoteMaxPermissionMode *string `json:"remoteMaxPermissionMode,omitempty"`
-	RemoteStart             *bool   `json:"remoteStart,omitempty"`
-	Status                  string  `json:"status"`
+	Owner string `json:"owner"`
+	// Modes the machine's pw code daemon accepts. Absent when the daemon predates the list, in which case it accepts read-only, accept-edits, bypass-permissions and plan.
+	PermissionModes         []string `json:"permissionModes,omitempty"`
+	RemoteMaxPermissionMode *string  `json:"remoteMaxPermissionMode,omitempty"`
+	RemoteStart             *bool    `json:"remoteStart,omitempty"`
+	Status                  string   `json:"status"`
+	// Session store the pw code daemon reported, when it answered. Machines with the same store list the same sessions, which are listed once.
+	StoreID *string `json:"storeId,omitempty"`
 }
 
 type AgentMachineSessionsResponse struct {
@@ -787,7 +793,7 @@ type AgentSessionSettingsBody struct {
 
 type AgentSessionsResponse struct {
 	Machines []AgentMachine `json:"machines"`
-	// Every reachable machine's sessions, newest first.
+	// Every reachable machine's sessions, newest first. A session machines sharing a store all list appears once.
 	Sessions []AgentSession `json:"sessions"`
 }
 
@@ -818,6 +824,7 @@ type AgentStreamEvent struct {
 	Client       *string          `json:"client,omitempty"`
 	Color        *string          `json:"color,omitempty"`
 	Content      *string          `json:"content,omitempty"`
+	Decision     *ToolDecision    `json:"decision,omitempty"`
 	GoalProgress *GoalProgress    `json:"goalProgress,omitempty"`
 	ID           *string          `json:"id,omitempty"`
 	Interim      *bool            `json:"interim,omitempty"`
@@ -827,6 +834,7 @@ type AgentStreamEvent struct {
 	Mcp          *McpStatus       `json:"mcp,omitempty"`
 	Name         *string          `json:"name,omitempty"`
 	NewID        *string          `json:"newId,omitempty"`
+	NoteID       *string          `json:"noteId,omitempty"`
 	Result       *string          `json:"result,omitempty"`
 	Seq          int64            `json:"seq"`
 	StartLine    *int64           `json:"startLine,omitempty"`
@@ -881,12 +889,12 @@ type AiProviderResponse struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// List of ingested documents
 	Documents []string `json:"documents,omitempty"`
-	// Whether emulated tool calling is enabled; only present for providers on emulated catalog entries
-	EmulatedToolCalling *bool `json:"emulatedToolCalling,omitempty"`
 	// List of model IDs enabled for the chat interface
 	EnabledModels []string `json:"enabledModels,omitempty"`
 	// Custom provider endpoint URL
 	Endpoint *string `json:"endpoint,omitempty"`
+	// Whether the gateway folds the conversation into the final user message, for providers that read only that message
+	FoldHistory bool `json:"foldHistory"`
 	// Billing group the provider is provisioned under (managed providers)
 	Group *string `json:"group,omitempty"`
 	// Whether the provider's billing target is over its allocation and blocks new usage
@@ -919,6 +927,8 @@ type AiProviderResponse struct {
 	SupportsUsage *bool `json:"supportsUsage,omitempty"`
 	// How the integration's TLS certificate is verified
 	TLSVerification *string `json:"tlsVerification,omitempty"`
+	// How tool calls reach the provider; only present for providers on emulated catalog entries, which can change it
+	ToolCallingMode *string `json:"toolCallingMode,omitempty"`
 	// The username of the user that owns this resource
 	User string `json:"user"`
 }
@@ -1106,6 +1116,13 @@ type AppBody struct {
 type AppIconSettingsOutputBody struct {
 	// URL of the uploaded app icon. Empty when the built-in icon is used.
 	AppIconURL string `json:"appIconUrl"`
+}
+
+type AppManifestResponse struct {
+	// The App's manifest, as JSON
+	Manifest string `json:"manifest"`
+	// GitHub's page for registering the App. POST the manifest to it as a form field named manifest.
+	URL string `json:"url"`
 }
 
 type AppResponse struct {
@@ -2330,6 +2347,8 @@ type BackgroundJob struct {
 	Queue string `json:"queue"`
 	// When the job is, or was, due to run.
 	ScheduledAt time.Time `json:"scheduledAt"`
+	// Why the job was put off, while it waits to run again.
+	SnoozeReason *string `json:"snoozeReason,omitempty"`
 	// Where the job is in its life: waiting (pending, available, scheduled, retryable), running, or finished (completed, cancelled, discarded). A discarded job ran out of attempts.
 	State string             `json:"state"`
 	Task  *BackgroundJobTask `json:"task,omitempty"`
@@ -3068,6 +3087,50 @@ type CleanupPreviewsOutputBody struct {
 	Removed []string `json:"removed"`
 	// Number of users whose preview list was modified.
 	UsersCleaned int64 `json:"usersCleaned"`
+}
+
+type ClientInformation struct {
+	// The client identifier
+	ClientID *string `json:"client_id,omitempty"`
+	// When the client identifier was issued, in seconds since the Unix epoch
+	ClientIDIssuedAt *int64 `json:"client_id_issued_at,omitempty"`
+	// The name the client registered, shown to the user it acts for
+	ClientName *string `json:"client_name,omitempty"`
+	// OAuth error code
+	Error *string `json:"error,omitempty"`
+	// Human-readable error detail
+	ErrorDescription *string `json:"error_description,omitempty"`
+	// The grant types the client may use
+	GrantTypes []string       `json:"grant_types,omitempty"`
+	Jwks       *JSONWebKeySet `json:"jwks,omitempty"`
+	// Bearer credential for the client configuration endpoint. Each request there returns a new one and retires the one presented.
+	RegistrationAccessToken *string `json:"registration_access_token,omitempty"`
+	// The client configuration endpoint, for reading, updating and deleting this registration
+	RegistrationClientURI *string `json:"registration_client_uri,omitempty"`
+	// Always empty: the client uses no redirect-based flow
+	ResponseTypes []string `json:"response_types,omitempty"`
+	// The software the client registered as
+	SoftwareID *string `json:"software_id,omitempty"`
+	// The version of that software
+	SoftwareVersion *string `json:"software_version,omitempty"`
+	// How the client authenticates at the token endpoint; always private_key_jwt
+	TokenEndpointAuthMethod *string `json:"token_endpoint_auth_method,omitempty"`
+}
+
+type ClientMetadata struct {
+	// Required on update: the client's identifier
+	ClientID *string `json:"client_id,omitempty"`
+	// Name shown to the user the client acts for
+	ClientName *string `json:"client_name,omitempty"`
+	// Grant types the client uses
+	GrantTypes []string      `json:"grant_types,omitempty"`
+	Jwks       JSONWebKeySet `json:"jwks"`
+	// Identifier of the client software
+	SoftwareID *string `json:"software_id,omitempty"`
+	// Version of the client software
+	SoftwareVersion *string `json:"software_version,omitempty"`
+	// How the client authenticates at the token endpoint
+	TokenEndpointAuthMethod *string `json:"token_endpoint_auth_method,omitempty"`
 }
 
 type CloudAccountBillingResponse struct {
@@ -3998,6 +4061,11 @@ type CreateAlertBody struct {
 	Message string `json:"message"`
 	// Short, human-readable alert title.
 	Title string `json:"title"`
+}
+
+type CreateAppManifestInputBody struct {
+	// GitHub organization to create the App in. Omit to create it on your personal account.
+	Organization *string `json:"organization,omitempty"`
 }
 
 type CreateAwsSlurmClusterBody struct {
@@ -5737,6 +5805,14 @@ type FilesystemInfo struct {
 	UsedPct float64 `json:"usedPct"`
 }
 
+type FilesystemRefreshInputBody struct {
+	ClusterID string `json:"clusterId"`
+}
+
+type FilesystemRefreshResponse struct {
+	Queued bool `json:"queued"`
+}
+
 type FlatError struct {
 	// Cloud service provider
 	Csp string `json:"csp"`
@@ -5807,7 +5883,7 @@ type FleetSummary struct {
 	Connected int64 `json:"connected"`
 	// Agents that authenticated with a legacy cluster credential within the last 30 days.
 	LegacyCredential int64 `json:"legacyCredential"`
-	// Whether the platform still issues legacy cluster credentials. While true, every cloud cluster agent holds one.
+	// Whether new cluster sessions still get legacy cluster credentials. While true, every cloud cluster agent holds one.
 	LegacyCredentialsIssued bool `json:"legacyCredentialsIssued"`
 	// Configured minimum agent version. Empty when enforcement is off.
 	MinimumAgentVersion *string `json:"minimumAgentVersion,omitempty"`
@@ -6301,6 +6377,17 @@ type GitLabServerPatchBody struct {
 	TLSVerification *string `json:"tlsVerification,omitempty"`
 }
 
+type GithubOrganization struct {
+	// The organization's avatar
+	AvatarURL *string `json:"avatarUrl,omitempty"`
+	// Whether GitHub has an organization by this name
+	Found bool `json:"found"`
+	// The organization's name on GitHub
+	Login *string `json:"login,omitempty"`
+	// The organization's display name
+	Name *string `json:"name,omitempty"`
+}
+
 type GitlabProjectListing struct {
 	Description *string `json:"description,omitempty"`
 	// Server this project lives on, for $host.
@@ -6316,13 +6403,14 @@ type GitlabProjectsOutputBody struct {
 }
 
 type GoalProgress struct {
-	Condition *string `json:"condition,omitempty"`
-	ElapsedMs *int64  `json:"elapsedMs,omitempty"`
-	Err       *string `json:"err,omitempty"`
-	Outcome   *string `json:"outcome,omitempty"`
-	Reason    *string `json:"reason,omitempty"`
-	Tokens    *int64  `json:"tokens,omitempty"`
-	Turns     *int64  `json:"turns,omitempty"`
+	Condition *string    `json:"condition,omitempty"`
+	ElapsedMs *int64     `json:"elapsedMs,omitempty"`
+	Err       *string    `json:"err,omitempty"`
+	Outcome   *string    `json:"outcome,omitempty"`
+	Reason    *string    `json:"reason,omitempty"`
+	ResumeAt  *time.Time `json:"resumeAt,omitempty"`
+	Tokens    *int64     `json:"tokens,omitempty"`
+	Turns     *int64     `json:"turns,omitempty"`
 }
 
 type GoalStatus struct {
@@ -7506,12 +7594,13 @@ type HelmReleaseValuesResponseBody struct {
 }
 
 type HistoryItem struct {
-	FromMain *bool   `json:"fromMain,omitempty"`
-	Kind     string  `json:"kind"`
-	PlanBody *string `json:"planBody,omitempty"`
-	Text     *string `json:"text,omitempty"`
-	ToolArgs *string `json:"toolArgs,omitempty"`
-	ToolName *string `json:"toolName,omitempty"`
+	Decision *ToolDecision `json:"decision,omitempty"`
+	FromMain *bool         `json:"fromMain,omitempty"`
+	Kind     string        `json:"kind"`
+	PlanBody *string       `json:"planBody,omitempty"`
+	Text     *string       `json:"text,omitempty"`
+	ToolArgs *string       `json:"toolArgs,omitempty"`
+	ToolName *string       `json:"toolName,omitempty"`
 }
 
 type HostForwardSetting struct {
@@ -7804,6 +7893,20 @@ type IP struct {
 	Tags []string `json:"tags"`
 	// The username of the user that owns this resource.
 	User *string `json:"user,omitempty"`
+}
+
+type JSONWebKey struct {
+	Alg *string `json:"alg,omitempty"`
+	Crv string  `json:"crv"`
+	Kid *string `json:"kid,omitempty"`
+	Kty string  `json:"kty"`
+	Use *string `json:"use,omitempty"`
+	X   string  `json:"x"`
+	Y   string  `json:"y"`
+}
+
+type JSONWebKeySet struct {
+	Keys []JSONWebKey `json:"keys"`
 }
 
 type Jwk struct {
@@ -9674,6 +9777,8 @@ type OpenIDConfiguration struct {
 	Issuer string `json:"issuer"`
 	// URL of the JSON Web Key Set
 	JwksURI string `json:"jwks_uri"`
+	// URL of the dynamic client registration endpoint (RFC 7591), which requires an initial access token
+	RegistrationEndpoint string `json:"registration_endpoint"`
 	// JSON array containing the supported response modes
 	ResponseModesSupported []string `json:"response_modes_supported"`
 	// JSON array containing the supported response types
@@ -9690,6 +9795,8 @@ type OpenIDConfiguration struct {
 	TokenEndpoint string `json:"token_endpoint"`
 	// JSON array containing the supported client authentication methods
 	TokenEndpointAuthMethodsSupported []string `json:"token_endpoint_auth_methods_supported"`
+	// JSON array containing the algorithms the token endpoint accepts for private_key_jwt client assertions
+	TokenEndpointAuthSigningAlgValuesSupported []string `json:"token_endpoint_auth_signing_alg_values_supported"`
 	// URL of the userinfo endpoint
 	UserinfoEndpoint string `json:"userinfo_endpoint"`
 }
@@ -10032,10 +10139,10 @@ type OrgAiProviderResponse struct {
 	CatalogEntryID *string `json:"catalogEntryId,omitempty"`
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
-	// Whether emulated tool calling is enabled; only present for connections on emulated catalog entries
-	EmulatedToolCalling *bool `json:"emulatedToolCalling,omitempty"`
 	// Provider endpoint URL
 	Endpoint *string `json:"endpoint,omitempty"`
+	// Whether the gateway folds the conversation into the final user message, for providers that read only that message
+	FoldHistory bool `json:"foldHistory"`
 	// Unique identifier
 	ID string `json:"id"`
 	// Current icon configured on the provider's catalog entry
@@ -10048,6 +10155,8 @@ type OrgAiProviderResponse struct {
 	SupportsUsage *bool `json:"supportsUsage,omitempty"`
 	// How the integration's TLS certificate is verified
 	TLSVerification *string `json:"tlsVerification,omitempty"`
+	// How tool calls reach the provider; only present for connections on emulated catalog entries, which can change it
+	ToolCallingMode *string `json:"toolCallingMode,omitempty"`
 	// AI provider type
 	Type string `json:"type"`
 }
@@ -10227,6 +10336,8 @@ type OrgWorkspaceDefaults struct {
 }
 
 type Organization struct {
+	// When the organization was created.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// The organization display name.
 	DisplayName string `json:"displayName"`
 	// The organization ID.
@@ -13564,6 +13675,7 @@ type SessionState struct {
 	Attribution            *bool         `json:"attribution,omitempty"`
 	AutoCompactWindow      *int64        `json:"autoCompactWindow,omitempty"`
 	AutoName               *string       `json:"autoName,omitempty"`
+	BackgroundShells       *int64        `json:"backgroundShells,omitempty"`
 	EffectiveEffort        *string       `json:"effectiveEffort,omitempty"`
 	Effort                 *string       `json:"effort,omitempty"`
 	EffortActive           *bool         `json:"effortActive,omitempty"`
@@ -14335,6 +14447,19 @@ func (t *ToolCall) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type ToolDecision struct {
+	Action            *string   `json:"action,omitempty"`
+	At                time.Time `json:"at"`
+	By                string    `json:"by"`
+	CallID            string    `json:"callId"`
+	Note              *string   `json:"note,omitempty"`
+	Rationale         *string   `json:"rationale,omitempty"`
+	RiskLevel         *string   `json:"riskLevel,omitempty"`
+	Status            string    `json:"status"`
+	UserAuthorization *string   `json:"userAuthorization,omitempty"`
+	Username          *string   `json:"username,omitempty"`
+}
+
 type TunnelShared struct {
 	// Whether shared with organization.
 	Organization *bool `json:"organization,omitempty"`
@@ -14391,10 +14516,12 @@ type UpdateAiProviderInputBody struct {
 	APIKey *string `json:"apiKey,omitempty"`
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
-	// Whether emulated tool calling is enabled (providers on emulated catalog entries only)
-	EmulatedToolCalling *bool `json:"emulatedToolCalling,omitempty"`
 	// List of model IDs enabled for the chat interface
 	EnabledModels []string `json:"enabledModels,omitempty"`
+	// Whether the gateway folds the conversation into the final user message
+	FoldHistory *bool `json:"foldHistory,omitempty"`
+	// How tool calls reach the provider (providers on emulated catalog entries only)
+	ToolCallingMode *string `json:"toolCallingMode,omitempty"`
 }
 
 type UpdateAiProviderPermissionsInputBody struct {
@@ -14640,8 +14767,10 @@ type UpdateOrgAiProviderInputBody struct {
 	APIKey *string `json:"apiKey,omitempty"`
 	// Display name of the AI provider
 	DisplayName *string `json:"displayName,omitempty"`
-	// Whether emulated tool calling is enabled (connections on emulated catalog entries only)
-	EmulatedToolCalling *bool `json:"emulatedToolCalling,omitempty"`
+	// Whether the gateway folds the conversation into the final user message
+	FoldHistory *bool `json:"foldHistory,omitempty"`
+	// How tool calls reach the provider (connections on emulated catalog entries only)
+	ToolCallingMode *string `json:"toolCallingMode,omitempty"`
 }
 
 type UpdateOrgCustomTagsInputBody struct {
