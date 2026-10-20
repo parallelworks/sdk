@@ -94,6 +94,57 @@ export const API_KEY_PREFIX = 'pwt_'
  */
 export const OPAQUE_ACCESS_TOKEN_PREFIX = 'pwoa_'
 
+/**
+ * Prefix for a workflow run's opaque token. It names its platform host like an
+ * API key and is sent as a Bearer token.
+ */
+export const WORKFLOW_RUN_TOKEN_PREFIX = 'pwwr_'
+
+/** Prefix for an instance agent's opaque token, named and sent like a workflow run's. */
+export const INSTANCE_TOKEN_PREFIX = 'pwin_'
+
+/** Prefix for a cluster session's opaque token, named and sent like a workflow run's. */
+export const CLUSTER_SESSION_TOKEN_PREFIX = 'pwcs_'
+
+const HOST_NAMING_TOKEN_PREFIXES = [
+  WORKFLOW_RUN_TOKEN_PREFIX,
+  INSTANCE_TOKEN_PREFIX,
+  CLUSTER_SESSION_TOKEN_PREFIX,
+]
+
+function hostNamingTokenPrefix(credential: string): string | undefined {
+  return HOST_NAMING_TOKEN_PREFIXES.find(prefix =>
+    credential.startsWith(prefix)
+  )
+}
+
+interface NodeModuleBuiltin {
+  createRequire(url: string): (id: string) => unknown
+}
+
+// The release stamps the version in package.json, which only Node.js can read here. A bundle that moved
+// this module finds some other package.json, so only this package's own counts.
+function sdkVersion(): string {
+  const get = (
+    globalThis as { process?: { getBuiltinModule?: (id: string) => unknown } }
+  ).process?.getBuiltinModule
+  try {
+    const nodeModule = get?.('node:module') as NodeModuleBuiltin | undefined
+    const pkg = nodeModule?.createRequire(import.meta.url)('../package.json') as
+      | { name?: unknown; version?: unknown }
+      | undefined
+    return pkg?.name === '@parallelworks/client' &&
+      typeof pkg.version === 'string'
+      ? pkg.version
+      : '0'
+  } catch {
+    return '0'
+  }
+}
+
+/** The User-Agent the client sends outside a browser, which sends its own. */
+export const USER_AGENT = `parallelworks-typescript-sdk/${sdkVersion()}`
+
 /** Error thrown when credential parsing fails */
 export class CredentialError extends Error {
   constructor(message: string) {
@@ -134,14 +185,18 @@ export function isApiKey(credential: string): boolean {
 
 /**
  * Check if a credential is sent as a Bearer token: a JWT, whose three
- * base64-encoded parts are separated by dots, or an opaque access token.
+ * base64-encoded parts are separated by dots, an opaque access token, or a
+ * workflow run's, instance's or cluster session's token.
  *
  * @param credential - The credential string to check
  * @returns True if the credential appears to be a token
  */
 export function isToken(credential: string): boolean {
   const trimmed = credential.trim()
-  if (trimmed.startsWith(OPAQUE_ACCESS_TOKEN_PREFIX)) {
+  if (
+    trimmed.startsWith(OPAQUE_ACCESS_TOKEN_PREFIX) ||
+    hostNamingTokenPrefix(trimmed) !== undefined
+  ) {
     return true
   }
   const parts = trimmed.split('.')
@@ -151,7 +206,9 @@ export function isToken(credential: string): boolean {
 /**
  * Extract the platform host from an API key or JWT token.
  *
- * For API keys (pwt_xxxx.yyyy): decodes the first part after pwt_ to get the host
+ * For API keys (pwt_xxxx.yyyy) and workflow run, instance and cluster session
+ * tokens (pwwr_, pwin_, pwcs_ followed by xxxx.yyyy): decodes the first part
+ * after the prefix to get the host
  * For JWT tokens: decodes the payload (second segment) and reads platform_host field
  *
  * @param credential - The API key or JWT token
@@ -162,7 +219,11 @@ export function isToken(credential: string): boolean {
 export function extractPlatformHost(credential: string): string {
   credential = credential.trim()
   if (isApiKey(credential)) {
-    return extractHostFromApiKey(credential)
+    return extractHostFromApiKey(credential, API_KEY_PREFIX)
+  }
+  const prefix = hostNamingTokenPrefix(credential)
+  if (prefix !== undefined) {
+    return extractHostFromApiKey(credential, prefix)
   }
   if (credential.startsWith(OPAQUE_ACCESS_TOKEN_PREFIX)) {
     throw new NoPlatformHostError()
@@ -173,9 +234,8 @@ export function extractPlatformHost(credential: string): string {
   throw new CredentialError('Invalid credential format')
 }
 
-function extractHostFromApiKey(apiKey: string): string {
-  // Remove pwt_ prefix
-  const withoutPrefix = apiKey.slice(API_KEY_PREFIX.length)
+function extractHostFromApiKey(apiKey: string, prefix: string): string {
+  const withoutPrefix = apiKey.slice(prefix.length)
 
   // Split by dot
   const dotIndex = withoutPrefix.indexOf('.')
@@ -291,7 +351,8 @@ export class Client {
    * Create a client using only a credential.
    *
    * The platform host is automatically extracted from the credential:
-   * - For API keys: host is decoded from the first part after pwt_
+   * - For API keys and workflow run, instance and cluster session tokens: host
+   *   is decoded from the first part after the prefix
    * - For JWT tokens: host is read from the platform_host claim
    * - For access tokens (pwoa_), which name no host: PW_PLATFORM_HOST, else
    *   the server of the credentials file's selected context (Node.js only)
@@ -364,10 +425,7 @@ export class Client {
         ? client.withToken(identity.apikey)
         : client.withApiKey(identity.apikey)
     }
-    if (!identity.token) {
-      throw new CredentialError('you must first authenticate using "pw auth"')
-    }
-    if (identity.oauth) {
+    if (identity.oauth || identity.workload) {
       return client.withTokenProvider(
         new CLIAuth({
           command: cliCommand,
@@ -375,6 +433,9 @@ export class Client {
           timeoutMs: cliTimeoutMs,
         })
       )
+    }
+    if (!identity.token) {
+      throw new CredentialError('you must first authenticate using "pw auth"')
     }
     return client.withToken(identity.token)
   }
@@ -453,13 +514,14 @@ export class Client {
    */
   build(): OpenAPIFetchClient {
     const { acceptLanguage: language, ...options } = this.options
+    const outsideBrowser = typeof document === 'undefined'
     const acceptLanguage =
-      language ??
-      (typeof document === 'undefined' ? acceptLanguageFromEnv() : undefined)
+      language ?? (outsideBrowser ? acceptLanguageFromEnv() : undefined)
     const client = createClient<paths>({
       baseUrl: this.baseUrl,
       ...options,
       headers: {
+        ...(outsideBrowser && { 'User-Agent': USER_AGENT }),
         ...(acceptLanguage && { 'Accept-Language': acceptLanguage }),
         ...options.headers,
         ...(this.authHeader && { Authorization: this.authHeader }),

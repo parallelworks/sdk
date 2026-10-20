@@ -1,10 +1,16 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import {
   acceptLanguageFromEnv,
+  CLUSTER_SESSION_TOKEN_PREFIX,
   Client,
+  extractPlatformHost,
+  INSTANCE_TOKEN_PREFIX,
+  isToken,
   problemMediaType,
   problemTypeUrl,
   toApiError,
+  USER_AGENT,
 } from './index'
 
 function respond(status: number, body: string, contentType: string) {
@@ -35,6 +41,38 @@ async function failedRequest(
 }
 
 describe('Client', () => {
+  it('sends the version of the SDK as its User-Agent', async () => {
+    const { request } = await failedRequest(404, '{}')
+    const pkg = JSON.parse(
+      readFileSync(new URL('../package.json', import.meta.url), 'utf8')
+    )
+    expect(USER_AGENT).toBe(`parallelworks-typescript-sdk/${pkg.version}`)
+    expect(request.headers.get('User-Agent')).toBe(USER_AGENT)
+  })
+
+  it('sends a workflow run token to the host it names as a Bearer token', async () => {
+    const token = `pwwr_${btoa('run.example.com')}.${btoa('secret')}`
+    expect(isToken(token)).toBe(true)
+    expect(extractPlatformHost(token)).toBe('run.example.com')
+    const { fetch, requests } = respond(200, '[]', 'application/json')
+    await Client.fromCredential(token, { fetch }).GET('/api/workflows')
+    expect(requests[0]!.url).toBe('https://run.example.com/api/workflows')
+    expect(requests[0]!.headers.get('Authorization')).toBe(`Bearer ${token}`)
+  })
+
+  it.each([INSTANCE_TOKEN_PREFIX, CLUSTER_SESSION_TOKEN_PREFIX])(
+    'sends a %s token to the host it names as a Bearer token',
+    async prefix => {
+      const token = `${prefix}${btoa('agent.example.com')}.${btoa('secret')}`
+      expect(isToken(token)).toBe(true)
+      expect(extractPlatformHost(token)).toBe('agent.example.com')
+      const { fetch, requests } = respond(200, '[]', 'application/json')
+      await Client.fromCredential(token, { fetch }).GET('/api/workflows')
+      expect(requests[0]!.url).toBe('https://agent.example.com/api/workflows')
+      expect(requests[0]!.headers.get('Authorization')).toBe(`Bearer ${token}`)
+    }
+  )
+
   it('asks for problem details in the chosen language', async () => {
     const { request } = await failedRequest(404, '{}')
     expect(request.headers.get('Accept')).toContain(problemMediaType)

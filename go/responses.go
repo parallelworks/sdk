@@ -73,6 +73,20 @@ func (m *ResponseMeta) GetAcmeChallengeHeaders() GetAcmeChallengeHeaders {
 	}
 }
 
+// GetOauthAuthorizationServerMetadataHeaders holds the headers GetOauthAuthorizationServerMetadata declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetOauthAuthorizationServerMetadataHeaders struct {
+	CacheControl string
+}
+
+// GetOauthAuthorizationServerMetadataHeaders reads the headers GetOauthAuthorizationServerMetadata declares out of the captured
+// response.
+func (m *ResponseMeta) GetOauthAuthorizationServerMetadataHeaders() GetOauthAuthorizationServerMetadataHeaders {
+	return GetOauthAuthorizationServerMetadataHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
 // GetPkiValidationFileHeaders holds the headers GetPkiValidationFile declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type GetPkiValidationFileHeaders struct {
@@ -371,6 +385,20 @@ func (m *ResponseMeta) GetMarketplaceIconHeaders() GetMarketplaceIconHeaders {
 	}
 }
 
+// GetOidcConfigurationHeaders holds the headers GetOidcConfiguration declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetOidcConfigurationHeaders struct {
+	CacheControl string
+}
+
+// GetOidcConfigurationHeaders reads the headers GetOidcConfiguration declares out of the captured
+// response.
+func (m *ResponseMeta) GetOidcConfigurationHeaders() GetOidcConfigurationHeaders {
+	return GetOidcConfigurationHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
 // GetOidcAuthorizeHeaders holds the headers GetOidcAuthorize declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type GetOidcAuthorizeHeaders struct {
@@ -384,6 +412,20 @@ func (m *ResponseMeta) GetOidcAuthorizeHeaders() GetOidcAuthorizeHeaders {
 	return GetOidcAuthorizeHeaders{
 		Location:  m.Header.Get("Location"),
 		SetCookie: m.Header.Get("Set-Cookie"),
+	}
+}
+
+// PostOidcAuthorizeHeaders holds the headers PostOidcAuthorize declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type PostOidcAuthorizeHeaders struct {
+	Location string
+}
+
+// PostOidcAuthorizeHeaders reads the headers PostOidcAuthorize declares out of the captured
+// response.
+func (m *ResponseMeta) PostOidcAuthorizeHeaders() PostOidcAuthorizeHeaders {
+	return PostOidcAuthorizeHeaders{
+		Location: m.Header.Get("Location"),
 	}
 }
 
@@ -693,6 +735,20 @@ func (m *ResponseMeta) RevealOrgOidcAppSecretHeaders() RevealOrgOidcAppSecretHea
 	}
 }
 
+// UnsubscribeSavedCostReportHeaders holds the headers UnsubscribeSavedCostReport declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type UnsubscribeSavedCostReportHeaders struct {
+	Location string
+}
+
+// UnsubscribeSavedCostReportHeaders reads the headers UnsubscribeSavedCostReport declares out of the captured
+// response.
+func (m *ResponseMeta) UnsubscribeSavedCostReportHeaders() UnsubscribeSavedCostReportHeaders {
+	return UnsubscribeSavedCostReportHeaders{
+		Location: m.Header.Get("Location"),
+	}
+}
+
 // CreateScimTokenHeaders holds the headers CreateScimToken declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type CreateScimTokenHeaders struct {
@@ -916,6 +972,20 @@ func (m *ResponseMeta) GithubAppManifestCallbackHeaders() GithubAppManifestCallb
 	return GithubAppManifestCallbackHeaders{
 		Location:  m.Header.Get("Location"),
 		SetCookie: m.Header.Get("Set-Cookie"),
+	}
+}
+
+// GetKeysHeaders holds the headers GetKeys declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetKeysHeaders struct {
+	CacheControl string
+}
+
+// GetKeysHeaders reads the headers GetKeys declares out of the captured
+// response.
+func (m *ResponseMeta) GetKeysHeaders() GetKeysHeaders {
+	return GetKeysHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
 	}
 }
 

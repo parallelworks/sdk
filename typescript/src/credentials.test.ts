@@ -162,6 +162,33 @@ describe.skipIf(process.platform === 'win32')(
       expect(calls()).toHaveLength(2)
     })
 
+    it('renews an enrolled workload through the CLI, even before its first token', async () => {
+      writeFileSync(
+        credentialsPath(),
+        JSON.stringify({
+          currentIdentity: 'agent',
+          identities: {
+            agent: {
+              server: 'work.example.com',
+              name: 'agent',
+              organization: 'org',
+              workload: { clientId: 'pwc_x', subject: 'user:alice' },
+            },
+          },
+        })
+      )
+      fakeCLI(printScript('pwoa_workload', 3600))
+      const { fetch, requests } = respond()
+      const client = Client.fromCredentialConfig({ fetch })
+
+      expect(await authorizations(client, requests)).toEqual([
+        'Bearer pwoa_workload',
+      ])
+      expect(calls()).toEqual([
+        'auth token --print -o json --context agent key=unset',
+      ])
+    })
+
     it('uses a token with no expiry for the life of the client', async () => {
       writeSignIn('pwoa_stored', 3_600_000)
       fakeCLI(printScript('pwoa_new'))

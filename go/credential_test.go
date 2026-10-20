@@ -34,6 +34,9 @@ func TestIsToken(t *testing.T) {
 		{"  header.payload.signature  ", true}, // trims whitespace
 		{"pwt_abc.def.ghi", false},             // API key with 3 parts
 		{"pwoa_0123abcd", true},                // opaque OAuth access token
+		{"pwwr_aG9zdA==.c2VjcmV0", true},       // workflow run token
+		{"pwin_aG9zdA==.c2VjcmV0", true},       // instance token
+		{"pwcs_aG9zdA==.c2VjcmV0", true},       // cluster session token
 		{"no-dots", false},
 		{"one.dot", false},
 		{"", false},
@@ -197,5 +200,39 @@ func TestNewClientFromCredential_TokenAuth(t *testing.T) {
 	expected := "Bearer " + token
 	if got := req.Header.Get("Authorization"); got != expected {
 		t.Errorf("got Authorization %q, want %q", got, expected)
+	}
+}
+
+func TestNewClientFromCredential_WorkflowRunToken(t *testing.T) {
+	token := WorkflowRunTokenPrefix + base64.StdEncoding.EncodeToString([]byte("cloud.parallel.works")) + "." +
+		base64.StdEncoding.EncodeToString([]byte("secret"))
+
+	client, err := NewClientFromCredential(token)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if client.baseURL != "https://cloud.parallel.works" {
+		t.Errorf("got base URL %q, want the host the token names", client.baseURL)
+	}
+
+	req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, "https://example.com", nil)
+	if err := client.auth.Apply(req); err != nil {
+		t.Fatalf("auth.Apply failed: %v", err)
+	}
+	if got := req.Header.Get("Authorization"); got != "Bearer "+token {
+		t.Errorf("got Authorization %q, want it sent as a Bearer token", got)
+	}
+}
+
+func TestExtractPlatformHost_OpaqueTokens(t *testing.T) {
+	host := base64.StdEncoding.EncodeToString([]byte("cloud.parallel.works"))
+	for _, prefix := range []string{WorkflowRunTokenPrefix, InstanceTokenPrefix, ClusterSessionTokenPrefix} {
+		got, err := ExtractPlatformHost(prefix + host + ".c2VjcmV0")
+		if err != nil {
+			t.Fatalf("%s: unexpected error: %v", prefix, err)
+		}
+		if got != "cloud.parallel.works" {
+			t.Errorf("%s: got %q, want %q", prefix, got, "cloud.parallel.works")
+		}
 	}
 }

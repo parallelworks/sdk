@@ -12,6 +12,7 @@ import threading
 import time
 from collections.abc import AsyncGenerator, Generator
 from dataclasses import dataclass, field
+from importlib import metadata
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -29,7 +30,27 @@ API_KEY_PREFIX = "pwt_"
 # Bearer token; it names no platform host.
 OPAQUE_ACCESS_TOKEN_PREFIX = "pwoa_"
 
-USER_AGENT = "parallelworks-python-sdk/0"
+# Prefix for a workflow run's opaque token. It names its platform host like an
+# API key and is sent as a Bearer token.
+WORKFLOW_RUN_TOKEN_PREFIX = "pwwr_"
+
+# Prefix for an instance agent's opaque token, named and sent like a workflow run's.
+INSTANCE_TOKEN_PREFIX = "pwin_"
+
+# Prefix for a cluster session's opaque token, named and sent like a workflow run's.
+CLUSTER_SESSION_TOKEN_PREFIX = "pwcs_"
+
+_HOST_NAMING_TOKEN_PREFIXES = (WORKFLOW_RUN_TOKEN_PREFIX, INSTANCE_TOKEN_PREFIX, CLUSTER_SESSION_TOKEN_PREFIX)
+
+
+def _sdk_version() -> str:
+    try:
+        return metadata.version("parallelworks-client")
+    except metadata.PackageNotFoundError:
+        return "0"
+
+
+USER_AGENT = f"parallelworks-python-sdk/{_sdk_version()}"
 
 
 class CredentialError(Exception):
@@ -72,7 +93,8 @@ def is_api_key(credential: str) -> bool:
 def is_token(credential: str) -> bool:
     """
     Check if a credential is sent as a Bearer token: a JWT, whose three
-    base64-encoded parts are separated by dots, or an opaque access token.
+    base64-encoded parts are separated by dots, an opaque access token, or a
+    workflow run's, instance's or cluster session's token.
 
     Args:
         credential: The credential string to check
@@ -81,7 +103,7 @@ def is_token(credential: str) -> bool:
         True if the credential appears to be a token
     """
     credential = credential.strip()
-    if credential.startswith(OPAQUE_ACCESS_TOKEN_PREFIX):
+    if credential.startswith((OPAQUE_ACCESS_TOKEN_PREFIX, *_HOST_NAMING_TOKEN_PREFIXES)):
         return True
     parts = credential.split(".")
     return len(parts) == 3 and not credential.startswith(API_KEY_PREFIX)
@@ -91,7 +113,9 @@ def extract_platform_host(credential: str) -> str:
     """
     Extract the platform host from an API key or JWT token.
 
-    For API keys (pwt_xxxx.yyyy): decodes the first part after pwt_ to get the host
+    For API keys (pwt_xxxx.yyyy) and workflow run, instance and cluster session
+    tokens (pwwr_, pwin_, pwcs_ followed by xxxx.yyyy): decodes the first part
+    after the prefix to get the host
     For JWT tokens: decodes the payload (second segment) and reads platform_host field
 
     Args:
@@ -106,7 +130,10 @@ def extract_platform_host(credential: str) -> str:
     """
     credential = credential.strip()
     if is_api_key(credential):
-        return _extract_host_from_api_key(credential)
+        return _extract_host_from_api_key(credential, API_KEY_PREFIX)
+    for prefix in _HOST_NAMING_TOKEN_PREFIXES:
+        if credential.startswith(prefix):
+            return _extract_host_from_api_key(credential, prefix)
     if credential.startswith(OPAQUE_ACCESS_TOKEN_PREFIX):
         raise NoPlatformHostError()
     if is_token(credential):
@@ -114,10 +141,9 @@ def extract_platform_host(credential: str) -> str:
     raise CredentialError("Invalid credential format")
 
 
-def _extract_host_from_api_key(api_key: str) -> str:
-    """Extract platform host from an API key."""
-    # Remove pwt_ prefix
-    without_prefix = api_key[len(API_KEY_PREFIX) :]
+def _extract_host_from_api_key(api_key: str, prefix: str) -> str:
+    """Extract platform host from a credential of the form <prefix><base64 host>.<key>, such as an API key."""
+    without_prefix = api_key[len(prefix) :]
 
     # Split by dot
     parts = without_prefix.split(".", 1)
@@ -329,7 +355,8 @@ class Client:
         Create a client using only a credential.
 
         The platform host is automatically extracted from the credential:
-        - For API keys: host is decoded from the first part after pwt_
+        - For API keys and workflow run, instance and cluster session tokens:
+          host is decoded from the first part after the prefix
         - For JWT tokens: host is read from the platform_host claim
         - For access tokens (pwoa_), which name no host: PW_PLATFORM_HOST, else
           the server of the credentials file's selected context
@@ -397,11 +424,11 @@ class Client:
             if is_token(identity.apikey):
                 return cls.with_token(base_url, identity.apikey, timeout=timeout)
             return cls.with_api_key(base_url, identity.apikey, timeout=timeout)
-        if not identity.token:
-            raise CredentialError('you must first authenticate using "pw auth"')
-        if identity.oauth:
+        if identity.oauth or identity.workload:
             auth = CLIAuth(command=cli_command, context=name, timeout=cli_timeout)
             return cls(ClientConfig(base_url=base_url.rstrip("/"), auth_header="", timeout=timeout, auth=auth))
+        if not identity.token:
+            raise CredentialError('you must first authenticate using "pw auth"')
         return cls.with_token(base_url, identity.token, timeout=timeout)
 
     # Async client methods
@@ -540,6 +567,7 @@ class Identity:
     token: str = ""
     canonical_name: str = ""
     oauth: dict[str, Any] | None = None
+    workload: dict[str, Any] | None = None
 
     @classmethod
     def from_json(cls, data: dict[str, Any]) -> Identity:
@@ -551,6 +579,7 @@ class Identity:
             token=data.get("token", ""),
             canonical_name=data.get("canonicalName", ""),
             oauth=data.get("oauth"),
+            workload=data.get("workload"),
         )
 
 

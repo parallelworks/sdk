@@ -16,6 +16,8 @@ export interface Identity {
   organization: string
   /** The state of a `pw auth` sign-in, which only the CLI reads. */
   oauth?: Record<string, unknown>
+  /** A workload `pw agent enroll` registered, which signs in with its own key. */
+  workload?: Record<string, unknown>
 }
 
 /** The pw credentials file. */

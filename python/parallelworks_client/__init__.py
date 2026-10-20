@@ -2,7 +2,11 @@
 
 from parallelworks_client.auth import (
     API_KEY_PREFIX,
+    CLUSTER_SESSION_TOKEN_PREFIX,
+    INSTANCE_TOKEN_PREFIX,
     OPAQUE_ACCESS_TOKEN_PREFIX,
+    USER_AGENT,
+    WORKFLOW_RUN_TOKEN_PREFIX,
     CLIAuth,
     Client,
     CredentialConfig,
@@ -28,7 +32,11 @@ from parallelworks_client.problem import (
 
 __all__ = [
     "API_KEY_PREFIX",
+    "CLUSTER_SESSION_TOKEN_PREFIX",
+    "INSTANCE_TOKEN_PREFIX",
     "OPAQUE_ACCESS_TOKEN_PREFIX",
+    "USER_AGENT",
+    "WORKFLOW_RUN_TOKEN_PREFIX",
     "CLIAuth",
     "Client",
     "CredentialConfig",

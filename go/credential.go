@@ -13,7 +13,28 @@ const (
 	// OpaqueAccessTokenPrefix marks an opaque OAuth access token, such as the one
 	// `pw auth login` saves; it is sent as a Bearer token like a JWT.
 	OpaqueAccessTokenPrefix = "pwoa_"
+	// WorkflowRunTokenPrefix marks a workflow run's opaque token. It names its
+	// platform host like an API key and is sent as a Bearer token.
+	WorkflowRunTokenPrefix = "pwwr_"
+	// InstanceTokenPrefix marks an instance agent's opaque token, named and sent
+	// like a workflow run's.
+	InstanceTokenPrefix = "pwin_"
+	// ClusterSessionTokenPrefix marks a cluster session's opaque token, named and
+	// sent like a workflow run's.
+	ClusterSessionTokenPrefix = "pwcs_"
 )
+
+// hostNamingTokenPrefixes mark opaque tokens that name their platform host like an API key and are sent as Bearer tokens.
+var hostNamingTokenPrefixes = []string{WorkflowRunTokenPrefix, InstanceTokenPrefix, ClusterSessionTokenPrefix}
+
+func hostNamingTokenPrefix(credential string) (string, bool) {
+	for _, prefix := range hostNamingTokenPrefixes {
+		if strings.HasPrefix(credential, prefix) {
+			return prefix, true
+		}
+	}
+	return "", false
+}
 
 // ErrInvalidCredential is returned when a credential cannot be parsed
 var ErrInvalidCredential = errors.New("invalid credential format")
@@ -27,10 +48,11 @@ func IsAPIKey(credential string) bool {
 }
 
 // IsToken returns true if the credential is sent as a Bearer token: a JWT, whose
-// three base64-encoded parts are separated by dots, or an opaque OAuth access token.
+// three base64-encoded parts are separated by dots, an opaque OAuth access token,
+// or a workflow run's, instance's or cluster session's token.
 func IsToken(credential string) bool {
 	credential = strings.TrimSpace(credential)
-	if strings.HasPrefix(credential, OpaqueAccessTokenPrefix) {
+	if _, ok := hostNamingTokenPrefix(credential); ok || strings.HasPrefix(credential, OpaqueAccessTokenPrefix) {
 		return true
 	}
 	parts := strings.Split(credential, ".")
@@ -39,12 +61,17 @@ func IsToken(credential string) bool {
 
 // ExtractPlatformHost extracts the platform host from an API key or JWT token.
 //
-// For API keys (pwt_xxxx.yyyy): decodes the first part after pwt_ to get the host
+// For API keys (pwt_xxxx.yyyy) and workflow run, instance and cluster session
+// tokens (pwwr_, pwin_, pwcs_ followed by xxxx.yyyy): decodes
+// the first part after the prefix to get the host
 // For JWT tokens: decodes the payload (second segment) and reads platform_host field
 func ExtractPlatformHost(credential string) (string, error) {
 	credential = strings.TrimSpace(credential)
 	if IsAPIKey(credential) {
-		return extractHostFromAPIKey(credential)
+		return extractHostFromAPIKey(credential, APIKeyPrefix)
+	}
+	if prefix, ok := hostNamingTokenPrefix(credential); ok {
+		return extractHostFromAPIKey(credential, prefix)
 	}
 	if strings.HasPrefix(credential, OpaqueAccessTokenPrefix) {
 		return "", ErrNoPlatformHost
@@ -55,11 +82,10 @@ func ExtractPlatformHost(credential string) (string, error) {
 	return "", ErrInvalidCredential
 }
 
-// extractHostFromAPIKey extracts platform host from an API key.
-// API key format: pwt_<base64_host>.<key>
-func extractHostFromAPIKey(apiKey string) (string, error) {
-	// Remove pwt_ prefix
-	withoutPrefix := strings.TrimPrefix(apiKey, APIKeyPrefix)
+// extractHostFromAPIKey extracts platform host from a credential of the form
+// <prefix><base64_host>.<key>, such as an API key.
+func extractHostFromAPIKey(apiKey, prefix string) (string, error) {
+	withoutPrefix := strings.TrimPrefix(apiKey, prefix)
 
 	// Split by dot
 	parts := strings.SplitN(withoutPrefix, ".", 2)
@@ -133,7 +159,7 @@ func extractHostFromToken(token string) (string, error) {
 // NewClientFromCredential creates a new client using only a credential.
 // The platform host is automatically extracted from the credential.
 //
-// For API keys: host is decoded from the first part after pwt_
+// For API keys and workflow run, instance and cluster session tokens: host is decoded from the first part after the prefix
 // For JWT tokens: host is read from the platform_host claim
 // For access tokens (pwoa_), which name no host: PW_PLATFORM_HOST, else the
 // server of the credentials file's selected context

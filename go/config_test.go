@@ -2,6 +2,7 @@ package parallelworks
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -557,6 +558,19 @@ func TestUpsertContext(t *testing.T) {
 		}
 	})
 
+	t.Run("a credential does not replace an enrolled workload", func(t *testing.T) {
+		workload := Identity{Token: "pwoa_old", CanonicalName: "pwc_x@example.com", Workload: json.RawMessage(`{"clientId":"pwc_x"}`)}
+		for _, name := range []string{"agent", ""} {
+			cfg := &CredentialConfig{Identities: map[string]Identity{"agent": workload}}
+			if err := cfg.UpsertContext(name, "pwc_x@example.com", "example.com", "org1", "pwt_new.key"); !errors.Is(err, ErrContextIsWorkload) {
+				t.Errorf("UpsertContext(%q) = %v, want ErrContextIsWorkload", name, err)
+			}
+			if string(cfg.Identities["agent"].Workload) != `{"clientId":"pwc_x"}` || cfg.Identities["agent"].Token != "pwoa_old" {
+				t.Errorf("the workload context was changed: %+v", cfg.Identities["agent"])
+			}
+		}
+	})
+
 	t.Run("multiple contexts same canonical name errors", func(t *testing.T) {
 		cfg := &CredentialConfig{
 			Identities: map[string]Identity{
@@ -580,5 +594,41 @@ func TestPlatformHost(t *testing.T) {
 	client2 := NewClient("http://localhost:8080")
 	if got := client2.PlatformHost(); got != "localhost:8080" {
 		t.Errorf("PlatformHost() = %q, want %q", got, "localhost:8080")
+	}
+}
+
+func TestNewClientFromCredentialConfig_AWorkloadIsRenewedThroughTheCLI(t *testing.T) {
+	t.Setenv("PW_API_KEY", "")
+	t.Setenv("PW_CONTEXT", "")
+	t.Setenv("PW_CREDENTIALS_DIR", t.TempDir())
+	path, err := DefaultCredentialConfigPath()
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Before its first exchange a workload context holds no token yet.
+	cfg := &CredentialConfig{
+		Identities: map[string]Identity{
+			"agent": {Server: "cloud.parallel.works", Workload: json.RawMessage(`{"clientId":"pwc_x","subject":"user:alice"}`)},
+		},
+		CurrentIdentity: "agent",
+	}
+	if err := cfg.SaveTo(path); err != nil {
+		t.Fatal(err)
+	}
+
+	client, err := NewClientFromCredentialConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	auth, ok := client.auth.(*CLIAuth)
+	if !ok {
+		t.Fatalf("auth = %T, want *CLIAuth", client.auth)
+	}
+	if auth.Context != "agent" {
+		t.Errorf("Context = %q, want the workload's", auth.Context)
+	}
+	identity := cfg.Identities["agent"]
+	if got := identity.Username(); got != "alice" {
+		t.Errorf("Username() = %q, want the user the workload acts for", got)
 	}
 }

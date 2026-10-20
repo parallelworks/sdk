@@ -26,6 +26,22 @@ func (c *Client) GetAcmeChallenge(ctx context.Context, token string) (*string, e
 	return &result, nil
 }
 
+// GetOauthAuthorizationServerMetadata - Get OAuth authorization server metadata
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the authorization server metadata (RFC 8414), the same document as the OpenID configuration.
+func (c *Client) GetOauthAuthorizationServerMetadata(ctx context.Context) (*OpenIDConfiguration, error) {
+
+	path := "/.well-known/oauth-authorization-server/api/oidc"
+
+	var result OpenIDConfiguration
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetPkiValidationFile - Serve PKI domain control validation file
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -303,7 +319,7 @@ func (c *Client) CancelBackgroundJob(ctx context.Context, jobID string) (*Backgr
 //
 // > This is a platform-admin only route.
 //
-// Runs a job again as soon as possible. A cancelled or discarded job gets one more attempt; a waiting job has its schedule brought forward
+// Runs a job again as soon as possible. A canceled or discarded job gets one more attempt; a waiting job has its schedule brought forward
 func (c *Client) RetryBackgroundJob(ctx context.Context, jobID string) (*BackgroundJob, error) {
 
 	path := "/api/admin/background-jobs/{jobId}/retry"
@@ -1918,7 +1934,7 @@ func (c *Client) UpdatePlatformReport(ctx context.Context, id string, body *Upda
 // ListResourcesParams contains the parameters for the ListResources operation.
 // Required parameters are value fields; optional parameters are pointers.
 type ListResourcesParams struct {
-	// Filter by resource kinds (vm, disk, lustre, nfs, bucket, ip).
+	// Filter by resource kinds (vm, disk, lustre, nfs, bucket, ip, snapshot, networkinterface).
 	Type *[]string `json:"type,omitempty"`
 	// Filter by cloud service providers.
 	Csp *[]string `json:"csp,omitempty"`
@@ -2465,6 +2481,24 @@ func (c *Client) SetAgentSessionGoal(ctx context.Context, machine string, id str
 	return &result, nil
 }
 
+// UploadAgentSessionImage - Attach an image to a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Saves an image on the machine for a message to carry, as pasting one into the pw code terminal does. Send the path it answers with in the message's images, and name the image in the text by its [Image #N] placeholder.
+func (c *Client) UploadAgentSessionImage(ctx context.Context, machine string, id string, body AgentImageBody) (*AgentImageSaved, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/images"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentImageSaved
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // InterruptAgentSession - Stop the turn a pw code session is running
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -2593,7 +2627,7 @@ func (c *Client) UpdateAgentSessionSettings(ctx context.Context, machine string,
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Runs a command in the session's workspace, as typing ! in the terminal does, and answers with its output. The command and output join the conversation; send an empty message to have the model react to them. The machine refuses a command its owner could not approve from a remote origin or that its PreToolUse hooks deny, and stops one that runs longer than about 20 seconds.
+// Runs a command in the session's workspace, as typing ! in the terminal does, and answers with its output. The command and output join the conversation, and the session starts the model's reply to them. The machine refuses a command its owner could not approve from a remote origin or that its PreToolUse hooks deny, and stops one that runs longer than about 20 seconds.
 func (c *Client) RunAgentSessionShell(ctx context.Context, machine string, id string, body AgentShellBody) (*AgentShellOutput, error) {
 
 	path := "/api/agents/machines/{machine}/sessions/{id}/shell"
@@ -3176,6 +3210,22 @@ func (c *Client) UpdateAiChatConversation(ctx context.Context, id string, body U
 	return &result, nil
 }
 
+// ListAiChatTools - List chat tools
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the read-only platform tools the chat can use while it answers.
+func (c *Client) ListAiChatTools(ctx context.Context) (*[]Info, error) {
+
+	path := "/api/aichat/tools"
+
+	var result []Info
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListUserAllocationsParams contains the parameters for the ListUserAllocations operation.
 // Required parameters are value fields; optional parameters are pointers.
 type ListUserAllocationsParams struct {
@@ -3291,9 +3341,13 @@ func (c *Client) GetAuthSession(ctx context.Context) (*AuthSession, error) {
 // Required parameters are value fields; optional parameters are pointers.
 type GetAuthSsoOidcCallbackParams struct {
 	// Authorization code returned by the OIDC provider
-	Code string `json:"code"`
+	Code *string `json:"code,omitempty"`
 	// State issued at redirect time, carrying the auth method ID and an anti-CSRF value bound to the browser session
-	State string `json:"state"`
+	State *string `json:"state,omitempty"`
+	// Error code the OIDC provider returns instead of a code (RFC 6749 section 4.1.2.1), such as access_denied
+	Error *string `json:"error,omitempty"`
+	// The provider's description of the error, logged but not shown
+	ErrorDescription *string `json:"error_description,omitempty"`
 }
 
 // GetAuthSsoOidcCallback - OIDC login callback
@@ -3301,13 +3355,21 @@ type GetAuthSsoOidcCallbackParams struct {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Called by the OIDC provider after the user authenticates. Exchanges the authorization code for tokens and signs the user in.
-func (c *Client) GetAuthSsoOidcCallback(ctx context.Context, params GetAuthSsoOidcCallbackParams) error {
+func (c *Client) GetAuthSsoOidcCallback(ctx context.Context, opts ...GetAuthSsoOidcCallbackParams) error {
 
 	path := "/api/auth/sso/oidc/callback"
+	var params GetAuthSsoOidcCallbackParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
 	queryValues := url.Values{}
 	addQueryParam(queryValues, "code", "form", false, params.Code)
 
 	addQueryParam(queryValues, "state", "form", false, params.State)
+
+	addQueryParam(queryValues, "error", "form", false, params.Error)
+
+	addQueryParam(queryValues, "error_description", "form", false, params.ErrorDescription)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
@@ -6024,17 +6086,21 @@ type GetOidcAuthorizeParams struct {
 	CodeChallenge *string `json:"code_challenge,omitempty"`
 	// Must be S256
 	CodeChallengeMethod *string `json:"code_challenge_method,omitempty"`
-	// Space-delimited list of none, login, or consent
+	// Space-delimited list of login, consent, and select_account, or none alone; select_account asks the user to sign in again
 	Prompt *string `json:"prompt,omitempty"`
 	// Maximum age in seconds of the user's authentication
 	MaxAge *string `json:"max_age,omitempty"`
+	// An ID token this provider issued to the application; the request fails with login_required unless its user is the one signed in
+	IDTokenHint *string `json:"id_token_hint,omitempty"`
+	// Must be query, the default
+	ResponseMode *string `json:"response_mode,omitempty"`
 }
 
 // GetOidcAuthorize - OIDC authorization endpoint
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Starts the authorization code flow. Sends the browser to sign in when there is no session, asks for consent when the application requires it, and redirects to the application with an authorization code.
+// Starts the authorization code flow. Sends the browser to sign in when there is no session, asks for consent when the application requires it, and redirects to the application with an authorization code. Every response to the application carries `iss` (RFC 9207). A parameter sent twice is `invalid_request`, as are `response_mode` other than `query` and `prompt=none` with another value; `request` and `request_uri` are refused with `request_not_supported` and `request_uri_not_supported`.
 func (c *Client) GetOidcAuthorize(ctx context.Context, opts ...GetOidcAuthorizeParams) error {
 
 	path := "/api/oidc/authorize"
@@ -6063,11 +6129,30 @@ func (c *Client) GetOidcAuthorize(ctx context.Context, opts ...GetOidcAuthorizeP
 
 	addQueryParam(queryValues, "max_age", "form", false, params.MaxAge)
 
+	addQueryParam(queryValues, "id_token_hint", "form", false, params.IDTokenHint)
+
+	addQueryParam(queryValues, "response_mode", "form", false, params.ResponseMode)
+
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
 	}
 
 	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// PostOidcAuthorize - OIDC authorization endpoint (form post)
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Accepts the authorization request parameters as an `application/x-www-form-urlencoded` body and answers 303 See Other to the GET endpoint with the same parameters, where the request is validated. The browser only sends the platform session cookie on that top-level GET.
+func (c *Client) PostOidcAuthorize(ctx context.Context, body map[string]any) error {
+
+	path := "/api/oidc/authorize"
+
+	if err := c.do(ctx, "POST", path, body, "application/x-www-form-urlencoded", nil, "application/json", true); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -6092,7 +6177,7 @@ func (c *Client) GetOidcAuthorizeResume(ctx context.Context) error {
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Lists the applications the user has granted access to their identity.
+// Lists the applications the user has granted access to their identity, and under `pw-agent`, the workloads acting for the user, such as the agent on an existing cluster. A workload's own token is refused with `requires_own_sign_in`.
 func (c *Client) ListOidcConnectedApps(ctx context.Context) (*ListConnectedAppsOutputBody, error) {
 
 	path := "/api/oidc/connected-apps"
@@ -6108,7 +6193,7 @@ func (c *Client) ListOidcConnectedApps(ctx context.Context) (*ListConnectedAppsO
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Revokes the user's consent for an application along with its authorization codes and access tokens.
+// Revokes the user's consent for an application along with its authorization codes and access tokens. For `pw-agent`, revokes every workload acting for the user.
 func (c *Client) RevokeOidcConnectedApp(ctx context.Context, clientID string) error {
 
 	path := "/api/oidc/connected-apps/{clientId}"
@@ -6120,11 +6205,11 @@ func (c *Client) RevokeOidcConnectedApp(ctx context.Context, clientID string) er
 	return nil
 }
 
-// SignOutOidcConnectedDevice - Sign a device out of the pw CLI or the ACTIVATE mobile app
+// SignOutOidcConnectedDevice - Sign a device out of the pw CLI or the ACTIVATE mobile app, or revoke a workload
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Ends one device's sign-in to the pw CLI or the ACTIVATE mobile app, revoking its tokens at once, and leaves the user's other devices signed in. The device IDs are listed under `devices` on the app's connected application.
+// Ends one device's sign-in to the pw CLI or the ACTIVATE mobile app, revoking its tokens at once, and leaves the user's other devices signed in. For `pw-agent`, revokes the workload acting for the user: its registration, its tokens, everything it started that carries its delegation, and any enrollment token for the same workload that has not been used. The device IDs are listed under `devices` on the app's connected application.
 func (c *Client) SignOutOidcConnectedDevice(ctx context.Context, clientID string, deviceID string) error {
 
 	path := "/api/oidc/connected-apps/{clientId}/devices/{deviceId}"
@@ -6173,7 +6258,7 @@ func (c *Client) PostOidcConsent(ctx context.Context, body ConsentDecisionInputB
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Approves or denies the pw CLI sign-in a user code belongs to. An approval signs the device in as the calling user when it next polls. Only a browser session can call this.
+// Approves or denies the pw CLI sign-in a user code belongs to. An approval signs the device in as the calling user when it next polls, or, for a `pw agent connect` request, lets it collect a bootstrap token for the caller's own PW CLI cluster. Only a browser session can call this.
 func (c *Client) DecideOidcDeviceRequest(ctx context.Context, body DecideDeviceRequestInputBody) (*DecideDeviceRequestOutputBody, error) {
 
 	path := "/api/oidc/device/decision"
@@ -6189,7 +6274,7 @@ func (c *Client) DecideOidcDeviceRequest(ctx context.Context, body DecideDeviceR
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Checks that a user code belongs to a pending pw CLI sign-in and names the application asking, so the user can confirm it before approving. The code is sent in the body so it stays out of URLs and logs. Only a browser session can call this, and failed codes are rate limited.
+// Checks that a user code belongs to a pending pw CLI sign-in and names the application asking, so the user can confirm it before approving. For a `pw agent connect` request, `agentEnrollment` names the cluster and host, and the call fails unless the cluster is the caller's own PW CLI cluster. The code is sent in the body so it stays out of URLs and logs. Only a browser session can call this, and failed codes are rate limited.
 func (c *Client) LookupOidcDeviceRequest(ctx context.Context, body DeviceCodeBody) (*DeviceRequestBody, error) {
 
 	path := "/api/oidc/device/lookup"
@@ -6206,6 +6291,8 @@ func (c *Client) LookupOidcDeviceRequest(ctx context.Context, body DeviceCodeBod
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Starts a pw CLI sign-in on a device without a usable browser (RFC 8628). The body is `application/x-www-form-urlencoded` with `client_id`, an optional `scope`, and an optional `device_name` naming the host. The response carries a `user_code` the user enters at `verification_uri` and a `device_code` the device polls the token endpoint with, using `grant_type=urn:ietf:params:oauth:grant-type:device_code`. Codes expire after 10 minutes and are single use.
+//
+// `pw agent connect` asks here for a cluster agent's bootstrap token instead of a sign-in: it sends `scope=agent_enrollment` alone and `authorization_details` (RFC 9396) holding one object, `{"type":"pw_agent_enrollment","cluster":"<cluster name>","host":"<host name>"}`. A malformed or unknown object is refused with `invalid_authorization_details`. Only the cluster's owner, signed in as themselves, can approve it. Once approved, the token endpoint answers with the single-use bootstrap token as `access_token`, `token_type=Bearer`, its `expires_in`, `scope=agent_enrollment` and the granted `authorization_details`, and no refresh token. The agent registers with it at the registration endpoint.
 func (c *Client) PostOidcDeviceAuthorization(ctx context.Context, body *map[string]any) (*DeviceAuthorizationBody, error) {
 
 	path := "/api/oidc/device_authorization"
@@ -6280,7 +6367,7 @@ func (c *Client) PostOidcEndSession(ctx context.Context, body map[string]any) er
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Reports whether a token is live and the authorization it carries (RFC 7662). The body is `application/x-www-form-urlencoded` with `token`. Only a confidential client may call it, with its client secret, and only about tokens issued to it.
+// Reports whether a token is live and the authorization it carries (RFC 7662). The body is `application/x-www-form-urlencoded` with `token`. Only a confidential client with its client secret, or a registered client with `private_key_jwt`, may call it, and only about tokens issued to it. A registered client's token reports `act`, the workload acting for the user.
 func (c *Client) PostOidcIntrospect(ctx context.Context, body *map[string]any) (*IntrospectBody, error) {
 
 	path := "/api/oidc/introspect"
@@ -6306,7 +6393,7 @@ func (c *Client) RegisterOauthClient(ctx context.Context, body *ClientMetadata) 
 	path := "/api/oidc/register"
 
 	var result ClientInformation
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", false); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6316,14 +6403,14 @@ func (c *Client) RegisterOauthClient(ctx context.Context, body *ClientMetadata) 
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns the client's current registration (RFC 7592 section 2.1). Authenticate with the client's registration access token as a Bearer credential. Each successful request returns a new registration access token and retires the one presented, so store the new one before making another request. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403.
+// Returns the client's current registration (RFC 7592 section 2.1). Authenticate with the client's registration access token as a Bearer credential. Each successful request returns a new registration access token and retires the one presented, so store the new one before making another request. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403. Presenting a retired token also deregisters the client, since a client that stores each new token never presents an old one.
 func (c *Client) GetOauthClientRegistration(ctx context.Context, clientID string) (*ClientInformation, error) {
 
 	path := "/api/oidc/register/{clientId}"
 	path = pathReplace(path, "clientId", "simple", false, clientID)
 
 	var result ClientInformation
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", false); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6333,14 +6420,14 @@ func (c *Client) GetOauthClientRegistration(ctx context.Context, clientID string
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Replaces the client's metadata (RFC 7592 section 2.2); this is how the client rotates its key, by sending a new `jwks`. Send every field as returned by the last response, with `client_id`, and leave out `registration_access_token`, `registration_client_uri` and `client_id_issued_at` or repeat their current values. Omitted fields are cleared. The same metadata rules as registration apply. Authenticate with the client's registration access token as a Bearer credential. Each successful request returns a new registration access token and retires the one presented, so store the new one before making another request. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403.
+// Replaces the client's metadata (RFC 7592 section 2.2); this is how the client rotates its key, by sending a new `jwks`. Send every field as returned by the last response, with `client_id`, and leave out `registration_access_token`, `registration_client_uri` and `client_id_issued_at` or repeat their current values. Omitted fields are cleared. The same metadata rules as registration apply. Authenticate with the client's registration access token as a Bearer credential. Each successful request returns a new registration access token and retires the one presented, so store the new one before making another request. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403. Presenting a retired token also deregisters the client, since a client that stores each new token never presents an old one.
 func (c *Client) UpdateOauthClientRegistration(ctx context.Context, clientID string, body *ClientMetadata) (*ClientInformation, error) {
 
 	path := "/api/oidc/register/{clientId}"
 	path = pathReplace(path, "clientId", "simple", false, clientID)
 
 	var result ClientInformation
-	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", false); err != nil {
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6350,14 +6437,14 @@ func (c *Client) UpdateOauthClientRegistration(ctx context.Context, clientID str
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Deregisters the client (RFC 7592 section 2.3). Its client ID, its registration access token and every token issued to it stop working at once. Authenticate with the client's registration access token as a Bearer credential. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403.
+// Deregisters the client (RFC 7592 section 2.3). Its client ID, its registration access token and every token issued to it stop working at once. Authenticate with the client's registration access token as a Bearer credential. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403. Presenting a retired token also deregisters the client, since a client that stores each new token never presents an old one.
 func (c *Client) DeleteOauthClientRegistration(ctx context.Context, clientID string) (*ClientInformation, error) {
 
 	path := "/api/oidc/register/{clientId}"
 	path = pathReplace(path, "clientId", "simple", false, clientID)
 
 	var result ClientInformation
-	if err := c.do(ctx, "DELETE", path, nil, "", &result, "application/json", false); err != nil {
+	if err := c.do(ctx, "DELETE", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -6404,11 +6491,13 @@ func (c *Client) GetOidcSectorIdentifier(ctx context.Context, authMethodID strin
 //
 // The body is `application/x-www-form-urlencoded`. To redeem a code, send `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. To refresh, send `grant_type=refresh_token`, a `refresh_token` issued for the `offline_access` scope, and an optional `scope` that can narrow but never widen the original grant; the response carries a new refresh token, and presenting a spent one again revokes every token descended from it. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.
 //
-// The pw CLI polls here with `grant_type=urn:ietf:params:oauth:grant-type:device_code` and the `device_code` from the device authorization endpoint, and is told `authorization_pending`, `slow_down`, `expired_token`, or `access_denied` until the user decides.
+// The pw CLI polls here with `grant_type=urn:ietf:params:oauth:grant-type:device_code` and the `device_code` from the device authorization endpoint, and is told `authorization_pending`, `slow_down`, `expired_token`, or `access_denied` until the user decides. For a `pw agent connect` device code, the `access_token` is a single-use bootstrap token for the registration endpoint, with `scope=agent_enrollment` and `authorization_details`, and no ID or refresh token.
 //
 // A service application or Kubernetes cluster gets an ID token for a user through the token exchange grant (RFC 8693), the exec-credential pattern kubectl uses. Send `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`, the application's `client_id` (or `audience`), `subject_token` set to the user's platform API key or pw CLI access token (a Kubernetes cluster also accepts the user's platform token; an ACTIVATE mobile app access token is refused), `subject_token_type=urn:ietf:params:oauth:token-type:access_token`, and optionally `requested_token_type=urn:ietf:params:oauth:token-type:id_token` and a narrowing `scope`. These clients hold no secret, so none is sent. The response carries the ID token in `access_token`, with `issued_token_type=urn:ietf:params:oauth:token-type:id_token` and `token_type=N_A`. Any other kind of application is refused with `unauthorized_client`, or with `invalid_target` when only `audience` names it.
 //
-// A client registered at the registration endpoint authenticates with `private_key_jwt` (RFC 7523 section 2.2): send `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer` and a `client_assertion` JWT signed with ES256 by its registered key, with no other client credential. The JWT's `iss` and `sub` are the `client_id`, `aud` is the issuer identifier from the discovery document and nothing else, `exp` is at most 5 minutes away, and `jti` is unique, since each assertion is accepted once. A `client_id` sent beside it must match. A failed authentication is `invalid_client` with status 401.
+// A client registered at the registration endpoint authenticates with `private_key_jwt` (RFC 7523 section 2.2): send `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer` and a `client_assertion` JWT signed with ES256 by its registered key, with no other client credential. The JWT's `iss` and `sub` are the `client_id`, `aud` is the issuer identifier from the discovery document and nothing else, `exp` is at most 5 minutes away, and `jti` is unique, since each assertion is accepted once. A `client_id` sent beside it must match. Its key is accepted for 90 days from when it was registered or last replaced through the registration endpoint. A failed authentication is `invalid_client` with status 401.
+//
+// Such a client exchanges for a short-lived access token for the one user it was registered for (RFC 8693): send the token exchange grant with its client assertion, `subject_token` set to a second ES256 JWT it signs with the same key, with `iss` its `client_id`, `sub` `user:<username>`, the same `aud`, `exp` and single-use `jti` rules, and `subject_token_type=urn:ietf:params:oauth:token-type:jwt`. `requested_token_type` may be `urn:ietf:params:oauth:token-type:access_token`; `actor_token` and `scope` are refused, and `audience` or `resource` may only name the platform's own URL. The response carries the access token, `issued_token_type=urn:ietf:params:oauth:token-type:access_token`, `token_type=Bearer` and `expires_in`, and no refresh token: exchange again before it expires. A subject token that does not verify is `invalid_request`.
 func (c *Client) PostOidcToken(ctx context.Context, body *map[string]any) (*TokenBody, error) {
 
 	path := "/api/oidc/token"
@@ -6425,11 +6514,11 @@ func (c *Client) PostOidcToken(ctx context.Context, body *map[string]any) (*Toke
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns the claims released by an application's access token. Authenticated with the opaque access token from the token endpoint, not a platform credential.
-func (c *Client) GetOidcUserinfo(ctx context.Context) (*map[string]any, error) {
+func (c *Client) GetOidcUserinfo(ctx context.Context) (*Userinfo, error) {
 
 	path := "/api/oidc/userinfo"
 
-	var result map[string]any
+	var result Userinfo
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -6441,11 +6530,11 @@ func (c *Client) GetOidcUserinfo(ctx context.Context) (*map[string]any, error) {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns the claims released by an application's access token. Authenticated with the opaque access token from the token endpoint, not a platform credential.
-func (c *Client) PostOidcUserinfo(ctx context.Context) (*map[string]any, error) {
+func (c *Client) PostOidcUserinfo(ctx context.Context) (*Userinfo, error) {
 
 	path := "/api/oidc/userinfo"
 
-	var result map[string]any
+	var result Userinfo
 	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -6481,6 +6570,8 @@ type ChatCompletionParams struct {
 	XUserMessageID *string `json:"X-User-Message-Id,omitempty"`
 	// Budget allocation name for org provider requests
 	XAllocation *string `json:"X-Allocation,omitempty"`
+	// Comma-separated names of the read-only platform tools, from listAIChatTools, the server may run while streaming an answer. Calls arrive as tool_calls deltas, each followed by a chunk carrying toolResult.
+	XPlatformTools *string `json:"X-Platform-Tools,omitempty"`
 }
 
 // ChatCompletion - Create chat completion
@@ -6501,6 +6592,7 @@ func (c *Client) ChatCompletion(ctx context.Context, body ChatCompletionRequest,
 	setHeader(headers, "X-Persist", false, params.XPersist)
 	setHeader(headers, "X-User-Message-Id", false, params.XUserMessageID)
 	setHeader(headers, "X-Allocation", false, params.XAllocation)
+	setHeader(headers, "X-Platform-Tools", false, params.XPlatformTools)
 
 	var result ChatCompletionResponse
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true, headers); err != nil {
@@ -6524,6 +6616,7 @@ func (c *Client) ChatCompletionStream(ctx context.Context, body ChatCompletionRe
 	setHeader(headers, "X-Persist", false, params.XPersist)
 	setHeader(headers, "X-User-Message-Id", false, params.XUserMessageID)
 	setHeader(headers, "X-Allocation", false, params.XAllocation)
+	setHeader(headers, "X-Platform-Tools", false, params.XPlatformTools)
 
 	resp, err := c.doStream(ctx, "POST", path, body, "application/json", "text/event-stream", true, headers)
 	if err != nil {
@@ -7183,6 +7276,93 @@ func (c *Client) GetOrgUsageSummary(ctx context.Context, organization string, op
 
 	var result OrgUsageSummaryResponse
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListAllocationPeriods - List allocation periods
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the organization's allocation periods, earliest first.
+func (c *Client) ListAllocationPeriods(ctx context.Context, organization string) (*[]AllocationPeriod, error) {
+
+	path := "/api/organizations/{organization}/allocation-periods"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result []AllocationPeriod
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreateAllocationPeriod - Create an allocation period
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a named time frame that allocations can budget against.
+func (c *Client) CreateAllocationPeriod(ctx context.Context, organization string, body AllocationPeriod) (*AllocationPeriod, error) {
+
+	path := "/api/organizations/{organization}/allocation-periods"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result AllocationPeriod
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAllocationPeriod - Get an allocation period
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns one allocation period.
+func (c *Client) GetAllocationPeriod(ctx context.Context, organization string, period string) (*AllocationPeriod, error) {
+
+	path := "/api/organizations/{organization}/allocation-periods/{period}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "period", "simple", false, period)
+
+	var result AllocationPeriod
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteAllocationPeriod - Delete an allocation period
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a period no allocation budgets against.
+func (c *Client) DeleteAllocationPeriod(ctx context.Context, organization string, period string) error {
+
+	path := "/api/organizations/{organization}/allocation-periods/{period}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "period", "simple", false, period)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UpdateAllocationPeriod - Update an allocation period
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Renames a period or moves its dates forward. Dates that have passed can't change.
+func (c *Client) UpdateAllocationPeriod(ctx context.Context, organization string, period string, body UpdateAllocationPeriodInputBody) (*AllocationPeriod, error) {
+
+	path := "/api/organizations/{organization}/allocation-periods/{period}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "period", "simple", false, period)
+
+	var result AllocationPeriod
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9136,6 +9316,23 @@ func (c *Client) ExportOrganizationEvents(ctx context.Context, organization stri
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// ListFiscalYears - List fiscal years
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the fiscal years reports can show, from the organization's allocation start date. They're for viewing spend only; no budget resets on them. Without one they run from October 1.
+func (c *Client) ListFiscalYears(ctx context.Context, organization string) (*[]FiscalYear, error) {
+
+	path := "/api/organizations/{organization}/fiscal-years"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result []FiscalYear
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // ListOrganizationGitlabServers - List GitLab servers
@@ -11568,7 +11765,7 @@ func (c *Client) GetOrganizationPolicies(ctx context.Context, organization strin
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Sets allocation-start-date policy for the organization as MM-DD. Allocation usage resets on the most recent occurrence of this date each year. When unset, allocations count spend over all time.
+// Sets allocation-start-date policy for the organization as MM-DD. It names the fiscal years reports show. Allocations created before allocation periods existed also reset their usage on its most recent occurrence each year; newer allocations budget by period instead.
 func (c *Client) SetOrganizationAllocationStartDatePolicy(ctx context.Context, organization string, body string) (*map[string]StringPolicyOutput, error) {
 
 	path := "/api/organizations/{organization}/policies/allocation-start-date"
@@ -11905,15 +12102,68 @@ func (c *Client) UpdateOrganizationRecommendedResources(ctx context.Context, org
 	return &result, nil
 }
 
-// GetAllocationUsageEventsSummaryParams contains the parameters for the GetAllocationUsageEventsSummary operation.
+// GetAllocationsUsageByFiscalYearParams contains the parameters for the GetAllocationsUsageByFiscalYear operation.
 // Required parameters are value fields; optional parameters are pointers.
-type GetAllocationUsageEventsSummaryParams struct {
-	// Start date (YYYY-MM-DD)
+type GetAllocationsUsageByFiscalYearParams struct {
+	// A day in the first fiscal year to report (YYYY-MM-DD)
+	From string `json:"from"`
+	// A day in the last fiscal year to report (YYYY-MM-DD)
+	To string `json:"to"`
+}
+
+// GetAllocationsUsageByFiscalYear - Get allocation spend by fiscal year
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns what each allocation the caller may report on spent in each fiscal year from one date to another. A year counts the windows the allocation budgets in it, which can run past the year's end, and includes the allocations below it in the same unit and live realtime estimates. Allocations with no spend in a year are left out.
+func (c *Client) GetAllocationsUsageByFiscalYear(ctx context.Context, organization string, params GetAllocationsUsageByFiscalYearParams) (*[]FiscalYearUsage, error) {
+
+	path := "/api/organizations/{organization}/reports/allocations/usage/by-fiscal-year"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "from", "form", false, params.From)
+
+	addQueryParam(queryValues, "to", "form", false, params.To)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []FiscalYearUsage
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAllocationsUsageByPeriod - Get allocation spend by period
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns what each allocation the caller may report on spent in each of its own allocation periods, or in the current month of one that repeats monthly. It includes the allocations below it in the same unit and live realtime estimates. Periods that haven't started, or have no spend, are left out.
+func (c *Client) GetAllocationsUsageByPeriod(ctx context.Context, organization string) (*[]PeriodUsage, error) {
+
+	path := "/api/organizations/{organization}/reports/allocations/usage/by-period"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result []PeriodUsage
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAllocationUsageByDayParams contains the parameters for the GetAllocationUsageByDay operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAllocationUsageByDayParams struct {
+	// First UTC day to include (YYYY-MM-DD).
 	StartDate string `json:"startDate"`
-	// End date (YYYY-MM-DD). Defaults to current date when omitted.
+	// Last UTC day to include (YYYY-MM-DD). Defaults to today.
 	EndDate *string `json:"endDate,omitempty"`
-	// Field to group costs by (type, subtype, user, sku)
-	GroupBy *string `json:"groupBy,omitempty"`
+	// Fields to break each day down by.
+	GroupBy *[]string `json:"groupBy,omitempty"`
+	// Include the allocations nested below this one, in the same unit.
+	IncludeDescendants *bool `json:"includeDescendants,omitempty"`
 	// Filter: comma-separated types
 	Type *string `json:"type,omitempty"`
 	// Filter: comma-separated subtypes
@@ -11922,18 +12172,22 @@ type GetAllocationUsageEventsSummaryParams struct {
 	User *string `json:"user,omitempty"`
 	// Filter: comma-separated SKU codes
 	Sku *string `json:"sku,omitempty"`
+	// Filter: comma-separated names of the resources cloud costs were deployed for
+	Resource *string `json:"resource,omitempty"`
+	// Filter: comma-separated kinds of resource cloud costs were deployed for, such as cluster
+	ResourceType *string `json:"resourceType,omitempty"`
 	// Filter: metadata contains this string (case-insensitive search in JSON). Only rated usage carries metadata, so cloud costs and realtime estimates are excluded.
 	Metadata *string `json:"metadata,omitempty"`
 	// Include live realtime cost estimates alongside invoiced cloud costs.
 	Realtime *bool `json:"realtime,omitempty"`
 }
 
-// GetAllocationUsageEventsSummary - Get summarized costs for an allocation
+// GetAllocationUsageByDay - Get an allocation's usage by day
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns rated usage and cloud costs for an allocation grouped by day and by type, subtype, user, or SKU for charting and reporting. Cloud rows without a user tag are attributed to the organization's default billing username, and live realtime estimates are included on request.
-func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organization string, allocation string, params GetAllocationUsageEventsSummaryParams) (*[]map[string]any, error) {
+// Sums an allocation's rated usage and cloud costs per UTC day, broken down by any of type, subtype, user, and SKU. Cloud costs without a user are attributed to the organization's default billing username. Live realtime estimates are included on request, as their own entries.
+func (c *Client) GetAllocationUsageByDay(ctx context.Context, organization string, allocation string, params GetAllocationUsageByDayParams) (*AllocationUsageByDay, error) {
 
 	path := "/api/organizations/{organization}/reports/allocations/{allocation}/usage/by-day"
 	path = pathReplace(path, "organization", "simple", false, organization)
@@ -11943,7 +12197,9 @@ func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organizati
 
 	addQueryParam(queryValues, "endDate", "form", false, params.EndDate)
 
-	addQueryParam(queryValues, "groupBy", "form", false, params.GroupBy)
+	addQueryParam(queryValues, "groupBy", "form", true, params.GroupBy)
+
+	addQueryParam(queryValues, "includeDescendants", "form", false, params.IncludeDescendants)
 
 	addQueryParam(queryValues, "type", "form", false, params.Type)
 
@@ -11953,6 +12209,10 @@ func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organizati
 
 	addQueryParam(queryValues, "sku", "form", false, params.Sku)
 
+	addQueryParam(queryValues, "resource", "form", false, params.Resource)
+
+	addQueryParam(queryValues, "resourceType", "form", false, params.ResourceType)
+
 	addQueryParam(queryValues, "metadata", "form", false, params.Metadata)
 
 	addQueryParam(queryValues, "realtime", "form", false, params.Realtime)
@@ -11961,7 +12221,7 @@ func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organizati
 		path += "?" + encodeQuery(queryValues)
 	}
 
-	var result []map[string]any
+	var result AllocationUsageByDay
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -11973,6 +12233,8 @@ func (c *Client) GetAllocationUsageEventsSummary(ctx context.Context, organizati
 type GetAllocationUsageEventsFilterOptionsParams struct {
 	// Include values that appear only in live realtime cost estimates.
 	Realtime *bool `json:"realtime,omitempty"`
+	// Include the allocations nested below this one, in the same unit.
+	IncludeDescendants *bool `json:"includeDescendants,omitempty"`
 }
 
 // GetAllocationUsageEventsFilterOptions - Get filter options for allocation costs
@@ -11992,11 +12254,208 @@ func (c *Client) GetAllocationUsageEventsFilterOptions(ctx context.Context, orga
 	queryValues := url.Values{}
 	addQueryParam(queryValues, "realtime", "form", false, params.Realtime)
 
+	addQueryParam(queryValues, "includeDescendants", "form", false, params.IncludeDescendants)
+
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
 	}
 
 	var result RatedCostsFilterOptions
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListSavedCostReports - List saved cost reports
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the saved cost reports visible to the caller: created by them or shared with them, or every report in the organization for an organization admin.
+func (c *Client) ListSavedCostReports(ctx context.Context, organization string) (*[]SavedReportDto, error) {
+
+	path := "/api/organizations/{organization}/reports/saved"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result []SavedReportDto
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreateSavedCostReport - Create a saved cost report
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Creates a saved cost report for an allocation the caller can access.
+func (c *Client) CreateSavedCostReport(ctx context.Context, organization string, body ReportBody) (*SavedReportDto, error) {
+
+	path := "/api/organizations/{organization}/reports/saved"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result SavedReportDto
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetSavedCostReport - Get a saved cost report
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a single saved cost report the caller can view.
+func (c *Client) GetSavedCostReport(ctx context.Context, organization string, id string) (*SavedReportDto, error) {
+
+	path := "/api/organizations/{organization}/reports/saved/{id}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result SavedReportDto
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteSavedCostReport - Delete a saved cost report
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a saved cost report and its delivery history. Only its creator or an organization admin may delete it.
+func (c *Client) DeleteSavedCostReport(ctx context.Context, organization string, id string) error {
+
+	path := "/api/organizations/{organization}/reports/saved/{id}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// PatchSavedCostReport - Update a saved cost report
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Updates a saved cost report. Only its creator or an organization admin may update it.
+func (c *Client) PatchSavedCostReport(ctx context.Context, organization string, id string, body ReportBody) (*SavedReportDto, error) {
+
+	path := "/api/organizations/{organization}/reports/saved/{id}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result SavedReportDto
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListSavedCostReportRuns - List saved cost report runs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the delivery history for a saved cost report, newest first.
+func (c *Client) ListSavedCostReportRuns(ctx context.Context, organization string, id string) (*[]SavedCostReportRun, error) {
+
+	path := "/api/organizations/{organization}/reports/saved/{id}/runs"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result []SavedCostReportRun
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SendSavedCostReport - Send a saved cost report now
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Delivers the report to its recipients immediately and records a run.
+func (c *Client) SendSavedCostReport(ctx context.Context, organization string, id string) error {
+
+	path := "/api/organizations/{organization}/reports/saved/{id}/send"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// SetSavedCostReportSubscription - Update saved cost report subscription
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Mutes or unmutes delivery of a shared report for the caller.
+func (c *Client) SetSavedCostReportSubscription(ctx context.Context, organization string, id string, body SubscriptionInputBody) error {
+
+	path := "/api/organizations/{organization}/reports/saved/{id}/subscription"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UnsubscribeSavedCostReport - Unsubscribe from a saved cost report
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Mutes delivery of the report for the signed-in caller and redirects to the reports page. Report emails link here.
+func (c *Client) UnsubscribeSavedCostReport(ctx context.Context, organization string, id string) error {
+
+	path := "/api/organizations/{organization}/reports/saved/{id}/unsubscribe"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// GetSavedCostReportUsageParams contains the parameters for the GetSavedCostReportUsage operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetSavedCostReportUsageParams struct {
+	// Start date (YYYY-MM-DD). Defaults to the start of the report's time range.
+	StartDate *string `json:"startDate,omitempty"`
+	// End date (YYYY-MM-DD). Defaults to the end of the report's time range.
+	EndDate *string `json:"endDate,omitempty"`
+}
+
+// GetSavedCostReportUsage - Get a saved cost report's costs by day
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the report's costs by day, grouped as the report is, with the report creator's access to its allocation. Defaults to the report's own time range.
+func (c *Client) GetSavedCostReportUsage(ctx context.Context, organization string, id string, opts ...GetSavedCostReportUsageParams) (*[]GetSavedCostReportUsageResponseItem, error) {
+
+	path := "/api/organizations/{organization}/reports/saved/{id}/usage"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "id", "simple", false, id)
+	var params GetSavedCostReportUsageParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "startDate", "form", false, params.StartDate)
+
+	addQueryParam(queryValues, "endDate", "form", false, params.EndDate)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []GetSavedCostReportUsageResponseItem
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -12222,7 +12681,7 @@ type ScimGroupsListParams struct {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // List SCIM groups for an organization.
-func (c *Client) ScimGroupsList(ctx context.Context, organization string, opts ...ScimGroupsListParams) (*ListResponse, error) {
+func (c *Client) ScimGroupsList(ctx context.Context, organization string, opts ...ScimGroupsListParams) (*ListResponseScimGroup, error) {
 
 	path := "/api/organizations/{organization}/scim/v2/Groups"
 	path = pathReplace(path, "organization", "simple", false, organization)
@@ -12243,7 +12702,7 @@ func (c *Client) ScimGroupsList(ctx context.Context, organization string, opts .
 		path += "?" + encodeQuery(queryValues)
 	}
 
-	var result ListResponse
+	var result ListResponseScimGroup
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -12357,12 +12816,12 @@ func (c *Client) ScimGroupPatch(ctx context.Context, organization string, id str
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // SCIM 2.0 ResourceTypes discovery.
-func (c *Client) ScimResourceTypes(ctx context.Context, organization string) (*map[string]any, error) {
+func (c *Client) ScimResourceTypes(ctx context.Context, organization string) (*ListResponseScimResourceType, error) {
 
 	path := "/api/organizations/{organization}/scim/v2/ResourceTypes"
 	path = pathReplace(path, "organization", "simple", false, organization)
 
-	var result map[string]any
+	var result ListResponseScimResourceType
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -12374,12 +12833,12 @@ func (c *Client) ScimResourceTypes(ctx context.Context, organization string) (*m
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // SCIM 2.0 Schemas discovery (core User/Group + CoreWeave extension).
-func (c *Client) ScimSchemas(ctx context.Context, organization string) (*map[string]any, error) {
+func (c *Client) ScimSchemas(ctx context.Context, organization string) (*ListResponseScimSchemaDefinition, error) {
 
 	path := "/api/organizations/{organization}/scim/v2/Schemas"
 	path = pathReplace(path, "organization", "simple", false, organization)
 
-	var result map[string]any
+	var result ListResponseScimSchemaDefinition
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -12391,12 +12850,12 @@ func (c *Client) ScimSchemas(ctx context.Context, organization string) (*map[str
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // SCIM 2.0 ServiceProviderConfig (capabilities discovery).
-func (c *Client) ScimServiceProviderConfig(ctx context.Context, organization string) (*map[string]any, error) {
+func (c *Client) ScimServiceProviderConfig(ctx context.Context, organization string) (*ScimServiceProviderConfig, error) {
 
 	path := "/api/organizations/{organization}/scim/v2/ServiceProviderConfig"
 	path = pathReplace(path, "organization", "simple", false, organization)
 
-	var result map[string]any
+	var result ScimServiceProviderConfig
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -12423,7 +12882,7 @@ type ScimUsersListParams struct {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // List SCIM users for an organization.
-func (c *Client) ScimUsersList(ctx context.Context, organization string, opts ...ScimUsersListParams) (*ListResponse, error) {
+func (c *Client) ScimUsersList(ctx context.Context, organization string, opts ...ScimUsersListParams) (*ListResponseScimUser, error) {
 
 	path := "/api/organizations/{organization}/scim/v2/Users"
 	path = pathReplace(path, "organization", "simple", false, organization)
@@ -12446,7 +12905,7 @@ func (c *Client) ScimUsersList(ctx context.Context, organization string, opts ..
 		path += "?" + encodeQuery(queryValues)
 	}
 
-	var result ListResponse
+	var result ListResponseScimUser
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -15948,7 +16407,7 @@ func (c *Client) SetUserLanguage(ctx context.Context, organization string, user 
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Lists the active login sessions for the specified user. IP addresses are only included when listing your own sessions. Another user's list also includes each device they are signed in to the pw CLI on, marked with `client: pw-cli`; your own devices are listed under connected applications.
+// Lists the active login sessions for the specified user. IP addresses are only included when listing your own sessions. Another user's list also includes each device they are signed in to the pw CLI or the ACTIVATE mobile app on, marked with `client: pw-cli` or `client: pw-mobile`, and each workload acting for them, marked with `client: pw-agent`; your own devices and workloads are listed under connected applications.
 func (c *Client) ListUserLoginSessions(ctx context.Context, organization string, user string) (*[]LoginSessionResponse, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/login-sessions"
@@ -15966,7 +16425,7 @@ func (c *Client) ListUserLoginSessions(ctx context.Context, organization string,
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Revokes all login sessions for the specified user, except the session making the request. Only callable via browser session authentication.
+// Revokes all login sessions for the specified user, except the session making the request, and revokes every workload acting for the user along with any enrollment token none has used yet. Only callable via browser session authentication.
 func (c *Client) RevokeUserLoginSessions(ctx context.Context, organization string, user string, body *RevokeLoginSessionOption) error {
 
 	path := "/api/organizations/{organization}/users/{user}/login-sessions"
@@ -15983,7 +16442,7 @@ func (c *Client) RevokeUserLoginSessions(ctx context.Context, organization strin
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Revokes a single login session for the specified user. A pw CLI device in another user's list is signed out along with every token issued to it. Only callable via browser session authentication.
+// Revokes a single login session for the specified user. A pw CLI or mobile app device in another user's list is signed out along with every token issued to it, and a workload is revoked with its registration, its tokens, and everything it started that carries its delegation. Only callable via browser session authentication.
 func (c *Client) RevokeUserLoginSession(ctx context.Context, organization string, user string, id string) error {
 
 	path := "/api/organizations/{organization}/users/{user}/login-sessions/{id}"
@@ -17122,6 +17581,24 @@ func (c *Client) GetStorageDeploymentProvisionStatus(ctx context.Context, organi
 	return &result, nil
 }
 
+// DestroyStorage - Destroy storage
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a storage's cloud resources and keeps its configuration, so it can be provisioned again. A disk listed in a running cluster cannot be destroyed.
+func (c *Client) DestroyStorage(ctx context.Context, organization string, user string, name string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/destroy"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetStoragePermissions - Get storage permissions
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -17154,6 +17631,24 @@ func (c *Client) UpdateStoragePermissions(ctx context.Context, organization stri
 	path = pathReplace(path, "name", "simple", false, name)
 
 	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// ProvisionStorage - Provision storage
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Makes a storage's cloud resources from its configuration, in a new deployment. Buckets made with a cloud account directly are provisioned when they are created.
+func (c *Client) ProvisionStorage(ctx context.Context, organization string, user string, name string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/provision"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
@@ -20994,6 +21489,84 @@ func (c *Client) GetWorkflowRunFile(ctx context.Context, slug string, params Get
 	}
 
 	var result string
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetWorkflowRunStepLogParams contains the parameters for the GetWorkflowRunStepLog operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetWorkflowRunStepLogParams struct {
+	// Byte offset to read from, normally the nextOffset of the previous read. -1, the default, reads the end of the log.
+	Offset *int64 `json:"offset,omitempty"`
+	// Maximum number of bytes to return
+	Limit *int64 `json:"limit,omitempty"`
+}
+
+// GetWorkflowRunStepLog - Get Workflow Run Step Log
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns a step's output. Reads the end of the log by default, or from a byte offset to read only what has since been appended. The log rotates at 10 MiB, so this reads the output since the latest rotation.
+func (c *Client) GetWorkflowRunStepLog(ctx context.Context, slug string, job string, step int64, opts ...GetWorkflowRunStepLogParams) (*Slice, error) {
+
+	path := "/api/workflow-runs/{slug}/jobs/{job}/steps/{step}/log"
+	path = pathReplace(path, "slug", "simple", false, slug)
+	path = pathReplace(path, "job", "simple", false, job)
+	path = pathReplace(path, "step", "simple", false, step)
+	var params GetWorkflowRunStepLogParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "offset", "form", false, params.Offset)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result Slice
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetWorkflowRunLogParams contains the parameters for the GetWorkflowRunLog operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetWorkflowRunLogParams struct {
+	// Byte offset to read from, normally the nextOffset of the previous read. -1, the default, reads the end of the log.
+	Offset *int64 `json:"offset,omitempty"`
+	// Maximum number of bytes to return
+	Limit *int64 `json:"limit,omitempty"`
+}
+
+// GetWorkflowRunLog - Get Workflow Run Log
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the run's own log, which records the run starting its jobs and how each ended. Reads the end of the log by default, or from a byte offset to read only what has since been appended.
+func (c *Client) GetWorkflowRunLog(ctx context.Context, slug string, opts ...GetWorkflowRunLogParams) (*Slice, error) {
+
+	path := "/api/workflow-runs/{slug}/log"
+	path = pathReplace(path, "slug", "simple", false, slug)
+	var params GetWorkflowRunLogParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "offset", "form", false, params.Offset)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result Slice
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}

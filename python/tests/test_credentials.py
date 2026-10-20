@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import functools
 import json
 import os
@@ -8,17 +9,22 @@ import stat
 import sys
 import time
 from datetime import datetime, timedelta, timezone
+from importlib import metadata
 from pathlib import Path
 
 import httpx
 import pytest
 
 from parallelworks_client import (
+    CLUSTER_SESSION_TOKEN_PREFIX,
+    INSTANCE_TOKEN_PREFIX,
+    USER_AGENT,
     CLIAuth,
     Client,
     CredentialError,
     NoPlatformHostError,
     SignInExpiredError,
+    extract_platform_host,
     is_token,
     load_credential_config,
     resolve_command,
@@ -128,6 +134,27 @@ def test_caches_the_token_until_it_nears_expiry(
 
     assert authorizations(seen, client, 3) == ["Bearer pwoa_new"] * 3
     assert cli.calls() == ["auth token --print -o json --context work key=unset"]
+
+
+def test_renews_an_enrolled_workload_through_the_cli(cli: FakeCLI, seen: list[httpx.Request]):
+    # Before its first exchange a workload context holds no token yet.
+    doc = {
+        "currentIdentity": "agent",
+        "identities": {
+            "agent": {
+                "server": "work.example.com",
+                "name": "agent",
+                "organization": "org",
+                "workload": {"clientId": "pwc_x", "subject": "user:alice"},
+            },
+        },
+    }
+    cli.credentials.write_text(json.dumps(doc))
+    cli.print_token("pwoa_workload", 3600)
+    client = Client.from_credential_config()
+
+    assert authorizations(seen, client) == ["Bearer pwoa_workload"]
+    assert cli.calls() == ["auth token --print -o json --context agent key=unset"]
 
 
 def test_renews_the_token_before_it_expires(cli: FakeCLI, seen: list[httpx.Request], monkeypatch: pytest.MonkeyPatch):
@@ -309,3 +336,29 @@ def test_access_token_names_no_host(cli: FakeCLI, monkeypatch: pytest.MonkeyPatc
     assert client._config.auth_header == "Bearer pwoa_abc"
     monkeypatch.setenv("PW_PLATFORM_HOST", "env.example.com")
     assert Client.from_credential("pwoa_abc")._config.base_url == "https://env.example.com"
+
+
+def test_workflow_run_token_names_its_host_and_is_a_bearer_token(cli: FakeCLI, seen: list[httpx.Request]):
+    token = "pwwr_" + base64.b64encode(b"run.example.com").decode() + "." + base64.b64encode(b"secret").decode()
+    assert is_token(token)
+
+    client = Client.from_credential(token)
+    assert client._config.base_url == "https://run.example.com"
+    assert authorizations(seen, client) == [f"Bearer {token}"]
+
+
+@pytest.mark.parametrize("prefix", [INSTANCE_TOKEN_PREFIX, CLUSTER_SESSION_TOKEN_PREFIX])
+def test_agent_tokens_name_their_host_and_are_bearer_tokens(prefix: str, cli: FakeCLI, seen: list[httpx.Request]):
+    token = prefix + base64.b64encode(b"agent.example.com").decode() + "." + base64.b64encode(b"secret").decode()
+    assert is_token(token)
+    assert extract_platform_host(token) == "agent.example.com"
+
+    client = Client.from_credential(token)
+    assert client._config.base_url == "https://agent.example.com"
+    assert authorizations(seen, client) == [f"Bearer {token}"]
+
+
+def test_user_agent_carries_the_installed_version(seen: list[httpx.Request]):
+    assert USER_AGENT == f"parallelworks-python-sdk/{metadata.version('parallelworks-client')}"
+    authorizations(seen, Client.with_api_key("https://example.com", "pwt_aG9zdA==.key"))
+    assert seen[0].headers["User-Agent"] == USER_AGENT

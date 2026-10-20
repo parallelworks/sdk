@@ -199,6 +199,11 @@ type AccessibleAiProviderResponse struct {
 	Status string `json:"status"`
 }
 
+type ActClaim struct {
+	// The party acting for the subject
+	Sub string `json:"sub"`
+}
+
 type ActiveUserReport struct {
 	// Whether the organization receives the monthly active-user report.
 	Enabled bool `json:"enabled"`
@@ -331,10 +336,11 @@ type AddAzureManagedLustreVersionInputBody struct {
 type AddAzureNetappFilesVersionInputBody struct {
 	Region *string `json:"region,omitempty"`
 	// Replace an existing version's variables instead of adding a new version.
-	Replace *bool          `json:"replace,omitempty"`
-	Service *string        `json:"service,omitempty"`
-	Size    *int64         `json:"size,omitempty"`
-	Tags    map[string]any `json:"tags,omitempty"`
+	Replace *bool   `json:"replace,omitempty"`
+	Service *string `json:"service,omitempty"`
+	Size    *int64  `json:"size,omitempty"`
+	// Azure resource tags applied to the provisioned NetApp Files volume.
+	Tags map[string]string `json:"tags,omitempty"`
 	// Version label to add (must start with v).
 	Version string `json:"version"`
 }
@@ -655,6 +661,34 @@ type AgentDirectionDelivered struct {
 	Delivered bool `json:"delivered"`
 }
 
+type AgentEnrollmentBody struct {
+	// Name of your PW CLI cluster the agent connects to
+	Cluster string `json:"cluster"`
+	// Host name of the node the agent runs on, as the node reported it
+	Host string `json:"host"`
+}
+
+type AgentImageBody struct {
+	// The image, base64. Up to 6MiB.
+	Data string `json:"data"`
+	Mime string `json:"mime"`
+	// The N of the [Image #N] placeholder the message names the image by. It also names the saved file, so reusing one replaces that image.
+	Seq int64 `json:"seq"`
+}
+
+type AgentImageRef struct {
+	Mime string `json:"mime"`
+	// The path the image upload answered with.
+	Path string `json:"path"`
+	// How the text names the image, such as [Image #1].
+	Placeholder string `json:"placeholder"`
+}
+
+type AgentImageSaved struct {
+	// Where the machine saved the image. Send it in the message's images.
+	Path string `json:"path"`
+}
+
 type AgentMachine struct {
 	AgentVersion *string `json:"agentVersion,omitempty"`
 	// Machine id the pw code daemon reported, when it answered. A local computer with the same id as a resource is the same host and is listed only as the resource.
@@ -770,6 +804,7 @@ type AgentSessionDetail struct {
 	Preview            string            `json:"preview"`
 	RemoteControl      *bool             `json:"remoteControl,omitempty"`
 	Status             string            `json:"status"`
+	TurnID             *string           `json:"turnId,omitempty"`
 	TurnStartedAt      *time.Time        `json:"turnStartedAt,omitempty"`
 	UpdatedAt          time.Time         `json:"updatedAt"`
 	Workspace          string            `json:"workspace"`
@@ -805,7 +840,7 @@ type AgentShellBody struct {
 type AgentShellOutput struct {
 	// What the command printed, stdout and stderr together.
 	Output string `json:"output"`
-	// Why the owner's hook asked that the model not react to the run. Send no follow-up message when it is set.
+	// Why the owner's hook asked that the model not react to the run; the session starts no reply when it is set.
 	Stop *string `json:"stop,omitempty"`
 }
 
@@ -816,32 +851,34 @@ type AgentSlashCommand struct {
 }
 
 type AgentStreamEvent struct {
-	AgentType    *string          `json:"agentType,omitempty"`
-	Approval     *ApprovalRequest `json:"approval,omitempty"`
-	ApprovalID   *string          `json:"approvalId,omitempty"`
-	Args         *string          `json:"args,omitempty"`
-	Background   *bool            `json:"background,omitempty"`
-	Client       *string          `json:"client,omitempty"`
-	Color        *string          `json:"color,omitempty"`
-	Content      *string          `json:"content,omitempty"`
-	Decision     *ToolDecision    `json:"decision,omitempty"`
-	GoalProgress *GoalProgress    `json:"goalProgress,omitempty"`
-	ID           *string          `json:"id,omitempty"`
-	Interim      *bool            `json:"interim,omitempty"`
-	Interrupted  *bool            `json:"interrupted,omitempty"`
-	IsError      *bool            `json:"isError,omitempty"`
-	Iters        *int64           `json:"iters,omitempty"`
-	Mcp          *McpStatus       `json:"mcp,omitempty"`
-	Name         *string          `json:"name,omitempty"`
-	NewID        *string          `json:"newId,omitempty"`
-	NoteID       *string          `json:"noteId,omitempty"`
-	Result       *string          `json:"result,omitempty"`
-	Seq          int64            `json:"seq"`
-	StartLine    *int64           `json:"startLine,omitempty"`
-	State        *SessionState    `json:"state,omitempty"`
-	Turn         *TurnResult      `json:"turn,omitempty"`
-	TurnID       *string          `json:"turnId,omitempty"`
-	Type         string           `json:"type"`
+	AgentType     *string          `json:"agentType,omitempty"`
+	Approval      *ApprovalRequest `json:"approval,omitempty"`
+	ApprovalID    *string          `json:"approvalId,omitempty"`
+	Args          *string          `json:"args,omitempty"`
+	Background    *bool            `json:"background,omitempty"`
+	CallID        *string          `json:"callId,omitempty"`
+	Client        *string          `json:"client,omitempty"`
+	Color         *string          `json:"color,omitempty"`
+	Content       *string          `json:"content,omitempty"`
+	Decision      *ToolDecision    `json:"decision,omitempty"`
+	GoalProgress  *GoalProgress    `json:"goalProgress,omitempty"`
+	ID            *string          `json:"id,omitempty"`
+	Interim       *bool            `json:"interim,omitempty"`
+	Interrupted   *bool            `json:"interrupted,omitempty"`
+	IsError       *bool            `json:"isError,omitempty"`
+	Iters         *int64           `json:"iters,omitempty"`
+	Mcp           *McpStatus       `json:"mcp,omitempty"`
+	Name          *string          `json:"name,omitempty"`
+	NewID         *string          `json:"newId,omitempty"`
+	NoteID        *string          `json:"noteId,omitempty"`
+	Result        *string          `json:"result,omitempty"`
+	Seq           int64            `json:"seq"`
+	ShellProgress *ShellProgress   `json:"shellProgress,omitempty"`
+	StartLine     *int64           `json:"startLine,omitempty"`
+	State         *SessionState    `json:"state,omitempty"`
+	Turn          *TurnResult      `json:"turn,omitempty"`
+	TurnID        *string          `json:"turnId,omitempty"`
+	Type          string           `json:"type"`
 }
 
 type AiConnectionInventory struct {
@@ -927,7 +964,7 @@ type AiProviderResponse struct {
 	SupportsUsage *bool `json:"supportsUsage,omitempty"`
 	// How the integration's TLS certificate is verified
 	TLSVerification *string `json:"tlsVerification,omitempty"`
-	// How tool calls reach the provider; only present for providers on emulated catalog entries, which can change it
+	// How tool calls reach the provider; only present for providers whose catalog entry lets them choose it
 	ToolCallingMode *string `json:"toolCallingMode,omitempty"`
 	// The username of the user that owns this resource
 	User string `json:"user"`
@@ -983,6 +1020,8 @@ type Alert struct {
 }
 
 type Allocation struct {
+	// Sum of the amounts of all the allocation's periods, a repeating period counted once per window. Absent without periods.
+	AllPeriodsTotal *float64 `json:"allPeriodsTotal,omitempty"`
 	// Resource types a managed allocation may fund. Empty means unrestricted.
 	Allowed []string `json:"allowed,omitempty"`
 	// Whether the current user can edit the allocation amount
@@ -991,12 +1030,22 @@ type Allocation struct {
 	CurrentOrgThreshold *int64 `json:"currentOrgThreshold,omitempty"`
 	// Estimated amount used
 	EstimatedUsed *float64 `json:"estimatedUsed,omitempty"`
+	// The allocation's period amounts summed by the fiscal year each period window starts in, earliest first. Absent without periods.
+	FiscalYears []AllocationFiscalYear `json:"fiscalYears,omitempty"`
+	// Whether any allocation sits under this one. Only set when reading a single allocation.
+	HasChildren *bool `json:"hasChildren,omitempty"`
 	// Whether this allocation has associated cloud usage records
 	HasCloudUsage *bool `json:"hasCloudUsage,omitempty"`
+	// Allocation ID, which its events target
+	ID *string `json:"id,omitempty"`
 	// Allocation name
 	Name string `json:"name"`
+	// Not chargeable: the allocation only holds budget for the allocations under it, and nothing can bill it directly.
+	NonChargeable *bool `json:"nonChargeable,omitempty"`
 	// Parent allocation name
 	Parent *string `json:"parent,omitempty"`
+	// Budget per period. Periods can't overlap, and the total follows the current period's amount.
+	Periods []AllocationPeriodAmount `json:"periods,omitempty"`
 	// Whether the allocation's unit is rated in USD (false = a raw consumption unit)
 	RatedInUsd *bool `json:"ratedInUsd,omitempty"`
 	// Number of resource groups currently billing this allocation
@@ -1008,7 +1057,7 @@ type Allocation struct {
 	Type *string `json:"type,omitempty"`
 	// Unit of measurement
 	Unit string `json:"unit"`
-	// Why new resources cannot bill this allocation: no budget set, or a freeze/shutdown threshold crossed
+	// Why new resources cannot bill this allocation: no budget set, a freeze/shutdown threshold crossed, a not chargeable allocation, no period covers today, or its budget or an ancestor's is used up
 	UnusableReason *string `json:"unusableReason,omitempty"`
 	// Whether new resources can bill this allocation right now
 	Usable *bool `json:"usable,omitempty"`
@@ -1016,11 +1065,77 @@ type Allocation struct {
 	Used *float64 `json:"used,omitempty"`
 }
 
+type AllocationDailyUsage struct {
+	// Name of the allocation the usage was charged to, when grouped by allocation.
+	Allocation *string `json:"allocation,omitempty"`
+	// Summed amount in unit, rounded to two decimal places.
+	Amount float64 `json:"amount"`
+	// End of the UTC day the amount covers, exclusive.
+	End time.Time `json:"end"`
+	// Whether the amount is a live realtime estimate rather than invoiced cloud cost or rated usage. Always false unless realtime is requested.
+	Estimate bool `json:"estimate"`
+	// Name of the cluster, storage or other resource a cloud cost was deployed for, when grouped by resource. Empty for rated usage and cloud costs with no deployment.
+	Resource *string `json:"resource,omitempty"`
+	// Kind of resource a cloud cost was deployed for, when grouped by resourceType. Empty for rated usage and cloud costs with no deployment.
+	ResourceType *string `json:"resourceType,omitempty"`
+	// SKU code, when grouped by SKU. Empty when it has no SKU.
+	Sku *string `json:"sku,omitempty"`
+	// Start of the UTC day the amount covers.
+	Start time.Time `json:"start"`
+	// Cost subtype, when grouped by subtype.
+	Subtype *string `json:"subtype,omitempty"`
+	// Cost type, when grouped by type.
+	Type *string `json:"type,omitempty"`
+	// Username the usage is attributed to when grouped by user, or the user's ID when it carries no username. Empty when it has no user.
+	User *string `json:"user,omitempty"`
+}
+
+type AllocationFiscalYear struct {
+	// Sum of the allocation's period amounts whose windows start in this fiscal year
+	Amount float64 `json:"amount"`
+	// End of the fiscal year (exclusive)
+	End time.Time `json:"end"`
+	// Fiscal year label, such as FY27
+	Name string `json:"name"`
+	// Names of the periods counted in this fiscal year
+	Periods []string `json:"periods"`
+	// Start of the fiscal year
+	Start time.Time `json:"start"`
+}
+
 type AllocationHistoryEntry struct {
 	// Allocation name
 	Allocation string `json:"allocation"`
 	// When the resource group stopped using this allocation
 	End time.Time `json:"end"`
+}
+
+type AllocationPeriod struct {
+	// Number of allocations that budget against the period
+	Allocations *int64 `json:"allocations,omitempty"`
+	// End of the period (exclusive)
+	End time.Time `json:"end"`
+	// Period name
+	Name string `json:"name"`
+	// monthly splits the period into monthly windows that each get the full amount, so usage resets every month. Omit for one window.
+	Repeat *string `json:"repeat,omitempty"`
+	// Start of the period
+	Start time.Time `json:"start"`
+}
+
+type AllocationPeriodAmount struct {
+	// Whether the period covers now
+	Active *bool `json:"active,omitempty"`
+	// Budget for the period
+	Amount float64 `json:"amount"`
+	// End of the period (exclusive)
+	End *time.Time `json:"end,omitempty"`
+	// Period name
+	Period string `json:"period"`
+	// How the period repeats; each window gets the full amount. Absent for a period that doesn't repeat.
+	Repeat *string `json:"repeat,omitempty"`
+	// Start of the period
+	Start *time.Time `json:"start,omitempty"`
 }
 
 type AllocationResourceGroup struct {
@@ -1042,6 +1157,15 @@ type AllocationSummary struct {
 	Name  string  `json:"name"`
 	Total float64 `json:"total"`
 	Used  float64 `json:"used"`
+}
+
+type AllocationUsageByDay struct {
+	// Fields each entry is broken down by; each is set on every entry.
+	GroupBy []string `json:"groupBy"`
+	// Unit of every amount: USD, or the name of the allocation's consumption unit.
+	Unit string `json:"unit"`
+	// One entry per day and combination of groupBy values that has usage, ordered by date, with live estimates as entries of their own. Days without usage are left out.
+	Usage []AllocationDailyUsage `json:"usage"`
 }
 
 type Allocations struct {
@@ -1077,6 +1201,18 @@ type AllowedInstanceTypesOutputBody struct {
 	Source string `json:"source"`
 }
 
+type Annotation struct {
+	Col       *int64  `json:"col,omitempty"`
+	EndColumn *int64  `json:"endColumn,omitempty"`
+	EndLine   *int64  `json:"endLine,omitempty"`
+	File      *string `json:"file,omitempty"`
+	ID        *string `json:"id,omitempty"`
+	Line      *int64  `json:"line,omitempty"`
+	Message   string  `json:"message"`
+	Title     *string `json:"title,omitempty"`
+	Type      string  `json:"type"`
+}
+
 type App struct {
 	IconURL string `json:"iconUrl"`
 	// Stable identifier of the app
@@ -1089,7 +1225,7 @@ type App struct {
 type AppBody struct {
 	// Groups whose members may use the application. Empty means everyone in the organization.
 	AllowedGroups []string `json:"allowedGroups,omitempty"`
-	// Whether the user sees a consent screen. Defaults to none. Always none for a service application, which shows no consent screen.
+	// Whether the user sees a consent screen. Omitted at registration, it defaults to required for a spa or native application and none otherwise. Always none for a service application, which shows no consent screen.
 	Consent *string `json:"consent,omitempty"`
 	// What the application is for.
 	Description *string `json:"description,omitempty"`
@@ -1169,7 +1305,7 @@ type AppResponse struct {
 type AppUpdateBody struct {
 	// Groups whose members may use the application. Empty means everyone in the organization.
 	AllowedGroups []string `json:"allowedGroups,omitempty"`
-	// Whether the user sees a consent screen. Defaults to none. Always none for a service application, which shows no consent screen.
+	// Whether the user sees a consent screen. Omitted at registration, it defaults to required for a spa or native application and none otherwise. Always none for a service application, which shows no consent screen.
 	Consent *string `json:"consent,omitempty"`
 	// What the application is for.
 	Description *string `json:"description,omitempty"`
@@ -1208,6 +1344,7 @@ type ApprovalAnswer struct {
 
 type ApprovalRequest struct {
 	Agent       *string     `json:"agent,omitempty"`
+	CallID      *string     `json:"callId,omitempty"`
 	Command     *string     `json:"command,omitempty"`
 	CreatedAt   time.Time   `json:"createdAt"`
 	Header      *string     `json:"header,omitempty"`
@@ -1331,6 +1468,15 @@ type AuthSession struct {
 	Timezone *string `json:"timezone,omitempty"`
 	// Username of the user.
 	Username string `json:"username"`
+}
+
+type AuthorizationDetail struct {
+	// Name of the PW CLI cluster the agent connects to
+	Cluster string `json:"cluster"`
+	// Host name of the node the agent runs on
+	Host string `json:"host"`
+	// Always pw_agent_enrollment
+	Type string `json:"type"`
 }
 
 type AwsBucket struct {
@@ -2226,8 +2372,9 @@ type AzureNetappFilesVersionSettings struct {
 	Service *string `json:"service,omitempty"`
 	Size    *int64  `json:"size,omitempty"`
 	// Subtype discriminator.
-	Subtype string         `json:"subtype"`
-	Tags    map[string]any `json:"tags,omitempty"`
+	Subtype string `json:"subtype"`
+	// Azure resource tags applied to the provisioned NetApp Files volume.
+	Tags map[string]string `json:"tags,omitempty"`
 }
 
 type AzureSasToken struct {
@@ -2349,7 +2496,7 @@ type BackgroundJob struct {
 	ScheduledAt time.Time `json:"scheduledAt"`
 	// Why the job was put off, while it waits to run again.
 	SnoozeReason *string `json:"snoozeReason,omitempty"`
-	// Where the job is in its life: waiting (pending, available, scheduled, retryable), running, or finished (completed, cancelled, discarded). A discarded job ran out of attempts.
+	// Where the job is in its life: waiting (pending, available, scheduled, retryable), running, or finished (completed, canceled, discarded). A discarded job ran out of attempts.
 	State string             `json:"state"`
 	Task  *BackgroundJobTask `json:"task,omitempty"`
 }
@@ -2842,8 +2989,10 @@ type ChatCompletionChunk struct {
 	// Object type (chat.completion.chunk)
 	Object string `json:"object"`
 	// System fingerprint
-	SystemFingerprint *string `json:"system_fingerprint,omitempty"`
-	Usage             *Usage  `json:"usage,omitempty"`
+	SystemFingerprint *string            `json:"system_fingerprint,omitempty"`
+	ToolApproval      *ToolApprovalChunk `json:"toolApproval,omitempty"`
+	ToolResult        *ToolResultChunk   `json:"toolResult,omitempty"`
+	Usage             *Usage             `json:"usage,omitempty"`
 }
 
 type ChatCompletionRequest struct {
@@ -2870,8 +3019,9 @@ type ChatCompletionRequest struct {
 	// Presence penalty (-2 to 2)
 	PresencePenalty *float64 `json:"presence_penalty,omitempty"`
 	// Reasoning effort level (none/minimal/low/medium/high/xhigh/max) for reasoning models
-	ReasoningEffort *string         `json:"reasoning_effort,omitempty"`
-	ResponseFormat  *ResponseFormat `json:"response_format,omitempty"`
+	ReasoningEffort *string             `json:"reasoning_effort,omitempty"`
+	ResponseFormat  *ResponseFormat     `json:"response_format,omitempty"`
+	Resume          *ToolApprovalAnswer `json:"resume,omitempty"`
 	// Random seed for deterministic output
 	Seed *int64 `json:"seed,omitempty"`
 	// Service tier for the request
@@ -2921,7 +3071,7 @@ func (t ChatCompletionRequest) MarshalJSON() ([]byte, error) {
 			}
 			extra[key] = raw
 		}
-		deleteDeclaredProperties(extra, []string{"frequency_penalty", "logit_bias", "logprobs", "max_completion_tokens", "max_tokens", "messages", "metadata", "model", "n", "parallel_tool_calls", "presence_penalty", "reasoning_effort", "response_format", "seed", "service_tier", "stop", "stream", "stream_options", "temperature", "thinking", "tool_choice", "tools", "top_logprobs", "top_p", "user"})
+		deleteDeclaredProperties(extra, []string{"frequency_penalty", "logit_bias", "logprobs", "max_completion_tokens", "max_tokens", "messages", "metadata", "model", "n", "parallel_tool_calls", "presence_penalty", "reasoning_effort", "response_format", "resume", "seed", "service_tier", "stop", "stream", "stream_options", "temperature", "thinking", "tool_choice", "tools", "top_logprobs", "top_p", "user"})
 		if len(extra) > 0 {
 			encoded, err := json.Marshal(extra)
 			if err != nil {
@@ -2947,7 +3097,7 @@ func (t *ChatCompletionRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
-	deleteDeclaredProperties(obj, []string{"frequency_penalty", "logit_bias", "logprobs", "max_completion_tokens", "max_tokens", "messages", "metadata", "model", "n", "parallel_tool_calls", "presence_penalty", "reasoning_effort", "response_format", "seed", "service_tier", "stop", "stream", "stream_options", "temperature", "thinking", "tool_choice", "tools", "top_logprobs", "top_p", "user"})
+	deleteDeclaredProperties(obj, []string{"frequency_penalty", "logit_bias", "logprobs", "max_completion_tokens", "max_tokens", "messages", "metadata", "model", "n", "parallel_tool_calls", "presence_penalty", "reasoning_effort", "response_format", "resume", "seed", "service_tier", "stop", "stream", "stream_options", "temperature", "thinking", "tool_choice", "tools", "top_logprobs", "top_p", "user"})
 	if len(obj) > 0 {
 		t.AdditionalProperties = make(map[string]any, len(obj))
 		for key, raw := range obj {
@@ -3073,6 +3223,19 @@ func (t *ChatMessage) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type ChatToolDecision struct {
+	// When it was settled
+	At time.Time `json:"at"`
+	// Who settled it
+	By string `json:"by"`
+	// The display name of the user who answered
+	Name *string `json:"name,omitempty"`
+	// How the call was settled
+	Status string `json:"status"`
+	// The user who answered
+	Username *string `json:"username,omitempty"`
+}
+
 type Choice struct {
 	Delta *DeltaMessage `json:"delta,omitempty"`
 	// Reason for finishing: stop, length, tool_calls, etc.
@@ -3090,6 +3253,8 @@ type CleanupPreviewsOutputBody struct {
 }
 
 type ClientInformation struct {
+	// The subject the client acts as, carried in act on the tokens it is issued
+	Actor *string `json:"actor,omitempty"`
 	// The client identifier
 	ClientID *string `json:"client_id,omitempty"`
 	// When the client identifier was issued, in seconds since the Unix epoch
@@ -3103,6 +3268,8 @@ type ClientInformation struct {
 	// The grant types the client may use
 	GrantTypes []string       `json:"grant_types,omitempty"`
 	Jwks       *JSONWebKeySet `json:"jwks,omitempty"`
+	// The workload the client stands for
+	Kind *string `json:"kind,omitempty"`
 	// Bearer credential for the client configuration endpoint. Each request there returns a new one and retires the one presented.
 	RegistrationAccessToken *string `json:"registration_access_token,omitempty"`
 	// The client configuration endpoint, for reading, updating and deleting this registration
@@ -3113,6 +3280,8 @@ type ClientInformation struct {
 	SoftwareID *string `json:"software_id,omitempty"`
 	// The version of that software
 	SoftwareVersion *string `json:"software_version,omitempty"`
+	// The user the client acts for, which its subject assertions name in sub
+	Subject *string `json:"subject,omitempty"`
 	// How the client authenticates at the token endpoint; always private_key_jwt
 	TokenEndpointAuthMethod *string `json:"token_endpoint_auth_method,omitempty"`
 }
@@ -3228,10 +3397,13 @@ type CloudAccountDetail struct {
 }
 
 type CloudAccountListItem struct {
-	Billing *CloudAccountBillingResponse `json:"billing,omitempty"`
-	Csp     string                       `json:"csp"`
-	CspID   string                       `json:"cspId"`
-	Name    string                       `json:"name"`
+	Billing  *CloudAccountBillingResponse `json:"billing,omitempty"`
+	Csp      string                       `json:"csp"`
+	CspID    string                       `json:"cspId"`
+	GovCloud bool                         `json:"govCloud"`
+	Name     string                       `json:"name"`
+	// Distinct regions across the cloud account's networks. Returned by the user-scoped list only.
+	Regions []string `json:"regions,omitempty"`
 }
 
 type CloudAccountNetwork struct {
@@ -3775,6 +3947,8 @@ type ConfirmHostKeyBody struct {
 	Host *string `json:"host,omitempty"`
 	// The host public key (authorized_keys line) the owner accepted.
 	Key string `json:"key"`
+	// Replace the keys recorded for this host instead of adding to them, after the owner confirmed that the host's key changed.
+	Replace *bool `json:"replace,omitempty"`
 	// Which host the key belongs to.
 	Target string `json:"target"`
 }
@@ -3806,7 +3980,7 @@ type ConnectWithTokenInputBody struct {
 type ConnectedApp struct {
 	// Client ID of the application
 	ClientID string `json:"clientId"`
-	// For the pw CLI and the ACTIVATE mobile app, each device it is signed in on; each can be signed out on its own
+	// For the pw CLI and the ACTIVATE mobile app, each device it is signed in on; for pw-agent, each workload acting for the user. Each can be signed out on its own
 	Devices []ConnectedDevice `json:"devices,omitempty"`
 	// When the user first granted access
 	GrantedAt *time.Time `json:"grantedAt,omitempty"`
@@ -3821,6 +3995,8 @@ type ConnectedApp struct {
 }
 
 type ConnectedDevice struct {
+	// For a workload acting for the user, who it is, as the act claim on its tokens names it (RFC 8693), such as existing-node:alice/hpc/login1
+	Actor *string `json:"actor,omitempty"`
 	// Whether this device made the request
 	Current bool `json:"current"`
 	// Name the device reported; nothing verifies it
@@ -3831,10 +4007,14 @@ type ConnectedDevice struct {
 	ID string `json:"id"`
 	// Address the device signed in from
 	IPAddress *string `json:"ipAddress,omitempty"`
+	// For a workload acting for the user, when it registered the key it signs in with
+	KeyCreatedAt *time.Time `json:"keyCreatedAt,omitempty"`
 	// When the device last used the platform
 	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
 	// When the device signed in
 	SignedInAt time.Time `json:"signedInAt"`
+	// For a workload acting for the user, what runs it: the agent on an existing cluster, or a workspace
+	WorkloadKind *string `json:"workloadKind,omitempty"`
 }
 
 type ConnectionPathInputBody struct {
@@ -4264,7 +4444,7 @@ type CreateEnvironmentBody struct {
 	// Default wall time.
 	DefaultTime *string `json:"defaultTime,omitempty"`
 	// Default values for fields.
-	Defaults map[string]any `json:"defaults,omitempty"`
+	Defaults map[string]FieldValue `json:"defaults,omitempty"`
 	// Description.
 	Description *string `json:"description,omitempty"`
 	// Display name.
@@ -4391,7 +4571,7 @@ type CreateKernelBody struct {
 	// Run the kernel on the cluster's controller agent directly instead of scheduling a worker. Cluster targets only; starts immediately with no Slurm allocation.
 	RunOnController *bool `json:"runOnController,omitempty"`
 	// Scheduling parameters for the kernel's worker.
-	SchedulingParams map[string]any `json:"schedulingParams,omitempty"`
+	SchedulingParams map[string]FieldValue `json:"schedulingParams,omitempty"`
 	// Cluster or instance the kernel runs on, or "user-workspace" to run it on the caller's own workspace.
 	TargetID string `json:"targetId"`
 	// Run the kernel on this existing compute worker instead of scheduling a new one.
@@ -4616,6 +4796,8 @@ type CreatePlatformDomainInputBody struct {
 	Organization *string `json:"organization,omitempty"`
 	// PEM private key matching the certificate; never returned by the API
 	PrivateKey *string `json:"privateKey,omitempty"`
+	// Send browsers that open this host to the same page on the default platform domain; API, CLI and agent traffic is still served here (deployment-scope, non-wildcard platform domains only)
+	RedirectToDefault *bool `json:"redirectToDefault,omitempty"`
 	// platform domains serve the app and frame sessions; sessions domains host session subdomains
 	Role string `json:"role"`
 }
@@ -4791,6 +4973,8 @@ type CreateVariableInput struct {
 }
 
 type CreateWebhookBody struct {
+	// Whether the platform may deliver to the URL's host on a private network address. Platform administrators only.
+	AllowPrivateAddress *bool `json:"allowPrivateAddress,omitempty"`
 	// Optional description of the webhook.
 	Description *string `json:"description,omitempty"`
 	// Whether the webhook should be enabled.
@@ -4811,7 +4995,7 @@ type CreateWorkerBody struct {
 	// Scheduler partition to use.
 	Partition *string `json:"partition,omitempty"`
 	// Scheduling parameters.
-	SchedulingParams map[string]any `json:"schedulingParams,omitempty"`
+	SchedulingParams map[string]FieldValue `json:"schedulingParams,omitempty"`
 }
 
 type CreateWorkflowBody struct {
@@ -5004,13 +5188,21 @@ type DashboardBody struct {
 	Widgets []DashboardWidget `json:"widgets"`
 }
 
+type DashboardClusterRef struct {
+	// Cluster id.
+	ID string `json:"id"`
+	// Cluster name.
+	Name *string `json:"name,omitempty"`
+	// Cluster reference.
+	URI *string `json:"uri,omitempty"`
+}
+
 type DashboardWidget struct {
 	// Height in grid rows.
 	H int64 `json:"h"`
 	// Widget instance id, unique within the dashboard.
-	ID string `json:"id"`
-	// Options from the widget's settings form.
-	Settings map[string]any `json:"settings,omitempty"`
+	ID       string                   `json:"id"`
+	Settings *DashboardWidgetSettings `json:"settings,omitempty"`
 	// Widget kind.
 	Type string `json:"type"`
 	// Width in grid columns.
@@ -5019,6 +5211,22 @@ type DashboardWidget struct {
 	X int64 `json:"x"`
 	// Grid row of the widget's top edge.
 	Y int64 `json:"y"`
+}
+
+type DashboardWidgetSettings struct {
+	Cluster *DashboardClusterRef `json:"cluster,omitempty"`
+	// compute: which clusters to list. Omitted lists all.
+	ClusterFilter *string `json:"clusterFilter,omitempty"`
+	// kubernetesWorkloads: the Kubernetes cluster to list resources from.
+	ClusterName *string `json:"clusterName,omitempty"`
+	// admin: the metrics not to show. Omitted or empty shows every metric.
+	HiddenMetrics []string `json:"hiddenMetrics,omitempty"`
+	// kubernetesWorkloads: the namespace to list resources from.
+	Namespace *string `json:"namespace,omitempty"`
+	// kubernetesWorkloads: the kind of resource to list.
+	ResourceType *string `json:"resourceType,omitempty"`
+	// Custom title shown in place of the widget's name. Any widget.
+	Title *string `json:"title,omitempty"`
 }
 
 type DecideDeviceRequestInputBody struct {
@@ -5215,6 +5423,7 @@ type DeviceCodeBody struct {
 }
 
 type DeviceRequestBody struct {
+	AgentEnrollment *AgentEnrollmentBody `json:"agentEnrollment,omitempty"`
 	// Name of the application asking to sign in
 	ClientName string `json:"clientName"`
 }
@@ -5403,7 +5612,7 @@ type Environment struct {
 	// Default wall time.
 	DefaultTime *string `json:"defaultTime,omitempty"`
 	// Default values for fields.
-	Defaults map[string]any `json:"defaults,omitempty"`
+	Defaults map[string]FieldValue `json:"defaults,omitempty"`
 	// Description.
 	Description *string `json:"description,omitempty"`
 	// Display name.
@@ -5588,6 +5797,68 @@ type EventsPageBody struct {
 	NextCursor *string `json:"nextCursor,omitempty"`
 	// Total events matching the filters (ignoring pagination), capped at 10000.
 	Total int64 `json:"total"`
+}
+
+type ExecutedJob struct {
+	Matrix      *ExecutedMatrix `json:"_matrix,omitempty"`
+	CompletedAt *time.Time      `json:"completedAt,omitempty"`
+	// The job's condition: true or false once resolved, or the expression still to evaluate.
+	If *JobCondition `json:"if,omitempty"`
+	// Jobs this job waits for.
+	Needs []string `json:"needs,omitempty"`
+	// Outputs the job produced, or the expressions it declares until it finishes.
+	Outputs map[string]string `json:"outputs,omitempty"`
+	// Where the job runs, such as remoteHost and remoteUser, as resolved for this run.
+	SSH       map[string]string `json:"ssh,omitempty"`
+	StartedAt *time.Time        `json:"startedAt,omitempty"`
+	// Job status: running, completed, error, canceled, canceling, faulted, skipped or skipped-failed. Empty until the job starts.
+	Status *string        `json:"status,omitempty"`
+	Steps  []ExecutedStep `json:"steps,omitempty"`
+}
+
+type ExecutedMatrix struct {
+	Failfast     bool     `json:"failfast"`
+	Groupjobs    []string `json:"groupjobs,omitempty"`
+	Index        int64    `json:"index"`
+	Maxparallel  *int64   `json:"maxparallel,omitempty"`
+	Originaljob  string   `json:"originaljob"`
+	Totalingroup *int64   `json:"totalingroup,omitempty"`
+	// This job's combination of matrix values.
+	Values map[string]any `json:"values,omitempty"`
+}
+
+type ExecutedStep struct {
+	// Errors, warnings and notices the step reported.
+	Annotations []Annotation `json:"annotations,omitempty"`
+	CompletedAt *time.Time   `json:"completedAt,omitempty"`
+	// For a cleanup step, the index of the step it cleans up after, or .job for the job's own cleanup.
+	LinkedStep *string           `json:"linkedStep,omitempty"`
+	Name       *string           `json:"name,omitempty"`
+	Outputs    map[string]string `json:"outputs,omitempty"`
+	// The command the step runs.
+	Run       *string    `json:"run,omitempty"`
+	StartedAt *time.Time `json:"startedAt,omitempty"`
+	// Step status, with the same values as the job's.
+	Status      *string              `json:"status,omitempty"`
+	Subworkflow *ExecutedSubworkflow `json:"subworkflow,omitempty"`
+	Summary     *StepSummary         `json:"summary,omitempty"`
+	// The action or workflow the step uses.
+	Uses *string `json:"uses,omitempty"`
+	// Inputs the step passes to what it uses, as resolved for this run.
+	With map[string]any `json:"with,omitempty"`
+}
+
+type ExecutedSubworkflow struct {
+	Image *string `json:"image,omitempty"`
+	// The subworkflow's jobs keyed by name, in the order it declares them.
+	Jobs map[string]ExecutedJob `json:"jobs,omitempty"`
+	// Page for the referenced workflow's source.
+	SourceURL *string `json:"sourceUrl,omitempty"`
+	Status    *string `json:"status,omitempty"`
+	Type      *string `json:"type,omitempty"`
+	// Inputs the subworkflow was run with.
+	Variables    map[string]any `json:"variables,omitempty"`
+	WorkflowName *string        `json:"workflowName,omitempty"`
 }
 
 type ExistingCluster struct {
@@ -5811,6 +6082,24 @@ type FilesystemRefreshInputBody struct {
 
 type FilesystemRefreshResponse struct {
 	Queued bool `json:"queued"`
+}
+
+type FiscalYear struct {
+	// End of the fiscal year (exclusive)
+	End time.Time `json:"end"`
+	// Fiscal year label, such as FY27, named for the year it ends in
+	Name string `json:"name"`
+	// Start of the fiscal year
+	Start time.Time `json:"start"`
+}
+
+type FiscalYearUsage struct {
+	// Allocation name
+	Allocation string `json:"allocation"`
+	// Fiscal year label, such as FY27
+	FiscalYear string `json:"fiscalYear"`
+	// Spend in the windows the allocation budgets in this fiscal year (the fiscal year itself when it budgets none), including the allocations below it in the same unit and live estimates
+	Used float64 `json:"used"`
 }
 
 type FlatError struct {
@@ -7452,7 +7741,9 @@ type HeartbeatInputBody struct {
 	// Operating system
 	Os string `json:"os"`
 	// OS release name (e.g., Ubuntu 22.04)
-	OsRelease *string        `json:"osRelease,omitempty"`
+	OsRelease *string `json:"osRelease,omitempty"`
+	// When the agent took this report. A report sent again carries the same time and records one metrics sample.
+	SampledAt *time.Time     `json:"sampledAt,omitempty"`
 	Scheduler *SchedulerInfo `json:"scheduler,omitempty"`
 	// The node's sshd host public keys (authorized_keys lines), which SSH clients verify the node against.
 	SSHHostKeys []string    `json:"sshHostKeys,omitempty"`
@@ -7594,6 +7885,7 @@ type HelmReleaseValuesResponseBody struct {
 }
 
 type HistoryItem struct {
+	CallID   *string       `json:"callId,omitempty"`
 	Decision *ToolDecision `json:"decision,omitempty"`
 	FromMain *bool         `json:"fromMain,omitempty"`
 	Kind     string        `json:"kind"`
@@ -7697,6 +7989,17 @@ type IndexStatusItem struct {
 	NeedsUpdate bool `json:"needsUpdate"`
 	// Whether the index enforces uniqueness
 	Unique bool `json:"unique"`
+}
+
+type Info struct {
+	// The tool changes something, so the chat holds each call until the user approves it.
+	AsksFirst *bool `json:"asksFirst,omitempty"`
+	// What the tool looks up or does.
+	Description string `json:"description"`
+	// Tools the user may run in place of a held call to this one, with the same arguments.
+	Instead []string `json:"instead,omitempty"`
+	// The tool's name, which the chat request lists in X-Platform-Tools.
+	Name string `json:"name"`
 }
 
 type InstallationResponse struct {
@@ -7838,6 +8141,7 @@ type IntPolicyOutput struct {
 }
 
 type IntrospectBody struct {
+	Act *ActClaim `json:"act,omitempty"`
 	// Whether the token is live
 	Active *bool `json:"active,omitempty"`
 	// Audience of the token
@@ -7997,7 +8301,7 @@ type KernelResponse struct {
 	Owner             *KernelOwner          `json:"owner,omitempty"`
 	PythonEnvironment *PythonEnvironmentRef `json:"pythonEnvironment,omitempty"`
 	// Scheduling parameters used for the kernel's worker.
-	SchedulingParams map[string]any `json:"schedulingParams,omitempty"`
+	SchedulingParams map[string]FieldValue `json:"schedulingParams,omitempty"`
 	// Kernel status.
 	Status *string `json:"status,omitempty"`
 	// ID of the cluster or instance the kernel runs on.
@@ -8508,12 +8812,36 @@ type ListResourcesResponse struct {
 	Total int64 `json:"total"`
 }
 
-type ListResponse struct {
-	Resources    []any    `json:"Resources"`
-	ItemsPerPage int64    `json:"itemsPerPage"`
-	Schemas      []string `json:"schemas"`
-	StartIndex   int64    `json:"startIndex"`
-	TotalResults int64    `json:"totalResults"`
+type ListResponseScimGroup struct {
+	Resources    []ScimGroup `json:"Resources"`
+	ItemsPerPage int64       `json:"itemsPerPage"`
+	Schemas      []string    `json:"schemas"`
+	StartIndex   int64       `json:"startIndex"`
+	TotalResults int64       `json:"totalResults"`
+}
+
+type ListResponseScimResourceType struct {
+	Resources    []ScimResourceType `json:"Resources"`
+	ItemsPerPage int64              `json:"itemsPerPage"`
+	Schemas      []string           `json:"schemas"`
+	StartIndex   int64              `json:"startIndex"`
+	TotalResults int64              `json:"totalResults"`
+}
+
+type ListResponseScimSchemaDefinition struct {
+	Resources    []ScimSchemaDefinition `json:"Resources"`
+	ItemsPerPage int64                  `json:"itemsPerPage"`
+	Schemas      []string               `json:"schemas"`
+	StartIndex   int64                  `json:"startIndex"`
+	TotalResults int64                  `json:"totalResults"`
+}
+
+type ListResponseScimUser struct {
+	Resources    []ScimUser `json:"Resources"`
+	ItemsPerPage int64      `json:"itemsPerPage"`
+	Schemas      []string   `json:"schemas"`
+	StartIndex   int64      `json:"startIndex"`
+	TotalResults int64      `json:"totalResults"`
 }
 
 type ListRoleBindingsOutputBody struct {
@@ -8571,13 +8899,15 @@ type LoginBannerResponse struct {
 }
 
 type LoginSessionResponse struct {
-	// Set to pw-cli for a device signed in to the pw CLI, or pw-mobile for one signed in to the ACTIVATE mobile app. Only listed for another user's sessions; your own are under connected applications.
+	// For a workload acting for the user, who it is, as the act claim on its tokens names it (RFC 8693), such as existing-node:alice/hpc/login1.
+	Actor *string `json:"actor,omitempty"`
+	// Set to pw-cli for a device signed in to the pw CLI, pw-mobile for one signed in to the ACTIVATE mobile app, or pw-agent for a workload acting for the user. Only listed for another user's sessions; your own are under connected applications.
 	Client *string `json:"client,omitempty"`
 	// When the session was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Whether this is the session making the request.
 	Current bool `json:"current"`
-	// For a pw CLI or mobile app sign-in, the name the device reported; nothing verifies it.
+	// For a pw CLI or mobile app sign-in, the name the device reported, and for a workload, the name it registered with; nothing verifies either.
 	DeviceName *string `json:"deviceName,omitempty"`
 	// When the session expires.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
@@ -8585,10 +8915,14 @@ type LoginSessionResponse struct {
 	ID string `json:"id"`
 	// Client IP address at login. Only included for the user's own sessions.
 	IPAddress *string `json:"ipAddress,omitempty"`
+	// For a workload acting for the user, when it registered the key it signs in with.
+	KeyCreatedAt *time.Time `json:"keyCreatedAt,omitempty"`
 	// When the session was last used.
 	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
 	// Client user agent at login.
 	UserAgent *string `json:"userAgent,omitempty"`
+	// For a workload acting for the user, what runs it: the agent on an existing cluster, or a workspace.
+	WorkloadKind *string `json:"workloadKind,omitempty"`
 }
 
 type Lustre struct {
@@ -8640,6 +8974,17 @@ type Lustre struct {
 	User string `json:"user"`
 	// Zone of the Lustre
 	Zone *string `json:"zone,omitempty"`
+}
+
+type LustreTypes struct {
+	// PERSISTENT_1 prices per GB-month, keyed by throughput per TiB in MB/s
+	Persistent1 map[string]float64 `json:"PERSISTENT_1,omitempty"`
+	// PERSISTENT_2 prices per GB-month, keyed by throughput per TiB in MB/s
+	Persistent2 map[string]float64 `json:"PERSISTENT_2,omitempty"`
+	// SCRATCH_1 price per GB-month
+	Scratch1 *float64 `json:"SCRATCH_1,omitempty"`
+	// SCRATCH_2 price per GB-month
+	Scratch2 *float64 `json:"SCRATCH_2,omitempty"`
 }
 
 type McpStatus struct {
@@ -8998,6 +9343,24 @@ type MessageAuthor struct {
 	Username string `json:"username"`
 }
 
+type MessagePart struct {
+	// Arguments as a JSON string
+	Args     string            `json:"args"`
+	Decision *ChatToolDecision `json:"decision,omitempty"`
+	// When a waiting call stops being answerable
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	// Tool call ID
+	ID string `json:"id"`
+	// Part kind
+	Kind string `json:"kind"`
+	// Tool name
+	Name string `json:"name"`
+	// What the tool returned to the model
+	Result string `json:"result"`
+	// Whether the call succeeded, or that it waits for the user's approval
+	Status string `json:"status"`
+}
+
 type MessageResponse struct {
 	// Attachment details
 	Attachments []AttachmentResponse `json:"attachments,omitempty"`
@@ -9010,6 +9373,8 @@ type MessageResponse struct {
 	Model *string `json:"model"`
 	// Parent message ID
 	ParentID *string `json:"parentId"`
+	// Platform tool calls the server ran while writing this answer, in order. Echo them back in history as an assistant tool_calls message and one tool message per result.
+	Parts []MessagePart `json:"parts,omitempty"`
 	// Provider ID
 	ProviderID *string `json:"providerId"`
 	// Reasoning/thinking content from the model
@@ -9556,11 +9921,11 @@ type NodeRecord struct {
 
 type NodeResponse struct {
 	// Resource allocatable of the node
-	Allocatable map[string]any `json:"allocatable"`
+	Allocatable map[string]string `json:"allocatable"`
 	// Architecture of the node
 	Architecture string `json:"architecture"`
 	// Resource capacity of the node
-	Capacity map[string]any `json:"capacity"`
+	Capacity map[string]string `json:"capacity"`
 	// Cluster name
 	Cluster string `json:"cluster"`
 	// Container runtime version running on the node
@@ -9755,8 +10120,12 @@ type Oidc struct {
 }
 
 type OpenIDConfiguration struct {
+	// Authorization details types (RFC 9396) the device authorization endpoint accepts
+	AuthorizationDetailsTypesSupported []string `json:"authorization_details_types_supported"`
 	// URL of the authorization endpoint
 	AuthorizationEndpoint string `json:"authorization_endpoint"`
+	// Whether authorization responses carry iss (RFC 9207); they do
+	AuthorizationResponseIssParameterSupported bool `json:"authorization_response_iss_parameter_supported"`
 	// JSON array containing a list of claim names
 	ClaimsSupported []string `json:"claims_supported"`
 	// JSON array containing the supported PKCE code challenge methods
@@ -9773,12 +10142,18 @@ type OpenIDConfiguration struct {
 	IntrospectionEndpoint string `json:"introspection_endpoint"`
 	// Client authentication methods the introspection endpoint accepts
 	IntrospectionEndpointAuthMethodsSupported []string `json:"introspection_endpoint_auth_methods_supported"`
+	// Algorithms the introspection endpoint accepts for private_key_jwt client assertions
+	IntrospectionEndpointAuthSigningAlgValuesSupported []string `json:"introspection_endpoint_auth_signing_alg_values_supported"`
 	// The authorization server's issuer identifier
 	Issuer string `json:"issuer"`
 	// URL of the JSON Web Key Set
 	JwksURI string `json:"jwks_uri"`
 	// URL of the dynamic client registration endpoint (RFC 7591), which requires an initial access token
 	RegistrationEndpoint string `json:"registration_endpoint"`
+	// Whether request objects are accepted by value; they are not
+	RequestParameterSupported bool `json:"request_parameter_supported"`
+	// Whether request objects are accepted by reference; they are not
+	RequestURIParameterSupported bool `json:"request_uri_parameter_supported"`
 	// JSON array containing the supported response modes
 	ResponseModesSupported []string `json:"response_modes_supported"`
 	// JSON array containing the supported response types
@@ -9787,6 +10162,8 @@ type OpenIDConfiguration struct {
 	RevocationEndpoint string `json:"revocation_endpoint"`
 	// Client authentication methods the revocation endpoint accepts
 	RevocationEndpointAuthMethodsSupported []string `json:"revocation_endpoint_auth_methods_supported"`
+	// Algorithms the revocation endpoint accepts for private_key_jwt client assertions
+	RevocationEndpointAuthSigningAlgValuesSupported []string `json:"revocation_endpoint_auth_signing_alg_values_supported"`
 	// JSON array containing the supported scopes
 	ScopesSupported []string `json:"scopes_supported"`
 	// JSON array containing a list of subject identifier types
@@ -10155,7 +10532,7 @@ type OrgAiProviderResponse struct {
 	SupportsUsage *bool `json:"supportsUsage,omitempty"`
 	// How the integration's TLS certificate is verified
 	TLSVerification *string `json:"tlsVerification,omitempty"`
-	// How tool calls reach the provider; only present for connections on emulated catalog entries, which can change it
+	// How tool calls reach the provider; only present for connections whose catalog entry lets them choose it
 	ToolCallingMode *string `json:"toolCallingMode,omitempty"`
 	// AI provider type
 	Type string `json:"type"`
@@ -10531,8 +10908,12 @@ type PatchAccessBodyType struct {
 type PatchAllocationInputBody struct {
 	// Replace the allowed resource types (managed allocations only). An empty list clears the restriction.
 	Allowed []string `json:"allowed,omitempty"`
-	// New total allocation amount
-	Total float64 `json:"total"`
+	// Make the allocation not chargeable, so it only holds budget for the allocations under it
+	NonChargeable *bool `json:"nonChargeable,omitempty"`
+	// Replace the budget per period. An empty list removes every period.
+	Periods []AllocationPeriodAmount `json:"periods,omitempty"`
+	// New total allocation amount. Refused when the allocation has periods, whose current amount sets the total.
+	Total *float64 `json:"total,omitempty"`
 }
 
 type PatchBillingDefaultAllocationInputBody struct {
@@ -10559,7 +10940,7 @@ type PatchEnvironmentBody struct {
 	// Default wall time.
 	DefaultTime *string `json:"defaultTime,omitempty"`
 	// Default values for fields.
-	Defaults map[string]any `json:"defaults,omitempty"`
+	Defaults map[string]FieldValue `json:"defaults,omitempty"`
 	// Description.
 	Description *string `json:"description,omitempty"`
 	// Display name.
@@ -10705,6 +11086,15 @@ type PendingNativeSignIn struct {
 	Account string `json:"account"`
 }
 
+type PeriodUsage struct {
+	// Allocation name
+	Allocation string `json:"allocation"`
+	// Allocation period name
+	Period string `json:"period"`
+	// Spend in the period, or in its current month for one that repeats monthly, including the allocations below it in the same unit and live estimates
+	Used float64 `json:"used"`
+}
+
 type PermissionEntry struct {
 	CreatedAt          time.Time `json:"createdAt"`
 	EntireOrganization bool      `json:"entireOrganization"`
@@ -10767,6 +11157,8 @@ type PlatformDomain struct {
 	Organization *string `json:"organization,omitempty"`
 	// Name of the owning organization
 	OrganizationName *string `json:"organizationName,omitempty"`
+	// Whether browsers that open this host are sent to the same page on the default platform domain
+	RedirectToDefault *bool `json:"redirectToDefault,omitempty"`
 	// platform domains serve the app and frame sessions; sessions domains host session subdomains
 	Role string `json:"role"`
 }
@@ -10890,6 +11282,8 @@ type PlatformSettingsAdmin struct {
 	AppName *string `json:"appName,omitempty"`
 	// Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Default 720 (12 hours).
 	BucketTokenTTLMinutes int64 `json:"bucketTokenTtlMinutes"`
+	// Whether cluster agents, managed cluster nodes included, may send their heartbeat, and cloud cluster agents their node management, node facts, filesystem, orphan and notification requests, over their tunnel instead of HTTP. On by default; turning it off sends every agent back to HTTP by its next request, and turning it back on brings them back to the tunnel within about five minutes.
+	ClusterSyncEnabled bool `json:"clusterSyncEnabled"`
 	// Indicates if k8s PVC should be created for workspaces.
 	Createk8sPvc *bool `json:"createk8sPVC,omitempty"`
 	// Indicates if user files should be deleted when their account is deleted.
@@ -10949,6 +11343,8 @@ type PlatformSettingsAdmin struct {
 	UseBuiltinChangelog bool `json:"useBuiltinChangelog"`
 	// Indicates if the platform license is valid.
 	ValidLicense *bool `json:"validLicense,omitempty"`
+	// Whether workflow runs get an opaque token that expires with the run instead of a 30-day JWT, where the workspace and every cluster the run uses are on 7.124.0 or later. Off by default; turning it off makes new runs get JWTs again at once.
+	WorkflowRunTokensEnabled bool `json:"workflowRunTokensEnabled"`
 	// Minimum age in days a user workspace container must reach before the hourly scale-down job stops it. 0 scales down regardless of age. Default 7.
 	WorkspaceScaleDownMinAgeDays int64 `json:"workspaceScaleDownMinAgeDays"`
 }
@@ -11100,7 +11496,7 @@ type PostSessionBody struct {
 	// Remote port.
 	RemotePort *int64 `json:"remotePort,omitempty"`
 	// Scheduling parameters for the environment.
-	SchedulingParams map[string]any `json:"schedulingParams,omitempty"`
+	SchedulingParams map[string]FieldValue `json:"schedulingParams,omitempty"`
 	// Session slug for URL path.
 	Slug *string `json:"slug,omitempty"`
 	// For endpoint sessions, strip the session URL prefix before forwarding to the local app (for apps that serve at root and can't set a base path).
@@ -11736,7 +12132,7 @@ type PublishAzureNetappFilesRequest struct {
 	// URL-friendly identifier.
 	Slug string `json:"slug"`
 	// Azure resource tags applied to the provisioned NetApp Files volume.
-	Tags map[string]any `json:"tags,omitempty"`
+	Tags map[string]string `json:"tags,omitempty"`
 	// Mark as verified (platform admins only).
 	Verified *bool `json:"verified,omitempty"`
 	// Initial version label.
@@ -12389,10 +12785,14 @@ type RatedCostWithMetadata struct {
 }
 
 type RatedCostsFilterOptions struct {
-	Skus     []string `json:"skus"`
-	Subtypes []string `json:"subtypes"`
-	Types    []string `json:"types"`
-	Users    []string `json:"users"`
+	// Kinds of resource cloud costs were deployed for, such as cluster.
+	ResourceTypes []string `json:"resourceTypes"`
+	// Names of the resources cloud costs were deployed for.
+	Resources []string `json:"resources"`
+	Skus      []string `json:"skus"`
+	Subtypes  []string `json:"subtypes"`
+	Types     []string `json:"types"`
+	Users     []string `json:"users"`
 }
 
 type RatedCostsPaginatedResponse struct {
@@ -12755,6 +13155,34 @@ type Report struct {
 	Who *string `json:"who,omitempty"`
 }
 
+type ReportBody struct {
+	// Allocation name the report targets.
+	Allocation string `json:"allocation"`
+	// Report description.
+	Description *string `json:"description,omitempty"`
+	// Custom range end (YYYY-MM-DD).
+	EndDate *string                `json:"endDate,omitempty"`
+	Filters SavedCostReportFilters `json:"filters"`
+	// Grouping dimension: type, subtype, user, sku, resource (the cluster or storage a cloud cost was for) or resourceType.
+	GroupBy string `json:"groupBy"`
+	// Report name.
+	Name     string                   `json:"name"`
+	Schedule *SavedCostReportSchedule `json:"schedule,omitempty"`
+	// Custom range start (YYYY-MM-DD).
+	StartDate *string `json:"startDate,omitempty"`
+	// Named time range or 'Custom'.
+	TimeRange string `json:"timeRange"`
+}
+
+type ReportStats struct {
+	// Per-day spend, downsampled for the card sparkline.
+	Spark []float64 `json:"spark"`
+	// Total spend over the report's window.
+	Total float64 `json:"total"`
+	// Percent change between the first and second half of the window.
+	TrendPct float64 `json:"trendPct"`
+}
+
 type ReportWorkspaceMountStatusInputBody struct {
 	Mounts []WorkspaceMountStatus `json:"mounts"`
 }
@@ -12868,7 +13296,7 @@ type Resource struct {
 	ResourceName *string `json:"resourceName,omitempty"`
 	// Machine type or storage class.
 	ResourceSubtype *string `json:"resourceSubtype,omitempty"`
-	// Resource kind: vm, disk, lustre, nfs, bucket, ip.
+	// Resource kind: vm, disk, lustre, nfs, bucket, ip, snapshot, networkinterface.
 	ResourceType string `json:"resourceType"`
 	// Storage size in GB.
 	SizeGb *float64 `json:"sizeGb,omitempty"`
@@ -13289,6 +13717,24 @@ type RuntimeAlertInput struct {
 	IntervalHours *int64 `json:"intervalHours,omitempty"`
 }
 
+type ScimAuthenticationScheme struct {
+	Description string `json:"description"`
+	Name        string `json:"name"`
+	Primary     bool   `json:"primary"`
+	Type        string `json:"type"`
+}
+
+type ScimBulkSupport struct {
+	MaxOperations  int64 `json:"maxOperations"`
+	MaxPayloadSize int64 `json:"maxPayloadSize"`
+	Supported      bool  `json:"supported"`
+}
+
+type ScimFilterSupport struct {
+	MaxResults int64 `json:"maxResults"`
+	Supported  bool  `json:"supported"`
+}
+
 type ScimGroup struct {
 	DisplayName                                                     string             `json:"displayName"`
 	ID                                                              string             `json:"id"`
@@ -13298,6 +13744,49 @@ type ScimGroup struct {
 	UrnCoreweaveParamsScimSchemasExtensionCoreweave20CoreWeaveGroup *CoreWeaveGroupExt `json:"urn:coreweave:params:scim:schemas:extension:coreweave:2.0:CoreWeaveGroup,omitempty"`
 }
 
+type ScimResourceType struct {
+	Description      string                `json:"description"`
+	Endpoint         string                `json:"endpoint"`
+	ID               string                `json:"id"`
+	Name             string                `json:"name"`
+	Schema           string                `json:"schema"`
+	SchemaExtensions []ScimSchemaExtension `json:"schemaExtensions"`
+	Schemas          []string              `json:"schemas"`
+}
+
+type ScimSchemaAttribute struct {
+	MultiValued *bool   `json:"multiValued,omitempty"`
+	Mutability  *string `json:"mutability,omitempty"`
+	Name        string  `json:"name"`
+	Required    *bool   `json:"required,omitempty"`
+	Type        string  `json:"type"`
+	Uniqueness  *string `json:"uniqueness,omitempty"`
+}
+
+type ScimSchemaDefinition struct {
+	Attributes  []ScimSchemaAttribute `json:"attributes"`
+	Description string                `json:"description"`
+	ID          string                `json:"id"`
+	Name        string                `json:"name"`
+}
+
+type ScimSchemaExtension struct {
+	Required bool   `json:"required"`
+	Schema   string `json:"schema"`
+}
+
+type ScimServiceProviderConfig struct {
+	AuthenticationSchemes []ScimAuthenticationScheme `json:"authenticationSchemes"`
+	Bulk                  ScimBulkSupport            `json:"bulk"`
+	ChangePassword        ScimSupported              `json:"changePassword"`
+	DocumentationURI      string                     `json:"documentationUri"`
+	Etag                  ScimSupported              `json:"etag"`
+	Filter                ScimFilterSupport          `json:"filter"`
+	Patch                 ScimSupported              `json:"patch"`
+	Schemas               []string                   `json:"schemas"`
+	Sort                  ScimSupported              `json:"sort"`
+}
+
 type ScimSettingsResponse struct {
 	// Whether SCIM is enabled for this organization.
 	Enabled bool `json:"enabled"`
@@ -13305,6 +13794,10 @@ type ScimSettingsResponse struct {
 	EnforceMaxTTL bool `json:"enforceMaxTTL"`
 	// Maximum allowed token expiration in days, if enforced.
 	MaxExpirationDays *int64 `json:"maxExpirationDays,omitempty"`
+}
+
+type ScimSupported struct {
+	Supported bool `json:"supported"`
 }
 
 type ScimTokenResponse struct {
@@ -13351,6 +13844,69 @@ type SSHPublicKey struct {
 	ImpersonatedBy *string `json:"impersonatedBy,omitempty"`
 	Key            string  `json:"key"`
 	Title          string  `json:"title"`
+}
+
+type SavedCostReportFilters struct {
+	Metadata     []string `json:"metadata,omitempty"`
+	Resource     []string `json:"resource,omitempty"`
+	ResourceType []string `json:"resourceType,omitempty"`
+	Sku          []string `json:"sku,omitempty"`
+	Subtype      []string `json:"subtype,omitempty"`
+	Type         []string `json:"type,omitempty"`
+	User         []string `json:"user,omitempty"`
+}
+
+type SavedCostReportRecipients struct {
+	Groups []string `json:"groups"`
+	Users  []string `json:"users"`
+}
+
+type SavedCostReportRun struct {
+	CreatedAt      time.Time `json:"createdAt"`
+	Date           time.Time `json:"date"`
+	EndDate        string    `json:"endDate"`
+	ID             string    `json:"id"`
+	RecipientCount int64     `json:"recipientCount"`
+	StartDate      string    `json:"startDate"`
+	Status         string    `json:"status"`
+	Total          float64   `json:"total"`
+	UpdatedAt      time.Time `json:"updatedAt"`
+}
+
+type SavedCostReportSchedule struct {
+	DayOfMonth   *int64                    `json:"dayOfMonth,omitempty"`
+	DayOfWeek    *int64                    `json:"dayOfWeek,omitempty"`
+	Frequency    string                    `json:"frequency"`
+	IntervalDays *int64                    `json:"intervalDays,omitempty"`
+	Recipients   SavedCostReportRecipients `json:"recipients"`
+	Time         string                    `json:"time"`
+	Timezone     *string                   `json:"timezone,omitempty"`
+}
+
+type SavedReportDto struct {
+	Allocation string `json:"allocation"`
+	// Whether the caller may edit or delete this report: its creator or an organization admin.
+	CanEdit     bool                    `json:"canEdit"`
+	CreatedAt   time.Time               `json:"createdAt"`
+	CreatedBy   string                  `json:"createdBy"`
+	Description *string                 `json:"description,omitempty"`
+	EndDate     *string                 `json:"endDate,omitempty"`
+	Filters     *SavedCostReportFilters `json:"filters,omitempty"`
+	GroupBy     string                  `json:"groupBy"`
+	ID          string                  `json:"id"`
+	LastSentAt  *time.Time              `json:"lastSentAt,omitempty"`
+	// Whether the caller created this report.
+	Mine bool `json:"mine"`
+	// Whether the caller unsubscribed from this report.
+	Muted     bool                     `json:"muted"`
+	Name      string                   `json:"name"`
+	Schedule  *SavedCostReportSchedule `json:"schedule,omitempty"`
+	StartDate *string                  `json:"startDate,omitempty"`
+	Stats     ReportStats              `json:"stats"`
+	// Whether the caller receives this report (not muted).
+	Subscribed bool      `json:"subscribed"`
+	TimeRange  string    `json:"timeRange"`
+	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
 type SchedulerCommandBody struct {
@@ -13486,6 +14042,8 @@ type SecretResponse struct {
 }
 
 type SendMessageBody struct {
+	// Images uploaded to the session with upload-agent-session-image, each named in the text by its placeholder.
+	Images []AgentImageRef `json:"images,omitempty"`
 	// The message to send. Empty continues the turn, which is how the terminal wakes background work.
 	Text string `json:"text"`
 }
@@ -13810,7 +14368,7 @@ type Shared struct {
 	// Group the storage is shared with.
 	Group string `json:"group"`
 	// Permissions granted to the group for this storage.
-	Permissions any `json:"permissions"`
+	Permissions []string `json:"permissions"`
 }
 
 type SharedGroup struct {
@@ -13818,6 +14376,11 @@ type SharedGroup struct {
 	Group string `json:"group"`
 	// K8s role (admin, edit, view)
 	Role string `json:"role"`
+}
+
+type ShellProgress struct {
+	Lines int64    `json:"lines"`
+	Tail  []string `json:"tail"`
 }
 
 type SingleQuotaResponse struct {
@@ -13945,6 +14508,10 @@ type StartCodexDeviceAuthorizationInputBody struct {
 	Name string `json:"name"`
 	// Reconnect an existing Codex provider in place
 	Reconnect *bool `json:"reconnect,omitempty"`
+}
+
+type StepSummary struct {
+	Bytes int64 `json:"bytes"`
 }
 
 type StopClusterOptions struct {
@@ -14132,8 +14699,7 @@ type StorageTypes struct {
 	FileStorage *float64 `json:"file_storage,omitempty"`
 	// Google Filestore tiers
 	Filestore map[string]float64 `json:"filestore,omitempty"`
-	// AWS FSx for Lustre deployment types; persistent types nest by throughput
-	Lustre map[string]any `json:"lustre,omitempty"`
+	Lustre    *LustreTypes       `json:"lustre,omitempty"`
 	// Google Managed Lustre performance tiers
 	ManagedLustre map[string]float64 `json:"managed_lustre,omitempty"`
 	// Azure Managed Lustre tiers
@@ -14173,6 +14739,11 @@ type SubnetInfo struct {
 	Cidr  string `json:"cidr"`
 	CspID string `json:"cspId"`
 	Name  string `json:"name"`
+}
+
+type SubscriptionInputBody struct {
+	// Whether the caller should receive this report.
+	Subscribed bool `json:"subscribed"`
 }
 
 type SystemInfo struct {
@@ -14273,6 +14844,8 @@ type TimeSeriesPoint struct {
 type TokenBody struct {
 	// Opaque access token for the userinfo endpoint; for a token exchange, the issued token itself
 	AccessToken *string `json:"access_token,omitempty"`
+	// The authorization details granted, set only for a pw agent enrollment by device code
+	AuthorizationDetails []AuthorizationDetail `json:"authorization_details,omitempty"`
 	// OAuth error code
 	Error *string `json:"error,omitempty"`
 	// Human-readable error detail
@@ -14368,6 +14941,26 @@ func (t *Tool) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type ToolApprovalAnswer struct {
+	// Whether the user approved the call
+	Allowed bool `json:"allowed"`
+	// Why the user declined, for the model
+	Feedback *string `json:"feedback,omitempty"`
+	// The assistant message holding the call
+	MessageID string `json:"messageId"`
+	// A tool to run in place of the held one, with its arguments, from the ones the held tool lists as instead
+	Tool *string `json:"tool,omitempty"`
+	// The held tool call
+	ToolCallID string `json:"toolCallId"`
+}
+
+type ToolApprovalChunk struct {
+	// When the server stops accepting an answer
+	ExpiresAt time.Time `json:"expiresAt"`
+	// ID of the held tool call
+	ToolCallID string `json:"toolCallId"`
+}
+
 type ToolCall struct {
 	Function FunctionCall `json:"function"`
 	// Unique tool call ID
@@ -14460,6 +15053,15 @@ type ToolDecision struct {
 	Username          *string   `json:"username,omitempty"`
 }
 
+type ToolResultChunk struct {
+	// What the tool returned to the model
+	Content string `json:"content"`
+	// Whether the call failed
+	IsError *bool `json:"isError,omitempty"`
+	// ID of the tool call this result answers
+	ToolCallID string `json:"toolCallId"`
+}
+
 type TunnelShared struct {
 	// Whether shared with organization.
 	Organization *bool `json:"organization,omitempty"`
@@ -14520,7 +15122,7 @@ type UpdateAiProviderInputBody struct {
 	EnabledModels []string `json:"enabledModels,omitempty"`
 	// Whether the gateway folds the conversation into the final user message
 	FoldHistory *bool `json:"foldHistory,omitempty"`
-	// How tool calls reach the provider (providers on emulated catalog entries only)
+	// How tool calls reach the provider, for providers whose catalog entry lets them choose
 	ToolCallingMode *string `json:"toolCallingMode,omitempty"`
 }
 
@@ -14553,6 +15155,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	AppName *string `json:"appName,omitempty"`
 	// Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Minimum 15 (Vault's STS floor); maximum 720, since an Azure SAS must expire before its cached signing key does.
 	BucketTokenTTLMinutes *int64 `json:"bucketTokenTtlMinutes,omitempty"`
+	// Whether cluster agents may send their heartbeat and other requests over their tunnel instead of HTTP.
+	ClusterSyncEnabled *bool `json:"clusterSyncEnabled,omitempty"`
 	// Whether to create a PVC for k8s workspaces.
 	Createk8sPvc *bool `json:"createk8sPVC,omitempty"`
 	// Whether to delete user files on account deletion.
@@ -14616,8 +15220,23 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	TermsAndConditions *string `json:"termsAndConditions,omitempty"`
 	// Whether the Changelog page serves the changelog bundled into this build instead of fetching the live one.
 	UseBuiltinChangelog *bool `json:"useBuiltinChangelog,omitempty"`
+	// Whether workflow runs get an opaque token that expires with the run instead of a 30-day JWT.
+	WorkflowRunTokensEnabled *bool `json:"workflowRunTokensEnabled,omitempty"`
 	// Minimum age in days a user workspace container must reach before the hourly scale-down job stops it. 0 scales down regardless of age.
 	WorkspaceScaleDownMinAgeDays *int64 `json:"workspaceScaleDownMinAgeDays,omitempty"`
+}
+
+type UpdateAllocationPeriodInputBody struct {
+	// New end. Only a period that hasn't ended can move its end, and never into the past.
+	End *time.Time `json:"end,omitempty"`
+	// When a later end would overlap a later period on an allocation that budgets both, move that period's start to the new end instead of refusing. Its last day stays.
+	MoveLater *bool `json:"moveLater,omitempty"`
+	// New period name
+	Name *string `json:"name,omitempty"`
+	// Change how the period repeats; none makes it one window. Only a period that hasn't started can change.
+	Repeat *string `json:"repeat,omitempty"`
+	// New start. Only a period that hasn't started can move its start, and never into the past.
+	Start *time.Time `json:"start,omitempty"`
 }
 
 type UpdateAllocationPermissionsInputBody struct {
@@ -14769,7 +15388,7 @@ type UpdateOrgAiProviderInputBody struct {
 	DisplayName *string `json:"displayName,omitempty"`
 	// Whether the gateway folds the conversation into the final user message
 	FoldHistory *bool `json:"foldHistory,omitempty"`
-	// How tool calls reach the provider (connections on emulated catalog entries only)
+	// How tool calls reach the provider, for connections whose catalog entry lets them choose
 	ToolCallingMode *string `json:"toolCallingMode,omitempty"`
 }
 
@@ -14796,6 +15415,8 @@ type UpdateOrgSidebarInputBody struct {
 }
 
 type UpdateOrgUserInputBody struct {
+	// Email address. Only a platform administrator may change it.
+	Email *string `json:"email,omitempty"`
 	// Full name of the user
 	Name *string `json:"name,omitempty"`
 	// Linux UID. Changing it stops the user's workspace so it comes back under the new UID, ending any running session. Files the user already created stay owned by the old UID, so a workspace or cloud cluster holding their files needs those ownerships updated by hand. A value below 1000 requires a platform administrator.
@@ -14825,6 +15446,8 @@ type UpdatePlatformDomainBody struct {
 	Organization *string `json:"organization,omitempty"`
 	// PEM private key matching the certificate; never returned by the API
 	PrivateKey *string `json:"privateKey,omitempty"`
+	// Send browsers that open this host to the same page on the default platform domain; API, CLI and agent traffic is still served here (deployment-scope, non-wildcard platform domains only)
+	RedirectToDefault *bool `json:"redirectToDefault,omitempty"`
 }
 
 type UpdateProxyWhitelistInputBody struct {
@@ -15275,6 +15898,19 @@ type UserWorkspacePatchBody struct {
 	Userhost *string `json:"userhost,omitempty"`
 }
 
+type Userinfo struct {
+	// Email address. Released by the email scope.
+	Email *string `json:"email,omitempty"`
+	// Names of the user's groups. Released by the groups scope.
+	Groups []string `json:"groups,omitempty"`
+	// Display name. Released by the profile scope.
+	Name *string `json:"name,omitempty"`
+	// Username. Released by the profile scope.
+	PreferredUsername *string `json:"preferred_username,omitempty"`
+	// Identifier of the user, stable for this application.
+	Sub string `json:"sub"`
+}
+
 type VerifyOtpInputBody struct {
 	// 6-digit OTP code from authenticator app
 	Code string `json:"code"`
@@ -15401,6 +16037,8 @@ type WebAuthnVerifyOutputBody struct {
 }
 
 type Webhook struct {
+	// Whether the platform may deliver to the URL's host on a private network address. Platform administrators only.
+	AllowPrivateAddress bool `json:"allowPrivateAddress"`
 	// Timestamp when the webhook was created.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// Optional description of the webhook.
@@ -15451,7 +16089,7 @@ type WorkerResponse struct {
 	// Scheduler job ID.
 	SchedulerJobID *string `json:"schedulerJobId,omitempty"`
 	// Scheduling parameters.
-	SchedulingParams map[string]any `json:"schedulingParams,omitempty"`
+	SchedulingParams map[string]FieldValue `json:"schedulingParams,omitempty"`
 	// Session IDs assigned to this worker.
 	Sessions []string `json:"sessions,omitempty"`
 	// Port of the worker's SSH server on the compute node. Present when the worker accepts SSH sessions through its own tunnel.
@@ -15533,10 +16171,11 @@ type WorkflowPermissionResponse struct {
 }
 
 type WorkflowRunDetailResponse struct {
-	CompletedAt      *time.Time                 `json:"completedAt,omitempty"`
-	CreatedAt        *time.Time                 `json:"createdAt,omitempty"`
-	DisplayName      *string                    `json:"displayName,omitempty"`
-	ExecutedJobs     map[string]any             `json:"executedJobs,omitempty"`
+	CompletedAt *time.Time `json:"completedAt,omitempty"`
+	CreatedAt   *time.Time `json:"createdAt,omitempty"`
+	DisplayName *string    `json:"displayName,omitempty"`
+	// The run's jobs keyed by name, in the order the workflow declares them.
+	ExecutedJobs     map[string]ExecutedJob     `json:"executedJobs,omitempty"`
 	ID               string                     `json:"id"`
 	ImageFallbackURL *string                    `json:"imageFallbackUrl,omitempty"`
 	ImageURL         *string                    `json:"imageUrl,omitempty"`
@@ -15555,7 +16194,9 @@ type WorkflowRunDetailResponse struct {
 	Status          *string              `json:"status,omitempty"`
 	StatusReason    *string              `json:"statusReason,omitempty"`
 	User            string               `json:"user"`
-	WorkflowName    *string              `json:"workflowName,omitempty"`
+	// Probable mistakes in the if: conditions of the run's jobs and steps, and of its subworkflows', found when the run was created, such as a word that is always true.
+	Warnings     []WorkflowRunWarning `json:"warnings,omitempty"`
+	WorkflowName *string              `json:"workflowName,omitempty"`
 	// Current name of the run's workflow, for linking to it. workflowName is the name it ran as, which its files live under.
 	WorkflowSlug *string `json:"workflowSlug,omitempty"`
 }
@@ -15613,6 +16254,17 @@ type WorkflowRunResponse struct {
 
 type WorkflowRunRunningStepsResponse struct {
 	RunningSteps []RunStep `json:"runningSteps"`
+}
+
+type WorkflowRunWarning struct {
+	// The job, by the name the workflow gives it.
+	Job string `json:"job"`
+	// What is probably wrong with the condition, and what to write instead.
+	Message string `json:"message"`
+	// The steps that lead to the subworkflow the job is in, such as [main, step_2] for the subworkflow of job main's step 2. Absent for the run's own workflow.
+	Path []string `json:"path,omitempty"`
+	// The step's index in the job's steps, when the condition is a step's. Absent when it is the job's own.
+	Step *int64 `json:"step,omitempty"`
 }
 
 type WorkflowRunsCleanupPreviewBody struct {
@@ -15719,7 +16371,7 @@ type WorkspaceSSHKey struct {
 	Current   *SSHKeyInfo `json:"current,omitempty"`
 	// Type of the next generated key, from the workspace-ssh-key-type policy.
 	KeyType string `json:"keyType"`
-	// When the workspace's self-generated pw_id_rsa key stopped, or stops, being trusted.
+	// When the workspace removes its self-generated pw_id_rsa key, which it keeps as pw_id_rsa.legacy once the managed key replaces it. Platform-managed clusters trust only the managed keys.
 	LegacyRetiredAt *time.Time `json:"legacyRetiredAt,omitempty"`
 	// False until the platform generates the user's key, which happens at their next workspace start.
 	Managed  bool        `json:"managed"`
@@ -15745,6 +16397,94 @@ type WorkspaceStatus struct {
 	Details     *string               `json:"details,omitempty"`
 	HomeStorage *WorkspaceHomeStorage `json:"homeStorage,omitempty"`
 	Status      string                `json:"status"`
+}
+
+// FieldValue represents a union type (oneOf/anyOf).
+// Variants: string, float64, bool
+type FieldValue struct {
+	Value any
+}
+
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u FieldValue) unionValue() any {
+	return u.Value
+}
+
+// MarshalJSON implements json.Marshaler for FieldValue.
+func (u FieldValue) MarshalJSON() ([]byte, error) {
+	return json.Marshal(u.Value)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for FieldValue.
+func (u *FieldValue) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	var errors []error
+	var variant0 string
+	if err := json.Unmarshal(data, &variant0); err == nil {
+		u.Value = variant0
+		return nil
+	} else {
+		errors = append(errors, err)
+	}
+	var variant1 float64
+	if err := json.Unmarshal(data, &variant1); err == nil {
+		u.Value = variant1
+		return nil
+	} else {
+		errors = append(errors, err)
+	}
+	var variant2 bool
+	if err := json.Unmarshal(data, &variant2); err == nil {
+		u.Value = variant2
+		return nil
+	} else {
+		errors = append(errors, err)
+	}
+	return fmt.Errorf("data did not match any variant of FieldValue: %v", errors)
+}
+
+// JobCondition - The job's condition: true or false once resolved, or the expression still to evaluate.
+
+// Variants: bool, string
+type JobCondition struct {
+	Value any
+}
+
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u JobCondition) unionValue() any {
+	return u.Value
+}
+
+// MarshalJSON implements json.Marshaler for JobCondition.
+func (u JobCondition) MarshalJSON() ([]byte, error) {
+	return json.Marshal(u.Value)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for JobCondition.
+func (u *JobCondition) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	var errors []error
+	var variant0 bool
+	if err := json.Unmarshal(data, &variant0); err == nil {
+		u.Value = variant0
+		return nil
+	} else {
+		errors = append(errors, err)
+	}
+	var variant1 string
+	if err := json.Unmarshal(data, &variant1); err == nil {
+		u.Value = variant1
+		return nil
+	} else {
+		errors = append(errors, err)
+	}
+	return fmt.Errorf("data did not match any variant of JobCondition: %v", errors)
 }
 
 // MarketplaceItemBodyVersionsValue - Per-version settings; the shape matches the item's publish body for its subtype, plus a subtype discriminator.
@@ -16381,6 +17121,121 @@ type PutOrganizationLogoDarkBody struct {
 type UploadManagedClusterIconBody struct {
 	// Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).
 	File FormFile `json:"file"`
+}
+
+// GetSavedCostReportUsageResponseItemValue represents a union type (oneOf/anyOf).
+// Variants: float64, string
+type GetSavedCostReportUsageResponseItemValue struct {
+	Value any
+}
+
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u GetSavedCostReportUsageResponseItemValue) unionValue() any {
+	return u.Value
+}
+
+// MarshalJSON implements json.Marshaler for GetSavedCostReportUsageResponseItemValue.
+func (u GetSavedCostReportUsageResponseItemValue) MarshalJSON() ([]byte, error) {
+	return json.Marshal(u.Value)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for GetSavedCostReportUsageResponseItemValue.
+func (u *GetSavedCostReportUsageResponseItemValue) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	var errors []error
+	var variant0 float64
+	if err := json.Unmarshal(data, &variant0); err == nil {
+		u.Value = variant0
+		return nil
+	} else {
+		errors = append(errors, err)
+	}
+	var variant1 string
+	if err := json.Unmarshal(data, &variant1); err == nil {
+		u.Value = variant1
+		return nil
+	} else {
+		errors = append(errors, err)
+	}
+	return fmt.Errorf("data did not match any variant of GetSavedCostReportUsageResponseItemValue: %v", errors)
+}
+
+// GetSavedCostReportUsageResponseItem - One UTC day: its timestamp, and the amount for each group keyed by the group's value.
+type GetSavedCostReportUsageResponseItem struct {
+	// Start of the UTC day.
+	Timestamp time.Time `json:"timestamp"`
+	// Properties not defined by the schema.
+	AdditionalProperties map[string]GetSavedCostReportUsageResponseItemValue `json:"-" openapi:"additionalProperties"`
+}
+
+// MarshalJSON implements json.Marshaler for GetSavedCostReportUsageResponseItem, inlining
+// AdditionalProperties alongside the schema's declared properties.
+func (t GetSavedCostReportUsageResponseItem) MarshalJSON() ([]byte, error) {
+	var members []jsonMember
+	type shadow GetSavedCostReportUsageResponseItem
+	data, err := json.Marshal(shadow(t))
+	if err != nil {
+		return nil, err
+	}
+	if members, err = mergeObjectMembers(members, data); err != nil {
+		return nil, err
+	}
+	if len(t.AdditionalProperties) > 0 {
+		extra := make(map[string]json.RawMessage, len(t.AdditionalProperties))
+		for key, value := range t.AdditionalProperties {
+			raw, err := json.Marshal(value)
+			if err != nil {
+				return nil, fmt.Errorf("marshaling additional property %q: %w", key, err)
+			}
+			extra[key] = raw
+		}
+		deleteDeclaredProperties(extra, []string{"timestamp"})
+		if len(extra) > 0 {
+			encoded, err := json.Marshal(extra)
+			if err != nil {
+				return nil, err
+			}
+			if members, err = mergeObjectMembers(members, encoded); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return encodeObject(members)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for GetSavedCostReportUsageResponseItem, collecting
+// properties the schema does not declare into AdditionalProperties.
+func (t *GetSavedCostReportUsageResponseItem) UnmarshalJSON(data []byte) error {
+	t.AdditionalProperties = nil
+	type shadow GetSavedCostReportUsageResponseItem
+	if err := json.Unmarshal(data, (*shadow)(t)); err != nil {
+		return err
+	}
+	var obj map[string]json.RawMessage
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return err
+	}
+	deleteDeclaredProperties(obj, []string{"timestamp"})
+	if len(obj) > 0 {
+		t.AdditionalProperties = make(map[string]GetSavedCostReportUsageResponseItemValue, len(obj))
+		for key, raw := range obj {
+			var value GetSavedCostReportUsageResponseItemValue
+			// A property that is both undeclared and not of the type the schema gives
+			// additionalProperties is the least useful thing in the payload, so it is
+			// dropped rather than failing the decode of everything alongside it.
+			if err := json.Unmarshal(raw, &value); err != nil {
+				continue
+			}
+			t.AdditionalProperties[key] = value
+		}
+		if len(t.AdditionalProperties) == 0 {
+			t.AdditionalProperties = nil
+		}
+	}
+	return nil
 }
 
 // AttachedStorage - A filesystem mounted on the cluster; the shape is selected by the kind discriminator.

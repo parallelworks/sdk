@@ -28,6 +28,9 @@ var (
 	ErrNoContextsAvailable  = errors.New("no contexts available")
 	ErrEmptyContextName     = errors.New("context name cannot be empty")
 	ErrMultipleContexts     = errors.New("multiple contexts exist for this user/server combination; use --context-name to specify which to update or to create a new one")
+	// ErrContextIsWorkload is a credential that would replace a workload `pw agent enroll` registered, whose
+	// registration and key `pw agent disconnect` must remove first.
+	ErrContextIsWorkload = errors.New("that context is an enrolled workload; disconnect it first with pw agent disconnect")
 )
 
 // Identity represents a saved authentication context in the credentials file.
@@ -41,6 +44,14 @@ type Identity struct {
 	// OAuth is the state of a `pw auth login` sign-in, kept opaque here so
 	// rewriting the file through this type does not drop it.
 	OAuth json.RawMessage `json:"oauth,omitempty"`
+	// Workload is the state of a workload `pw agent enroll` registered, which
+	// signs in with its own key; kept opaque for the same reason.
+	Workload json.RawMessage `json:"workload,omitempty"`
+}
+
+// renewedByCLI reports a context whose access token the pw CLI renews.
+func (id *Identity) renewedByCLI() bool {
+	return id.ApiKey == "" && (len(id.OAuth) > 0 || len(id.Workload) > 0)
 }
 
 // Credential returns the API key or JWT token from this identity.
@@ -51,8 +62,17 @@ func (id *Identity) Credential() string {
 	return id.Token
 }
 
-// Username extracts the username from CanonicalName (format: "user:<username>@<server>").
+// Username extracts the username from CanonicalName (format: "user:<username>@<server>"),
+// or for an enrolled workload, from the subject it acts for.
 func (id *Identity) Username() string {
+	if len(id.Workload) > 0 {
+		var workload struct {
+			Subject string `json:"subject"`
+		}
+		if json.Unmarshal(id.Workload, &workload) == nil && workload.Subject != "" {
+			return strings.TrimPrefix(workload.Subject, "user:")
+		}
+	}
 	if id.CanonicalName == "" {
 		return ""
 	}
@@ -483,6 +503,9 @@ func (c *CredentialConfig) UpsertContext(contextName, canonicalName, server, org
 
 	if contextName != "" {
 		if existing, exists := c.Identities[contextName]; exists {
+			if len(existing.Workload) > 0 {
+				return ErrContextIsWorkload
+			}
 			existing.ApiKey = apiKey
 			existing.Token = token
 			existing.OAuth = nil
@@ -516,6 +539,9 @@ func (c *CredentialConfig) UpsertContext(contextName, canonicalName, server, org
 	existingName := c.findContextByCanonicalName(canonicalName)
 	if existingName != "" {
 		existing := c.Identities[existingName]
+		if len(existing.Workload) > 0 {
+			return ErrContextIsWorkload
+		}
 		existing.ApiKey = apiKey
 		existing.Token = token
 		existing.OAuth = nil
@@ -558,7 +584,8 @@ func (c *CredentialConfig) countContextsByCanonicalName(canonicalName string) in
 
 // NewClientFromCredentialConfig creates an authenticated client from the credentials file.
 // Respects PW_API_KEY, PW_CONTEXT env vars, and flag overrides via ResolveOption.
-// A context signed in with `pw auth` is renewed through the pw CLI (see CLIAuth).
+// A context signed in with `pw auth`, or enrolled with `pw agent enroll`, is
+// renewed through the pw CLI (see CLIAuth).
 //
 // ResolveOption values (WithContext, WithPlatformHost) are extracted from opts
 // and used for identity resolution. Remaining ClientOption values configure the client.
@@ -591,14 +618,12 @@ func NewClientFromCredentialConfig(opts ...any) (*Client, error) {
 	}
 
 	credential := identity.Credential()
-	if credential == "" {
-		return nil, ErrNoCredentials
-	}
-
 	var auth AuthProvider
 	switch {
-	case identity.ApiKey == "" && len(identity.OAuth) > 0:
+	case identity.renewedByCLI():
 		auth = &CLIAuth{Command: o.cliCommand, Context: contextName, Timeout: o.cliTimeout}
+	case credential == "":
+		return nil, ErrNoCredentials
 	case IsToken(credential):
 		auth = &BearerAuth{Token: credential}
 	default:
