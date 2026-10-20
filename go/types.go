@@ -1243,7 +1243,7 @@ type AppBody struct {
 	RedirectUris []string `json:"redirectUris,omitempty"`
 	// Whether the user's session must have completed two-step verification. Turning it on revokes the credentials issued to sessions that had not.
 	RequireMfa *bool `json:"requireMfa,omitempty"`
-	// Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed. A service application gets no refresh tokens, so offline_access is dropped from its list.
+	// Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed. tandem:read and tandem:write let a platform-level application act as the user in Tandem, read-only or fully, and nowhere else on the platform. A service application gets no refresh tokens, so offline_access is dropped from its list.
 	Scopes []string `json:"scopes,omitempty"`
 	// What the sub claim contains. Defaults to userId.
 	SubjectType *string `json:"subjectType,omitempty"`
@@ -1323,7 +1323,7 @@ type AppUpdateBody struct {
 	RedirectUris []string `json:"redirectUris,omitempty"`
 	// Whether the user's session must have completed two-step verification. Turning it on revokes the credentials issued to sessions that had not.
 	RequireMfa *bool `json:"requireMfa,omitempty"`
-	// Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed. A service application gets no refresh tokens, so offline_access is dropped from its list.
+	// Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed. tandem:read and tandem:write let a platform-level application act as the user in Tandem, read-only or fully, and nowhere else on the platform. A service application gets no refresh tokens, so offline_access is dropped from its list.
 	Scopes []string `json:"scopes,omitempty"`
 	// What the sub claim contains. Defaults to userId.
 	SubjectType *string `json:"subjectType,omitempty"`
@@ -3228,6 +3228,8 @@ type ChatToolDecision struct {
 	At time.Time `json:"at"`
 	// Who settled it
 	By string `json:"by"`
+	// Whether the user changed the arguments before allowing the call
+	Edited *bool `json:"edited,omitempty"`
 	// The display name of the user who answered
 	Name *string `json:"name,omitempty"`
 	// How the call was settled
@@ -3255,21 +3257,27 @@ type CleanupPreviewsOutputBody struct {
 type ClientInformation struct {
 	// The subject the client acts as, carried in act on the tokens it is issued
 	Actor *string `json:"actor,omitempty"`
+	// Managed cluster node only: the agent key that authenticates the node's tunnel and heartbeat. It is returned once.
+	AgentKey *string `json:"agent_key,omitempty"`
 	// The client identifier
 	ClientID *string `json:"client_id,omitempty"`
 	// When the client identifier was issued, in seconds since the Unix epoch
 	ClientIDIssuedAt *int64 `json:"client_id_issued_at,omitempty"`
 	// The name the client registered, shown to the user it acts for
 	ClientName *string `json:"client_name,omitempty"`
+	// Managed cluster node only: the managed cluster the node joined
+	Cluster *string `json:"cluster,omitempty"`
 	// OAuth error code
 	Error *string `json:"error,omitempty"`
 	// Human-readable error detail
 	ErrorDescription *string `json:"error_description,omitempty"`
-	// The grant types the client may use
+	// The grant types the client may use; empty for a managed cluster node
 	GrantTypes []string       `json:"grant_types,omitempty"`
 	Jwks       *JSONWebKeySet `json:"jwks,omitempty"`
 	// The workload the client stands for
 	Kind *string `json:"kind,omitempty"`
+	// Managed cluster node only: the organization the node joined
+	Organization *string `json:"organization,omitempty"`
 	// Bearer credential for the client configuration endpoint. Each request there returns a new one and retires the one presented.
 	RegistrationAccessToken *string `json:"registration_access_token,omitempty"`
 	// The client configuration endpoint, for reading, updating and deleting this registration
@@ -3282,23 +3290,31 @@ type ClientInformation struct {
 	SoftwareVersion *string `json:"software_version,omitempty"`
 	// The user the client acts for, which its subject assertions name in sub
 	Subject *string `json:"subject,omitempty"`
-	// How the client authenticates at the token endpoint; always private_key_jwt
+	// How the client authenticates at the token endpoint: private_key_jwt, or none for a managed cluster node, which never uses it
 	TokenEndpointAuthMethod *string `json:"token_endpoint_auth_method,omitempty"`
 }
 
 type ClientMetadata struct {
+	// Managed cluster node only: the node's architecture
+	Arch *string `json:"arch,omitempty"`
 	// Required on update: the client's identifier
 	ClientID *string `json:"client_id,omitempty"`
 	// Name shown to the user the client acts for
 	ClientName *string `json:"client_name,omitempty"`
-	// Grant types the client uses
-	GrantTypes []string      `json:"grant_types,omitempty"`
-	Jwks       JSONWebKeySet `json:"jwks"`
+	// Grant types the client uses; empty for a managed cluster node
+	GrantTypes []string `json:"grant_types,omitempty"`
+	// Managed cluster node only, and required there: the node's hostname
+	Hostname *string `json:"hostname,omitempty"`
+	// Managed cluster node only: the node's IP addresses
+	IPAddresses []string      `json:"ip_addresses,omitempty"`
+	Jwks        JSONWebKeySet `json:"jwks"`
+	// Managed cluster node only: the node's operating system
+	Os *string `json:"os,omitempty"`
 	// Identifier of the client software
 	SoftwareID *string `json:"software_id,omitempty"`
 	// Version of the client software
 	SoftwareVersion *string `json:"software_version,omitempty"`
-	// How the client authenticates at the token endpoint
+	// How the client authenticates at the token endpoint: private_key_jwt for a workload, none for a managed cluster node
 	TokenEndpointAuthMethod *string `json:"token_endpoint_auth_method,omitempty"`
 }
 
@@ -14944,6 +14960,8 @@ func (t *Tool) UnmarshalJSON(data []byte) error {
 type ToolApprovalAnswer struct {
 	// Whether the user approved the call
 	Allowed bool `json:"allowed"`
+	// Arguments the user changed the call to, as JSON, when allowing it
+	Args *string `json:"args,omitempty"`
 	// Why the user declined, for the model
 	Feedback *string `json:"feedback,omitempty"`
 	// The assistant message holding the call

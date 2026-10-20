@@ -6094,6 +6094,8 @@ type GetOidcAuthorizeParams struct {
 	IDTokenHint *string `json:"id_token_hint,omitempty"`
 	// Must be query, the default
 	ResponseMode *string `json:"response_mode,omitempty"`
+	// Resource indicator (RFC 8707). An application granted tandem:read or tandem:write gets a token for https://<platform host>/tandem whether or not it names it, and any other value is invalid_target
+	Resource *[]string `json:"resource,omitempty"`
 }
 
 // GetOidcAuthorize - OIDC authorization endpoint
@@ -6132,6 +6134,8 @@ func (c *Client) GetOidcAuthorize(ctx context.Context, opts ...GetOidcAuthorizeP
 	addQueryParam(queryValues, "id_token_hint", "form", false, params.IDTokenHint)
 
 	addQueryParam(queryValues, "response_mode", "form", false, params.ResponseMode)
+
+	addQueryParam(queryValues, "resource", "form", false, params.Resource)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
@@ -6388,6 +6392,8 @@ func (c *Client) PostOidcIntrospect(ctx context.Context, body *map[string]any) (
 // The body is JSON client metadata. Send `jwks` with exactly one EC P-256 public key for ES256; private key members are refused. `token_endpoint_auth_method` is `private_key_jwt` and `grant_types` is `urn:ietf:params:oauth:grant-type:token-exchange`; omitted, they take those values. `client_name`, `software_id` and `software_version` are optional; `client_name` names the client to the user it acts for. `redirect_uris` and `jwks_uri` are refused. Other metadata is ignored.
 //
 // The response carries the `client_id`, the registered metadata, and a `registration_access_token` for the `registration_client_uri` (RFC 7592). Errors use the RFC 7591 shape: `invalid_client_metadata` or `invalid_redirect_uri` with status 400, and `invalid_token` with status 401 for an initial access token that is not valid, has expired, or was already used.
+//
+// A managed cluster node registers here with its node registration token (`pwrt_`) as the initial access token. A single-use token registers one node; a reusable one registers any number until it expires or is revoked. The node registers no key: `token_endpoint_auth_method` is `none`, `grant_types` is empty, `jwks_uri` is refused, and `jwks` must be absent or an empty key set. It sends `hostname`, which is required, and optionally `ip_addresses`, `os` and `arch`. The response has `kind` `managed-cluster-node` and carries the node's `agent_key`, which authenticates its tunnel and heartbeat, with the `organization` and `cluster` it joined, and no `registration_access_token`: an organization administrator removes the node, and a single-use token replaces its key. A reusable token presented for a hostname the cluster already has is refused with `invalid_client_metadata`.
 func (c *Client) RegisterOauthClient(ctx context.Context, body *ClientMetadata) (*ClientInformation, error) {
 
 	path := "/api/oidc/register"
@@ -6489,7 +6495,7 @@ func (c *Client) GetOidcSectorIdentifier(ctx context.Context, authMethodID strin
 //
 // Redeems an authorization code, or rotates a refresh token, for an ID token and an opaque access token (RFC 6749 sections 4.1.3 and 6).
 //
-// The body is `application/x-www-form-urlencoded`. To redeem a code, send `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. To refresh, send `grant_type=refresh_token`, a `refresh_token` issued for the `offline_access` scope, and an optional `scope` that can narrow but never widen the original grant; the response carries a new refresh token, and presenting a spent one again revokes every token descended from it. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.
+// The body is `application/x-www-form-urlencoded`. To redeem a code, send `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. To refresh, send `grant_type=refresh_token`, a `refresh_token` issued for the `offline_access` scope, and an optional `scope` that can narrow but never widen the original grant; the response carries a new refresh token, and presenting a spent one again revokes every token descended from it. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE. A grant holding tandem:read or tandem:write is for Tandem (RFC 8707): its access token opens https://<platform host>/tandem and nothing else on the platform, and a `resource` sent on either grant must name that URL or is `invalid_target`.
 //
 // The pw CLI polls here with `grant_type=urn:ietf:params:oauth:grant-type:device_code` and the `device_code` from the device authorization endpoint, and is told `authorization_pending`, `slow_down`, `expired_token`, or `access_denied` until the user decides. For a `pw agent connect` device code, the `access_token` is a single-use bootstrap token for the registration endpoint, with `scope=agent_enrollment` and `authorization_details`, and no ID or refresh token.
 //

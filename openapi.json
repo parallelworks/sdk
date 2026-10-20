@@ -3606,7 +3606,7 @@
             "type": "boolean"
           },
           "scopes": {
-            "description": "Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed. A service application gets no refresh tokens, so offline_access is dropped from its list.",
+            "description": "Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed. tandem:read and tandem:write let a platform-level application act as the user in Tandem, read-only or fully, and nowhere else on the platform. A service application gets no refresh tokens, so offline_access is dropped from its list.",
             "items": {
               "type": "string"
             },
@@ -3890,7 +3890,7 @@
             "type": "boolean"
           },
           "scopes": {
-            "description": "Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed. A service application gets no refresh tokens, so offline_access is dropped from its list.",
+            "description": "Scopes the application may request. Omitted at registration, it defaults to openid, profile, and email; groups and offline_access must be listed. tandem:read and tandem:write let a platform-level application act as the user in Tandem, read-only or fully, and nowhere else on the platform. A service application gets no refresh tokens, so offline_access is dropped from its list.",
             "items": {
               "type": "string"
             },
@@ -9395,6 +9395,10 @@
             ],
             "type": "string"
           },
+          "edited": {
+            "description": "Whether the user changed the arguments before allowing the call",
+            "type": "boolean"
+          },
           "name": {
             "description": "The display name of the user who answered",
             "type": "string"
@@ -9482,6 +9486,10 @@
             "description": "The subject the client acts as, carried in act on the tokens it is issued",
             "type": "string"
           },
+          "agent_key": {
+            "description": "Managed cluster node only: the agent key that authenticates the node's tunnel and heartbeat. It is returned once.",
+            "type": "string"
+          },
           "client_id": {
             "description": "The client identifier",
             "type": "string"
@@ -9495,6 +9503,10 @@
             "description": "The name the client registered, shown to the user it acts for",
             "type": "string"
           },
+          "cluster": {
+            "description": "Managed cluster node only: the managed cluster the node joined",
+            "type": "string"
+          },
           "error": {
             "description": "OAuth error code",
             "type": "string"
@@ -9504,14 +9516,11 @@
             "type": "string"
           },
           "grant_types": {
-            "description": "The grant types the client may use",
+            "description": "The grant types the client may use; empty for a managed cluster node",
             "items": {
               "type": "string"
             },
-            "type": [
-              "array",
-              "null"
-            ]
+            "type": "array"
           },
           "jwks": {
             "$ref": "#/components/schemas/JSONWebKeySet",
@@ -9521,8 +9530,13 @@
             "description": "The workload the client stands for",
             "enum": [
               "existing-cluster-agent",
-              "workspace"
+              "workspace",
+              "managed-cluster-node"
             ],
+            "type": "string"
+          },
+          "organization": {
+            "description": "Managed cluster node only: the organization the node joined",
             "type": "string"
           },
           "registration_access_token": {
@@ -9553,7 +9567,7 @@
             "type": "string"
           },
           "token_endpoint_auth_method": {
-            "description": "How the client authenticates at the token endpoint; always private_key_jwt",
+            "description": "How the client authenticates at the token endpoint: private_key_jwt, or none for a managed cluster node, which never uses it",
             "type": "string"
           }
         },
@@ -9562,6 +9576,11 @@
       "ClientMetadata": {
         "additionalProperties": false,
         "properties": {
+          "arch": {
+            "description": "Managed cluster node only: the node's architecture",
+            "maxLength": 128,
+            "type": "string"
+          },
           "client_id": {
             "description": "Required on update: the client's identifier",
             "type": "string"
@@ -9572,7 +9591,7 @@
             "type": "string"
           },
           "grant_types": {
-            "description": "Grant types the client uses",
+            "description": "Grant types the client uses; empty for a managed cluster node",
             "items": {
               "enum": [
                 "urn:ietf:params:oauth:grant-type:token-exchange"
@@ -9584,9 +9603,31 @@
               "null"
             ]
           },
+          "hostname": {
+            "description": "Managed cluster node only, and required there: the node's hostname",
+            "maxLength": 253,
+            "type": "string"
+          },
+          "ip_addresses": {
+            "description": "Managed cluster node only: the node's IP addresses",
+            "items": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "jwks": {
             "$ref": "#/components/schemas/JSONWebKeySet",
-            "description": "The client's public key: exactly one EC P-256 key for ES256"
+            "description": "The client's public key: exactly one EC P-256 key for ES256. A managed cluster node registers no key, so it sends an empty key set or omits jwks."
+          },
+          "os": {
+            "description": "Managed cluster node only: the node's operating system",
+            "maxLength": 128,
+            "type": "string"
           },
           "software_id": {
             "description": "Identifier of the client software",
@@ -9599,9 +9640,10 @@
             "type": "string"
           },
           "token_endpoint_auth_method": {
-            "description": "How the client authenticates at the token endpoint",
+            "description": "How the client authenticates at the token endpoint: private_key_jwt for a workload, none for a managed cluster node",
             "enum": [
-              "private_key_jwt"
+              "private_key_jwt",
+              "none"
             ],
             "type": "string"
           }
@@ -43793,6 +43835,11 @@
             "description": "Whether the user approved the call",
             "type": "boolean"
           },
+          "args": {
+            "description": "Arguments the user changed the call to, as JSON, when allowing it",
+            "maxLength": 100000,
+            "type": "string"
+          },
           "feedback": {
             "description": "Why the user declined, for the model",
             "maxLength": 2000,
@@ -62445,6 +62492,22 @@
               "description": "Must be query, the default",
               "type": "string"
             }
+          },
+          {
+            "description": "Resource indicator (RFC 8707). An application granted tandem:read or tandem:write gets a token for https://\u003cplatform host\u003e/tandem whether or not it names it, and any other value is invalid_target",
+            "explode": false,
+            "in": "query",
+            "name": "resource",
+            "schema": {
+              "description": "Resource indicator (RFC 8707). An application granted tandem:read or tandem:write gets a token for https://\u003cplatform host\u003e/tandem whether or not it names it, and any other value is invalid_target",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
           }
         ],
         "responses": {
@@ -63079,7 +63142,7 @@
     },
     "/api/oidc/register": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRegisters a platform workload, such as the pw agent on an existing cluster or a workspace, as an OAuth client of its own (RFC 7591). Authenticate with an initial access token the platform issued to the workload, as a Bearer credential. Each one registers one client, once, within 10 minutes of being issued. The token, not the request, decides which user the client acts for, and a new registration for the same workload replaces the previous one.\n\nThe body is JSON client metadata. Send `jwks` with exactly one EC P-256 public key for ES256; private key members are refused. `token_endpoint_auth_method` is `private_key_jwt` and `grant_types` is `urn:ietf:params:oauth:grant-type:token-exchange`; omitted, they take those values. `client_name`, `software_id` and `software_version` are optional; `client_name` names the client to the user it acts for. `redirect_uris` and `jwks_uri` are refused. Other metadata is ignored.\n\nThe response carries the `client_id`, the registered metadata, and a `registration_access_token` for the `registration_client_uri` (RFC 7592). Errors use the RFC 7591 shape: `invalid_client_metadata` or `invalid_redirect_uri` with status 400, and `invalid_token` with status 401 for an initial access token that is not valid, has expired, or was already used.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRegisters a platform workload, such as the pw agent on an existing cluster or a workspace, as an OAuth client of its own (RFC 7591). Authenticate with an initial access token the platform issued to the workload, as a Bearer credential. Each one registers one client, once, within 10 minutes of being issued. The token, not the request, decides which user the client acts for, and a new registration for the same workload replaces the previous one.\n\nThe body is JSON client metadata. Send `jwks` with exactly one EC P-256 public key for ES256; private key members are refused. `token_endpoint_auth_method` is `private_key_jwt` and `grant_types` is `urn:ietf:params:oauth:grant-type:token-exchange`; omitted, they take those values. `client_name`, `software_id` and `software_version` are optional; `client_name` names the client to the user it acts for. `redirect_uris` and `jwks_uri` are refused. Other metadata is ignored.\n\nThe response carries the `client_id`, the registered metadata, and a `registration_access_token` for the `registration_client_uri` (RFC 7592). Errors use the RFC 7591 shape: `invalid_client_metadata` or `invalid_redirect_uri` with status 400, and `invalid_token` with status 401 for an initial access token that is not valid, has expired, or was already used.\n\nA managed cluster node registers here with its node registration token (`pwrt_`) as the initial access token. A single-use token registers one node; a reusable one registers any number until it expires or is revoked. The node registers no key: `token_endpoint_auth_method` is `none`, `grant_types` is empty, `jwks_uri` is refused, and `jwks` must be absent or an empty key set. It sends `hostname`, which is required, and optionally `ip_addresses`, `os` and `arch`. The response has `kind` `managed-cluster-node` and carries the node's `agent_key`, which authenticates its tunnel and heartbeat, with the `organization` and `cluster` it joined, and no `registration_access_token`: an organization administrator removes the node, and a single-use token replaces its key. A reusable token presented for a hostname the cluster already has is refused with `invalid_client_metadata`.",
         "operationId": "register-oauth-client",
         "requestBody": {
           "content": {
@@ -63471,7 +63534,7 @@
     },
     "/api/oidc/token": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRedeems an authorization code, or rotates a refresh token, for an ID token and an opaque access token (RFC 6749 sections 4.1.3 and 6).\n\nThe body is `application/x-www-form-urlencoded`. To redeem a code, send `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. To refresh, send `grant_type=refresh_token`, a `refresh_token` issued for the `offline_access` scope, and an optional `scope` that can narrow but never widen the original grant; the response carries a new refresh token, and presenting a spent one again revokes every token descended from it. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE.\n\nThe pw CLI polls here with `grant_type=urn:ietf:params:oauth:grant-type:device_code` and the `device_code` from the device authorization endpoint, and is told `authorization_pending`, `slow_down`, `expired_token`, or `access_denied` until the user decides. For a `pw agent connect` device code, the `access_token` is a single-use bootstrap token for the registration endpoint, with `scope=agent_enrollment` and `authorization_details`, and no ID or refresh token.\n\nA service application or Kubernetes cluster gets an ID token for a user through the token exchange grant (RFC 8693), the exec-credential pattern kubectl uses. Send `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`, the application's `client_id` (or `audience`), `subject_token` set to the user's platform API key or pw CLI access token (a Kubernetes cluster also accepts the user's platform token; an ACTIVATE mobile app access token is refused), `subject_token_type=urn:ietf:params:oauth:token-type:access_token`, and optionally `requested_token_type=urn:ietf:params:oauth:token-type:id_token` and a narrowing `scope`. These clients hold no secret, so none is sent. The response carries the ID token in `access_token`, with `issued_token_type=urn:ietf:params:oauth:token-type:id_token` and `token_type=N_A`. Any other kind of application is refused with `unauthorized_client`, or with `invalid_target` when only `audience` names it.\n\nA client registered at the registration endpoint authenticates with `private_key_jwt` (RFC 7523 section 2.2): send `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer` and a `client_assertion` JWT signed with ES256 by its registered key, with no other client credential. The JWT's `iss` and `sub` are the `client_id`, `aud` is the issuer identifier from the discovery document and nothing else, `exp` is at most 5 minutes away, and `jti` is unique, since each assertion is accepted once. A `client_id` sent beside it must match. Its key is accepted for 90 days from when it was registered or last replaced through the registration endpoint. A failed authentication is `invalid_client` with status 401.\n\nSuch a client exchanges for a short-lived access token for the one user it was registered for (RFC 8693): send the token exchange grant with its client assertion, `subject_token` set to a second ES256 JWT it signs with the same key, with `iss` its `client_id`, `sub` `user:\u003cusername\u003e`, the same `aud`, `exp` and single-use `jti` rules, and `subject_token_type=urn:ietf:params:oauth:token-type:jwt`. `requested_token_type` may be `urn:ietf:params:oauth:token-type:access_token`; `actor_token` and `scope` are refused, and `audience` or `resource` may only name the platform's own URL. The response carries the access token, `issued_token_type=urn:ietf:params:oauth:token-type:access_token`, `token_type=Bearer` and `expires_in`, and no refresh token: exchange again before it expires. A subject token that does not verify is `invalid_request`.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRedeems an authorization code, or rotates a refresh token, for an ID token and an opaque access token (RFC 6749 sections 4.1.3 and 6).\n\nThe body is `application/x-www-form-urlencoded`. To redeem a code, send `grant_type=authorization_code`, `code`, `redirect_uri`, and `code_verifier` for PKCE. To refresh, send `grant_type=refresh_token`, a `refresh_token` issued for the `offline_access` scope, and an optional `scope` that can narrow but never widen the original grant; the response carries a new refresh token, and presenting a spent one again revokes every token descended from it. A confidential client authenticates with `client_id` and `client_secret`, either in the body or with HTTP Basic; a public client sends `client_id` and relies on PKCE. A grant holding tandem:read or tandem:write is for Tandem (RFC 8707): its access token opens https://\u003cplatform host\u003e/tandem and nothing else on the platform, and a `resource` sent on either grant must name that URL or is `invalid_target`.\n\nThe pw CLI polls here with `grant_type=urn:ietf:params:oauth:grant-type:device_code` and the `device_code` from the device authorization endpoint, and is told `authorization_pending`, `slow_down`, `expired_token`, or `access_denied` until the user decides. For a `pw agent connect` device code, the `access_token` is a single-use bootstrap token for the registration endpoint, with `scope=agent_enrollment` and `authorization_details`, and no ID or refresh token.\n\nA service application or Kubernetes cluster gets an ID token for a user through the token exchange grant (RFC 8693), the exec-credential pattern kubectl uses. Send `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`, the application's `client_id` (or `audience`), `subject_token` set to the user's platform API key or pw CLI access token (a Kubernetes cluster also accepts the user's platform token; an ACTIVATE mobile app access token is refused), `subject_token_type=urn:ietf:params:oauth:token-type:access_token`, and optionally `requested_token_type=urn:ietf:params:oauth:token-type:id_token` and a narrowing `scope`. These clients hold no secret, so none is sent. The response carries the ID token in `access_token`, with `issued_token_type=urn:ietf:params:oauth:token-type:id_token` and `token_type=N_A`. Any other kind of application is refused with `unauthorized_client`, or with `invalid_target` when only `audience` names it.\n\nA client registered at the registration endpoint authenticates with `private_key_jwt` (RFC 7523 section 2.2): send `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer` and a `client_assertion` JWT signed with ES256 by its registered key, with no other client credential. The JWT's `iss` and `sub` are the `client_id`, `aud` is the issuer identifier from the discovery document and nothing else, `exp` is at most 5 minutes away, and `jti` is unique, since each assertion is accepted once. A `client_id` sent beside it must match. Its key is accepted for 90 days from when it was registered or last replaced through the registration endpoint. A failed authentication is `invalid_client` with status 401.\n\nSuch a client exchanges for a short-lived access token for the one user it was registered for (RFC 8693): send the token exchange grant with its client assertion, `subject_token` set to a second ES256 JWT it signs with the same key, with `iss` its `client_id`, `sub` `user:\u003cusername\u003e`, the same `aud`, `exp` and single-use `jti` rules, and `subject_token_type=urn:ietf:params:oauth:token-type:jwt`. `requested_token_type` may be `urn:ietf:params:oauth:token-type:access_token`; `actor_token` and `scope` are refused, and `audience` or `resource` may only name the platform's own URL. The response carries the access token, `issued_token_type=urn:ietf:params:oauth:token-type:access_token`, `token_type=Bearer` and `expires_in`, and no refresh token: exchange again before it expires. A subject token that does not verify is `invalid_request`.",
         "operationId": "post-oidc-token",
         "requestBody": {
           "content": {
