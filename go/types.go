@@ -1479,65 +1479,6 @@ type AuthorizationDetail struct {
 	Type string `json:"type"`
 }
 
-type AwsBucket struct {
-	// The requesting user's access level for this bucket.
-	AccessMode string `json:"accessMode"`
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Name of the AWS bucket
-	BucketName *string `json:"bucketName,omitempty"`
-	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)
-	CanGetCredentials bool `json:"canGetCredentials"`
-	// Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)
-	CanWrite bool `json:"canWrite"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the AWS bucket is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
-	// Indicates if the AWS bucket has versioning enabled
-	Versioning *bool `json:"versioning,omitempty"`
-}
-
 type AwsBucketToken struct {
 	// Temporary AWS access key ID scoped to this bucket.
 	AccessKeyID string `json:"accessKeyId"`
@@ -1564,61 +1505,6 @@ type AwsBucketVersionSettings struct {
 	Versioning *bool  `json:"versioning,omitempty"`
 }
 
-type AwsDisk struct {
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the disk is encrypted
-	Encrypted *bool `json:"encrypted,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the AWS disk is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Size of the AWS disk in GB
-	SizeGb *int32 `json:"sizeGb,omitempty"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of the AWS disk
-	Type *string `json:"type,omitempty"`
-	// User associated with the storage.
-	User string `json:"user"`
-	// Availability zone of the AWS disk
-	Zone *string `json:"zone,omitempty"`
-}
-
 type AwsDiskVersionSettings struct {
 	Encrypted *bool   `json:"encrypted,omitempty"`
 	Iops      *int64  `json:"iops,omitempty"`
@@ -1631,66 +1517,13 @@ type AwsDiskVersionSettings struct {
 	Zone       *string `json:"zone,omitempty"`
 }
 
-type AwsEfs struct {
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// ID of the AWS elastic filesystem
-	FileSystemID *string `json:"fileSystemId,omitempty"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Mount targets of the AWS elastic filesystem
-	MountTargets map[string]string `json:"mountTargets,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the AWS bucket is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Throughput mode of the AWS elastic filesystem
-	ThroughputMode *string `json:"throughputMode,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
-}
-
 type AwsEfsDefinition struct {
 	// EFS filesystem id at AWS.
 	FileSystemID *string `json:"fileSystemId,omitempty"`
 	// Mount targets by subnet.
 	MountTargets map[string]string `json:"mountTargets,omitempty"`
+	// Provisioned throughput in MiB/s, when the throughput mode is provisioned.
+	ProvisionedThroughputMibps *int64 `json:"provisionedThroughputMibps,omitempty"`
 	// Throughput mode of the filesystem.
 	ThroughputMode *string `json:"throughputMode,omitempty"`
 	// Type discriminator.
@@ -1708,86 +1541,19 @@ type AwsEfsVersionSettings struct {
 	ThroughputMode *string `json:"throughput_mode,omitempty"`
 }
 
-type AwsLustre struct {
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Availability zone of the AWS Lustre file system
-	AvailabilityZone *string `json:"availabilityZone,omitempty"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the storage is ephemeral.
-	Ephemeral *bool `json:"ephemeral,omitempty"`
-	// Export path for the AWS Lustre file system
-	ExportPath *string `json:"exportPath,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Name of the AWS Lustre file system
-	FsName *string `json:"fsName,omitempty"`
-	// Compression type of the AWS Lustre file system
-	FsxCompression *string `json:"fsxCompression,omitempty"`
-	// Deployment type of the AWS Lustre file system
-	FsxDeployment *string `json:"fsxDeployment,omitempty"`
-	// ID of the AWS Lustre file system
-	FsxID *string `json:"fsxId,omitempty"`
-	// Throughput type of the AWS Lustre file system
-	FsxThroughput *string `json:"fsxThroughput,omitempty"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Import path for the AWS Lustre file system
-	ImportPath *string `json:"importPath,omitempty"`
-	// Metadata server of the AWS Lustre file system
-	Mds *string `json:"mds,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the AWS bucket is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Storage capacity of the AWS Lustre file system
-	StorageCapacity *int32 `json:"storageCapacity,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
-}
-
 type AwsLustreDefinition struct {
 	// Availability zone the filesystem is in.
 	AvailabilityZone *string `json:"availabilityZone,omitempty"`
+	// S3 path the filesystem exports to.
+	ExportPath *string `json:"exportPath,omitempty"`
 	// Data compression algorithm, e.g. LZ4.
 	FsxCompression *string `json:"fsxCompression,omitempty"`
 	// FSx deployment type, e.g. PERSISTENT_2.
 	FsxDeploymentType *string `json:"fsxDeploymentType,omitempty"`
 	// Per-unit throughput in MBps/TiB.
 	FsxThroughput *string `json:"fsxThroughput,omitempty"`
+	// S3 path the filesystem imports from.
+	ImportPath *string `json:"importPath,omitempty"`
 	// Provisioned capacity in GB.
 	StorageCapacityGb *int32 `json:"storageCapacityGb,omitempty"`
 	// Type discriminator.
@@ -1883,6 +1649,44 @@ type AwsSlurmDefinition struct {
 	Zone                    *string `json:"zone,omitempty"`
 }
 
+type AwsSlurmDefinitionPatch struct {
+	// Marketplace-injected fetch command; omitted from a save to clear it when the cluster switches marketplace configuration.
+	AnsibleFetchCommand *string `json:"ansible_fetch_command,omitempty"`
+	// Marketplace-injected fetch command output location.
+	AnsibleFetchCommandOutput *string `json:"ansible_fetch_command_output,omitempty"`
+	// Marketplace-injected fetch destination.
+	AnsibleFetchLocation   *string `json:"ansible_fetch_location,omitempty"`
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	// Admin-set provisioning debug flag.
+	DebugMode *bool `json:"debugMode,omitempty"`
+	// Desktop session settings.
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	Disks          []ClusterControllerDisk `json:"disks,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
+	HealthCheck  *string `json:"healthCheck,omitempty"`
+	// Id of the attached IP address or network interface. Clusters saved before network-interface support hold the raw IP address instead.
+	IPAddress  *string                    `json:"ipAddress,omitempty"`
+	Partitions []ClusterAwsSlurmPartition `json:"partitions,omitempty"`
+	Region     *string                    `json:"region,omitempty"`
+	// Root disk size in GiB.
+	RootSize *int64 `json:"rootSize,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
+	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64 `json:"slurmSuspendTimeout,omitempty"`
+	// Type discriminator.
+	Type                    string  `json:"type"`
+	UserBootstrap           *string `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	Zone                    *string `json:"zone,omitempty"`
+}
+
 type AwsSlurmPartition struct {
 	Architecture          *string       `json:"architecture,omitempty"`
 	CapacityBlock         *bool         `json:"capacityBlock,omitempty"`
@@ -1933,6 +1737,8 @@ type AzureAzfilesDefinition struct {
 	AzfilesName *string `json:"azfilesName,omitempty"`
 	// Azure resource group the storage account belongs to.
 	AzureResourceGroup *string `json:"azureResourceGroup,omitempty"`
+	// Share quota in GB.
+	SizeGb *int64 `json:"sizeGb,omitempty"`
 	// Azure storage account hosting the share.
 	StorageAccountName *string `json:"storageAccountName,omitempty"`
 	// Type discriminator.
@@ -1944,63 +1750,6 @@ type AzureAzfilesVersionSettings struct {
 	SizeGb *int64  `json:"sizeGb,omitempty"`
 	// Subtype discriminator.
 	Subtype string `json:"subtype"`
-}
-
-type AzureBlobStorage struct {
-	// The requesting user's access level for this bucket.
-	AccessMode string `json:"accessMode"`
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Name of the Azure blob storage
-	BucketName *string `json:"bucketName,omitempty"`
-	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)
-	CanGetCredentials bool `json:"canGetCredentials"`
-	// Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)
-	CanWrite bool `json:"canWrite"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the Azure blob storage is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
 }
 
 type AzureBucketToken struct {
@@ -2030,61 +1779,6 @@ type AzureBucketVersionSettings struct {
 	Subtype string `json:"subtype"`
 }
 
-type AzureDisk struct {
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Type of the disk
-	DiskType *string `json:"diskType,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the disk is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Size of the disk in GiB
-	Size *int32 `json:"size,omitempty"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
-	// Zone the disk is in
-	Zone *string `json:"zone,omitempty"`
-}
-
 type AzureDiskVersionSettings struct {
 	Region *string `json:"region,omitempty"`
 	SizeGb *int64  `json:"size_gb,omitempty"`
@@ -2092,69 +1786,6 @@ type AzureDiskVersionSettings struct {
 	Subtype string  `json:"subtype"`
 	Type    *string `json:"type,omitempty"`
 	Zone    *string `json:"zone,omitempty"`
-}
-
-type AzureFiles struct {
-	// The requesting user's access level for this bucket.
-	AccessMode string `json:"accessMode"`
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Name of the Azure Files share
-	AzfilesName *string `json:"azfilesName,omitempty"`
-	// Name of the Azure resource group holding the storage account
-	AzureResourceGroup *string `json:"azureResourceGroup,omitempty"`
-	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)
-	CanGetCredentials bool `json:"canGetCredentials"`
-	// Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)
-	CanWrite bool `json:"canWrite"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the Azure files is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Size of the Azure files in GB
-	Size *int32 `json:"size,omitempty"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Name of the Azure storage account backing the share
-	StorageAccountName *string `json:"storageAccountName,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
 }
 
 type AzureFilesSas struct {
@@ -2209,67 +1840,6 @@ type AzureMachineLearningDetail struct {
 	WorkspaceID *string `json:"workspaceId,omitempty"`
 }
 
-type AzureManagedLustre struct {
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// ID of the Lustre filesystem
-	FilesystemID *string `json:"filesystemId,omitempty"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Day of the week for maintenance window
-	MaintenanceWindowDay *string `json:"maintenanceWindowDay,omitempty"`
-	// Time of the day for maintenance window
-	MaintenanceWindowTime *string `json:"maintenanceWindowTime,omitempty"`
-	// Address of the MGS (Management Server) in the Azure managed Lustre storage
-	MgsAddress *string `json:"mgsAddress,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the Azure Managed Lustre is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Size of the Azure managed Lustre storage in TB
-	StorageSize *int32 `json:"storageSize,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of the Azure managed Lustre storage
-	Type *string `json:"type,omitempty"`
-	// User associated with the storage.
-	User string `json:"user"`
-	// Zone the Azure managed Lustre storage is in
-	Zone *string `json:"zone,omitempty"`
-}
-
 type AzureManagedLustreDefinition struct {
 	// Day of the week for the maintenance window.
 	MaintenanceWindowDay *string `json:"maintenanceWindowDay,omitempty"`
@@ -2299,63 +1869,6 @@ type AzureManagedLustreVersionSettings struct {
 	Zone    *string `json:"zone,omitempty"`
 }
 
-type AzureNetAppFiles struct {
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Export path of the Azure NetApp Files
-	ExportPath *string `json:"exportPath,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Mount IP of the Azure NetApp Files
-	MountIP *string `json:"mountIp,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the Azure NetApp Files is in
-	Region       *string   `json:"region,omitempty"`
-	RuntimeAlert *RunAlert `json:"runtimeAlert,omitempty"`
-	// Service level of the Azure NetApp Files
-	Service          *string       `json:"service,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Size of the Azure NetApp Files storage in TB
-	Size *int32 `json:"size,omitempty"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
-}
-
 type AzureNetappFilesDefinition struct {
 	// Export path of the volume.
 	ExportPath *string `json:"exportPath,omitempty"`
@@ -2363,6 +1876,8 @@ type AzureNetappFilesDefinition struct {
 	MountIP *string `json:"mountIp,omitempty"`
 	// Service level of the volume.
 	Service *string `json:"service,omitempty"`
+	// Volume size in TiB.
+	SizeTib *int64 `json:"sizeTib,omitempty"`
 	// Type discriminator.
 	Type string `json:"type"`
 }
@@ -2398,6 +1913,48 @@ type AzureSlurmDefinition struct {
 	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
 	// Admin-set provisioning debug flag.
 	DebugMode      *bool                   `json:"debugMode,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	Disks          []ClusterControllerDisk `json:"disks,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
+	HealthCheck  *string `json:"healthCheck,omitempty"`
+	// Id of the attached IP address or network interface. Clusters saved before network-interface support hold the raw IP address instead.
+	IPAddress *string `json:"ipAddress,omitempty"`
+	// Mount point of the controller's local disk; only applies when the controller instance type has a local disk.
+	LocalDiskMountPoint *string `json:"localDiskMountPoint,omitempty"`
+	// Export the controller's local disk over NFS; only applies when the controller instance type has a local disk.
+	LocalDiskNfs *bool                        `json:"localDiskNFS,omitempty"`
+	Partitions   []ClusterAzureSlurmPartition `json:"partitions,omitempty"`
+	Region       *string                      `json:"region,omitempty"`
+	// Root disk size in GiB.
+	RootSize *int64 `json:"rootSize,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
+	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64 `json:"slurmSuspendTimeout,omitempty"`
+	// Type discriminator.
+	Type                    string  `json:"type"`
+	UserBootstrap           *string `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	Zone                    *string `json:"zone,omitempty"`
+}
+
+type AzureSlurmDefinitionPatch struct {
+	// Marketplace-injected fetch command; omitted from a save to clear it when the cluster switches marketplace configuration.
+	AnsibleFetchCommand *string `json:"ansible_fetch_command,omitempty"`
+	// Marketplace-injected fetch command output location.
+	AnsibleFetchCommandOutput *string `json:"ansible_fetch_command_output,omitempty"`
+	// Marketplace-injected fetch destination.
+	AnsibleFetchLocation   *string `json:"ansible_fetch_location,omitempty"`
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	// Admin-set provisioning debug flag.
+	DebugMode *bool `json:"debugMode,omitempty"`
+	// Desktop session settings.
 	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
 	Disks          []ClusterControllerDisk `json:"disks,omitempty"`
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
@@ -2594,6 +2151,23 @@ type BaseImageSummary struct {
 	TotalRootSnapshots int64 `json:"totalRootSnapshots"`
 }
 
+type BillingAllocation struct {
+	// Spent in the current period including live estimates not invoiced yet.
+	EstimatedUsed *float64 `json:"estimatedUsed,omitempty"`
+	// Allocation name.
+	Name string `json:"name"`
+	// Budget for the current period.
+	Total float64 `json:"total"`
+	// The unit its amounts are in.
+	Unit string `json:"unit"`
+	// Why new resources cannot bill it.
+	UnusableReason *string `json:"unusableReason,omitempty"`
+	// Whether new resources can bill it right now.
+	Usable *bool `json:"usable,omitempty"`
+	// Spent in the current period, from invoiced costs and rated usage.
+	Used *float64 `json:"used,omitempty"`
+}
+
 type BillingDetails struct {
 	CloudAccountName      string                           `json:"cloudAccountName"`
 	CreatedAt             time.Time                        `json:"createdAt"`
@@ -2655,6 +2229,19 @@ type BillingRunList struct {
 	Runs []BillingRun `json:"runs"`
 	// Total number of billing runs
 	Total int64 `json:"total"`
+}
+
+type BillingSummaryBody struct {
+	// Allocations the caller can see, the most spent this period first.
+	Allocations []BillingAllocation `json:"allocations"`
+	// Estimated cost per hour of the listed resources, in USD.
+	HourlyCost float64 `json:"hourlyCost"`
+	// The caller's live cloud resources, the most expensive per hour first.
+	Resources []CloudResource `json:"resources"`
+	// Estimated cost of the listed resources so far today (UTC), in USD.
+	TodayCost float64 `json:"todayCost"`
+	// How many listed resources have no estimate yet, so the totals leave them out.
+	Unpriced int64 `json:"unpriced"`
 }
 
 type BooleanPolicyOutput struct {
@@ -2749,86 +2336,16 @@ type BucketDefinition struct {
 	AzureStorageAccount *string `json:"azureStorageAccount,omitempty"`
 	// Name of the bucket at the cloud provider, which can differ from the platform name.
 	BucketName *string `json:"bucketName,omitempty"`
+	// Name of the cloud account the bucket is created in. Required to create a bucket.
+	CloudAccount *string `json:"cloudAccount,omitempty"`
+	// Two Google regions forming the dual-region the bucket is in, in place of a region. Google buckets only.
+	DualRegions []string `json:"dualRegions,omitempty"`
+	// Whether object versioning is on. AWS buckets only, and required to create one.
+	EnableVersioning *bool `json:"enableVersioning,omitempty"`
+	// Google multi-region the bucket is in, in place of a region. Google buckets only.
+	MultiRegion *string `json:"multiRegion,omitempty"`
 	// Type discriminator.
 	Type string `json:"type"`
-}
-
-type BucketOutput struct {
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Name of the bucket
-	BucketName *string `json:"bucketName,omitempty"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the bucket is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
-	// Indicates if the bucket has versioning enabled
-	Versioning *bool `json:"versioning,omitempty"`
-}
-
-type BucketResource struct {
-	// Name of the bucket.
-	BucketName *string `json:"bucketName,omitempty"`
-	// The name of the cloud account to which the bucket belongs.
-	CloudAccount string `json:"cloudAccount"`
-	// The description of the storage.
-	Description *string `json:"description,omitempty"`
-	// The display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Two regions forming a dual-region to provision the bucket in (e.g. ["us-east1","us-west1"]). Both regions must belong to the same location. For Google buckets only.
-	DualRegions []string `json:"dualRegions,omitempty"`
-	// Indicates if versioning will be enabled. For AWS buckets only.
-	EnableVersioning *bool `json:"enableVersioning,omitempty"`
-	// The group to which the storage will be associated. Optional when resourceGroup is provided.
-	Group *string `json:"group,omitempty"`
-	// Multi-region location to provision the bucket in. When set, the bucket is provisioned as a multi-region bucket instead of a regional bucket. For Google buckets only.
-	MultiRegion *string `json:"multiRegion,omitempty"`
-	// Region the storage will be provisioned in. Required unless a Google multi-region or dual-region is specified.
-	Region *string `json:"region,omitempty"`
-	// The resource group the storage bills against. Takes precedence over group.
-	ResourceGroup *string `json:"resourceGroup,omitempty"`
-	// The tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
 }
 
 type BuiltInWorkspaceDefaults struct {
@@ -3297,7 +2814,7 @@ type ClientInformation struct {
 type ClientMetadata struct {
 	// Managed cluster node only: the node's architecture
 	Arch *string `json:"arch,omitempty"`
-	// Required on update: the client's identifier
+	// Ignored on registration, which issues the client's identifier
 	ClientID *string `json:"client_id,omitempty"`
 	// Name shown to the user the client acts for
 	ClientName *string `json:"client_name,omitempty"`
@@ -3305,7 +2822,7 @@ type ClientMetadata struct {
 	GrantTypes []string `json:"grant_types,omitempty"`
 	// Managed cluster node only, and required there: the node's hostname
 	Hostname *string `json:"hostname,omitempty"`
-	// Managed cluster node only: the node's IP addresses
+	// Managed cluster node only: the node's IP addresses; the platform keeps the first 64
 	IPAddresses []string      `json:"ip_addresses,omitempty"`
 	Jwks        JSONWebKeySet `json:"jwks"`
 	// Managed cluster node only: the node's operating system
@@ -3315,6 +2832,22 @@ type ClientMetadata struct {
 	// Version of the client software
 	SoftwareVersion *string `json:"software_version,omitempty"`
 	// How the client authenticates at the token endpoint: private_key_jwt for a workload, none for a managed cluster node
+	TokenEndpointAuthMethod *string `json:"token_endpoint_auth_method,omitempty"`
+}
+
+type ClientMetadataUpdate struct {
+	// The client's identifier
+	ClientID string `json:"client_id"`
+	// Name shown to the user the client acts for
+	ClientName *string `json:"client_name,omitempty"`
+	// Grant types the client uses
+	GrantTypes []string      `json:"grant_types,omitempty"`
+	Jwks       JSONWebKeySet `json:"jwks"`
+	// Identifier of the client software
+	SoftwareID *string `json:"software_id,omitempty"`
+	// Version of the client software
+	SoftwareVersion *string `json:"software_version,omitempty"`
+	// How the client authenticates at the token endpoint
 	TokenEndpointAuthMethod *string `json:"token_endpoint_auth_method,omitempty"`
 }
 
@@ -3573,6 +3106,37 @@ type CloudImage struct {
 	Variant *string `json:"variant,omitempty"`
 }
 
+type CloudResource struct {
+	// Cloud service provider.
+	Csp string `json:"csp"`
+	// The cluster or storage the resource was provisioned for.
+	DeploymentName string `json:"deploymentName"`
+	// What the resource was provisioned for, such as cluster or a storage type.
+	DeploymentType string `json:"deploymentType"`
+	// Estimated cost per hour at today's rate, in USD. Missing until the estimator has priced the resource.
+	HourlyCost *float64 `json:"hourlyCost,omitempty"`
+	// When the resource was last seen in the cloud.
+	LastSeenAt time.Time `json:"lastSeenAt"`
+	// The resource's name in the cloud.
+	Name *string `json:"name,omitempty"`
+	// Region.
+	Region string `json:"region"`
+	// Resource kind: vm, disk, lustre, nfs, bucket, ip, snapshot or networkinterface.
+	ResourceType string `json:"resourceType"`
+	// Storage size in GB.
+	SizeGb *float64 `json:"sizeGb,omitempty"`
+	// Whether the resource is a spot instance.
+	Spot bool `json:"spot"`
+	// When the resource was created or launched.
+	StartTime time.Time `json:"startTime"`
+	// Normalized state, such as running, stopped or available.
+	State string `json:"state"`
+	// Machine type or storage class.
+	Subtype *string `json:"subtype,omitempty"`
+	// Estimated cost so far today (UTC), in USD. Missing until the estimator has priced the resource.
+	TodayCost *float64 `json:"todayCost,omitempty"`
+}
+
 type Cluster struct {
 	// Whether orphan alerts are muted for the whole deployment.
 	AlertsMuted *bool `json:"alertsMuted,omitempty"`
@@ -3665,6 +3229,49 @@ type ClusterControllerDisk struct {
 	Snapshot   *string `json:"snapshot,omitempty"`
 	Throughput *int64  `json:"throughput,omitempty"`
 	Type       *string `json:"type,omitempty"`
+}
+
+type ClusterCostEstimate struct {
+	Controller ClusterCostNode `json:"controller"`
+	// Currency of every amount.
+	Currency string `json:"currency"`
+	// Cost per hour while the cluster is on with no compute nodes: the controller and its disks.
+	Hourly float64 `json:"hourly"`
+	// A price is missing from the catalog, so the totals leave that node out.
+	Incomplete bool `json:"incomplete"`
+	// Cost per hour with every partition at its maximum node count.
+	MaxHourly  float64                `json:"maxHourly"`
+	Partitions []ClusterCostPartition `json:"partitions"`
+	// Region the prices are for.
+	Region string `json:"region"`
+	// Tier 1 networking is on for a node type the catalog has no Tier 1 price for, so the totals leave it out.
+	Tier1Unpriced bool `json:"tier1Unpriced"`
+}
+
+type ClusterCostNode struct {
+	// The part of hourly that is disks.
+	DiskHourly *float64 `json:"diskHourly,omitempty"`
+	// Cost per hour of the node and its disks; absent when a price is missing.
+	Hourly       *float64 `json:"hourly,omitempty"`
+	InstanceType string   `json:"instanceType"`
+}
+
+type ClusterCostPartition struct {
+	// The part of hourly that is disks.
+	DiskHourly *float64 `json:"diskHourly,omitempty"`
+	// Cost per hour of the node and its disks; absent when a price is missing.
+	Hourly       *float64 `json:"hourly,omitempty"`
+	InstanceType string   `json:"instanceType"`
+	// Cost per hour with maxNodes nodes running.
+	MaxHourly *float64 `json:"maxHourly,omitempty"`
+	MaxNodes  int64    `json:"maxNodes"`
+	Name      string   `json:"name"`
+}
+
+type ClusterDefinitionCheck struct {
+	CostEstimate *ClusterCostEstimate `json:"costEstimate,omitempty"`
+	// The definition the patch would save.
+	Definition ClusterDefinition `json:"definition"`
 }
 
 type ClusterDeployment struct {
@@ -4950,6 +4557,27 @@ type CreateSnapshotOutputBody struct {
 	Status string `json:"status"`
 }
 
+type CreateStorageBody struct {
+	// The storage's typed configuration, in the shape the storage's details return. A bucket is provisioned as it is created; every other type is saved to provision later. Read-only fields are set by provisioning and ignored.
+	Definition StorageDefinition `json:"definition"`
+	// Description.
+	Description *string `json:"description,omitempty"`
+	// Display name. Defaults to the name.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Ephemeral storage is provisioned with the cluster that mounts it and removed with it. Required for Lustre.
+	Ephemeral *bool `json:"ephemeral,omitempty"`
+	// The group the storage bills to. Its members must be able to use a cloud account on this cloud.
+	Group *string `json:"group,omitempty"`
+	// Name of the cloud network the storage is provisioned in.
+	Network *string `json:"network,omitempty"`
+	// Region the storage is provisioned in.
+	Region *string `json:"region,omitempty"`
+	// The resource group the storage bills against. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Tags.
+	Tags []string `json:"tags,omitempty"`
+}
+
 type CreateUnitRuleBody struct {
 	// USD rate per unit
 	Rate float64 `json:"rate"`
@@ -5078,6 +4706,19 @@ type CreateWorkflowSavedInputsInputBody struct {
 	Inputs map[string]any `json:"inputs"`
 	// Name for the saved inputs.
 	Name string `json:"name"`
+}
+
+type CreatedStorage struct {
+	// ID of the storage.
+	ID string `json:"id"`
+	// Name of the storage.
+	Name string `json:"name"`
+	// Status of the storage, unprovisioned until it is provisioned.
+	Status string `json:"status"`
+	// CSP-qualified type of the storage, e.g. aws-disk.
+	Type string `json:"type"`
+	// Username of the owner.
+	User string `json:"user"`
 }
 
 type CredentialListingError struct {
@@ -5538,8 +5179,16 @@ type Disk struct {
 type DiskDefinition struct {
 	// Underlying disk type, e.g. gp3.
 	DiskType *string `json:"diskType,omitempty"`
+	// Whether the disk is encrypted. AWS only; a cloud account that enforces encryption encrypts it either way.
+	Encrypted *bool `json:"encrypted,omitempty"`
+	// Provisioned IOPS. AWS io1 and io2 only.
+	Iops *int64 `json:"iops,omitempty"`
 	// Provisioned capacity in GB.
 	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Id of the snapshot the disk is restored from; empty when the disk starts blank.
+	Snapshot *string `json:"snapshot,omitempty"`
+	// Provisioned throughput in MB/s. AWS gp3 only.
+	ThroughputMbps *int64 `json:"throughputMbps,omitempty"`
 	// Type discriminator.
 	Type string `json:"type"`
 	// Zone the disk is in.
@@ -5570,22 +5219,27 @@ type DurableClaimOutputBody struct {
 	Username       string    `json:"username"`
 }
 
-type DurableCompleteBody struct {
+type DurableHeartbeatOutputBody struct {
+	LeaseExpiresAt time.Time `json:"leaseExpiresAt"`
+}
+
+type DurableTaskClaimRequest struct {
+	// A value the worker chooses once for its task. A claim sent again with it answers with the lease the first one was granted.
+	ClaimID *string `json:"claimId,omitempty"`
+}
+
+type DurableTaskLease struct {
+	Fencing int64  `json:"fencing"`
+	LeaseID string `json:"leaseId"`
+	TaskID  string `json:"taskId"`
+}
+
+type DurableTaskResult struct {
 	Error    *string `json:"error,omitempty"`
 	ExitCode int64   `json:"exitCode"`
 	Fencing  int64   `json:"fencing"`
 	LeaseID  string  `json:"leaseId"`
 	TaskID   string  `json:"taskId"`
-}
-
-type DurableHeartbeatOutputBody struct {
-	LeaseExpiresAt time.Time `json:"leaseExpiresAt"`
-}
-
-type DurableLeaseBody struct {
-	Fencing int64  `json:"fencing"`
-	LeaseID string `json:"leaseId"`
-	TaskID  string `json:"taskId"`
 }
 
 type EffectiveProduct struct {
@@ -5905,6 +5559,29 @@ type ExistingCluster struct {
 type ExistingClusterDefinition struct {
 	// How the platform authenticates to the cluster.
 	AuthMethod     *string                 `json:"authMethod,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
+	// Jump (bastion) host; omit to connect directly.
+	JumpNodeHost *string `json:"jumpNodeHost,omitempty"`
+	// Jump (bastion) user.
+	JumpNodeUser *string `json:"jumpNodeUser,omitempty"`
+	// Scheduler type, e.g. slurm.
+	SchedulerType *string `json:"schedulerType,omitempty"`
+	// Login nodes.
+	SlurmLoginNodes []PoolSlurmLoginNode `json:"slurmLoginNodes,omitempty"`
+	// SLURM username (supports __USER__).
+	SlurmUsername *string `json:"slurmUsername,omitempty"`
+	// Name of the owner's SSH key to authenticate with; only applies when the auth method is ssh-key.
+	SSHKey *string `json:"sshKey,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+}
+
+type ExistingClusterDefinitionPatch struct {
+	// How the platform authenticates to the cluster.
+	AuthMethod *string `json:"authMethod,omitempty"`
+	// Desktop session settings.
 	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
 	ExplorerPath *string `json:"explorerPath,omitempty"`
@@ -6725,63 +6402,6 @@ type GoalStatus struct {
 	Paused    *bool  `json:"paused,omitempty"`
 }
 
-type GoogleBucket struct {
-	// The requesting user's access level for this bucket.
-	AccessMode string `json:"accessMode"`
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Name of the Google Bucket
-	BucketName *string `json:"bucketName,omitempty"`
-	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)
-	CanGetCredentials bool `json:"canGetCredentials"`
-	// Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)
-	CanWrite bool `json:"canWrite"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the Google bucket is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
-}
-
 type GoogleBucketToken struct {
 	// Name of the bucket on Google Cloud Storage.
 	BucketName string `json:"bucketName"`
@@ -6799,61 +6419,6 @@ type GoogleBucketVersionSettings struct {
 	Subtype string `json:"subtype"`
 }
 
-type GoogleDisk struct {
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Type of the disk
-	DiskType *string `json:"diskType,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the disk is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Size of the disk in GiB
-	Size *int32 `json:"size,omitempty"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
-	// Zone the disk is in
-	Zone *string `json:"zone,omitempty"`
-}
-
 type GoogleDiskVersionSettings struct {
 	Region *string `json:"region,omitempty"`
 	SizeGb *int64  `json:"size_gb,omitempty"`
@@ -6863,74 +6428,17 @@ type GoogleDiskVersionSettings struct {
 	Zone    *string `json:"zone,omitempty"`
 }
 
-type GoogleFilestore struct {
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// IP address of the Google Filestore file server
-	FileserverIP *string `json:"fileserverIp,omitempty"`
-	// Tier of the Google Filestore
-	FilestoreTier *string `json:"filestoreTier,omitempty"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the Google Filestore is in
-	Region *string `json:"region,omitempty"`
-	// Export path of the Google Filestore instance
-	RegionFs *string `json:"regionFs,omitempty"`
-	// Filesystem type to format the export disk with
-	RegionFsType     *string       `json:"regionFsType,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Size of the Google Filestore in TB
-	Size *float64 `json:"size,omitempty"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
-	// Zone the Google Filestore is in
-	Zone *string `json:"zone,omitempty"`
-}
-
 type GoogleFilestoreDefinition struct {
 	// IP address of the file server.
 	FileserverIP *string `json:"fileserverIp,omitempty"`
 	// Service tier of the instance.
 	FilestoreTier *string `json:"filestoreTier,omitempty"`
+	// Instance capacity in TiB: 2.5 to 10 for BASIC_SSD, 1 to 10 for BASIC_HDD.
+	SizeTib *float64 `json:"sizeTib,omitempty"`
 	// Type discriminator.
 	Type string `json:"type"`
+	// Zone the instance is in.
+	Zone *string `json:"zone,omitempty"`
 }
 
 type GoogleFilestoreVersionSettings struct {
@@ -6940,39 +6448,6 @@ type GoogleFilestoreVersionSettings struct {
 	// Subtype discriminator.
 	Subtype string  `json:"subtype"`
 	Zone    *string `json:"zone,omitempty"`
-}
-
-type GoogleManagedLustre struct {
-	// Can be ephemeral or persistent.
-	DeploymentType *bool `json:"deploymentType,omitempty"`
-	// The description of the instance.
-	Description *string `json:"description,omitempty"`
-	// The display name of the instance.
-	DisplayName *string `json:"displayName,omitempty"`
-	// The group the instance bills to. Optional when resourceGroup is provided.
-	Group *string `json:"group,omitempty"`
-	// Unique identifier of the Google Managed Lustre.
-	ID *string `json:"id,omitempty"`
-	// Identifier. The name of the instance.
-	Name string `json:"name"`
-	// The throughput in MBps/TiB of the instance.
-	Performance *int64 `json:"performance,omitempty"`
-	// The gcp region of the instance.
-	Region *string `json:"region,omitempty"`
-	// The resource group the instance bills against. Takes precedence over group.
-	ResourceGroup    *string                `json:"resourceGroup,omitempty"`
-	RuntimeAlert     *RuntimeAlertInput     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionCostLimitInput `json:"sessionCostLimit,omitempty"`
-	// When true, create and delete the cloud filesystem in one shot (legacy behavior). When false (default), the resource supports start/stop like AWS/Azure managed Lustre.
-	Sessionless *bool `json:"sessionless,omitempty"`
-	// The storage capacity of the instance in gibibytes (GiB).
-	Size *int64 `json:"size,omitempty"`
-	// The tags associated with the instance.
-	Tags *string `json:"tags,omitempty"`
-	// The full name of the VPC network to which the instance is connected.
-	VpcNetwork *string `json:"vpcNetwork,omitempty"`
-	// The gcp location of the instance.
-	Zone *string `json:"zone,omitempty"`
 }
 
 type GoogleManagedLustreDefinition struct {
@@ -7011,6 +6486,45 @@ type GoogleSlurmDefinition struct {
 	ControllerTier1        *bool   `json:"controllerTier1,omitempty"`
 	// Admin-set provisioning debug flag.
 	DebugMode      *bool                   `json:"debugMode,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	Disks          []ClusterControllerDisk `json:"disks,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
+	HealthCheck  *string `json:"healthCheck,omitempty"`
+	// Id of the attached IP address or network interface. Clusters saved before network-interface support hold the raw IP address instead.
+	IPAddress  *string                       `json:"ipAddress,omitempty"`
+	Partitions []ClusterGoogleSlurmPartition `json:"partitions,omitempty"`
+	Region     *string                       `json:"region,omitempty"`
+	// Root disk size in GiB.
+	RootSize *int64 `json:"rootSize,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
+	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64 `json:"slurmSuspendTimeout,omitempty"`
+	// Type discriminator.
+	Type                    string  `json:"type"`
+	UserBootstrap           *string `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	Zone                    *string `json:"zone,omitempty"`
+}
+
+type GoogleSlurmDefinitionPatch struct {
+	// Marketplace-injected fetch command; omitted from a save to clear it when the cluster switches marketplace configuration.
+	AnsibleFetchCommand *string `json:"ansible_fetch_command,omitempty"`
+	// Marketplace-injected fetch command output location.
+	AnsibleFetchCommandOutput *string `json:"ansible_fetch_command_output,omitempty"`
+	// Marketplace-injected fetch destination.
+	AnsibleFetchLocation   *string `json:"ansible_fetch_location,omitempty"`
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	ControllerTier1        *bool   `json:"controllerTier1,omitempty"`
+	// Admin-set provisioning debug flag.
+	DebugMode *bool `json:"debugMode,omitempty"`
+	// Desktop session settings.
 	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
 	Disks          []ClusterControllerDisk `json:"disks,omitempty"`
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
@@ -9133,8 +8647,10 @@ type ManagedNode struct {
 	// Is controller node
 	IsController bool `json:"isController"`
 	// Last heartbeat time
-	LastHeartbeat time.Time           `json:"lastHeartbeat"`
-	Metrics       *ManagedNodeMetrics `json:"metrics,omitempty"`
+	LastHeartbeat time.Time `json:"lastHeartbeat"`
+	// When the node's current agent key was issued. Unlike registeredAt, registering the hostname again moves it.
+	LastRegisteredAt *time.Time          `json:"lastRegisteredAt,omitempty"`
+	Metrics          *ManagedNodeMetrics `json:"metrics,omitempty"`
 	// Operating system
 	Os *string `json:"os,omitempty"`
 	// OS release name
@@ -9375,6 +8891,8 @@ type MessagePart struct {
 	Result string `json:"result"`
 	// Whether the call succeeded, or that it waits for the user's approval
 	Status string `json:"status"`
+	// What the model wrote at this point, for a text part
+	Text *string `json:"text,omitempty"`
 }
 
 type MessageResponse struct {
@@ -9389,7 +8907,7 @@ type MessageResponse struct {
 	Model *string `json:"model"`
 	// Parent message ID
 	ParentID *string `json:"parentId"`
-	// Platform tool calls the server ran while writing this answer, in order. Echo them back in history as an assistant tool_calls message and one tool message per result.
+	// Platform tool calls the server ran while writing this answer and the text written around them, in order. The last text part, when it ends the list, is the answer in content. Echo each run of calls back in history as an assistant message with the text before it and the calls, then one tool message per result.
 	Parts []MessagePart `json:"parts,omitempty"`
 	// Provider ID
 	ProviderID *string `json:"providerId"`
@@ -10164,6 +9682,8 @@ type OpenIDConfiguration struct {
 	Issuer string `json:"issuer"`
 	// URL of the JSON Web Key Set
 	JwksURI string `json:"jwks_uri"`
+	// Whether a managed cluster node registers at registration_endpoint with its node registration token as the initial access token
+	PwNodeRegistrationSupported *bool `json:"pw_node_registration_supported,omitempty"`
 	// URL of the dynamic client registration endpoint (RFC 7591), which requires an initial access token
 	RegistrationEndpoint string `json:"registration_endpoint"`
 	// Whether request objects are accepted by value; they are not
@@ -10256,6 +9776,39 @@ type OpenstackSlurmDefinition struct {
 	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
 }
 
+type OpenstackSlurmDefinitionPatch struct {
+	// Marketplace-injected fetch command; omitted from a save to clear it when the cluster switches marketplace configuration.
+	AnsibleFetchCommand *string `json:"ansible_fetch_command,omitempty"`
+	// Marketplace-injected fetch command output location.
+	AnsibleFetchCommandOutput *string `json:"ansible_fetch_command_output,omitempty"`
+	// Marketplace-injected fetch destination.
+	AnsibleFetchLocation   *string `json:"ansible_fetch_location,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	// Admin-set provisioning debug flag.
+	DebugMode *bool `json:"debugMode,omitempty"`
+	// Desktop session settings.
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath      *string                          `json:"explorerPath,omitempty"`
+	FloatingIPNetwork *string                          `json:"floatingIpNetwork,omitempty"`
+	HealthCheck       *string                          `json:"healthCheck,omitempty"`
+	NetworkID         *string                          `json:"networkId,omitempty"`
+	Partitions        []ClusterOpenstackSlurmPartition `json:"partitions,omitempty"`
+	Region            *string                          `json:"region,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
+	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64 `json:"slurmSuspendTimeout,omitempty"`
+	// Type discriminator.
+	Type                    string  `json:"type"`
+	UserBootstrap           *string `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+}
+
 type OpenstackSlurmPartition struct {
 	Architecture        *string       `json:"architecture,omitempty"`
 	AssociateFloatingIP *bool         `json:"associateFloatingIp,omitempty"`
@@ -10294,63 +9847,6 @@ type OpenstackSyncResponse struct {
 	Status  string `json:"status"`
 }
 
-type OracleBucket struct {
-	// The requesting user's access level for this bucket.
-	AccessMode string `json:"accessMode"`
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Name of the Oracle bucket
-	BucketName *string `json:"bucketName,omitempty"`
-	// Whether the requesting user can obtain access credentials for this bucket (owner, or shared with the Admin, Mount Storage, or Read-only permission)
-	CanGetCredentials bool `json:"canGetCredentials"`
-	// Whether credentials the requesting user obtains for this bucket allow writing objects (owner, or shared with the Admin or Mount Storage permission)
-	CanWrite bool `json:"canWrite"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the Oracle bucket is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
-}
-
 type OracleBucketPar struct {
 	// Name of the Oracle bucket.
 	BucketName string `json:"bucketName"`
@@ -10370,61 +9866,6 @@ type OracleBucketVersionSettings struct {
 	Region *string `json:"region,omitempty"`
 	// Subtype discriminator.
 	Subtype string `json:"subtype"`
-}
-
-type OracleFs struct {
-	// Resources the storage is attached to.
-	AttachedTo []StorageAttachment `json:"attachedTo,omitempty"`
-	// Availability domain the Oracle file storage is in
-	AvailabilityDomain *string `json:"availabilityDomain,omitempty"`
-	// Cloud service provider of the storage.
-	Csp string `json:"csp"`
-	// Indicates if the storage is currently being provisioned.
-	CurrentlyProvisioning bool `json:"currentlyProvisioning"`
-	// Description of the storage.
-	Description *string `json:"description,omitempty"`
-	// Display name of the storage.
-	DisplayName *string `json:"displayName,omitempty"`
-	// Export path of the Oracle FSS
-	ExportPath *string `json:"exportPath,omitempty"`
-	// Indicates if the storage is a favorite for the requesting user.
-	Favorite bool `json:"favorite"`
-	// Indicates if the storage is in a GovCloud environment.
-	GovCloud *bool `json:"govCloud,omitempty"`
-	// Group the storage bills to.
-	Group *string `json:"group,omitempty"`
-	// ID of the storage.
-	ID string `json:"id"`
-	// URL of the icon used for the storage. This will be empty if the default image is used.
-	ImageURL *string `json:"imageUrl,omitempty"`
-	// IP address of the Oracle FSS mount target
-	MountTargetIP *string `json:"mountTargetIp,omitempty"`
-	// Name of the storage.
-	Name string `json:"name"`
-	// Network the storage uses to provision.
-	Network *string `json:"network,omitempty"`
-	// Error message if the storage provisioning failed.
-	ProvisionError *string `json:"provisionError,omitempty"`
-	// Indicates if the storage has been provisioned.
-	Provisioned bool `json:"provisioned"`
-	// Region the Oracle file storage is in
-	Region           *string       `json:"region,omitempty"`
-	RuntimeAlert     *RunAlert     `json:"runtimeAlert,omitempty"`
-	SessionCostLimit *SessionAlert `json:"sessionCostLimit,omitempty"`
-	// Session number of the storage.
-	SessionNumber *int64 `json:"sessionNumber,omitempty"`
-	// Indicates if the storage is sessionless.
-	Sessionless bool `json:"sessionless"`
-	// Sharing permissions of the storage.
-	Shared []Shared `json:"shared"`
-	// Current status of the storage.
-	Status *string `json:"status,omitempty"`
-	// Tags associated with the storage.
-	Tags []string `json:"tags,omitempty"`
-	// Type of storage.
-	Type string `json:"type"`
-	// User associated with the storage.
-	User string `json:"user"`
 }
 
 type OracleFsDefinition struct {
@@ -10461,6 +9902,45 @@ type OracleSlurmDefinition struct {
 	ControllerOcpus *int64 `json:"controllerOcpus,omitempty"`
 	// Admin-set provisioning debug flag.
 	DebugMode      *bool                   `json:"debugMode,omitempty"`
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string                       `json:"explorerPath,omitempty"`
+	HealthCheck  *string                       `json:"healthCheck,omitempty"`
+	Partitions   []ClusterOracleSlurmPartition `json:"partitions,omitempty"`
+	Region       *string                       `json:"region,omitempty"`
+	// Root disk size in GiB.
+	RootSize *int64 `json:"rootSize,omitempty"`
+	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
+	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
+	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
+	SlurmReturnToService *int64 `json:"slurmReturnToService,omitempty"`
+	SlurmSuspendTime     *int64 `json:"slurmSuspendTime,omitempty"`
+	SlurmSuspendTimeout  *int64 `json:"slurmSuspendTimeout,omitempty"`
+	// Type discriminator.
+	Type                    string  `json:"type"`
+	UserBootstrap           *string `json:"userBootstrap,omitempty"`
+	UserBootstrapCompute    *bool   `json:"userBootstrapCompute,omitempty"`
+	UserBootstrapController *bool   `json:"userBootstrapController,omitempty"`
+	Zone                    *string `json:"zone,omitempty"`
+}
+
+type OracleSlurmDefinitionPatch struct {
+	// Marketplace-injected fetch command; omitted from a save to clear it when the cluster switches marketplace configuration.
+	AnsibleFetchCommand *string `json:"ansible_fetch_command,omitempty"`
+	// Marketplace-injected fetch command output location.
+	AnsibleFetchCommandOutput *string `json:"ansible_fetch_command_output,omitempty"`
+	// Marketplace-injected fetch destination.
+	AnsibleFetchLocation   *string `json:"ansible_fetch_location,omitempty"`
+	Architecture           *string `json:"architecture,omitempty"`
+	ControllerImage        *string `json:"controllerImage,omitempty"`
+	ControllerInstanceType *string `json:"controllerInstanceType,omitempty"`
+	// Memory in GiB when the controller instance type is a flexible shape.
+	ControllerMemoryGb *int64 `json:"controllerMemoryGb,omitempty"`
+	// OCPU count when the controller instance type is a flexible shape.
+	ControllerOcpus *int64 `json:"controllerOcpus,omitempty"`
+	// Admin-set provisioning debug flag.
+	DebugMode *bool `json:"debugMode,omitempty"`
+	// Desktop session settings.
 	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
 	ExplorerPath *string                       `json:"explorerPath,omitempty"`
@@ -11298,7 +10778,7 @@ type PlatformSettingsAdmin struct {
 	AppName *string `json:"appName,omitempty"`
 	// Lifetime in minutes of bucket mount credentials (AWS STS tokens, Azure SAS tokens and service principals). Default 720 (12 hours).
 	BucketTokenTTLMinutes int64 `json:"bucketTokenTtlMinutes"`
-	// Whether cluster agents, managed cluster nodes included, may send their heartbeat, and cloud cluster agents their node management, node facts, filesystem, orphan and notification requests, over their tunnel instead of HTTP. On by default; turning it off sends every agent back to HTTP by its next request, and turning it back on brings them back to the tunnel within about five minutes.
+	// Whether cluster agents, managed cluster nodes included, may send their heartbeat, cloud cluster agents their node management, node facts, filesystem, orphan and notification requests, and durable workers their task claims, lease renewals and results, over their tunnel instead of HTTP. On by default; turning it off sends every agent back to HTTP by its next request, and turning it back on brings them back to the tunnel within about five minutes.
 	ClusterSyncEnabled bool `json:"clusterSyncEnabled"`
 	// Indicates if k8s PVC should be created for workspaces.
 	Createk8sPvc *bool `json:"createk8sPVC,omitempty"`
@@ -13650,15 +13130,6 @@ type RotateSecretInputBody struct {
 	OverlapHours *int64 `json:"overlapHours,omitempty"`
 }
 
-type RunAlert struct {
-	// Indicates if runtime alert is enabled for the storage.
-	Enabled bool `json:"enabled"`
-	// Interval in hours for the runtime alert.
-	IntervalHours int64 `json:"intervalHours"`
-	// Next time the runtime alert will be triggered.
-	NextAlertTime time.Time `json:"nextAlertTime"`
-}
-
 type RunError struct {
 	// Error message
 	Message string `json:"message"`
@@ -14172,19 +13643,6 @@ type Session struct {
 	WorkflowRunningSteps []RunStep `json:"workflowRunningSteps,omitempty"`
 }
 
-type SessionAlert struct {
-	// Indicates if the storage will be automatically terminated when the cost limit is reached.
-	AutoTerminate bool `json:"autoTerminate"`
-	// Indicates if session cost alert is enabled for the storage.
-	Enabled bool `json:"enabled"`
-	// Cost limit for the session cost alert.
-	Limit float64 `json:"limit"`
-	// Next time the session cost alert will be triggered.
-	NextAlertTime time.Time `json:"nextAlertTime"`
-	// Indicates if the session cost alert uses realtime estimated cost data.
-	UseRealtime bool `json:"useRealtime"`
-}
-
 type SessionCostLimit struct {
 	// Whether reaching the limit destroys the cluster instead of only alerting.
 	AutoTerminate bool `json:"autoTerminate"`
@@ -14535,19 +13993,6 @@ type StopClusterOptions struct {
 	Force *bool `json:"force,omitempty"`
 }
 
-type StorageAttachment struct {
-	// ID of the resource.
-	ID string `json:"id"`
-	// Name of the resource.
-	Name string `json:"name"`
-	// Status of the resource.
-	Status string `json:"status"`
-	// Type of the resource, e.g., 'cluster', 'pool', etc.
-	Type *string `json:"type,omitempty"`
-	// Username of the resource owner.
-	User string `json:"user"`
-}
-
 type StorageDeployment struct {
 	// The deployment creation time.
 	CreatedAt time.Time `json:"createdAt"`
@@ -14568,12 +14013,18 @@ type StorageDeployment struct {
 type StorageDetail struct {
 	// Whether the storage is currently attached to a cluster.
 	Attached bool `json:"attached"`
+	// Azure storage account that holds the bucket. Only Azure buckets have one.
+	BucketAccountName *string `json:"bucketAccountName,omitempty"`
+	// Name of the bucket in the cloud provider. Only buckets have one.
+	BucketName *string `json:"bucketName,omitempty"`
 	// Category of the storage.
 	Category string `json:"category"`
 	// Cloud service provider of the storage.
 	Csp string `json:"csp"`
 	// The storage's typed configuration.
 	Definition StorageDefinition `json:"definition"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName string `json:"displayName"`
 	// Whether the storage is ephemeral.
@@ -14628,10 +14079,16 @@ type StorageDetail struct {
 type StorageListItem struct {
 	// Whether the storage is currently attached to a cluster.
 	Attached bool `json:"attached"`
+	// Azure storage account that holds the bucket. Only Azure buckets have one.
+	BucketAccountName *string `json:"bucketAccountName,omitempty"`
+	// Name of the bucket in the cloud provider. Only buckets have one.
+	BucketName *string `json:"bucketName,omitempty"`
 	// Category of the storage.
 	Category string `json:"category"`
 	// Cloud service provider of the storage.
 	Csp string `json:"csp"`
+	// Description of the storage.
+	Description *string `json:"description,omitempty"`
 	// Display name of the storage.
 	DisplayName string `json:"displayName"`
 	// Whether the storage is ephemeral.
@@ -14684,7 +14141,7 @@ type StorageListItem struct {
 }
 
 type StoragePermissions struct {
-	// Whether the requesting user can obtain access credentials for this storage. Only buckets issue credentials.
+	// Whether the requesting user can obtain access credentials for this storage. Only buckets and Azure Files shares issue credentials.
 	CanGetCredentials bool `json:"canGetCredentials"`
 	// Whether the requesting user may write to this storage, which is also what decides whether it can be mounted.
 	CanWrite bool `json:"canWrite"`
@@ -16073,6 +15530,15 @@ type Webhook struct {
 	URL *string `json:"url"`
 }
 
+type WindowsCredentialStatus struct {
+	// Whether the platform holds an RDP credential for this instance.
+	Stored bool `json:"stored"`
+	// When the stored credential was last reported.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+	// The local account RDP signs in as: the stored credential's, otherwise the instance owner's username.
+	Username string `json:"username"`
+}
+
 type WorkerResponse struct {
 	// Cluster ID.
 	ClusterID *string `json:"clusterId,omitempty"`
@@ -16417,6 +15883,158 @@ type WorkspaceStatus struct {
 	Status      string                `json:"status"`
 }
 
+// ClusterDefinition - The definition the patch would save.
+
+// Variants: ExistingClusterDefinition, AwsSlurmDefinition, GoogleSlurmDefinition, AzureSlurmDefinition, OracleSlurmDefinition, OpenstackSlurmDefinition
+type ClusterDefinition struct {
+	Value any
+
+	unknownDiscriminator string
+	raw                  string
+}
+
+// IsUnknownVariant reports whether the payload carried a type
+// this client does not know. Value is nil in that case; the original JSON is
+// available from Raw and is re-marshaled unchanged.
+func (u ClusterDefinition) IsUnknownVariant() bool {
+	return u.Value == nil && len(u.raw) > 0
+}
+
+// UnknownDiscriminator returns the unrecognized type value,
+// or "" when the payload decoded into a known variant.
+func (u ClusterDefinition) UnknownDiscriminator() string {
+	return u.unknownDiscriminator
+}
+
+// Raw returns the original JSON of an unrecognized variant, or nil.
+func (u ClusterDefinition) Raw() json.RawMessage {
+	if u.raw == "" {
+		return nil
+	}
+	return json.RawMessage(u.raw)
+}
+
+// Base returns the ClusterDefinitionBase that every variant of ClusterDefinition carries, or
+// nil when Value holds none of them. It is a copy: writing to it does not change
+// the value the union holds.
+func (u ClusterDefinition) Base() *ClusterDefinitionBase {
+	switch v := u.Value.(type) {
+	case ExistingClusterDefinition:
+		return &ClusterDefinitionBase{
+			DesktopSession: v.DesktopSession,
+			ExplorerPath:   v.ExplorerPath,
+		}
+	case AwsSlurmDefinition:
+		return &ClusterDefinitionBase{
+			DesktopSession: v.DesktopSession,
+			ExplorerPath:   v.ExplorerPath,
+		}
+	case GoogleSlurmDefinition:
+		return &ClusterDefinitionBase{
+			DesktopSession: v.DesktopSession,
+			ExplorerPath:   v.ExplorerPath,
+		}
+	case AzureSlurmDefinition:
+		return &ClusterDefinitionBase{
+			DesktopSession: v.DesktopSession,
+			ExplorerPath:   v.ExplorerPath,
+		}
+	case OracleSlurmDefinition:
+		return &ClusterDefinitionBase{
+			DesktopSession: v.DesktopSession,
+			ExplorerPath:   v.ExplorerPath,
+		}
+	case OpenstackSlurmDefinition:
+		return &ClusterDefinitionBase{
+			DesktopSession: v.DesktopSession,
+			ExplorerPath:   v.ExplorerPath,
+		}
+	}
+	return nil
+}
+
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u ClusterDefinition) unionValue() any {
+	return u.Value
+}
+
+// MarshalJSON implements json.Marshaler for ClusterDefinition.
+func (u ClusterDefinition) MarshalJSON() ([]byte, error) {
+	if u.IsUnknownVariant() {
+		return []byte(u.raw), nil
+	}
+	return json.Marshal(u.Value)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for ClusterDefinition.
+func (u *ClusterDefinition) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	var disc struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &disc); err != nil {
+		return fmt.Errorf("unmarshaling ClusterDefinition discriminator: %w", err)
+	}
+	switch disc.Type {
+	case "aws-slurm":
+		var v AwsSlurmDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = ClusterDefinition{Value: v}
+		return nil
+	case "azure-slurm":
+		var v AzureSlurmDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = ClusterDefinition{Value: v}
+		return nil
+	case "existing":
+		var v ExistingClusterDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = ClusterDefinition{Value: v}
+		return nil
+	case "google-slurm":
+		var v GoogleSlurmDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = ClusterDefinition{Value: v}
+		return nil
+	case "openstack-slurm":
+		var v OpenstackSlurmDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = ClusterDefinition{Value: v}
+		return nil
+	case "oracle-slurm":
+		var v OracleSlurmDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = ClusterDefinition{Value: v}
+		return nil
+	case "":
+		return fmt.Errorf("unmarshaling ClusterDefinition: missing type discriminator")
+	default:
+		// Adding a variant to a oneOf is meant to be a backward-compatible change,
+		// so an unrecognized one is preserved verbatim instead of failing the decode
+		// of the whole payload it happens to appear in.
+		*u = ClusterDefinition{
+			unknownDiscriminator: disc.Type,
+			raw:                  string(data),
+		}
+		return nil
+	}
+}
+
 // FieldValue represents a union type (oneOf/anyOf).
 // Variants: string, float64, bool
 type FieldValue struct {
@@ -16462,6 +16080,182 @@ func (u *FieldValue) UnmarshalJSON(data []byte) error {
 		errors = append(errors, err)
 	}
 	return fmt.Errorf("data did not match any variant of FieldValue: %v", errors)
+}
+
+// StorageDefinition - The storage's typed configuration, in the shape the storage's details return. A bucket is provisioned as it is created; every other type is saved to provision later. Read-only fields are set by provisioning and ignored.
+
+// Variants: AwsLustreDefinition, AzureManagedLustreDefinition, GoogleManagedLustreDefinition, BucketDefinition, DiskDefinition, AwsEfsDefinition, AzureAzfilesDefinition, AzureNetappFilesDefinition, GoogleFilestoreDefinition, OracleFsDefinition
+type StorageDefinition struct {
+	Value any
+
+	unknownDiscriminator string
+	raw                  string
+}
+
+// IsUnknownVariant reports whether the payload carried a type
+// this client does not know. Value is nil in that case; the original JSON is
+// available from Raw and is re-marshaled unchanged.
+func (u StorageDefinition) IsUnknownVariant() bool {
+	return u.Value == nil && len(u.raw) > 0
+}
+
+// UnknownDiscriminator returns the unrecognized type value,
+// or "" when the payload decoded into a known variant.
+func (u StorageDefinition) UnknownDiscriminator() string {
+	return u.unknownDiscriminator
+}
+
+// Raw returns the original JSON of an unrecognized variant, or nil.
+func (u StorageDefinition) Raw() json.RawMessage {
+	if u.raw == "" {
+		return nil
+	}
+	return json.RawMessage(u.raw)
+}
+
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u StorageDefinition) unionValue() any {
+	return u.Value
+}
+
+// MarshalJSON implements json.Marshaler for StorageDefinition.
+func (u StorageDefinition) MarshalJSON() ([]byte, error) {
+	if u.IsUnknownVariant() {
+		return []byte(u.raw), nil
+	}
+	return json.Marshal(u.Value)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for StorageDefinition.
+func (u *StorageDefinition) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	var disc struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &disc); err != nil {
+		return fmt.Errorf("unmarshaling StorageDefinition discriminator: %w", err)
+	}
+	switch disc.Type {
+	case "aws-bucket":
+		var v BucketDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "aws-disk":
+		var v DiskDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "aws-efs":
+		var v AwsEfsDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "aws-lustre":
+		var v AwsLustreDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "azure-azfiles":
+		var v AzureAzfilesDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "azure-bucket":
+		var v BucketDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "azure-disk":
+		var v DiskDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "azure-managedlustre":
+		var v AzureManagedLustreDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "azure-netappfiles":
+		var v AzureNetappFilesDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "google-bucket":
+		var v BucketDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "google-disk":
+		var v DiskDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "google-filestore":
+		var v GoogleFilestoreDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "google-managedlustre":
+		var v GoogleManagedLustreDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "oracle-bucket":
+		var v BucketDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "oracle-oraclefs":
+		var v OracleFsDefinition
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinition{Value: v}
+		return nil
+	case "":
+		return fmt.Errorf("unmarshaling StorageDefinition: missing type discriminator")
+	default:
+		// Adding a variant to a oneOf is meant to be a backward-compatible change,
+		// so an unrecognized one is preserved verbatim instead of failing the decode
+		// of the whole payload it happens to appear in.
+		*u = StorageDefinition{
+			unknownDiscriminator: disc.Type,
+			raw:                  string(data),
+		}
+		return nil
+	}
 }
 
 // JobCondition - The job's condition: true or false once resolved, or the expression still to evaluate.
@@ -16731,182 +16525,6 @@ func (u *MarketplaceItemBodyVersionsValue) UnmarshalJSON(data []byte) error {
 		// of the whole payload it happens to appear in.
 		*u = MarketplaceItemBodyVersionsValue{
 			unknownDiscriminator: disc.Subtype,
-			raw:                  string(data),
-		}
-		return nil
-	}
-}
-
-// StorageDefinition - The storage's typed configuration.
-
-// Variants: AwsLustreDefinition, AzureManagedLustreDefinition, GoogleManagedLustreDefinition, BucketDefinition, DiskDefinition, AwsEfsDefinition, AzureAzfilesDefinition, AzureNetappFilesDefinition, GoogleFilestoreDefinition, OracleFsDefinition
-type StorageDefinition struct {
-	Value any
-
-	unknownDiscriminator string
-	raw                  string
-}
-
-// IsUnknownVariant reports whether the payload carried a type
-// this client does not know. Value is nil in that case; the original JSON is
-// available from Raw and is re-marshaled unchanged.
-func (u StorageDefinition) IsUnknownVariant() bool {
-	return u.Value == nil && len(u.raw) > 0
-}
-
-// UnknownDiscriminator returns the unrecognized type value,
-// or "" when the payload decoded into a known variant.
-func (u StorageDefinition) UnknownDiscriminator() string {
-	return u.unknownDiscriminator
-}
-
-// Raw returns the original JSON of an unrecognized variant, or nil.
-func (u StorageDefinition) Raw() json.RawMessage {
-	if u.raw == "" {
-		return nil
-	}
-	return json.RawMessage(u.raw)
-}
-
-// unionValue hands the decoded variant to the parameter encoders, which write
-// the value a union carries rather than the wrapper carrying it.
-func (u StorageDefinition) unionValue() any {
-	return u.Value
-}
-
-// MarshalJSON implements json.Marshaler for StorageDefinition.
-func (u StorageDefinition) MarshalJSON() ([]byte, error) {
-	if u.IsUnknownVariant() {
-		return []byte(u.raw), nil
-	}
-	return json.Marshal(u.Value)
-}
-
-// UnmarshalJSON implements json.Unmarshaler for StorageDefinition.
-func (u *StorageDefinition) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
-	var disc struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &disc); err != nil {
-		return fmt.Errorf("unmarshaling StorageDefinition discriminator: %w", err)
-	}
-	switch disc.Type {
-	case "aws-bucket":
-		var v BucketDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "aws-disk":
-		var v DiskDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "aws-efs":
-		var v AwsEfsDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "aws-lustre":
-		var v AwsLustreDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "azure-azfiles":
-		var v AzureAzfilesDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "azure-bucket":
-		var v BucketDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "azure-disk":
-		var v DiskDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "azure-managedlustre":
-		var v AzureManagedLustreDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "azure-netappfiles":
-		var v AzureNetappFilesDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "google-bucket":
-		var v BucketDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "google-disk":
-		var v DiskDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "google-filestore":
-		var v GoogleFilestoreDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "google-managedlustre":
-		var v GoogleManagedLustreDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "oracle-bucket":
-		var v BucketDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "oracle-oraclefs":
-		var v OracleFsDefinition
-		if err := json.Unmarshal(data, &v); err != nil {
-			return err
-		}
-		*u = StorageDefinition{Value: v}
-		return nil
-	case "":
-		return fmt.Errorf("unmarshaling StorageDefinition: missing type discriminator")
-	default:
-		// Adding a variant to a oneOf is meant to be a backward-compatible change,
-		// so an unrecognized one is preserved verbatim instead of failing the decode
-		// of the whole payload it happens to appear in.
-		*u = StorageDefinition{
-			unknownDiscriminator: disc.Type,
 			raw:                  string(data),
 		}
 		return nil
@@ -17464,10 +17082,10 @@ func (u *AttachedStorageWrite) UnmarshalJSON(data []byte) error {
 	}
 }
 
-// ClusterDefinition - A cluster's typed configuration variables; the shape is selected by the type discriminator.
+// ClusterDefinitionPatch - A JSON merge patch (RFC 7396) against the cluster's definition, in the shape get-cluster-definition returns. A field it sets replaces that field, null removes it, an array replaces the whole array, and fields it leaves out are kept. type must be the cluster's own.
 
-// Variants: ExistingClusterDefinition, AwsSlurmDefinition, GoogleSlurmDefinition, AzureSlurmDefinition, OracleSlurmDefinition, OpenstackSlurmDefinition
-type ClusterDefinition struct {
+// Variants: ExistingClusterDefinitionPatch, AwsSlurmDefinitionPatch, GoogleSlurmDefinitionPatch, AzureSlurmDefinitionPatch, OracleSlurmDefinitionPatch, OpenstackSlurmDefinitionPatch
+type ClusterDefinitionPatch struct {
 	Value any
 
 	unknownDiscriminator string
@@ -17477,56 +17095,56 @@ type ClusterDefinition struct {
 // IsUnknownVariant reports whether the payload carried a type
 // this client does not know. Value is nil in that case; the original JSON is
 // available from Raw and is re-marshaled unchanged.
-func (u ClusterDefinition) IsUnknownVariant() bool {
+func (u ClusterDefinitionPatch) IsUnknownVariant() bool {
 	return u.Value == nil && len(u.raw) > 0
 }
 
 // UnknownDiscriminator returns the unrecognized type value,
 // or "" when the payload decoded into a known variant.
-func (u ClusterDefinition) UnknownDiscriminator() string {
+func (u ClusterDefinitionPatch) UnknownDiscriminator() string {
 	return u.unknownDiscriminator
 }
 
 // Raw returns the original JSON of an unrecognized variant, or nil.
-func (u ClusterDefinition) Raw() json.RawMessage {
+func (u ClusterDefinitionPatch) Raw() json.RawMessage {
 	if u.raw == "" {
 		return nil
 	}
 	return json.RawMessage(u.raw)
 }
 
-// Base returns the ClusterDefinitionBase that every variant of ClusterDefinition carries, or
+// Base returns the ClusterDefinitionPatchBase that every variant of ClusterDefinitionPatch carries, or
 // nil when Value holds none of them. It is a copy: writing to it does not change
 // the value the union holds.
-func (u ClusterDefinition) Base() *ClusterDefinitionBase {
+func (u ClusterDefinitionPatch) Base() *ClusterDefinitionPatchBase {
 	switch v := u.Value.(type) {
-	case ExistingClusterDefinition:
-		return &ClusterDefinitionBase{
+	case ExistingClusterDefinitionPatch:
+		return &ClusterDefinitionPatchBase{
 			DesktopSession: v.DesktopSession,
 			ExplorerPath:   v.ExplorerPath,
 		}
-	case AwsSlurmDefinition:
-		return &ClusterDefinitionBase{
+	case AwsSlurmDefinitionPatch:
+		return &ClusterDefinitionPatchBase{
 			DesktopSession: v.DesktopSession,
 			ExplorerPath:   v.ExplorerPath,
 		}
-	case GoogleSlurmDefinition:
-		return &ClusterDefinitionBase{
+	case GoogleSlurmDefinitionPatch:
+		return &ClusterDefinitionPatchBase{
 			DesktopSession: v.DesktopSession,
 			ExplorerPath:   v.ExplorerPath,
 		}
-	case AzureSlurmDefinition:
-		return &ClusterDefinitionBase{
+	case AzureSlurmDefinitionPatch:
+		return &ClusterDefinitionPatchBase{
 			DesktopSession: v.DesktopSession,
 			ExplorerPath:   v.ExplorerPath,
 		}
-	case OracleSlurmDefinition:
-		return &ClusterDefinitionBase{
+	case OracleSlurmDefinitionPatch:
+		return &ClusterDefinitionPatchBase{
 			DesktopSession: v.DesktopSession,
 			ExplorerPath:   v.ExplorerPath,
 		}
-	case OpenstackSlurmDefinition:
-		return &ClusterDefinitionBase{
+	case OpenstackSlurmDefinitionPatch:
+		return &ClusterDefinitionPatchBase{
 			DesktopSession: v.DesktopSession,
 			ExplorerPath:   v.ExplorerPath,
 		}
@@ -17536,20 +17154,20 @@ func (u ClusterDefinition) Base() *ClusterDefinitionBase {
 
 // unionValue hands the decoded variant to the parameter encoders, which write
 // the value a union carries rather than the wrapper carrying it.
-func (u ClusterDefinition) unionValue() any {
+func (u ClusterDefinitionPatch) unionValue() any {
 	return u.Value
 }
 
-// MarshalJSON implements json.Marshaler for ClusterDefinition.
-func (u ClusterDefinition) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements json.Marshaler for ClusterDefinitionPatch.
+func (u ClusterDefinitionPatch) MarshalJSON() ([]byte, error) {
 	if u.IsUnknownVariant() {
 		return []byte(u.raw), nil
 	}
 	return json.Marshal(u.Value)
 }
 
-// UnmarshalJSON implements json.Unmarshaler for ClusterDefinition.
-func (u *ClusterDefinition) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON implements json.Unmarshaler for ClusterDefinitionPatch.
+func (u *ClusterDefinitionPatch) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
 		return nil
 	}
@@ -17557,58 +17175,58 @@ func (u *ClusterDefinition) UnmarshalJSON(data []byte) error {
 		Type string `json:"type"`
 	}
 	if err := json.Unmarshal(data, &disc); err != nil {
-		return fmt.Errorf("unmarshaling ClusterDefinition discriminator: %w", err)
+		return fmt.Errorf("unmarshaling ClusterDefinitionPatch discriminator: %w", err)
 	}
 	switch disc.Type {
 	case "aws-slurm":
-		var v AwsSlurmDefinition
+		var v AwsSlurmDefinitionPatch
 		if err := json.Unmarshal(data, &v); err != nil {
 			return err
 		}
-		*u = ClusterDefinition{Value: v}
+		*u = ClusterDefinitionPatch{Value: v}
 		return nil
 	case "azure-slurm":
-		var v AzureSlurmDefinition
+		var v AzureSlurmDefinitionPatch
 		if err := json.Unmarshal(data, &v); err != nil {
 			return err
 		}
-		*u = ClusterDefinition{Value: v}
+		*u = ClusterDefinitionPatch{Value: v}
 		return nil
 	case "existing":
-		var v ExistingClusterDefinition
+		var v ExistingClusterDefinitionPatch
 		if err := json.Unmarshal(data, &v); err != nil {
 			return err
 		}
-		*u = ClusterDefinition{Value: v}
+		*u = ClusterDefinitionPatch{Value: v}
 		return nil
 	case "google-slurm":
-		var v GoogleSlurmDefinition
+		var v GoogleSlurmDefinitionPatch
 		if err := json.Unmarshal(data, &v); err != nil {
 			return err
 		}
-		*u = ClusterDefinition{Value: v}
+		*u = ClusterDefinitionPatch{Value: v}
 		return nil
 	case "openstack-slurm":
-		var v OpenstackSlurmDefinition
+		var v OpenstackSlurmDefinitionPatch
 		if err := json.Unmarshal(data, &v); err != nil {
 			return err
 		}
-		*u = ClusterDefinition{Value: v}
+		*u = ClusterDefinitionPatch{Value: v}
 		return nil
 	case "oracle-slurm":
-		var v OracleSlurmDefinition
+		var v OracleSlurmDefinitionPatch
 		if err := json.Unmarshal(data, &v); err != nil {
 			return err
 		}
-		*u = ClusterDefinition{Value: v}
+		*u = ClusterDefinitionPatch{Value: v}
 		return nil
 	case "":
-		return fmt.Errorf("unmarshaling ClusterDefinition: missing type discriminator")
+		return fmt.Errorf("unmarshaling ClusterDefinitionPatch: missing type discriminator")
 	default:
 		// Adding a variant to a oneOf is meant to be a backward-compatible change,
 		// so an unrecognized one is preserved verbatim instead of failing the decode
 		// of the whole payload it happens to appear in.
-		*u = ClusterDefinition{
+		*u = ClusterDefinitionPatch{
 			unknownDiscriminator: disc.Type,
 			raw:                  string(data),
 		}
@@ -17629,6 +17247,15 @@ type UploadUserThumbnailBody struct {
 type UploadWorkflowIconBody struct {
 	// Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).
 	File FormFile `json:"file"`
+}
+
+// ClusterDefinitionBase - The properties every variant of ClusterDefinition declares.
+// Derived from the variants rather than declared by the spec, so it
+// changes when they do.
+type ClusterDefinitionBase struct {
+	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
+	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
+	ExplorerPath *string `json:"explorerPath,omitempty"`
 }
 
 // ClusterCreateBase - The properties every variant of ClusterCreate declares.
@@ -17671,10 +17298,11 @@ type AttachedStorageWriteBase struct {
 	ReadOnly *bool `json:"readOnly,omitempty"`
 }
 
-// ClusterDefinitionBase - The properties every variant of ClusterDefinition declares.
+// ClusterDefinitionPatchBase - The properties every variant of ClusterDefinitionPatch declares.
 // Derived from the variants rather than declared by the spec, so it
 // changes when they do.
-type ClusterDefinitionBase struct {
+type ClusterDefinitionPatchBase struct {
+	// Desktop session settings.
 	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
 	ExplorerPath *string `json:"explorerPath,omitempty"`

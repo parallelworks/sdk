@@ -3583,7 +3583,9 @@ type GetBucketsParams struct {
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Returns buckets the user can access.
+// Returns buckets the user can access. Deprecated: use get-storages with category=buckets. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetBuckets(ctx context.Context, opts ...GetBucketsParams) (*[]Bucket, error) {
 
 	path := "/api/buckets"
@@ -3750,7 +3752,9 @@ type GetDisksParams struct {
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Returns disks the user can access.
+// Returns disks the user can access. Deprecated: use get-storages with category=disks. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetDisks(ctx context.Context, opts ...GetDisksParams) (*[]Disk, error) {
 
 	path := "/api/disks"
@@ -3786,7 +3790,7 @@ type ClaimDurableTaskParams struct {
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Grants the calling worker the lease on the task it was started for, with what its executor needs to run it.
-func (c *Client) ClaimDurableTask(ctx context.Context, opts ...ClaimDurableTaskParams) (*DurableClaimOutputBody, error) {
+func (c *Client) ClaimDurableTask(ctx context.Context, body *DurableTaskClaimRequest, opts ...ClaimDurableTaskParams) (*DurableClaimOutputBody, error) {
 
 	path := "/api/eos/claim"
 	var params ClaimDurableTaskParams
@@ -3797,7 +3801,7 @@ func (c *Client) ClaimDurableTask(ctx context.Context, opts ...ClaimDurableTaskP
 	setHeader(headers, "Authorization", false, params.Authorization)
 
 	var result DurableClaimOutputBody
-	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true, headers); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true, headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3815,7 +3819,7 @@ type CompleteDurableTaskParams struct {
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Records the result of the calling worker's task and ends it.
-func (c *Client) CompleteDurableTask(ctx context.Context, body DurableCompleteBody, opts ...CompleteDurableTaskParams) error {
+func (c *Client) CompleteDurableTask(ctx context.Context, body DurableTaskResult, opts ...CompleteDurableTaskParams) error {
 
 	path := "/api/eos/complete"
 	var params CompleteDurableTaskParams
@@ -3843,7 +3847,7 @@ type HeartbeatDurableTaskParams struct {
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Renews the calling worker's lease on its task.
-func (c *Client) HeartbeatDurableTask(ctx context.Context, body DurableLeaseBody, opts ...HeartbeatDurableTaskParams) (*DurableHeartbeatOutputBody, error) {
+func (c *Client) HeartbeatDurableTask(ctx context.Context, body DurableTaskLease, opts ...HeartbeatDurableTaskParams) (*DurableHeartbeatOutputBody, error) {
 
 	path := "/api/eos/heartbeat"
 	var params HeartbeatDurableTaskParams
@@ -4231,6 +4235,22 @@ func (c *Client) UpdateInstanceStatus(ctx context.Context, body PatchInstanceSta
 	return nil
 }
 
+// GetInstanceWindowsCredential - Get Windows RDP credential status
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Windows instance agent checks whether the platform holds its RDP credential. The password is never returned.
+func (c *Client) GetInstanceWindowsCredential(ctx context.Context) (*WindowsCredentialStatus, error) {
+
+	path := "/api/instances/windows-credential"
+
+	var result WindowsCredentialStatus
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // PutInstanceWindowsCredential - Report Windows RDP credential
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -4591,7 +4611,9 @@ type GetLustreParams struct {
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Returns Lustre Filesystems the user can access.
+// Returns Lustre Filesystems the user can access. Deprecated: use get-storages with category=lustre. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetLustre(ctx context.Context, opts ...GetLustreParams) (*[]Lustre, error) {
 
 	path := "/api/lustre"
@@ -5812,7 +5834,9 @@ type GetNfsParams struct {
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Returns NFS filesystems the user can access.
+// Returns NFS filesystems the user can access. Deprecated: use get-storages with category=nfs. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetNfs(ctx context.Context, opts ...GetNfsParams) (*[]Nfs, error) {
 
 	path := "/api/nfs"
@@ -6393,7 +6417,7 @@ func (c *Client) PostOidcIntrospect(ctx context.Context, body *map[string]any) (
 //
 // The response carries the `client_id`, the registered metadata, and a `registration_access_token` for the `registration_client_uri` (RFC 7592). Errors use the RFC 7591 shape: `invalid_client_metadata` or `invalid_redirect_uri` with status 400, and `invalid_token` with status 401 for an initial access token that is not valid, has expired, or was already used.
 //
-// A managed cluster node registers here with its node registration token (`pwrt_`) as the initial access token. A single-use token registers one node; a reusable one registers any number until it expires or is revoked. The node registers no key: `token_endpoint_auth_method` is `none`, `grant_types` is empty, `jwks_uri` is refused, and `jwks` must be absent or an empty key set. It sends `hostname`, which is required, and optionally `ip_addresses`, `os` and `arch`. The response has `kind` `managed-cluster-node` and carries the node's `agent_key`, which authenticates its tunnel and heartbeat, with the `organization` and `cluster` it joined, and no `registration_access_token`: an organization administrator removes the node, and a single-use token replaces its key. A reusable token presented for a hostname the cluster already has is refused with `invalid_client_metadata`.
+// A managed cluster node registers here with its node registration token (`pwrt_`) as the initial access token. A single-use token registers one node; a reusable one registers any number until it expires or is revoked. The node registers no key: `token_endpoint_auth_method` is `none`, `grant_types` is empty, `jwks_uri` is refused, and `jwks` must be absent or an empty key set. It sends `hostname`, which is required, and optionally `ip_addresses`, `os` and `arch`; `software_version` is recorded as the node's agent version. The platform keeps the first 64 addresses and cuts `os`, `arch` and `software_version` to 128 characters. A platform that registers nodes here says so with `pw_node_registration_supported` in its discovery document. The response has `kind` `managed-cluster-node` and carries the node's `agent_key`, which authenticates its tunnel and heartbeat, with the `organization` and `cluster` it joined, and no `registration_access_token`: an organization administrator removes the node, and a single-use token replaces its key. A reusable token presented for a hostname the cluster already has is refused with `invalid_client_metadata`.
 func (c *Client) RegisterOauthClient(ctx context.Context, body *ClientMetadata) (*ClientInformation, error) {
 
 	path := "/api/oidc/register"
@@ -6426,8 +6450,8 @@ func (c *Client) GetOauthClientRegistration(ctx context.Context, clientID string
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Replaces the client's metadata (RFC 7592 section 2.2); this is how the client rotates its key, by sending a new `jwks`. Send every field as returned by the last response, with `client_id`, and leave out `registration_access_token`, `registration_client_uri` and `client_id_issued_at` or repeat their current values. Omitted fields are cleared. The same metadata rules as registration apply. Authenticate with the client's registration access token as a Bearer credential. Each successful request returns a new registration access token and retires the one presented, so store the new one before making another request. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403. Presenting a retired token also deregisters the client, since a client that stores each new token never presents an old one.
-func (c *Client) UpdateOauthClientRegistration(ctx context.Context, clientID string, body *ClientMetadata) (*ClientInformation, error) {
+// Replaces the client's metadata (RFC 7592 section 2.2); this is how the client rotates its key, by sending a new `jwks`. Send every field as returned by the last response, with `client_id`, and leave out `registration_access_token`, `registration_client_uri` and `client_id_issued_at` or repeat their current values. Omitted fields are cleared. The same metadata rules as a workload's registration apply. A managed cluster node has no registration access token, so it never updates here. Authenticate with the client's registration access token as a Bearer credential. Each successful request returns a new registration access token and retires the one presented, so store the new one before making another request. An unknown or retired token gets `invalid_token` with status 401, and a token for a different client gets `insufficient_scope` with status 403. Presenting a retired token also deregisters the client, since a client that stores each new token never presents an old one.
+func (c *Client) UpdateOauthClientRegistration(ctx context.Context, clientID string, body *ClientMetadataUpdate) (*ClientInformation, error) {
 
 	path := "/api/oidc/register/{clientId}"
 	path = pathReplace(path, "clientId", "simple", false, clientID)
@@ -12162,8 +12186,8 @@ func (c *Client) GetAllocationsUsageByPeriod(ctx context.Context, organization s
 // GetAllocationUsageByDayParams contains the parameters for the GetAllocationUsageByDay operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetAllocationUsageByDayParams struct {
-	// First UTC day to include (YYYY-MM-DD).
-	StartDate string `json:"startDate"`
+	// First UTC day to include (YYYY-MM-DD). Defaults to the start of the allocation's current period, or of this month when it has none.
+	StartDate *string `json:"startDate,omitempty"`
 	// Last UTC day to include (YYYY-MM-DD). Defaults to today.
 	EndDate *string `json:"endDate,omitempty"`
 	// Fields to break each day down by.
@@ -12193,11 +12217,15 @@ type GetAllocationUsageByDayParams struct {
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Sums an allocation's rated usage and cloud costs per UTC day, broken down by any of type, subtype, user, and SKU. Cloud costs without a user are attributed to the organization's default billing username. Live realtime estimates are included on request, as their own entries.
-func (c *Client) GetAllocationUsageByDay(ctx context.Context, organization string, allocation string, params GetAllocationUsageByDayParams) (*AllocationUsageByDay, error) {
+func (c *Client) GetAllocationUsageByDay(ctx context.Context, organization string, allocation string, opts ...GetAllocationUsageByDayParams) (*AllocationUsageByDay, error) {
 
 	path := "/api/organizations/{organization}/reports/allocations/{allocation}/usage/by-day"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "allocation", "simple", false, allocation)
+	var params GetAllocationUsageByDayParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
 	queryValues := url.Values{}
 	addQueryParam(queryValues, "startDate", "form", false, params.StartDate)
 
@@ -13932,44 +13960,6 @@ func (c *Client) GetOrgUserAvatar(ctx context.Context, organization string, user
 	return &result, nil
 }
 
-// GetStorageAwsBucket - Get Storage: AWS bucket
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns an AWS bucket
-func (c *Client) GetStorageAwsBucket(ctx context.Context, organization string, user string, name string) (*AwsBucket, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/aws-bucket/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result AwsBucket
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// ProvisionAwsBucket - Provision Storage: AWS Bucket
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Provisions an AWS S3 bucket.
-func (c *Client) ProvisionAwsBucket(ctx context.Context, organization string, user string, name string, body BucketResource) (*BucketOutput, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/aws-bucket/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result BucketOutput
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
 // AddCorsRulesAwsBucket - Add CORS rules to AWS bucket
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -14001,103 +13991,6 @@ func (c *Client) GetTokenAwsBucket(ctx context.Context, organization string, use
 	path = pathReplace(path, "name", "simple", false, name)
 
 	var result AwsBucketToken
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetAwsDisk - Get Storage: AWS disk
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns an AWS disk
-func (c *Client) GetAwsDisk(ctx context.Context, organization string, user string, name string) (*AwsDisk, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/aws-disk/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result AwsDisk
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetStorageAwsEfs - Get Storage: AWS EFS
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns an AWS EFS (Elastic File System)
-func (c *Client) GetStorageAwsEfs(ctx context.Context, organization string, user string, name string) (*AwsEfs, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/aws-efs/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result AwsEfs
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetStorageAwsLustre - Get Storage: AWS Lustre
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns an AWS Lustre (FSx for Lustre)
-func (c *Client) GetStorageAwsLustre(ctx context.Context, organization string, user string, name string) (*AwsLustre, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/aws-lustre/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result AwsLustre
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetStorageAwsManagedlustre - Get Storage: AWS Managed Lustre
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns an AWS Managed Lustre (FSx for Lustre)
-//
-// Deprecated: this operation is deprecated.
-func (c *Client) GetStorageAwsManagedlustre(ctx context.Context, organization string, user string, name string) (*AwsLustre, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/aws-managedlustre/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result AwsLustre
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetAzureFiles - Get Storage: Azure Files
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns an Azure Files
-func (c *Client) GetAzureFiles(ctx context.Context, organization string, user string, name string) (*AzureFiles, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result AzureFiles
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -14180,44 +14073,6 @@ func (c *Client) GetSasTokenAzureAzfiles(ctx context.Context, organization strin
 
 	var result AzureFilesSas
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetAzureBucket - Get Storage: Azure Blob Storage
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns an Azure Blob storage
-func (c *Client) GetAzureBucket(ctx context.Context, organization string, user string, name string) (*AzureBlobStorage, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result AzureBlobStorage
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// ProvisionAzureBucket - Provision Storage: Azure Bucket
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Provisions an Azure bucket.
-func (c *Client) ProvisionAzureBucket(ctx context.Context, organization string, user string, name string, body BucketResource) (*BucketOutput, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result BucketOutput
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -14323,63 +14178,6 @@ func (c *Client) GetTokenAzureBucket(ctx context.Context, organization string, u
 	return &result, nil
 }
 
-// GetAzureDisk - Get Storage: Azure Disk
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns an Azure Disk
-func (c *Client) GetAzureDisk(ctx context.Context, organization string, user string, name string) (*AzureDisk, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/azure-disk/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result AzureDisk
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetAzureManagedlustre - Get Storage: Azure Managed Lustre
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns an Azure Managed Lustre
-func (c *Client) GetAzureManagedlustre(ctx context.Context, organization string, user string, name string) (*AzureManagedLustre, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/azure-managedlustre/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result AzureManagedLustre
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetAzureNetappfiles - Get Storage: Azure NetApp Files
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns an Azure NetApp Files
-func (c *Client) GetAzureNetappfiles(ctx context.Context, organization string, user string, name string) (*AzureNetAppFiles, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/azure-netappfiles/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result AzureNetAppFiles
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
 // SetUserBillingAdmin - Set user platform billing admin status
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -14395,6 +14193,24 @@ func (c *Client) SetUserBillingAdmin(ctx context.Context, organization string, u
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// GetBillingSummary - Get what is billing you
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns in one response what each allocation you can see has spent in its current period, including live estimates, and every live cloud resource your clusters and storage were provisioned with (VMs, disks, file systems, buckets, IP addresses) that the inventory has seen in the last hour, with each one's realtime cost estimate so far today and per hour, in USD.
+func (c *Client) GetBillingSummary(ctx context.Context, organization string, user string) (*BillingSummaryBody, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/billing-summary"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+
+	var result BillingSummaryBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetCluster - Get Cluster
@@ -14603,6 +14419,25 @@ func (c *Client) UpdateClusterAttachedStorages(ctx context.Context, organization
 	return &result, nil
 }
 
+// GetClusterCostEstimate - Get cluster cost estimate
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Estimates what a cloud cluster costs per hour from its definition and the cloud provider's on-demand list prices: the controller and its disks while the cluster is on, and each partition per node and at its maximum node count. Storage attached to the cluster bills on its own and is not included.
+func (c *Client) GetClusterCostEstimate(ctx context.Context, organization string, user string, clusterName string) (*ClusterCostEstimate, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/cost-estimate"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+
+	var result ClusterCostEstimate
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetClusterDefinition - Get Cluster Definition
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -14636,6 +14471,44 @@ func (c *Client) UpdateClusterDefinition(ctx context.Context, organization strin
 
 	var result ClusterDefinition
 	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PatchClusterDefinition - Patch Cluster Definition
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Changes part of a cluster's configuration with a JSON merge patch (RFC 7396), sent as application/merge-patch+json or application/json. Fields the patch leaves out are kept. A cloud cluster must be off; the patched definition is checked as update-cluster-definition checks a whole one.
+func (c *Client) PatchClusterDefinition(ctx context.Context, organization string, user string, clusterName string, body ClusterDefinitionPatch) (*ClusterDefinition, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/definition"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+
+	var result ClusterDefinition
+	if err := c.do(ctx, "PATCH", path, body, "application/merge-patch+json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ValidateClusterDefinition - Validate Cluster Definition
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Checks a JSON merge patch (RFC 7396) against a cluster's definition without saving it. Returns the definition the patch would save and, for a cloud cluster in a priced region, what it would cost per hour, or the same error patch-cluster-definition would return.
+func (c *Client) ValidateClusterDefinition(ctx context.Context, organization string, user string, clusterName string, body ClusterDefinitionPatch) (*ClusterDefinitionCheck, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/definition/validate"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+
+	var result ClusterDefinitionCheck
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -15592,6 +15465,8 @@ func (c *Client) SetUserComplimentary(ctx context.Context, organization string, 
 // ListComputeFilesParams contains the parameters for the ListComputeFiles operation.
 // Required parameters are value fields; optional parameters are pointers.
 type ListComputeFilesParams struct {
+	// Folder to treat as the root instead of the cluster's default (supports ~, __HOME__ and __USER__).
+	Root *string `json:"root,omitempty"`
 	// Folder to list, relative to the root. Empty lists the root.
 	Path *string `json:"path,omitempty"`
 	// The nextCursor of the previous page.
@@ -15616,6 +15491,8 @@ func (c *Client) ListComputeFiles(ctx context.Context, organization string, user
 		params = opts[0]
 	}
 	queryValues := url.Values{}
+	addQueryParam(queryValues, "root", "form", false, params.Root)
+
 	addQueryParam(queryValues, "path", "form", false, params.Path)
 
 	addQueryParam(queryValues, "cursor", "form", false, params.Cursor)
@@ -15854,44 +15731,6 @@ func (c *Client) ConnectUserGitlabToken(ctx context.Context, organization string
 	return &result, nil
 }
 
-// GetGoogleBucket - Get Storage: Google bucket
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns a Google bucket
-func (c *Client) GetGoogleBucket(ctx context.Context, organization string, user string, name string) (*GoogleBucket, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/google-bucket/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result GoogleBucket
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// ProvisionGoogleBucket - Provision Storage: Google Bucket
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Provisions a Google bucket.
-func (c *Client) ProvisionGoogleBucket(ctx context.Context, organization string, user string, name string, body BucketResource) (*BucketOutput, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/google-bucket/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result BucketOutput
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
 // AddCorsRulesGoogleBucket - Add CORS rules to Google bucket
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -15967,80 +15806,6 @@ func (c *Client) GetTokenGoogleBucket(ctx context.Context, organization string, 
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
-}
-
-// GetGoogleDisk - Get Storage: Google Disk
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns a Google Disk
-func (c *Client) GetGoogleDisk(ctx context.Context, organization string, user string, name string) (*GoogleDisk, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/google-disk/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result GoogleDisk
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetGoogleFilestore - Get Storage: Google Filestore
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns a Google Filestore
-func (c *Client) GetGoogleFilestore(ctx context.Context, organization string, user string, name string) (*GoogleFilestore, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/google-filestore/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result GoogleFilestore
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// CreateGoogleManagedLustre - Create Google managed lustre
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Creates a new google managed lustre instance
-func (c *Client) CreateGoogleManagedLustre(ctx context.Context, organization string, user string, body GoogleManagedLustre) (*GoogleManagedLustre, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/google-managed-lustre"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-
-	var result GoogleManagedLustre
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// DeleteGoogleManagedLustre - Delete Google managed lustre
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Deletes a google managed lustre instance
-func (c *Client) DeleteGoogleManagedLustre(ctx context.Context, organization string, user string, managedLustreName string) error {
-
-	path := "/api/organizations/{organization}/users/{user}/google-managed-lustre/{managedLustreName}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "managedLustreName", "simple", false, managedLustreName)
-
-	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
 }
 
 // GetInstances - List Instances
@@ -16591,44 +16356,6 @@ func (c *Client) DeleteNetworkInterface(ctx context.Context, organization string
 	return nil
 }
 
-// GetOracleBucket - Get Storage: Oracle bucket
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns an Oracle Object Storage bucket
-func (c *Client) GetOracleBucket(ctx context.Context, organization string, user string, name string) (*OracleBucket, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/oracle-bucket/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result OracleBucket
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// ProvisionOracleBucket - Provision Storage: Oracle Bucket
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Provisions an Oracle Object Storage bucket.
-func (c *Client) ProvisionOracleBucket(ctx context.Context, organization string, user string, name string, body BucketResource) (*BucketOutput, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/oracle-bucket/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result BucketOutput
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
 // GetParOracleBucket - Get Pre-Authenticated Request URL for Oracle bucket
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -16642,25 +16369,6 @@ func (c *Client) GetParOracleBucket(ctx context.Context, organization string, us
 	path = pathReplace(path, "name", "simple", false, name)
 
 	var result OracleBucketPar
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetOracleOraclefs - Get Storage: Oracle File Storage
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Returns an Oracle FSS file system
-func (c *Client) GetOracleOraclefs(ctx context.Context, organization string, user string, name string) (*OracleFs, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/oracle-oraclefs/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	var result OracleFs
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -17449,6 +17157,61 @@ func (c *Client) GetStorage(ctx context.Context, organization string, user strin
 	return &result, nil
 }
 
+// CreateStorage - Create Storage
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Saves a storage definition for a disk, Lustre or NFS file system, to provision later with provision-storage. Storage is created only for the caller. Buckets and Google managed Lustre are created with their own routes.
+func (c *Client) CreateStorage(ctx context.Context, organization string, user string, name string, body CreateStorageBody) (*CreatedStorage, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	var result CreatedStorage
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteStorage - Delete a storage
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Deletes a storage configuration. This will also detach the storage from all clusters.
+func (c *Client) DeleteStorage(ctx context.Context, organization string, user string, name string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UpdateStorageBilling - Update storage billing
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Reassigns which resource group the storage bills against.
+func (c *Client) UpdateStorageBilling(ctx context.Context, organization string, user string, name string, body UpdateStorageBillingInputBody) error {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/billing"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetStorageDeploymentsParams contains the parameters for the GetStorageDeployments operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetStorageDeploymentsParams struct {
@@ -17603,6 +17366,43 @@ func (c *Client) DestroyStorage(ctx context.Context, organization string, user s
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// DeleteStorageIcon - Delete storage icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes a storage's custom icon and releases the underlying blob reference.
+func (c *Client) DeleteStorageIcon(ctx context.Context, organization string, user string, name string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/icon"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// SetStorageIcon - Set storage icon
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Sets a storage's icon from either a curated preset URL or a blob already in the caller's thumbnail library. Increments refcount on the new blob and releases the prior one.
+func (c *Client) SetStorageIcon(ctx context.Context, organization string, user string, name string, body IconRef) (*SetStorageIconOutputBody, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/icon"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	var result SetStorageIconOutputBody
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetStoragePermissions - Get storage permissions
@@ -17883,83 +17683,6 @@ func (c *Client) RemoveWorkspaceMount(ctx context.Context, organization string, 
 		return parseErrorResponse(err)
 	}
 	return nil
-}
-
-// DeleteStorage - Delete a storage
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// Deletes a storage configuration. This will also detach the storage from all clusters.
-func (c *Client) DeleteStorage(ctx context.Context, organization string, user string, name string, type_ string) error {
-
-	path := "/api/organizations/{organization}/users/{user}/{type}/{name}"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-	path = pathReplace(path, "type", "simple", false, type_)
-
-	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// UpdateStorageBilling - Update storage billing
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Reassigns which resource group the storage bills against.
-func (c *Client) UpdateStorageBilling(ctx context.Context, organization string, user string, name string, type_ string, body UpdateStorageBillingInputBody) error {
-
-	path := "/api/organizations/{organization}/users/{user}/{type}/{name}/billing"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-	path = pathReplace(path, "type", "simple", false, type_)
-
-	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// DeleteStorageIcon - Delete storage icon
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Removes a storage's custom icon and releases the underlying blob reference.
-func (c *Client) DeleteStorageIcon(ctx context.Context, organization string, user string, name string, type_ string) error {
-
-	path := "/api/organizations/{organization}/users/{user}/{type}/{name}/icon"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-	path = pathReplace(path, "type", "simple", false, type_)
-
-	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// SetStorageIcon - Set storage icon
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Sets a storage's icon from either a curated preset URL or a blob already in the caller's thumbnail library. Increments refcount on the new blob and releases the prior one.
-func (c *Client) SetStorageIcon(ctx context.Context, organization string, user string, name string, type_ string, body IconRef) (*SetStorageIconOutputBody, error) {
-
-	path := "/api/organizations/{organization}/users/{user}/{type}/{name}/icon"
-	path = pathReplace(path, "organization", "simple", false, organization)
-	path = pathReplace(path, "user", "simple", false, user)
-	path = pathReplace(path, "name", "simple", false, name)
-	path = pathReplace(path, "type", "simple", false, type_)
-
-	var result SetStorageIconOutputBody
-	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
 }
 
 // GetOrganizationVariables - List workflow variables
