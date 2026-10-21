@@ -1619,6 +1619,16 @@
       "AgentDirectionBody": {
         "additionalProperties": false,
         "properties": {
+          "pastes": {
+            "description": "Pastes saved with upload-agent-session-paste that the text mentions by placeholder, as a message's pastes are.",
+            "items": {
+              "$ref": "#/components/schemas/PasteRef"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "text": {
             "description": "What to tell the running turn.",
             "minLength": 1,
@@ -1906,6 +1916,50 @@
           "commands",
           "mcpPrompts",
           "prompts"
+        ],
+        "type": "object"
+      },
+      "AgentPasteSaved": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": "The paste's number in the session. Refer to it in a message's pastes.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "lines": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "placeholder": {
+            "description": "The label the message text mentions the paste by, such as [Pasted text #1 +20 lines].",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "placeholder",
+          "lines",
+          "bytes"
+        ],
+        "type": "object"
+      },
+      "AgentPasteUpload": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "contentEncoding": "base64",
+            "description": "The pasted text, base64-encoded; at most 16MiB before encoding.",
+            "maxLength": 22369624,
+            "type": "string"
+          }
+        },
+        "required": [
+          "data"
         ],
         "type": "object"
       },
@@ -2390,6 +2444,15 @@
           "noteId": {
             "type": "string"
           },
+          "pastes": {
+            "items": {
+              "$ref": "#/components/schemas/PasteView"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "result": {
             "type": "string"
           },
@@ -2409,6 +2472,9 @@
           },
           "turn": {
             "$ref": "#/components/schemas/TurnResult"
+          },
+          "turnEnd": {
+            "$ref": "#/components/schemas/TurnEnd"
           },
           "turnId": {
             "type": "string"
@@ -11809,6 +11875,10 @@
             "pattern": "^($|/|~|__HOME__)",
             "type": "string"
           },
+          "group": {
+            "description": "Name of the group the cluster's usage is attributed to; cloud clusters only.",
+            "type": "string"
+          },
           "healthCheck": {
             "type": "string"
           },
@@ -11825,6 +11895,10 @@
             "minLength": 2,
             "type": "string"
           },
+          "network": {
+            "description": "Name of the network the cluster provisions into; cloud clusters only.",
+            "type": "string"
+          },
           "partitions": {
             "items": {
               "$ref": "#/components/schemas/ClusterAwsSlurmPartition"
@@ -11835,6 +11909,10 @@
             ]
           },
           "region": {
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.",
             "type": "string"
           },
           "rootSize": {
@@ -11954,6 +12032,10 @@
             "pattern": "^($|/|~|__HOME__)",
             "type": "string"
           },
+          "group": {
+            "description": "Name of the group the cluster's usage is attributed to; cloud clusters only.",
+            "type": "string"
+          },
           "healthCheck": {
             "type": "string"
           },
@@ -11978,6 +12060,10 @@
             "minLength": 2,
             "type": "string"
           },
+          "network": {
+            "description": "Name of the network the cluster provisions into; cloud clusters only.",
+            "type": "string"
+          },
           "partitions": {
             "items": {
               "$ref": "#/components/schemas/ClusterAzureSlurmPartition"
@@ -11988,6 +12074,10 @@
             ]
           },
           "region": {
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.",
             "type": "string"
           },
           "rootSize": {
@@ -12391,6 +12481,10 @@
             "pattern": "^($|/|~|__HOME__)",
             "type": "string"
           },
+          "group": {
+            "description": "Name of the group the cluster's usage is attributed to; cloud clusters only.",
+            "type": "string"
+          },
           "jumpNodeHost": {
             "description": "Jump (bastion) host; omit to connect directly.",
             "type": "string"
@@ -12406,6 +12500,14 @@
             ],
             "maxLength": 255,
             "minLength": 2,
+            "type": "string"
+          },
+          "network": {
+            "description": "Name of the network the cluster provisions into; cloud clusters only.",
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.",
             "type": "string"
           },
           "runTimeAlert": {
@@ -12518,6 +12620,10 @@
             "pattern": "^($|/|~|__HOME__)",
             "type": "string"
           },
+          "group": {
+            "description": "Name of the group the cluster's usage is attributed to; cloud clusters only.",
+            "type": "string"
+          },
           "healthCheck": {
             "type": "string"
           },
@@ -12534,6 +12640,10 @@
             "minLength": 2,
             "type": "string"
           },
+          "network": {
+            "description": "Name of the network the cluster provisions into; cloud clusters only.",
+            "type": "string"
+          },
           "partitions": {
             "items": {
               "$ref": "#/components/schemas/ClusterGoogleSlurmPartition"
@@ -12544,6 +12654,10 @@
             ]
           },
           "region": {
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.",
             "type": "string"
           },
           "rootSize": {
@@ -12998,6 +13112,10 @@
           "floatingIpNetwork": {
             "type": "string"
           },
+          "group": {
+            "description": "Name of the group the cluster's usage is attributed to; cloud clusters only.",
+            "type": "string"
+          },
           "healthCheck": {
             "type": "string"
           },
@@ -13008,6 +13126,10 @@
             ],
             "maxLength": 255,
             "minLength": 2,
+            "type": "string"
+          },
+          "network": {
+            "description": "Name of the network the cluster provisions into; cloud clusters only.",
             "type": "string"
           },
           "networkId": {
@@ -13023,6 +13145,10 @@
             ]
           },
           "region": {
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.",
             "type": "string"
           },
           "runTimeAlert": {
@@ -13134,6 +13260,10 @@
             "pattern": "^($|/|~|__HOME__)",
             "type": "string"
           },
+          "group": {
+            "description": "Name of the group the cluster's usage is attributed to; cloud clusters only.",
+            "type": "string"
+          },
           "healthCheck": {
             "type": "string"
           },
@@ -13146,6 +13276,10 @@
             "minLength": 2,
             "type": "string"
           },
+          "network": {
+            "description": "Name of the network the cluster provisions into; cloud clusters only.",
+            "type": "string"
+          },
           "partitions": {
             "items": {
               "$ref": "#/components/schemas/ClusterOracleSlurmPartition"
@@ -13156,6 +13290,10 @@
             ]
           },
           "region": {
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.",
             "type": "string"
           },
           "rootSize": {
@@ -20770,9 +20908,19 @@
               "notice",
               "plan_view",
               "goal_view",
-              "goal_progress"
+              "goal_progress",
+              "turn_end"
             ],
             "type": "string"
+          },
+          "pastes": {
+            "items": {
+              "$ref": "#/components/schemas/PasteView"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "planBody": {
             "type": "string"
@@ -20785,6 +20933,9 @@
           },
           "toolName": {
             "type": "string"
+          },
+          "turnEnd": {
+            "$ref": "#/components/schemas/TurnEnd"
           }
         },
         "required": [
@@ -27077,6 +27228,16 @@
         ],
         "type": "object"
       },
+      "NewClusterCheck": {
+        "additionalProperties": false,
+        "properties": {
+          "costEstimate": {
+            "$ref": "#/components/schemas/ClusterCostEstimate",
+            "description": "What the cluster would cost per hour; absent for clusters that can't be priced."
+          }
+        },
+        "type": "object"
+      },
       "Nfs": {
         "additionalProperties": false,
         "properties": {
@@ -30837,6 +30998,58 @@
         "required": [
           "token",
           "newPassword"
+        ],
+        "type": "object"
+      },
+      "PasteRef": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "placeholder": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "placeholder",
+          "id"
+        ],
+        "type": "object"
+      },
+      "PasteView": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inline": {
+            "type": "boolean"
+          },
+          "lines": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "placeholder": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "placeholder",
+          "id",
+          "lines",
+          "bytes"
         ],
         "type": "object"
       },
@@ -40555,6 +40768,16 @@
               "null"
             ]
           },
+          "pastes": {
+            "description": "Pastes saved with upload-agent-session-paste that the text mentions by placeholder. The machine decides when the turn starts whether each goes to the model inline or as its saved file.",
+            "items": {
+              "$ref": "#/components/schemas/PasteRef"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "text": {
             "description": "The message to send. Empty continues the turn, which is how the terminal wakes background work.",
             "type": "string"
@@ -41085,6 +41308,10 @@
             "type": "string"
           },
           "outputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pasteInlineMaxBytes": {
             "format": "int64",
             "type": "integer"
           },
@@ -43212,6 +43439,28 @@
             "type": "array"
           }
         },
+        "type": "object"
+      },
+      "TurnEnd": {
+        "additionalProperties": false,
+        "properties": {
+          "durationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "endedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pendingAgents": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "durationMs",
+          "endedAt"
+        ],
         "type": "object"
       },
       "TurnResult": {
@@ -53276,6 +53525,71 @@
         "x-internal": true
       }
     },
+    "/api/agents/machines/{machine}/sessions/{id}/texts": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSaves pasted text in the session's folder on the machine, so a message can refer to it by placeholder instead of carrying it. The machine holds it to the same checks as a message: remote control must be on, and a session running above the remote permission ceiling takes pastes only from the machine itself. A session keeps at most 256MiB of pastes, and one with tools off refuses a paste too large to send its model inline, since the model could not read it as a file.",
+        "operationId": "upload-agent-session-paste",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentPasteUpload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPasteSaved"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Save a large paste with a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/agents/sessions": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nAsks every connected cluster and instance you can log in to for its pw code sessions and returns them together with each machine's reachability. Nothing is stored: the answer is what the machines report right now.",
@@ -55760,6 +56074,80 @@
           }
         },
         "summary": "Create Cluster",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
+    "/api/clusters/validate": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nChecks a cloud cluster create-cluster would make for the requesting user, without saving it. Returns what it would cost per hour, when its region is priced, or the same error create-cluster would return.",
+        "operationId": "validate-new-cluster",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "A cluster to create; the shape is selected by the type discriminator. The full definition may be included up front; omitted definition fields are left unset.",
+                "discriminator": {
+                  "mapping": {
+                    "aws-slurm": "#/components/schemas/CreateAwsSlurmClusterBody",
+                    "azure-slurm": "#/components/schemas/CreateAzureSlurmClusterBody",
+                    "existing": "#/components/schemas/CreateExistingClusterBody",
+                    "google-slurm": "#/components/schemas/CreateGoogleSlurmClusterBody",
+                    "openstack-slurm": "#/components/schemas/CreateOpenstackSlurmClusterBody",
+                    "oracle-slurm": "#/components/schemas/CreateOracleSlurmClusterBody"
+                  },
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateExistingClusterBody"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CreateAwsSlurmClusterBody"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CreateGoogleSlurmClusterBody"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CreateAzureSlurmClusterBody"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CreateOracleSlurmClusterBody"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CreateOpenstackSlurmClusterBody"
+                  }
+                ],
+                "title": "ClusterCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewClusterCheck"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Validate New Cluster",
         "tags": [
           "Clusters"
         ]
@@ -69883,6 +70271,64 @@
             "schema": {
               "description": "Return only Azure instance types supporting accelerated networking",
               "type": "boolean"
+            }
+          },
+          {
+            "description": "Return only instance types with at least this many virtual CPUs",
+            "explode": false,
+            "in": "query",
+            "name": "minVcpus",
+            "schema": {
+              "description": "Return only instance types with at least this many virtual CPUs",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return only instance types with at least this much memory in GB",
+            "explode": false,
+            "in": "query",
+            "name": "minMemoryGb",
+            "schema": {
+              "description": "Return only instance types with at least this much memory in GB",
+              "format": "double",
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Return only instance types with at least this many built-in GPUs",
+            "explode": false,
+            "in": "query",
+            "name": "minGpus",
+            "schema": {
+              "description": "Return only instance types with at least this many built-in GPUs",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return only instance types of this CPU architecture, such as amd64 or arm64",
+            "explode": false,
+            "in": "query",
+            "name": "arch",
+            "schema": {
+              "description": "Return only instance types of this CPU architecture, such as amd64 or arm64",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return only priced instance types that cost at most this much per hour in USD",
+            "explode": false,
+            "in": "query",
+            "name": "maxHourlyPrice",
+            "schema": {
+              "description": "Return only priced instance types that cost at most this much per hour in USD",
+              "format": "double",
+              "minimum": 0,
+              "type": "number"
             }
           }
         ],

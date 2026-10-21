@@ -2641,6 +2641,24 @@ func (c *Client) RunAgentSessionShell(ctx context.Context, machine string, id st
 	return &result, nil
 }
 
+// UploadAgentSessionPaste - Save a large paste with a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Saves pasted text in the session's folder on the machine, so a message can refer to it by placeholder instead of carrying it. The machine holds it to the same checks as a message: remote control must be on, and a session running above the remote permission ceiling takes pastes only from the machine itself. A session keeps at most 256MiB of pastes, and one with tools off refuses a paste too large to send its model inline, since the model could not read it as a file.
+func (c *Client) UploadAgentSessionPaste(ctx context.Context, machine string, id string, body AgentPasteUpload) (*AgentPasteSaved, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/texts"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentPasteSaved
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListAgentSessions - List pw code sessions across your machines
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -3717,6 +3735,22 @@ func (c *Client) CreateCluster(ctx context.Context, body ClusterCreate) (*Genera
 	path := "/api/clusters"
 
 	var result GeneralCluster
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ValidateNewCluster - Validate New Cluster
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Checks a cloud cluster create-cluster would make for the requesting user, without saving it. Returns what it would cost per hour, when its region is priced, or the same error create-cluster would return.
+func (c *Client) ValidateNewCluster(ctx context.Context, body ClusterCreate) (*NewClusterCheck, error) {
+
+	path := "/api/clusters/validate"
+
+	var result NewClusterCheck
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -8990,6 +9024,16 @@ type ListRegionInstanceTypesParams struct {
 	IncludeLowMemory *bool `json:"includeLowMemory,omitempty"`
 	// Return only Azure instance types supporting accelerated networking
 	AcceleratedNetworking *bool `json:"acceleratedNetworking,omitempty"`
+	// Return only instance types with at least this many virtual CPUs
+	MinVcpus *int64 `json:"minVcpus,omitempty"`
+	// Return only instance types with at least this much memory in GB
+	MinMemoryGb *float64 `json:"minMemoryGb,omitempty"`
+	// Return only instance types with at least this many built-in GPUs
+	MinGpus *int64 `json:"minGpus,omitempty"`
+	// Return only instance types of this CPU architecture, such as amd64 or arm64
+	Arch *string `json:"arch,omitempty"`
+	// Return only priced instance types that cost at most this much per hour in USD
+	MaxHourlyPrice *float64 `json:"maxHourlyPrice,omitempty"`
 }
 
 // ListRegionInstanceTypes - List the instance types available in a region
@@ -9011,6 +9055,16 @@ func (c *Client) ListRegionInstanceTypes(ctx context.Context, organization strin
 	addQueryParam(queryValues, "includeLowMemory", "form", false, params.IncludeLowMemory)
 
 	addQueryParam(queryValues, "acceleratedNetworking", "form", false, params.AcceleratedNetworking)
+
+	addQueryParam(queryValues, "minVcpus", "form", false, params.MinVcpus)
+
+	addQueryParam(queryValues, "minMemoryGb", "form", false, params.MinMemoryGb)
+
+	addQueryParam(queryValues, "minGpus", "form", false, params.MinGpus)
+
+	addQueryParam(queryValues, "arch", "form", false, params.Arch)
+
+	addQueryParam(queryValues, "maxHourlyPrice", "form", false, params.MaxHourlyPrice)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)

@@ -652,6 +652,8 @@ type AgentCompacted struct {
 }
 
 type AgentDirectionBody struct {
+	// Pastes saved with upload-agent-session-paste that the text mentions by placeholder, as a message's pastes are.
+	Pastes []PasteRef `json:"pastes,omitempty"`
 	// What to tell the running turn.
 	Text string `json:"text"`
 }
@@ -731,6 +733,20 @@ type AgentPalette struct {
 	McpPrompts []AgentSlashCommand `json:"mcpPrompts"`
 	// Names among the commands that are skills or custom commands, which run as a message rather than a command.
 	Prompts []string `json:"prompts"`
+}
+
+type AgentPasteSaved struct {
+	Bytes int64 `json:"bytes"`
+	// The paste's number in the session. Refer to it in a message's pastes.
+	ID    int64 `json:"id"`
+	Lines int64 `json:"lines"`
+	// The label the message text mentions the paste by, such as [Pasted text #1 +20 lines].
+	Placeholder string `json:"placeholder"`
+}
+
+type AgentPasteUpload struct {
+	// The pasted text, base64-encoded; at most 16MiB before encoding.
+	Data string `json:"data"`
 }
 
 type AgentPlanResult struct {
@@ -871,12 +887,14 @@ type AgentStreamEvent struct {
 	Name          *string          `json:"name,omitempty"`
 	NewID         *string          `json:"newId,omitempty"`
 	NoteID        *string          `json:"noteId,omitempty"`
+	Pastes        []PasteView      `json:"pastes,omitempty"`
 	Result        *string          `json:"result,omitempty"`
 	Seq           int64            `json:"seq"`
 	ShellProgress *ShellProgress   `json:"shellProgress,omitempty"`
 	StartLine     *int64           `json:"startLine,omitempty"`
 	State         *SessionState    `json:"state,omitempty"`
 	Turn          *TurnResult      `json:"turn,omitempty"`
+	TurnEnd       *TurnEnd         `json:"turnEnd,omitempty"`
 	TurnID        *string          `json:"turnId,omitempty"`
 	Type          string           `json:"type"`
 }
@@ -3893,13 +3911,19 @@ type CreateAwsSlurmClusterBody struct {
 	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
 	ExplorerPath *string `json:"explorerPath,omitempty"`
-	HealthCheck  *string `json:"healthCheck,omitempty"`
+	// Name of the group the cluster's usage is attributed to; cloud clusters only.
+	Group       *string `json:"group,omitempty"`
+	HealthCheck *string `json:"healthCheck,omitempty"`
 	// Id of the attached IP address or network interface. Clusters saved before network-interface support hold the raw IP address instead.
 	IPAddress *string `json:"ipAddress,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
-	Name       string                     `json:"name"`
+	Name string `json:"name"`
+	// Name of the network the cluster provisions into; cloud clusters only.
+	Network    *string                    `json:"network,omitempty"`
 	Partitions []ClusterAwsSlurmPartition `json:"partitions,omitempty"`
 	Region     *string                    `json:"region,omitempty"`
+	// Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Root disk size in GiB.
 	RootSize     *int64        `json:"rootSize,omitempty"`
 	RunTimeAlert *RunTimeAlert `json:"runTimeAlert,omitempty"`
@@ -3941,7 +3965,9 @@ type CreateAzureSlurmClusterBody struct {
 	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
 	ExplorerPath *string `json:"explorerPath,omitempty"`
-	HealthCheck  *string `json:"healthCheck,omitempty"`
+	// Name of the group the cluster's usage is attributed to; cloud clusters only.
+	Group       *string `json:"group,omitempty"`
+	HealthCheck *string `json:"healthCheck,omitempty"`
 	// Id of the attached IP address or network interface. Clusters saved before network-interface support hold the raw IP address instead.
 	IPAddress *string `json:"ipAddress,omitempty"`
 	// Mount point of the controller's local disk; only applies when the controller instance type has a local disk.
@@ -3949,9 +3975,13 @@ type CreateAzureSlurmClusterBody struct {
 	// Export the controller's local disk over NFS; only applies when the controller instance type has a local disk.
 	LocalDiskNfs *bool `json:"localDiskNFS,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
-	Name       string                       `json:"name"`
+	Name string `json:"name"`
+	// Name of the network the cluster provisions into; cloud clusters only.
+	Network    *string                      `json:"network,omitempty"`
 	Partitions []ClusterAzureSlurmPartition `json:"partitions,omitempty"`
 	Region     *string                      `json:"region,omitempty"`
+	// Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Root disk size in GiB.
 	RootSize     *int64        `json:"rootSize,omitempty"`
 	RunTimeAlert *RunTimeAlert `json:"runTimeAlert,omitempty"`
@@ -4098,13 +4128,19 @@ type CreateExistingClusterBody struct {
 	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
 	ExplorerPath *string `json:"explorerPath,omitempty"`
+	// Name of the group the cluster's usage is attributed to; cloud clusters only.
+	Group *string `json:"group,omitempty"`
 	// Jump (bastion) host; omit to connect directly.
 	JumpNodeHost *string `json:"jumpNodeHost,omitempty"`
 	// Jump (bastion) user.
 	JumpNodeUser *string `json:"jumpNodeUser,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
-	Name         string        `json:"name"`
-	RunTimeAlert *RunTimeAlert `json:"runTimeAlert,omitempty"`
+	Name string `json:"name"`
+	// Name of the network the cluster provisions into; cloud clusters only.
+	Network *string `json:"network,omitempty"`
+	// Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.
+	ResourceGroup *string       `json:"resourceGroup,omitempty"`
+	RunTimeAlert  *RunTimeAlert `json:"runTimeAlert,omitempty"`
 	// Scheduler type, e.g. slurm.
 	SchedulerType *string `json:"schedulerType,omitempty"`
 	// Login nodes.
@@ -4142,13 +4178,19 @@ type CreateGoogleSlurmClusterBody struct {
 	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
 	ExplorerPath *string `json:"explorerPath,omitempty"`
-	HealthCheck  *string `json:"healthCheck,omitempty"`
+	// Name of the group the cluster's usage is attributed to; cloud clusters only.
+	Group       *string `json:"group,omitempty"`
+	HealthCheck *string `json:"healthCheck,omitempty"`
 	// Id of the attached IP address or network interface. Clusters saved before network-interface support hold the raw IP address instead.
 	IPAddress *string `json:"ipAddress,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
-	Name       string                        `json:"name"`
+	Name string `json:"name"`
+	// Name of the network the cluster provisions into; cloud clusters only.
+	Network    *string                       `json:"network,omitempty"`
 	Partitions []ClusterGoogleSlurmPartition `json:"partitions,omitempty"`
 	Region     *string                       `json:"region,omitempty"`
+	// Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Root disk size in GiB.
 	RootSize     *int64        `json:"rootSize,omitempty"`
 	RunTimeAlert *RunTimeAlert `json:"runTimeAlert,omitempty"`
@@ -4294,13 +4336,19 @@ type CreateOpenstackSlurmClusterBody struct {
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
 	ExplorerPath      *string `json:"explorerPath,omitempty"`
 	FloatingIPNetwork *string `json:"floatingIpNetwork,omitempty"`
-	HealthCheck       *string `json:"healthCheck,omitempty"`
+	// Name of the group the cluster's usage is attributed to; cloud clusters only.
+	Group       *string `json:"group,omitempty"`
+	HealthCheck *string `json:"healthCheck,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
-	Name         string                           `json:"name"`
-	NetworkID    *string                          `json:"networkId,omitempty"`
-	Partitions   []ClusterOpenstackSlurmPartition `json:"partitions,omitempty"`
-	Region       *string                          `json:"region,omitempty"`
-	RunTimeAlert *RunTimeAlert                    `json:"runTimeAlert,omitempty"`
+	Name string `json:"name"`
+	// Name of the network the cluster provisions into; cloud clusters only.
+	Network    *string                          `json:"network,omitempty"`
+	NetworkID  *string                          `json:"networkId,omitempty"`
+	Partitions []ClusterOpenstackSlurmPartition `json:"partitions,omitempty"`
+	Region     *string                          `json:"region,omitempty"`
+	// Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.
+	ResourceGroup *string       `json:"resourceGroup,omitempty"`
+	RunTimeAlert  *RunTimeAlert `json:"runTimeAlert,omitempty"`
 	// Record every node's running processes and what preceded a freeze, kept on the controller and viewable on each node's detail page.
 	RunningProcesses     *bool  `json:"runningProcesses,omitempty"`
 	SlurmResumeTimeout   *int64 `json:"slurmResumeTimeout,omitempty"`
@@ -4341,11 +4389,17 @@ type CreateOracleSlurmClusterBody struct {
 	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
 	ExplorerPath *string `json:"explorerPath,omitempty"`
-	HealthCheck  *string `json:"healthCheck,omitempty"`
+	// Name of the group the cluster's usage is attributed to; cloud clusters only.
+	Group       *string `json:"group,omitempty"`
+	HealthCheck *string `json:"healthCheck,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
-	Name       string                        `json:"name"`
+	Name string `json:"name"`
+	// Name of the network the cluster provisions into; cloud clusters only.
+	Network    *string                       `json:"network,omitempty"`
 	Partitions []ClusterOracleSlurmPartition `json:"partitions,omitempty"`
 	Region     *string                       `json:"region,omitempty"`
+	// Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Root disk size in GiB.
 	RootSize     *int64        `json:"rootSize,omitempty"`
 	RunTimeAlert *RunTimeAlert `json:"runTimeAlert,omitempty"`
@@ -7419,10 +7473,12 @@ type HistoryItem struct {
 	Decision *ToolDecision `json:"decision,omitempty"`
 	FromMain *bool         `json:"fromMain,omitempty"`
 	Kind     string        `json:"kind"`
+	Pastes   []PasteView   `json:"pastes,omitempty"`
 	PlanBody *string       `json:"planBody,omitempty"`
 	Text     *string       `json:"text,omitempty"`
 	ToolArgs *string       `json:"toolArgs,omitempty"`
 	ToolName *string       `json:"toolName,omitempty"`
+	TurnEnd  *TurnEnd      `json:"turnEnd,omitempty"`
 }
 
 type HostForwardSetting struct {
@@ -9274,6 +9330,10 @@ type NetworkRegion struct {
 	Region string `json:"region"`
 }
 
+type NewClusterCheck struct {
+	CostEstimate *ClusterCostEstimate `json:"costEstimate,omitempty"`
+}
+
 type Nfs struct {
 	// The requesting user's access level for this bucket.
 	AccessMode string `json:"accessMode"`
@@ -10392,6 +10452,20 @@ type PasswordResetVerifyInputBody struct {
 	NewPassword string `json:"newPassword"`
 	// Password reset token received via email
 	Token string `json:"token"`
+}
+
+type PasteRef struct {
+	ID          int64  `json:"id"`
+	Placeholder string `json:"placeholder"`
+}
+
+type PasteView struct {
+	Bytes       int64   `json:"bytes"`
+	ID          int64   `json:"id"`
+	Inline      *bool   `json:"inline,omitempty"`
+	Lines       int64   `json:"lines"`
+	Placeholder string  `json:"placeholder"`
+	Text        *string `json:"text,omitempty"`
 }
 
 type PatchAccessBodyType struct {
@@ -13531,6 +13605,8 @@ type SecretResponse struct {
 type SendMessageBody struct {
 	// Images uploaded to the session with upload-agent-session-image, each named in the text by its placeholder.
 	Images []AgentImageRef `json:"images,omitempty"`
+	// Pastes saved with upload-agent-session-paste that the text mentions by placeholder. The machine decides when the turn starts whether each goes to the model inline or as its saved file.
+	Pastes []PasteRef `json:"pastes,omitempty"`
 	// The message to send. Empty continues the turn, which is how the terminal wakes background work.
 	Text string `json:"text"`
 }
@@ -13716,6 +13792,7 @@ type SessionState struct {
 	Model                  string        `json:"model"`
 	Name                   *string       `json:"name,omitempty"`
 	OutputTokens           *int64        `json:"outputTokens,omitempty"`
+	PasteInlineMaxBytes    *int64        `json:"pasteInlineMaxBytes,omitempty"`
 	PendingSubagentWork    *bool         `json:"pendingSubagentWork,omitempty"`
 	PermissionMode         *string       `json:"permissionMode,omitempty"`
 	ProviderUsageAvailable *bool         `json:"providerUsageAvailable,omitempty"`
@@ -14544,6 +14621,12 @@ type TunnelShared struct {
 	Public *bool `json:"public,omitempty"`
 	// Shared team IDs.
 	Teams []string `json:"teams,omitempty"`
+}
+
+type TurnEnd struct {
+	DurationMs    int64     `json:"durationMs"`
+	EndedAt       time.Time `json:"endedAt"`
+	PendingAgents *int64    `json:"pendingAgents,omitempty"`
 }
 
 type TurnResult struct {
@@ -16589,7 +16672,10 @@ func (u ClusterCreate) Base() *ClusterCreateBase {
 			DisplayName:    v.DisplayName,
 			DuplicatedFrom: v.DuplicatedFrom,
 			ExplorerPath:   v.ExplorerPath,
+			Group:          v.Group,
 			Name:           v.Name,
+			Network:        v.Network,
+			ResourceGroup:  v.ResourceGroup,
 			RunTimeAlert:   v.RunTimeAlert,
 			Tags:           v.Tags,
 		}
@@ -16600,7 +16686,10 @@ func (u ClusterCreate) Base() *ClusterCreateBase {
 			DisplayName:    v.DisplayName,
 			DuplicatedFrom: v.DuplicatedFrom,
 			ExplorerPath:   v.ExplorerPath,
+			Group:          v.Group,
 			Name:           v.Name,
+			Network:        v.Network,
+			ResourceGroup:  v.ResourceGroup,
 			RunTimeAlert:   v.RunTimeAlert,
 			Tags:           v.Tags,
 		}
@@ -16611,7 +16700,10 @@ func (u ClusterCreate) Base() *ClusterCreateBase {
 			DisplayName:    v.DisplayName,
 			DuplicatedFrom: v.DuplicatedFrom,
 			ExplorerPath:   v.ExplorerPath,
+			Group:          v.Group,
 			Name:           v.Name,
+			Network:        v.Network,
+			ResourceGroup:  v.ResourceGroup,
 			RunTimeAlert:   v.RunTimeAlert,
 			Tags:           v.Tags,
 		}
@@ -16622,7 +16714,10 @@ func (u ClusterCreate) Base() *ClusterCreateBase {
 			DisplayName:    v.DisplayName,
 			DuplicatedFrom: v.DuplicatedFrom,
 			ExplorerPath:   v.ExplorerPath,
+			Group:          v.Group,
 			Name:           v.Name,
+			Network:        v.Network,
+			ResourceGroup:  v.ResourceGroup,
 			RunTimeAlert:   v.RunTimeAlert,
 			Tags:           v.Tags,
 		}
@@ -16633,7 +16728,10 @@ func (u ClusterCreate) Base() *ClusterCreateBase {
 			DisplayName:    v.DisplayName,
 			DuplicatedFrom: v.DuplicatedFrom,
 			ExplorerPath:   v.ExplorerPath,
+			Group:          v.Group,
 			Name:           v.Name,
+			Network:        v.Network,
+			ResourceGroup:  v.ResourceGroup,
 			RunTimeAlert:   v.RunTimeAlert,
 			Tags:           v.Tags,
 		}
@@ -16644,7 +16742,10 @@ func (u ClusterCreate) Base() *ClusterCreateBase {
 			DisplayName:    v.DisplayName,
 			DuplicatedFrom: v.DuplicatedFrom,
 			ExplorerPath:   v.ExplorerPath,
+			Group:          v.Group,
 			Name:           v.Name,
+			Network:        v.Network,
+			ResourceGroup:  v.ResourceGroup,
 			RunTimeAlert:   v.RunTimeAlert,
 			Tags:           v.Tags,
 		}
@@ -17271,9 +17372,15 @@ type ClusterCreateBase struct {
 	DuplicatedFrom *string `json:"duplicatedFrom,omitempty"`
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
 	ExplorerPath *string `json:"explorerPath,omitempty"`
+	// Name of the group the cluster's usage is attributed to; cloud clusters only.
+	Group *string `json:"group,omitempty"`
 	// Cluster name; only lowercase letters and numbers.
-	Name         string        `json:"name"`
-	RunTimeAlert *RunTimeAlert `json:"runTimeAlert,omitempty"`
+	Name string `json:"name"`
+	// Name of the network the cluster provisions into; cloud clusters only.
+	Network *string `json:"network,omitempty"`
+	// Name of the resource group the cluster's usage bills against; cloud clusters only. Takes precedence over group.
+	ResourceGroup *string       `json:"resourceGroup,omitempty"`
+	RunTimeAlert  *RunTimeAlert `json:"runTimeAlert,omitempty"`
 	// Tags.
 	Tags []string `json:"tags,omitempty"`
 }
