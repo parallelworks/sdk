@@ -11424,7 +11424,7 @@ func (c *Client) UpdateManagedCluster(ctx context.Context, organization string, 
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Dispatches the agent update to every eligible node of a managed cluster (org admins only) and returns a per-hostname outcome: dispatched, offline, not-connected, up-to-date, unsupported, in-progress, or error.
+// Dispatches the agent update to every eligible node of a managed cluster (org admins only) and returns a per-hostname outcome: dispatched, offline, not-connected, up-to-date, unsupported, in-progress, busy, or error.
 func (c *Client) UpgradeManagedClusterAgents(ctx context.Context, organization string, cluster string) (*UpgradeManagedClusterAgentsOutputBody, error) {
 
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}/agent/upgrade"
@@ -11647,17 +11647,34 @@ func (c *Client) UpdateManagedClusterNode(ctx context.Context, organization stri
 	return &result, nil
 }
 
+// UpgradeManagedNodeAgentParams contains the parameters for the UpgradeManagedNodeAgent operation.
+// Required parameters are value fields; optional parameters are pointers.
+type UpgradeManagedNodeAgentParams struct {
+	// Bypass the check for jobs and sessions running on the node.
+	Force *bool `json:"force,omitempty"`
+}
+
 // UpgradeManagedNodeAgent - Upgrade managed node agent
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Tells one managed-cluster node's connected agent to update itself to the platform version (org admins only). Returns 202 on dispatch; the node restarts its agent and reports the new version on its next heartbeat.
-func (c *Client) UpgradeManagedNodeAgent(ctx context.Context, organization string, cluster string, hostname string) (*UpgradeAgentResponseBody, error) {
+func (c *Client) UpgradeManagedNodeAgent(ctx context.Context, organization string, cluster string, hostname string, opts ...UpgradeManagedNodeAgentParams) (*UpgradeAgentResponseBody, error) {
 
 	path := "/api/organizations/{organization}/managed-clusters/{cluster}/nodes/{hostname}/agent/upgrade"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "cluster", "simple", false, cluster)
 	path = pathReplace(path, "hostname", "simple", false, hostname)
+	var params UpgradeManagedNodeAgentParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "force", "form", false, params.Force)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
 
 	var result UpgradeAgentResponseBody
 	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {

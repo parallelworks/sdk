@@ -7854,6 +7854,8 @@ type HeartbeatOutputBody struct {
 	Groups []HeartbeatGroup `json:"groups,omitempty"`
 	// Effective per-node access management settings (cluster defaults merged with the node's overrides), present only for nodes with overrides
 	NodeOverrides map[string]HeartbeatAccessManagement `json:"nodeOverrides,omitempty"`
+	// Whether the platform reads scheduler.jobsStatus, so the node may send it
+	ReadsJobsStatus *bool `json:"readsJobsStatus,omitempty"`
 	// Whether this node should report cluster-wide scheduler partitions and jobs on its next heartbeat
 	SchedulerReporter bool `json:"schedulerReporter"`
 	// Heartbeat status
@@ -9176,6 +9178,10 @@ type ManagedClusterOutputBody struct {
 	ProxySSH bool `json:"proxySsh"`
 	// Active scheduler jobs
 	SchedulerJobs []ManagedSchedulerJob `json:"schedulerJobs,omitempty"`
+	// Whether the cluster's current jobs are unknown, because no node has listed them recently or the last listing failed. schedulerJobs then holds the last list collected, which may be out of date.
+	SchedulerJobsUnavailable *bool `json:"schedulerJobsUnavailable,omitempty"`
+	// When schedulerJobs was last collected
+	SchedulerJobsUpdatedAt *time.Time `json:"schedulerJobsUpdatedAt,omitempty"`
 	// Scheduler type (slurm, pbs)
 	SchedulerType *string `json:"schedulerType,omitempty"`
 	// Hostname of the registered node that hosts managed (desktop/VS Code) sessions over the tunnel
@@ -13501,9 +13507,15 @@ type ResourceGroup struct {
 	ActiveResourceCount *int64 `json:"activeResourceCount,omitempty"`
 	// Current allocation name
 	Allocation *string `json:"allocation"`
+	// When the current allocation's unbroken run of periods ends; in the past once its last period ended, absent without periods or between them
+	AllocationExpiresAt *time.Time `json:"allocationExpiresAt,omitempty"`
+	// When the current allocation's next period starts after a gap without one; absent when no gap lies ahead
+	AllocationNextPeriodStartsAt *time.Time `json:"allocationNextPeriodStartsAt,omitempty"`
 	// Whether the current allocation is rated in USD; cloud resources need a USD-rated allocation
-	AllocationRatedInUsd *bool             `json:"allocationRatedInUsd,omitempty"`
-	AllocationThreshold  *CrossedThreshold `json:"allocationThreshold,omitempty"`
+	AllocationRatedInUsd *bool `json:"allocationRatedInUsd,omitempty"`
+	// When the current allocation's spend next starts over before it expires: its next period or month, or without periods its organization's allocation start date
+	AllocationResetsAt  *time.Time        `json:"allocationResetsAt,omitempty"`
+	AllocationThreshold *CrossedThreshold `json:"allocationThreshold,omitempty"`
 	// Budget total of the current allocation
 	AllocationTotal *float64 `json:"allocationTotal,omitempty"`
 	// Unit the current allocation is denominated in
@@ -13535,11 +13547,17 @@ type ResourceGroupDetail struct {
 	Allocation *string `json:"allocation"`
 	// Resource types the current allocation may fund; empty means unrestricted
 	AllocationAllowed []string `json:"allocationAllowed,omitempty"`
+	// When the current allocation's unbroken run of periods ends; in the past once its last period ended, absent without periods or between them
+	AllocationExpiresAt *time.Time `json:"allocationExpiresAt,omitempty"`
 	// Previous allocations of this resource group, oldest first
 	AllocationHistory []AllocationHistoryEntry `json:"allocationHistory,omitempty"`
+	// When the current allocation's next period starts after a gap without one; absent when no gap lies ahead
+	AllocationNextPeriodStartsAt *time.Time `json:"allocationNextPeriodStartsAt,omitempty"`
 	// Whether the current allocation is rated in USD; cloud resources need a USD-rated allocation
-	AllocationRatedInUsd *bool             `json:"allocationRatedInUsd,omitempty"`
-	AllocationThreshold  *CrossedThreshold `json:"allocationThreshold,omitempty"`
+	AllocationRatedInUsd *bool `json:"allocationRatedInUsd,omitempty"`
+	// When the current allocation's spend next starts over before it expires: its next period or month, or without periods its organization's allocation start date
+	AllocationResetsAt  *time.Time        `json:"allocationResetsAt,omitempty"`
+	AllocationThreshold *CrossedThreshold `json:"allocationThreshold,omitempty"`
 	// Budget total of the current allocation
 	AllocationTotal *float64 `json:"allocationTotal,omitempty"`
 	// Unit the current allocation is denominated in
@@ -14034,6 +14052,8 @@ type SchedulerInfo struct {
 	IsController bool `json:"isController"`
 	// Active jobs
 	Jobs []JobInfo `json:"jobs,omitempty"`
+	// What the node did about jobs: collected lists them in jobs, failed means listing them failed, skipped means it was not asked to. Sent only once the platform says it reads it; absent, the platform infers it.
+	JobsStatus *string `json:"jobsStatus,omitempty"`
 	// Scheduler partitions/queues
 	Partitions []PartitionInfo `json:"partitions,omitempty"`
 	// Scheduler type (slurm, pbs, etc.)
@@ -14093,11 +14113,13 @@ type SchedulerJobsResponse struct {
 }
 
 type SchedulerNodeSummary struct {
-	Allocated int64 `json:"allocated"`
-	Down      int64 `json:"down"`
-	Idle      int64 `json:"idle"`
-	Mixed     int64 `json:"mixed"`
-	Total     int64 `json:"total"`
+	Allocated int64  `json:"allocated"`
+	Down      int64  `json:"down"`
+	Drained   *int64 `json:"drained,omitempty"`
+	Draining  *int64 `json:"draining,omitempty"`
+	Idle      int64  `json:"idle"`
+	Mixed     int64  `json:"mixed"`
+	Total     int64  `json:"total"`
 }
 
 type SchedulerNotificationSettings struct {
@@ -14110,6 +14132,8 @@ type SchedulerPartitionData struct {
 	AllowAccounts []string `json:"allowAccounts,omitempty"`
 	AllowQos      []string `json:"allowQos,omitempty"`
 	DenyAccounts  []string `json:"denyAccounts,omitempty"`
+	DrainedNodes  *int64   `json:"drainedNodes,omitempty"`
+	DrainingNodes *int64   `json:"drainingNodes,omitempty"`
 	IdleNodes     int64    `json:"idleNodes"`
 	MaxTime       *string  `json:"maxTime,omitempty"`
 	Name          string   `json:"name"`

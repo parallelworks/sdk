@@ -22446,6 +22446,10 @@
             "description": "Effective per-node access management settings (cluster defaults merged with the node's overrides), present only for nodes with overrides",
             "type": "object"
           },
+          "readsJobsStatus": {
+            "description": "Whether the platform reads scheduler.jobsStatus, so the node may send it",
+            "type": "boolean"
+          },
           "schedulerReporter": {
             "description": "Whether this node should report cluster-wide scheduler partitions and jobs on its next heartbeat",
             "type": "boolean"
@@ -26898,6 +26902,15 @@
               "null"
             ]
           },
+          "schedulerJobsUnavailable": {
+            "description": "Whether the cluster's current jobs are unknown, because no node has listed them recently or the last listing failed. schedulerJobs then holds the last list collected, which may be out of date.",
+            "type": "boolean"
+          },
+          "schedulerJobsUpdatedAt": {
+            "description": "When schedulerJobs was last collected",
+            "format": "date-time",
+            "type": "string"
+          },
           "schedulerType": {
             "description": "Scheduler type (slurm, pbs)",
             "type": "string"
@@ -27243,6 +27256,7 @@
               "up-to-date",
               "unsupported",
               "in-progress",
+              "busy",
               "error"
             ],
             "type": "string"
@@ -40769,10 +40783,28 @@
               "null"
             ]
           },
+          "allocationExpiresAt": {
+            "description": "When the current allocation's unbroken run of periods ends; in the past once its last period ended, absent without periods or between them",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "allocationNextPeriodStartsAt": {
+            "description": "When the current allocation's next period starts after a gap without one; absent when no gap lies ahead",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
           "allocationRatedInUsd": {
             "description": "Whether the current allocation is rated in USD; cloud resources need a USD-rated allocation",
             "readOnly": true,
             "type": "boolean"
+          },
+          "allocationResetsAt": {
+            "description": "When the current allocation's spend next starts over before it expires: its next period or month, or without periods its organization's allocation start date",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
           },
           "allocationThreshold": {
             "$ref": "#/components/schemas/CrossedThreshold",
@@ -40886,6 +40918,12 @@
               "null"
             ]
           },
+          "allocationExpiresAt": {
+            "description": "When the current allocation's unbroken run of periods ends; in the past once its last period ended, absent without periods or between them",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
           "allocationHistory": {
             "description": "Previous allocations of this resource group, oldest first",
             "items": {
@@ -40897,10 +40935,22 @@
               "null"
             ]
           },
+          "allocationNextPeriodStartsAt": {
+            "description": "When the current allocation's next period starts after a gap without one; absent when no gap lies ahead",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
           "allocationRatedInUsd": {
             "description": "Whether the current allocation is rated in USD; cloud resources need a USD-rated allocation",
             "readOnly": true,
             "type": "boolean"
+          },
+          "allocationResetsAt": {
+            "description": "When the current allocation's spend next starts over before it expires: its next period or month, or without periods its organization's allocation start date",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
           },
           "allocationThreshold": {
             "$ref": "#/components/schemas/CrossedThreshold",
@@ -42392,6 +42442,15 @@
               "null"
             ]
           },
+          "jobsStatus": {
+            "description": "What the node did about jobs: collected lists them in jobs, failed means listing them failed, skipped means it was not asked to. Sent only once the platform says it reads it; absent, the platform infers it.",
+            "enum": [
+              "collected",
+              "failed",
+              "skipped"
+            ],
+            "type": "string"
+          },
           "partitions": {
             "description": "Scheduler partitions/queues",
             "items": {
@@ -42594,6 +42653,14 @@
             "format": "int64",
             "type": "integer"
           },
+          "drained": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "draining": {
+            "format": "int64",
+            "type": "integer"
+          },
           "idle": {
             "format": "int64",
             "type": "integer"
@@ -42667,6 +42734,14 @@
               "array",
               "null"
             ]
+          },
+          "drainedNodes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "drainingNodes": {
+            "format": "int64",
+            "type": "integer"
           },
           "idleNodes": {
             "format": "int64",
@@ -79768,7 +79843,7 @@
     },
     "/api/organizations/{organization}/managed-clusters/{cluster}/agent/upgrade": {
       "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDispatches the agent update to every eligible node of a managed cluster (org admins only) and returns a per-hostname outcome: dispatched, offline, not-connected, up-to-date, unsupported, in-progress, or error.",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nDispatches the agent update to every eligible node of a managed cluster (org admins only) and returns a per-hostname outcome: dispatched, offline, not-connected, up-to-date, unsupported, in-progress, busy, or error.",
         "operationId": "upgrade-managed-cluster-agents",
         "parameters": [
           {
@@ -80547,6 +80622,16 @@
             "schema": {
               "description": "Hostname of the node to update",
               "type": "string"
+            }
+          },
+          {
+            "description": "Bypass the check for jobs and sessions running on the node.",
+            "explode": false,
+            "in": "query",
+            "name": "force",
+            "schema": {
+              "description": "Bypass the check for jobs and sessions running on the node.",
+              "type": "boolean"
             }
           }
         ],
