@@ -137,7 +137,7 @@ func isIdempotentMethod(method string) bool {
 	}
 }
 
-// isRetryableNetworkError reports whether a request that got no response is
+// isRetryableNetworkError reports whether a request that failed with err is
 // worth sending again. The transport reports most dropped connections through
 // unexported types, so the failures known to be permanent are excluded rather
 // than the transient ones enumerated. An expired deadline is not excluded: a
@@ -155,10 +155,14 @@ func isRetryableNetworkError(err error) bool {
 	if errors.As(err, &recordErr) {
 		return false
 	}
+	var refused *RedirectRefusedError
+	// A Transport or middleware whose own http.Client uses CheckRedirect gets its refusals back untyped.
+	if errors.As(err, &refused) || errors.Is(err, ErrInsecureRedirect) || errors.Is(err, ErrTooManyRedirects) {
+		return false
+	}
 	var urlErr *url.Error
 	if errors.As(err, &urlErr) {
-		msg := urlErr.Err.Error()
-		return !strings.Contains(msg, "unsupported protocol scheme") && !strings.HasPrefix(msg, "stopped after ")
+		return !strings.Contains(urlErr.Err.Error(), "unsupported protocol scheme")
 	}
 	return true
 }

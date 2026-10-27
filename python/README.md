@@ -18,7 +18,7 @@ from parallelworks_client import Client
 
 # The platform host is automatically extracted from your credential
 with Client.from_credential(os.environ["PW_API_KEY"]).sync() as client:
-    response = client.get("/api/buckets")
+    response = client.get("/api/storage", params={"category": "buckets"})
     for bucket in response.json():
         print(f"Bucket: {bucket['name']}")
 ```
@@ -35,7 +35,7 @@ For scripts you run yourself, sign in once with `pw auth`, then create the clien
 from parallelworks_client import Client
 
 with Client.from_credential_config().sync() as client:
-    response = client.get("/api/buckets")
+    response = client.get("/api/storage")
 ```
 
 The credential is picked as the `pw` CLI picks it: `PW_API_KEY`, then the `context` argument, `PW_CONTEXT`, and the current context. A signed-in context stays signed in: the client runs `pw auth token --print -o json` for an access token, reads its lifetime from the response (an RFC 6749 token response), and runs it again a minute before the token expires, the way a Kubernetes exec credential plugin or an AWS `credential_process` works, so only the `pw` CLI ever rotates the sign-in's refresh token. `cli_command` and `cli_timeout` set the `pw` executable (default `pw` on `PATH`) and how long one run may take (default 60 seconds). A `pw` found through a relative `PATH` entry, such as the current directory, is refused, as Go refuses it. Without `pw`, requests raise `SignInExpiredError`.
@@ -102,7 +102,7 @@ from parallelworks_client import Client
 
 async def main():
     async with Client.from_credential(os.environ["PW_API_KEY"]) as client:
-        response = await client.get("/api/buckets")
+        response = await client.get("/api/storage")
         print(response.json())
 
 asyncio.run(main())
@@ -117,7 +117,7 @@ from parallelworks_client import Client, ProblemError, raise_for_problem
 
 with Client.from_credential(os.environ["PW_API_KEY"]).sync() as client:
     try:
-        raise_for_problem(client.get("/api/buckets"))
+        raise_for_problem(client.get("/api/storage"))
     except ProblemError as problem:
         print(problem.code, problem.detail)
         for field in problem.errors:

@@ -26,7 +26,7 @@ async def main():
 
         # Fetch buckets and clusters concurrently
         buckets_response, clusters_response = await asyncio.gather(
-            client.get("/api/buckets"),
+            client.get("/api/storage", params={"category": "buckets"}),
             client.get("/api/clusters"),
         )
 

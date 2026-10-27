@@ -26,7 +26,7 @@ Every client supports automatic host detection from your API key or token:
 import { Client } from '@parallelworks/client'
 
 const client = Client.fromCredential(process.env.PW_API_KEY!)
-const { data } = await client.GET('/api/buckets')
+const { data } = await client.GET('/api/storage')
 ```
 
 ### Python
@@ -35,7 +35,7 @@ const { data } = await client.GET('/api/buckets')
 from parallelworks_client import Client
 
 with Client.from_credential(os.environ["PW_API_KEY"]).sync() as client:
-    buckets = client.get("/api/buckets").json()
+    storages = client.get("/api/storage").json()
 ```
 
 ### Go
@@ -44,7 +44,7 @@ with Client.from_credential(os.environ["PW_API_KEY"]).sync() as client:
 import parallelworks "github.com/parallelworks/sdk/go/v7"
 
 client, _ := parallelworks.NewClientFromCredential(os.Getenv("PW_API_KEY"))
-buckets, _ := client.GetBuckets(context.Background())
+storages, _ := client.GetStorages(context.Background())
 ```
 
 See each client's README for full documentation on authentication, error handling, retries, and more:

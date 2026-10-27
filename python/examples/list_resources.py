@@ -24,7 +24,7 @@ def main():
         print("Fetching resources...\n")
 
         # Fetch buckets
-        buckets_response = client.get("/api/buckets")
+        buckets_response = client.get("/api/storage", params={"category": "buckets"})
         buckets_response.raise_for_status()
         buckets = buckets_response.json()
 

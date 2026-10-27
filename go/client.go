@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -28,7 +29,7 @@ func NewClient(baseURL string, opts ...ClientOption) *Client {
 	c := &Client{
 		baseURL:    strings.TrimRight(baseURL, "/"),
 		httpClient: http.DefaultClient,
-		userAgent:  "parallelworks-go-sdk/7.127.0",
+		userAgent:  "parallelworks-go-sdk/7.128.0",
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -96,9 +97,10 @@ func (c *Client) send(ctx context.Context, method string, path string, body any,
 		}
 	}
 
-	// Build the transport function.
+	// Applied per call, not in NewClient, so a change to the caller's http.Client after NewClient still takes effect.
+	httpClient := SafeRedirects(c.httpClient)
 	transport := func(req *http.Request) (*http.Response, error) {
-		return c.httpClient.Do(req)
+		return httpClient.Do(req)
 	}
 
 	// Wrap with middleware chain (applied in reverse order so first middleware runs first).
@@ -160,12 +162,13 @@ func (c *Client) send(ctx context.Context, method string, path string, body any,
 		resp, err := transport(req)
 		if err != nil {
 			// A middleware may return a response alongside the error; don't leak its body.
-			if resp != nil {
+			if resp != nil && resp.Body != nil {
 				resp.Body.Close()
 			}
-			// Retry idempotent requests on transient network errors.
-			if c.retryConfig != nil && attempt < maxAttempts-1 && isIdempotentMethod(method) && isRetryableNetworkError(err) {
-				timer := time.NewTimer(retryDelay(attempt, *c.retryConfig, nil))
+			// net/http returns a refused redirect's response with the error, whatever the policy's error was, and a retry is refused again.
+			refusedRedirect := resp != nil && resp.StatusCode/100 == 3
+			if c.retryConfig != nil && attempt < maxAttempts-1 && !refusedRedirect && isIdempotentMethod(method) && isRetryableNetworkError(err) && withinRetryBudget(resp, *c.retryConfig) {
+				timer := time.NewTimer(retryDelay(attempt, *c.retryConfig, resp))
 				select {
 				case <-ctx.Done():
 					timer.Stop()
@@ -175,6 +178,9 @@ func (c *Client) send(ctx context.Context, method string, path string, body any,
 				continue
 			}
 			return nil, fmt.Errorf("executing request: %w", err)
+		}
+		if resp == nil {
+			return nil, errors.New("executing request: middleware returned no response and no error")
 		}
 
 		// Check if we should retry.

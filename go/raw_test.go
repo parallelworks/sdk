@@ -107,3 +107,54 @@ func TestStreamDoesNotRetryCanceledRequest(t *testing.T) {
 		t.Fatalf("expected 1 attempt for a canceled request, got %d", attempts)
 	}
 }
+
+func TestARawRequestRunsTheClientsMiddleware(t *testing.T) {
+	var sent []byte
+	rt := roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+		sent, _ = io.ReadAll(req.Body)
+		return okResponse(req), nil
+	})
+	var seen string
+	client := NewClient("https://example.test",
+		WithHTTPClient(&http.Client{Transport: rt}),
+		WithMiddleware(func(req *http.Request, next RoundTripFunc) (*http.Response, error) {
+			seen = req.Method + " " + req.URL.Path
+			return next(req)
+		}),
+	)
+
+	if _, err := client.PostRaw(t.Context(), "/api/kernels", []byte(`{"name":"python3"}`)); err != nil {
+		t.Fatal(err)
+	}
+	if seen != "POST /api/kernels" {
+		t.Fatalf("middleware saw %q, want POST /api/kernels", seen)
+	}
+	if string(sent) != `{"name":"python3"}` {
+		t.Fatalf("sent body %q", sent)
+	}
+}
+
+func TestARawRequestSendsTheBodyVerbatim(t *testing.T) {
+	for _, body := range []string{"{\n \"cell\": \"a < b\"\n}\n", ""} {
+		var sent []byte
+		var contentType string
+		rt := roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+			if req.Body != nil {
+				sent, _ = io.ReadAll(req.Body)
+			}
+			contentType = req.Header.Get("Content-Type")
+			return okResponse(req), nil
+		})
+		client := NewClient("https://example.test", WithHTTPClient(&http.Client{Transport: rt}))
+
+		if _, err := client.PutRaw(t.Context(), "/me/3004/api/files/~/a.ipynb", []byte(body)); err != nil {
+			t.Fatalf("PutRaw(%q): %v", body, err)
+		}
+		if string(sent) != body {
+			t.Fatalf("sent body %q, want %q", sent, body)
+		}
+		if contentType != "application/json" {
+			t.Fatalf("Content-Type %q, want application/json", contentType)
+		}
+	}
+}

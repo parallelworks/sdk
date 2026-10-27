@@ -23,7 +23,7 @@ async function main() {
 
   // Fetch buckets and clusters in parallel
   const [bucketsResponse, clustersResponse] = await Promise.all([
-    client.GET('/api/buckets'),
+    client.GET('/api/storage', { params: { query: { category: 'buckets' } } }),
     client.GET('/api/clusters'),
   ])
 

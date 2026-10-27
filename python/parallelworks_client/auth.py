@@ -415,7 +415,7 @@ class Client:
 
         Example:
             async with Client.from_credential_config() as client:
-                response = await client.get("/api/buckets")
+                response = await client.get("/api/storage")
         """
         config = load_credential_config()
         name, identity = resolve_identity(config, context=context, platform_host=platform_host)

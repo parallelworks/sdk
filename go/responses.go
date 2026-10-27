@@ -917,6 +917,48 @@ func (m *ResponseMeta) CreateSSHPrivateKeyHeaders() CreateSSHPrivateKeyHeaders {
 	}
 }
 
+// GetStorageCredentialsHeaders holds the headers GetStorageCredentials declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetStorageCredentialsHeaders struct {
+	CacheControl string
+}
+
+// GetStorageCredentialsHeaders reads the headers GetStorageCredentials declares out of the captured
+// response.
+func (m *ResponseMeta) GetStorageCredentialsHeaders() GetStorageCredentialsHeaders {
+	return GetStorageCredentialsHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// GetStoragePresignedURLHeaders holds the headers GetStoragePresignedURL declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetStoragePresignedURLHeaders struct {
+	CacheControl string
+}
+
+// GetStoragePresignedURLHeaders reads the headers GetStoragePresignedURL declares out of the captured
+// response.
+func (m *ResponseMeta) GetStoragePresignedURLHeaders() GetStoragePresignedURLHeaders {
+	return GetStoragePresignedURLHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// GetStorageSasTokenHeaders holds the headers GetStorageSasToken declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetStorageSasTokenHeaders struct {
+	CacheControl string
+}
+
+// GetStorageSasTokenHeaders reads the headers GetStorageSasToken declares out of the captured
+// response.
+func (m *ResponseMeta) GetStorageSasTokenHeaders() GetStorageSasTokenHeaders {
+	return GetStorageSasTokenHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
 // CreateWorkerHeaders holds the headers CreateWorker declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type CreateWorkerHeaders struct {

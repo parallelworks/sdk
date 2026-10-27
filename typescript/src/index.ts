@@ -333,7 +333,7 @@ function extractHostFromToken(token: string): string {
  * const client = Client.fromCredential(process.env.PW_API_KEY!)
  *
  * // Make requests
- * const { data, error } = await client.GET('/api/buckets')
+ * const { data, error } = await client.GET('/api/storage')
  * ```
  */
 export class Client {
@@ -401,7 +401,7 @@ export class Client {
    * @example
    * ```ts
    * const client = Client.fromCredentialConfig()
-   * const { data } = await client.GET('/api/buckets')
+   * const { data } = await client.GET('/api/storage')
    * ```
    */
   static fromCredentialConfig(

@@ -134,6 +134,14 @@ logging := func(req *http.Request, next parallelworks.RoundTripFunc) (*http.Resp
 client := parallelworks.NewClient(url, parallelworks.WithMiddleware(logging))
 ```
 
+### Redirects
+
+The client follows a redirect on the origin it called. To another origin, it follows only a GET or HEAD without a body, or the GET a 303 asks for, and sends no credentials there. Any other redirect elsewhere comes back as an `*APIError` with its 3xx status. It stops at a redirect from https to plain http (`ErrInsecureRedirect`) and at a request redirected 10 times (`ErrTooManyRedirects`), and does not retry either.
+
+An `http.Client` passed to `WithHTTPClient` with a `CheckRedirect` of its own keeps that policy instead. `parallelworks.CheckRedirect` is exported to build one on.
+
+Either policy's refusal comes back as a `*RedirectRefusedError` wrapping the policy's error, which `errors.Is` and `errors.As` see through, and is never retried.
+
 ## Error Handling
 
 API errors can be matched with sentinel errors using `errors.Is`:

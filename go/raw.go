@@ -9,32 +9,20 @@ import (
 	"time"
 )
 
-// doRaw executes an HTTP request and returns the raw response body.
-// Unlike do(), it does not attempt to unmarshal the response as JSON.
-func (c *Client) doRaw(ctx context.Context, method string, path string, body io.Reader) ([]byte, error) {
-	fullURL := c.baseURL + path
-
-	req, err := http.NewRequestWithContext(ctx, method, fullURL, body)
-	if err != nil {
-		return nil, fmt.Errorf("creating request: %w", err)
-	}
-
+// doRaw sends the request through the generated send, so the redirect policy, middlewares and retries apply, and
+// returns the response body undecoded.
+func (c *Client) doRaw(ctx context.Context, method string, path string, body []byte) ([]byte, error) {
+	var payload any
+	var headers http.Header
 	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
+		// A JSON media type would re-marshal the body, compacting it and failing on an empty one, so the bytes go
+		// out verbatim as octet-stream and the header restores the Content-Type.
+		payload = body
+		headers = http.Header{"Content-Type": {"application/json"}}
 	}
-	if c.userAgent != "" {
-		req.Header.Set("User-Agent", c.userAgent)
-	}
-
-	if c.auth != nil {
-		if err := c.auth.Apply(req); err != nil {
-			return nil, fmt.Errorf("applying auth: %w", err)
-		}
-	}
-
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.send(ctx, method, path, payload, "application/octet-stream", "*/*", true, headers)
 	if err != nil {
-		return nil, fmt.Errorf("executing request: %w", err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
@@ -42,11 +30,6 @@ func (c *Client) doRaw(ctx context.Context, method string, path string, body io.
 	if err != nil {
 		return nil, fmt.Errorf("reading response body: %w", err)
 	}
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, &APIError{StatusCode: resp.StatusCode, Status: resp.Status, Body: respBody}
-	}
-
 	return respBody, nil
 }
 
@@ -57,17 +40,17 @@ func (c *Client) GetRaw(ctx context.Context, path string) ([]byte, error) {
 
 // PostRaw performs an authenticated POST request with a raw body and returns the raw response body.
 func (c *Client) PostRaw(ctx context.Context, path string, body []byte) ([]byte, error) {
-	return c.doRaw(ctx, http.MethodPost, path, bytes.NewReader(body))
+	return c.doRaw(ctx, http.MethodPost, path, body)
 }
 
 // PutRaw performs an authenticated PUT request with a raw body and returns the raw response body.
 func (c *Client) PutRaw(ctx context.Context, path string, body []byte) ([]byte, error) {
-	return c.doRaw(ctx, http.MethodPut, path, bytes.NewReader(body))
+	return c.doRaw(ctx, http.MethodPut, path, body)
 }
 
 // PatchRaw performs an authenticated PATCH request with a raw body and returns the raw response body.
 func (c *Client) PatchRaw(ctx context.Context, path string, body []byte) ([]byte, error) {
-	return c.doRaw(ctx, http.MethodPatch, path, bytes.NewReader(body))
+	return c.doRaw(ctx, http.MethodPatch, path, body)
 }
 
 // DeleteRaw performs an authenticated DELETE request.
@@ -120,6 +103,7 @@ func (c *Client) Stream(ctx context.Context, method, path string, body io.Reader
 		maxAttempts = 1 + c.retryConfig.MaxRetries
 	}
 
+	httpClient := SafeRedirects(c.httpClient)
 	for attempt := 0; ; attempt++ {
 		var reqBody io.Reader = body
 		if retryEnabled && bodyBytes != nil {
@@ -145,7 +129,7 @@ func (c *Client) Stream(ctx context.Context, method, path string, body io.Reader
 			}
 		}
 
-		resp, err := c.httpClient.Do(req)
+		resp, err := httpClient.Do(req)
 		if err != nil {
 			if retryEnabled && attempt < maxAttempts-1 && isRetryableNetworkError(err) {
 				timer := time.NewTimer(retryDelay(attempt, *c.retryConfig, nil))

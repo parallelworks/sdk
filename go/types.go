@@ -1042,10 +1042,14 @@ type Allocation struct {
 	AllPeriodsTotal *float64 `json:"allPeriodsTotal,omitempty"`
 	// Resource types a managed allocation may fund. Empty means unrestricted.
 	Allowed []string `json:"allowed,omitempty"`
+	// Names of the allocations above this one, the top-level one first. Only set when reading a single allocation.
+	Ancestors []string `json:"ancestors,omitempty"`
 	// Whether the current user can edit the allocation amount
 	CanEditTotal *bool `json:"canEditTotal,omitempty"`
 	// Current organization threshold level
 	CurrentOrgThreshold *int64 `json:"currentOrgThreshold,omitempty"`
+	// Whether crossing an organization threshold freezes or shuts down resources charged to this allocation or the allocations under it. When false, its thresholds only notify, and its budget running out stops only work charged to it directly, not the allocations under it. Defaults to true.
+	EnforceThresholds *bool `json:"enforceThresholds,omitempty"`
 	// Estimated amount used
 	EstimatedUsed *float64 `json:"estimatedUsed,omitempty"`
 	// The allocation's period amounts summed by the fiscal year each period window starts in, earliest first. Absent without periods.
@@ -1075,7 +1079,7 @@ type Allocation struct {
 	Type *string `json:"type,omitempty"`
 	// Unit of measurement
 	Unit string `json:"unit"`
-	// Why new resources cannot bill this allocation: no budget set, a freeze/shutdown threshold crossed, a not chargeable allocation, no period covers today, or its budget or an ancestor's is used up
+	// Why new resources cannot bill this allocation: no budget set, a freeze/shutdown threshold crossed, a not chargeable allocation, no period covers today, its budget or an enforcing ancestor's is used up, or, in a listing of your own allocations, it is shared with you to read but not to bill
 	UnusableReason *string `json:"unusableReason,omitempty"`
 	// Whether new resources can bill this allocation right now
 	Usable *bool `json:"usable,omitempty"`
@@ -1514,6 +1518,8 @@ type AwsBucketToken struct {
 	SecretAccessKey string `json:"secretAccessKey"`
 	// Temporary AWS session token scoped to this bucket.
 	SessionToken string `json:"sessionToken"`
+	// Type of the storage the credentials are for.
+	Type string `json:"type"`
 }
 
 type AwsBucketVersionSettings struct {
@@ -1548,6 +1554,19 @@ type AwsEfsDefinition struct {
 	Type string `json:"type"`
 }
 
+type AwsEfsDefinitionPatch struct {
+	// EFS filesystem id at AWS.
+	FileSystemID *string `json:"fileSystemId,omitempty"`
+	// Mount targets by subnet.
+	MountTargets map[string]string `json:"mountTargets,omitempty"`
+	// Provisioned throughput in MiB/s, when the throughput mode is provisioned.
+	ProvisionedThroughputMibps *int64 `json:"provisionedThroughputMibps,omitempty"`
+	// Throughput mode of the filesystem.
+	ThroughputMode *string `json:"throughputMode,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+}
+
 type AwsEfsVersionSettings struct {
 	EfsEncrypted                 *bool   `json:"efs_encrypted,omitempty"`
 	EfsPerformanceMode           *string `json:"efs_performance_mode,omitempty"`
@@ -1560,6 +1579,25 @@ type AwsEfsVersionSettings struct {
 }
 
 type AwsLustreDefinition struct {
+	// Availability zone the filesystem is in.
+	AvailabilityZone *string `json:"availabilityZone,omitempty"`
+	// S3 path the filesystem exports to.
+	ExportPath *string `json:"exportPath,omitempty"`
+	// Data compression algorithm, e.g. LZ4.
+	FsxCompression *string `json:"fsxCompression,omitempty"`
+	// FSx deployment type, e.g. PERSISTENT_2.
+	FsxDeploymentType *string `json:"fsxDeploymentType,omitempty"`
+	// Per-unit throughput in MBps/TiB.
+	FsxThroughput *string `json:"fsxThroughput,omitempty"`
+	// S3 path the filesystem imports from.
+	ImportPath *string `json:"importPath,omitempty"`
+	// Provisioned capacity in GB.
+	StorageCapacityGb *int32 `json:"storageCapacityGb,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+}
+
+type AwsLustreDefinitionPatch struct {
 	// Availability zone the filesystem is in.
 	AvailabilityZone *string `json:"availabilityZone,omitempty"`
 	// S3 path the filesystem exports to.
@@ -1763,6 +1801,19 @@ type AzureAzfilesDefinition struct {
 	Type string `json:"type"`
 }
 
+type AzureAzfilesDefinitionPatch struct {
+	// Name of the file share at Azure, which can differ from the platform name.
+	AzfilesName *string `json:"azfilesName,omitempty"`
+	// Azure resource group the storage account belongs to.
+	AzureResourceGroup *string `json:"azureResourceGroup,omitempty"`
+	// Share quota in GB.
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Azure storage account hosting the share.
+	StorageAccountName *string `json:"storageAccountName,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+}
+
 type AzureAzfilesVersionSettings struct {
 	Region *string `json:"region,omitempty"`
 	SizeGb *int64  `json:"sizeGb,omitempty"`
@@ -1789,6 +1840,8 @@ type AzureBucketToken struct {
 	SubscriptionID string `json:"subscriptionId"`
 	// Azure tenant ID of the service principal.
 	TenantID string `json:"tenantId"`
+	// Type of the storage the credentials are for.
+	Type string `json:"type"`
 }
 
 type AzureBucketVersionSettings struct {
@@ -1873,6 +1926,21 @@ type AzureManagedLustreDefinition struct {
 	Zone *string `json:"zone,omitempty"`
 }
 
+type AzureManagedLustreDefinitionPatch struct {
+	// Day of the week for the maintenance window.
+	MaintenanceWindowDay *string `json:"maintenanceWindowDay,omitempty"`
+	// Time of day for the maintenance window, UTC.
+	MaintenanceWindowTime *string `json:"maintenanceWindowTime,omitempty"`
+	// AMLFS SKU, e.g. AMLFS-Durable-Premium-125.
+	Sku *string `json:"sku,omitempty"`
+	// Provisioned capacity in TB.
+	StorageSizeTb *int32 `json:"storageSizeTb,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+	// Zone the filesystem is in.
+	Zone *string `json:"zone,omitempty"`
+}
+
 type AzureManagedLustreVersionSettings struct {
 	MaintenanceWindowDay     *string `json:"maintenance-window-day,omitempty"`
 	MaintenanceWindowTimeUtc *string `json:"maintenance-window-time-UTC,omitempty"`
@@ -1900,6 +1968,19 @@ type AzureNetappFilesDefinition struct {
 	Type string `json:"type"`
 }
 
+type AzureNetappFilesDefinitionPatch struct {
+	// Export path of the volume.
+	ExportPath *string `json:"exportPath,omitempty"`
+	// IP address clients mount the volume from.
+	MountIP *string `json:"mountIp,omitempty"`
+	// Service level of the volume.
+	Service *string `json:"service,omitempty"`
+	// Volume size in TiB.
+	SizeTib *int64 `json:"sizeTib,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+}
+
 type AzureNetappFilesVersionSettings struct {
 	Region  *string `json:"region,omitempty"`
 	Service *string `json:"service,omitempty"`
@@ -1913,9 +1994,11 @@ type AzureNetappFilesVersionSettings struct {
 type AzureSasToken struct {
 	// The expiration time of the SAS token.
 	Expiry time.Time `json:"expiry"`
-	// The name of the blob container on Azure.
+	// The name of the blob container or file share on Azure.
 	StorageName string `json:"storageName"`
-	// The URL of the storage bucket with the SAS token appended in the query parameters.
+	// Type of the storage the SAS token is for.
+	Type string `json:"type"`
+	// The URL of the blob container or file share with the SAS token appended in the query parameters.
 	URL string `json:"url"`
 }
 
@@ -2354,7 +2437,26 @@ type BucketDefinition struct {
 	AzureStorageAccount *string `json:"azureStorageAccount,omitempty"`
 	// Name of the bucket at the cloud provider, which can differ from the platform name.
 	BucketName *string `json:"bucketName,omitempty"`
-	// Name of the cloud account the bucket is created in. Required to create a bucket.
+	// Name of the cloud account the bucket is created in. Required to create a bucket; an update keeps the one it was created with.
+	CloudAccount *string `json:"cloudAccount,omitempty"`
+	// Two Google regions forming the dual-region the bucket is in, in place of a region. Google buckets only.
+	DualRegions []string `json:"dualRegions,omitempty"`
+	// Whether object versioning is on. AWS buckets only, and required to create one.
+	EnableVersioning *bool `json:"enableVersioning,omitempty"`
+	// Google multi-region the bucket is in, in place of a region. Google buckets only.
+	MultiRegion *string `json:"multiRegion,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+}
+
+type BucketDefinitionPatch struct {
+	// Azure resource group the storage account belongs to.
+	AzureResourceGroup *string `json:"azureResourceGroup,omitempty"`
+	// Azure storage account hosting the container.
+	AzureStorageAccount *string `json:"azureStorageAccount,omitempty"`
+	// Name of the bucket at the cloud provider, which can differ from the platform name.
+	BucketName *string `json:"bucketName,omitempty"`
+	// Name of the cloud account the bucket is created in. Required to create a bucket; an update keeps the one it was created with.
 	CloudAccount *string `json:"cloudAccount,omitempty"`
 	// Two Google regions forming the dual-region the bucket is in, in place of a region. Google buckets only.
 	DualRegions []string `json:"dualRegions,omitempty"`
@@ -3330,6 +3432,30 @@ type ClusterError struct {
 	Error string `json:"error"`
 }
 
+type ClusterEventJob struct {
+	ID        *string `json:"id,omitempty"`
+	Name      *string `json:"name,omitempty"`
+	Partition *string `json:"partition,omitempty"`
+	Reason    *string `json:"reason,omitempty"`
+	State     *string `json:"state,omitempty"`
+	User      *string `json:"user,omitempty"`
+}
+
+type ClusterEventNode struct {
+	CspID    *string `json:"cspId,omitempty"`
+	Hostname *string `json:"hostname,omitempty"`
+}
+
+type ClusterEventRequest struct {
+	Error  *string           `json:"error,omitempty"`
+	ID     *string           `json:"id,omitempty"`
+	Job    *ClusterEventJob  `json:"job,omitempty"`
+	Kind   string            `json:"kind"`
+	Node   *ClusterEventNode `json:"node,omitempty"`
+	Text   *string           `json:"text,omitempty"`
+	Update *bool             `json:"update,omitempty"`
+}
+
 type ClusterGoogleSlurmPartition struct {
 	Architecture      *string                `json:"architecture,omitempty"`
 	Default           *bool                  `json:"default,omitempty"`
@@ -4155,6 +4281,52 @@ type CreateExistingClusterBody struct {
 	Type string `json:"type"`
 }
 
+type CreateFirewallBlockedIPInputBody struct {
+	// Address or range to block, such as 203.0.113.7 or 203.0.113.0/24
+	Cidr string `json:"cidr"`
+	// When the block lifts; absent blocks until deleted
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	Note      *string    `json:"note,omitempty"`
+}
+
+type CreateFirewallExclusionInputBody struct {
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	// HTTP methods it applies to; absent applies to every method
+	Methods []string `json:"methods,omitempty"`
+	Note    *string  `json:"note,omitempty"`
+	// Route it applies to, such as /api/organizations/{organization}/users, where each {param} stands for one path segment and a trailing /* covers every path below; absent applies to every route
+	Path *string `json:"path,omitempty"`
+	// CRS detection rule to remove; give it or tag
+	RuleID *int64 `json:"ruleId,omitempty"`
+	// CRS tag whose rules to remove, such as attack-xss; needs a target
+	Tag *string `json:"tag,omitempty"`
+	// Request field to limit the removal to, such as ARGS:json.name
+	Target *string `json:"target,omitempty"`
+}
+
+type CreateFirewallRuleInputBody struct {
+	// deny blocks a matching request; log only reports it, to check a rule before it blocks
+	Action *string `json:"action,omitempty"`
+	// What the operator compares with; detectSQLi and detectXSS take none. It cannot contain a double quote; write \x22 in a regular expression instead
+	Argument  *string    `json:"argument,omitempty"`
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	// What block logs and evaluations report when it matches
+	Message string `json:"message"`
+	// HTTP methods it applies to; absent applies to every method
+	Methods  []string `json:"methods,omitempty"`
+	Note     *string  `json:"note,omitempty"`
+	Operator string   `json:"operator"`
+	// Route it applies to, such as /api/organizations/{organization}/users, where each {param} stands for one path segment and a trailing /* covers every path below; absent applies to every route
+	Path *string `json:"path,omitempty"`
+	// 1 inspects the request line and headers, and also runs on routes whose shipped exemption turns the rest of the firewall off; 2 also inspects the body
+	Phase  *int64 `json:"phase,omitempty"`
+	Status *int64 `json:"status,omitempty"`
+	// Transformations to apply to each variable first, such as lowercase or urlDecodeUni
+	Transforms []string `json:"transforms,omitempty"`
+	// Request fields to inspect, such as ARGS:json.name, REQUEST_HEADERS:User-Agent or REQUEST_FILENAME
+	Variables []string `json:"variables"`
+}
+
 type CreateGoogleSlurmClusterBody struct {
 	// Marketplace-injected fetch command; omitted from a save to clear it when the cluster switches marketplace configuration.
 	AnsibleFetchCommand *string `json:"ansible_fetch_command,omitempty"`
@@ -4818,7 +4990,7 @@ type CrossCheckRow struct {
 }
 
 type CrossedThreshold struct {
-	// Actions the organization configured for this threshold
+	// Actions this threshold takes; only notify for an allocation that doesn't enforce thresholds
 	Actions []string `json:"actions"`
 	// Usage percent of the crossed threshold
 	Threshold float64 `json:"threshold"`
@@ -5245,6 +5417,29 @@ type DiskDefinition struct {
 	ThroughputMbps *int64 `json:"throughputMbps,omitempty"`
 	// Type discriminator.
 	Type string `json:"type"`
+	// Id of the disk at the cloud provider.
+	VolumeID *string `json:"volumeId,omitempty"`
+	// Zone the disk is in.
+	Zone *string `json:"zone,omitempty"`
+}
+
+type DiskDefinitionPatch struct {
+	// Underlying disk type, e.g. gp3.
+	DiskType *string `json:"diskType,omitempty"`
+	// Whether the disk is encrypted. AWS only; a cloud account that enforces encryption encrypts it either way.
+	Encrypted *bool `json:"encrypted,omitempty"`
+	// Provisioned IOPS. AWS io1 and io2 only.
+	Iops *int64 `json:"iops,omitempty"`
+	// Provisioned capacity in GB.
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Id of the snapshot the disk is restored from; empty when the disk starts blank.
+	Snapshot *string `json:"snapshot,omitempty"`
+	// Provisioned throughput in MB/s. AWS gp3 only.
+	ThroughputMbps *int64 `json:"throughputMbps,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+	// Id of the disk at the cloud provider.
+	VolumeID *string `json:"volumeId,omitempty"`
 	// Zone the disk is in.
 	Zone *string `json:"zone,omitempty"`
 }
@@ -5416,6 +5611,18 @@ type ErrorLogItem struct {
 	RequestID string `json:"requestId"`
 	// Username if available
 	User *string `json:"user,omitempty"`
+}
+
+type EvaluateFirewallRequestInputBody struct {
+	// Request body; give a Content-Type header too, so it is parsed the way the server would parse it
+	Body *string `json:"body,omitempty"`
+	// Address the request comes from; defaults to 192.0.2.1, which nothing blocks
+	ClientIP *string `json:"clientIp,omitempty"`
+	// Request headers; Host defaults to localhost
+	Headers map[string]string `json:"headers,omitempty"`
+	Method  string            `json:"method"`
+	// Path and query string, as the request line sends them, such as /api/users?sortBy=name
+	Path string `json:"path"`
 }
 
 type Event struct {
@@ -5831,6 +6038,113 @@ type FilesystemRefreshResponse struct {
 	Queued bool `json:"queued"`
 }
 
+type FirewallBlockedIP struct {
+	// Blocked address or range, in CIDR notation
+	Cidr      string    `json:"cidr"`
+	CreatedAt time.Time `json:"createdAt"`
+	CreatedBy string    `json:"createdBy"`
+	// When the block lifts; absent blocks until deleted
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	ID        int64      `json:"id"`
+	Note      string     `json:"note"`
+}
+
+type FirewallEvaluation struct {
+	// Policy revision the request ran against; absent when only the rules that ship with the platform ran
+	AppliedRevision *int64 `json:"appliedRevision,omitempty"`
+	Blocked         bool   `json:"blocked"`
+	// Every rule the request matched, in the order they ran; the last one decides a block
+	Matches []FirewallEvaluationMatch `json:"matches"`
+	// Status a blocked request gets
+	Status *int64 `json:"status,omitempty"`
+}
+
+type FirewallEvaluationMatch struct {
+	Message string `json:"message"`
+	RuleID  int64  `json:"ruleId"`
+}
+
+type FirewallExclusion struct {
+	CreatedAt time.Time `json:"createdAt"`
+	CreatedBy string    `json:"createdBy"`
+	// When it stops applying; absent applies until deleted
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	// Rule id that block logs and evaluations report for this exclusion
+	FirewallRuleID int64 `json:"firewallRuleId"`
+	ID             int64 `json:"id"`
+	// HTTP methods it applies to; empty applies to every method
+	Methods []string `json:"methods"`
+	Note    string   `json:"note"`
+	// Route it applies to, such as /api/organizations/{organization}/users; empty applies to every route
+	Path string `json:"path"`
+	// CRS rule it removes
+	RuleID *int64 `json:"ruleId,omitempty"`
+	// CRS tag whose rules it removes, for the target only
+	Tag *string `json:"tag,omitempty"`
+	// Request field the removal is limited to, such as ARGS:json.name; absent removes the rule for the whole request
+	Target *string `json:"target,omitempty"`
+}
+
+type FirewallRule struct {
+	// deny blocks a matching request; log only reports it
+	Action    string    `json:"action"`
+	Argument  string    `json:"argument"`
+	CreatedAt time.Time `json:"createdAt"`
+	CreatedBy string    `json:"createdBy"`
+	// When it stops applying; absent applies until deleted
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	// Rule id that block logs and evaluations report for this rule
+	FirewallRuleID int64 `json:"firewallRuleId"`
+	ID             int64 `json:"id"`
+	// What block logs and evaluations report when it matches
+	Message string `json:"message"`
+	// HTTP methods it applies to; empty applies to every method
+	Methods  []string `json:"methods"`
+	Note     string   `json:"note"`
+	Operator string   `json:"operator"`
+	// Route it applies to, such as /api/organizations/{organization}/users; empty applies to every route
+	Path string `json:"path"`
+	// 1 inspects the request line and headers; 2 also inspects the body
+	Phase int64 `json:"phase"`
+	// Status a denied request gets
+	Status int64 `json:"status"`
+	// Transformations applied to each variable before the operator, in order
+	Transforms []string `json:"transforms"`
+	// Request fields it inspects, such as ARGS:json.name or REQUEST_HEADERS:User-Agent
+	Variables []string `json:"variables"`
+}
+
+type FirewallServer struct {
+	// Policy revision the server enforces; absent while it runs only the rules that ship with the platform
+	AppliedRevision *int64 `json:"appliedRevision,omitempty"`
+	// Why the server refused failedRevision
+	Error *string `json:"error,omitempty"`
+	// Latest revision the server refused to apply; absent when it applied the latest one
+	FailedRevision *int64 `json:"failedRevision,omitempty"`
+	// Server name, the pod name in Kubernetes
+	Name       string    `json:"name"`
+	ReportedAt time.Time `json:"reportedAt"`
+}
+
+type FirewallSettings struct {
+	// Policy revision the API server answering has applied; absent while it runs only the rules that ship with the platform
+	AppliedRevision *int64 `json:"appliedRevision,omitempty"`
+	// Whether this deployment runs the firewall; settings and entries apply only where it does
+	Enabled bool `json:"enabled"`
+	// CRS anomaly score at which a request is blocked; a critical match scores 5
+	InboundAnomalyThreshold int64 `json:"inboundAnomalyThreshold"`
+	// on blocks; detection_only logs what would be blocked and blocks nothing, platform rules and blocked IPs included
+	Mode string `json:"mode"`
+	// CRS paranoia level: higher levels catch more attacks and block more legitimate requests
+	ParanoiaLevel int64 `json:"paranoiaLevel"`
+	// Policy revision; every change to the settings or an entry raises it
+	Revision int64 `json:"revision"`
+	// API servers that reported the policy they enforce in the last minute
+	Servers   []FirewallServer `json:"servers"`
+	UpdatedAt time.Time        `json:"updatedAt"`
+	UpdatedBy string           `json:"updatedBy"`
+}
+
 type FiscalYear struct {
 	// End of the fiscal year (exclusive)
 	End time.Time `json:"end"`
@@ -5937,6 +6251,17 @@ type FleetSummary struct {
 	Unreported int64 `json:"unreported"`
 	// Version distribution across the whole fleet, newest first.
 	Versions []FleetVersionCount `json:"versions"`
+}
+
+type FleetUpgradeResult struct {
+	// Why the agent was not updated, when there is more to say.
+	Detail *string `json:"detail,omitempty"`
+	// Row id of the agent, as the agents list reports it.
+	ID string `json:"id"`
+	// Node hostname for a managed cluster node, otherwise the cluster's display name or name.
+	Name string `json:"name"`
+	// Outcome for this agent.
+	Result string `json:"result"`
 }
 
 type FleetVersionCount struct {
@@ -6279,6 +6604,15 @@ type GetTermsBody struct {
 	TermsAndConditions string `json:"termsAndConditions"`
 }
 
+type GetUserClusterPermissionsOutputBody struct {
+	// Map of group names to permissions
+	Groups map[string]map[string]bool `json:"groups"`
+	// Whether the cluster owner's organization enforces no-root-access, under which admin and sudo grants have no effect and new ones are refused
+	NoRootAccess bool `json:"noRootAccess"`
+	// Map of permission names to whether entire organization has that access
+	Organization map[string]bool `json:"organization"`
+}
+
 type GetUserContainersResponse struct {
 	// List of user workspace hosts that could not be reached
 	UnreachableHosts []string `json:"unreachableHosts"`
@@ -6465,6 +6799,8 @@ type GoogleBucketToken struct {
 	ExpiresAt time.Time `json:"expiresAt"`
 	// OAuth2 access token scoped to this bucket.
 	Token string `json:"token"`
+	// Type of the storage the credentials are for.
+	Type string `json:"type"`
 }
 
 type GoogleBucketVersionSettings struct {
@@ -6495,6 +6831,19 @@ type GoogleFilestoreDefinition struct {
 	Zone *string `json:"zone,omitempty"`
 }
 
+type GoogleFilestoreDefinitionPatch struct {
+	// IP address of the file server.
+	FileserverIP *string `json:"fileserverIp,omitempty"`
+	// Service tier of the instance.
+	FilestoreTier *string `json:"filestoreTier,omitempty"`
+	// Instance capacity in TiB: 2.5 to 10 for BASIC_SSD, 1 to 10 for BASIC_HDD.
+	SizeTib *float64 `json:"sizeTib,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+	// Zone the instance is in.
+	Zone *string `json:"zone,omitempty"`
+}
+
 type GoogleFilestoreVersionSettings struct {
 	FilestoreTier *string  `json:"filestore_tier,omitempty"`
 	Region        *string  `json:"region,omitempty"`
@@ -6505,6 +6854,17 @@ type GoogleFilestoreVersionSettings struct {
 }
 
 type GoogleManagedLustreDefinition struct {
+	// Throughput tier in MBps per TiB, which is what the price is keyed on.
+	PerformanceMbpsPerTib *int64 `json:"performanceMbpsPerTib,omitempty"`
+	// Provisioned capacity in GB.
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+	// Zone the filesystem is in.
+	Zone *string `json:"zone,omitempty"`
+}
+
+type GoogleManagedLustreDefinitionPatch struct {
 	// Throughput tier in MBps per TiB, which is what the price is keyed on.
 	PerformanceMbpsPerTib *int64 `json:"performanceMbpsPerTib,omitempty"`
 	// Provisioned capacity in GB.
@@ -6719,6 +7079,160 @@ type GroupWithMembers struct {
 	Organization *string `json:"organization,omitempty"`
 	// List of roles assigned to the group.
 	Roles []string `json:"roles,omitempty"`
+}
+
+type HavenBlocker struct {
+	// The items or services the reason covers.
+	Count *int64 `json:"count,omitempty"`
+	// The preflight check that failed, or the services, as service@host, whose Haven is not connected.
+	Detail *string `json:"detail,omitempty"`
+	Reason string  `json:"reason"`
+}
+
+type HavenCheck struct {
+	Detail *string `json:"detail,omitempty"`
+	// configured, fips, connected, transport, root-key, recovery-key or database-ca.
+	Name   string `json:"name"`
+	Status string `json:"status"`
+	// What the check is about, such as a root key's ID or a CA file's path.
+	Subject *string `json:"subject,omitempty"`
+}
+
+type HavenFailureGroup struct {
+	Category  string    `json:"category"`
+	Count24h  int64     `json:"count24h"`
+	Count7d   int64     `json:"count7d"`
+	HavenCode string    `json:"havenCode"`
+	LastAt    time.Time `json:"lastAt"`
+	// Haven's or Vault's error message, which never holds a secret value.
+	LastError  *string  `json:"lastError,omitempty"`
+	Operation  string   `json:"operation"`
+	Paths      []string `json:"paths"`
+	RequestIds []string `json:"requestIds"`
+	Source     string   `json:"source"`
+	Total      int64    `json:"total"`
+	Triage     string   `json:"triage"`
+	Type       string   `json:"type"`
+}
+
+type HavenImportedItem struct {
+	// What the run did with the secret, such as written, updated, verified, in-sync, repaired, deleted, conflict, would-write, differs or failed.
+	Action string `json:"action"`
+	// Haven's error code, when Haven refused.
+	Code      *string `json:"code,omitempty"`
+	HavenPath string  `json:"havenPath"`
+	Reason    *string `json:"reason,omitempty"`
+	Type      string  `json:"type"`
+	VaultPath string  `json:"vaultPath"`
+}
+
+type HavenItem struct {
+	Attempts  int64   `json:"attempts"`
+	HavenPath string  `json:"havenPath"`
+	LastCode  *string `json:"lastCode,omitempty"`
+	LastRunID *int64  `json:"lastRunId,omitempty"`
+	OrgID     *string `json:"orgId,omitempty"`
+	Reason    *string `json:"reason,omitempty"`
+	// When a failure left the stores apart; cleared by the sync that brings them together.
+	RepairAt   *time.Time `json:"repairAt,omitempty"`
+	State      string     `json:"state"`
+	Type       string     `json:"type"`
+	UpdatedAt  time.Time  `json:"updatedAt"`
+	VaultPath  string     `json:"vaultPath"`
+	VerifiedAt *time.Time `json:"verifiedAt,omitempty"`
+}
+
+type HavenItemsResponse struct {
+	Items []HavenItem `json:"items"`
+	Total int64       `json:"total"`
+}
+
+type HavenReadiness struct {
+	// When the current stretch without a fallback began.
+	CleanSince *time.Time `json:"cleanSince,omitempty"`
+	// Times the stores disagreed in the window.
+	Drift int64 `json:"drift"`
+	// Haven failures Vault covered in the window.
+	Fallbacks     int64 `json:"fallbacks"`
+	ItemsTotal    int64 `json:"itemsTotal"`
+	ItemsVerified int64 `json:"itemsVerified"`
+	// The latest sync or verify that finished.
+	LastCheck   *int64     `json:"lastCheck,omitempty"`
+	LastCheckAt *time.Time `json:"lastCheckAt,omitempty"`
+	// Secrets the latest sync or verify found differing.
+	LastDrift int64 `json:"lastDrift"`
+	// The last Haven failure Vault covered.
+	LastFallbackAt *time.Time `json:"lastFallbackAt,omitempty"`
+	// When the first sync succeeded, where measuring starts.
+	MeasuringSince *time.Time `json:"measuringSince,omitempty"`
+	// Items a failure left apart, waiting for the repair pass.
+	PendingRepairs int64 `json:"pendingRepairs"`
+	Ready          bool  `json:"ready"`
+	// Deleted items a store may still hold, waiting for a sync.
+	Tombstones int64 `json:"tombstones"`
+	// Writes a sync found reached Vault around the router in the window; Vault's audit log is not read yet.
+	VaultBypasses int64 `json:"vaultBypasses"`
+	// How many days without a fallback or drift make haven-only ready.
+	WindowDays int64 `json:"windowDays"`
+}
+
+type HavenRunResponse struct {
+	// Started by a pass of the automatic migration; startedBy is who started the pass.
+	Automatic *bool `json:"automatic,omitempty"`
+	// Items by action, and total.
+	Counts     map[string]int64 `json:"counts"`
+	Error      *string          `json:"error,omitempty"`
+	FinishedAt *time.Time       `json:"finishedAt,omitempty"`
+	ID         int64            `json:"id"`
+	// Each secret's outcome, in a single run's response only.
+	Items     []HavenImportedItem `json:"items,omitempty"`
+	Kind      string              `json:"kind"`
+	Outcome   string              `json:"outcome"`
+	StartedAt time.Time           `json:"startedAt"`
+	StartedBy string              `json:"startedBy"`
+	Types     []string            `json:"types,omitempty"`
+	// Vault mounts under platform/ that no routed secret uses.
+	Unrouted []string `json:"unrouted,omitempty"`
+}
+
+type HavenSequence struct {
+	// The preflight check that failed, and what it is about, such as a root key.
+	Check   *string `json:"check,omitempty"`
+	Message *string `json:"message,omitempty"`
+	// Why the sequence failed: the preflight, the step's run failing, the run leaving items needing attention, or an error starting the step.
+	Reason *string `json:"reason,omitempty"`
+	RunID  *int64  `json:"runId,omitempty"`
+	// Steps that changed nothing because they were done already, such as the stage when Haven already routed secrets.
+	Skipped   []string   `json:"skipped,omitempty"`
+	StartedAt *time.Time `json:"startedAt,omitempty"`
+	// Who started the pass.
+	StartedBy *string    `json:"startedBy,omitempty"`
+	State     string     `json:"state"`
+	Step      string     `json:"step"`
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+type HavenStatusResponse struct {
+	// What keeps the platform from haven-only; empty when it may switch.
+	Blockers []HavenBlocker `json:"blockers"`
+	// Whether HAVEN_ROOT_KEYS is set and valid, connected yet or not.
+	Configured bool `json:"configured"`
+	Connected  bool `json:"connected"`
+	// Haven failures in the last 24 hours, which alert the platform admins.
+	HavenFailures int64 `json:"havenFailures"`
+	// Tracked secrets by state.
+	Items    map[string]int64  `json:"items"`
+	LastSync *HavenRunResponse `json:"lastSync,omitempty"`
+	// When the nightly sync runs next, while it is on and the stage is haven-first or haven-only.
+	NextSyncAt *time.Time `json:"nextSyncAt,omitempty"`
+	// The nightly sync setting.
+	NightlySync     bool            `json:"nightlySync"`
+	Preflight       []HavenCheck    `json:"preflight"`
+	PreflightPassed bool            `json:"preflightPassed"`
+	Readiness       *HavenReadiness `json:"readiness,omitempty"`
+	RunInProgress   bool            `json:"runInProgress"`
+	Sequence        *HavenSequence  `json:"sequence,omitempty"`
+	Stage           string          `json:"stage"`
 }
 
 type HealthMonitoringSettings struct {
@@ -7665,6 +8179,17 @@ type Instance struct {
 	WorkspaceMounts []WorkspaceMount `json:"workspaceMounts,omitempty"`
 	// The availability zone where the Instance will be provisioned.
 	Zone string `json:"zone"`
+}
+
+type InstanceCostEstimate struct {
+	// Currency of every amount.
+	Currency string `json:"currency"`
+	// The part of hourly that is the root disk.
+	DiskHourly float64 `json:"diskHourly"`
+	// Cost per hour while the instance runs: the machine and its root disk.
+	Hourly float64 `json:"hourly"`
+	// Region the prices are for.
+	Region string `json:"region"`
 }
 
 type InstanceType struct {
@@ -9046,11 +9571,11 @@ type MfaSettingResponse struct {
 }
 
 type MigrationRegistryItem struct {
-	Applied   bool    `json:"applied"`
-	AppliedAt *string `json:"appliedAt,omitempty"`
-	AppliedBy *string `json:"appliedBy,omitempty"`
-	Auto      bool    `json:"auto"`
-	ID        string  `json:"id"`
+	Applied   bool       `json:"applied"`
+	AppliedAt *time.Time `json:"appliedAt,omitempty"`
+	AppliedBy *string    `json:"appliedBy,omitempty"`
+	Auto      bool       `json:"auto"`
+	ID        string     `json:"id"`
 }
 
 type MigrationRunLogResponse struct {
@@ -9332,6 +9857,10 @@ type NetworkRegion struct {
 
 type NewClusterCheck struct {
 	CostEstimate *ClusterCostEstimate `json:"costEstimate,omitempty"`
+}
+
+type NewInstanceCheck struct {
+	CostEstimate *InstanceCostEstimate `json:"costEstimate,omitempty"`
 }
 
 type Nfs struct {
@@ -9918,6 +10447,8 @@ type OracleBucketPar struct {
 	Namespace string `json:"namespace"`
 	// Region the Oracle bucket is in.
 	Region string `json:"region"`
+	// Type of the storage the credentials are for.
+	Type string `json:"type"`
 	// The Pre-Authenticated Request URL granting HTTP access to the bucket. Read/write for users with write access, read-only otherwise.
 	URL string `json:"url"`
 }
@@ -9929,6 +10460,17 @@ type OracleBucketVersionSettings struct {
 }
 
 type OracleFsDefinition struct {
+	// Availability domain the file system is in.
+	AvailabilityDomain *string `json:"availabilityDomain,omitempty"`
+	// Export path of the file system.
+	ExportPath *string `json:"exportPath,omitempty"`
+	// IP address of the mount target.
+	MountTargetIP *string `json:"mountTargetIp,omitempty"`
+	// Type discriminator.
+	Type string `json:"type"`
+}
+
+type OracleFsDefinitionPatch struct {
 	// Availability domain the file system is in.
 	AvailabilityDomain *string `json:"availabilityDomain,omitempty"`
 	// Export path of the file system.
@@ -10478,6 +11020,8 @@ type PatchAccessBodyType struct {
 type PatchAllocationInputBody struct {
 	// Replace the allowed resource types (managed allocations only). An empty list clears the restriction.
 	Allowed []string `json:"allowed,omitempty"`
+	// Whether crossing an organization threshold freezes or shuts down resources charged to this allocation or the allocations under it, and whether its budget running out stops the allocations under it. Only organization admins can change it.
+	EnforceThresholds *bool `json:"enforceThresholds,omitempty"`
 	// Make the allocation not chargeable, so it only holds budget for the allocations under it
 	NonChargeable *bool `json:"nonChargeable,omitempty"`
 	// Replace the budget per period. An empty list removes every period.
@@ -10871,6 +11415,10 @@ type PlatformSettingsAdmin struct {
 	GcsHmacRotationMaxAgeHours int64 `json:"gcsHmacRotationMaxAgeHours"`
 	// Minutes between GCS HMAC rotation sweeps. Default 60.
 	GcsHmacRotationSweepMinutes int64 `json:"gcsHmacRotationSweepMinutes"`
+	// Whether every secret Haven routes is synced between Haven and Vault each night while the stage is haven-first or haven-only, so the stores converge; drift is recorded as a failure. On by default.
+	HavenNightlySync bool `json:"havenNightlySync"`
+	// Where the services keep the secrets Haven routes: off (the default) keeps them in Vault alone; haven-first writes them to Haven and Vault, reads Haven for those verified there and Vault for the rest, and falls back to Vault on any Haven error; haven-only reads Haven alone and fails a write Haven fails, mirroring each write to Vault as a backup. Turning it off, or back to haven-first, takes effect at once.
+	HavenStage string `json:"havenStage"`
 	// TLS passthrough rules: connections whose SNI exactly matches a rule's host are piped, still encrypted, to its target.
 	HostForwards []HostForwardSetting `json:"hostForwards"`
 	// The expiration date of the platform license, if valid.
@@ -13720,7 +14268,7 @@ type Session struct {
 }
 
 type SessionCostLimit struct {
-	// Whether reaching the limit destroys the cluster instead of only alerting.
+	// Whether reaching the limit destroys the resource instead of only alerting.
 	AutoTerminate bool `json:"autoTerminate"`
 	// Whether the session cost limit is on.
 	Enabled bool `json:"enabled"`
@@ -14061,6 +14609,13 @@ type StartCodexDeviceAuthorizationInputBody struct {
 	Reconnect *bool `json:"reconnect,omitempty"`
 }
 
+type StartRunInBody struct {
+	// A sync makes each secret's other store match the authoritative one: Vault until the secret is verified, then Haven; a deleted secret is removed from both. A dry run writes nothing; a verify only compares; a repair syncs only the secrets a failure left apart.
+	Kind string `json:"kind"`
+	// Limit the run to these secret types; empty runs all.
+	Types []string `json:"types,omitempty"`
+}
+
 type StepSummary struct {
 	Bytes int64 `json:"bytes"`
 }
@@ -14068,6 +14623,22 @@ type StepSummary struct {
 type StopClusterOptions struct {
 	// Stop the controller through the cloud provider instead of waiting for the cluster agent to shut it down from inside the guest.
 	Force *bool `json:"force,omitempty"`
+}
+
+type StorageClusterMount struct {
+	// Path the cluster mounts the storage at.
+	MountPoint *string `json:"mountPoint,omitempty"`
+	// Name of the cluster.
+	Name string `json:"name"`
+	// Whether the cluster is provisioned.
+	On bool `json:"on"`
+	// Username of the cluster's owner.
+	User string `json:"user"`
+}
+
+type StorageDefinitionCheck struct {
+	// The definition the patch would save.
+	Definition StorageDefinition `json:"definition"`
 }
 
 type StorageDeployment struct {
@@ -14090,6 +14661,8 @@ type StorageDeployment struct {
 type StorageDetail struct {
 	// Whether the storage is currently attached to a cluster.
 	Attached bool `json:"attached"`
+	// Clusters the storage is attached to, with where each mounts it.
+	AttachedTo []StorageClusterMount `json:"attachedTo"`
 	// Azure storage account that holds the bucket. Only Azure buckets have one.
 	BucketAccountName *string `json:"bucketAccountName,omitempty"`
 	// Name of the bucket in the cloud provider. Only buckets have one.
@@ -14118,6 +14691,8 @@ type StorageDetail struct {
 	ImageURL string `json:"imageUrl"`
 	// The number of the storage's most recent deployment. Absent when the storage has never been deployed.
 	LatestDeploymentNumber *int64 `json:"latestDeploymentNumber,omitempty"`
+	// Google multi-region (US) or dual-region (us-east1, us-west1) the bucket is in, in place of a region. Google buckets only.
+	Location *string `json:"location,omitempty"`
 	// Platform name of the storage.
 	Name string `json:"name"`
 	// Deprecated: use 'user' instead. Username of the storage owner.
@@ -14132,7 +14707,9 @@ type StorageDetail struct {
 	// Name of the resource group the storage bills against.
 	ResourceGroup *string `json:"resourceGroup,omitempty"`
 	// Username of the owner of the resource group the storage bills against.
-	ResourceGroupOwner *string `json:"resourceGroupOwner,omitempty"`
+	ResourceGroupOwner *string          `json:"resourceGroupOwner,omitempty"`
+	RunTimeAlert       RunTimeAlert     `json:"runTimeAlert"`
+	SessionCostLimit   SessionCostLimit `json:"sessionCostLimit"`
 	// Whether the storage is sessionless.
 	Sessionless bool `json:"sessionless"`
 	// Size of the storage in GiB.
@@ -14182,6 +14759,8 @@ type StorageListItem struct {
 	ImageURL string `json:"imageUrl"`
 	// The number of the storage's most recent deployment. Absent when the storage has never been deployed.
 	LatestDeploymentNumber *int64 `json:"latestDeploymentNumber,omitempty"`
+	// Google multi-region (US) or dual-region (us-east1, us-west1) the bucket is in, in place of a region. Google buckets only.
+	Location *string `json:"location,omitempty"`
 	// Platform name of the storage.
 	Name string `json:"name"`
 	// Deprecated: use 'user' instead. Username of the storage owner.
@@ -14614,6 +15193,24 @@ type ToolResultChunk struct {
 	ToolCallID string `json:"toolCallId"`
 }
 
+type TriageInBody struct {
+	Category string `json:"category"`
+	// The Haven or core release that fixed it.
+	FixedIn   *string `json:"fixedIn,omitempty"`
+	HavenCode string  `json:"havenCode"`
+	// A link to the issue that tracks the fix.
+	Issue     *string `json:"issue,omitempty"`
+	Notes     *string `json:"notes,omitempty"`
+	Operation string  `json:"operation"`
+	Triage    string  `json:"triage"`
+	Type      string  `json:"type"`
+}
+
+type TriageResponse struct {
+	// How many failure rows changed.
+	Updated int64 `json:"updated"`
+}
+
 type TunnelShared struct {
 	// Whether shared with organization.
 	Organization *bool `json:"organization,omitempty"`
@@ -14734,6 +15331,10 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	GcsHmacRotationMaxAgeHours *int64 `json:"gcsHmacRotationMaxAgeHours,omitempty"`
 	// Minutes between GCS HMAC rotation sweeps.
 	GcsHmacRotationSweepMinutes *int64 `json:"gcsHmacRotationSweepMinutes,omitempty"`
+	// Whether every secret Haven routes is synced between both stores each night while Haven routes them.
+	HavenNightlySync *bool `json:"havenNightlySync,omitempty"`
+	// Where the services keep the secrets Haven routes: off keeps them in Vault alone; haven-first writes them to Haven and Vault and reads Haven for those verified there; haven-only reads Haven alone. haven-first needs Haven's preflight to pass; haven-only also needs the stage haven-first, a sync that succeeded, every item verified or decided, no repair or tombstone waiting, and a sync or verify since the stage changed that found the stores equal. Off, or haven-first from haven-only, always applies at once.
+	HavenStage *string `json:"havenStage,omitempty"`
 	// TLS passthrough rules, replacing the current list. Empty list removes all rules.
 	HostForwards []HostForwardSetting `json:"hostForwards,omitempty"`
 	// The maintenance message to show.
@@ -14844,6 +15445,18 @@ type UpdateCostTrackingBody struct {
 
 type UpdateDeploymentInputBody struct {
 	ProvisionStatus ProvisionStatusStruct `json:"provisionStatus"`
+}
+
+type UpdateFirewallRuleInputBody struct {
+	Action *string `json:"action,omitempty"`
+	Note   *string `json:"note,omitempty"`
+	Status *int64  `json:"status,omitempty"`
+}
+
+type UpdateFirewallSettingsInputBody struct {
+	InboundAnomalyThreshold *int64  `json:"inboundAnomalyThreshold,omitempty"`
+	Mode                    *string `json:"mode,omitempty"`
+	ParanoiaLevel           *int64  `json:"paranoiaLevel,omitempty"`
 }
 
 type UpdateGpuOperatorBody struct {
@@ -15095,9 +15708,25 @@ type UpdateSentrySettingsBody struct {
 	TracesSampleRate float64 `json:"tracesSampleRate"`
 }
 
-type UpdateStorageBillingInputBody struct {
-	// Name of the resource group the storage bills against.
-	ResourceGroup string `json:"resourceGroup"`
+type UpdateStorageBody struct {
+	// Description.
+	Description *string `json:"description,omitempty"`
+	// Display name.
+	DisplayName *string `json:"displayName,omitempty"`
+	// Name of the group the storage's usage is attributed to: one the caller belongs to. Only the owner can change it to another group.
+	Group *string `json:"group,omitempty"`
+	// New storage name. Only the owner can rename a storage, and only while it is off.
+	Name *string `json:"name,omitempty"`
+	// Name of the network the storage provisions into. Only the owner can change it, and only while the storage is off. Ephemeral storage uses its cluster's network.
+	Network *string `json:"network,omitempty"`
+	// Region the storage provisions in. The storage must be off. Ephemeral storage uses its cluster's region.
+	Region *string `json:"region,omitempty"`
+	// Name of the resource group the storage bills against. Only the owner can change it. Takes precedence over group.
+	ResourceGroup    *string           `json:"resourceGroup,omitempty"`
+	RunTimeAlert     *RunTimeAlert     `json:"runTimeAlert,omitempty"`
+	SessionCostLimit *SessionCostLimit `json:"sessionCostLimit,omitempty"`
+	// Tags; replaces the full list.
+	Tags []string `json:"tags,omitempty"`
 }
 
 type UpdateUserPreferencesInputBody struct {
@@ -15178,6 +15807,13 @@ type UpgradeAgentResponseBody struct {
 	// Agent version at dispatch time.
 	AgentVersion  string `json:"agentVersion"`
 	Dispatched    bool   `json:"dispatched"`
+	TargetVersion string `json:"targetVersion"`
+}
+
+type UpgradeFleetAgentsOutputBody struct {
+	// One outcome per reporting agent that was behind the platform version.
+	Results []FleetUpgradeResult `json:"results"`
+	// Version the agents were told to update to.
 	TargetVersion string `json:"targetVersion"`
 }
 
@@ -17335,6 +17971,310 @@ func (u *ClusterDefinitionPatch) UnmarshalJSON(data []byte) error {
 	}
 }
 
+// StorageCredentials - Temporary credentials for a storage; the shape is selected by the type discriminator.
+
+// Variants: AwsBucketToken, AzureBucketToken, GoogleBucketToken, OracleBucketPar
+type StorageCredentials struct {
+	Value any
+
+	unknownDiscriminator string
+	raw                  string
+}
+
+// IsUnknownVariant reports whether the payload carried a type
+// this client does not know. Value is nil in that case; the original JSON is
+// available from Raw and is re-marshaled unchanged.
+func (u StorageCredentials) IsUnknownVariant() bool {
+	return u.Value == nil && len(u.raw) > 0
+}
+
+// UnknownDiscriminator returns the unrecognized type value,
+// or "" when the payload decoded into a known variant.
+func (u StorageCredentials) UnknownDiscriminator() string {
+	return u.unknownDiscriminator
+}
+
+// Raw returns the original JSON of an unrecognized variant, or nil.
+func (u StorageCredentials) Raw() json.RawMessage {
+	if u.raw == "" {
+		return nil
+	}
+	return json.RawMessage(u.raw)
+}
+
+// Base returns the StorageCredentialsBase that every variant of StorageCredentials carries, or
+// nil when Value holds none of them. It is a copy: writing to it does not change
+// the value the union holds.
+func (u StorageCredentials) Base() *StorageCredentialsBase {
+	switch v := u.Value.(type) {
+	case AwsBucketToken:
+		return &StorageCredentialsBase{
+			BucketName: v.BucketName,
+			CanWrite:   v.CanWrite,
+		}
+	case AzureBucketToken:
+		return &StorageCredentialsBase{
+			BucketName: v.BucketName,
+			CanWrite:   v.CanWrite,
+		}
+	case GoogleBucketToken:
+		return &StorageCredentialsBase{
+			BucketName: v.BucketName,
+			CanWrite:   v.CanWrite,
+		}
+	case OracleBucketPar:
+		return &StorageCredentialsBase{
+			BucketName: v.BucketName,
+			CanWrite:   v.CanWrite,
+		}
+	}
+	return nil
+}
+
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u StorageCredentials) unionValue() any {
+	return u.Value
+}
+
+// MarshalJSON implements json.Marshaler for StorageCredentials.
+func (u StorageCredentials) MarshalJSON() ([]byte, error) {
+	if u.IsUnknownVariant() {
+		return []byte(u.raw), nil
+	}
+	return json.Marshal(u.Value)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for StorageCredentials.
+func (u *StorageCredentials) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	var disc struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &disc); err != nil {
+		return fmt.Errorf("unmarshaling StorageCredentials discriminator: %w", err)
+	}
+	switch disc.Type {
+	case "aws-bucket":
+		var v AwsBucketToken
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageCredentials{Value: v}
+		return nil
+	case "azure-bucket":
+		var v AzureBucketToken
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageCredentials{Value: v}
+		return nil
+	case "google-bucket":
+		var v GoogleBucketToken
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageCredentials{Value: v}
+		return nil
+	case "oracle-bucket":
+		var v OracleBucketPar
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageCredentials{Value: v}
+		return nil
+	case "":
+		return fmt.Errorf("unmarshaling StorageCredentials: missing type discriminator")
+	default:
+		// Adding a variant to a oneOf is meant to be a backward-compatible change,
+		// so an unrecognized one is preserved verbatim instead of failing the decode
+		// of the whole payload it happens to appear in.
+		*u = StorageCredentials{
+			unknownDiscriminator: disc.Type,
+			raw:                  string(data),
+		}
+		return nil
+	}
+}
+
+// StorageDefinitionPatch - A JSON merge patch (RFC 7396) against the storage's definition, in the shape get-storage returns. A field it sets replaces that field, null removes it, an array replaces the whole array, and fields it leaves out are kept. type must be the storage's own. Read-only fields are set by provisioning and ignored.
+
+// Variants: AwsLustreDefinitionPatch, AzureManagedLustreDefinitionPatch, GoogleManagedLustreDefinitionPatch, BucketDefinitionPatch, DiskDefinitionPatch, AwsEfsDefinitionPatch, AzureAzfilesDefinitionPatch, AzureNetappFilesDefinitionPatch, GoogleFilestoreDefinitionPatch, OracleFsDefinitionPatch
+type StorageDefinitionPatch struct {
+	Value any
+
+	unknownDiscriminator string
+	raw                  string
+}
+
+// IsUnknownVariant reports whether the payload carried a type
+// this client does not know. Value is nil in that case; the original JSON is
+// available from Raw and is re-marshaled unchanged.
+func (u StorageDefinitionPatch) IsUnknownVariant() bool {
+	return u.Value == nil && len(u.raw) > 0
+}
+
+// UnknownDiscriminator returns the unrecognized type value,
+// or "" when the payload decoded into a known variant.
+func (u StorageDefinitionPatch) UnknownDiscriminator() string {
+	return u.unknownDiscriminator
+}
+
+// Raw returns the original JSON of an unrecognized variant, or nil.
+func (u StorageDefinitionPatch) Raw() json.RawMessage {
+	if u.raw == "" {
+		return nil
+	}
+	return json.RawMessage(u.raw)
+}
+
+// unionValue hands the decoded variant to the parameter encoders, which write
+// the value a union carries rather than the wrapper carrying it.
+func (u StorageDefinitionPatch) unionValue() any {
+	return u.Value
+}
+
+// MarshalJSON implements json.Marshaler for StorageDefinitionPatch.
+func (u StorageDefinitionPatch) MarshalJSON() ([]byte, error) {
+	if u.IsUnknownVariant() {
+		return []byte(u.raw), nil
+	}
+	return json.Marshal(u.Value)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for StorageDefinitionPatch.
+func (u *StorageDefinitionPatch) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	var disc struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &disc); err != nil {
+		return fmt.Errorf("unmarshaling StorageDefinitionPatch discriminator: %w", err)
+	}
+	switch disc.Type {
+	case "aws-bucket":
+		var v BucketDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "aws-disk":
+		var v DiskDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "aws-efs":
+		var v AwsEfsDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "aws-lustre":
+		var v AwsLustreDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "azure-azfiles":
+		var v AzureAzfilesDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "azure-bucket":
+		var v BucketDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "azure-disk":
+		var v DiskDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "azure-managedlustre":
+		var v AzureManagedLustreDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "azure-netappfiles":
+		var v AzureNetappFilesDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "google-bucket":
+		var v BucketDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "google-disk":
+		var v DiskDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "google-filestore":
+		var v GoogleFilestoreDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "google-managedlustre":
+		var v GoogleManagedLustreDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "oracle-bucket":
+		var v BucketDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "oracle-oraclefs":
+		var v OracleFsDefinitionPatch
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*u = StorageDefinitionPatch{Value: v}
+		return nil
+	case "":
+		return fmt.Errorf("unmarshaling StorageDefinitionPatch: missing type discriminator")
+	default:
+		// Adding a variant to a oneOf is meant to be a backward-compatible change,
+		// so an unrecognized one is preserved verbatim instead of failing the decode
+		// of the whole payload it happens to appear in.
+		*u = StorageDefinitionPatch{
+			unknownDiscriminator: disc.Type,
+			raw:                  string(data),
+		}
+		return nil
+	}
+}
+
 type UploadAppIconBody struct {
 	// Image file (PNG/JPEG/GIF/WEBP, max 5MB by default).
 	File FormFile `json:"file"`
@@ -17413,4 +18353,14 @@ type ClusterDefinitionPatchBase struct {
 	DesktopSession *DesktopSessionSettings `json:"desktopSession,omitempty"`
 	// Directory the file explorer opens by default (supports __HOME__ and __USER__). Empty opens the home directory.
 	ExplorerPath *string `json:"explorerPath,omitempty"`
+}
+
+// StorageCredentialsBase - The properties every variant of StorageCredentials declares.
+// Derived from the variants rather than declared by the spec, so it
+// changes when they do.
+type StorageCredentialsBase struct {
+	// Name of the S3 bucket on AWS.
+	BucketName string `json:"bucketName"`
+	// Whether these credentials allow writing objects; false for read-only access.
+	CanWrite bool `json:"canWrite"`
 }

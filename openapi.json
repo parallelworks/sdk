@@ -2921,6 +2921,17 @@
               "null"
             ]
           },
+          "ancestors": {
+            "description": "Names of the allocations above this one, the top-level one first. Only set when reading a single allocation.",
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "canEditTotal": {
             "description": "Whether the current user can edit the allocation amount",
             "readOnly": true,
@@ -2931,6 +2942,10 @@
             "format": "int64",
             "readOnly": true,
             "type": "integer"
+          },
+          "enforceThresholds": {
+            "description": "Whether crossing an organization threshold freezes or shuts down resources charged to this allocation or the allocations under it. When false, its thresholds only notify, and its budget running out stops only work charged to it directly, not the allocations under it. Defaults to true.",
+            "type": "boolean"
           },
           "estimatedUsed": {
             "description": "Estimated amount used",
@@ -3023,13 +3038,14 @@
             "type": "string"
           },
           "unusableReason": {
-            "description": "Why new resources cannot bill this allocation: no budget set, a freeze/shutdown threshold crossed, a not chargeable allocation, no period covers today, or its budget or an ancestor's is used up",
+            "description": "Why new resources cannot bill this allocation: no budget set, a freeze/shutdown threshold crossed, a not chargeable allocation, no period covers today, its budget or an enforcing ancestor's is used up, or, in a listing of your own allocations, it is shared with you to read but not to bill",
             "enum": [
               "no-budget",
               "over-threshold",
               "non-chargeable",
               "no-active-period",
-              "budget-spent"
+              "budget-spent",
+              "no-access"
             ],
             "readOnly": true,
             "type": "string"
@@ -4494,9 +4510,17 @@
           "sessionToken": {
             "description": "Temporary AWS session token scoped to this bucket.",
             "type": "string"
+          },
+          "type": {
+            "description": "Type of the storage the credentials are for.",
+            "enum": [
+              "aws-bucket"
+            ],
+            "type": "string"
           }
         },
         "required": [
+          "type",
           "accessKeyId",
           "secretAccessKey",
           "sessionToken",
@@ -4615,6 +4639,63 @@
         ],
         "type": "object"
       },
+      "AwsEfsDefinitionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "fileSystemId": {
+            "description": "EFS filesystem id at AWS.",
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mountTargets": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Mount targets by subnet.",
+            "readOnly": true,
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "provisionedThroughputMibps": {
+            "description": "Provisioned throughput in MiB/s, when the throughput mode is provisioned.",
+            "format": "int64",
+            "maximum": 2048,
+            "minimum": 5,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "throughputMode": {
+            "description": "Throughput mode of the filesystem.",
+            "enum": [
+              "elastic",
+              "bursting",
+              "provisioned"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "aws-efs"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "AwsEfsVersionSettings": {
         "additionalProperties": false,
         "properties": {
@@ -4681,6 +4762,72 @@
             "description": "Provisioned capacity in GB.",
             "format": "int32",
             "type": "integer"
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "aws-lustre"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "AwsLustreDefinitionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "availabilityZone": {
+            "description": "Availability zone the filesystem is in.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "exportPath": {
+            "description": "S3 path the filesystem exports to.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fsxCompression": {
+            "description": "Data compression algorithm, e.g. LZ4.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fsxDeploymentType": {
+            "description": "FSx deployment type, e.g. PERSISTENT_2.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fsxThroughput": {
+            "description": "Per-unit throughput in MBps/TiB.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "importPath": {
+            "description": "S3 path the filesystem imports from.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "storageCapacityGb": {
+            "description": "Provisioned capacity in GB.",
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "type": {
             "description": "Type discriminator.",
@@ -5383,6 +5530,53 @@
         ],
         "type": "object"
       },
+      "AzureAzfilesDefinitionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "azfilesName": {
+            "description": "Name of the file share at Azure, which can differ from the platform name.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "azureResourceGroup": {
+            "description": "Azure resource group the storage account belongs to.",
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sizeGb": {
+            "description": "Share quota in GB.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "storageAccountName": {
+            "description": "Azure storage account hosting the share.",
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "azure-azfiles"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "AzureAzfilesVersionSettings": {
         "additionalProperties": false,
         "properties": {
@@ -5457,9 +5651,17 @@
           "tenantId": {
             "description": "Azure tenant ID of the service principal.",
             "type": "string"
+          },
+          "type": {
+            "description": "Type of the storage the credentials are for.",
+            "enum": [
+              "azure-bucket"
+            ],
+            "type": "string"
           }
         },
         "required": [
+          "type",
           "clientId",
           "clientSecret",
           "tenantId",
@@ -5771,6 +5973,58 @@
         ],
         "type": "object"
       },
+      "AzureManagedLustreDefinitionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "maintenanceWindowDay": {
+            "description": "Day of the week for the maintenance window.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "maintenanceWindowTime": {
+            "description": "Time of day for the maintenance window, UTC.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sku": {
+            "description": "AMLFS SKU, e.g. AMLFS-Durable-Premium-125.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "storageSizeTb": {
+            "description": "Provisioned capacity in TB.",
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "azure-managedlustre"
+            ],
+            "type": "string"
+          },
+          "zone": {
+            "description": "Zone the filesystem is in.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "AzureManagedLustreVersionSettings": {
         "additionalProperties": false,
         "properties": {
@@ -5860,6 +6114,60 @@
         ],
         "type": "object"
       },
+      "AzureNetappFilesDefinitionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "exportPath": {
+            "description": "Export path of the volume.",
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mountIp": {
+            "description": "IP address clients mount the volume from.",
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "service": {
+            "description": "Service level of the volume.",
+            "enum": [
+              "Standard",
+              "Premium",
+              "Ultra"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sizeTib": {
+            "description": "Volume size in TiB.",
+            "format": "int64",
+            "maximum": 2000,
+            "minimum": 2,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "azure-netappfiles"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "AzureNetappFilesVersionSettings": {
         "additionalProperties": false,
         "properties": {
@@ -5905,14 +6213,22 @@
             "type": "string"
           },
           "storageName": {
-            "description": "The name of the blob container on Azure.",
+            "description": "The name of the blob container or file share on Azure.",
             "examples": [
               "sample-container"
             ],
             "type": "string"
           },
+          "type": {
+            "description": "Type of the storage the SAS token is for.",
+            "enum": [
+              "azure-bucket",
+              "azure-azfiles"
+            ],
+            "type": "string"
+          },
           "url": {
-            "description": "The URL of the storage bucket with the SAS token appended in the query parameters.",
+            "description": "The URL of the blob container or file share with the SAS token appended in the query parameters.",
             "examples": [
               "https://storagesample.blob.core.windows.net/sample-container/sampleBlob.pdf?sv=2019-12-12\u0026st=2021-01-26T18%3A30%3A20Z\u0026se=2021-02-05T18%3A30%3A00Z\u0026sr=c\u0026sp=rl\u0026sig=d7PZKyQsIeE6xb%2B1M4Yb56I%2FEEKoNIF65D%2Fs0IFsYcE%3D"
             ],
@@ -5920,6 +6236,7 @@
           }
         },
         "required": [
+          "type",
           "url",
           "storageName",
           "expiry"
@@ -7388,7 +7705,7 @@
             "type": "string"
           },
           "cloudAccount": {
-            "description": "Name of the cloud account the bucket is created in. Required to create a bucket.",
+            "description": "Name of the cloud account the bucket is created in. Required to create a bucket; an update keeps the one it was created with.",
             "type": "string"
           },
           "dualRegions": {
@@ -7415,6 +7732,86 @@
               "ASIA"
             ],
             "type": "string"
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "aws-bucket",
+              "azure-bucket",
+              "google-bucket",
+              "oracle-bucket"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "BucketDefinitionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "azureResourceGroup": {
+            "description": "Azure resource group the storage account belongs to.",
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "azureStorageAccount": {
+            "description": "Azure storage account hosting the container.",
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bucketName": {
+            "description": "Name of the bucket at the cloud provider, which can differ from the platform name.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cloudAccount": {
+            "description": "Name of the cloud account the bucket is created in. Required to create a bucket; an update keeps the one it was created with.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "dualRegions": {
+            "description": "Two Google regions forming the dual-region the bucket is in, in place of a region. Google buckets only.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "enableVersioning": {
+            "description": "Whether object versioning is on. AWS buckets only, and required to create one.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "multiRegion": {
+            "description": "Google multi-region the bucket is in, in place of a region. Google buckets only.",
+            "enum": [
+              "US",
+              "EU",
+              "ASIA"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "type": {
             "description": "Type discriminator.",
@@ -10124,6 +10521,72 @@
         ],
         "type": "object"
       },
+      "ClusterEventJob": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "partition": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterEventNode": {
+        "additionalProperties": false,
+        "properties": {
+          "cspId": {
+            "type": "string"
+          },
+          "hostname": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterEventRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "job": {
+            "$ref": "#/components/schemas/ClusterEventJob"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "node": {
+            "$ref": "#/components/schemas/ClusterEventNode"
+          },
+          "text": {
+            "type": "string"
+          },
+          "update": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
       "ClusterGoogleSlurmPartition": {
         "additionalProperties": false,
         "properties": {
@@ -12557,6 +13020,189 @@
         ],
         "type": "object"
       },
+      "CreateFirewallBlockedIPInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "cidr": {
+            "description": "Address or range to block, such as 203.0.113.7 or 203.0.113.0/24",
+            "maxLength": 64,
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": "When the block lifts; absent blocks until deleted",
+            "format": "date-time",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "type": "string"
+          }
+        },
+        "required": [
+          "cidr"
+        ],
+        "type": "object"
+      },
+      "CreateFirewallExclusionInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "methods": {
+            "description": "HTTP methods it applies to; absent applies to every method",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 7,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "note": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "path": {
+            "description": "Route it applies to, such as /api/organizations/{organization}/users, where each {param} stands for one path segment and a trailing /* covers every path below; absent applies to every route",
+            "maxLength": 500,
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "CRS detection rule to remove; give it or tag",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tag": {
+            "description": "CRS tag whose rules to remove, such as attack-xss; needs a target",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "target": {
+            "description": "Request field to limit the removal to, such as ARGS:json.name",
+            "maxLength": 200,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CreateFirewallRuleInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "default": "deny",
+            "description": "deny blocks a matching request; log only reports it, to check a rule before it blocks",
+            "enum": [
+              "deny",
+              "log"
+            ],
+            "type": "string"
+          },
+          "argument": {
+            "description": "What the operator compares with; detectSQLi and detectXSS take none. It cannot contain a double quote; write \\x22 in a regular expression instead",
+            "maxLength": 4096,
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "message": {
+            "description": "What block logs and evaluations report when it matches",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "methods": {
+            "description": "HTTP methods it applies to; absent applies to every method",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 7,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "note": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "operator": {
+            "enum": [
+              "rx",
+              "pm",
+              "streq",
+              "beginsWith",
+              "endsWith",
+              "contains",
+              "within",
+              "ipMatch",
+              "eq",
+              "gt",
+              "ge",
+              "lt",
+              "le",
+              "detectSQLi",
+              "detectXSS"
+            ],
+            "type": "string"
+          },
+          "path": {
+            "description": "Route it applies to, such as /api/organizations/{organization}/users, where each {param} stands for one path segment and a trailing /* covers every path below; absent applies to every route",
+            "maxLength": 500,
+            "type": "string"
+          },
+          "phase": {
+            "default": 2,
+            "description": "1 inspects the request line and headers, and also runs on routes whose shipped exemption turns the rest of the firewall off; 2 also inspects the body",
+            "enum": [
+              1,
+              2
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "default": 403,
+            "format": "int64",
+            "maximum": 499,
+            "minimum": 400,
+            "type": "integer"
+          },
+          "transforms": {
+            "description": "Transformations to apply to each variable first, such as lowercase or urlDecodeUni",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "variables": {
+            "description": "Request fields to inspect, such as ARGS:json.name, REQUEST_HEADERS:User-Agent or REQUEST_FILENAME",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "variables",
+          "operator",
+          "message"
+        ],
+        "type": "object"
+      },
       "CreateGoogleSlurmClusterBody": {
         "additionalProperties": false,
         "properties": {
@@ -14619,7 +15265,7 @@
         "additionalProperties": false,
         "properties": {
           "actions": {
-            "description": "Actions the organization configured for this threshold",
+            "description": "Actions this threshold takes; only notify for an allocation that doesn't enforce thresholds",
             "examples": [
               [
                 "freeze"
@@ -15878,9 +16524,92 @@
             ],
             "type": "string"
           },
+          "volumeId": {
+            "description": "Id of the disk at the cloud provider.",
+            "readOnly": true,
+            "type": "string"
+          },
           "zone": {
             "description": "Zone the disk is in.",
             "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "DiskDefinitionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "diskType": {
+            "description": "Underlying disk type, e.g. gp3.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "encrypted": {
+            "description": "Whether the disk is encrypted. AWS only; a cloud account that enforces encryption encrypts it either way.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "iops": {
+            "description": "Provisioned IOPS. AWS io1 and io2 only.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "sizeGb": {
+            "description": "Provisioned capacity in GB.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "snapshot": {
+            "description": "Id of the snapshot the disk is restored from; empty when the disk starts blank.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "throughputMbps": {
+            "description": "Provisioned throughput in MB/s. AWS gp3 only.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "aws-disk",
+              "azure-disk",
+              "google-disk"
+            ],
+            "type": "string"
+          },
+          "volumeId": {
+            "description": "Id of the disk at the cloud provider.",
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "zone": {
+            "description": "Zone the disk is in.",
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -16429,6 +17158,51 @@
           "method",
           "requestId",
           "createdAt"
+        ],
+        "type": "object"
+      },
+      "EvaluateFirewallRequestInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "body": {
+            "description": "Request body; give a Content-Type header too, so it is parsed the way the server would parse it",
+            "maxLength": 1048576,
+            "type": "string"
+          },
+          "clientIp": {
+            "description": "Address the request comes from; defaults to 192.0.2.1, which nothing blocks",
+            "type": "string"
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Request headers; Host defaults to localhost",
+            "type": "object"
+          },
+          "method": {
+            "enum": [
+              "GET",
+              "HEAD",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE",
+              "OPTIONS"
+            ],
+            "type": "string"
+          },
+          "path": {
+            "description": "Path and query string, as the request line sends them, such as /api/users?sortBy=name",
+            "maxLength": 8192,
+            "minLength": 1,
+            "pattern": "^/",
+            "type": "string"
+          }
+        },
+        "required": [
+          "method",
+          "path"
         ],
         "type": "object"
       },
@@ -17706,6 +18480,365 @@
         ],
         "type": "object"
       },
+      "FirewallBlockedIP": {
+        "additionalProperties": false,
+        "properties": {
+          "cidr": {
+            "description": "Blocked address or range, in CIDR notation",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": "When the block lifts; absent blocks until deleted",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "cidr",
+          "note",
+          "createdAt",
+          "createdBy"
+        ],
+        "type": "object"
+      },
+      "FirewallEvaluation": {
+        "additionalProperties": false,
+        "properties": {
+          "appliedRevision": {
+            "description": "Policy revision the request ran against; absent when only the rules that ship with the platform ran",
+            "format": "int64",
+            "type": "integer"
+          },
+          "blocked": {
+            "type": "boolean"
+          },
+          "matches": {
+            "description": "Every rule the request matched, in the order they ran; the last one decides a block",
+            "items": {
+              "$ref": "#/components/schemas/FirewallEvaluationMatch"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "status": {
+            "description": "Status a blocked request gets",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "blocked",
+          "matches"
+        ],
+        "type": "object"
+      },
+      "FirewallEvaluationMatch": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ruleId",
+          "message"
+        ],
+        "type": "object"
+      },
+      "FirewallExclusion": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": "When it stops applying; absent applies until deleted",
+            "format": "date-time",
+            "type": "string"
+          },
+          "firewallRuleId": {
+            "description": "Rule id that block logs and evaluations report for this exclusion",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "methods": {
+            "description": "HTTP methods it applies to; empty applies to every method",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "note": {
+            "type": "string"
+          },
+          "path": {
+            "description": "Route it applies to, such as /api/organizations/{organization}/users; empty applies to every route",
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "CRS rule it removes",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tag": {
+            "description": "CRS tag whose rules it removes, for the target only",
+            "type": "string"
+          },
+          "target": {
+            "description": "Request field the removal is limited to, such as ARGS:json.name; absent removes the rule for the whole request",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "firewallRuleId",
+          "path",
+          "methods",
+          "note",
+          "createdAt",
+          "createdBy"
+        ],
+        "type": "object"
+      },
+      "FirewallRule": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "deny blocks a matching request; log only reports it",
+            "enum": [
+              "deny",
+              "log"
+            ],
+            "type": "string"
+          },
+          "argument": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": "When it stops applying; absent applies until deleted",
+            "format": "date-time",
+            "type": "string"
+          },
+          "firewallRuleId": {
+            "description": "Rule id that block logs and evaluations report for this rule",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "message": {
+            "description": "What block logs and evaluations report when it matches",
+            "type": "string"
+          },
+          "methods": {
+            "description": "HTTP methods it applies to; empty applies to every method",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "note": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "path": {
+            "description": "Route it applies to, such as /api/organizations/{organization}/users; empty applies to every route",
+            "type": "string"
+          },
+          "phase": {
+            "description": "1 inspects the request line and headers; 2 also inspects the body",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": "Status a denied request gets",
+            "format": "int64",
+            "type": "integer"
+          },
+          "transforms": {
+            "description": "Transformations applied to each variable before the operator, in order",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "variables": {
+            "description": "Request fields it inspects, such as ARGS:json.name or REQUEST_HEADERS:User-Agent",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "firewallRuleId",
+          "path",
+          "methods",
+          "phase",
+          "variables",
+          "operator",
+          "argument",
+          "transforms",
+          "action",
+          "status",
+          "message",
+          "note",
+          "createdAt",
+          "createdBy"
+        ],
+        "type": "object"
+      },
+      "FirewallServer": {
+        "additionalProperties": false,
+        "properties": {
+          "appliedRevision": {
+            "description": "Policy revision the server enforces; absent while it runs only the rules that ship with the platform",
+            "format": "int64",
+            "type": "integer"
+          },
+          "error": {
+            "description": "Why the server refused failedRevision",
+            "type": "string"
+          },
+          "failedRevision": {
+            "description": "Latest revision the server refused to apply; absent when it applied the latest one",
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Server name, the pod name in Kubernetes",
+            "type": "string"
+          },
+          "reportedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "reportedAt"
+        ],
+        "type": "object"
+      },
+      "FirewallSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "appliedRevision": {
+            "description": "Policy revision the API server answering has applied; absent while it runs only the rules that ship with the platform",
+            "format": "int64",
+            "type": "integer"
+          },
+          "enabled": {
+            "description": "Whether this deployment runs the firewall; settings and entries apply only where it does",
+            "type": "boolean"
+          },
+          "inboundAnomalyThreshold": {
+            "description": "CRS anomaly score at which a request is blocked; a critical match scores 5",
+            "format": "int64",
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "mode": {
+            "description": "on blocks; detection_only logs what would be blocked and blocks nothing, platform rules and blocked IPs included",
+            "enum": [
+              "on",
+              "detection_only"
+            ],
+            "type": "string"
+          },
+          "paranoiaLevel": {
+            "description": "CRS paranoia level: higher levels catch more attacks and block more legitimate requests",
+            "format": "int64",
+            "maximum": 4,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "revision": {
+            "description": "Policy revision; every change to the settings or an entry raises it",
+            "format": "int64",
+            "type": "integer"
+          },
+          "servers": {
+            "description": "API servers that reported the policy they enforce in the last minute",
+            "items": {
+              "$ref": "#/components/schemas/FirewallServer"
+            },
+            "type": "array"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "revision",
+          "mode",
+          "paranoiaLevel",
+          "inboundAnomalyThreshold",
+          "updatedAt",
+          "updatedBy",
+          "servers"
+        ],
+        "type": "object"
+      },
       "FiscalYear": {
         "additionalProperties": false,
         "properties": {
@@ -17991,6 +19124,42 @@
           "legacyCredential",
           "legacyCredentialsIssued",
           "versions"
+        ],
+        "type": "object"
+      },
+      "FleetUpgradeResult": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "description": "Why the agent was not updated, when there is more to say.",
+            "type": "string"
+          },
+          "id": {
+            "description": "Row id of the agent, as the agents list reports it.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Node hostname for a managed cluster node, otherwise the cluster's display name or name.",
+            "type": "string"
+          },
+          "result": {
+            "description": "Outcome for this agent.",
+            "enum": [
+              "dispatched",
+              "busy",
+              "up-to-date",
+              "unsupported",
+              "in-progress",
+              "not-connected",
+              "error"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "result"
         ],
         "type": "object"
       },
@@ -18676,6 +19845,38 @@
         ],
         "type": "object"
       },
+      "GetUserClusterPermissionsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "groups": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "boolean"
+              },
+              "type": "object"
+            },
+            "description": "Map of group names to permissions",
+            "type": "object"
+          },
+          "noRootAccess": {
+            "description": "Whether the cluster owner's organization enforces no-root-access, under which admin and sudo grants have no effect and new ones are refused",
+            "type": "boolean"
+          },
+          "organization": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "description": "Map of permission names to whether entire organization has that access",
+            "type": "object"
+          }
+        },
+        "required": [
+          "noRootAccess",
+          "organization",
+          "groups"
+        ],
+        "type": "object"
+      },
       "GetUserContainersResponse": {
         "additionalProperties": false,
         "properties": {
@@ -19247,9 +20448,17 @@
           "token": {
             "description": "OAuth2 access token scoped to this bucket.",
             "type": "string"
+          },
+          "type": {
+            "description": "Type of the storage the credentials are for.",
+            "enum": [
+              "google-bucket"
+            ],
+            "type": "string"
           }
         },
         "required": [
+          "type",
           "token",
           "bucketName",
           "canWrite",
@@ -19343,6 +20552,56 @@
         ],
         "type": "object"
       },
+      "GoogleFilestoreDefinitionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "fileserverIp": {
+            "description": "IP address of the file server.",
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "filestoreTier": {
+            "description": "Service tier of the instance.",
+            "enum": [
+              "BASIC_SSD",
+              "BASIC_HDD"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sizeTib": {
+            "description": "Instance capacity in TiB: 2.5 to 10 for BASIC_SSD, 1 to 10 for BASIC_HDD.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "google-filestore"
+            ],
+            "type": "string"
+          },
+          "zone": {
+            "description": "Zone the instance is in.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "GoogleFilestoreVersionSettings": {
         "additionalProperties": false,
         "properties": {
@@ -19401,6 +20660,51 @@
           "zone": {
             "description": "Zone the filesystem is in.",
             "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "GoogleManagedLustreDefinitionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "performanceMbpsPerTib": {
+            "description": "Throughput tier in MBps per TiB, which is what the price is keyed on.",
+            "enum": [
+              125,
+              250,
+              500,
+              1000
+            ],
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "sizeGb": {
+            "description": "Provisioned capacity in GB.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "google-managedlustre"
+            ],
+            "type": "string"
+          },
+          "zone": {
+            "description": "Zone the filesystem is in.",
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -20134,6 +21438,624 @@
         "required": [
           "name",
           "members"
+        ],
+        "type": "object"
+      },
+      "HavenBlocker": {
+        "additionalProperties": false,
+        "properties": {
+          "count": {
+            "description": "The items or services the reason covers.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "detail": {
+            "description": "The preflight check that failed, or the services, as service@host, whose Haven is not connected.",
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "not-connected",
+              "not-haven-first",
+              "preflight",
+              "unverified-items",
+              "pending-repairs",
+              "unapplied-tombstones",
+              "no-sync",
+              "no-check",
+              "services-not-connected"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "HavenCheck": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "name": {
+            "description": "configured, fips, connected, transport, root-key, recovery-key or database-ca.",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "warn",
+              "fail"
+            ],
+            "type": "string"
+          },
+          "subject": {
+            "description": "What the check is about, such as a root key's ID or a CA file's path.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "status"
+        ],
+        "type": "object"
+      },
+      "HavenFailureGroup": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "enum": [
+              "haven",
+              "config",
+              "data",
+              "cloud",
+              "vault",
+              "mismatch",
+              "bypass"
+            ],
+            "type": "string"
+          },
+          "count24h": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "count7d": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "havenCode": {
+            "type": "string"
+          },
+          "lastAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastError": {
+            "description": "Haven's or Vault's error message, which never holds a secret value.",
+            "type": "string"
+          },
+          "operation": {
+            "type": "string"
+          },
+          "paths": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "requestIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "source": {
+            "enum": [
+              "import",
+              "runtime",
+              "check"
+            ],
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "triage": {
+            "enum": [
+              "new",
+              "known",
+              "fixed",
+              "wont_fix"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "havenCode",
+          "operation",
+          "type",
+          "source",
+          "triage",
+          "count24h",
+          "count7d",
+          "total",
+          "lastAt",
+          "requestIds",
+          "paths"
+        ],
+        "type": "object"
+      },
+      "HavenImportedItem": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "What the run did with the secret, such as written, updated, verified, in-sync, repaired, deleted, conflict, would-write, differs or failed.",
+            "type": "string"
+          },
+          "code": {
+            "description": "Haven's error code, when Haven refused.",
+            "type": "string"
+          },
+          "havenPath": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "vaultPath": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "vaultPath",
+          "havenPath",
+          "type",
+          "action"
+        ],
+        "type": "object"
+      },
+      "HavenItem": {
+        "additionalProperties": false,
+        "properties": {
+          "attempts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "havenPath": {
+            "type": "string"
+          },
+          "lastCode": {
+            "type": "string"
+          },
+          "lastRunId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "repairAt": {
+            "description": "When a failure left the stores apart; cleared by the sync that brings them together.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "written",
+              "verified",
+              "failed",
+              "skipped"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "vaultPath": {
+            "type": "string"
+          },
+          "verifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "vaultPath",
+          "havenPath",
+          "type",
+          "state",
+          "attempts",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "HavenItemsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/HavenItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "type": "object"
+      },
+      "HavenReadiness": {
+        "additionalProperties": false,
+        "properties": {
+          "cleanSince": {
+            "description": "When the current stretch without a fallback began.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "drift": {
+            "description": "Times the stores disagreed in the window.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "fallbacks": {
+            "description": "Haven failures Vault covered in the window.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemsTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemsVerified": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastCheck": {
+            "description": "The latest sync or verify that finished.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastCheckAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastDrift": {
+            "description": "Secrets the latest sync or verify found differing.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastFallbackAt": {
+            "description": "The last Haven failure Vault covered.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "measuringSince": {
+            "description": "When the first sync succeeded, where measuring starts.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "pendingRepairs": {
+            "description": "Items a failure left apart, waiting for the repair pass.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "ready": {
+            "type": "boolean"
+          },
+          "tombstones": {
+            "description": "Deleted items a store may still hold, waiting for a sync.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "vaultBypasses": {
+            "description": "Writes a sync found reached Vault around the router in the window; Vault's audit log is not read yet.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowDays": {
+            "description": "How many days without a fallback or drift make haven-only ready.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "windowDays",
+          "ready",
+          "fallbacks",
+          "drift",
+          "lastDrift",
+          "pendingRepairs",
+          "tombstones",
+          "itemsVerified",
+          "itemsTotal",
+          "vaultBypasses"
+        ],
+        "type": "object"
+      },
+      "HavenRunResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "automatic": {
+            "description": "Started by a pass of the automatic migration; startedBy is who started the pass.",
+            "type": "boolean"
+          },
+          "counts": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "description": "Items by action, and total.",
+            "type": "object"
+          },
+          "error": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "description": "Each secret's outcome, in a single run's response only.",
+            "items": {
+              "$ref": "#/components/schemas/HavenImportedItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "kind": {
+            "enum": [
+              "dry-run",
+              "sync",
+              "verify",
+              "repair"
+            ],
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "running",
+              "succeeded",
+              "failed",
+              "interrupted"
+            ],
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startedBy": {
+            "type": "string"
+          },
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "unrouted": {
+            "description": "Vault mounts under platform/ that no routed secret uses.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "outcome",
+          "startedAt",
+          "startedBy",
+          "counts"
+        ],
+        "type": "object"
+      },
+      "HavenSequence": {
+        "additionalProperties": false,
+        "properties": {
+          "check": {
+            "description": "The preflight check that failed, and what it is about, such as a root key.",
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why the sequence failed: the preflight, the step's run failing, the run leaving items needing attention, or an error starting the step.",
+            "enum": [
+              "preflight",
+              "run-failed",
+              "needs-attention",
+              "error"
+            ],
+            "type": "string"
+          },
+          "runId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "skipped": {
+            "description": "Steps that changed nothing because they were done already, such as the stage when Haven already routed secrets.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startedBy": {
+            "description": "Who started the pass.",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "idle",
+              "running",
+              "failed",
+              "done",
+              "stopped"
+            ],
+            "type": "string"
+          },
+          "step": {
+            "enum": [
+              "preflight",
+              "stage",
+              "dry-run",
+              "sync",
+              "verify",
+              "done"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "step",
+          "state"
+        ],
+        "type": "object"
+      },
+      "HavenStatusResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "blockers": {
+            "description": "What keeps the platform from haven-only; empty when it may switch.",
+            "items": {
+              "$ref": "#/components/schemas/HavenBlocker"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "configured": {
+            "description": "Whether HAVEN_ROOT_KEYS is set and valid, connected yet or not.",
+            "type": "boolean"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "havenFailures": {
+            "description": "Haven failures in the last 24 hours, which alert the platform admins.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "description": "Tracked secrets by state.",
+            "type": "object"
+          },
+          "lastSync": {
+            "$ref": "#/components/schemas/HavenRunResponse",
+            "description": "The latest sync, by anyone; the nightly sync skips a night one ran after 03:00 UTC."
+          },
+          "nextSyncAt": {
+            "description": "When the nightly sync runs next, while it is on and the stage is haven-first or haven-only.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "nightlySync": {
+            "description": "The nightly sync setting.",
+            "type": "boolean"
+          },
+          "preflight": {
+            "items": {
+              "$ref": "#/components/schemas/HavenCheck"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "preflightPassed": {
+            "type": "boolean"
+          },
+          "readiness": {
+            "$ref": "#/components/schemas/HavenReadiness"
+          },
+          "runInProgress": {
+            "type": "boolean"
+          },
+          "sequence": {
+            "$ref": "#/components/schemas/HavenSequence"
+          },
+          "stage": {
+            "enum": [
+              "off",
+              "haven-first",
+              "haven-only"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "configured",
+          "connected",
+          "stage",
+          "nightlySync",
+          "preflightPassed",
+          "preflight",
+          "blockers",
+          "items",
+          "runInProgress",
+          "havenFailures"
         ],
         "type": "object"
       },
@@ -20909,7 +22831,8 @@
               "plan_view",
               "goal_view",
               "goal_progress",
-              "turn_end"
+              "turn_end",
+              "recap"
             ],
             "type": "string"
           },
@@ -21567,6 +23490,39 @@
           "ipAddress",
           "network",
           "instanceType"
+        ],
+        "type": "object"
+      },
+      "InstanceCostEstimate": {
+        "additionalProperties": false,
+        "properties": {
+          "currency": {
+            "description": "Currency of every amount.",
+            "enum": [
+              "USD"
+            ],
+            "type": "string"
+          },
+          "diskHourly": {
+            "description": "The part of hourly that is the root disk.",
+            "format": "double",
+            "type": "number"
+          },
+          "hourly": {
+            "description": "Cost per hour while the instance runs: the machine and its root disk.",
+            "format": "double",
+            "type": "number"
+          },
+          "region": {
+            "description": "Region the prices are for.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "currency",
+          "region",
+          "hourly",
+          "diskHourly"
         ],
         "type": "object"
       },
@@ -26279,6 +28235,7 @@
             "type": "boolean"
           },
           "appliedAt": {
+            "format": "date-time",
             "type": "string"
           },
           "appliedBy": {
@@ -27234,6 +29191,16 @@
           "costEstimate": {
             "$ref": "#/components/schemas/ClusterCostEstimate",
             "description": "What the cluster would cost per hour; absent for clusters that can't be priced."
+          }
+        },
+        "type": "object"
+      },
+      "NewInstanceCheck": {
+        "additionalProperties": false,
+        "properties": {
+          "costEstimate": {
+            "$ref": "#/components/schemas/InstanceCostEstimate",
+            "description": "What the instance would cost per hour; absent when its instance type or region can't be priced."
           }
         },
         "type": "object"
@@ -29253,6 +31220,13 @@
             ],
             "type": "string"
           },
+          "type": {
+            "description": "Type of the storage the credentials are for.",
+            "enum": [
+              "oracle-bucket"
+            ],
+            "type": "string"
+          },
           "url": {
             "description": "The Pre-Authenticated Request URL granting HTTP access to the bucket. Read/write for users with write access, read-only otherwise.",
             "examples": [
@@ -29262,6 +31236,7 @@
           }
         },
         "required": [
+          "type",
           "url",
           "bucketName",
           "namespace",
@@ -29306,6 +31281,45 @@
             "description": "IP address of the mount target.",
             "readOnly": true,
             "type": "string"
+          },
+          "type": {
+            "description": "Type discriminator.",
+            "enum": [
+              "oracle-oraclefs"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "OracleFsDefinitionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "availabilityDomain": {
+            "description": "Availability domain the file system is in.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "exportPath": {
+            "description": "Export path of the file system.",
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mountTargetIp": {
+            "description": "IP address of the mount target.",
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "type": {
             "description": "Type discriminator.",
@@ -31096,6 +33110,10 @@
             },
             "type": "array"
           },
+          "enforceThresholds": {
+            "description": "Whether crossing an organization threshold freezes or shuts down resources charged to this allocation or the allocations under it, and whether its budget running out stops the allocations under it. Only organization admins can change it.",
+            "type": "boolean"
+          },
           "nonChargeable": {
             "description": "Make the allocation not chargeable, so it only holds budget for the allocations under it",
             "type": "boolean"
@@ -32261,6 +34279,19 @@
             "format": "int64",
             "type": "integer"
           },
+          "havenNightlySync": {
+            "description": "Whether every secret Haven routes is synced between Haven and Vault each night while the stage is haven-first or haven-only, so the stores converge; drift is recorded as a failure. On by default.",
+            "type": "boolean"
+          },
+          "havenStage": {
+            "description": "Where the services keep the secrets Haven routes: off (the default) keeps them in Vault alone; haven-first writes them to Haven and Vault, reads Haven for those verified there and Vault for the rest, and falls back to Vault on any Haven error; haven-only reads Haven alone and fails a write Haven fails, mirroring each write to Vault as a backup. Turning it off, or back to haven-first, takes effect at once.",
+            "enum": [
+              "off",
+              "haven-first",
+              "haven-only"
+            ],
+            "type": "string"
+          },
           "hostForwards": {
             "description": "TLS passthrough rules: connections whose SNI exactly matches a rule's host are piped, still encrypted, to its target.",
             "items": {
@@ -32397,7 +34428,9 @@
           "gcsHmacRotationSweepMinutes",
           "workspaceScaleDownMinAgeDays",
           "hostForwards",
-          "appInstallable"
+          "appInstallable",
+          "havenStage",
+          "havenNightlySync"
         ],
         "type": "object"
       },
@@ -41116,7 +43149,7 @@
         "additionalProperties": false,
         "properties": {
           "autoTerminate": {
-            "description": "Whether reaching the limit destroys the cluster instead of only alerting.",
+            "description": "Whether reaching the limit destroys the resource instead of only alerting.",
             "type": "boolean"
           },
           "enabled": {
@@ -42095,6 +44128,46 @@
         ],
         "type": "object"
       },
+      "StartRunInBody": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "description": "A sync makes each secret's other store match the authoritative one: Vault until the secret is verified, then Haven; a deleted secret is removed from both. A dry run writes nothing; a verify only compares; a repair syncs only the secrets a failure left apart.",
+            "enum": [
+              "dry-run",
+              "sync",
+              "verify",
+              "repair"
+            ],
+            "type": "string"
+          },
+          "types": {
+            "description": "Limit the run to these secret types; empty runs all.",
+            "items": {
+              "enum": [
+                "oidc",
+                "idp",
+                "client-secret-key",
+                "windows-credential-key",
+                "auth-method-credential-key",
+                "platform-key",
+                "github-app",
+                "slack",
+                "gitlab-server"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
       "StepSummary": {
         "additionalProperties": false,
         "properties": {
@@ -42116,6 +44189,98 @@
             "type": "boolean"
           }
         },
+        "type": "object"
+      },
+      "StorageClusterMount": {
+        "additionalProperties": false,
+        "properties": {
+          "mountPoint": {
+            "description": "Path the cluster mounts the storage at.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the cluster.",
+            "type": "string"
+          },
+          "on": {
+            "description": "Whether the cluster is provisioned.",
+            "type": "boolean"
+          },
+          "user": {
+            "description": "Username of the cluster's owner.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "user",
+          "on"
+        ],
+        "type": "object"
+      },
+      "StorageDefinitionCheck": {
+        "additionalProperties": false,
+        "properties": {
+          "definition": {
+            "description": "The definition the patch would save.",
+            "discriminator": {
+              "mapping": {
+                "aws-bucket": "#/components/schemas/BucketDefinition",
+                "aws-disk": "#/components/schemas/DiskDefinition",
+                "aws-efs": "#/components/schemas/AwsEfsDefinition",
+                "aws-lustre": "#/components/schemas/AwsLustreDefinition",
+                "azure-azfiles": "#/components/schemas/AzureAzfilesDefinition",
+                "azure-bucket": "#/components/schemas/BucketDefinition",
+                "azure-disk": "#/components/schemas/DiskDefinition",
+                "azure-managedlustre": "#/components/schemas/AzureManagedLustreDefinition",
+                "azure-netappfiles": "#/components/schemas/AzureNetappFilesDefinition",
+                "google-bucket": "#/components/schemas/BucketDefinition",
+                "google-disk": "#/components/schemas/DiskDefinition",
+                "google-filestore": "#/components/schemas/GoogleFilestoreDefinition",
+                "google-managedlustre": "#/components/schemas/GoogleManagedLustreDefinition",
+                "oracle-bucket": "#/components/schemas/BucketDefinition",
+                "oracle-oraclefs": "#/components/schemas/OracleFsDefinition"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AwsLustreDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/AzureManagedLustreDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/GoogleManagedLustreDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/BucketDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/DiskDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/AwsEfsDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/AzureAzfilesDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/AzureNetappFilesDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/GoogleFilestoreDefinition"
+              },
+              {
+                "$ref": "#/components/schemas/OracleFsDefinition"
+              }
+            ],
+            "title": "StorageDefinition"
+          }
+        },
+        "required": [
+          "definition"
+        ],
         "type": "object"
       },
       "StorageDeployment": {
@@ -42165,6 +44330,16 @@
           "attached": {
             "description": "Whether the storage is currently attached to a cluster.",
             "type": "boolean"
+          },
+          "attachedTo": {
+            "description": "Clusters the storage is attached to, with where each mounts it.",
+            "items": {
+              "$ref": "#/components/schemas/StorageClusterMount"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "bucketAccountName": {
             "description": "Azure storage account that holds the bucket. Only Azure buckets have one.",
@@ -42288,6 +44463,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "location": {
+            "description": "Google multi-region (US) or dual-region (us-east1, us-west1) the bucket is in, in place of a region. Google buckets only.",
+            "type": "string"
+          },
           "name": {
             "description": "Platform name of the storage.",
             "type": "string"
@@ -42317,6 +44496,14 @@
             "description": "Username of the owner of the resource group the storage bills against.",
             "readOnly": true,
             "type": "string"
+          },
+          "runTimeAlert": {
+            "$ref": "#/components/schemas/RunTimeAlert",
+            "description": "Notifies the owner at a fixed interval while the storage is on."
+          },
+          "sessionCostLimit": {
+            "$ref": "#/components/schemas/SessionCostLimit",
+            "description": "Notifies the owner, and optionally destroys the storage, when a session's cost reaches a threshold."
           },
           "sessionless": {
             "description": "Whether the storage is sessionless.",
@@ -42381,6 +44568,9 @@
         },
         "required": [
           "definition",
+          "runTimeAlert",
+          "sessionCostLimit",
+          "attachedTo",
           "id",
           "name",
           "displayName",
@@ -42471,6 +44661,10 @@
             "description": "The number of the storage's most recent deployment. Absent when the storage has never been deployed.",
             "format": "int64",
             "type": "integer"
+          },
+          "location": {
+            "description": "Google multi-region (US) or dual-region (us-east1, us-west1) the bucket is in, in place of a region. Google buckets only.",
+            "type": "string"
           },
           "name": {
             "description": "Platform name of the storage.",
@@ -43420,6 +45614,77 @@
         ],
         "type": "object"
       },
+      "TriageInBody": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "enum": [
+              "haven",
+              "config",
+              "data",
+              "cloud",
+              "vault",
+              "mismatch",
+              "bypass"
+            ],
+            "type": "string"
+          },
+          "fixedIn": {
+            "description": "The Haven or core release that fixed it.",
+            "maxLength": 64,
+            "type": "string"
+          },
+          "havenCode": {
+            "type": "string"
+          },
+          "issue": {
+            "description": "A link to the issue that tracks the fix.",
+            "maxLength": 512,
+            "type": "string"
+          },
+          "notes": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "operation": {
+            "type": "string"
+          },
+          "triage": {
+            "enum": [
+              "new",
+              "known",
+              "fixed",
+              "wont_fix"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "havenCode",
+          "operation",
+          "type",
+          "triage"
+        ],
+        "type": "object"
+      },
+      "TriageResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "updated": {
+            "description": "How many failure rows changed.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "updated"
+        ],
+        "type": "object"
+      },
       "TunnelShared": {
         "additionalProperties": false,
         "properties": {
@@ -43770,6 +46035,19 @@
             "minimum": 1,
             "type": "integer"
           },
+          "havenNightlySync": {
+            "description": "Whether every secret Haven routes is synced between both stores each night while Haven routes them.",
+            "type": "boolean"
+          },
+          "havenStage": {
+            "description": "Where the services keep the secrets Haven routes: off keeps them in Vault alone; haven-first writes them to Haven and Vault and reads Haven for those verified there; haven-only reads Haven alone. haven-first needs Haven's preflight to pass; haven-only also needs the stage haven-first, a sync that succeeded, every item verified or decided, no repair or tombstone waiting, and a sync or verify since the stage changed that found the stores equal. Off, or haven-first from haven-only, always applies at once.",
+            "enum": [
+              "off",
+              "haven-first",
+              "haven-only"
+            ],
+            "type": "string"
+          },
           "hostForwards": {
             "description": "TLS passthrough rules, replacing the current list. Empty list removes all rules.",
             "items": {
@@ -44050,6 +46328,54 @@
         "required": [
           "provisionStatus"
         ],
+        "type": "object"
+      },
+      "UpdateFirewallRuleInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "deny",
+              "log"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "status": {
+            "format": "int64",
+            "maximum": 499,
+            "minimum": 400,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateFirewallSettingsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "inboundAnomalyThreshold": {
+            "format": "int64",
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "mode": {
+            "enum": [
+              "on",
+              "detection_only"
+            ],
+            "type": "string"
+          },
+          "paranoiaLevel": {
+            "format": "int64",
+            "maximum": 4,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
         "type": "object"
       },
       "UpdateGPUOperatorBody": {
@@ -44790,20 +47116,53 @@
         ],
         "type": "object"
       },
-      "UpdateStorageBillingInputBody": {
+      "UpdateStorageBody": {
         "additionalProperties": false,
         "properties": {
-          "resourceGroup": {
-            "description": "Name of the resource group the storage bills against.",
-            "examples": [
-              "my-resource-group"
-            ],
+          "description": {
+            "description": "Description.",
             "type": "string"
+          },
+          "displayName": {
+            "description": "Display name.",
+            "type": "string"
+          },
+          "group": {
+            "description": "Name of the group the storage's usage is attributed to: one the caller belongs to. Only the owner can change it to another group.",
+            "type": "string"
+          },
+          "name": {
+            "description": "New storage name. Only the owner can rename a storage, and only while it is off.",
+            "type": "string"
+          },
+          "network": {
+            "description": "Name of the network the storage provisions into. Only the owner can change it, and only while the storage is off. Ephemeral storage uses its cluster's network.",
+            "type": "string"
+          },
+          "region": {
+            "description": "Region the storage provisions in. The storage must be off. Ephemeral storage uses its cluster's region.",
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Name of the resource group the storage bills against. Only the owner can change it. Takes precedence over group.",
+            "type": "string"
+          },
+          "runTimeAlert": {
+            "$ref": "#/components/schemas/RunTimeAlert",
+            "description": "Notifies the owner at a fixed interval while the storage is on."
+          },
+          "sessionCostLimit": {
+            "$ref": "#/components/schemas/SessionCostLimit",
+            "description": "Notifies the owner, and optionally destroys the storage, when a session's cost reaches a threshold. Not for disks."
+          },
+          "tags": {
+            "description": "Tags; replaces the full list.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           }
         },
-        "required": [
-          "resourceGroup"
-        ],
         "type": "object"
       },
       "UpdateUserPreferencesInputBody": {
@@ -45015,6 +47374,30 @@
           "dispatched",
           "targetVersion",
           "agentVersion"
+        ],
+        "type": "object"
+      },
+      "UpgradeFleetAgentsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "results": {
+            "description": "One outcome per reporting agent that was behind the platform version.",
+            "items": {
+              "$ref": "#/components/schemas/FleetUpgradeResult"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "targetVersion": {
+            "description": "Version the agents were told to update to.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetVersion",
+          "results"
         ],
         "type": "object"
       },
@@ -47833,6 +50216,94 @@
         "x-internal": true
       }
     },
+    "/api/admin/agents/upgrade": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nTells every reporting agent older than the platform version to update itself, except endpoint sessions and agents already updating. Agents on busy clusters are skipped. Returns one outcome per agent: dispatched, busy, up-to-date, unsupported, in-progress, not-connected, or error.",
+        "operationId": "upgrade-fleet-agents",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpgradeFleetAgentsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update outdated agents",
+        "tags": [
+          "Agent"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/agents/{clusterId}/upgrade": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nTells one cluster's agent, or one managed cluster node's agent when hostname is set, to update itself to the platform version. Returns 202 on dispatch. Fails with 409 when the cluster is busy, the agent is already up to date or updating, or the agent is too old to support platform-triggered updates.",
+        "operationId": "upgrade-fleet-agent",
+        "parameters": [
+          {
+            "description": "Id of the cluster the agent belongs to.",
+            "in": "path",
+            "name": "clusterId",
+            "required": true,
+            "schema": {
+              "description": "Id of the cluster the agent belongs to.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Node hostname, for a managed cluster node's agent.",
+            "explode": false,
+            "in": "query",
+            "name": "hostname",
+            "schema": {
+              "description": "Node hostname, for a managed cluster node's agent.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpgradeAgentResponseBody"
+                }
+              }
+            },
+            "description": "Accepted"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update an agent",
+        "tags": [
+          "Agent"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/admin/alerts": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns a list of all platform alerts",
@@ -49694,6 +52165,463 @@
         ]
       }
     },
+    "/api/admin/haven/migration/failures": {
+      "get": {
+        "description": "Returns the failures grouped by category, Haven code, operation and type, with counts and samples. Platform admins only.",
+        "operationId": "list-haven-migration-failures",
+        "parameters": [
+          {
+            "description": "haven, config, data, cloud, vault, mismatch or bypass; empty for all.",
+            "explode": false,
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "description": "haven, config, data, cloud, vault, mismatch or bypass; empty for all.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "new, known, fixed or wont_fix; empty for all.",
+            "explode": false,
+            "in": "query",
+            "name": "triage",
+            "schema": {
+              "description": "new, known, fixed or wont_fix; empty for all.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "import, runtime or check; empty for all.",
+            "explode": false,
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "description": "import, runtime or check; empty for all.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HavenFailureGroup"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Haven migration failures by group",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      },
+      "patch": {
+        "description": "Sets the triage state of every failure in a group. Platform admins only.",
+        "operationId": "triage-haven-migration-failures",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriageInBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TriageResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Triage a group of Haven migration failures",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/migration/items": {
+      "get": {
+        "description": "Returns the secrets the sync tracks, by state, with any repair waiting. Platform admins only.",
+        "operationId": "list-haven-migration-items",
+        "parameters": [
+          {
+            "description": "pending, written, verified, failed or skipped; empty for all.",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "pending, written, verified, failed or skipped; empty for all.",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100,
+              "format": "int64",
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenItemsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the secrets the sync tracks",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/migration/runs": {
+      "get": {
+        "description": "Returns the latest sync runs first, with their outcome and counts. Platform admins only.",
+        "operationId": "list-haven-sync-runs",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HavenRunResponse"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Haven sync runs",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      },
+      "post": {
+        "description": "Starts a sync, repair, verify or dry run of the secrets Haven routes, one at a time across replicas. Platform admins only.",
+        "operationId": "start-haven-sync-run",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartRunInBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenRunResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Start a Haven sync run",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/migration/runs/{id}": {
+      "get": {
+        "description": "Returns one sync run with each secret's outcome. Platform admins only.",
+        "operationId": "get-haven-sync-run",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenRunResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a Haven sync run",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/migration/sequence/retry": {
+      "post": {
+        "description": "Resumes the automatic migration at the step that failed. Platform admins only.",
+        "operationId": "retry-haven-migration-sequence",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenSequence"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Resume the automatic Haven migration",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/migration/sequence/start": {
+      "post": {
+        "description": "Starts a fresh pass of the automatic migration at the preflight, unless one is running. Platform admins only.",
+        "operationId": "start-haven-migration-sequence",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenSequence"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Start the automatic Haven migration",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/migration/sequence/stop": {
+      "post": {
+        "description": "Stops the running pass after its current step. Platform admins only.",
+        "operationId": "stop-haven-migration-sequence",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenSequence"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Stop the automatic Haven migration",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/migration/status": {
+      "get": {
+        "description": "Returns Haven's preflight, the stage and what blocks haven-only, the readiness measured for it, and the automatic migration. Platform admins only.",
+        "operationId": "get-haven-migration-status",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenStatusResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Haven's migration status",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/admin/images/compliance": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nLists disabled or removed base images together with the root snapshots and resources that depend on them",
@@ -49954,7 +52882,7 @@
     },
     "/api/admin/maintenance/infrastructures/orphaned/cleanup": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nPermanently deletes infrastructures with non-existent user references",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nPermanently deletes infrastructures with non-existent user references, except those whose delete is still running",
         "operationId": "cleanup-orphaned-infrastructures",
         "responses": {
           "200": {
@@ -49986,7 +52914,7 @@
     },
     "/api/admin/maintenance/infrastructures/orphaned/preview": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns infrastructures with non-existent user references",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns infrastructures with non-existent user references, except those whose delete is still running",
         "operationId": "preview-orphaned-infrastructures-cleanup",
         "responses": {
           "200": {
@@ -52246,6 +55174,42 @@
           }
         },
         "summary": "Receive Agent Alive",
+        "tags": [
+          "Agent"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agent/cluster-events": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nRecords what a cloud cluster reports about itself, as its tunnel's CLUSTER-EVENT does, for its own session. The event's id makes a repeat over either path record nothing, and a node's configuration report older than one already taken records nothing.",
+        "operationId": "create-cluster-event",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClusterEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Report a cluster event",
         "tags": [
           "Agent"
         ],
@@ -54993,6 +57957,23 @@
                 "-name",
                 "total",
                 "-total"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Which allocations to list: mine (default), those shared with you, or all, every allocation in the organization. Widening requires administrator access.",
+            "explode": false,
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "description": "Which allocations to list: mine (default), those shared with you, or all, every allocation in the organization. Widening requires administrator access.",
+              "enum": [
+                "mine",
+                "all"
+              ],
+              "examples": [
+                "all"
               ],
               "type": "string"
             }
@@ -63672,7 +66653,7 @@
         ]
       },
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates a new organization. Only platform admins and partners can create organizations.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nCreates a new organization. Only platform admins and admins of partner organizations can create organizations.",
         "operationId": "create-organization",
         "requestBody": {
           "content": {
@@ -65910,6 +68891,16 @@
             }
           },
           {
+            "description": "Filter to allocations that budget against this allocation period",
+            "explode": false,
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "description": "Filter to allocations that budget against this allocation period",
+              "type": "string"
+            }
+          },
+          {
             "description": "Sort field and direction",
             "explode": false,
             "in": "query",
@@ -66681,6 +69672,15 @@
             "required": true,
             "schema": {
               "description": "Allocation name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "A key, unique per event, that makes retrying the request safe: a repeat with the same key and payload returns the event the first request created instead of charging again. 1 to 255 printable ASCII characters, optionally quoted as in the IETF Idempotency-Key header draft. Reusing a key with a different payload is refused.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "schema": {
+              "description": "A key, unique per event, that makes retrying the request safe: a repeat with the same key and payload returns the event the first request created instead of charging again. 1 to 255 printable ASCII characters, optionally quoted as in the IETF Idempotency-Key header draft. Reusing a key with a different payload is refused.",
               "type": "string"
             }
           }
@@ -79274,6 +82274,74 @@
         ]
       }
     },
+    "/api/organizations/{organization}/policies/browser-sign-in-lifetime": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets how many seconds a new browser sign-in lasts before members must sign in again, from 15 minutes to 365 days. Sign-ins already made keep their original expiration. Unavailable when the platform sets the policy.",
+        "operationId": "set-organization-browser-sign-in-lifetime-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Seconds a new browser sign-in lasts before the user must sign in again",
+                "examples": [
+                  43200
+                ],
+                "format": "int64",
+                "maximum": 31536000,
+                "minimum": 900,
+                "type": "integer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/IntPolicyOutput"
+                  },
+                  "description": "Map of int policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: browser-sign-in-lifetime",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/organizations/{organization}/policies/default-billing-username": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets default-billing-username policy for the organization: the username shown on dashboards and reports for cost records without a username tag.",
@@ -85649,7 +88717,8 @@
     },
     "/api/organizations/{organization}/users/{user}/aws-bucket/{name}/cors-rules": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds CORS rules to an AWS S3 bucket.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds CORS rules to an AWS S3 bucket. Deprecated: use add-storage-cors-rules. Removed after 2026-12-01.",
         "operationId": "add-cors-rules-aws-bucket",
         "parameters": [
           {
@@ -85718,7 +88787,8 @@
     },
     "/api/organizations/{organization}/users/{user}/aws-bucket/{name}/token": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns temporary STS credentials scoped to an AWS S3 bucket. The credentials are valid for 12 hours.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns temporary STS credentials scoped to an AWS S3 bucket. The credentials are valid for 12 hours. Deprecated: use get-storage-credentials. Removed after 2027-02-01.",
         "operationId": "get-token-aws-bucket",
         "parameters": [
           {
@@ -85800,7 +88870,8 @@
     },
     "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/cors-rules": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds CORS rules to the storage account hosting an Azure Files share so it can be accessed from the browser.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds CORS rules to the storage account hosting an Azure Files share so it can be accessed from the browser. Deprecated: use add-storage-cors-rules. Removed after 2026-12-01.",
         "operationId": "add-cors-rules-azure-azfiles",
         "parameters": [
           {
@@ -85869,7 +88940,8 @@
     },
     "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/presigned-url": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a pre-signed URL for a file inside an Azure Files share.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a pre-signed URL for a file inside an Azure Files share. Deprecated: use get-storage-presigned-url. Removed after 2026-12-01.",
         "operationId": "get-presigned-url-azure-azfiles-object",
         "parameters": [
           {
@@ -86008,7 +89080,8 @@
     },
     "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/sas-token": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a SAS token for an Azure Files share.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a SAS token for an Azure Files share. Deprecated: use get-storage-sas-token. Removed after 2026-12-01.",
         "operationId": "get-sas-token-azure-azfiles",
         "parameters": [
           {
@@ -86084,7 +89157,8 @@
     },
     "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/cors-rules": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds CORS rules to an Azure storage bucket.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds CORS rules to an Azure storage bucket. Deprecated: use add-storage-cors-rules. Removed after 2026-12-01.",
         "operationId": "add-cors-rules-azure-bucket",
         "parameters": [
           {
@@ -86153,7 +89227,8 @@
     },
     "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/presigned-url": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a pre-signed URL for an object inside an Azure bucket.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a pre-signed URL for an object inside an Azure bucket. Deprecated: use get-storage-presigned-url. Removed after 2026-12-01.",
         "operationId": "get-presigned-url-azure-bucket-object",
         "parameters": [
           {
@@ -86291,7 +89366,8 @@
     },
     "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/sas-token": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a SAS token for an Azure storage bucket.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a SAS token for an Azure storage bucket. Deprecated: use get-storage-sas-token. Removed after 2026-12-01.",
         "operationId": "get-sas-token-azure-bucket",
         "parameters": [
           {
@@ -86366,7 +89442,8 @@
     },
     "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/token": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns temporary service principal credentials scoped to an Azure storage bucket. The credentials are valid for 12 hours.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns temporary service principal credentials scoped to an Azure storage bucket. The credentials are valid for 12 hours. Deprecated: use get-storage-credentials. Removed after 2027-02-01.",
         "operationId": "get-token-azure-bucket",
         "parameters": [
           {
@@ -89309,7 +92386,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SubjectPermissions"
+                  "$ref": "#/components/schemas/GetUserClusterPermissionsOutputBody"
                 }
               }
             },
@@ -91963,7 +95040,8 @@
     },
     "/api/organizations/{organization}/users/{user}/google-bucket/{name}/cors-rules": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds CORS rules to a Google Cloud Storage bucket.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds CORS rules to a Google Cloud Storage bucket. Deprecated: use add-storage-cors-rules. Removed after 2026-12-01.",
         "operationId": "add-cors-rules-google-bucket",
         "parameters": [
           {
@@ -92032,7 +95110,8 @@
     },
     "/api/organizations/{organization}/users/{user}/google-bucket/{name}/presigned-url": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a pre-signed URL for an object inside a Google bucket.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a pre-signed URL for an object inside a Google bucket. Deprecated: use get-storage-presigned-url. Removed after 2026-12-01.",
         "operationId": "get-presigned-url-google-bucket-object",
         "parameters": [
           {
@@ -92155,7 +95234,8 @@
     },
     "/api/organizations/{organization}/users/{user}/google-bucket/{name}/token": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a temporary OAuth2 access token scoped to a Google Cloud Storage bucket.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a temporary OAuth2 access token scoped to a Google Cloud Storage bucket. Deprecated: use get-storage-credentials. Removed after 2027-02-01.",
         "operationId": "get-token-google-bucket",
         "parameters": [
           {
@@ -92364,6 +95444,76 @@
           }
         },
         "summary": "Create Instance",
+        "tags": [
+          "Instances"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/instances/validate": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nChecks an instance create-instance would make for the requesting user, without saving it. Returns what it would cost per hour, when its instance type and region are priced, or the same error create-instance would return.",
+        "operationId": "validate-new-instance",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Instance"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewInstanceCheck"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Validate New Instance",
         "tags": [
           "Instances"
         ]
@@ -92871,6 +96021,132 @@
         "tags": [
           "Instances",
           "Snapshots"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/instances/{instanceName}/start": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nStarts a stopped instance's virtual machine again, which restarts billing for it. Its public IP address can change. Starting one that is starting or running does nothing.",
+        "operationId": "start-instance",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the instance.",
+            "in": "path",
+            "name": "instanceName",
+            "required": true,
+            "schema": {
+              "description": "The name of the instance.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Start Instance",
+        "tags": [
+          "Instances"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/instances/{instanceName}/stop": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nStops a running instance's virtual machine on AWS, Google Cloud or Azure. The instance keeps its root disk, which is still billed, and can be started again. Stopping one that is stopping or stopped does nothing.",
+        "operationId": "stop-instance",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the instance.",
+            "in": "path",
+            "name": "instanceName",
+            "required": true,
+            "schema": {
+              "description": "The name of the instance.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Stop Instance",
+        "tags": [
+          "Instances"
         ]
       }
     },
@@ -94269,7 +97545,8 @@
     },
     "/api/organizations/{organization}/users/{user}/oracle-bucket/{name}/par": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a Pre-Authenticated Request (PAR) URL for an Oracle Object Storage bucket. The URL grants HTTP read/write access to the bucket for 12 hours.",
+        "deprecated": true,
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a Pre-Authenticated Request (PAR) URL for an Oracle Object Storage bucket. The URL grants HTTP read/write access to the bucket for 12 hours. Deprecated: use get-storage-credentials. Removed after 2027-02-01.",
         "operationId": "get-par-oracle-bucket",
         "parameters": [
           {
@@ -97386,6 +100663,93 @@
           "NFS"
         ]
       },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nChanges a storage's name, display name, description, tags, network, region, billing and alerts. Fields left out are kept. The name, network and region change only while the storage is off. Returns the storage as get-storage does.",
+        "operationId": "update-storage",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStorageBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageDetail"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update a storage",
+        "tags": [
+          "Storage",
+          "Disks",
+          "Lustre",
+          "NFS",
+          "Buckets"
+        ]
+      },
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSaves a storage definition for a disk, Lustre or NFS file system, to provision later with provision-storage. Storage is created only for the caller. Buckets and Google managed Lustre are created with their own routes.",
         "operationId": "create-storage",
@@ -97470,10 +100834,326 @@
         ]
       }
     },
-    "/api/organizations/{organization}/users/{user}/storage/{name}/billing": {
+    "/api/organizations/{organization}/users/{user}/storage/{name}/cors-rules": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nAdds CORS rules to an AWS, Azure or Google bucket, or to the storage account hosting an Azure Files share, so the browser can reach it.",
+        "operationId": "add-storage-cors-rules",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add CORS rules to storage",
+        "tags": [
+          "Storage",
+          "Buckets",
+          "NFS"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/storage/{name}/credentials": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns temporary credentials scoped to a bucket, shaped by its type: STS credentials for AWS, service principal credentials for Azure, an OAuth2 access token for Google and a Pre-Authenticated Request URL for Oracle. They are valid for up to 12 hours, and read-only for users with read-only access.",
+        "operationId": "get-storage-credentials",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Temporary credentials for a storage; the shape is selected by the type discriminator.",
+                  "discriminator": {
+                    "mapping": {
+                      "aws-bucket": "#/components/schemas/AwsBucketToken",
+                      "azure-bucket": "#/components/schemas/AzureBucketToken",
+                      "google-bucket": "#/components/schemas/GoogleBucketToken",
+                      "oracle-bucket": "#/components/schemas/OracleBucketPAR"
+                    },
+                    "propertyName": "type"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/AwsBucketToken"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AzureBucketToken"
+                    },
+                    {
+                      "$ref": "#/components/schemas/GoogleBucketToken"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OracleBucketPAR"
+                    }
+                  ],
+                  "title": "StorageCredentials"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get storage credentials",
+        "tags": [
+          "Storage",
+          "Buckets"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/storage/{name}/definition": {
       "patch": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReassigns which resource group the storage bills against.",
-        "operationId": "update-storage-billing",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nChanges part of a disk, Lustre or NFS storage's definition with a JSON merge patch (RFC 7396), sent as application/merge-patch+json or application/json. Fields the patch leaves out are kept. The storage must be off, and the patched definition is checked as a start checks it. Returns the storage as get-storage does.",
+        "operationId": "patch-storage-definition",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/merge-patch+json": {
+              "schema": {
+                "description": "A JSON merge patch (RFC 7396) against the storage's definition, in the shape get-storage returns. A field it sets replaces that field, null removes it, an array replaces the whole array, and fields it leaves out are kept. type must be the storage's own. Read-only fields are set by provisioning and ignored.",
+                "discriminator": {
+                  "mapping": {
+                    "aws-bucket": "#/components/schemas/BucketDefinitionPatch",
+                    "aws-disk": "#/components/schemas/DiskDefinitionPatch",
+                    "aws-efs": "#/components/schemas/AwsEfsDefinitionPatch",
+                    "aws-lustre": "#/components/schemas/AwsLustreDefinitionPatch",
+                    "azure-azfiles": "#/components/schemas/AzureAzfilesDefinitionPatch",
+                    "azure-bucket": "#/components/schemas/BucketDefinitionPatch",
+                    "azure-disk": "#/components/schemas/DiskDefinitionPatch",
+                    "azure-managedlustre": "#/components/schemas/AzureManagedLustreDefinitionPatch",
+                    "azure-netappfiles": "#/components/schemas/AzureNetappFilesDefinitionPatch",
+                    "google-bucket": "#/components/schemas/BucketDefinitionPatch",
+                    "google-disk": "#/components/schemas/DiskDefinitionPatch",
+                    "google-filestore": "#/components/schemas/GoogleFilestoreDefinitionPatch",
+                    "google-managedlustre": "#/components/schemas/GoogleManagedLustreDefinitionPatch",
+                    "oracle-bucket": "#/components/schemas/BucketDefinitionPatch",
+                    "oracle-oraclefs": "#/components/schemas/OracleFsDefinitionPatch"
+                  },
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AwsLustreDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureManagedLustreDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GoogleManagedLustreDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BucketDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DiskDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AwsEfsDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureAzfilesDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureNetappFilesDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GoogleFilestoreDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OracleFsDefinitionPatch"
+                  }
+                ],
+                "title": "StorageDefinitionPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageDetail"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Patch storage definition",
+        "tags": [
+          "Storage",
+          "Disks",
+          "Lustre",
+          "NFS"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReplaces a disk, Lustre or NFS storage's definition, in the shape get-storage returns it. Fields it leaves out are cleared; settings the definition does not model keep their values. The storage must be off, and the definition is checked as a start checks it. Returns the storage as get-storage does.",
+        "operationId": "update-storage-definition",
         "parameters": [
           {
             "description": "The name of the organization.",
@@ -97521,15 +101201,75 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateStorageBillingInputBody"
+                "description": "A storage's typed configuration; the shape is selected by the type discriminator. Absent for types that have not been migrated to this route yet.",
+                "discriminator": {
+                  "mapping": {
+                    "aws-bucket": "#/components/schemas/BucketDefinition",
+                    "aws-disk": "#/components/schemas/DiskDefinition",
+                    "aws-efs": "#/components/schemas/AwsEfsDefinition",
+                    "aws-lustre": "#/components/schemas/AwsLustreDefinition",
+                    "azure-azfiles": "#/components/schemas/AzureAzfilesDefinition",
+                    "azure-bucket": "#/components/schemas/BucketDefinition",
+                    "azure-disk": "#/components/schemas/DiskDefinition",
+                    "azure-managedlustre": "#/components/schemas/AzureManagedLustreDefinition",
+                    "azure-netappfiles": "#/components/schemas/AzureNetappFilesDefinition",
+                    "google-bucket": "#/components/schemas/BucketDefinition",
+                    "google-disk": "#/components/schemas/DiskDefinition",
+                    "google-filestore": "#/components/schemas/GoogleFilestoreDefinition",
+                    "google-managedlustre": "#/components/schemas/GoogleManagedLustreDefinition",
+                    "oracle-bucket": "#/components/schemas/BucketDefinition",
+                    "oracle-oraclefs": "#/components/schemas/OracleFsDefinition"
+                  },
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AwsLustreDefinition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureManagedLustreDefinition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GoogleManagedLustreDefinition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BucketDefinition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DiskDefinition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AwsEfsDefinition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureAzfilesDefinition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureNetappFilesDefinition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GoogleFilestoreDefinition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OracleFsDefinition"
+                  }
+                ],
+                "title": "StorageDefinition"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "204": {
-            "description": "No Content"
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageDetail"
+                }
+              }
+            },
+            "description": "OK"
           },
           "default": {
             "content": {
@@ -97542,13 +101282,153 @@
             "description": "Error"
           }
         },
-        "summary": "Update storage billing",
+        "summary": "Update storage definition",
         "tags": [
           "Storage",
           "Disks",
           "Lustre",
-          "NFS",
-          "Buckets"
+          "NFS"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/storage/{name}/definition/validate": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nChecks a JSON merge patch (RFC 7396) against a storage's definition without saving it. Returns the definition the patch would save, or the same error patch-storage-definition would return.",
+        "operationId": "validate-storage-definition",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "A JSON merge patch (RFC 7396) against the storage's definition, in the shape get-storage returns. A field it sets replaces that field, null removes it, an array replaces the whole array, and fields it leaves out are kept. type must be the storage's own. Read-only fields are set by provisioning and ignored.",
+                "discriminator": {
+                  "mapping": {
+                    "aws-bucket": "#/components/schemas/BucketDefinitionPatch",
+                    "aws-disk": "#/components/schemas/DiskDefinitionPatch",
+                    "aws-efs": "#/components/schemas/AwsEfsDefinitionPatch",
+                    "aws-lustre": "#/components/schemas/AwsLustreDefinitionPatch",
+                    "azure-azfiles": "#/components/schemas/AzureAzfilesDefinitionPatch",
+                    "azure-bucket": "#/components/schemas/BucketDefinitionPatch",
+                    "azure-disk": "#/components/schemas/DiskDefinitionPatch",
+                    "azure-managedlustre": "#/components/schemas/AzureManagedLustreDefinitionPatch",
+                    "azure-netappfiles": "#/components/schemas/AzureNetappFilesDefinitionPatch",
+                    "google-bucket": "#/components/schemas/BucketDefinitionPatch",
+                    "google-disk": "#/components/schemas/DiskDefinitionPatch",
+                    "google-filestore": "#/components/schemas/GoogleFilestoreDefinitionPatch",
+                    "google-managedlustre": "#/components/schemas/GoogleManagedLustreDefinitionPatch",
+                    "oracle-bucket": "#/components/schemas/BucketDefinitionPatch",
+                    "oracle-oraclefs": "#/components/schemas/OracleFsDefinitionPatch"
+                  },
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AwsLustreDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureManagedLustreDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GoogleManagedLustreDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BucketDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DiskDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AwsEfsDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureAzfilesDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureNetappFilesDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GoogleFilestoreDefinitionPatch"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OracleFsDefinitionPatch"
+                  }
+                ],
+                "title": "StorageDefinitionPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageDefinitionCheck"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Validate storage definition",
+        "tags": [
+          "Storage",
+          "Disks",
+          "Lustre",
+          "NFS"
         ]
       }
     },
@@ -98341,6 +102221,153 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/storage/{name}/presigned-url": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a pre-signed URL for one object in an Azure bucket, Azure Files share or Google bucket.",
+        "operationId": "get-storage-presigned-url",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The path of the object or file inside the storage.",
+            "explode": false,
+            "in": "query",
+            "name": "objectName",
+            "required": true,
+            "schema": {
+              "description": "The path of the object or file inside the storage.",
+              "examples": [
+                "path/to/file"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The expiration time in seconds for the pre-signed URL. Default and maximum is 12 hours.",
+            "explode": false,
+            "in": "query",
+            "name": "expiresIn",
+            "schema": {
+              "default": 43200,
+              "description": "The expiration time in seconds for the pre-signed URL. Default and maximum is 12 hours.",
+              "examples": [
+                43200
+              ],
+              "format": "int64",
+              "maximum": 43200,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The permissions for the pre-signed URL, combined as needed: read (r), write (w), delete (d) and create (c), and for Azure buckets also list (l) and add (a). Default is read. Write permissions are dropped for read-only access. Google bucket URLs are always read-only.",
+            "explode": false,
+            "in": "query",
+            "name": "permissions",
+            "schema": {
+              "default": "r",
+              "description": "The permissions for the pre-signed URL, combined as needed: read (r), write (w), delete (d) and create (c), and for Azure buckets also list (l) and add (a). Default is read. Write permissions are dropped for read-only access. Google bucket URLs are always read-only.",
+              "examples": [
+                "rwdc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Content-Disposition the object is served with, so a browser download can be given a filename. Omit to serve the object as stored.",
+            "explode": false,
+            "in": "query",
+            "name": "contentDisposition",
+            "schema": {
+              "description": "Content-Disposition the object is served with, so a browser download can be given a filename. Omit to serve the object as stored.",
+              "examples": [
+                "attachment; filename=\"report.csv\""
+              ],
+              "maxLength": 512,
+              "pattern": "^[\\x20-\\x7e]*$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "The pre-signed URL for the object.",
+                  "examples": [
+                    "https://storage.googleapis.com/example-bucket/cat.jpeg?X-Goog-Algorithm=GOOG4-HMAC-SHA256\u0026X-Goog-Credential=accessid\u0026X-Goog-SignedHeaders=host\u0026X-Goog-Signature=signature"
+                  ],
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get presigned URL for storage object",
+        "tags": [
+          "Storage",
+          "Buckets",
+          "NFS"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/storage/{name}/provision": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nMakes a storage's cloud resources from its configuration, in a new deployment. Buckets made with a cloud account directly are provisioned when they are created.",
@@ -98410,6 +102437,90 @@
           "Lustre",
           "NFS",
           "Buckets"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/storage/{name}/sas-token": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a SAS token for an Azure bucket or Azure Files share, read-only for users with read-only access.",
+        "operationId": "get-storage-sas-token",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the storage resource.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "The name of the storage resource.",
+              "examples": [
+                "mystorage"
+              ],
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AzureSASToken"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get storage SAS token",
+        "tags": [
+          "Storage",
+          "Buckets",
+          "NFS"
         ]
       }
     },
@@ -100336,6 +104447,517 @@
         ]
       }
     },
+    "/api/platform/firewall": {
+      "get": {
+        "description": "\u003e This is a platform-admin only route.\n\nReturns the platform firewall's settings, its policy revision, and the revision the API server answering has applied",
+        "operationId": "get-firewall-settings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirewallSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Firewall Settings",
+        "tags": [
+          "Firewall"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a platform-admin only route.\n\nChanges the firewall's mode, paranoia level or inbound anomaly threshold; every API server applies the change within seconds",
+        "operationId": "update-firewall-settings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFirewallSettingsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirewallSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update Firewall Settings",
+        "tags": [
+          "Firewall"
+        ]
+      }
+    },
+    "/api/platform/firewall/blocked-ips": {
+      "get": {
+        "description": "\u003e This is a platform-admin only route.\n\nLists the addresses and ranges the firewall blocks, including ones whose block has expired",
+        "operationId": "list-firewall-blocked-ips",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FirewallBlockedIP"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Firewall Blocked IPs",
+        "tags": [
+          "Firewall"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a platform-admin only route.\n\nBlocks every request from an address or range, on every route, until the block expires or is deleted",
+        "operationId": "create-firewall-blocked-ip",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFirewallBlockedIPInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirewallBlockedIP"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Block an IP",
+        "tags": [
+          "Firewall"
+        ]
+      }
+    },
+    "/api/platform/firewall/blocked-ips/{id}": {
+      "delete": {
+        "description": "\u003e This is a platform-admin only route.\n\nDeletes a block",
+        "operationId": "delete-firewall-blocked-ip",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Unblock an IP",
+        "tags": [
+          "Firewall"
+        ]
+      }
+    },
+    "/api/platform/firewall/evaluate": {
+      "post": {
+        "description": "\u003e This is a platform-admin only route.\n\nRuns a request through the firewall the answering API server enforces, without sending it on, and returns whether it would be blocked and every rule it matched",
+        "operationId": "evaluate-firewall-request",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateFirewallRequestInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirewallEvaluation"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Evaluate a Request",
+        "tags": [
+          "Firewall"
+        ]
+      }
+    },
+    "/api/platform/firewall/exclusions": {
+      "get": {
+        "description": "\u003e This is a platform-admin only route.\n\nLists the CRS rules removed from routes, including expired ones",
+        "operationId": "list-firewall-exclusions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FirewallExclusion"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Firewall Exclusions",
+        "tags": [
+          "Firewall"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a platform-admin only route.\n\nRemoves a CRS rule, or a tagged group of rules for one target, from a route, to stop a false positive",
+        "operationId": "create-firewall-exclusion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFirewallExclusionInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirewallExclusion"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create Firewall Exclusion",
+        "tags": [
+          "Firewall"
+        ]
+      }
+    },
+    "/api/platform/firewall/exclusions/{id}": {
+      "delete": {
+        "description": "\u003e This is a platform-admin only route.\n\nDeletes an exclusion, so the rules it removed apply to its route again",
+        "operationId": "delete-firewall-exclusion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete Firewall Exclusion",
+        "tags": [
+          "Firewall"
+        ]
+      }
+    },
+    "/api/platform/firewall/rules": {
+      "get": {
+        "description": "\u003e This is a platform-admin only route.\n\nLists the platform's own firewall rules, including expired ones",
+        "operationId": "list-firewall-rules",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FirewallRule"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Firewall Rules",
+        "tags": [
+          "Firewall"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a platform-admin only route.\n\nAdds a rule that denies, or only logs, requests whose variables match, to answer an attack the shipped rules miss",
+        "operationId": "create-firewall-rule",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFirewallRuleInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirewallRule"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create Firewall Rule",
+        "tags": [
+          "Firewall"
+        ]
+      }
+    },
+    "/api/platform/firewall/rules/{id}": {
+      "delete": {
+        "description": "\u003e This is a platform-admin only route.\n\nDeletes a rule",
+        "operationId": "delete-firewall-rule",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete Firewall Rule",
+        "tags": [
+          "Firewall"
+        ]
+      },
+      "patch": {
+        "description": "\u003e This is a platform-admin only route.\n\nChanges a rule's action, status or note, such as moving it from log to deny once its matches look right",
+        "operationId": "update-firewall-rule",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFirewallRuleInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirewallRule"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update Firewall Rule",
+        "tags": [
+          "Firewall"
+        ]
+      }
+    },
     "/api/platform/groups": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns a list of all groups on the platform. Requires platform admin or billing admin.",
@@ -101426,6 +106048,59 @@
           }
         },
         "summary": "Set platform policy: base-image-compliance",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/browser-sign-in-lifetime": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets how many seconds a new browser sign-in lasts before users must sign in again, from 15 minutes to 365 days, for every organization. Sign-ins already made keep their original expiration.",
+        "operationId": "set-platform-browser-sign-in-lifetime-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Seconds a new browser sign-in lasts before the user must sign in again",
+                "examples": [
+                  43200
+                ],
+                "format": "int64",
+                "maximum": 31536000,
+                "minimum": 900,
+                "type": "integer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/IntPolicyOutput"
+                  },
+                  "description": "Map of int policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: browser-sign-in-lifetime",
         "tags": [
           "Policies"
         ]
@@ -104062,7 +108737,7 @@
     },
     "/api/scheduler-jobs": {
       "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns scheduler jobs from clusters the user can access.",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the scheduler jobs that the agents of the clusters the user can access report now. A cluster whose agent cannot be reached adds no jobs, and filtering to a cluster whose agent cannot be reached is an error.",
         "operationId": "get-scheduler-jobs",
         "parameters": [
           {
@@ -106911,6 +111586,16 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "description": "Only users of this organization, by name. Narrows the users the caller can see, so it reveals nothing they cannot already see.",
+            "explode": false,
+            "in": "query",
+            "name": "organization",
+            "schema": {
+              "description": "Only users of this organization, by name. Narrows the users the caller can see, so it reveals nothing they cannot already see.",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -109156,6 +113841,10 @@
     {
       "description": "Endpoints related to error log viewing",
       "name": "Error Logs"
+    },
+    {
+      "description": "Endpoints related to the platform firewall policy",
+      "name": "Firewall"
     },
     {
       "description": "Endpoints related to the audit events system",

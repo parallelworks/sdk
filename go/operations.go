@@ -118,6 +118,60 @@ func (c *Client) ListFleetAgents(ctx context.Context, opts ...ListFleetAgentsPar
 	return &result, nil
 }
 
+// UpgradeFleetAgents - Update outdated agents
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Tells every reporting agent older than the platform version to update itself, except endpoint sessions and agents already updating. Agents on busy clusters are skipped. Returns one outcome per agent: dispatched, busy, up-to-date, unsupported, in-progress, not-connected, or error.
+func (c *Client) UpgradeFleetAgents(ctx context.Context) (*UpgradeFleetAgentsOutputBody, error) {
+
+	path := "/api/admin/agents/upgrade"
+
+	var result UpgradeFleetAgentsOutputBody
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpgradeFleetAgentParams contains the parameters for the UpgradeFleetAgent operation.
+// Required parameters are value fields; optional parameters are pointers.
+type UpgradeFleetAgentParams struct {
+	// Node hostname, for a managed cluster node's agent.
+	Hostname *string `json:"hostname,omitempty"`
+}
+
+// UpgradeFleetAgent - Update an agent
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Tells one cluster's agent, or one managed cluster node's agent when hostname is set, to update itself to the platform version. Returns 202 on dispatch. Fails with 409 when the cluster is busy, the agent is already up to date or updating, or the agent is too old to support platform-triggered updates.
+func (c *Client) UpgradeFleetAgent(ctx context.Context, clusterID string, opts ...UpgradeFleetAgentParams) (*UpgradeAgentResponseBody, error) {
+
+	path := "/api/admin/agents/{clusterId}/upgrade"
+	path = pathReplace(path, "clusterId", "simple", false, clusterID)
+	var params UpgradeFleetAgentParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "hostname", "form", false, params.Hostname)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result UpgradeAgentResponseBody
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetPlatformAlertsParams contains the parameters for the GetPlatformAlerts operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetPlatformAlertsParams struct {
@@ -1037,6 +1091,214 @@ func (c *Client) ExportAdminEvents(ctx context.Context, opts ...ExportAdminEvent
 	return nil
 }
 
+// ListHavenMigrationFailuresParams contains the parameters for the ListHavenMigrationFailures operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListHavenMigrationFailuresParams struct {
+	// haven, config, data, cloud, vault, mismatch or bypass; empty for all.
+	Category *string `json:"category,omitempty"`
+	// new, known, fixed or wont_fix; empty for all.
+	Triage *string `json:"triage,omitempty"`
+	// import, runtime or check; empty for all.
+	Source *string `json:"source,omitempty"`
+}
+
+// ListHavenMigrationFailures - List Haven migration failures by group
+//
+// Returns the failures grouped by category, Haven code, operation and type, with counts and samples. Platform admins only.
+func (c *Client) ListHavenMigrationFailures(ctx context.Context, opts ...ListHavenMigrationFailuresParams) (*[]HavenFailureGroup, error) {
+
+	path := "/api/admin/haven/migration/failures"
+	var params ListHavenMigrationFailuresParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "category", "form", false, params.Category)
+
+	addQueryParam(queryValues, "triage", "form", false, params.Triage)
+
+	addQueryParam(queryValues, "source", "form", false, params.Source)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []HavenFailureGroup
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// TriageHavenMigrationFailures - Triage a group of Haven migration failures
+//
+// Sets the triage state of every failure in a group. Platform admins only.
+func (c *Client) TriageHavenMigrationFailures(ctx context.Context, body TriageInBody) (*TriageResponse, error) {
+
+	path := "/api/admin/haven/migration/failures"
+
+	var result TriageResponse
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListHavenMigrationItemsParams contains the parameters for the ListHavenMigrationItems operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListHavenMigrationItemsParams struct {
+	// pending, written, verified, failed or skipped; empty for all.
+	State  *string `json:"state,omitempty"`
+	Type   *string `json:"type,omitempty"`
+	Limit  *int64  `json:"limit,omitempty"`
+	Offset *int64  `json:"offset,omitempty"`
+}
+
+// ListHavenMigrationItems - List the secrets the sync tracks
+//
+// Returns the secrets the sync tracks, by state, with any repair waiting. Platform admins only.
+func (c *Client) ListHavenMigrationItems(ctx context.Context, opts ...ListHavenMigrationItemsParams) (*HavenItemsResponse, error) {
+
+	path := "/api/admin/haven/migration/items"
+	var params ListHavenMigrationItemsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "state", "form", false, params.State)
+
+	addQueryParam(queryValues, "type", "form", false, params.Type)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	addQueryParam(queryValues, "offset", "form", false, params.Offset)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result HavenItemsResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListHavenSyncRunsParams contains the parameters for the ListHavenSyncRuns operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListHavenSyncRunsParams struct {
+	Limit *int64 `json:"limit,omitempty"`
+}
+
+// ListHavenSyncRuns - List Haven sync runs
+//
+// Returns the latest sync runs first, with their outcome and counts. Platform admins only.
+func (c *Client) ListHavenSyncRuns(ctx context.Context, opts ...ListHavenSyncRunsParams) (*[]HavenRunResponse, error) {
+
+	path := "/api/admin/haven/migration/runs"
+	var params ListHavenSyncRunsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []HavenRunResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// StartHavenSyncRun - Start a Haven sync run
+//
+// Starts a sync, repair, verify or dry run of the secrets Haven routes, one at a time across replicas. Platform admins only.
+func (c *Client) StartHavenSyncRun(ctx context.Context, body StartRunInBody) (*HavenRunResponse, error) {
+
+	path := "/api/admin/haven/migration/runs"
+
+	var result HavenRunResponse
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetHavenSyncRun - Get a Haven sync run
+//
+// Returns one sync run with each secret's outcome. Platform admins only.
+func (c *Client) GetHavenSyncRun(ctx context.Context, id int64) (*HavenRunResponse, error) {
+
+	path := "/api/admin/haven/migration/runs/{id}"
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result HavenRunResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RetryHavenMigrationSequence - Resume the automatic Haven migration
+//
+// Resumes the automatic migration at the step that failed. Platform admins only.
+func (c *Client) RetryHavenMigrationSequence(ctx context.Context) (*HavenSequence, error) {
+
+	path := "/api/admin/haven/migration/sequence/retry"
+
+	var result HavenSequence
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// StartHavenMigrationSequence - Start the automatic Haven migration
+//
+// Starts a fresh pass of the automatic migration at the preflight, unless one is running. Platform admins only.
+func (c *Client) StartHavenMigrationSequence(ctx context.Context) (*HavenSequence, error) {
+
+	path := "/api/admin/haven/migration/sequence/start"
+
+	var result HavenSequence
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// StopHavenMigrationSequence - Stop the automatic Haven migration
+//
+// Stops the running pass after its current step. Platform admins only.
+func (c *Client) StopHavenMigrationSequence(ctx context.Context) (*HavenSequence, error) {
+
+	path := "/api/admin/haven/migration/sequence/stop"
+
+	var result HavenSequence
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetHavenMigrationStatus - Get Haven's migration status
+//
+// Returns Haven's preflight, the stage and what blocks haven-only, the readiness measured for it, and the automatic migration. Platform admins only.
+func (c *Client) GetHavenMigrationStatus(ctx context.Context) (*HavenStatusResponse, error) {
+
+	path := "/api/admin/haven/migration/status"
+
+	var result HavenStatusResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetImageCompliance - Base image compliance inventory
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -1169,7 +1431,7 @@ func (c *Client) DeleteStaleIndex(ctx context.Context, body DeleteStaleIndexBody
 //
 // > This is a platform-admin only route.
 //
-// Permanently deletes infrastructures with non-existent user references
+// Permanently deletes infrastructures with non-existent user references, except those whose delete is still running
 func (c *Client) CleanupOrphanedInfrastructures(ctx context.Context) (*DeleteOrphanedInfraResultBody, error) {
 
 	path := "/api/admin/maintenance/infrastructures/orphaned/cleanup"
@@ -1187,7 +1449,7 @@ func (c *Client) CleanupOrphanedInfrastructures(ctx context.Context) (*DeleteOrp
 //
 // > This is a platform-admin only route.
 //
-// Returns infrastructures with non-existent user references
+// Returns infrastructures with non-existent user references, except those whose delete is still running
 func (c *Client) PreviewOrphanedInfrastructuresCleanup(ctx context.Context) (*OrphanedInfraPreviewBody, error) {
 
 	path := "/api/admin/maintenance/infrastructures/orphaned/preview"
@@ -2254,6 +2516,21 @@ func (c *Client) ReceiveAgentAlive(ctx context.Context, body WorkflowAgentAliveU
 	return &result, nil
 }
 
+// CreateClusterEvent - Report a cluster event
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Records what a cloud cluster reports about itself, as its tunnel's CLUSTER-EVENT does, for its own session. The event's id makes a repeat over either path record nothing, and a node's configuration report older than one already taken records nothing.
+func (c *Client) CreateClusterEvent(ctx context.Context, body ClusterEventRequest) error {
+
+	path := "/api/agent/cluster-events"
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // AgentHeartbeat - Node Heartbeat
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -3255,6 +3532,8 @@ type ListUserAllocationsParams struct {
 	Name *string `json:"name,omitempty"`
 	// Sort field and direction
 	Sort *string `json:"sort,omitempty"`
+	// Which allocations to list: mine (default), those shared with you, or all, every allocation in the organization. Widening requires administrator access.
+	Scope *string `json:"scope,omitempty"`
 }
 
 // ListUserAllocations - List allocations
@@ -3277,6 +3556,8 @@ func (c *Client) ListUserAllocations(ctx context.Context, opts ...ListUserAlloca
 	addQueryParam(queryValues, "name", "form", false, params.Name)
 
 	addQueryParam(queryValues, "sort", "form", false, params.Sort)
+
+	addQueryParam(queryValues, "scope", "form", false, params.Scope)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
@@ -6798,7 +7079,7 @@ func (c *Client) GetOrganizations(ctx context.Context, opts ...GetOrganizationsP
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Creates a new organization. Only platform admins and partners can create organizations.
+// Creates a new organization. Only platform admins and admins of partner organizations can create organizations.
 func (c *Client) CreateOrganization(ctx context.Context, body CreateOrganizationInputBody) (*CreateOrganizationOutputBody, error) {
 
 	path := "/api/organizations"
@@ -7530,6 +7811,8 @@ type ListOrgAllocationsParams struct {
 	Name *string `json:"name,omitempty"`
 	// Filter by parent allocation name
 	Parent *string `json:"parent,omitempty"`
+	// Filter to allocations that budget against this allocation period
+	Period *string `json:"period,omitempty"`
 	// Sort field and direction
 	Sort *string `json:"sort,omitempty"`
 }
@@ -7555,6 +7838,8 @@ func (c *Client) ListOrgAllocations(ctx context.Context, organization string, op
 	addQueryParam(queryValues, "name", "form", false, params.Name)
 
 	addQueryParam(queryValues, "parent", "form", false, params.Parent)
+
+	addQueryParam(queryValues, "period", "form", false, params.Period)
 
 	addQueryParam(queryValues, "sort", "form", false, params.Sort)
 
@@ -7787,17 +8072,30 @@ func (c *Client) ListAllocationUsageEvents(ctx context.Context, organization str
 	return &result, nil
 }
 
+// CreateUsageEventParams contains the parameters for the CreateUsageEvent operation.
+// Required parameters are value fields; optional parameters are pointers.
+type CreateUsageEventParams struct {
+	// A key, unique per event, that makes retrying the request safe: a repeat with the same key and payload returns the event the first request created instead of charging again. 1 to 255 printable ASCII characters, optionally quoted as in the IETF Idempotency-Key header draft. Reusing a key with a different payload is refused.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
+}
+
 // CreateUsageEvent - Create an allocation usage event
 //
 // Creates a usage event for an allocation. Requires allocation write access.
-func (c *Client) CreateUsageEvent(ctx context.Context, organization string, name string, body *PostUsageEventInput) (*UsageEventOutput, error) {
+func (c *Client) CreateUsageEvent(ctx context.Context, organization string, name string, body *PostUsageEventInput, opts ...CreateUsageEventParams) (*UsageEventOutput, error) {
 
 	path := "/api/organizations/{organization}/allocations/{name}/usage"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "name", "simple", false, name)
+	var params CreateUsageEventParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	headers := make(http.Header)
+	setHeader(headers, "Idempotency-Key", false, params.IdempotencyKey)
 
 	var result UsageEventOutput
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true, headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -11913,6 +12211,23 @@ func (c *Client) SetOrganizationArchiveCostDataPolicy(ctx context.Context, organ
 	return &result, nil
 }
 
+// SetOrganizationBrowserSignInLifetimePolicy - Set organization policy: browser-sign-in-lifetime
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets how many seconds a new browser sign-in lasts before members must sign in again, from 15 minutes to 365 days. Sign-ins already made keep their original expiration. Unavailable when the platform sets the policy.
+func (c *Client) SetOrganizationBrowserSignInLifetimePolicy(ctx context.Context, organization string, body int64) (*map[string]IntPolicyOutput, error) {
+
+	path := "/api/organizations/{organization}/policies/browser-sign-in-lifetime"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result map[string]IntPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetOrganizationDefaultBillingUsernamePolicy - Set organization policy: default-billing-username
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -14018,7 +14333,9 @@ func (c *Client) GetOrgUserAvatar(ctx context.Context, organization string, user
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Adds CORS rules to an AWS S3 bucket.
+// Adds CORS rules to an AWS S3 bucket. Deprecated: use add-storage-cors-rules. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) AddCorsRulesAwsBucket(ctx context.Context, organization string, user string, name string) error {
 
 	path := "/api/organizations/{organization}/users/{user}/aws-bucket/{name}/cors-rules"
@@ -14036,7 +14353,9 @@ func (c *Client) AddCorsRulesAwsBucket(ctx context.Context, organization string,
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns temporary STS credentials scoped to an AWS S3 bucket. The credentials are valid for 12 hours.
+// Returns temporary STS credentials scoped to an AWS S3 bucket. The credentials are valid for 12 hours. Deprecated: use get-storage-credentials. Removed after 2027-02-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetTokenAwsBucket(ctx context.Context, organization string, user string, name string) (*AwsBucketToken, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/aws-bucket/{name}/token"
@@ -14055,7 +14374,9 @@ func (c *Client) GetTokenAwsBucket(ctx context.Context, organization string, use
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Adds CORS rules to the storage account hosting an Azure Files share so it can be accessed from the browser.
+// Adds CORS rules to the storage account hosting an Azure Files share so it can be accessed from the browser. Deprecated: use add-storage-cors-rules. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) AddCorsRulesAzureAzfiles(ctx context.Context, organization string, user string, name string) error {
 
 	path := "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/cors-rules"
@@ -14086,7 +14407,9 @@ type GetPresignedURLAzureAzfilesObjectParams struct {
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns a pre-signed URL for a file inside an Azure Files share.
+// Returns a pre-signed URL for a file inside an Azure Files share. Deprecated: use get-storage-presigned-url. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetPresignedURLAzureAzfilesObject(ctx context.Context, organization string, user string, name string, params GetPresignedURLAzureAzfilesObjectParams) (*string, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/presigned-url"
@@ -14117,7 +14440,9 @@ func (c *Client) GetPresignedURLAzureAzfilesObject(ctx context.Context, organiza
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns a SAS token for an Azure Files share.
+// Returns a SAS token for an Azure Files share. Deprecated: use get-storage-sas-token. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetSasTokenAzureAzfiles(ctx context.Context, organization string, user string, name string) (*AzureFilesSas, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/azure-azfiles/{name}/sas-token"
@@ -14136,7 +14461,9 @@ func (c *Client) GetSasTokenAzureAzfiles(ctx context.Context, organization strin
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Adds CORS rules to an Azure storage bucket.
+// Adds CORS rules to an Azure storage bucket. Deprecated: use add-storage-cors-rules. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) AddCorsRulesAzureBucket(ctx context.Context, organization string, user string, name string) error {
 
 	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/cors-rules"
@@ -14167,7 +14494,9 @@ type GetPresignedURLAzureBucketObjectParams struct {
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns a pre-signed URL for an object inside an Azure bucket.
+// Returns a pre-signed URL for an object inside an Azure bucket. Deprecated: use get-storage-presigned-url. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetPresignedURLAzureBucketObject(ctx context.Context, organization string, user string, name string, params GetPresignedURLAzureBucketObjectParams) (*string, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/presigned-url"
@@ -14198,7 +14527,9 @@ func (c *Client) GetPresignedURLAzureBucketObject(ctx context.Context, organizat
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns a SAS token for an Azure storage bucket.
+// Returns a SAS token for an Azure storage bucket. Deprecated: use get-storage-sas-token. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetSasTokenAzureBucket(ctx context.Context, organization string, user string, name string) (*AzureSasToken, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/sas-token"
@@ -14217,7 +14548,9 @@ func (c *Client) GetSasTokenAzureBucket(ctx context.Context, organization string
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns temporary service principal credentials scoped to an Azure storage bucket. The credentials are valid for 12 hours.
+// Returns temporary service principal credentials scoped to an Azure storage bucket. The credentials are valid for 12 hours. Deprecated: use get-storage-credentials. Removed after 2027-02-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetTokenAzureBucket(ctx context.Context, organization string, user string, name string) (*AzureBucketToken, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/azure-bucket/{name}/token"
@@ -14978,14 +15311,14 @@ func (c *Client) GetClusterNodeMetrics(ctx context.Context, organization string,
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
 // Returns access permissions for a cloud cluster owned by the user. Existing clusters cannot be shared.
-func (c *Client) GetUserClusterPermissions(ctx context.Context, organization string, user string, clusterName string) (*SubjectPermissions, error) {
+func (c *Client) GetUserClusterPermissions(ctx context.Context, organization string, user string, clusterName string) (*GetUserClusterPermissionsOutputBody, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/permissions"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "clusterName", "simple", false, clusterName)
 
-	var result SubjectPermissions
+	var result GetUserClusterPermissionsOutputBody
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -15789,7 +16122,9 @@ func (c *Client) ConnectUserGitlabToken(ctx context.Context, organization string
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Adds CORS rules to a Google Cloud Storage bucket.
+// Adds CORS rules to a Google Cloud Storage bucket. Deprecated: use add-storage-cors-rules. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) AddCorsRulesGoogleBucket(ctx context.Context, organization string, user string, name string) error {
 
 	path := "/api/organizations/{organization}/users/{user}/google-bucket/{name}/cors-rules"
@@ -15818,7 +16153,9 @@ type GetPresignedURLGoogleBucketObjectParams struct {
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns a pre-signed URL for an object inside a Google bucket.
+// Returns a pre-signed URL for an object inside a Google bucket. Deprecated: use get-storage-presigned-url. Removed after 2026-12-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetPresignedURLGoogleBucketObject(ctx context.Context, organization string, user string, name string, params GetPresignedURLGoogleBucketObjectParams) (*string, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/google-bucket/{name}/presigned-url"
@@ -15847,7 +16184,9 @@ func (c *Client) GetPresignedURLGoogleBucketObject(ctx context.Context, organiza
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns a temporary OAuth2 access token scoped to a Google Cloud Storage bucket.
+// Returns a temporary OAuth2 access token scoped to a Google Cloud Storage bucket. Deprecated: use get-storage-credentials. Removed after 2027-02-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetTokenGoogleBucket(ctx context.Context, organization string, user string, name string) (*GoogleBucketToken, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/google-bucket/{name}/token"
@@ -15892,6 +16231,24 @@ func (c *Client) CreateInstance(ctx context.Context, organization string, user s
 	path = pathReplace(path, "user", "simple", false, user)
 
 	var result Instance
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ValidateNewInstance - Validate New Instance
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Checks an instance create-instance would make for the requesting user, without saving it. Returns what it would cost per hour, when its instance type and region are priced, or the same error create-instance would return.
+func (c *Client) ValidateNewInstance(ctx context.Context, organization string, user string, body Instance) (*NewInstanceCheck, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/instances/validate"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+
+	var result NewInstanceCheck
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -16027,6 +16384,42 @@ func (c *Client) CreateInstanceSnapshot(ctx context.Context, organization string
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
+}
+
+// StartInstance - Start Instance
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Starts a stopped instance's virtual machine again, which restarts billing for it. Its public IP address can change. Starting one that is starting or running does nothing.
+func (c *Client) StartInstance(ctx context.Context, organization string, user string, instanceName string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/instances/{instanceName}/start"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "instanceName", "simple", false, instanceName)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// StopInstance - Stop Instance
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Stops a running instance's virtual machine on AWS, Google Cloud or Azure. The instance keeps its root disk, which is still billed, and can be started again. Stopping one that is stopping or stopped does nothing.
+func (c *Client) StopInstance(ctx context.Context, organization string, user string, instanceName string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/instances/{instanceName}/stop"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "instanceName", "simple", false, instanceName)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
 }
 
 // CreateIP - Create IP Address
@@ -16414,7 +16807,9 @@ func (c *Client) DeleteNetworkInterface(ctx context.Context, organization string
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Returns a Pre-Authenticated Request (PAR) URL for an Oracle Object Storage bucket. The URL grants HTTP read/write access to the bucket for 12 hours.
+// Returns a Pre-Authenticated Request (PAR) URL for an Oracle Object Storage bucket. The URL grants HTTP read/write access to the bucket for 12 hours. Deprecated: use get-storage-credentials. Removed after 2027-02-01.
+//
+// Deprecated: this operation is deprecated.
 func (c *Client) GetParOracleBucket(ctx context.Context, organization string, user string, name string) (*OracleBucketPar, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/oracle-bucket/{name}/par"
@@ -17248,22 +17643,117 @@ func (c *Client) DeleteStorage(ctx context.Context, organization string, user st
 	return nil
 }
 
-// UpdateStorageBilling - Update storage billing
+// UpdateStorage - Update a storage
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Reassigns which resource group the storage bills against.
-func (c *Client) UpdateStorageBilling(ctx context.Context, organization string, user string, name string, body UpdateStorageBillingInputBody) error {
+// Changes a storage's name, display name, description, tags, network, region, billing and alerts. Fields left out are kept. The name, network and region change only while the storage is off. Returns the storage as get-storage does.
+func (c *Client) UpdateStorage(ctx context.Context, organization string, user string, name string, body UpdateStorageBody) (*StorageDetail, error) {
 
-	path := "/api/organizations/{organization}/users/{user}/storage/{name}/billing"
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}"
 	path = pathReplace(path, "organization", "simple", false, organization)
 	path = pathReplace(path, "user", "simple", false, user)
 	path = pathReplace(path, "name", "simple", false, name)
 
-	if err := c.do(ctx, "PATCH", path, body, "application/json", nil, "application/json", true); err != nil {
+	var result StorageDetail
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// AddStorageCorsRules - Add CORS rules to storage
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Adds CORS rules to an AWS, Azure or Google bucket, or to the storage account hosting an Azure Files share, so the browser can reach it.
+func (c *Client) AddStorageCorsRules(ctx context.Context, organization string, user string, name string) error {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/cors-rules"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// GetStorageCredentials - Get storage credentials
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns temporary credentials scoped to a bucket, shaped by its type: STS credentials for AWS, service principal credentials for Azure, an OAuth2 access token for Google and a Pre-Authenticated Request URL for Oracle. They are valid for up to 12 hours, and read-only for users with read-only access.
+func (c *Client) GetStorageCredentials(ctx context.Context, organization string, user string, name string) (*StorageCredentials, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/credentials"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	var result StorageCredentials
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateStorageDefinition - Update storage definition
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Replaces a disk, Lustre or NFS storage's definition, in the shape get-storage returns it. Fields it leaves out are cleared; settings the definition does not model keep their values. The storage must be off, and the definition is checked as a start checks it. Returns the storage as get-storage does.
+func (c *Client) UpdateStorageDefinition(ctx context.Context, organization string, user string, name string, body StorageDefinition) (*StorageDetail, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/definition"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	var result StorageDetail
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PatchStorageDefinition - Patch storage definition
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Changes part of a disk, Lustre or NFS storage's definition with a JSON merge patch (RFC 7396), sent as application/merge-patch+json or application/json. Fields the patch leaves out are kept. The storage must be off, and the patched definition is checked as a start checks it. Returns the storage as get-storage does.
+func (c *Client) PatchStorageDefinition(ctx context.Context, organization string, user string, name string, body StorageDefinitionPatch) (*StorageDetail, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/definition"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	var result StorageDetail
+	if err := c.do(ctx, "PATCH", path, body, "application/merge-patch+json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ValidateStorageDefinition - Validate storage definition
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Checks a JSON merge patch (RFC 7396) against a storage's definition without saving it. Returns the definition the patch would save, or the same error patch-storage-definition would return.
+func (c *Client) ValidateStorageDefinition(ctx context.Context, organization string, user string, name string, body StorageDefinitionPatch) (*StorageDefinitionCheck, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/definition/validate"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	var result StorageDefinitionCheck
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetStorageDeploymentsParams contains the parameters for the GetStorageDeployments operation.
@@ -17496,6 +17986,50 @@ func (c *Client) UpdateStoragePermissions(ctx context.Context, organization stri
 	return nil
 }
 
+// GetStoragePresignedURLParams contains the parameters for the GetStoragePresignedURL operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetStoragePresignedURLParams struct {
+	// The path of the object or file inside the storage.
+	ObjectName string `json:"objectName"`
+	// The expiration time in seconds for the pre-signed URL. Default and maximum is 12 hours.
+	ExpiresIn *int64 `json:"expiresIn,omitempty"`
+	// The permissions for the pre-signed URL, combined as needed: read (r), write (w), delete (d) and create (c), and for Azure buckets also list (l) and add (a). Default is read. Write permissions are dropped for read-only access. Google bucket URLs are always read-only.
+	Permissions *string `json:"permissions,omitempty"`
+	// Content-Disposition the object is served with, so a browser download can be given a filename. Omit to serve the object as stored.
+	ContentDisposition *string `json:"contentDisposition,omitempty"`
+}
+
+// GetStoragePresignedURL - Get presigned URL for storage object
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a pre-signed URL for one object in an Azure bucket, Azure Files share or Google bucket.
+func (c *Client) GetStoragePresignedURL(ctx context.Context, organization string, user string, name string, params GetStoragePresignedURLParams) (*string, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/presigned-url"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "objectName", "form", false, params.ObjectName)
+
+	addQueryParam(queryValues, "expiresIn", "form", false, params.ExpiresIn)
+
+	addQueryParam(queryValues, "permissions", "form", false, params.Permissions)
+
+	addQueryParam(queryValues, "contentDisposition", "form", false, params.ContentDisposition)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result string
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ProvisionStorage - Provision storage
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -17512,6 +18046,25 @@ func (c *Client) ProvisionStorage(ctx context.Context, organization string, user
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// GetStorageSasToken - Get storage SAS token
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns a SAS token for an Azure bucket or Azure Files share, read-only for users with read-only access.
+func (c *Client) GetStorageSasToken(ctx context.Context, organization string, user string, name string) (*AzureSasToken, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/storage/{name}/sas-token"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	var result AzureSasToken
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // GetUserWorkspace - Get User Workspace
@@ -18121,6 +18674,215 @@ func (c *Client) UpdatePlatformDomain(ctx context.Context, id string, body Updat
 	return &result, nil
 }
 
+// GetFirewallSettings - Get Firewall Settings
+//
+// > This is a platform-admin only route.
+//
+// Returns the platform firewall's settings, its policy revision, and the revision the API server answering has applied
+func (c *Client) GetFirewallSettings(ctx context.Context) (*FirewallSettings, error) {
+
+	path := "/api/platform/firewall"
+
+	var result FirewallSettings
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateFirewallSettings - Update Firewall Settings
+//
+// > This is a platform-admin only route.
+//
+// Changes the firewall's mode, paranoia level or inbound anomaly threshold; every API server applies the change within seconds
+func (c *Client) UpdateFirewallSettings(ctx context.Context, body UpdateFirewallSettingsInputBody) (*FirewallSettings, error) {
+
+	path := "/api/platform/firewall"
+
+	var result FirewallSettings
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListFirewallBlockedIps - List Firewall Blocked IPs
+//
+// > This is a platform-admin only route.
+//
+// Lists the addresses and ranges the firewall blocks, including ones whose block has expired
+func (c *Client) ListFirewallBlockedIps(ctx context.Context) (*[]FirewallBlockedIP, error) {
+
+	path := "/api/platform/firewall/blocked-ips"
+
+	var result []FirewallBlockedIP
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreateFirewallBlockedIP - Block an IP
+//
+// > This is a platform-admin only route.
+//
+// Blocks every request from an address or range, on every route, until the block expires or is deleted
+func (c *Client) CreateFirewallBlockedIP(ctx context.Context, body CreateFirewallBlockedIPInputBody) (*FirewallBlockedIP, error) {
+
+	path := "/api/platform/firewall/blocked-ips"
+
+	var result FirewallBlockedIP
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteFirewallBlockedIP - Unblock an IP
+//
+// > This is a platform-admin only route.
+//
+// Deletes a block
+func (c *Client) DeleteFirewallBlockedIP(ctx context.Context, id int64) error {
+
+	path := "/api/platform/firewall/blocked-ips/{id}"
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// EvaluateFirewallRequest - Evaluate a Request
+//
+// > This is a platform-admin only route.
+//
+// Runs a request through the firewall the answering API server enforces, without sending it on, and returns whether it would be blocked and every rule it matched
+func (c *Client) EvaluateFirewallRequest(ctx context.Context, body EvaluateFirewallRequestInputBody) (*FirewallEvaluation, error) {
+
+	path := "/api/platform/firewall/evaluate"
+
+	var result FirewallEvaluation
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListFirewallExclusions - List Firewall Exclusions
+//
+// > This is a platform-admin only route.
+//
+// Lists the CRS rules removed from routes, including expired ones
+func (c *Client) ListFirewallExclusions(ctx context.Context) (*[]FirewallExclusion, error) {
+
+	path := "/api/platform/firewall/exclusions"
+
+	var result []FirewallExclusion
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreateFirewallExclusion - Create Firewall Exclusion
+//
+// > This is a platform-admin only route.
+//
+// Removes a CRS rule, or a tagged group of rules for one target, from a route, to stop a false positive
+func (c *Client) CreateFirewallExclusion(ctx context.Context, body CreateFirewallExclusionInputBody) (*FirewallExclusion, error) {
+
+	path := "/api/platform/firewall/exclusions"
+
+	var result FirewallExclusion
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteFirewallExclusion - Delete Firewall Exclusion
+//
+// > This is a platform-admin only route.
+//
+// Deletes an exclusion, so the rules it removed apply to its route again
+func (c *Client) DeleteFirewallExclusion(ctx context.Context, id int64) error {
+
+	path := "/api/platform/firewall/exclusions/{id}"
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// ListFirewallRules - List Firewall Rules
+//
+// > This is a platform-admin only route.
+//
+// Lists the platform's own firewall rules, including expired ones
+func (c *Client) ListFirewallRules(ctx context.Context) (*[]FirewallRule, error) {
+
+	path := "/api/platform/firewall/rules"
+
+	var result []FirewallRule
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreateFirewallRule - Create Firewall Rule
+//
+// > This is a platform-admin only route.
+//
+// Adds a rule that denies, or only logs, requests whose variables match, to answer an attack the shipped rules miss
+func (c *Client) CreateFirewallRule(ctx context.Context, body CreateFirewallRuleInputBody) (*FirewallRule, error) {
+
+	path := "/api/platform/firewall/rules"
+
+	var result FirewallRule
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteFirewallRule - Delete Firewall Rule
+//
+// > This is a platform-admin only route.
+//
+// Deletes a rule
+func (c *Client) DeleteFirewallRule(ctx context.Context, id int64) error {
+
+	path := "/api/platform/firewall/rules/{id}"
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UpdateFirewallRule - Update Firewall Rule
+//
+// > This is a platform-admin only route.
+//
+// Changes a rule's action, status or note, such as moving it from log to deny once its matches look right
+func (c *Client) UpdateFirewallRule(ctx context.Context, id int64, body UpdateFirewallRuleInputBody) (*FirewallRule, error) {
+
+	path := "/api/platform/firewall/rules/{id}"
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result FirewallRule
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetAllPlatformGroupsParams contains the parameters for the GetAllPlatformGroups operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetAllPlatformGroupsParams struct {
@@ -18620,6 +19382,22 @@ func (c *Client) SetPlatformBaseImageCompliancePolicy(ctx context.Context, body 
 	path := "/api/platform/policies/base-image-compliance"
 
 	var result map[string]BaseImageCompliancePolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformBrowserSignInLifetimePolicy - Set platform policy: browser-sign-in-lifetime
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets how many seconds a new browser sign-in lasts before users must sign in again, from 15 minutes to 365 days, for every organization. Sign-ins already made keep their original expiration.
+func (c *Client) SetPlatformBrowserSignInLifetimePolicy(ctx context.Context, body int64) (*map[string]IntPolicyOutput, error) {
+
+	path := "/api/platform/policies/browser-sign-in-lifetime"
+
+	var result map[string]IntPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -19695,7 +20473,7 @@ type GetSchedulerJobsParams struct {
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Returns scheduler jobs from clusters the user can access.
+// Returns the scheduler jobs that the agents of the clusters the user can access report now. A cluster whose agent cannot be reached adds no jobs, and filtering to a cluster whose agent cannot be reached is an error.
 func (c *Client) GetSchedulerJobs(ctx context.Context, opts ...GetSchedulerJobsParams) (*[]SchedulerJob, error) {
 
 	path := "/api/scheduler-jobs"
@@ -20851,6 +21629,8 @@ type ListUsersParams struct {
 	SortBy *string `json:"sortBy,omitempty"`
 	// Sort direction (only applies when sortBy is specified)
 	SortDir *string `json:"sortDir,omitempty"`
+	// Only users of this organization, by name. Narrows the users the caller can see, so it reveals nothing they cannot already see.
+	Organization *string `json:"organization,omitempty"`
 }
 
 // ListUsers - List users
@@ -20877,6 +21657,8 @@ func (c *Client) ListUsers(ctx context.Context, opts ...ListUsersParams) (*ListU
 	addQueryParam(queryValues, "sortBy", "form", false, params.SortBy)
 
 	addQueryParam(queryValues, "sortDir", "form", false, params.SortDir)
+
+	addQueryParam(queryValues, "organization", "form", false, params.Organization)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)

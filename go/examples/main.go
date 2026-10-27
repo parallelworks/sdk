@@ -33,7 +33,8 @@ func main() {
 	fmt.Println()
 
 	// List buckets
-	buckets, err := client.GetBuckets(ctx)
+	category := "buckets"
+	buckets, err := client.GetStorages(ctx, parallelworks.GetStoragesParams{Category: &category})
 	if err != nil {
 		log.Fatalf("Failed to get buckets: %v", err)
 	}

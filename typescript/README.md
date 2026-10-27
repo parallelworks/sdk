@@ -24,7 +24,7 @@ import { Client } from '@parallelworks/client'
 // The platform host is automatically extracted from your credential
 const client = Client.fromCredential(process.env.PW_API_KEY!)
 
-const { data, error } = await client.GET('/api/buckets')
+const { data, error } = await client.GET('/api/storage')
 ```
 
 See the [examples](./examples) directory for complete runnable examples.
@@ -39,7 +39,7 @@ For scripts you run yourself, sign in once with `pw auth`, then create the clien
 import { Client } from '@parallelworks/client'
 
 const client = Client.fromCredentialConfig()
-const { data } = await client.GET('/api/buckets')
+const { data } = await client.GET('/api/storage')
 ```
 
 The credential is picked as the `pw` CLI picks it: `PW_API_KEY`, then the `context` option, `PW_CONTEXT`, and the current context. A signed-in context stays signed in: the client runs `pw auth token --print -o json` for an access token, reads its lifetime from the response (an RFC 6749 token response), and runs it again a minute before the token expires, the way a Kubernetes exec credential plugin or an AWS `credential_process` works, so only the `pw` CLI ever rotates the sign-in's refresh token. `cliCommand` and `cliTimeoutMs` set the `pw` executable (default `pw` on `PATH`) and how long one run may take (default one minute). A `pw` found through a relative `PATH` entry, such as the current directory, is refused, as Go refuses it. Without `pw`, requests reject with `SignInExpiredError`. This needs Node.js 20.16 or later.
@@ -110,7 +110,9 @@ export const { useQuery, useImmutable, useInfinite } = createSwrHooks(client)
 import { useQuery } from '@/lib/api'
 
 export function BucketList() {
-  const { data, error, isLoading } = useQuery('/api/buckets')
+  const { data, error, isLoading } = useQuery('/api/storage', {
+    params: { query: { category: 'buckets' } },
+  })
 
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error: {error.message}</div>
@@ -132,7 +134,7 @@ The client asks for errors as [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457)
 ```ts
 import { Client, problemTypeUrl, toApiError } from '@parallelworks/client'
 
-const { error } = await client.GET('/api/buckets')
+const { error } = await client.GET('/api/storage')
 if (error) {
   const problem = toApiError(error)
   console.error(problem.code, problem.message)
