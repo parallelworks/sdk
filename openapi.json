@@ -213,6 +213,27 @@
         ],
         "type": "object"
       },
+      "AcceptDeleteInBody": {
+        "additionalProperties": false,
+        "properties": {
+          "all": {
+            "description": "Accept every item a sync left pending because Vault lost it outside Haven (reason vault-bypass-write), found by the server; vaultPaths is then ignored.",
+            "type": "boolean"
+          },
+          "vaultPaths": {
+            "description": "The items, by Vault path.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 500,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
       "AcceptTermsBody": {
         "additionalProperties": false,
         "properties": {
@@ -9355,6 +9376,10 @@
           "govCloud": {
             "type": "boolean"
           },
+          "haven": {
+            "$ref": "#/components/schemas/CloudAccountHaven",
+            "description": "The credentials' copy in Haven, the platform's new credential store, while it is configured. Org admins see it only when the platform asks them to enter credentials again."
+          },
           "name": {
             "type": "string"
           },
@@ -9387,6 +9412,33 @@
           "billing",
           "permissions",
           "networks"
+        ],
+        "type": "object"
+      },
+      "CloudAccountHaven": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "description": "Where issuance will take the credentials from once it goes through Haven; until then Vault serves them in every mode. Platform admins only.",
+            "enum": [
+              "vault",
+              "haven",
+              "haven-only"
+            ],
+            "type": "string"
+          },
+          "needsUpdate": {
+            "description": "Whether Haven can hold the credentials only once they are entered again: Google service account keys, and AWS or Azure credentials without a copy core can read back.",
+            "type": "boolean"
+          },
+          "reentryRequested": {
+            "description": "Whether the platform asks org admins to enter such credentials again now.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "needsUpdate",
+          "reentryRequested"
         ],
         "type": "object"
       },
@@ -21441,6 +21493,106 @@
         ],
         "type": "object"
       },
+      "HavenAcceptDeleteResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted": {
+            "description": "Items whose Haven copy is deleted, now tombstones.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "refused": {
+            "description": "Items left as they were.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "results": {
+            "description": "Each item's outcome.",
+            "items": {
+              "$ref": "#/components/schemas/HavenAcceptDeleteResult"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "accepted",
+          "refused",
+          "results"
+        ],
+        "type": "object"
+      },
+      "HavenAcceptDeleteResult": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "Haven's error code, when Haven refused.",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "accepted",
+              "refused"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why it was refused: not tracked; not pending for vault-bypass-write; a type readers take from Vault, whose deletes the sync already follows; not routed; Vault holds a copy again; Vault could not be read; Haven's copy changed in the last minute; a write changed the item meanwhile; Haven refused; or the item could not be read or recorded.",
+            "enum": [
+              "not-tracked",
+              "not-vault-delete",
+              "vault-backed",
+              "not-routed",
+              "vault-has-it",
+              "vault-error",
+              "written-recently",
+              "changed",
+              "haven-error",
+              "item-error"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "vaultPath": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "vaultPath",
+          "outcome"
+        ],
+        "type": "object"
+      },
+      "HavenAccountBlocker": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "description": "The preflight check that failed.",
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "not-connected",
+              "stage-off",
+              "preflight",
+              "not-verified",
+              "needs-reentry",
+              "repair-pending",
+              "not-haven",
+              "no-check"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
       "HavenBlocker": {
         "additionalProperties": false,
         "properties": {
@@ -21499,6 +21651,130 @@
         "required": [
           "name",
           "status"
+        ],
+        "type": "object"
+      },
+      "HavenCloudAccount": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "type": "string"
+          },
+          "haven": {
+            "description": "What blocks the haven mode; empty when it is allowed.",
+            "items": {
+              "$ref": "#/components/schemas/HavenAccountBlocker"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "havenOnly": {
+            "description": "What blocks the haven-only mode; empty when it is allowed.",
+            "items": {
+              "$ref": "#/components/schemas/HavenAccountBlocker"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "vault",
+              "haven",
+              "haven-only"
+            ],
+            "type": "string"
+          },
+          "modeChangedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "needsUpdate": {
+            "description": "Whether Haven can hold the credentials only once they are entered again.",
+            "type": "boolean"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "orgName": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "repairPending": {
+            "type": "boolean"
+          },
+          "state": {
+            "description": "The state of the credentials' copy in Haven; empty before a sync or write tracked it.",
+            "enum": [
+              "pending",
+              "written",
+              "verified",
+              "failed",
+              "skipped"
+            ],
+            "type": "string"
+          },
+          "verifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "orgId",
+          "orgName",
+          "csp",
+          "mode",
+          "repairPending",
+          "needsUpdate",
+          "haven",
+          "havenOnly"
+        ],
+        "type": "object"
+      },
+      "HavenCloudAccountsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "accounts": {
+            "items": {
+              "$ref": "#/components/schemas/HavenCloudAccount"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "needsUpdate": {
+            "description": "Accounts a sync found Haven can hold only once their credentials are entered again.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "reentryRequested": {
+            "description": "Whether org admins are asked to enter credentials again.",
+            "type": "boolean"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accounts",
+          "total",
+          "reentryRequested",
+          "needsUpdate"
         ],
         "type": "object"
       },
@@ -21716,6 +21992,57 @@
         ],
         "type": "object"
       },
+      "HavenModeBlocked": {
+        "additionalProperties": false,
+        "properties": {
+          "blockers": {
+            "items": {
+              "$ref": "#/components/schemas/HavenAccountBlocker"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "blockers"
+        ],
+        "type": "object"
+      },
+      "HavenModeChange": {
+        "additionalProperties": false,
+        "properties": {
+          "blocked": {
+            "description": "The accounts that did not, and why.",
+            "items": {
+              "$ref": "#/components/schemas/HavenModeBlocked"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "changed": {
+            "description": "How many accounts switched.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "changed",
+          "blocked"
+        ],
+        "type": "object"
+      },
       "HavenReadiness": {
         "additionalProperties": false,
         "properties": {
@@ -21801,6 +22128,18 @@
           "itemsVerified",
           "itemsTotal",
           "vaultBypasses"
+        ],
+        "type": "object"
+      },
+      "HavenReentryResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "requested": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "requested"
         ],
         "type": "object"
       },
@@ -43296,6 +43635,30 @@
         ],
         "type": "object"
       },
+      "SessionDeadlines": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresIn": {
+            "description": "Seconds until the sign-in ends, unless inactivity ends it first.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "idleExpiresIn": {
+            "description": "Seconds until the sign-in ends unless it is used before then; absent when no policy limits inactivity.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "idleTimeout": {
+            "description": "Seconds the sign-in can go unused before it ends; absent when no policy limits inactivity.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expiresIn"
+        ],
+        "type": "object"
+      },
       "SessionScheduling": {
         "additionalProperties": false,
         "properties": {
@@ -43641,6 +44004,46 @@
         ],
         "type": "object"
       },
+      "SetModesInBody": {
+        "additionalProperties": false,
+        "properties": {
+          "csp": {
+            "description": "Switch every account of this cloud instead, up to 500.",
+            "enum": [
+              "aws",
+              "azure",
+              "google",
+              "openstack",
+              "oracle"
+            ],
+            "type": "string"
+          },
+          "ids": {
+            "description": "The accounts to switch.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 500,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "mode": {
+            "description": "vault always applies: it is an account's kill switch. haven needs the account's copy verified and the stage haven-first or haven-only; haven-only also needs the account in haven, a passing preflight, and a sync or verify since that found the stores equal.",
+            "enum": [
+              "vault",
+              "haven",
+              "haven-only"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "type": "object"
+      },
       "SetOrgLogoOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -43667,6 +44070,19 @@
         },
         "required": [
           "username"
+        ],
+        "type": "object"
+      },
+      "SetReentryInBody": {
+        "additionalProperties": false,
+        "properties": {
+          "requested": {
+            "description": "Whether org admins are asked to enter again the cloud credentials Haven cannot copy from Vault.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "requested"
         ],
         "type": "object"
       },
@@ -44217,7 +44633,7 @@
             "type": "string"
           },
           "types": {
-            "description": "Limit the run to these secret types; empty runs all.",
+            "description": "Limit the run to these secret types; empty runs all. Cloud credentials (aws, azure, gcp, openstack, oracle, hmac) are only copied to Haven: every reader still takes Vault's, so Vault's value always wins.",
             "items": {
               "enum": [
                 "oidc",
@@ -44228,7 +44644,18 @@
                 "platform-key",
                 "github-app",
                 "slack",
-                "gitlab-server"
+                "gitlab-server",
+                "github-token",
+                "gitlab-token",
+                "chatgpt",
+                "copilot",
+                "ssh-key",
+                "aws",
+                "azure",
+                "gcp",
+                "openstack",
+                "oracle",
+                "hmac"
               ],
               "type": "string"
             },
@@ -52240,6 +52667,126 @@
         ]
       }
     },
+    "/api/admin/haven/migration/cloud-accounts": {
+      "get": {
+        "description": "Returns every cloud account with its Haven mode, the state of its credentials' copy in Haven, and what blocks each mode. Platform admins only.",
+        "operationId": "list-haven-cloud-accounts",
+        "parameters": [
+          {
+            "description": "aws, azure, google, openstack or oracle; empty for all.",
+            "explode": false,
+            "in": "query",
+            "name": "csp",
+            "schema": {
+              "description": "aws, azure, google, openstack or oracle; empty for all.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "vault, haven or haven-only; empty for all.",
+            "explode": false,
+            "in": "query",
+            "name": "mode",
+            "schema": {
+              "description": "vault, haven or haven-only; empty for all.",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100,
+              "format": "int64",
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenCloudAccountsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List cloud accounts' Haven copies and modes",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/migration/cloud-accounts/mode": {
+      "post": {
+        "description": "Switches the named accounts, or every account of a cloud, to a Haven mode; each switches only if its gate allows, and the response names what blocked the rest. Vault always applies. Platform admins only.",
+        "operationId": "set-haven-cloud-account-modes",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetModesInBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenModeChange"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set cloud accounts' Haven mode",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/admin/haven/migration/failures": {
       "get": {
         "description": "Returns the failures grouped by category, Haven code, operation and type, with counts and samples. Platform admins only.",
@@ -52376,6 +52923,16 @@
             }
           },
           {
+            "description": "Only items with this reason, such as vault-bypass-write; empty for any.",
+            "explode": false,
+            "in": "query",
+            "name": "reason",
+            "schema": {
+              "description": "Only items with this reason, such as vault-bypass-write; empty for any.",
+              "type": "string"
+            }
+          },
+          {
             "explode": false,
             "in": "query",
             "name": "limit",
@@ -52421,6 +52978,92 @@
           }
         },
         "summary": "List the secrets the sync tracks",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/migration/items/accept-delete": {
+      "post": {
+        "description": "Deletes Haven's copies of the secrets something deleted from Vault outside Haven, which the sync keeps in case the delete was a mistake: the items named, or all of them. Each is deleted only while a sync left it pending for that reason and Vault still has no copy, read again now; it then becomes a tombstone. Holds the sync's lock. Platform admins only.",
+        "operationId": "accept-haven-vault-deletes",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptDeleteInBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenAcceptDeleteResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Accept deletes made in Vault outside Haven",
+        "tags": [
+          "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/migration/reentry": {
+      "put": {
+        "description": "Turns on or off the request, shown to org admins on each cloud account Haven cannot copy from Vault, to enter its credentials again. Shown only while the stage is haven-first or haven-only. Platform admins only.",
+        "operationId": "set-haven-reentry-request",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetReentryInBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenReentryResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Ask org admins to enter cloud credentials again",
         "tags": [
           "Migrations"
         ],
@@ -58237,6 +58880,68 @@
           }
         },
         "summary": "Get current session",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/auth/session/activity": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns when the current browser sign-in ends, and when it ends for inactivity under the browser-sign-in-idle-timeout policy. Reading it does not count as activity.",
+        "operationId": "get-auth-session-activity",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionDeadlines"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get sign-in deadlines",
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRecords that the person behind the current browser sign-in is using it, which restarts the browser-sign-in-idle-timeout clock, and returns the new deadlines. Call it on clicks and key presses, not from background requests.",
+        "operationId": "record-auth-session-activity",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionDeadlines"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Record sign-in activity",
         "tags": [
           "Authentication"
         ]
@@ -82359,9 +83064,77 @@
         ]
       }
     },
+    "/api/organizations/{organization}/policies/browser-sign-in-idle-timeout": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets how many seconds a browser sign-in can go unused before members must sign in again, from 5 minutes to 24 hours; no limit when unset. Clicks and keys in ACTIVATE count as use, as does input to session apps; background requests do not. Unavailable when the platform sets the policy.",
+        "operationId": "set-organization-browser-sign-in-idle-timeout-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Seconds a browser sign-in can go unused before the user must sign in again",
+                "examples": [
+                  900
+                ],
+                "format": "int64",
+                "maximum": 86400,
+                "minimum": 300,
+                "type": "integer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/IntPolicyOutput"
+                  },
+                  "description": "Map of int policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: browser-sign-in-idle-timeout",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/organizations/{organization}/policies/browser-sign-in-lifetime": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets how many seconds a new browser sign-in lasts before members must sign in again, from 15 minutes to 365 days. Sign-ins already made keep their original expiration. Unavailable when the platform sets the policy.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets how many seconds a browser sign-in lasts before members must sign in again, from 15 minutes to 365 days; 7 days when unset. Sign-ins already older than the new lifetime end. Unavailable when the platform sets the policy.",
         "operationId": "set-organization-browser-sign-in-lifetime-policy",
         "parameters": [
           {
@@ -82382,7 +83155,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "description": "Seconds a new browser sign-in lasts before the user must sign in again",
+                "description": "Seconds a browser sign-in lasts before the user must sign in again",
                 "examples": [
                   43200
                 ],
@@ -106138,15 +106911,121 @@
         ]
       }
     },
+    "/api/platform/policies/browser-sign-in-admin-idle-timeout": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets how many seconds a platform administrator's browser sign-in can go unused before they must sign in again, from 5 minutes to 24 hours. Applies when shorter than browser-sign-in-idle-timeout; no separate limit when unset.",
+        "operationId": "set-platform-browser-sign-in-admin-idle-timeout-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Seconds a browser sign-in can go unused before the user must sign in again",
+                "examples": [
+                  900
+                ],
+                "format": "int64",
+                "maximum": 86400,
+                "minimum": 300,
+                "type": "integer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/IntPolicyOutput"
+                  },
+                  "description": "Map of int policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: browser-sign-in-admin-idle-timeout",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/browser-sign-in-idle-timeout": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets how many seconds a browser sign-in can go unused before users must sign in again, from 5 minutes to 24 hours, for every organization; no limit when unset. Clicks and keys in ACTIVATE count as use, as does input to session apps; background requests do not.",
+        "operationId": "set-platform-browser-sign-in-idle-timeout-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Seconds a browser sign-in can go unused before the user must sign in again",
+                "examples": [
+                  900
+                ],
+                "format": "int64",
+                "maximum": 86400,
+                "minimum": 300,
+                "type": "integer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/IntPolicyOutput"
+                  },
+                  "description": "Map of int policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: browser-sign-in-idle-timeout",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/platform/policies/browser-sign-in-lifetime": {
       "post": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets how many seconds a new browser sign-in lasts before users must sign in again, from 15 minutes to 365 days, for every organization. Sign-ins already made keep their original expiration.",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets how many seconds a browser sign-in lasts before users must sign in again, from 15 minutes to 365 days, for every organization; 7 days when unset. Sign-ins already older than the new lifetime end.",
         "operationId": "set-platform-browser-sign-in-lifetime-policy",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "description": "Seconds a new browser sign-in lasts before the user must sign in again",
+                "description": "Seconds a browser sign-in lasts before the user must sign in again",
                 "examples": [
                   43200
                 ],

@@ -1091,6 +1091,61 @@ func (c *Client) ExportAdminEvents(ctx context.Context, opts ...ExportAdminEvent
 	return nil
 }
 
+// ListHavenCloudAccountsParams contains the parameters for the ListHavenCloudAccounts operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListHavenCloudAccountsParams struct {
+	// aws, azure, google, openstack or oracle; empty for all.
+	Csp *string `json:"csp,omitempty"`
+	// vault, haven or haven-only; empty for all.
+	Mode   *string `json:"mode,omitempty"`
+	Limit  *int64  `json:"limit,omitempty"`
+	Offset *int64  `json:"offset,omitempty"`
+}
+
+// ListHavenCloudAccounts - List cloud accounts' Haven copies and modes
+//
+// Returns every cloud account with its Haven mode, the state of its credentials' copy in Haven, and what blocks each mode. Platform admins only.
+func (c *Client) ListHavenCloudAccounts(ctx context.Context, opts ...ListHavenCloudAccountsParams) (*HavenCloudAccountsResponse, error) {
+
+	path := "/api/admin/haven/migration/cloud-accounts"
+	var params ListHavenCloudAccountsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "csp", "form", false, params.Csp)
+
+	addQueryParam(queryValues, "mode", "form", false, params.Mode)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	addQueryParam(queryValues, "offset", "form", false, params.Offset)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result HavenCloudAccountsResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetHavenCloudAccountModes - Set cloud accounts' Haven mode
+//
+// Switches the named accounts, or every account of a cloud, to a Haven mode; each switches only if its gate allows, and the response names what blocked the rest. Vault always applies. Platform admins only.
+func (c *Client) SetHavenCloudAccountModes(ctx context.Context, body SetModesInBody) (*HavenModeChange, error) {
+
+	path := "/api/admin/haven/migration/cloud-accounts/mode"
+
+	var result HavenModeChange
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListHavenMigrationFailuresParams contains the parameters for the ListHavenMigrationFailures operation.
 // Required parameters are value fields; optional parameters are pointers.
 type ListHavenMigrationFailuresParams struct {
@@ -1148,8 +1203,10 @@ func (c *Client) TriageHavenMigrationFailures(ctx context.Context, body TriageIn
 // Required parameters are value fields; optional parameters are pointers.
 type ListHavenMigrationItemsParams struct {
 	// pending, written, verified, failed or skipped; empty for all.
-	State  *string `json:"state,omitempty"`
-	Type   *string `json:"type,omitempty"`
+	State *string `json:"state,omitempty"`
+	Type  *string `json:"type,omitempty"`
+	// Only items with this reason, such as vault-bypass-write; empty for any.
+	Reason *string `json:"reason,omitempty"`
 	Limit  *int64  `json:"limit,omitempty"`
 	Offset *int64  `json:"offset,omitempty"`
 }
@@ -1169,6 +1226,8 @@ func (c *Client) ListHavenMigrationItems(ctx context.Context, opts ...ListHavenM
 
 	addQueryParam(queryValues, "type", "form", false, params.Type)
 
+	addQueryParam(queryValues, "reason", "form", false, params.Reason)
+
 	addQueryParam(queryValues, "limit", "form", false, params.Limit)
 
 	addQueryParam(queryValues, "offset", "form", false, params.Offset)
@@ -1179,6 +1238,34 @@ func (c *Client) ListHavenMigrationItems(ctx context.Context, opts ...ListHavenM
 
 	var result HavenItemsResponse
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// AcceptHavenVaultDeletes - Accept deletes made in Vault outside Haven
+//
+// Deletes Haven's copies of the secrets something deleted from Vault outside Haven, which the sync keeps in case the delete was a mistake: the items named, or all of them. Each is deleted only while a sync left it pending for that reason and Vault still has no copy, read again now; it then becomes a tombstone. Holds the sync's lock. Platform admins only.
+func (c *Client) AcceptHavenVaultDeletes(ctx context.Context, body AcceptDeleteInBody) (*HavenAcceptDeleteResponse, error) {
+
+	path := "/api/admin/haven/migration/items/accept-delete"
+
+	var result HavenAcceptDeleteResponse
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetHavenReentryRequest - Ask org admins to enter cloud credentials again
+//
+// Turns on or off the request, shown to org admins on each cloud account Haven cannot copy from Vault, to enter its credentials again. Shown only while the stage is haven-first or haven-only. Platform admins only.
+func (c *Client) SetHavenReentryRequest(ctx context.Context, body SetReentryInBody) (*HavenReentryResponse, error) {
+
+	path := "/api/admin/haven/migration/reentry"
+
+	var result HavenReentryResponse
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -3631,6 +3718,38 @@ func (c *Client) GetAuthSession(ctx context.Context) (*AuthSession, error) {
 
 	var result AuthSession
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAuthSessionActivity - Get sign-in deadlines
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns when the current browser sign-in ends, and when it ends for inactivity under the browser-sign-in-idle-timeout policy. Reading it does not count as activity.
+func (c *Client) GetAuthSessionActivity(ctx context.Context) (*SessionDeadlines, error) {
+
+	path := "/api/auth/session/activity"
+
+	var result SessionDeadlines
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RecordAuthSessionActivity - Record sign-in activity
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Records that the person behind the current browser sign-in is using it, which restarts the browser-sign-in-idle-timeout clock, and returns the new deadlines. Call it on clicks and key presses, not from background requests.
+func (c *Client) RecordAuthSessionActivity(ctx context.Context) (*SessionDeadlines, error) {
+
+	path := "/api/auth/session/activity"
+
+	var result SessionDeadlines
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -12228,11 +12347,28 @@ func (c *Client) SetOrganizationArchiveCostDataPolicy(ctx context.Context, organ
 	return &result, nil
 }
 
+// SetOrganizationBrowserSignInIdleTimeoutPolicy - Set organization policy: browser-sign-in-idle-timeout
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets how many seconds a browser sign-in can go unused before members must sign in again, from 5 minutes to 24 hours; no limit when unset. Clicks and keys in ACTIVATE count as use, as does input to session apps; background requests do not. Unavailable when the platform sets the policy.
+func (c *Client) SetOrganizationBrowserSignInIdleTimeoutPolicy(ctx context.Context, organization string, body int64) (*map[string]IntPolicyOutput, error) {
+
+	path := "/api/organizations/{organization}/policies/browser-sign-in-idle-timeout"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result map[string]IntPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetOrganizationBrowserSignInLifetimePolicy - Set organization policy: browser-sign-in-lifetime
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Sets how many seconds a new browser sign-in lasts before members must sign in again, from 15 minutes to 365 days. Sign-ins already made keep their original expiration. Unavailable when the platform sets the policy.
+// Sets how many seconds a browser sign-in lasts before members must sign in again, from 15 minutes to 365 days; 7 days when unset. Sign-ins already older than the new lifetime end. Unavailable when the platform sets the policy.
 func (c *Client) SetOrganizationBrowserSignInLifetimePolicy(ctx context.Context, organization string, body int64) (*map[string]IntPolicyOutput, error) {
 
 	path := "/api/organizations/{organization}/policies/browser-sign-in-lifetime"
@@ -19405,11 +19541,43 @@ func (c *Client) SetPlatformBaseImageCompliancePolicy(ctx context.Context, body 
 	return &result, nil
 }
 
+// SetPlatformBrowserSignInAdminIdleTimeoutPolicy - Set platform policy: browser-sign-in-admin-idle-timeout
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets how many seconds a platform administrator's browser sign-in can go unused before they must sign in again, from 5 minutes to 24 hours. Applies when shorter than browser-sign-in-idle-timeout; no separate limit when unset.
+func (c *Client) SetPlatformBrowserSignInAdminIdleTimeoutPolicy(ctx context.Context, body int64) (*map[string]IntPolicyOutput, error) {
+
+	path := "/api/platform/policies/browser-sign-in-admin-idle-timeout"
+
+	var result map[string]IntPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformBrowserSignInIdleTimeoutPolicy - Set platform policy: browser-sign-in-idle-timeout
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets how many seconds a browser sign-in can go unused before users must sign in again, from 5 minutes to 24 hours, for every organization; no limit when unset. Clicks and keys in ACTIVATE count as use, as does input to session apps; background requests do not.
+func (c *Client) SetPlatformBrowserSignInIdleTimeoutPolicy(ctx context.Context, body int64) (*map[string]IntPolicyOutput, error) {
+
+	path := "/api/platform/policies/browser-sign-in-idle-timeout"
+
+	var result map[string]IntPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetPlatformBrowserSignInLifetimePolicy - Set platform policy: browser-sign-in-lifetime
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Sets how many seconds a new browser sign-in lasts before users must sign in again, from 15 minutes to 365 days, for every organization. Sign-ins already made keep their original expiration.
+// Sets how many seconds a browser sign-in lasts before users must sign in again, from 15 minutes to 365 days, for every organization; 7 days when unset. Sign-ins already older than the new lifetime end.
 func (c *Client) SetPlatformBrowserSignInLifetimePolicy(ctx context.Context, body int64) (*map[string]IntPolicyOutput, error) {
 
 	path := "/api/platform/policies/browser-sign-in-lifetime"

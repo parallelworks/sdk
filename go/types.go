@@ -162,6 +162,13 @@ type AcceleratorInfo struct {
 	Name                    string   `json:"Name"`
 }
 
+type AcceptDeleteInBody struct {
+	// Accept every item a sync left pending because Vault lost it outside Haven (reason vault-bypass-write), found by the server; vaultPaths is then ignored.
+	All *bool `json:"all,omitempty"`
+	// The items, by Vault path.
+	VaultPaths []string `json:"vaultPaths,omitempty"`
+}
+
 type AcceptTermsBody struct {
 	// When the user accepted the Terms & Conditions
 	TermsAcceptedAt time.Time `json:"termsAcceptedAt"`
@@ -3059,10 +3066,20 @@ type CloudAccountDetail struct {
 	EnableOsLogin     bool                                    `json:"enableOsLogin"`
 	EncryptKey        *string                                 `json:"encryptKey,omitempty"`
 	GovCloud          bool                                    `json:"govCloud"`
+	Haven             *CloudAccountHaven                      `json:"haven,omitempty"`
 	Name              string                                  `json:"name"`
 	Networks          []CloudAccountNetworkSummary            `json:"networks"`
 	OpenstackMetadata *OpenstackMetadata                      `json:"openstackMetadata,omitempty"`
 	Permissions       map[string]CloudAccountPermissionsEntry `json:"permissions"`
+}
+
+type CloudAccountHaven struct {
+	// Where issuance will take the credentials from once it goes through Haven; until then Vault serves them in every mode. Platform admins only.
+	Mode *string `json:"mode,omitempty"`
+	// Whether Haven can hold the credentials only once they are entered again: Google service account keys, and AWS or Azure credentials without a copy core can read back.
+	NeedsUpdate bool `json:"needsUpdate"`
+	// Whether the platform asks org admins to enter such credentials again now.
+	ReentryRequested bool `json:"reentryRequested"`
 }
 
 type CloudAccountListItem struct {
@@ -7081,6 +7098,31 @@ type GroupWithMembers struct {
 	Roles []string `json:"roles,omitempty"`
 }
 
+type HavenAcceptDeleteResponse struct {
+	// Items whose Haven copy is deleted, now tombstones.
+	Accepted int64 `json:"accepted"`
+	// Items left as they were.
+	Refused int64 `json:"refused"`
+	// Each item's outcome.
+	Results []HavenAcceptDeleteResult `json:"results"`
+}
+
+type HavenAcceptDeleteResult struct {
+	// Haven's error code, when Haven refused.
+	Code    *string `json:"code,omitempty"`
+	Outcome string  `json:"outcome"`
+	// Why it was refused: not tracked; not pending for vault-bypass-write; a type readers take from Vault, whose deletes the sync already follows; not routed; Vault holds a copy again; Vault could not be read; Haven's copy changed in the last minute; a write changed the item meanwhile; Haven refused; or the item could not be read or recorded.
+	Reason    *string `json:"reason,omitempty"`
+	Type      *string `json:"type,omitempty"`
+	VaultPath string  `json:"vaultPath"`
+}
+
+type HavenAccountBlocker struct {
+	// The preflight check that failed.
+	Detail *string `json:"detail,omitempty"`
+	Reason string  `json:"reason"`
+}
+
 type HavenBlocker struct {
 	// The items or services the reason covers.
 	Count *int64 `json:"count,omitempty"`
@@ -7096,6 +7138,36 @@ type HavenCheck struct {
 	Status string `json:"status"`
 	// What the check is about, such as a root key's ID or a CA file's path.
 	Subject *string `json:"subject,omitempty"`
+}
+
+type HavenCloudAccount struct {
+	Csp string `json:"csp"`
+	// What blocks the haven mode; empty when it is allowed.
+	Haven []HavenAccountBlocker `json:"haven"`
+	// What blocks the haven-only mode; empty when it is allowed.
+	HavenOnly     []HavenAccountBlocker `json:"havenOnly"`
+	ID            string                `json:"id"`
+	Mode          string                `json:"mode"`
+	ModeChangedAt *time.Time            `json:"modeChangedAt,omitempty"`
+	Name          string                `json:"name"`
+	// Whether Haven can hold the credentials only once they are entered again.
+	NeedsUpdate   bool    `json:"needsUpdate"`
+	OrgID         string  `json:"orgId"`
+	OrgName       string  `json:"orgName"`
+	Reason        *string `json:"reason,omitempty"`
+	RepairPending bool    `json:"repairPending"`
+	// The state of the credentials' copy in Haven; empty before a sync or write tracked it.
+	State      *string    `json:"state,omitempty"`
+	VerifiedAt *time.Time `json:"verifiedAt,omitempty"`
+}
+
+type HavenCloudAccountsResponse struct {
+	Accounts []HavenCloudAccount `json:"accounts"`
+	// Accounts a sync found Haven can hold only once their credentials are entered again.
+	NeedsUpdate int64 `json:"needsUpdate"`
+	// Whether org admins are asked to enter credentials again.
+	ReentryRequested bool  `json:"reentryRequested"`
+	Total            int64 `json:"total"`
 }
 
 type HavenFailureGroup struct {
@@ -7147,6 +7219,19 @@ type HavenItemsResponse struct {
 	Total int64       `json:"total"`
 }
 
+type HavenModeBlocked struct {
+	Blockers []HavenAccountBlocker `json:"blockers"`
+	ID       string                `json:"id"`
+	Name     string                `json:"name"`
+}
+
+type HavenModeChange struct {
+	// The accounts that did not, and why.
+	Blocked []HavenModeBlocked `json:"blocked"`
+	// How many accounts switched.
+	Changed int64 `json:"changed"`
+}
+
 type HavenReadiness struct {
 	// When the current stretch without a fallback began.
 	CleanSince *time.Time `json:"cleanSince,omitempty"`
@@ -7174,6 +7259,10 @@ type HavenReadiness struct {
 	VaultBypasses int64 `json:"vaultBypasses"`
 	// How many days without a fallback or drift make haven-only ready.
 	WindowDays int64 `json:"windowDays"`
+}
+
+type HavenReentryResponse struct {
+	Requested bool `json:"requested"`
 }
 
 type HavenRunResponse struct {
@@ -14320,6 +14409,15 @@ type SessionCredentials struct {
 	Username string `json:"username"`
 }
 
+type SessionDeadlines struct {
+	// Seconds until the sign-in ends, unless inactivity ends it first.
+	ExpiresIn int64 `json:"expiresIn"`
+	// Seconds until the sign-in ends unless it is used before then; absent when no policy limits inactivity.
+	IdleExpiresIn *int64 `json:"idleExpiresIn,omitempty"`
+	// Seconds the sign-in can go unused before it ends; absent when no policy limits inactivity.
+	IdleTimeout *int64 `json:"idleTimeout,omitempty"`
+}
+
 type SessionScheduling struct {
 	// ID of the environment the worker was scheduled onto.
 	EnvironmentID *string `json:"environmentId,omitempty"`
@@ -14441,6 +14539,15 @@ type SetManagedClusterIconOutputBody struct {
 	ImageURL string `json:"imageUrl"`
 }
 
+type SetModesInBody struct {
+	// Switch every account of this cloud instead, up to 500.
+	Csp *string `json:"csp,omitempty"`
+	// The accounts to switch.
+	Ids []string `json:"ids,omitempty"`
+	// vault always applies: it is an account's kill switch. haven needs the account's copy verified and the stage haven-first or haven-only; haven-only also needs the account in haven, a passing preflight, and a sync or verify since that found the stores equal.
+	Mode string `json:"mode"`
+}
+
 type SetOrgLogoOutputBody struct {
 	// SHA256 hex of the attached blob.
 	Etag string `json:"etag"`
@@ -14449,6 +14556,11 @@ type SetOrgLogoOutputBody struct {
 type SetOwnerInputBody struct {
 	// The username of the user to set as organization owner.
 	Username string `json:"username"`
+}
+
+type SetReentryInBody struct {
+	// Whether org admins are asked to enter again the cloud credentials Haven cannot copy from Vault.
+	Requested bool `json:"requested"`
 }
 
 type SetSessionIconOutputBody struct {
@@ -14636,7 +14748,7 @@ type StartCodexDeviceAuthorizationInputBody struct {
 type StartRunInBody struct {
 	// A sync makes each secret's other store match the authoritative one: Vault until the secret is verified, then Haven; a deleted secret is removed from both. A dry run writes nothing; a verify only compares; a repair syncs only the secrets a failure left apart.
 	Kind string `json:"kind"`
-	// Limit the run to these secret types; empty runs all.
+	// Limit the run to these secret types; empty runs all. Cloud credentials (aws, azure, gcp, openstack, oracle, hmac) are only copied to Haven: every reader still takes Vault's, so Vault's value always wins.
 	Types []string `json:"types,omitempty"`
 }
 

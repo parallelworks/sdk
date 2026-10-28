@@ -295,6 +295,46 @@ func (c *Client) ListAdminEventsIter(ctx context.Context, opts ...ListAdminEvent
 	}
 }
 
+// ListHavenCloudAccountsIter returns an iterator over paginated ListHavenCloudAccounts results.
+// It advances offset by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) ListHavenCloudAccountsIter(ctx context.Context, opts ...ListHavenCloudAccountsParams) *PageIterator[HavenCloudAccount] {
+	return &PageIterator[HavenCloudAccount]{
+		fetch: func(cursor string) ([]HavenCloudAccount, string, error) {
+			p := ListHavenCloudAccountsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Offset != nil {
+				at = int64(*p.Offset)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the offset to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Offset = &next
+			}
+
+			result, err := c.ListHavenCloudAccounts(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Accounts
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
 // ListHavenMigrationItemsIter returns an iterator over paginated ListHavenMigrationItems results.
 // It advances offset by the number of items each page returns,
 // and stops on the first page that comes back empty.
