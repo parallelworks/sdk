@@ -367,6 +367,54 @@ func (c *Client) CancelBackgroundJob(ctx context.Context, jobID string) (*Backgr
 	return &result, nil
 }
 
+// GetBackgroundJobLogsParams contains the parameters for the GetBackgroundJobLogs operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetBackgroundJobLogsParams struct {
+	// Byte offset to read from, normally the nextOffset of the previous read. -1, the default, reads the end of the log.
+	Offset *int64 `json:"offset,omitempty"`
+	// Maximum number of bytes to return
+	Limit *int64 `json:"limit,omitempty"`
+	// Run id from a previous response. Empty follows the latest run.
+	Run *string `json:"run,omitempty"`
+	// Run the byte offset belongs to. A different selected run resets the read to its tail.
+	AfterRun *string `json:"afterRun,omitempty"`
+}
+
+// GetBackgroundJobLogs - Get background job logs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns retained executions and a bounded slice of log output, including output from a running job. Poll using run and nextOffset to read only newly appended output.
+func (c *Client) GetBackgroundJobLogs(ctx context.Context, jobID string, opts ...GetBackgroundJobLogsParams) (*BackgroundJobLogsOutputBody, error) {
+
+	path := "/api/admin/background-jobs/{jobId}/logs"
+	path = pathReplace(path, "jobId", "simple", false, jobID)
+	var params GetBackgroundJobLogsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "offset", "form", false, params.Offset)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	addQueryParam(queryValues, "run", "form", false, params.Run)
+
+	addQueryParam(queryValues, "afterRun", "form", false, params.AfterRun)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result BackgroundJobLogsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // RetryBackgroundJob - Retry a background job
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -1091,6 +1139,285 @@ func (c *Client) ExportAdminEvents(ctx context.Context, opts ...ExportAdminEvent
 	return nil
 }
 
+// ListHavenAuditParams contains the parameters for the ListHavenAudit operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListHavenAuditParams struct {
+	// Only this secret's records.
+	Path *string `json:"path,omitempty"`
+	// Only paths that start with this, such as org/64a1/.
+	PathPrefix *string `json:"pathPrefix,omitempty"`
+	Namespace  *string `json:"namespace,omitempty"`
+	Principal  *string `json:"principal,omitempty"`
+	// Only calls made for this user, by username or ID.
+	User *string `json:"user,omitempty"`
+	// Only this event type, such as haven.read.
+	Action *string `json:"action,omitempty"`
+	// Only event types that start with this, such as haven.policy.
+	ActionPrefix *string `json:"actionPrefix,omitempty"`
+	Outcome      *string `json:"outcome,omitempty"`
+	// Only records at or after this time (RFC3339).
+	Since *time.Time `json:"since,omitempty"`
+	// Only records before this time (RFC3339).
+	Until *time.Time `json:"until,omitempty"`
+	// desc for the newest first.
+	Order  *string `json:"order,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+	Limit  *int64  `json:"limit,omitempty"`
+}
+
+// ListHavenAudit - List Haven's audit trail
+//
+// Returns Haven's audit records, newest first unless asked otherwise, filtered, a page at a time. Records hold no secret value. Platform admins only.
+func (c *Client) ListHavenAudit(ctx context.Context, opts ...ListHavenAuditParams) (*HavenAuditPage, error) {
+
+	path := "/api/admin/haven/audit"
+	var params ListHavenAuditParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "path", "form", false, params.Path)
+
+	addQueryParam(queryValues, "pathPrefix", "form", false, params.PathPrefix)
+
+	addQueryParam(queryValues, "namespace", "form", false, params.Namespace)
+
+	addQueryParam(queryValues, "principal", "form", false, params.Principal)
+
+	addQueryParam(queryValues, "user", "form", false, params.User)
+
+	addQueryParam(queryValues, "action", "form", false, params.Action)
+
+	addQueryParam(queryValues, "actionPrefix", "form", false, params.ActionPrefix)
+
+	addQueryParam(queryValues, "outcome", "form", false, params.Outcome)
+
+	addQueryParam(queryValues, "since", "form", false, params.Since)
+
+	addQueryParam(queryValues, "until", "form", false, params.Until)
+
+	addQueryParam(queryValues, "order", "form", false, params.Order)
+
+	addQueryParam(queryValues, "cursor", "form", false, params.Cursor)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result HavenAuditPage
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ExportHavenAuditParams contains the parameters for the ExportHavenAudit operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ExportHavenAuditParams struct {
+	// Only this secret's records.
+	Path *string `json:"path,omitempty"`
+	// Only paths that start with this, such as org/64a1/.
+	PathPrefix *string `json:"pathPrefix,omitempty"`
+	Namespace  *string `json:"namespace,omitempty"`
+	Principal  *string `json:"principal,omitempty"`
+	// Only calls made for this user, by username or ID.
+	User *string `json:"user,omitempty"`
+	// Only this event type, such as haven.read.
+	Action *string `json:"action,omitempty"`
+	// Only event types that start with this, such as haven.policy.
+	ActionPrefix *string `json:"actionPrefix,omitempty"`
+	Outcome      *string `json:"outcome,omitempty"`
+	// Only records at or after this time (RFC3339).
+	Since *time.Time `json:"since,omitempty"`
+	// Only records before this time (RFC3339).
+	Until *time.Time `json:"until,omitempty"`
+}
+
+// ExportHavenAudit - Export Haven's audit trail
+//
+// Streams the audit records the filters select as JSON lines, newest first, up to 50,000. Platform admins only.
+func (c *Client) ExportHavenAudit(ctx context.Context, opts ...ExportHavenAuditParams) error {
+
+	path := "/api/admin/haven/audit/export"
+	var params ExportHavenAuditParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "path", "form", false, params.Path)
+
+	addQueryParam(queryValues, "pathPrefix", "form", false, params.PathPrefix)
+
+	addQueryParam(queryValues, "namespace", "form", false, params.Namespace)
+
+	addQueryParam(queryValues, "principal", "form", false, params.Principal)
+
+	addQueryParam(queryValues, "user", "form", false, params.User)
+
+	addQueryParam(queryValues, "action", "form", false, params.Action)
+
+	addQueryParam(queryValues, "actionPrefix", "form", false, params.ActionPrefix)
+
+	addQueryParam(queryValues, "outcome", "form", false, params.Outcome)
+
+	addQueryParam(queryValues, "since", "form", false, params.Since)
+
+	addQueryParam(queryValues, "until", "form", false, params.Until)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	if err := c.do(ctx, "GET", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// GetHavenAuditVerify - Get the audit chain's verification
+//
+// Returns the latest verification of the audit chain: running, or how it ended. Platform admins only.
+func (c *Client) GetHavenAuditVerify(ctx context.Context) (*HavenJob, error) {
+
+	path := "/api/admin/haven/audit/verify"
+
+	var result HavenJob
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// StartHavenAuditVerify - Verify Haven's audit chain
+//
+// Starts recomputing the whole audit hash chain in the background, one verification at a time across replicas; the result is kept until the next. Platform admins only.
+func (c *Client) StartHavenAuditVerify(ctx context.Context) (*HavenJob, error) {
+
+	path := "/api/admin/haven/audit/verify"
+
+	var result HavenJob
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListHavenIssuancesParams contains the parameters for the ListHavenIssuances operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListHavenIssuancesParams struct {
+	Path      *string `json:"path,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
+	// The session name a cloud audit log shows, such as in a CloudTrail entry.
+	SessionName *string `json:"sessionName,omitempty"`
+	Principal   *string `json:"principal,omitempty"`
+	// Only issuances in these states (repeatable).
+	State *[]string `json:"state,omitempty"`
+	// Only issuances at or after this time (RFC3339).
+	Since *time.Time `json:"since,omitempty"`
+	// Only issuances before this time (RFC3339).
+	Until  *time.Time `json:"until,omitempty"`
+	Cursor *string    `json:"cursor,omitempty"`
+	Limit  *int64     `json:"limit,omitempty"`
+}
+
+// ListHavenIssuances - List Haven's issuances
+//
+// Returns the short-lived credentials Haven issued, newest first, filtered, a page at a time; never a credential. Platform admins only.
+func (c *Client) ListHavenIssuances(ctx context.Context, opts ...ListHavenIssuancesParams) (*HavenIssuancesResponse, error) {
+
+	path := "/api/admin/haven/issuances"
+	var params ListHavenIssuancesParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "path", "form", false, params.Path)
+
+	addQueryParam(queryValues, "namespace", "form", false, params.Namespace)
+
+	addQueryParam(queryValues, "sessionName", "form", false, params.SessionName)
+
+	addQueryParam(queryValues, "principal", "form", false, params.Principal)
+
+	addQueryParam(queryValues, "state", "form", true, params.State)
+
+	addQueryParam(queryValues, "since", "form", false, params.Since)
+
+	addQueryParam(queryValues, "until", "form", false, params.Until)
+
+	addQueryParam(queryValues, "cursor", "form", false, params.Cursor)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result HavenIssuancesResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetHavenKeys - Get Haven's root keys
+//
+// Returns every root key the store has registered, its state and the principals that list it, and the wraps each version of a versioned root key holds. Platform admins only.
+func (c *Client) GetHavenKeys(ctx context.Context) (*HavenKeysResponse, error) {
+
+	path := "/api/admin/haven/keys"
+
+	var result HavenKeysResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListHavenKinds - List Haven's secret kinds
+//
+// Returns each kind Haven stores and its fields: which are secret, required or multiline, so a form can ask for a new value. Platform admins only.
+func (c *Client) ListHavenKinds(ctx context.Context) (*[]HavenKind, error) {
+
+	path := "/api/admin/haven/kinds"
+
+	var result []HavenKind
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetHavenMaintenance - Get Haven's maintenance run
+//
+// Returns the latest maintenance run started from this page: running, or what it did. Platform admins only.
+func (c *Client) GetHavenMaintenance(ctx context.Context) (*HavenJob, error) {
+
+	path := "/api/admin/haven/maintenance"
+
+	var result HavenJob
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// StartHavenMaintenance - Run Haven's maintenance
+//
+// Starts maintenance in the background, one run at a time across replicas: expired versions are destroyed, deleted secrets past their grace purged, data keys rewrapped off retired master keys, and the issuance ledger pruned. confirm is maintenance. Platform admins only.
+func (c *Client) StartHavenMaintenance(ctx context.Context, body HavenConfirm) (*HavenJob, error) {
+
+	path := "/api/admin/haven/maintenance"
+
+	var result HavenJob
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListHavenCloudAccountsParams contains the parameters for the ListHavenCloudAccounts operation.
 // Required parameters are value fields; optional parameters are pointers.
 type ListHavenCloudAccountsParams struct {
@@ -1380,6 +1707,474 @@ func (c *Client) GetHavenMigrationStatus(ctx context.Context) (*HavenStatusRespo
 	path := "/api/admin/haven/migration/status"
 
 	var result HavenStatusResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListHavenNamespacesParams contains the parameters for the ListHavenNamespaces operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListHavenNamespacesParams struct {
+	// Only namespaces whose name starts with this, such as org/64a1.
+	Prefix *string `json:"prefix,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+	Limit  *int64  `json:"limit,omitempty"`
+}
+
+// ListHavenNamespaces - List Haven's namespaces and master keys
+//
+// Returns namespaces by name, a page at a time, each with its secret count and master key versions: each one's state, the root key versions and recovery key that wrap it, and how many secret versions it still wraps. Never key material. Platform admins only.
+func (c *Client) ListHavenNamespaces(ctx context.Context, opts ...ListHavenNamespacesParams) (*HavenNamespacesResponse, error) {
+
+	path := "/api/admin/haven/namespaces"
+	var params ListHavenNamespacesParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "prefix", "form", false, params.Prefix)
+
+	addQueryParam(queryValues, "cursor", "form", false, params.Cursor)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result HavenNamespacesResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RotateHavenNamespace - Rotate a namespace's master key
+//
+// Creates a new master key version for a namespace and retires the old one, which maintenance then rewraps the namespace's data keys off; confirm repeats the name. Platform admins only.
+func (c *Client) RotateHavenNamespace(ctx context.Context, body HavenNamespaceRotate) (*HavenNamespace, error) {
+
+	path := "/api/admin/haven/namespaces/rotate"
+
+	var result HavenNamespace
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetHavenOverview - Get Haven's overview
+//
+// Returns Haven's FIPS mode, store connection and capabilities, each root key's health, the recovery key, and the audit chain's head and backlog. Platform admins only.
+func (c *Client) GetHavenOverview(ctx context.Context) (*HavenOverview, error) {
+
+	path := "/api/admin/haven/overview"
+
+	var result HavenOverview
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListHavenPolicies - List Haven's policies
+//
+// Returns every Haven policy, and whether core seeds it at startup. Platform admins only.
+func (c *Client) ListHavenPolicies(ctx context.Context) (*[]HavenPolicy, error) {
+
+	path := "/api/admin/haven/policies"
+
+	var result []HavenPolicy
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PutHavenPolicy - Save a Haven policy
+//
+// Creates or replaces a policy; confirm repeats its path glob. Core's seeded policies, and admin or a scope under _haven for this page's own principal, are refused. Platform admins only.
+func (c *Client) PutHavenPolicy(ctx context.Context, body HavenPolicyPut) (*HavenPolicy, error) {
+
+	path := "/api/admin/haven/policies"
+
+	var result HavenPolicy
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteHavenPolicy - Delete a Haven policy
+//
+// Removes a policy added by hand; confirm repeats its path glob. Core's seeded policies are refused. Platform admins only.
+func (c *Client) DeleteHavenPolicy(ctx context.Context, body HavenPolicyDelete) error {
+
+	path := "/api/admin/haven/policies/delete"
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// PreviewHavenPolicy - Preview a Haven policy
+//
+// Returns what a policy would grant before it is saved: the secrets it matches, the store scopes it reaches, the policy it replaces, broad grants worth a second look, and why saving it would be refused. Changes nothing. Platform admins only.
+func (c *Client) PreviewHavenPolicy(ctx context.Context, body HavenPolicyInput) (*HavenPolicyPreview, error) {
+
+	path := "/api/admin/haven/policies/preview"
+
+	var result HavenPolicyPreview
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetHavenSecretParams contains the parameters for the GetHavenSecret operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetHavenSecretParams struct {
+	// The secret's path, such as org/64a1/cloud-account/9f.
+	Path string `json:"path"`
+}
+
+// GetHavenSecret - Get a Haven secret's metadata
+//
+// Returns one secret's metadata, labels and versions, never a value, who may act on it and the policies that say so, and its migration state. Platform admins only.
+func (c *Client) GetHavenSecret(ctx context.Context, params GetHavenSecretParams) (*HavenSecretDetail, error) {
+
+	path := "/api/admin/haven/secret"
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "path", "form", false, params.Path)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result HavenSecretDetail
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListHavenSecretActivityParams contains the parameters for the ListHavenSecretActivity operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListHavenSecretActivityParams struct {
+	// The secret's path.
+	Path   string  `json:"path"`
+	Cursor *string `json:"cursor,omitempty"`
+	Limit  *int64  `json:"limit,omitempty"`
+}
+
+// ListHavenSecretActivity - List a Haven secret's recent activity
+//
+// Returns the secret's audit records, newest first, a page at a time. Platform admins only.
+func (c *Client) ListHavenSecretActivity(ctx context.Context, params ListHavenSecretActivityParams) (*HavenAuditPage, error) {
+
+	path := "/api/admin/haven/secret/activity"
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "path", "form", false, params.Path)
+
+	addQueryParam(queryValues, "cursor", "form", false, params.Cursor)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result HavenAuditPage
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CheckHavenSecret - Check a credential at its cloud
+//
+// Uses the credential at its cloud now, without returning it, and refreshes the labels Haven derives from the answer, such as its expiry. Platform admins only.
+func (c *Client) CheckHavenSecret(ctx context.Context, body HavenPathRequest) (*HavenCheckReport, error) {
+
+	path := "/api/admin/haven/secret/check"
+
+	var result HavenCheckReport
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreateHavenSecret - Create a Haven secret
+//
+// Stores a new secret of any kind Haven knows under console/, where no service reads and the Vault sync tracks nothing; a cloud credential is checked at its cloud unless skipCheck. Platform admins only.
+func (c *Client) CreateHavenSecret(ctx context.Context, body HavenCreateRequest) (*HavenWriteResult, error) {
+
+	path := "/api/admin/haven/secret/create"
+
+	var result HavenWriteResult
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteHavenSecret - Delete a Haven secret
+//
+// Deletes a secret, which can be undeleted until its grace period ends. Refused for a secret Vault still backs. Platform admins only.
+func (c *Client) DeleteHavenSecret(ctx context.Context, body HavenPathRequest) error {
+
+	path := "/api/admin/haven/secret/delete"
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// DestroyHavenSecretVersion - Destroy a Haven secret's version
+//
+// Destroys a previous version now, such as a leaked one, with the reason in Haven's audit; confirm repeats the path. Refused for a secret Vault still backs. Platform admins only.
+func (c *Client) DestroyHavenSecretVersion(ctx context.Context, body HavenDestroyVersionRequest) error {
+
+	path := "/api/admin/haven/secret/destroy-version"
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// IssueHavenCredential - Issue a short-lived credential from a cloud credential
+//
+// Issues a short-lived credential from a cloud account's root credential, with the reason recorded as the issuance's purpose, instead of revealing the root credential. Only a platform admin's own browser session may. Platform admins only.
+func (c *Client) IssueHavenCredential(ctx context.Context, body HavenIssueRequest) (*HavenIssued, error) {
+
+	path := "/api/admin/haven/secret/issue"
+
+	var result HavenIssued
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetHavenSecretLabels - Edit a Haven secret's labels
+//
+// Sets or removes a secret's labels, guarded by the label revision the admin saw. Labels core sets on its writes and Haven's own are refused. Platform admins only.
+func (c *Client) SetHavenSecretLabels(ctx context.Context, body HavenLabelsRequest) (*HavenLabelsResult, error) {
+
+	path := "/api/admin/haven/secret/labels"
+
+	var result HavenLabelsResult
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PurgeHavenSecret - Purge a Haven secret
+//
+// Destroys every version of a secret and removes it now, with no grace period; confirm repeats the path. Refused for a secret Vault still backs. Platform admins only.
+func (c *Client) PurgeHavenSecret(ctx context.Context, body HavenConfirmPathRequest) error {
+
+	path := "/api/admin/haven/secret/purge"
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// RestoreHavenSecretVersion - Restore a Haven secret's version
+//
+// Makes an earlier version's value current again as a new version, copied inside Haven so the value never leaves it. Refused for a secret Vault still backs. Platform admins only.
+func (c *Client) RestoreHavenSecretVersion(ctx context.Context, body HavenRestoreVersionRequest) (*HavenWriteResult, error) {
+
+	path := "/api/admin/haven/secret/restore-version"
+
+	var result HavenWriteResult
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RevealHavenSecret - Reveal a Haven secret's value
+//
+// Returns one version's value, with the reason recorded in Haven's audit as haven.reveal. Only a platform admin's own browser session may, at most 20 times an hour. Platform admins only.
+func (c *Client) RevealHavenSecret(ctx context.Context, body HavenRevealRequest) (*HavenRevealed, error) {
+
+	path := "/api/admin/haven/secret/reveal"
+
+	var result HavenRevealed
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RotateHavenSecret - Rotate a Haven secret
+//
+// Stores a new value as the secret's next version; the replaced one stays readable through its grace period. Refused for a secret Vault still backs, whose feature page changes it. Platform admins only.
+func (c *Client) RotateHavenSecret(ctx context.Context, body HavenRotateRequest) (*HavenWriteResult, error) {
+
+	path := "/api/admin/haven/secret/rotate"
+
+	var result HavenWriteResult
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UndeleteHavenSecret - Undelete a Haven secret
+//
+// Restores a deleted secret before it is purged. Refused for a secret Vault still backs. Platform admins only.
+func (c *Client) UndeleteHavenSecret(ctx context.Context, body HavenPathRequest) error {
+
+	path := "/api/admin/haven/secret/undelete"
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// ListHavenSecretsParams contains the parameters for the ListHavenSecrets operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListHavenSecretsParams struct {
+	// Only paths that start with this, such as org/64a1/.
+	Prefix    *string `json:"prefix,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
+	// Only this kind, such as kv or aws-static.
+	Kind *string `json:"kind,omitempty"`
+	// Words that must each appear in the path or a label value, ignoring case.
+	Q *string `json:"q,omitempty"`
+	// Labels that must match exactly, as key=value (repeatable).
+	Label *[]string `json:"label,omitempty"`
+	State *string   `json:"state,omitempty"`
+	// By path, by the name label, or by when the value last changed, newest first.
+	Sort *string `json:"sort,omitempty"`
+	// Only credentials their cloud reported to expire before this time (RFC3339).
+	ExpiresBefore *time.Time `json:"expiresBefore,omitempty"`
+	// Only secrets past their rotation reminder.
+	RotateDue *bool   `json:"rotateDue,omitempty"`
+	Cursor    *string `json:"cursor,omitempty"`
+	Limit     *int64  `json:"limit,omitempty"`
+}
+
+// ListHavenSecrets - List Haven's secrets
+//
+// Returns secrets' metadata and labels, never their values, filtered and sorted, a page at a time, with each one's migration state while the Vault sync tracks it. Platform admins only.
+func (c *Client) ListHavenSecrets(ctx context.Context, opts ...ListHavenSecretsParams) (*HavenSecretsResponse, error) {
+
+	path := "/api/admin/haven/secrets"
+	var params ListHavenSecretsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "prefix", "form", false, params.Prefix)
+
+	addQueryParam(queryValues, "namespace", "form", false, params.Namespace)
+
+	addQueryParam(queryValues, "kind", "form", false, params.Kind)
+
+	addQueryParam(queryValues, "q", "form", false, params.Q)
+
+	addQueryParam(queryValues, "label", "form", true, params.Label)
+
+	addQueryParam(queryValues, "state", "form", false, params.State)
+
+	addQueryParam(queryValues, "sort", "form", false, params.Sort)
+
+	addQueryParam(queryValues, "expiresBefore", "form", false, params.ExpiresBefore)
+
+	addQueryParam(queryValues, "rotateDue", "form", false, params.RotateDue)
+
+	addQueryParam(queryValues, "cursor", "form", false, params.Cursor)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result HavenSecretsResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListHavenSecretFoldersParams contains the parameters for the ListHavenSecretFolders operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListHavenSecretFoldersParams struct {
+	// The folder to list, ending in /, such as org/64a1/; empty for the top.
+	Prefix *string `json:"prefix,omitempty"`
+	State  *string `json:"state,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+	Limit  *int64  `json:"limit,omitempty"`
+}
+
+// ListHavenSecretFolders - List the folders under a Haven path
+//
+// Returns the next path segments under a prefix, each with how many secrets it holds and whether a secret sits at it, a page at a time. Platform admins only.
+func (c *Client) ListHavenSecretFolders(ctx context.Context, opts ...ListHavenSecretFoldersParams) (*HavenFoldersResponse, error) {
+
+	path := "/api/admin/haven/secrets/children"
+	var params ListHavenSecretFoldersParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "prefix", "form", false, params.Prefix)
+
+	addQueryParam(queryValues, "state", "form", false, params.State)
+
+	addQueryParam(queryValues, "cursor", "form", false, params.Cursor)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result HavenFoldersResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetHavenStatsParams contains the parameters for the GetHavenStats operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetHavenStatsParams struct {
+	// Count only paths under this folder, ending in /; empty for every secret.
+	Prefix *string `json:"prefix,omitempty"`
+}
+
+// GetHavenStats - Count Haven's secrets
+//
+// Returns how many secrets Haven holds by namespace, kind and state, and how many are past their rotation reminder. Platform admins only.
+func (c *Client) GetHavenStats(ctx context.Context, opts ...GetHavenStatsParams) (*HavenStats, error) {
+
+	path := "/api/admin/haven/stats"
+	var params GetHavenStatsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "prefix", "form", false, params.Prefix)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result HavenStats
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -2491,6 +3286,22 @@ func (c *Client) DeleteDeploymentResources(ctx context.Context, body DeleteDeplo
 	return &result, nil
 }
 
+// ImportResource - Import a cloud resource the platform did not create
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Tags a disk, IP address, bucket or snapshot created outside the platform as a platform deployment, so its cost is charged to a resource group's allocation. The resource group must have an allocation, and the owner must be a member of the resource's organization whose groups can use its cloud account. Platform administrators can import any resource; organization administrators can import their organization's. A dry run checks the import and lists the owner's resource groups.
+func (c *Client) ImportResource(ctx context.Context, body ImportResourceBody) (*ImportResourceResponse, error) {
+
+	path := "/api/admin/resources/import"
+
+	var result ImportResourceResponse
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // MuteOrphanAlerts - Mute orphan alerts for a deployment or individual resources
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -2650,6 +3461,84 @@ func (c *Client) RegisterNode(ctx context.Context, body RegisterNodeByTokenInput
 	return &result, nil
 }
 
+// GetAgentMachineClaudeAccountsParams contains the parameters for the GetAgentMachineClaudeAccounts operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentMachineClaudeAccountsParams struct {
+	Account   *string `json:"account,omitempty"`
+	Refresh   *bool   `json:"refresh,omitempty"`
+	NamesOnly *bool   `json:"namesOnly,omitempty"`
+}
+
+// GetAgentMachineClaudeAccounts - List Claude Code accounts on a machine
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List Claude Code accounts on a machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.
+func (c *Client) GetAgentMachineClaudeAccounts(ctx context.Context, machine string, opts ...GetAgentMachineClaudeAccountsParams) (*[]AgentClaudeAccount, error) {
+
+	path := "/api/agents/machines/{machine}/claude-code/accounts"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	var params GetAgentMachineClaudeAccountsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "account", "form", false, params.Account)
+
+	addQueryParam(queryValues, "refresh", "form", false, params.Refresh)
+
+	addQueryParam(queryValues, "namesOnly", "form", false, params.NamesOnly)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []AgentClaudeAccount
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentMachineClaudeModelsParams contains the parameters for the GetAgentMachineClaudeModels operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentMachineClaudeModelsParams struct {
+	Account   *string `json:"account,omitempty"`
+	Refresh   *bool   `json:"refresh,omitempty"`
+	NamesOnly *bool   `json:"namesOnly,omitempty"`
+}
+
+// GetAgentMachineClaudeModels - List Claude subscription models on a machine
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List Claude subscription models on a machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.
+func (c *Client) GetAgentMachineClaudeModels(ctx context.Context, machine string, opts ...GetAgentMachineClaudeModelsParams) (*[]AgentClaudeModel, error) {
+
+	path := "/api/agents/machines/{machine}/claude-code/models"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	var params GetAgentMachineClaudeModelsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "account", "form", false, params.Account)
+
+	addQueryParam(queryValues, "refresh", "form", false, params.Refresh)
+
+	addQueryParam(queryValues, "namesOnly", "form", false, params.NamesOnly)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []AgentClaudeModel
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListAgentMachineSessions - List pw code sessions on one machine
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -2735,6 +3624,46 @@ func (c *Client) AnswerAgentSessionApproval(ctx context.Context, machine string,
 		return parseErrorResponse(err)
 	}
 	return nil
+}
+
+// GetAgentSessionClaudeAccountsParams contains the parameters for the GetAgentSessionClaudeAccounts operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentSessionClaudeAccountsParams struct {
+	Account   *string `json:"account,omitempty"`
+	Refresh   *bool   `json:"refresh,omitempty"`
+	NamesOnly *bool   `json:"namesOnly,omitempty"`
+}
+
+// GetAgentSessionClaudeAccounts - List Claude Code accounts on a session's machine
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List Claude Code accounts on a session's machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.
+func (c *Client) GetAgentSessionClaudeAccounts(ctx context.Context, machine string, id string, opts ...GetAgentSessionClaudeAccountsParams) (*[]AgentClaudeAccount, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/claude-code/accounts"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	var params GetAgentSessionClaudeAccountsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "account", "form", false, params.Account)
+
+	addQueryParam(queryValues, "refresh", "form", false, params.Refresh)
+
+	addQueryParam(queryValues, "namesOnly", "form", false, params.NamesOnly)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []AgentClaudeAccount
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
 }
 
 // ClearAgentSession - Start a pw code session over
@@ -2893,6 +3822,46 @@ func (c *Client) SendAgentSessionMessage(ctx context.Context, machine string, id
 
 	var result AgentMessageAccepted
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentSessionClaudeModelsParams contains the parameters for the GetAgentSessionClaudeModels operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentSessionClaudeModelsParams struct {
+	Account   *string `json:"account,omitempty"`
+	Refresh   *bool   `json:"refresh,omitempty"`
+	NamesOnly *bool   `json:"namesOnly,omitempty"`
+}
+
+// GetAgentSessionClaudeModels - List Claude subscription models for a session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List Claude subscription models for a session. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.
+func (c *Client) GetAgentSessionClaudeModels(ctx context.Context, machine string, id string, opts ...GetAgentSessionClaudeModelsParams) (*[]AgentClaudeModel, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/models"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	var params GetAgentSessionClaudeModelsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "account", "form", false, params.Account)
+
+	addQueryParam(queryValues, "refresh", "form", false, params.Refresh)
+
+	addQueryParam(queryValues, "namesOnly", "form", false, params.NamesOnly)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []AgentClaudeModel
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4152,6 +5121,22 @@ func (c *Client) ValidateNewCluster(ctx context.Context, body ClusterCreate) (*N
 
 	var result NewClusterCheck
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetCodeSettings - Get pw code settings
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the pw code settings the caller's organization sets, such as the announcements pw code shows when it starts.
+func (c *Client) GetCodeSettings(ctx context.Context) (*GetCodeSettingsOutputBody, error) {
+
+	path := "/api/code/settings"
+
+	var result GetCodeSettingsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -9508,6 +10493,40 @@ func (c *Client) ListRegionStorageTypes(ctx context.Context, organization string
 
 	var result StorageTypes
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetOrganizationCodeSettings - Get organization pw code settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns what the organization sets for everyone who uses pw code, such as its startup announcements.
+func (c *Client) GetOrganizationCodeSettings(ctx context.Context, organization string) (*OrgCodeSettings, error) {
+
+	path := "/api/organizations/{organization}/code-settings"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result OrgCodeSettings
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateOrganizationCodeSettings - Update organization pw code settings
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces what the organization sets for everyone who uses pw code, and returns the settings as stored.
+func (c *Client) UpdateOrganizationCodeSettings(ctx context.Context, organization string, body OrgCodeSettings) (*OrgCodeSettings, error) {
+
+	path := "/api/organizations/{organization}/code-settings"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result OrgCodeSettings
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil

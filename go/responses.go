@@ -101,6 +101,34 @@ func (m *ResponseMeta) GetPkiValidationFileHeaders() GetPkiValidationFileHeaders
 	}
 }
 
+// IssueHavenCredentialHeaders holds the headers IssueHavenCredential declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type IssueHavenCredentialHeaders struct {
+	CacheControl string
+}
+
+// IssueHavenCredentialHeaders reads the headers IssueHavenCredential declares out of the captured
+// response.
+func (m *ResponseMeta) IssueHavenCredentialHeaders() IssueHavenCredentialHeaders {
+	return IssueHavenCredentialHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// RevealHavenSecretHeaders holds the headers RevealHavenSecret declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type RevealHavenSecretHeaders struct {
+	CacheControl string
+}
+
+// RevealHavenSecretHeaders reads the headers RevealHavenSecret declares out of the captured
+// response.
+func (m *ResponseMeta) RevealHavenSecretHeaders() RevealHavenSecretHeaders {
+	return RevealHavenSecretHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
 // RegisterNodeHeaders holds the headers RegisterNode declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type RegisterNodeHeaders struct {

@@ -630,6 +630,24 @@ type AdminProduct struct {
 	SetupStatus           string                 `json:"setupStatus"`
 }
 
+type AgentClaudeAccount struct {
+	Email               *string    `json:"email,omitempty"`
+	Error               *string    `json:"error,omitempty"`
+	FiveHourResetsAt    *time.Time `json:"fiveHourResetsAt,omitempty"`
+	FiveHourUsedPercent *float64   `json:"fiveHourUsedPercent,omitempty"`
+	Name                string     `json:"name"`
+	Plan                *string    `json:"plan,omitempty"`
+	SignInRequired      *bool      `json:"signInRequired,omitempty"`
+	Usage               *string    `json:"usage,omitempty"`
+	WeeklyResetsAt      *time.Time `json:"weeklyResetsAt,omitempty"`
+	WeeklyUsedPercent   *float64   `json:"weeklyUsedPercent,omitempty"`
+}
+
+type AgentClaudeModel struct {
+	ID   string  `json:"id"`
+	Name *string `json:"name,omitempty"`
+}
+
 type AgentCommandArgs struct {
 	// Everything typed after the command name.
 	Args *string `json:"args,omitempty"`
@@ -809,6 +827,7 @@ type AgentSessionDetail struct {
 	ArchivedAt         *time.Time        `json:"archivedAt,omitempty"`
 	AutoName           *string           `json:"autoName,omitempty"`
 	Branch             *string           `json:"branch,omitempty"`
+	ClaudeAccount      *string           `json:"claudeAccount,omitempty"`
 	CreatedAt          time.Time         `json:"createdAt"`
 	Effort             *string           `json:"effort,omitempty"`
 	History            []HistoryItem     `json:"history"`
@@ -843,6 +862,8 @@ type AgentSessionForked struct {
 type AgentSessionSettingsBody struct {
 	// Allocation to bill; the daemon requires one for org provider models.
 	Allocation *string `json:"allocation,omitempty"`
+	// An existing Claude Code account on the machine; applies after the current turn.
+	ClaudeAccount *string `json:"claudeAccount,omitempty"`
 	// Model id to switch the session to.
 	Model *string `json:"model,omitempty"`
 	// Authority the session runs with; the machine refuses anything above its remoteMaxPermissionMode.
@@ -1359,35 +1380,37 @@ type AppUpdateBody struct {
 }
 
 type ApprovalAnswer struct {
-	AllowDir    *bool    `json:"allowDir,omitempty"`
-	AllowRules  []string `json:"allowRules,omitempty"`
-	Allowed     *bool    `json:"allowed,omitempty"`
-	Chat        *bool    `json:"chat,omitempty"`
-	Clear       *bool    `json:"clear,omitempty"`
-	DenyMessage *string  `json:"denyMessage,omitempty"`
-	Feedback    *string  `json:"feedback,omitempty"`
-	Mode        *string  `json:"mode,omitempty"`
-	Plan        *string  `json:"plan,omitempty"`
-	Text        *string  `json:"text,omitempty"`
+	AllowDir    *bool               `json:"allowDir,omitempty"`
+	AllowRules  []string            `json:"allowRules,omitempty"`
+	Allowed     *bool               `json:"allowed,omitempty"`
+	Answers     []AskQuestionAnswer `json:"answers,omitempty"`
+	Chat        *bool               `json:"chat,omitempty"`
+	Clear       *bool               `json:"clear,omitempty"`
+	DenyMessage *string             `json:"denyMessage,omitempty"`
+	Feedback    *string             `json:"feedback,omitempty"`
+	Mode        *string             `json:"mode,omitempty"`
+	Plan        *string             `json:"plan,omitempty"`
+	Text        *string             `json:"text,omitempty"`
 }
 
 type ApprovalRequest struct {
-	Agent       *string     `json:"agent,omitempty"`
-	CallID      *string     `json:"callId,omitempty"`
-	Command     *string     `json:"command,omitempty"`
-	CreatedAt   time.Time   `json:"createdAt"`
-	Header      *string     `json:"header,omitempty"`
-	ID          string      `json:"id"`
-	Kind        string      `json:"kind"`
-	Mode        *string     `json:"mode,omitempty"`
-	MultiSelect *bool       `json:"multiSelect,omitempty"`
-	Options     []AskOption `json:"options,omitempty"`
-	Plan        *string     `json:"plan,omitempty"`
-	PlanPath    *string     `json:"planPath,omitempty"`
-	Question    *string     `json:"question,omitempty"`
-	Reason      *string     `json:"reason,omitempty"`
-	SubagentID  *string     `json:"subagentId,omitempty"`
-	Tool        *string     `json:"tool,omitempty"`
+	Agent       *string       `json:"agent,omitempty"`
+	CallID      *string       `json:"callId,omitempty"`
+	Command     *string       `json:"command,omitempty"`
+	CreatedAt   time.Time     `json:"createdAt"`
+	Header      *string       `json:"header,omitempty"`
+	ID          string        `json:"id"`
+	Kind        string        `json:"kind"`
+	Mode        *string       `json:"mode,omitempty"`
+	MultiSelect *bool         `json:"multiSelect,omitempty"`
+	Options     []AskOption   `json:"options,omitempty"`
+	Plan        *string       `json:"plan,omitempty"`
+	PlanPath    *string       `json:"planPath,omitempty"`
+	Question    *string       `json:"question,omitempty"`
+	Questions   []AskQuestion `json:"questions,omitempty"`
+	Reason      *string       `json:"reason,omitempty"`
+	SubagentID  *string       `json:"subagentId,omitempty"`
+	Tool        *string       `json:"tool,omitempty"`
 }
 
 type AppsOutputBody struct {
@@ -1397,6 +1420,19 @@ type AppsOutputBody struct {
 type AskOption struct {
 	Description *string `json:"description,omitempty"`
 	Label       string  `json:"label"`
+}
+
+type AskQuestion struct {
+	Header      *string     `json:"header,omitempty"`
+	MultiSelect *bool       `json:"multiSelect,omitempty"`
+	Options     []AskOption `json:"options,omitempty"`
+	Question    string      `json:"question"`
+}
+
+type AskQuestionAnswer struct {
+	Picked   []string `json:"picked,omitempty"`
+	Question *string  `json:"question,omitempty"`
+	Text     *string  `json:"text,omitempty"`
 }
 
 type AssignedOrganization struct {
@@ -1841,6 +1877,10 @@ type AzureBucketToken struct {
 	ClientSecret string `json:"clientSecret"`
 	// Time at which the credentials expire.
 	ExpiresAt time.Time `json:"expiresAt"`
+	// A container SAS with the same access and expiry, for clients that sign in with a SAS rather than the service principal. Set only for some cloud accounts.
+	SasToken *string `json:"sasToken,omitempty"`
+	// bucketUrl with sasToken appended. Set only with sasToken.
+	SasURL *string `json:"sasUrl,omitempty"`
 	// Name of the Azure storage account.
 	StorageAccount string `json:"storageAccount"`
 	// Azure subscription ID the bucket belongs to.
@@ -2173,6 +2213,32 @@ type BackgroundJobError struct {
 	Attempt int64 `json:"attempt"`
 	// The failure.
 	Error string `json:"error"`
+}
+
+type BackgroundJobLogRun struct {
+	// Attempt number, starting at one.
+	Attempt int64 `json:"attempt"`
+	// Identifies one execution, including repeated snoozes of the same attempt.
+	ID string `json:"id"`
+	// Whether this log was saved inline before live logging was enabled.
+	Legacy bool `json:"legacy"`
+}
+
+type BackgroundJobLogsOutputBody struct {
+	// The requested slice of the log, empty when nothing has been written yet
+	Log string `json:"log"`
+	// Offset to request next to read only what has since been appended
+	NextOffset int64 `json:"nextOffset"`
+	// Byte offset the returned slice starts at. Lower than the requested offset when the log was replaced, meaning the slice replaces rather than appends to what was read before.
+	Offset int64 `json:"offset"`
+	// The run returned; empty when no output has been written.
+	Run string `json:"run"`
+	// Retained runs, oldest first.
+	Runs []BackgroundJobLogRun `json:"runs"`
+	// Current size of the log in bytes
+	Size int64 `json:"size"`
+	// Current job state.
+	State string `json:"state"`
 }
 
 type BackgroundJobQueue struct {
@@ -3040,6 +3106,8 @@ type CloudAccountCredentialsInput struct {
 	OracleFingerprint *string `json:"oracleFingerprint,omitempty"`
 	// Oracle Cloud API private key (PEM format)
 	OraclePrivateKey *string `json:"oraclePrivateKey,omitempty"`
+	// Oracle Cloud tenancy's home region, such as us-ashburn-1; required for Oracle. The credentials are checked there; resources still pick their own region
+	OracleRegion *string `json:"oracleRegion,omitempty"`
 	// Oracle Cloud tenancy OCID
 	OracleTenancyOcid *string `json:"oracleTenancyOcid,omitempty"`
 	// Oracle Cloud user OCID
@@ -4195,6 +4263,8 @@ type CreateCloudAccountBody struct {
 	OracleFingerprint *string `json:"oracleFingerprint,omitempty"`
 	// Oracle Cloud API private key (PEM format)
 	OraclePrivateKey *string `json:"oraclePrivateKey,omitempty"`
+	// Oracle Cloud tenancy's home region, such as us-ashburn-1; required for Oracle. The credentials are checked there; resources still pick their own region
+	OracleRegion *string `json:"oracleRegion,omitempty"`
 	// Oracle Cloud tenancy OCID
 	OracleTenancyOcid *string `json:"oracleTenancyOcid,omitempty"`
 	// Oracle Cloud user OCID
@@ -4765,6 +4835,8 @@ type CreateSSHPublicKeyInputBody struct {
 type CreateSessionBody struct {
 	// Allocation to bill the session to. Required for org provider models.
 	Allocation *string `json:"allocation,omitempty"`
+	// An existing Claude Code account on the machine; used for subscription models.
+	ClaudeAccount *string `json:"claudeAccount,omitempty"`
 	// Model id; the machine's default is used when empty.
 	Model *string `json:"model,omitempty"`
 	// Authority the session runs with, clamped by the machine to its remoteMaxPermissionMode; the machine's default is used when empty.
@@ -5119,6 +5191,8 @@ type DashboardWidgetSettings struct {
 	ClusterFilter *string `json:"clusterFilter,omitempty"`
 	// kubernetesWorkloads: the Kubernetes cluster to list resources from.
 	ClusterName *string `json:"clusterName,omitempty"`
+	// sessions: how tightly to list sessions. Omitted lists them comfortably.
+	Density *string `json:"density,omitempty"`
 	// admin: the metrics not to show. Omitted or empty shows every metric.
 	HiddenMetrics []string `json:"hiddenMetrics,omitempty"`
 	// kubernetesWorkloads: the namespace to list resources from.
@@ -6477,7 +6551,7 @@ type GeneralCluster struct {
 	AllocationThreshold *CrossedThreshold `json:"allocationThreshold,omitempty"`
 	// Whether the requesting user may change this cluster's configuration.
 	CanEdit *bool `json:"canEdit,omitempty"`
-	// Features the cluster's connected agent supports, such as files. Absent when no agent is connected.
+	// Features the cluster's connected agent supports, such as files and files-write. Absent when no agent is connected.
 	Capabilities []string `json:"capabilities,omitempty"`
 	// The SSH connection string for the resource.
 	ConnectionString *string `json:"connectionString,omitempty"`
@@ -6581,6 +6655,12 @@ type GetChangelogOutputBody struct {
 
 type GetClusterMetricsOutputBody struct {
 	DataPoints []ClusterMetricsDataPoint `json:"dataPoints"`
+}
+
+type GetCodeSettingsOutputBody struct {
+	// The display name of the caller's organization, for crediting its announcements.
+	OrganizationDisplayName string          `json:"organizationDisplayName"`
+	Settings                OrgCodeSettings `json:"settings"`
 }
 
 type GetMessageSiblingsBody struct {
@@ -7118,9 +7198,59 @@ type HavenAcceptDeleteResult struct {
 }
 
 type HavenAccountBlocker struct {
-	// The preflight check that failed.
+	// The preflight check that failed, or the first permission the credentials lack.
 	Detail *string `json:"detail,omitempty"`
 	Reason string  `json:"reason"`
+}
+
+type HavenActionGrant struct {
+	Action string `json:"action"`
+	// The IDs of the policies that grant it.
+	Policies []string `json:"policies"`
+}
+
+type HavenAuditEvent struct {
+	// The event type, such as haven.read or haven.policy.put.
+	Action string    `json:"action"`
+	At     time.Time `json:"at"`
+	// The caller's context, such as the service that made the call.
+	Attributes map[string]string `json:"attributes,omitempty"`
+	// What the record adds, such as a count returned; never a value.
+	Details   map[string]string `json:"details,omitempty"`
+	ErrorCode *string           `json:"errorCode,omitempty"`
+	ID        string            `json:"id"`
+	// The user who impersonated them, by ID.
+	Impersonator *string `json:"impersonator,omitempty"`
+	Namespace    *string `json:"namespace,omitempty"`
+	Outcome      string  `json:"outcome"`
+	Path         *string `json:"path,omitempty"`
+	// The service identity that made the call, such as activate, or activate-console for this page.
+	Principal string `json:"principal"`
+	// Why the call was made, such as an issuance's purpose or the reason given for it.
+	Purpose   *string `json:"purpose,omitempty"`
+	RequestID *string `json:"requestId,omitempty"`
+	Seq       int64   `json:"seq"`
+	SourceIP  *string `json:"sourceIp,omitempty"`
+	UserAgent *string `json:"userAgent,omitempty"`
+	// The user the call was made for.
+	UserID   *string `json:"userId,omitempty"`
+	Username *string `json:"username,omitempty"`
+	Version  *int64  `json:"version,omitempty"`
+}
+
+type HavenAuditPage struct {
+	Events []HavenAuditEvent `json:"events"`
+	// Passed as cursor, continues to older records, or newer ones in ascending order; empty on the last page.
+	NextCursor *string `json:"nextCursor,omitempty"`
+}
+
+type HavenAuditStatus struct {
+	// The newest chained record's sequence number.
+	HeadSeq int64 `json:"headSeq"`
+	// How long the oldest pending record has waited; over 60 means no service is chaining.
+	OldestPendingSeconds int64 `json:"oldestPendingSeconds"`
+	// Records committed but not yet chained.
+	Pending int64 `json:"pending"`
 }
 
 type HavenBlocker struct {
@@ -7140,8 +7270,28 @@ type HavenCheck struct {
 	Subject *string `json:"subject,omitempty"`
 }
 
+type HavenCheckReport struct {
+	// When the cloud confirmed the credential.
+	CheckedAt *time.Time `json:"checkedAt,omitempty"`
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	// When the cloud says the credential stops working; empty unless the cloud confirmed it.
+	Expiry *string `json:"expiry,omitempty"`
+	// Why a credential never expires, or why its expiry is unknown.
+	ExpiryNote *string `json:"expiryNote,omitempty"`
+	// The haven. labels the secret carries now, such as its account and expiry.
+	Labels map[string]string `json:"labels"`
+	// Permissions issuance needs that the credential lacks, when they were checked.
+	Missing []HavenMissingPermission `json:"missing"`
+	// ok: the cloud accepted the credential; skipped: the check was skipped; none: Haven has no check for this kind.
+	Outcome string `json:"outcome"`
+	// What looks wrong but may be right.
+	Warnings []string `json:"warnings"`
+}
+
 type HavenCloudAccount struct {
-	Csp string `json:"csp"`
+	// When a credential check last got the cloud's answer on the permissions issuance needs.
+	CheckedAt *time.Time `json:"checkedAt,omitempty"`
+	Csp       string     `json:"csp"`
 	// What blocks the haven mode; empty when it is allowed.
 	Haven []HavenAccountBlocker `json:"haven"`
 	// What blocks the haven-only mode; empty when it is allowed.
@@ -7151,11 +7301,13 @@ type HavenCloudAccount struct {
 	ModeChangedAt *time.Time            `json:"modeChangedAt,omitempty"`
 	Name          string                `json:"name"`
 	// Whether Haven can hold the credentials only once they are entered again.
-	NeedsUpdate   bool    `json:"needsUpdate"`
-	OrgID         string  `json:"orgId"`
-	OrgName       string  `json:"orgName"`
-	Reason        *string `json:"reason,omitempty"`
-	RepairPending bool    `json:"repairPending"`
+	NeedsUpdate bool   `json:"needsUpdate"`
+	OrgID       string `json:"orgId"`
+	OrgName     string `json:"orgName"`
+	// What that check found the credentials lack. While any is missing, Vault serves an account in haven, and the account cannot move to haven-only.
+	PermissionsMissing []string `json:"permissionsMissing,omitempty"`
+	Reason             *string  `json:"reason,omitempty"`
+	RepairPending      bool     `json:"repairPending"`
 	// The state of the credentials' copy in Haven; empty before a sync or write tracked it.
 	State      *string    `json:"state,omitempty"`
 	VerifiedAt *time.Time `json:"verifiedAt,omitempty"`
@@ -7168,6 +7320,40 @@ type HavenCloudAccountsResponse struct {
 	// Whether org admins are asked to enter credentials again.
 	ReentryRequested bool  `json:"reentryRequested"`
 	Total            int64 `json:"total"`
+}
+
+type HavenConfirm struct {
+	// maintenance, typed by the admin.
+	Confirm string `json:"confirm"`
+}
+
+type HavenConfirmPathRequest struct {
+	// The path again, typed by the admin.
+	Confirm string `json:"confirm"`
+	// The secret's path.
+	Path string `json:"path"`
+}
+
+type HavenCreateRequest struct {
+	// The value's fields, as the kind names them; a kv secret's are data.<key>.
+	Fields []HavenFieldInput `json:"fields"`
+	// The secret's kind, as list-haven-kinds names it; kv when empty.
+	Kind *string `json:"kind,omitempty"`
+	// The path under console/, such as ops/break-glass: lowercase letters, digits, '.', '_' and '-', in '/'-separated segments.
+	Name string `json:"name"`
+	// Store a cloud credential without checking it at its cloud, such as one whose access is not granted yet.
+	SkipCheck *bool `json:"skipCheck,omitempty"`
+}
+
+type HavenDestroyVersionRequest struct {
+	// The path again, typed by the admin.
+	Confirm string `json:"confirm"`
+	// The secret's path.
+	Path string `json:"path"`
+	// Why, such as a leak, at most 256 bytes of UTF-8; Haven's audit keeps it.
+	Reason string `json:"reason"`
+	// A previous version; the current one is replaced by rotating, or removed with the secret.
+	Version int64 `json:"version"`
 }
 
 type HavenFailureGroup struct {
@@ -7187,6 +7373,47 @@ type HavenFailureGroup struct {
 	Type       string   `json:"type"`
 }
 
+type HavenFieldInput struct {
+	// The field, as the kind's fields name it, such as secretAccessKey or data.DB_PASSWORD.
+	Name string `json:"name"`
+	// The field's new value.
+	Value string `json:"value"`
+}
+
+type HavenFips struct {
+	// Whether that version has a CMVP certificate.
+	Certified bool `json:"certified"`
+	// Whether FIPS 140-3 mode is on.
+	Enabled bool `json:"enabled"`
+	// Whether algorithms outside FIPS 140-3 fail.
+	Enforced bool `json:"enforced"`
+	// The Go Cryptographic Module's version.
+	Module string `json:"module"`
+}
+
+type HavenFolder struct {
+	// A cloud credential's account, subscription, project or tenancy at its cloud.
+	Account *string `json:"account,omitempty"`
+	// The cloud account's name: a secret's cloud-account label, or for a folder, the cloud account of the bucket its path names.
+	CloudAccount *string `json:"cloudAccount,omitempty"`
+	// The next path segment under the prefix.
+	Name string `json:"name"`
+	// The organization's name: a secret's organization label, or for a folder, the organization its path names.
+	Organization *string `json:"organization,omitempty"`
+	// The prefix and the name.
+	Path string `json:"path"`
+	// Whether a secret sits at the path itself.
+	Secret bool `json:"secret"`
+	// Secrets under the path, in the state asked for.
+	Secrets int64 `json:"secrets"`
+}
+
+type HavenFoldersResponse struct {
+	Children []HavenFolder `json:"children"`
+	// Passed as cursor, continues the listing; empty on the last page.
+	NextCursor *string `json:"nextCursor,omitempty"`
+}
+
 type HavenImportedItem struct {
 	// What the run did with the secret, such as written, updated, verified, in-sync, repaired, deleted, conflict, would-write, differs or failed.
 	Action string `json:"action"`
@@ -7196,6 +7423,53 @@ type HavenImportedItem struct {
 	Reason    *string `json:"reason,omitempty"`
 	Type      string  `json:"type"`
 	VaultPath string  `json:"vaultPath"`
+}
+
+type HavenIssuance struct {
+	ErrorCode *string    `json:"errorCode,omitempty"`
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	ID        string     `json:"id"`
+	IssuedAt  time.Time  `json:"issuedAt"`
+	Issuer    string     `json:"issuer"`
+	Kind      string     `json:"kind"`
+	Namespace string     `json:"namespace"`
+	Path      string     `json:"path"`
+	Principal string     `json:"principal"`
+	Purpose   string     `json:"purpose"`
+	RequestID *string    `json:"requestId,omitempty"`
+	// What the credential may do, as JSON; never secret.
+	Scope     string `json:"scope"`
+	ScopeType string `json:"scopeType"`
+	// The name the cloud's audit log shows, such as in CloudTrail.
+	SessionName *string `json:"sessionName,omitempty"`
+	// abandoned: its process ended before recording the cloud's answer, so the cloud may have issued it.
+	State    string  `json:"state"`
+	UserID   *string `json:"userId,omitempty"`
+	Username *string `json:"username,omitempty"`
+	// The secret's version it was issued from.
+	Version int64 `json:"version"`
+}
+
+type HavenIssuancesResponse struct {
+	Issuances []HavenIssuance `json:"issuances"`
+	// Passed as cursor, continues to older issuances; empty on the last page.
+	NextCursor *string `json:"nextCursor,omitempty"`
+}
+
+type HavenIssueRequest struct {
+	// The cloud account credential's path.
+	Path string `json:"path"`
+	// Why the credential is needed, at most 250 bytes of UTF-8; it becomes the issuance's purpose after admin:.
+	Reason string `json:"reason"`
+}
+
+type HavenIssued struct {
+	ExpiresAt time.Time `json:"expiresAt"`
+	// The credential, such as an access key, a secret key and a session token.
+	Fields   []HavenRevealedField `json:"fields"`
+	IssuedAt time.Time            `json:"issuedAt"`
+	// The name the cloud's audit log shows for the credential, such as in CloudTrail.
+	SessionName string `json:"sessionName"`
 }
 
 type HavenItem struct {
@@ -7219,6 +7493,105 @@ type HavenItemsResponse struct {
 	Total int64       `json:"total"`
 }
 
+type HavenJob struct {
+	// Why it failed.
+	Error       *string                 `json:"error,omitempty"`
+	FinishedAt  *time.Time              `json:"finishedAt,omitempty"`
+	Kind        string                  `json:"kind"`
+	Maintenance *HavenMaintenanceResult `json:"maintenance,omitempty"`
+	StartedAt   *time.Time              `json:"startedAt,omitempty"`
+	// Who started it.
+	StartedBy *string `json:"startedBy,omitempty"`
+	// idle: never run from this page.
+	State  string             `json:"state"`
+	Verify *HavenVerifyResult `json:"verify,omitempty"`
+}
+
+type HavenKeyWrap struct {
+	// The root key version that made the wrap, for a KMS key that reports versions.
+	KeyVersion *string `json:"keyVersion,omitempty"`
+	RootKeyID  string  `json:"rootKeyId"`
+}
+
+type HavenKeysResponse struct {
+	// Every root key the store has registered.
+	Registered []HavenRegisteredRootKey `json:"registered"`
+	// For each root key ingress lists that reports versions, the wraps each version holds.
+	Versions []HavenRootKeyVersions `json:"versions"`
+}
+
+type HavenKind struct {
+	Fields []HavenKindField `json:"fields"`
+	Name   string           `json:"name"`
+}
+
+type HavenKindField struct {
+	// A list's entry fields.
+	Fields []HavenKindField `json:"fields,omitempty"`
+	// Whether its value spans lines, such as a PEM key or a key file.
+	Multiline bool `json:"multiline"`
+	// The field's name, as its value's fields are named: a map's entries are <name>.<key>, a list's <name>[i].<field>.
+	Name     string `json:"name"`
+	Required bool   `json:"required"`
+	// Whether its value is secret (for a map, each entry's).
+	Secret bool `json:"secret"`
+	// string; map: named string entries; list: entries with fields of their own; time: RFC 3339; json: anything else, as JSON.
+	Type string `json:"type"`
+}
+
+type HavenLabelsRequest struct {
+	// The label revision the admin saw; a change since refuses this one.
+	ExpectedRevision int64 `json:"expectedRevision"`
+	// The secret's path.
+	Path string `json:"path"`
+	// Labels to remove, by key; the same labels are refused.
+	Remove []string `json:"remove,omitempty"`
+	// Labels to add or change, by key. Haven checks each: a key of lowercase letters, digits, '.', '_', '/' and '-', at most 63 characters; a value of at most 256 characters; at most 64 labels on a secret. Labels core sets on its writes, such as vault-path, and Haven's own under haven. are refused.
+	Set map[string]string `json:"set,omitempty"`
+}
+
+type HavenLabelsResult struct {
+	// The labels' revision after the change.
+	LabelRevision int64 `json:"labelRevision"`
+}
+
+type HavenMaintenanceResult struct {
+	AbandonedIssuances int64 `json:"abandonedIssuances"`
+	ExpiredVersions    int64 `json:"expiredVersions"`
+	PrunedIssuances    int64 `json:"prunedIssuances"`
+	PurgedSecrets      int64 `json:"purgedSecrets"`
+	// Retired master key versions destroyed once nothing used them.
+	RetiredMasterKeys int64 `json:"retiredMasterKeys"`
+	// Secret versions moved off retired master keys.
+	RewrappedVersions int64 `json:"rewrappedVersions"`
+	// Whether another process was running maintenance, so this run did nothing.
+	Skipped bool `json:"skipped"`
+}
+
+type HavenMasterKey struct {
+	CreatedAt time.Time `json:"createdAt"`
+	ID        string    `json:"id"`
+	// Whether the active recovery key wraps it, so it survives losing every root key.
+	RecoveryWrapped bool       `json:"recoveryWrapped"`
+	RetiredAt       *time.Time `json:"retiredAt,omitempty"`
+	// A retired version still wraps data keys until maintenance moves them to the active one.
+	State   string `json:"state"`
+	Version int64  `json:"version"`
+	// Secret versions whose data keys it still wraps; a retired version's count falls to 0 as maintenance rewraps them onto the active one.
+	Versions int64 `json:"versions"`
+	// Its wraps under root keys; a destroyed version has none.
+	Wraps []HavenKeyWrap `json:"wraps"`
+}
+
+type HavenMissingPermission struct {
+	// How to grant it.
+	Fix *string `json:"fix,omitempty"`
+	// The cloud's name for it, such as sts:GetFederationToken.
+	Permission string `json:"permission"`
+	// What it is needed on, such as a bucket.
+	Resource *string `json:"resource,omitempty"`
+}
+
 type HavenModeBlocked struct {
 	Blockers []HavenAccountBlocker `json:"blockers"`
 	ID       string                `json:"id"`
@@ -7230,6 +7603,118 @@ type HavenModeChange struct {
 	Blocked []HavenModeBlocked `json:"blocked"`
 	// How many accounts switched.
 	Changed int64 `json:"changed"`
+}
+
+type HavenNamespace struct {
+	CreatedAt   time.Time  `json:"createdAt"`
+	DestroyedAt *time.Time `json:"destroyedAt,omitempty"`
+	// Its master key versions, newest first.
+	MasterKeys []HavenMasterKey `json:"masterKeys"`
+	Name       string           `json:"name"`
+	// The root keys that wrap its master keys; empty means every active one.
+	RootKeyIds []string `json:"rootKeyIds"`
+	// Its secrets, deleted ones awaiting purge included.
+	Secrets int64 `json:"secrets"`
+}
+
+type HavenNamespaceRotate struct {
+	// The namespace's name again, typed by the admin.
+	Confirm string `json:"confirm"`
+	// The namespace.
+	Name string `json:"name"`
+}
+
+type HavenNamespacesResponse struct {
+	// In byte order of their names.
+	Namespaces []HavenNamespace `json:"namespaces"`
+	// Passed as cursor, continues the listing; empty on the last page.
+	NextCursor *string `json:"nextCursor,omitempty"`
+}
+
+type HavenOverview struct {
+	Audit *HavenAuditStatus `json:"audit,omitempty"`
+	// Whether HAVEN_ROOT_KEYS is set and valid, connected yet or not.
+	Configured bool `json:"configured"`
+	// Whether the page's Haven client is open; it opens once the service's is.
+	Connected bool       `json:"connected"`
+	Fips      *HavenFips `json:"fips,omitempty"`
+	// The principal the page reads Haven as.
+	Principal   *string           `json:"principal,omitempty"`
+	RecoveryKey *HavenRecoveryKey `json:"recoveryKey,omitempty"`
+	// The root keys ingress opens Haven with.
+	RootKeys []HavenRootKeyHealth `json:"rootKeys"`
+	// The migration stage; until haven-only, Vault answers for secrets the sync has not verified.
+	Stage     string                  `json:"stage"`
+	Store     *HavenStoreCapabilities `json:"store,omitempty"`
+	Transport *string                 `json:"transport,omitempty"`
+}
+
+type HavenPathRequest struct {
+	// The secret's path.
+	Path string `json:"path"`
+}
+
+type HavenPolicy struct {
+	Actions []string `json:"actions"`
+	ID      string   `json:"id"`
+	// If set, the namespaces it is limited to.
+	Namespaces []string `json:"namespaces,omitempty"`
+	// The paths it covers: * within a segment, ** across segments; _haven/<scope> for the store's own state.
+	PathGlob  string `json:"pathGlob"`
+	Principal string `json:"principal"`
+	// Whether core seeds it when a service starts, so only a release changes it; the rest were added with the haven CLI or on this page.
+	Seeded bool `json:"seeded"`
+}
+
+type HavenPolicyDelete struct {
+	// The stored policy's path glob, typed by the admin.
+	Confirm string `json:"confirm"`
+	// The policy's ID.
+	ID string `json:"id"`
+}
+
+type HavenPolicyInput struct {
+	// What it grants. admin implies every action; reveal implies read.
+	Actions []string `json:"actions"`
+	// The policy's ID; saving an ID that exists replaces that policy.
+	ID string `json:"id"`
+	// If set, limits it to secrets in these namespaces, as globs.
+	Namespaces []string `json:"namespaces,omitempty"`
+	// The paths it covers: * within a segment, ** across segments; _haven/<scope> for the store's own state.
+	PathGlob string `json:"pathGlob"`
+	// Who it grants to, such as a service's principal or a person's name for the haven CLI.
+	Principal string `json:"principal"`
+}
+
+type HavenPolicyPreview struct {
+	// Whether every secret was read; when false, matches counts only those scanned.
+	Complete bool `json:"complete"`
+	// Secrets it grants an action on, of those scanned.
+	Matches  int64        `json:"matches"`
+	Policy   HavenPolicy  `json:"policy"`
+	Previous *HavenPolicy `json:"previous,omitempty"`
+	// Why saving it would be refused, as the error's code.
+	Refused *string `json:"refused,omitempty"`
+	// The first matching paths, up to 25.
+	Samples []string `json:"samples"`
+	// Secrets read for the preview; at most 5,000.
+	Scanned int64 `json:"scanned"`
+	// The store scopes under _haven it reaches, such as policy or audit.
+	Scopes []string `json:"scopes"`
+	// Grants worth a second look: admin; reveal-broad, reveal on every path; cloud-reveal, reveal on cloud account credentials; replaces, a stored policy has this ID.
+	Warnings []string `json:"warnings"`
+}
+
+type HavenPolicyPut struct {
+	// The policy's path glob again, typed by the admin.
+	Confirm string           `json:"confirm"`
+	Policy  HavenPolicyInput `json:"policy"`
+}
+
+type HavenPrincipalAccess struct {
+	// What the principal may do, implied actions included: admin implies every action, and reveal implies read.
+	Actions   []HavenActionGrant `json:"actions"`
+	Principal string             `json:"principal"`
 }
 
 type HavenReadiness struct {
@@ -7261,8 +7746,97 @@ type HavenReadiness struct {
 	WindowDays int64 `json:"windowDays"`
 }
 
+type HavenRecoveryKey struct {
+	Error        *string    `json:"error,omitempty"`
+	ID           *string    `json:"id,omitempty"`
+	RegisteredAt *time.Time `json:"registeredAt,omitempty"`
+	// The principal that registered it.
+	RegisteredBy *string `json:"registeredBy,omitempty"`
+	// ok; missing before haven init registers one; invalid when its record was changed outside Haven; unknown when the store could not be read.
+	State string `json:"state"`
+}
+
 type HavenReentryResponse struct {
 	Requested bool `json:"requested"`
+}
+
+type HavenRegisteredRootKey struct {
+	CanUnwrap bool   `json:"canUnwrap"`
+	ID        string `json:"id"`
+	// The principals that list the key, most recent first.
+	Listings []HavenRootKeyListing `json:"listings"`
+	// When the key was registered or last changed state.
+	Since time.Time `json:"since"`
+	State string    `json:"state"`
+}
+
+type HavenRestoreVersionRequest struct {
+	// The current version the admin saw; a write since refuses this one.
+	ExpectedVersion int64 `json:"expectedVersion"`
+	// The secret's path.
+	Path string `json:"path"`
+	// The earlier version whose value becomes current again.
+	Version int64 `json:"version"`
+}
+
+type HavenRevealRequest struct {
+	// The secret's path.
+	Path string `json:"path"`
+	// Why the value is needed, at most 256 bytes of UTF-8; Haven's audit keeps it with the reveal.
+	Reason string `json:"reason"`
+	// The version to reveal; 0 or absent for the current one.
+	Version *int64 `json:"version,omitempty"`
+}
+
+type HavenRevealed struct {
+	Fields  []HavenRevealedField `json:"fields"`
+	Kind    string               `json:"kind"`
+	Version int64                `json:"version"`
+}
+
+type HavenRevealedField struct {
+	// The field, such as secretAccessKey, data.DB_PASSWORD or keys[0].material.
+	Name string `json:"name"`
+	// Whether the field is secret, so the page masks it until asked.
+	Secret bool `json:"secret"`
+	// The value as text; render it as text, never as markup.
+	Value string `json:"value"`
+}
+
+type HavenRootKeyHealth struct {
+	Algorithm *string `json:"algorithm,omitempty"`
+	// Whether the key's service logs each use with the caller.
+	Audited   bool `json:"audited"`
+	CanUnwrap bool `json:"canUnwrap"`
+	// Why the health check failed; empty when the key is healthy.
+	Error        *string `json:"error,omitempty"`
+	FipsApproved bool    `json:"fipsApproved"`
+	// Whether the key material is in validated hardware.
+	Hardware bool   `json:"hardware"`
+	ID       string `json:"id"`
+}
+
+type HavenRootKeyListing struct {
+	// When the principal last opened Haven with the key, or loaded a master key to write with it.
+	LastListed time.Time `json:"lastListed"`
+	Principal  string    `json:"principal"`
+}
+
+type HavenRootKeyVersions struct {
+	ID string `json:"id"`
+	// Wraps of master keys by key version; the key "" counts wraps that record no version. A version with none can be disabled.
+	Wraps map[string]int64 `json:"wraps"`
+}
+
+type HavenRotateRequest struct {
+	// The current version the admin saw; a write since refuses this one.
+	ExpectedVersion int64 `json:"expectedVersion"`
+	// The new value's fields, as the secret's kind names them.
+	Fields []HavenFieldInput `json:"fields"`
+	// The secret's path.
+	Path string `json:"path"`
+	// Store a cloud credential without checking it at its cloud, such as one whose access is not granted yet.
+	SkipCheck *bool `json:"skipCheck,omitempty"`
 }
 
 type HavenRunResponse struct {
@@ -7284,6 +7858,84 @@ type HavenRunResponse struct {
 	Unrouted []string `json:"unrouted,omitempty"`
 }
 
+type HavenSecret struct {
+	// The cloud account, subscription, project or tenancy a credential belongs to.
+	Account *string `json:"account,omitempty"`
+	// A cloud credential's cloud.
+	Cloud *string `json:"cloud,omitempty"`
+	// What this page may do to the secret by Haven's policies now, such as reveal or rotate; the server checks again on every call.
+	ConsoleActions []string   `json:"consoleActions"`
+	CreatedAt      time.Time  `json:"createdAt"`
+	DeletedAt      *time.Time `json:"deletedAt,omitempty"`
+	ExpiresAt      *time.Time `json:"expiresAt,omitempty"`
+	// When the cloud last reported the credential stops working; empty if never checked.
+	Expiry *string `json:"expiry,omitempty"`
+	Kind   string  `json:"kind"`
+	// The labels' revision, which an edit names so it never overwrites a change made since.
+	LabelRevision int64 `json:"labelRevision"`
+	// Plain metadata: the host's labels, such as name and owner, and Haven's own under haven., such as a credential's account and expiry.
+	Labels map[string]string `json:"labels"`
+	// Whether Haven's own labels were edited outside Haven; they are left out until a check recomputes them.
+	LabelsTampered bool                  `json:"labelsTampered"`
+	Migration      *HavenSecretMigration `json:"migration,omitempty"`
+	Namespace      string                `json:"namespace"`
+	Path           string                `json:"path"`
+	// When a deleted secret is purged for good.
+	PurgeAfter *time.Time `json:"purgeAfter,omitempty"`
+	// When the secret is due for rotation.
+	RotateAfter *time.Time `json:"rotateAfter,omitempty"`
+	State       string     `json:"state"`
+	// When anything about the secret last changed, its labels included.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// When the current version was written; label changes, deletes and undeletes leave it.
+	ValueChangedAt time.Time `json:"valueChangedAt"`
+	// The current version.
+	Version int64 `json:"version"`
+}
+
+type HavenSecretDetail struct {
+	// Who may act on the secret, by Haven's policies now.
+	Access []HavenPrincipalAccess `json:"access"`
+	Secret HavenSecret            `json:"secret"`
+	// Newest first.
+	Versions []HavenSecretVersion `json:"versions"`
+}
+
+type HavenSecretMigration struct {
+	Reason    *string   `json:"reason,omitempty"`
+	State     string    `json:"state"`
+	Type      string    `json:"type"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	// Whether the page refuses changes to the secret's value (rotate, restore or destroy a version, delete, undelete, purge) because Vault still keeps a copy the sync compares; its feature page makes them, writing both stores.
+	ValueChangesRefused bool `json:"valueChangesRefused"`
+	// Whether readers take Vault's copy: while the stage is off, and in haven-first until the sync verifies Haven's copy; for a cloud credential or HMAC key, until its cloud account's mode routes it to Haven.
+	VaultAuthoritative bool `json:"vaultAuthoritative"`
+	// The Vault secret Haven's copy mirrors, as core's vault-path label names it. A cloud credential's changes with every rotation, so the sync tracks it by its account instead.
+	VaultPath  string     `json:"vaultPath"`
+	VerifiedAt *time.Time `json:"verifiedAt,omitempty"`
+}
+
+type HavenSecretVersion struct {
+	CreatedAt time.Time `json:"createdAt"`
+	// The principal that wrote it.
+	CreatedBy   string     `json:"createdBy"`
+	DestroyedAt *time.Time `json:"destroyedAt,omitempty"`
+	// A keyed hash of the value: equal fingerprints mean equal values, and it reveals nothing else.
+	Fingerprint *string `json:"fingerprint,omitempty"`
+	// When a previous version stops being readable.
+	GraceUntil  *time.Time `json:"graceUntil,omitempty"`
+	MasterKeyID string     `json:"masterKeyId"`
+	State       string     `json:"state"`
+	Version     int64      `json:"version"`
+}
+
+type HavenSecretsResponse struct {
+	// Passed as cursor, continues the listing; empty on the last page.
+	NextCursor *string `json:"nextCursor,omitempty"`
+	// A page can hold fewer than the limit while nextCursor is set.
+	Secrets []HavenSecret `json:"secrets"`
+}
+
 type HavenSequence struct {
 	// The preflight check that failed, and what it is about, such as a root key.
 	Check   *string `json:"check,omitempty"`
@@ -7299,6 +7951,24 @@ type HavenSequence struct {
 	State     string     `json:"state"`
 	Step      string     `json:"step"`
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+type HavenStats struct {
+	// Secrets by namespace, kind and state.
+	Counts []HavenStatsCount `json:"counts"`
+	// Secrets past their rotation reminder.
+	RotateDue int64 `json:"rotateDue"`
+	// Secrets in every state, deleted ones awaiting purge included.
+	Secrets int64 `json:"secrets"`
+}
+
+type HavenStatsCount struct {
+	Kind      string `json:"kind"`
+	Namespace string `json:"namespace"`
+	// Of these, the secrets past their rotation reminder.
+	RotateDue int64  `json:"rotateDue"`
+	Secrets   int64  `json:"secrets"`
+	State     string `json:"state"`
 }
 
 type HavenStatusResponse struct {
@@ -7322,6 +7992,33 @@ type HavenStatusResponse struct {
 	RunInProgress   bool            `json:"runInProgress"`
 	Sequence        *HavenSequence  `json:"sequence,omitempty"`
 	Stage           string          `json:"stage"`
+}
+
+type HavenStoreCapabilities struct {
+	// Whether the database itself refuses edits to the audit trail.
+	AppendOnlyAudit   bool `json:"appendOnlyAudit"`
+	ConcurrentWriters bool `json:"concurrentWriters"`
+	// Whether the store connection verifies the server's certificate.
+	EncryptedTransport bool `json:"encryptedTransport"`
+	IndexedSearch      bool `json:"indexedSearch"`
+	// Whether expiry follows the database's clock rather than each service's.
+	ServerTime bool `json:"serverTime"`
+}
+
+type HavenVerifyResult struct {
+	// The newest record it verified.
+	HeadSeq int64 `json:"headSeq"`
+	// Records the verification read.
+	Records int64 `json:"records"`
+	// The first record that does not verify, when the chain is broken.
+	TamperedAtSeq *int64 `json:"tamperedAtSeq,omitempty"`
+}
+
+type HavenWriteResult struct {
+	Check HavenCheckReport `json:"check"`
+	Path  string           `json:"path"`
+	// The version written.
+	Version int64 `json:"version"`
 }
 
 type HealthMonitoringSettings struct {
@@ -8154,6 +8851,41 @@ type ImageComplianceItem struct {
 	State string `json:"state"`
 }
 
+type ImportResourceBody struct {
+	// Check the import and list the owner's resource groups without importing.
+	DryRun bool `json:"dryRun"`
+	// Platform name of the imported resource, unique among the owner's resources. Required to import; checked on a dry run when given.
+	Name *string `json:"name,omitempty"`
+	// Username of the member who owns the imported resource. Defaults to the caller.
+	Owner *string `json:"owner,omitempty"`
+	// Resource group the resource's cost is charged to; it must have an allocation. Optional on a dry run.
+	ResourceGroup *string `json:"resourceGroup,omitempty"`
+	// Username of the resource group's owner, to pick between groups that share a name.
+	ResourceGroupUser *string `json:"resourceGroupUser,omitempty"`
+	// Row id of the resource to import, from the resources list.
+	ResourceID string `json:"resourceId"`
+}
+
+type ImportResourceGroup struct {
+	// Resource group name.
+	Name string `json:"name"`
+	// Username of the resource group's owner.
+	Owner *string `json:"owner,omitempty"`
+	// Why the resource can't be charged to this group: its allocation is over budget, doesn't allow the resource's cloud, its owner lost access to it, it no longer exists, or it isn't rated in USD.
+	Unavailable *string `json:"unavailable,omitempty"`
+}
+
+type ImportResourceResponse struct {
+	// Whether this was a check only.
+	DryRun bool `json:"dryRun"`
+	// Id of the import, which the resource is tagged with as its deployment id.
+	ImportID *string `json:"importId,omitempty"`
+	// Username of the owner the resource is imported for.
+	Owner string `json:"owner"`
+	// On a dry run, the owner's resource groups with an allocation, each saying whether it can take the resource.
+	ResourceGroups []ImportResourceGroup `json:"resourceGroups,omitempty"`
+}
+
 type IndexDifference struct {
 	// Value currently in the database
 	Actual string `json:"actual"`
@@ -8204,7 +8936,7 @@ type InstallationResponse struct {
 type Instance struct {
 	// The architecture of the Instance.
 	Architecture *string `json:"architecture,omitempty"`
-	// Features the instance's connected agent supports, such as files. Absent when no agent is connected.
+	// Features the instance's connected agent supports, such as files and files-write. Absent when no agent is connected.
 	Capabilities []string `json:"capabilities,omitempty"`
 	// The cloud service provider for the Instance.
 	Csp string `json:"csp"`
@@ -10751,6 +11483,11 @@ type OrgBillingSettings struct {
 	AllocationSystem string `json:"allocationSystem"`
 	// Username shown on dashboards and reports for cost records without a username tag. Empty when unset.
 	DefaultBillingUsername string `json:"defaultBillingUsername"`
+}
+
+type OrgCodeSettings struct {
+	// Messages pw code shows when it starts, one at random each launch. Control characters other than newlines are removed, and blank ones are dropped.
+	Announcements []string `json:"announcements,omitempty"`
 }
 
 type OrgConnectionPermissionsOutputBody struct {
@@ -13487,6 +14224,14 @@ type Resource struct {
 	EndTime *time.Time `json:"endTime,omitempty"`
 	// Row id.
 	ID string `json:"id"`
+	// Why the import failed: too many tags, the cloud account may not tag it, it no longer exists, it was replaced, or another cloud error.
+	ImportFailure *string `json:"importFailure,omitempty"`
+	// Platform name the resource is imported under, while it is being imported or once imported.
+	ImportName *string `json:"importName,omitempty"`
+	// State of an import of this external resource, until the inventory lists it as platform-managed.
+	ImportStatus *string `json:"importStatus,omitempty"`
+	// The platform-managed resource was created outside the platform and imported for billing.
+	Imported *bool `json:"imported,omitempty"`
 	// Last time the resource was seen in the cloud.
 	LastSeenAt time.Time `json:"lastSeenAt"`
 	// Organization name.
@@ -13678,6 +14423,8 @@ type ResourceGroupResource struct {
 	ID string `json:"id"`
 	// Custom icon configured on the resource
 	ImageURL *string `json:"imageUrl,omitempty"`
+	// The resource was created outside the platform and imported for billing
+	Imported *bool `json:"imported,omitempty"`
 	// Resource name
 	Name string `json:"name"`
 	// Resource namespace (owner username)
@@ -14449,36 +15196,36 @@ type SessionSoftware struct {
 }
 
 type SessionState struct {
-	Allocation             *string       `json:"allocation,omitempty"`
-	Attribution            *bool         `json:"attribution,omitempty"`
-	AutoCompactWindow      *int64        `json:"autoCompactWindow,omitempty"`
-	AutoName               *string       `json:"autoName,omitempty"`
-	BackgroundShells       *int64        `json:"backgroundShells,omitempty"`
-	EffectiveEffort        *string       `json:"effectiveEffort,omitempty"`
-	Effort                 *string       `json:"effort,omitempty"`
-	EffortActive           *bool         `json:"effortActive,omitempty"`
-	Goal                   *GoalStatus   `json:"goal,omitempty"`
-	InputTokens            *int64        `json:"inputTokens,omitempty"`
-	Model                  string        `json:"model"`
-	Name                   *string       `json:"name,omitempty"`
-	OutputTokens           *int64        `json:"outputTokens,omitempty"`
-	PasteInlineMaxBytes    *int64        `json:"pasteInlineMaxBytes,omitempty"`
-	PendingSubagentWork    *bool         `json:"pendingSubagentWork,omitempty"`
-	PermissionMode         *string       `json:"permissionMode,omitempty"`
-	ProviderUsageAvailable *bool         `json:"providerUsageAvailable,omitempty"`
-	RemoteControl          *bool         `json:"remoteControl,omitempty"`
-	RemotePolicy           RemotePolicy  `json:"remotePolicy"`
-	RemoteTunnel           *RemoteTunnel `json:"remoteTunnel,omitempty"`
-	RemoteURL              *string       `json:"remoteUrl,omitempty"`
-	SessionRetentionDays   *int64        `json:"sessionRetentionDays,omitempty"`
-	SubagentConcurrency    *int64        `json:"subagentConcurrency,omitempty"`
-	SubagentDepth          *int64        `json:"subagentDepth,omitempty"`
-	SubagentModel          *string       `json:"subagentModel,omitempty"`
-	SubagentsDisabled      *bool         `json:"subagentsDisabled,omitempty"`
-	SupportedEfforts       []string      `json:"supportedEfforts,omitempty"`
-	ToolCallingMode        *string       `json:"toolCallingMode,omitempty"`
-	ToolsDisabled          *bool         `json:"toolsDisabled,omitempty"`
-	UsageStatusLine        *string       `json:"usageStatusLine,omitempty"`
+	Allocation           *string       `json:"allocation,omitempty"`
+	Attribution          *bool         `json:"attribution,omitempty"`
+	AutoCompactWindow    *int64        `json:"autoCompactWindow,omitempty"`
+	AutoName             *string       `json:"autoName,omitempty"`
+	BackgroundShells     *int64        `json:"backgroundShells,omitempty"`
+	ClaudeAccount        *string       `json:"claudeAccount,omitempty"`
+	EffectiveEffort      *string       `json:"effectiveEffort,omitempty"`
+	Effort               *string       `json:"effort,omitempty"`
+	EffortActive         *bool         `json:"effortActive,omitempty"`
+	Goal                 *GoalStatus   `json:"goal,omitempty"`
+	InputTokens          *int64        `json:"inputTokens,omitempty"`
+	Model                string        `json:"model"`
+	Name                 *string       `json:"name,omitempty"`
+	OutputTokens         *int64        `json:"outputTokens,omitempty"`
+	PasteInlineMaxBytes  *int64        `json:"pasteInlineMaxBytes,omitempty"`
+	PendingSubagentWork  *bool         `json:"pendingSubagentWork,omitempty"`
+	PermissionMode       *string       `json:"permissionMode,omitempty"`
+	RemoteControl        *bool         `json:"remoteControl,omitempty"`
+	RemotePolicy         RemotePolicy  `json:"remotePolicy"`
+	RemoteTunnel         *RemoteTunnel `json:"remoteTunnel,omitempty"`
+	RemoteURL            *string       `json:"remoteUrl,omitempty"`
+	SessionRetentionDays *int64        `json:"sessionRetentionDays,omitempty"`
+	SubagentConcurrency  *int64        `json:"subagentConcurrency,omitempty"`
+	SubagentDepth        *int64        `json:"subagentDepth,omitempty"`
+	SubagentModel        *string       `json:"subagentModel,omitempty"`
+	SubagentsDisabled    *bool         `json:"subagentsDisabled,omitempty"`
+	SupportedEfforts     []string      `json:"supportedEfforts,omitempty"`
+	ToolCallingMode      *string       `json:"toolCallingMode,omitempty"`
+	ToolsDisabled        *bool         `json:"toolsDisabled,omitempty"`
+	UsageStatusLine      *string       `json:"usageStatusLine,omitempty"`
 }
 
 type SetActiveInputBody struct {
@@ -15308,16 +16055,17 @@ func (t *ToolCall) UnmarshalJSON(data []byte) error {
 }
 
 type ToolDecision struct {
-	Action            *string   `json:"action,omitempty"`
-	At                time.Time `json:"at"`
-	By                string    `json:"by"`
-	CallID            string    `json:"callId"`
-	Note              *string   `json:"note,omitempty"`
-	Rationale         *string   `json:"rationale,omitempty"`
-	RiskLevel         *string   `json:"riskLevel,omitempty"`
-	Status            string    `json:"status"`
-	UserAuthorization *string   `json:"userAuthorization,omitempty"`
-	Username          *string   `json:"username,omitempty"`
+	Action            *string             `json:"action,omitempty"`
+	Answers           []AskQuestionAnswer `json:"answers,omitempty"`
+	At                time.Time           `json:"at"`
+	By                string              `json:"by"`
+	CallID            string              `json:"callId"`
+	Note              *string             `json:"note,omitempty"`
+	Rationale         *string             `json:"rationale,omitempty"`
+	RiskLevel         *string             `json:"riskLevel,omitempty"`
+	Status            string              `json:"status"`
+	UserAuthorization *string             `json:"userAuthorization,omitempty"`
+	Username          *string             `json:"username,omitempty"`
 }
 
 type ToolResultChunk struct {

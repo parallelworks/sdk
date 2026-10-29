@@ -151,6 +151,46 @@ func (c *Client) GetPlatformAlertsIter(ctx context.Context, opts ...GetPlatformA
 	}
 }
 
+// GetBackgroundJobLogsIter returns an iterator over paginated GetBackgroundJobLogs results.
+// It advances offset by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) GetBackgroundJobLogsIter(ctx context.Context, jobID string, opts ...GetBackgroundJobLogsParams) *PageIterator[BackgroundJobLogRun] {
+	return &PageIterator[BackgroundJobLogRun]{
+		fetch: func(cursor string) ([]BackgroundJobLogRun, string, error) {
+			p := GetBackgroundJobLogsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Offset != nil {
+				at = int64(*p.Offset)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the offset to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Offset = &next
+			}
+
+			result, err := c.GetBackgroundJobLogs(ctx, jobID, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Runs
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
 // ListBillingRunsIter returns an iterator over paginated ListBillingRuns results.
 // It advances skip by the number of items each page returns,
 // and stops on the first page that comes back empty.
@@ -295,6 +335,54 @@ func (c *Client) ListAdminEventsIter(ctx context.Context, opts ...ListAdminEvent
 	}
 }
 
+// ListHavenAuditIter returns an iterator over paginated ListHavenAudit results.
+func (c *Client) ListHavenAuditIter(ctx context.Context, opts ...ListHavenAuditParams) *PageIterator[HavenAuditEvent] {
+	return &PageIterator[HavenAuditEvent]{
+		fetch: func(cursor string) ([]HavenAuditEvent, string, error) {
+			p := ListHavenAuditParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			if cursor != "" {
+				p.Cursor = &cursor
+			}
+			result, err := c.ListHavenAudit(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var next string
+			if result.NextCursor != nil {
+				next = *result.NextCursor
+			}
+			return result.Events, next, nil
+		},
+	}
+}
+
+// ListHavenIssuancesIter returns an iterator over paginated ListHavenIssuances results.
+func (c *Client) ListHavenIssuancesIter(ctx context.Context, opts ...ListHavenIssuancesParams) *PageIterator[HavenIssuance] {
+	return &PageIterator[HavenIssuance]{
+		fetch: func(cursor string) ([]HavenIssuance, string, error) {
+			p := ListHavenIssuancesParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			if cursor != "" {
+				p.Cursor = &cursor
+			}
+			result, err := c.ListHavenIssuances(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var next string
+			if result.NextCursor != nil {
+				next = *result.NextCursor
+			}
+			return result.Issuances, next, nil
+		},
+	}
+}
+
 // ListHavenCloudAccountsIter returns an iterator over paginated ListHavenCloudAccounts results.
 // It advances offset by the number of items each page returns,
 // and stops on the first page that comes back empty.
@@ -371,6 +459,99 @@ func (c *Client) ListHavenMigrationItemsIter(ctx context.Context, opts ...ListHa
 				return items, "", nil
 			}
 			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
+// ListHavenNamespacesIter returns an iterator over paginated ListHavenNamespaces results.
+func (c *Client) ListHavenNamespacesIter(ctx context.Context, opts ...ListHavenNamespacesParams) *PageIterator[HavenNamespace] {
+	return &PageIterator[HavenNamespace]{
+		fetch: func(cursor string) ([]HavenNamespace, string, error) {
+			p := ListHavenNamespacesParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			if cursor != "" {
+				p.Cursor = &cursor
+			}
+			result, err := c.ListHavenNamespaces(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var next string
+			if result.NextCursor != nil {
+				next = *result.NextCursor
+			}
+			return result.Namespaces, next, nil
+		},
+	}
+}
+
+// ListHavenSecretActivityIter returns an iterator over paginated ListHavenSecretActivity results.
+func (c *Client) ListHavenSecretActivityIter(ctx context.Context, params ListHavenSecretActivityParams) *PageIterator[HavenAuditEvent] {
+	return &PageIterator[HavenAuditEvent]{
+		fetch: func(cursor string) ([]HavenAuditEvent, string, error) {
+			p := params
+			if cursor != "" {
+				p.Cursor = &cursor
+			}
+			result, err := c.ListHavenSecretActivity(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var next string
+			if result.NextCursor != nil {
+				next = *result.NextCursor
+			}
+			return result.Events, next, nil
+		},
+	}
+}
+
+// ListHavenSecretsIter returns an iterator over paginated ListHavenSecrets results.
+func (c *Client) ListHavenSecretsIter(ctx context.Context, opts ...ListHavenSecretsParams) *PageIterator[HavenSecret] {
+	return &PageIterator[HavenSecret]{
+		fetch: func(cursor string) ([]HavenSecret, string, error) {
+			p := ListHavenSecretsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			if cursor != "" {
+				p.Cursor = &cursor
+			}
+			result, err := c.ListHavenSecrets(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var next string
+			if result.NextCursor != nil {
+				next = *result.NextCursor
+			}
+			return result.Secrets, next, nil
+		},
+	}
+}
+
+// ListHavenSecretFoldersIter returns an iterator over paginated ListHavenSecretFolders results.
+func (c *Client) ListHavenSecretFoldersIter(ctx context.Context, opts ...ListHavenSecretFoldersParams) *PageIterator[HavenFolder] {
+	return &PageIterator[HavenFolder]{
+		fetch: func(cursor string) ([]HavenFolder, string, error) {
+			p := ListHavenSecretFoldersParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			if cursor != "" {
+				p.Cursor = &cursor
+			}
+			result, err := c.ListHavenSecretFolders(ctx, p)
+			if err != nil {
+				return nil, "", err
+			}
+			var next string
+			if result.NextCursor != nil {
+				next = *result.NextCursor
+			}
+			return result.Children, next, nil
 		},
 	}
 }

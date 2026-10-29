@@ -1569,6 +1569,64 @@
         ],
         "type": "object"
       },
+      "AgentClaudeAccount": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "fiveHourResetsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fiveHourUsedPercent": {
+            "format": "double",
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "plan": {
+            "type": "string"
+          },
+          "signInRequired": {
+            "type": "boolean"
+          },
+          "usage": {
+            "type": "string"
+          },
+          "weeklyResetsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "weeklyUsedPercent": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "AgentClaudeModel": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
       "AgentCommandArgs": {
         "additionalProperties": false,
         "properties": {
@@ -2177,6 +2235,9 @@
           "branch": {
             "type": "string"
           },
+          "claudeAccount": {
+            "type": "string"
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string"
@@ -2303,6 +2364,10 @@
         "properties": {
           "allocation": {
             "description": "Allocation to bill; the daemon requires one for org provider models.",
+            "type": "string"
+          },
+          "claudeAccount": {
+            "description": "An existing Claude Code account on the machine; applies after the current turn.",
             "type": "string"
           },
           "model": {
@@ -4031,6 +4096,15 @@
           "allowed": {
             "type": "boolean"
           },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/AskQuestionAnswer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "chat": {
             "type": "boolean"
           },
@@ -4117,6 +4191,15 @@
           "question": {
             "type": "string"
           },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/AskQuestion"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "reason": {
             "type": "string"
           },
@@ -4162,6 +4245,54 @@
         "required": [
           "label"
         ],
+        "type": "object"
+      },
+      "AskQuestion": {
+        "additionalProperties": false,
+        "properties": {
+          "header": {
+            "type": "string"
+          },
+          "multiSelect": {
+            "type": "boolean"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/AskOption"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "question": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "type": "object"
+      },
+      "AskQuestionAnswer": {
+        "additionalProperties": false,
+        "properties": {
+          "picked": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "question": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "AssignedOrganization": {
@@ -5658,6 +5789,20 @@
             "format": "date-time",
             "type": "string"
           },
+          "sasToken": {
+            "description": "A container SAS with the same access and expiry, for clients that sign in with a SAS rather than the service principal. Set only for some cloud accounts.",
+            "examples": [
+              "sv=2022-11-02\u0026sr=c\u0026sp=rl\u0026se=2025-07-24T02%3A01%3A02Z\u0026sig=..."
+            ],
+            "type": "string"
+          },
+          "sasUrl": {
+            "description": "bucketUrl with sasToken appended. Set only with sasToken.",
+            "examples": [
+              "https://mystorageaccount.blob.core.windows.net/mybucket?sv=2022-11-02\u0026sr=c\u0026sp=rl\u0026se=2025-07-24T02%3A01%3A02Z\u0026sig=..."
+            ],
+            "type": "string"
+          },
           "storageAccount": {
             "description": "Name of the Azure storage account.",
             "examples": [
@@ -6837,6 +6982,79 @@
           "at",
           "attempt",
           "error"
+        ],
+        "type": "object"
+      },
+      "BackgroundJobLogRun": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt": {
+            "description": "Attempt number, starting at one.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": "Identifies one execution, including repeated snoozes of the same attempt.",
+            "type": "string"
+          },
+          "legacy": {
+            "description": "Whether this log was saved inline before live logging was enabled.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "attempt",
+          "legacy"
+        ],
+        "type": "object"
+      },
+      "BackgroundJobLogsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "log": {
+            "description": "The requested slice of the log, empty when nothing has been written yet",
+            "type": "string"
+          },
+          "nextOffset": {
+            "description": "Offset to request next to read only what has since been appended",
+            "format": "int64",
+            "type": "integer"
+          },
+          "offset": {
+            "description": "Byte offset the returned slice starts at. Lower than the requested offset when the log was replaced, meaning the slice replaces rather than appends to what was read before.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "run": {
+            "description": "The run returned; empty when no output has been written.",
+            "type": "string"
+          },
+          "runs": {
+            "description": "Retained runs, oldest first.",
+            "items": {
+              "$ref": "#/components/schemas/BackgroundJobLogRun"
+            },
+            "type": "array"
+          },
+          "size": {
+            "description": "Current size of the log in bytes",
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "description": "Current job state.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "runs",
+          "run",
+          "state",
+          "log",
+          "offset",
+          "nextOffset",
+          "size"
         ],
         "type": "object"
       },
@@ -9289,6 +9507,10 @@
           },
           "oraclePrivateKey": {
             "description": "Oracle Cloud API private key (PEM format)",
+            "type": "string"
+          },
+          "oracleRegion": {
+            "description": "Oracle Cloud tenancy's home region, such as us-ashburn-1; required for Oracle. The credentials are checked there; resources still pick their own region",
             "type": "string"
           },
           "oracleTenancyOcid": {
@@ -12764,6 +12986,10 @@
             "description": "Oracle Cloud API private key (PEM format)",
             "type": "string"
           },
+          "oracleRegion": {
+            "description": "Oracle Cloud tenancy's home region, such as us-ashburn-1; required for Oracle. The credentials are checked there; resources still pick their own region",
+            "type": "string"
+          },
           "oracleTenancyOcid": {
             "description": "Oracle Cloud tenancy OCID",
             "type": "string"
@@ -14520,6 +14746,10 @@
             "description": "Allocation to bill the session to. Required for org provider models.",
             "type": "string"
           },
+          "claudeAccount": {
+            "description": "An existing Claude Code account on the machine; used for subscription models.",
+            "type": "string"
+          },
           "model": {
             "description": "Model id; the machine's default is used when empty.",
             "type": "string"
@@ -15702,6 +15932,14 @@
               "research"
             ],
             "maxLength": 255,
+            "type": "string"
+          },
+          "density": {
+            "description": "sessions: how tightly to list sessions. Omitted lists them comfortably.",
+            "enum": [
+              "comfortable",
+              "compact"
+            ],
             "type": "string"
           },
           "hiddenMetrics": {
@@ -19369,10 +19607,11 @@
             "type": "boolean"
           },
           "capabilities": {
-            "description": "Features the cluster's connected agent supports, such as files. Absent when no agent is connected.",
+            "description": "Features the cluster's connected agent supports, such as files and files-write. Absent when no agent is connected.",
             "items": {
               "enum": [
-                "files"
+                "files",
+                "files-write"
               ],
               "type": "string"
             },
@@ -19766,6 +20005,24 @@
         },
         "required": [
           "dataPoints"
+        ],
+        "type": "object"
+      },
+      "GetCodeSettingsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "organizationDisplayName": {
+            "description": "The display name of the caller's organization, for crediting its announcements.",
+            "type": "string"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/OrgCodeSettings",
+            "description": "The pw code settings the caller's organization sets. Each key replaces the member's own value for it; a key left out leaves the member's."
+          }
+        },
+        "required": [
+          "organizationDisplayName",
+          "settings"
         ],
         "type": "object"
       },
@@ -21571,7 +21828,7 @@
         "additionalProperties": false,
         "properties": {
           "detail": {
-            "description": "The preflight check that failed.",
+            "description": "The preflight check that failed, or the first permission the credentials lack.",
             "type": "string"
           },
           "reason": {
@@ -21583,13 +21840,177 @@
               "needs-reentry",
               "repair-pending",
               "not-haven",
-              "no-check"
+              "no-check",
+              "permissions-missing"
             ],
             "type": "string"
           }
         },
         "required": [
           "reason"
+        ],
+        "type": "object"
+      },
+      "HavenActionGrant": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "policies": {
+            "description": "The IDs of the policies that grant it.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "policies"
+        ],
+        "type": "object"
+      },
+      "HavenAuditEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "The event type, such as haven.read or haven.policy.put.",
+            "type": "string"
+          },
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "attributes": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "The caller's context, such as the service that made the call.",
+            "type": "object"
+          },
+          "details": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "What the record adds, such as a count returned; never a value.",
+            "type": "object"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "impersonator": {
+            "description": "The user who impersonated them, by ID.",
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "ok",
+              "denied",
+              "error"
+            ],
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "principal": {
+            "description": "The service identity that made the call, such as activate, or activate-console for this page.",
+            "type": "string"
+          },
+          "purpose": {
+            "description": "Why the call was made, such as an issuance's purpose or the reason given for it.",
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "seq": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sourceIp": {
+            "type": "string"
+          },
+          "userAgent": {
+            "type": "string"
+          },
+          "userId": {
+            "description": "The user the call was made for.",
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "seq",
+          "id",
+          "at",
+          "principal",
+          "action",
+          "outcome"
+        ],
+        "type": "object"
+      },
+      "HavenAuditPage": {
+        "additionalProperties": false,
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/HavenAuditEvent"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "nextCursor": {
+            "description": "Passed as cursor, continues to older records, or newer ones in ascending order; empty on the last page.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "type": "object"
+      },
+      "HavenAuditStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "headSeq": {
+            "description": "The newest chained record's sequence number.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "oldestPendingSeconds": {
+            "description": "How long the oldest pending record has waited; over 60 means no service is chaining.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pending": {
+            "description": "Records committed but not yet chained.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "headSeq",
+          "pending",
+          "oldestPendingSeconds"
         ],
         "type": "object"
       },
@@ -21654,9 +22075,84 @@
         ],
         "type": "object"
       },
+      "HavenCheckReport": {
+        "additionalProperties": false,
+        "properties": {
+          "checkedAt": {
+            "description": "When the cloud confirmed the credential.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiry": {
+            "description": "When the cloud says the credential stops working; empty unless the cloud confirmed it.",
+            "enum": [
+              "expires",
+              "never",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "expiryNote": {
+            "description": "Why a credential never expires, or why its expiry is unknown.",
+            "type": "string"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "The haven. labels the secret carries now, such as its account and expiry.",
+            "type": "object"
+          },
+          "missing": {
+            "description": "Permissions issuance needs that the credential lacks, when they were checked.",
+            "items": {
+              "$ref": "#/components/schemas/HavenMissingPermission"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "outcome": {
+            "description": "ok: the cloud accepted the credential; skipped: the check was skipped; none: Haven has no check for this kind.",
+            "enum": [
+              "ok",
+              "skipped",
+              "none"
+            ],
+            "type": "string"
+          },
+          "warnings": {
+            "description": "What looks wrong but may be right.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "outcome",
+          "labels",
+          "warnings",
+          "missing"
+        ],
+        "type": "object"
+      },
       "HavenCloudAccount": {
         "additionalProperties": false,
         "properties": {
+          "checkedAt": {
+            "description": "When a credential check last got the cloud's answer on the permissions issuance needs.",
+            "format": "date-time",
+            "type": "string"
+          },
           "csp": {
             "type": "string"
           },
@@ -21707,6 +22203,16 @@
           },
           "orgName": {
             "type": "string"
+          },
+          "permissionsMissing": {
+            "description": "What that check found the credentials lack. While any is missing, Vault serves an account in haven, and the account cannot move to haven-only.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "reason": {
             "type": "string"
@@ -21775,6 +22281,111 @@
           "total",
           "reentryRequested",
           "needsUpdate"
+        ],
+        "type": "object"
+      },
+      "HavenConfirm": {
+        "additionalProperties": false,
+        "properties": {
+          "confirm": {
+            "description": "maintenance, typed by the admin.",
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": [
+          "confirm"
+        ],
+        "type": "object"
+      },
+      "HavenConfirmPathRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "confirm": {
+            "description": "The path again, typed by the admin.",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "path": {
+            "description": "The secret's path.",
+            "maxLength": 256,
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "confirm"
+        ],
+        "type": "object"
+      },
+      "HavenCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "description": "The value's fields, as the kind names them; a kv secret's are data.\u003ckey\u003e.",
+            "items": {
+              "$ref": "#/components/schemas/HavenFieldInput"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "kind": {
+            "description": "The secret's kind, as list-haven-kinds names it; kv when empty.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The path under console/, such as ops/break-glass: lowercase letters, digits, '.', '_' and '-', in '/'-separated segments.",
+            "maxLength": 200,
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9._-]*(/[a-z0-9][a-z0-9._-]*)*$",
+            "type": "string"
+          },
+          "skipCheck": {
+            "description": "Store a cloud credential without checking it at its cloud, such as one whose access is not granted yet.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "fields"
+        ],
+        "type": "object"
+      },
+      "HavenDestroyVersionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "confirm": {
+            "description": "The path again, typed by the admin.",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "path": {
+            "description": "The secret's path.",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why, such as a leak, at most 256 bytes of UTF-8; Haven's audit keeps it.",
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "description": "A previous version; the current one is replaced by rotating, or removed with the secret.",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "version",
+          "reason",
+          "confirm"
         ],
         "type": "object"
       },
@@ -21874,6 +22485,117 @@
         ],
         "type": "object"
       },
+      "HavenFieldInput": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "The field, as the kind's fields name it, such as secretAccessKey or data.DB_PASSWORD.",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "value": {
+            "description": "The field's new value.",
+            "maxLength": 65536,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ],
+        "type": "object"
+      },
+      "HavenFips": {
+        "additionalProperties": false,
+        "properties": {
+          "certified": {
+            "description": "Whether that version has a CMVP certificate.",
+            "type": "boolean"
+          },
+          "enabled": {
+            "description": "Whether FIPS 140-3 mode is on.",
+            "type": "boolean"
+          },
+          "enforced": {
+            "description": "Whether algorithms outside FIPS 140-3 fail.",
+            "type": "boolean"
+          },
+          "module": {
+            "description": "The Go Cryptographic Module's version.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "enforced",
+          "module",
+          "certified"
+        ],
+        "type": "object"
+      },
+      "HavenFolder": {
+        "additionalProperties": false,
+        "properties": {
+          "account": {
+            "description": "A cloud credential's account, subscription, project or tenancy at its cloud.",
+            "type": "string"
+          },
+          "cloudAccount": {
+            "description": "The cloud account's name: a secret's cloud-account label, or for a folder, the cloud account of the bucket its path names.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The next path segment under the prefix.",
+            "type": "string"
+          },
+          "organization": {
+            "description": "The organization's name: a secret's organization label, or for a folder, the organization its path names.",
+            "type": "string"
+          },
+          "path": {
+            "description": "The prefix and the name.",
+            "type": "string"
+          },
+          "secret": {
+            "description": "Whether a secret sits at the path itself.",
+            "type": "boolean"
+          },
+          "secrets": {
+            "description": "Secrets under the path, in the state asked for.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "path",
+          "secret",
+          "secrets"
+        ],
+        "type": "object"
+      },
+      "HavenFoldersResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/HavenFolder"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "nextCursor": {
+            "description": "Passed as cursor, continues the listing; empty on the last page.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "children"
+        ],
+        "type": "object"
+      },
       "HavenImportedItem": {
         "additionalProperties": false,
         "properties": {
@@ -21903,6 +22625,170 @@
           "havenPath",
           "type",
           "action"
+        ],
+        "type": "object"
+      },
+      "HavenIssuance": {
+        "additionalProperties": false,
+        "properties": {
+          "errorCode": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "principal": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "scope": {
+            "description": "What the credential may do, as JSON; never secret.",
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "sessionName": {
+            "description": "The name the cloud's audit log shows, such as in CloudTrail.",
+            "type": "string"
+          },
+          "state": {
+            "description": "abandoned: its process ended before recording the cloud's answer, so the cloud may have issued it.",
+            "enum": [
+              "pending",
+              "issued",
+              "failed",
+              "abandoned"
+            ],
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "version": {
+            "description": "The secret's version it was issued from.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "path",
+          "namespace",
+          "version",
+          "kind",
+          "issuer",
+          "purpose",
+          "scopeType",
+          "scope",
+          "principal",
+          "state",
+          "issuedAt"
+        ],
+        "type": "object"
+      },
+      "HavenIssuancesResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "issuances": {
+            "items": {
+              "$ref": "#/components/schemas/HavenIssuance"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "nextCursor": {
+            "description": "Passed as cursor, continues to older issuances; empty on the last page.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "issuances"
+        ],
+        "type": "object"
+      },
+      "HavenIssueRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "description": "The cloud account credential's path.",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why the credential is needed, at most 250 bytes of UTF-8; it becomes the issuance's purpose after admin:.",
+            "maxLength": 250,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "HavenIssued": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fields": {
+            "description": "The credential, such as an access key, a secret key and a session token.",
+            "items": {
+              "$ref": "#/components/schemas/HavenRevealedField"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sessionName": {
+            "description": "The name the cloud's audit log shows for the credential, such as in CloudTrail.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sessionName",
+          "issuedAt",
+          "expiresAt",
+          "fields"
         ],
         "type": "object"
       },
@@ -21992,6 +22878,349 @@
         ],
         "type": "object"
       },
+      "HavenJob": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "description": "Why it failed.",
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "verify",
+              "maintenance"
+            ],
+            "type": "string"
+          },
+          "maintenance": {
+            "$ref": "#/components/schemas/HavenMaintenanceResult"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startedBy": {
+            "description": "Who started it.",
+            "type": "string"
+          },
+          "state": {
+            "description": "idle: never run from this page.",
+            "enum": [
+              "idle",
+              "running",
+              "done",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "verify": {
+            "$ref": "#/components/schemas/HavenVerifyResult"
+          }
+        },
+        "required": [
+          "kind",
+          "state"
+        ],
+        "type": "object"
+      },
+      "HavenKeyWrap": {
+        "additionalProperties": false,
+        "properties": {
+          "keyVersion": {
+            "description": "The root key version that made the wrap, for a KMS key that reports versions.",
+            "type": "string"
+          },
+          "rootKeyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rootKeyId"
+        ],
+        "type": "object"
+      },
+      "HavenKeysResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "registered": {
+            "description": "Every root key the store has registered.",
+            "items": {
+              "$ref": "#/components/schemas/HavenRegisteredRootKey"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "versions": {
+            "description": "For each root key ingress lists that reports versions, the wraps each version holds.",
+            "items": {
+              "$ref": "#/components/schemas/HavenRootKeyVersions"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "registered",
+          "versions"
+        ],
+        "type": "object"
+      },
+      "HavenKind": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/HavenKindField"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "fields"
+        ],
+        "type": "object"
+      },
+      "HavenKindField": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "description": "A list's entry fields.",
+            "items": {
+              "$ref": "#/components/schemas/HavenKindField"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "multiline": {
+            "description": "Whether its value spans lines, such as a PEM key or a key file.",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "The field's name, as its value's fields are named: a map's entries are \u003cname\u003e.\u003ckey\u003e, a list's \u003cname\u003e[i].\u003cfield\u003e.",
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "secret": {
+            "description": "Whether its value is secret (for a map, each entry's).",
+            "type": "boolean"
+          },
+          "type": {
+            "description": "string; map: named string entries; list: entries with fields of their own; time: RFC 3339; json: anything else, as JSON.",
+            "enum": [
+              "string",
+              "map",
+              "list",
+              "time",
+              "json"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "secret",
+          "required",
+          "multiline"
+        ],
+        "type": "object"
+      },
+      "HavenLabelsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "expectedRevision": {
+            "description": "The label revision the admin saw; a change since refuses this one.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "path": {
+            "description": "The secret's path.",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "remove": {
+            "description": "Labels to remove, by key; the same labels are refused.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 64,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "set": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Labels to add or change, by key. Haven checks each: a key of lowercase letters, digits, '.', '_', '/' and '-', at most 63 characters; a value of at most 256 characters; at most 64 labels on a secret. Labels core sets on its writes, such as vault-path, and Haven's own under haven. are refused.",
+            "maxProperties": 64,
+            "type": "object"
+          }
+        },
+        "required": [
+          "path",
+          "expectedRevision"
+        ],
+        "type": "object"
+      },
+      "HavenLabelsResult": {
+        "additionalProperties": false,
+        "properties": {
+          "labelRevision": {
+            "description": "The labels' revision after the change.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "labelRevision"
+        ],
+        "type": "object"
+      },
+      "HavenMaintenanceResult": {
+        "additionalProperties": false,
+        "properties": {
+          "abandonedIssuances": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "expiredVersions": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "prunedIssuances": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "purgedSecrets": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "retiredMasterKeys": {
+            "description": "Retired master key versions destroyed once nothing used them.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "rewrappedVersions": {
+            "description": "Secret versions moved off retired master keys.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "skipped": {
+            "description": "Whether another process was running maintenance, so this run did nothing.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "skipped",
+          "expiredVersions",
+          "purgedSecrets",
+          "rewrappedVersions",
+          "retiredMasterKeys",
+          "prunedIssuances",
+          "abandonedIssuances"
+        ],
+        "type": "object"
+      },
+      "HavenMasterKey": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "recoveryWrapped": {
+            "description": "Whether the active recovery key wraps it, so it survives losing every root key.",
+            "type": "boolean"
+          },
+          "retiredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "description": "A retired version still wraps data keys until maintenance moves them to the active one.",
+            "enum": [
+              "active",
+              "retired",
+              "destroyed"
+            ],
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "versions": {
+            "description": "Secret versions whose data keys it still wraps; a retired version's count falls to 0 as maintenance rewraps them onto the active one.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "wraps": {
+            "description": "Its wraps under root keys; a destroyed version has none.",
+            "items": {
+              "$ref": "#/components/schemas/HavenKeyWrap"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "state",
+          "createdAt",
+          "wraps",
+          "recoveryWrapped",
+          "versions"
+        ],
+        "type": "object"
+      },
+      "HavenMissingPermission": {
+        "additionalProperties": false,
+        "properties": {
+          "fix": {
+            "description": "How to grant it.",
+            "type": "string"
+          },
+          "permission": {
+            "description": "The cloud's name for it, such as sts:GetFederationToken.",
+            "type": "string"
+          },
+          "resource": {
+            "description": "What it is needed on, such as a bucket.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "permission"
+        ],
+        "type": "object"
+      },
       "HavenModeBlocked": {
         "additionalProperties": false,
         "properties": {
@@ -22040,6 +23269,424 @@
         "required": [
           "changed",
           "blocked"
+        ],
+        "type": "object"
+      },
+      "HavenNamespace": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "destroyedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "masterKeys": {
+            "description": "Its master key versions, newest first.",
+            "items": {
+              "$ref": "#/components/schemas/HavenMasterKey"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "rootKeyIds": {
+            "description": "The root keys that wrap its master keys; empty means every active one.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "secrets": {
+            "description": "Its secrets, deleted ones awaiting purge included.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "createdAt",
+          "rootKeyIds",
+          "secrets",
+          "masterKeys"
+        ],
+        "type": "object"
+      },
+      "HavenNamespaceRotate": {
+        "additionalProperties": false,
+        "properties": {
+          "confirm": {
+            "description": "The namespace's name again, typed by the admin.",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "name": {
+            "description": "The namespace.",
+            "maxLength": 256,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "confirm"
+        ],
+        "type": "object"
+      },
+      "HavenNamespacesResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "namespaces": {
+            "description": "In byte order of their names.",
+            "items": {
+              "$ref": "#/components/schemas/HavenNamespace"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "nextCursor": {
+            "description": "Passed as cursor, continues the listing; empty on the last page.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "namespaces"
+        ],
+        "type": "object"
+      },
+      "HavenOverview": {
+        "additionalProperties": false,
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/HavenAuditStatus"
+          },
+          "configured": {
+            "description": "Whether HAVEN_ROOT_KEYS is set and valid, connected yet or not.",
+            "type": "boolean"
+          },
+          "connected": {
+            "description": "Whether the page's Haven client is open; it opens once the service's is.",
+            "type": "boolean"
+          },
+          "fips": {
+            "$ref": "#/components/schemas/HavenFips"
+          },
+          "principal": {
+            "description": "The principal the page reads Haven as.",
+            "type": "string"
+          },
+          "recoveryKey": {
+            "$ref": "#/components/schemas/HavenRecoveryKey"
+          },
+          "rootKeys": {
+            "description": "The root keys ingress opens Haven with.",
+            "items": {
+              "$ref": "#/components/schemas/HavenRootKeyHealth"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "stage": {
+            "description": "The migration stage; until haven-only, Vault answers for secrets the sync has not verified.",
+            "enum": [
+              "off",
+              "haven-first",
+              "haven-only"
+            ],
+            "type": "string"
+          },
+          "store": {
+            "$ref": "#/components/schemas/HavenStoreCapabilities"
+          },
+          "transport": {
+            "enum": [
+              "encrypted",
+              "encrypted-externally",
+              "plaintext"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "configured",
+          "connected",
+          "stage",
+          "rootKeys"
+        ],
+        "type": "object"
+      },
+      "HavenPathRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "description": "The secret's path.",
+            "maxLength": 256,
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object"
+      },
+      "HavenPolicy": {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "namespaces": {
+            "description": "If set, the namespaces it is limited to.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "pathGlob": {
+            "description": "The paths it covers: * within a segment, ** across segments; _haven/\u003cscope\u003e for the store's own state.",
+            "type": "string"
+          },
+          "principal": {
+            "type": "string"
+          },
+          "seeded": {
+            "description": "Whether core seeds it when a service starts, so only a release changes it; the rest were added with the haven CLI or on this page.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "principal",
+          "pathGlob",
+          "actions",
+          "seeded"
+        ],
+        "type": "object"
+      },
+      "HavenPolicyDelete": {
+        "additionalProperties": false,
+        "properties": {
+          "confirm": {
+            "description": "The stored policy's path glob, typed by the admin.",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "id": {
+            "description": "The policy's ID.",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "confirm"
+        ],
+        "type": "object"
+      },
+      "HavenPolicyInput": {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "description": "What it grants. admin implies every action; reveal implies read.",
+            "items": {
+              "enum": [
+                "read",
+                "reveal",
+                "write",
+                "rotate",
+                "delete",
+                "issue",
+                "list",
+                "label",
+                "check",
+                "admin"
+              ],
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "The policy's ID; saving an ID that exists replaces that policy.",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]*$",
+            "type": "string"
+          },
+          "namespaces": {
+            "description": "If set, limits it to secrets in these namespaces, as globs.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "pathGlob": {
+            "description": "The paths it covers: * within a segment, ** across segments; _haven/\u003cscope\u003e for the store's own state.",
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "principal": {
+            "description": "Who it grants to, such as a service's principal or a person's name for the haven CLI.",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "principal",
+          "pathGlob",
+          "actions"
+        ],
+        "type": "object"
+      },
+      "HavenPolicyPreview": {
+        "additionalProperties": false,
+        "properties": {
+          "complete": {
+            "description": "Whether every secret was read; when false, matches counts only those scanned.",
+            "type": "boolean"
+          },
+          "matches": {
+            "description": "Secrets it grants an action on, of those scanned.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/HavenPolicy",
+            "description": "The policy as it would be saved."
+          },
+          "previous": {
+            "$ref": "#/components/schemas/HavenPolicy",
+            "description": "The stored policy it replaces, which has its ID."
+          },
+          "refused": {
+            "description": "Why saving it would be refused, as the error's code.",
+            "enum": [
+              "haven_seeded_policy",
+              "haven_console_grant"
+            ],
+            "type": "string"
+          },
+          "samples": {
+            "description": "The first matching paths, up to 25.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "scanned": {
+            "description": "Secrets read for the preview; at most 5,000.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopes": {
+            "description": "The store scopes under _haven it reaches, such as policy or audit.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "warnings": {
+            "description": "Grants worth a second look: admin; reveal-broad, reveal on every path; cloud-reveal, reveal on cloud account credentials; replaces, a stored policy has this ID.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "policy",
+          "matches",
+          "scanned",
+          "complete",
+          "samples",
+          "scopes",
+          "warnings"
+        ],
+        "type": "object"
+      },
+      "HavenPolicyPut": {
+        "additionalProperties": false,
+        "properties": {
+          "confirm": {
+            "description": "The policy's path glob again, typed by the admin.",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/HavenPolicyInput"
+          }
+        },
+        "required": [
+          "policy",
+          "confirm"
+        ],
+        "type": "object"
+      },
+      "HavenPrincipalAccess": {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "description": "What the principal may do, implied actions included: admin implies every action, and reveal implies read.",
+            "items": {
+              "$ref": "#/components/schemas/HavenActionGrant"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "principal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "principal",
+          "actions"
         ],
         "type": "object"
       },
@@ -22131,6 +23778,39 @@
         ],
         "type": "object"
       },
+      "HavenRecoveryKey": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "registeredBy": {
+            "description": "The principal that registered it.",
+            "type": "string"
+          },
+          "state": {
+            "description": "ok; missing before haven init registers one; invalid when its record was changed outside Haven; unknown when the store could not be read.",
+            "enum": [
+              "ok",
+              "missing",
+              "invalid",
+              "unknown"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "type": "object"
+      },
       "HavenReentryResponse": {
         "additionalProperties": false,
         "properties": {
@@ -22140,6 +23820,267 @@
         },
         "required": [
           "requested"
+        ],
+        "type": "object"
+      },
+      "HavenRegisteredRootKey": {
+        "additionalProperties": false,
+        "properties": {
+          "canUnwrap": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "listings": {
+            "description": "The principals that list the key, most recent first.",
+            "items": {
+              "$ref": "#/components/schemas/HavenRootKeyListing"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "since": {
+            "description": "When the key was registered or last changed state.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "active",
+              "retired",
+              "lost"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "state",
+          "since",
+          "canUnwrap",
+          "listings"
+        ],
+        "type": "object"
+      },
+      "HavenRestoreVersionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "expectedVersion": {
+            "description": "The current version the admin saw; a write since refuses this one.",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "path": {
+            "description": "The secret's path.",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "version": {
+            "description": "The earlier version whose value becomes current again.",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "version",
+          "expectedVersion"
+        ],
+        "type": "object"
+      },
+      "HavenRevealRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "description": "The secret's path.",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why the value is needed, at most 256 bytes of UTF-8; Haven's audit keeps it with the reveal.",
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "description": "The version to reveal; 0 or absent for the current one.",
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "HavenRevealed": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/HavenRevealedField"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "kind": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "version",
+          "fields"
+        ],
+        "type": "object"
+      },
+      "HavenRevealedField": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "The field, such as secretAccessKey, data.DB_PASSWORD or keys[0].material.",
+            "type": "string"
+          },
+          "secret": {
+            "description": "Whether the field is secret, so the page masks it until asked.",
+            "type": "boolean"
+          },
+          "value": {
+            "description": "The value as text; render it as text, never as markup.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value",
+          "secret"
+        ],
+        "type": "object"
+      },
+      "HavenRootKeyHealth": {
+        "additionalProperties": false,
+        "properties": {
+          "algorithm": {
+            "type": "string"
+          },
+          "audited": {
+            "description": "Whether the key's service logs each use with the caller.",
+            "type": "boolean"
+          },
+          "canUnwrap": {
+            "type": "boolean"
+          },
+          "error": {
+            "description": "Why the health check failed; empty when the key is healthy.",
+            "type": "string"
+          },
+          "fipsApproved": {
+            "type": "boolean"
+          },
+          "hardware": {
+            "description": "Whether the key material is in validated hardware.",
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "canUnwrap",
+          "hardware",
+          "audited",
+          "fipsApproved"
+        ],
+        "type": "object"
+      },
+      "HavenRootKeyListing": {
+        "additionalProperties": false,
+        "properties": {
+          "lastListed": {
+            "description": "When the principal last opened Haven with the key, or loaded a master key to write with it.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "principal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "principal",
+          "lastListed"
+        ],
+        "type": "object"
+      },
+      "HavenRootKeyVersions": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "wraps": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "description": "Wraps of master keys by key version; the key \"\" counts wraps that record no version. A version with none can be disabled.",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "wraps"
+        ],
+        "type": "object"
+      },
+      "HavenRotateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "expectedVersion": {
+            "description": "The current version the admin saw; a write since refuses this one.",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "fields": {
+            "description": "The new value's fields, as the secret's kind names them.",
+            "items": {
+              "$ref": "#/components/schemas/HavenFieldInput"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "path": {
+            "description": "The secret's path.",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "skipCheck": {
+            "description": "Store a cloud credential without checking it at its cloud, such as one whose access is not granted yet.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "path",
+          "fields",
+          "expectedVersion"
         ],
         "type": "object"
       },
@@ -22234,6 +24175,282 @@
         ],
         "type": "object"
       },
+      "HavenSecret": {
+        "additionalProperties": false,
+        "properties": {
+          "account": {
+            "description": "The cloud account, subscription, project or tenancy a credential belongs to.",
+            "type": "string"
+          },
+          "cloud": {
+            "description": "A cloud credential's cloud.",
+            "type": "string"
+          },
+          "consoleActions": {
+            "description": "What this page may do to the secret by Haven's policies now, such as reveal or rotate; the server checks again on every call.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiry": {
+            "description": "When the cloud last reported the credential stops working; empty if never checked.",
+            "enum": [
+              "expires",
+              "never",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "labelRevision": {
+            "description": "The labels' revision, which an edit names so it never overwrites a change made since.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Plain metadata: the host's labels, such as name and owner, and Haven's own under haven., such as a credential's account and expiry.",
+            "type": "object"
+          },
+          "labelsTampered": {
+            "description": "Whether Haven's own labels were edited outside Haven; they are left out until a check recomputes them.",
+            "type": "boolean"
+          },
+          "migration": {
+            "$ref": "#/components/schemas/HavenSecretMigration",
+            "description": "The Vault sync's record of the secret; absent when it does not track it. A secret core wrote whose record has not reached the sync's log yet reads as pending, with no type."
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "purgeAfter": {
+            "description": "When a deleted secret is purged for good.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "rotateAfter": {
+            "description": "When the secret is due for rotation.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "active",
+              "deleted"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "description": "When anything about the secret last changed, its labels included.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "valueChangedAt": {
+            "description": "When the current version was written; label changes, deletes and undeletes leave it.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "description": "The current version.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "namespace",
+          "kind",
+          "state",
+          "version",
+          "labels",
+          "labelRevision",
+          "labelsTampered",
+          "createdAt",
+          "updatedAt",
+          "valueChangedAt",
+          "consoleActions"
+        ],
+        "type": "object"
+      },
+      "HavenSecretDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "access": {
+            "description": "Who may act on the secret, by Haven's policies now.",
+            "items": {
+              "$ref": "#/components/schemas/HavenPrincipalAccess"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "secret": {
+            "$ref": "#/components/schemas/HavenSecret"
+          },
+          "versions": {
+            "description": "Newest first.",
+            "items": {
+              "$ref": "#/components/schemas/HavenSecretVersion"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "secret",
+          "versions",
+          "access"
+        ],
+        "type": "object"
+      },
+      "HavenSecretMigration": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "written",
+              "verified",
+              "failed",
+              "skipped"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "valueChangesRefused": {
+            "description": "Whether the page refuses changes to the secret's value (rotate, restore or destroy a version, delete, undelete, purge) because Vault still keeps a copy the sync compares; its feature page makes them, writing both stores.",
+            "type": "boolean"
+          },
+          "vaultAuthoritative": {
+            "description": "Whether readers take Vault's copy: while the stage is off, and in haven-first until the sync verifies Haven's copy; for a cloud credential or HMAC key, until its cloud account's mode routes it to Haven.",
+            "type": "boolean"
+          },
+          "vaultPath": {
+            "description": "The Vault secret Haven's copy mirrors, as core's vault-path label names it. A cloud credential's changes with every rotation, so the sync tracks it by its account instead.",
+            "type": "string"
+          },
+          "verifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "type",
+          "vaultPath",
+          "updatedAt",
+          "vaultAuthoritative",
+          "valueChangesRefused"
+        ],
+        "type": "object"
+      },
+      "HavenSecretVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "description": "The principal that wrote it.",
+            "type": "string"
+          },
+          "destroyedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fingerprint": {
+            "description": "A keyed hash of the value: equal fingerprints mean equal values, and it reveals nothing else.",
+            "type": "string"
+          },
+          "graceUntil": {
+            "description": "When a previous version stops being readable.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "masterKeyId": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "current",
+              "previous",
+              "destroyed"
+            ],
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "state",
+          "createdAt",
+          "createdBy",
+          "masterKeyId"
+        ],
+        "type": "object"
+      },
+      "HavenSecretsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "nextCursor": {
+            "description": "Passed as cursor, continues the listing; empty on the last page.",
+            "type": "string"
+          },
+          "secrets": {
+            "description": "A page can hold fewer than the limit while nextCursor is set.",
+            "items": {
+              "$ref": "#/components/schemas/HavenSecret"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "secrets"
+        ],
+        "type": "object"
+      },
       "HavenSequence": {
         "additionalProperties": false,
         "properties": {
@@ -22305,6 +24522,72 @@
         "required": [
           "step",
           "state"
+        ],
+        "type": "object"
+      },
+      "HavenStats": {
+        "additionalProperties": false,
+        "properties": {
+          "counts": {
+            "description": "Secrets by namespace, kind and state.",
+            "items": {
+              "$ref": "#/components/schemas/HavenStatsCount"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "rotateDue": {
+            "description": "Secrets past their rotation reminder.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "secrets": {
+            "description": "Secrets in every state, deleted ones awaiting purge included.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "secrets",
+          "rotateDue",
+          "counts"
+        ],
+        "type": "object"
+      },
+      "HavenStatsCount": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "rotateDue": {
+            "description": "Of these, the secrets past their rotation reminder.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "secrets": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "active",
+              "deleted"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "namespace",
+          "kind",
+          "state",
+          "secrets",
+          "rotateDue"
         ],
         "type": "object"
       },
@@ -22395,6 +24678,85 @@
           "items",
           "runInProgress",
           "havenFailures"
+        ],
+        "type": "object"
+      },
+      "HavenStoreCapabilities": {
+        "additionalProperties": false,
+        "properties": {
+          "appendOnlyAudit": {
+            "description": "Whether the database itself refuses edits to the audit trail.",
+            "type": "boolean"
+          },
+          "concurrentWriters": {
+            "type": "boolean"
+          },
+          "encryptedTransport": {
+            "description": "Whether the store connection verifies the server's certificate.",
+            "type": "boolean"
+          },
+          "indexedSearch": {
+            "type": "boolean"
+          },
+          "serverTime": {
+            "description": "Whether expiry follows the database's clock rather than each service's.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "concurrentWriters",
+          "encryptedTransport",
+          "serverTime",
+          "indexedSearch",
+          "appendOnlyAudit"
+        ],
+        "type": "object"
+      },
+      "HavenVerifyResult": {
+        "additionalProperties": false,
+        "properties": {
+          "headSeq": {
+            "description": "The newest record it verified.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "records": {
+            "description": "Records the verification read.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tamperedAtSeq": {
+            "description": "The first record that does not verify, when the chain is broken.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "records",
+          "headSeq"
+        ],
+        "type": "object"
+      },
+      "HavenWriteResult": {
+        "additionalProperties": false,
+        "properties": {
+          "check": {
+            "$ref": "#/components/schemas/HavenCheckReport",
+            "description": "What the credential check and validation found."
+          },
+          "path": {
+            "type": "string"
+          },
+          "version": {
+            "description": "The version written.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "version",
+          "check"
         ],
         "type": "object"
       },
@@ -23405,6 +25767,105 @@
         ],
         "type": "object"
       },
+      "ImportResourceBody": {
+        "additionalProperties": false,
+        "properties": {
+          "dryRun": {
+            "description": "Check the import and list the owner's resource groups without importing.",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "Platform name of the imported resource, unique among the owner's resources. Required to import; checked on a dry run when given.",
+            "maxLength": 63,
+            "minLength": 2,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "patternDescription": "lowercase letters and digits, with single dashes between them",
+            "type": "string"
+          },
+          "owner": {
+            "description": "Username of the member who owns the imported resource. Defaults to the caller.",
+            "type": "string"
+          },
+          "resourceGroup": {
+            "description": "Resource group the resource's cost is charged to; it must have an allocation. Optional on a dry run.",
+            "type": "string"
+          },
+          "resourceGroupUser": {
+            "description": "Username of the resource group's owner, to pick between groups that share a name.",
+            "type": "string"
+          },
+          "resourceId": {
+            "description": "Row id of the resource to import, from the resources list.",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "resourceId",
+          "dryRun"
+        ],
+        "type": "object"
+      },
+      "ImportResourceGroup": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Resource group name.",
+            "type": "string"
+          },
+          "owner": {
+            "description": "Username of the resource group's owner.",
+            "type": "string"
+          },
+          "unavailable": {
+            "description": "Why the resource can't be charged to this group: its allocation is over budget, doesn't allow the resource's cloud, its owner lost access to it, it no longer exists, or it isn't rated in USD.",
+            "enum": [
+              "budget",
+              "type",
+              "access",
+              "gone",
+              "unit"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "ImportResourceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "dryRun": {
+            "description": "Whether this was a check only.",
+            "type": "boolean"
+          },
+          "importId": {
+            "description": "Id of the import, which the resource is tagged with as its deployment id.",
+            "type": "string"
+          },
+          "owner": {
+            "description": "Username of the owner the resource is imported for.",
+            "type": "string"
+          },
+          "resourceGroups": {
+            "description": "On a dry run, the owner's resource groups with an allocation, each saying whether it can take the resource.",
+            "items": {
+              "$ref": "#/components/schemas/ImportResourceGroup"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "dryRun",
+          "owner"
+        ],
+        "type": "object"
+      },
       "IndexDifference": {
         "additionalProperties": false,
         "properties": {
@@ -23558,10 +26019,11 @@
             "type": "string"
           },
           "capabilities": {
-            "description": "Features the instance's connected agent supports, such as files. Absent when no agent is connected.",
+            "description": "Features the instance's connected agent supports, such as files and files-write. Absent when no agent is connected.",
             "items": {
               "enum": [
-                "files"
+                "files",
+                "files-write"
               ],
               "type": "string"
             },
@@ -32286,6 +34748,21 @@
         ],
         "type": "object"
       },
+      "OrgCodeSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "announcements": {
+            "description": "Messages pw code shows when it starts, one at random each launch. Control characters other than newlines are removed, and blank ones are dropped.",
+            "items": {
+              "maxLength": 1000,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "OrgConnectionPermissionsOutputBody": {
         "additionalProperties": false,
         "properties": {
@@ -40846,6 +43323,34 @@
             "description": "Row id.",
             "type": "string"
           },
+          "importFailure": {
+            "description": "Why the import failed: too many tags, the cloud account may not tag it, it no longer exists, it was replaced, or another cloud error.",
+            "enum": [
+              "tag_limit",
+              "permission_denied",
+              "not_found",
+              "changed",
+              "other"
+            ],
+            "type": "string"
+          },
+          "importName": {
+            "description": "Platform name the resource is imported under, while it is being imported or once imported.",
+            "type": "string"
+          },
+          "importStatus": {
+            "description": "State of an import of this external resource, until the inventory lists it as platform-managed.",
+            "enum": [
+              "tagging",
+              "imported",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "imported": {
+            "description": "The platform-managed resource was created outside the platform and imported for billing.",
+            "type": "boolean"
+          },
           "lastSeenAt": {
             "description": "Last time the resource was seen in the cloud.",
             "format": "date-time",
@@ -41387,6 +43892,10 @@
           "imageUrl": {
             "description": "Custom icon configured on the resource",
             "type": "string"
+          },
+          "imported": {
+            "description": "The resource was created outside the platform and imported for billing",
+            "type": "boolean"
           },
           "name": {
             "description": "Resource name",
@@ -43756,6 +46265,9 @@
             "format": "int64",
             "type": "integer"
           },
+          "claudeAccount": {
+            "type": "string"
+          },
           "effectiveEffort": {
             "type": "string"
           },
@@ -43791,9 +46303,6 @@
           },
           "permissionMode": {
             "type": "string"
-          },
-          "providerUsageAvailable": {
-            "type": "boolean"
           },
           "remoteControl": {
             "type": "boolean"
@@ -46030,6 +48539,15 @@
         "properties": {
           "action": {
             "type": "string"
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/AskQuestionAnswer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "at": {
             "format": "date-time",
@@ -51206,6 +53724,98 @@
         "x-internal": true
       }
     },
+    "/api/admin/background-jobs/{jobId}/logs": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns retained executions and a bounded slice of log output, including output from a running job. Poll using run and nextOffset to read only newly appended output.",
+        "operationId": "get-background-job-logs",
+        "parameters": [
+          {
+            "description": "Job id.",
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "description": "Job id.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Byte offset to read from, normally the nextOffset of the previous read. -1, the default, reads the end of the log.",
+            "explode": false,
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": -1,
+              "description": "Byte offset to read from, normally the nextOffset of the previous read. -1, the default, reads the end of the log.",
+              "format": "int64",
+              "minimum": -1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of bytes to return",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100000,
+              "description": "Maximum number of bytes to return",
+              "format": "int64",
+              "maximum": 5000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Run id from a previous response. Empty follows the latest run.",
+            "explode": false,
+            "in": "query",
+            "name": "run",
+            "schema": {
+              "description": "Run id from a previous response. Empty follows the latest run.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Run the byte offset belongs to. A different selected run resets the read to its tail.",
+            "explode": false,
+            "in": "query",
+            "name": "afterRun",
+            "schema": {
+              "description": "Run the byte offset belongs to. A different selected run resets the read to its tail.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackgroundJobLogsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get background job logs",
+        "tags": [
+          "Maintenance"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/admin/background-jobs/{jobId}/retry": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nRuns a job again as soon as possible. A canceled or discarded job gets one more attempt; a waiting job has its schedule brought forward",
@@ -52667,6 +55277,669 @@
         ]
       }
     },
+    "/api/admin/haven/audit": {
+      "get": {
+        "description": "Returns Haven's audit records, newest first unless asked otherwise, filtered, a page at a time. Records hold no secret value. Platform admins only.",
+        "operationId": "list-haven-audit",
+        "parameters": [
+          {
+            "description": "Only this secret's records.",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Only this secret's records.",
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only paths that start with this, such as org/64a1/.",
+            "explode": false,
+            "in": "query",
+            "name": "pathPrefix",
+            "schema": {
+              "description": "Only paths that start with this, such as org/64a1/.",
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "namespace",
+            "schema": {
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "principal",
+            "schema": {
+              "maxLength": 128,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only calls made for this user, by username or ID.",
+            "explode": false,
+            "in": "query",
+            "name": "user",
+            "schema": {
+              "description": "Only calls made for this user, by username or ID.",
+              "maxLength": 128,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this event type, such as haven.read.",
+            "explode": false,
+            "in": "query",
+            "name": "action",
+            "schema": {
+              "description": "Only this event type, such as haven.read.",
+              "maxLength": 128,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only event types that start with this, such as haven.policy.",
+            "explode": false,
+            "in": "query",
+            "name": "actionPrefix",
+            "schema": {
+              "description": "Only event types that start with this, such as haven.policy.",
+              "maxLength": 128,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "outcome",
+            "schema": {
+              "enum": [
+                "ok",
+                "denied",
+                "error"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only records at or after this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "since",
+            "schema": {
+              "description": "Only records at or after this time (RFC3339).",
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only records before this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "until",
+            "schema": {
+              "description": "Only records before this time (RFC3339).",
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "desc for the newest first.",
+            "explode": false,
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "default": "desc",
+              "description": "desc for the newest first.",
+              "enum": [
+                "desc",
+                "asc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "maxLength": 1024,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenAuditPage"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Haven's audit trail",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/audit/export": {
+      "get": {
+        "description": "Streams the audit records the filters select as JSON lines, newest first, up to 50,000. Platform admins only.",
+        "operationId": "export-haven-audit",
+        "parameters": [
+          {
+            "description": "Only this secret's records.",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Only this secret's records.",
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only paths that start with this, such as org/64a1/.",
+            "explode": false,
+            "in": "query",
+            "name": "pathPrefix",
+            "schema": {
+              "description": "Only paths that start with this, such as org/64a1/.",
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "namespace",
+            "schema": {
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "principal",
+            "schema": {
+              "maxLength": 128,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only calls made for this user, by username or ID.",
+            "explode": false,
+            "in": "query",
+            "name": "user",
+            "schema": {
+              "description": "Only calls made for this user, by username or ID.",
+              "maxLength": 128,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this event type, such as haven.read.",
+            "explode": false,
+            "in": "query",
+            "name": "action",
+            "schema": {
+              "description": "Only this event type, such as haven.read.",
+              "maxLength": 128,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only event types that start with this, such as haven.policy.",
+            "explode": false,
+            "in": "query",
+            "name": "actionPrefix",
+            "schema": {
+              "description": "Only event types that start with this, such as haven.policy.",
+              "maxLength": 128,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "outcome",
+            "schema": {
+              "enum": [
+                "ok",
+                "denied",
+                "error"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only records at or after this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "since",
+            "schema": {
+              "description": "Only records at or after this time (RFC3339).",
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only records before this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "until",
+            "schema": {
+              "description": "Only records before this time (RFC3339).",
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Export Haven's audit trail",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/audit/verify": {
+      "get": {
+        "description": "Returns the latest verification of the audit chain: running, or how it ended. Platform admins only.",
+        "operationId": "get-haven-audit-verify",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenJob"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get the audit chain's verification",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      },
+      "post": {
+        "description": "Starts recomputing the whole audit hash chain in the background, one verification at a time across replicas; the result is kept until the next. Platform admins only.",
+        "operationId": "start-haven-audit-verify",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenJob"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Verify Haven's audit chain",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/issuances": {
+      "get": {
+        "description": "Returns the short-lived credentials Haven issued, newest first, filtered, a page at a time; never a credential. Platform admins only.",
+        "operationId": "list-haven-issuances",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "namespace",
+            "schema": {
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The session name a cloud audit log shows, such as in a CloudTrail entry.",
+            "explode": false,
+            "in": "query",
+            "name": "sessionName",
+            "schema": {
+              "description": "The session name a cloud audit log shows, such as in a CloudTrail entry.",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "principal",
+            "schema": {
+              "maxLength": 128,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only issuances in these states (repeatable).",
+            "explode": true,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "Only issuances in these states (repeatable).",
+              "items": {
+                "enum": [
+                  "pending",
+                  "issued",
+                  "failed",
+                  "abandoned"
+                ],
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Only issuances at or after this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "since",
+            "schema": {
+              "description": "Only issuances at or after this time (RFC3339).",
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only issuances before this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "until",
+            "schema": {
+              "description": "Only issuances before this time (RFC3339).",
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "maxLength": 1024,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenIssuancesResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Haven's issuances",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/keys": {
+      "get": {
+        "description": "Returns every root key the store has registered, its state and the principals that list it, and the wraps each version of a versioned root key holds. Platform admins only.",
+        "operationId": "get-haven-keys",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenKeysResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Haven's root keys",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/kinds": {
+      "get": {
+        "description": "Returns each kind Haven stores and its fields: which are secret, required or multiline, so a form can ask for a new value. Platform admins only.",
+        "operationId": "list-haven-kinds",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HavenKind"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Haven's secret kinds",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/maintenance": {
+      "get": {
+        "description": "Returns the latest maintenance run started from this page: running, or what it did. Platform admins only.",
+        "operationId": "get-haven-maintenance",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenJob"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Haven's maintenance run",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      },
+      "post": {
+        "description": "Starts maintenance in the background, one run at a time across replicas: expired versions are destroyed, deleted secrets past their grace purged, data keys rewrapped off retired master keys, and the issuance ledger pruned. confirm is maintenance. Platform admins only.",
+        "operationId": "start-haven-maintenance",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenConfirm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenJob"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Run Haven's maintenance",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/admin/haven/migration/cloud-accounts": {
       "get": {
         "description": "Returns every cloud account with its Haven mode, the state of its credentials' copy in Haven, and what blocks each mode. Platform admins only.",
@@ -53336,6 +56609,1177 @@
         "summary": "Get Haven's migration status",
         "tags": [
           "Migrations"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/namespaces": {
+      "get": {
+        "description": "Returns namespaces by name, a page at a time, each with its secret count and master key versions: each one's state, the root key versions and recovery key that wrap it, and how many secret versions it still wraps. Never key material. Platform admins only.",
+        "operationId": "list-haven-namespaces",
+        "parameters": [
+          {
+            "description": "Only namespaces whose name starts with this, such as org/64a1.",
+            "explode": false,
+            "in": "query",
+            "name": "prefix",
+            "schema": {
+              "description": "Only namespaces whose name starts with this, such as org/64a1.",
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "maxLength": 1024,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenNamespacesResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Haven's namespaces and master keys",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/namespaces/rotate": {
+      "post": {
+        "description": "Creates a new master key version for a namespace and retires the old one, which maintenance then rewraps the namespace's data keys off; confirm repeats the name. Platform admins only.",
+        "operationId": "rotate-haven-namespace",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenNamespaceRotate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenNamespace"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Rotate a namespace's master key",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/overview": {
+      "get": {
+        "description": "Returns Haven's FIPS mode, store connection and capabilities, each root key's health, the recovery key, and the audit chain's head and backlog. Platform admins only.",
+        "operationId": "get-haven-overview",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenOverview"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Haven's overview",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/policies": {
+      "get": {
+        "description": "Returns every Haven policy, and whether core seeds it at startup. Platform admins only.",
+        "operationId": "list-haven-policies",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HavenPolicy"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Haven's policies",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      },
+      "put": {
+        "description": "Creates or replaces a policy; confirm repeats its path glob. Core's seeded policies, and admin or a scope under _haven for this page's own principal, are refused. Platform admins only.",
+        "operationId": "put-haven-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenPolicyPut"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenPolicy"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Save a Haven policy",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/policies/delete": {
+      "post": {
+        "description": "Removes a policy added by hand; confirm repeats its path glob. Core's seeded policies are refused. Platform admins only.",
+        "operationId": "delete-haven-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenPolicyDelete"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a Haven policy",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/policies/preview": {
+      "post": {
+        "description": "Returns what a policy would grant before it is saved: the secrets it matches, the store scopes it reaches, the policy it replaces, broad grants worth a second look, and why saving it would be refused. Changes nothing. Platform admins only.",
+        "operationId": "preview-haven-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenPolicyPreview"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Preview a Haven policy",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret": {
+      "get": {
+        "description": "Returns one secret's metadata, labels and versions, never a value, who may act on it and the policies that say so, and its migration state. Platform admins only.",
+        "operationId": "get-haven-secret",
+        "parameters": [
+          {
+            "description": "The secret's path, such as org/64a1/cloud-account/9f.",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "required": true,
+            "schema": {
+              "description": "The secret's path, such as org/64a1/cloud-account/9f.",
+              "maxLength": 256,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenSecretDetail"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a Haven secret's metadata",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret/activity": {
+      "get": {
+        "description": "Returns the secret's audit records, newest first, a page at a time. Platform admins only.",
+        "operationId": "list-haven-secret-activity",
+        "parameters": [
+          {
+            "description": "The secret's path.",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "required": true,
+            "schema": {
+              "description": "The secret's path.",
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "maxLength": 1024,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 25,
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenAuditPage"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List a Haven secret's recent activity",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret/check": {
+      "post": {
+        "description": "Uses the credential at its cloud now, without returning it, and refreshes the labels Haven derives from the answer, such as its expiry. Platform admins only.",
+        "operationId": "check-haven-secret",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenPathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenCheckReport"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Check a credential at its cloud",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret/create": {
+      "post": {
+        "description": "Stores a new secret of any kind Haven knows under console/, where no service reads and the Vault sync tracks nothing; a cloud credential is checked at its cloud unless skipCheck. Platform admins only.",
+        "operationId": "create-haven-secret",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenWriteResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create a Haven secret",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret/delete": {
+      "post": {
+        "description": "Deletes a secret, which can be undeleted until its grace period ends. Refused for a secret Vault still backs. Platform admins only.",
+        "operationId": "delete-haven-secret",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenPathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a Haven secret",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret/destroy-version": {
+      "post": {
+        "description": "Destroys a previous version now, such as a leaked one, with the reason in Haven's audit; confirm repeats the path. Refused for a secret Vault still backs. Platform admins only.",
+        "operationId": "destroy-haven-secret-version",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenDestroyVersionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Destroy a Haven secret's version",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret/issue": {
+      "post": {
+        "description": "Issues a short-lived credential from a cloud account's root credential, with the reason recorded as the issuance's purpose, instead of revealing the root credential. Only a platform admin's own browser session may. Platform admins only.",
+        "operationId": "issue-haven-credential",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenIssueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenIssued"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Issue a short-lived credential from a cloud credential",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret/labels": {
+      "patch": {
+        "description": "Sets or removes a secret's labels, guarded by the label revision the admin saw. Labels core sets on its writes and Haven's own are refused. Platform admins only.",
+        "operationId": "set-haven-secret-labels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenLabelsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenLabelsResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Edit a Haven secret's labels",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret/purge": {
+      "post": {
+        "description": "Destroys every version of a secret and removes it now, with no grace period; confirm repeats the path. Refused for a secret Vault still backs. Platform admins only.",
+        "operationId": "purge-haven-secret",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenConfirmPathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Purge a Haven secret",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret/restore-version": {
+      "post": {
+        "description": "Makes an earlier version's value current again as a new version, copied inside Haven so the value never leaves it. Refused for a secret Vault still backs. Platform admins only.",
+        "operationId": "restore-haven-secret-version",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenRestoreVersionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenWriteResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Restore a Haven secret's version",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret/reveal": {
+      "post": {
+        "description": "Returns one version's value, with the reason recorded in Haven's audit as haven.reveal. Only a platform admin's own browser session may, at most 20 times an hour. Platform admins only.",
+        "operationId": "reveal-haven-secret",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenRevealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenRevealed"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Reveal a Haven secret's value",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret/rotate": {
+      "post": {
+        "description": "Stores a new value as the secret's next version; the replaced one stays readable through its grace period. Refused for a secret Vault still backs, whose feature page changes it. Platform admins only.",
+        "operationId": "rotate-haven-secret",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenRotateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenWriteResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Rotate a Haven secret",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secret/undelete": {
+      "post": {
+        "description": "Restores a deleted secret before it is purged. Refused for a secret Vault still backs. Platform admins only.",
+        "operationId": "undelete-haven-secret",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HavenPathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Undelete a Haven secret",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secrets": {
+      "get": {
+        "description": "Returns secrets' metadata and labels, never their values, filtered and sorted, a page at a time, with each one's migration state while the Vault sync tracks it. Platform admins only.",
+        "operationId": "list-haven-secrets",
+        "parameters": [
+          {
+            "description": "Only paths that start with this, such as org/64a1/.",
+            "explode": false,
+            "in": "query",
+            "name": "prefix",
+            "schema": {
+              "description": "Only paths that start with this, such as org/64a1/.",
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "namespace",
+            "schema": {
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this kind, such as kv or aws-static.",
+            "explode": false,
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "description": "Only this kind, such as kv or aws-static.",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Words that must each appear in the path or a label value, ignoring case.",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Words that must each appear in the path or a label value, ignoring case.",
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Labels that must match exactly, as key=value (repeatable).",
+            "explode": true,
+            "in": "query",
+            "name": "label",
+            "schema": {
+              "description": "Labels that must match exactly, as key=value (repeatable).",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 10,
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "default": "active",
+              "enum": [
+                "active",
+                "deleted",
+                "any"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "By path, by the name label, or by when the value last changed, newest first.",
+            "explode": false,
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "default": "path",
+              "description": "By path, by the name label, or by when the value last changed, newest first.",
+              "enum": [
+                "path",
+                "name",
+                "updated"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only credentials their cloud reported to expire before this time (RFC3339).",
+            "explode": false,
+            "in": "query",
+            "name": "expiresBefore",
+            "schema": {
+              "description": "Only credentials their cloud reported to expire before this time (RFC3339).",
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only secrets past their rotation reminder.",
+            "explode": false,
+            "in": "query",
+            "name": "rotateDue",
+            "schema": {
+              "description": "Only secrets past their rotation reminder.",
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "maxLength": 1024,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenSecretsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Haven's secrets",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/secrets/children": {
+      "get": {
+        "description": "Returns the next path segments under a prefix, each with how many secrets it holds and whether a secret sits at it, a page at a time. Platform admins only.",
+        "operationId": "list-haven-secret-folders",
+        "parameters": [
+          {
+            "description": "The folder to list, ending in /, such as org/64a1/; empty for the top.",
+            "explode": false,
+            "in": "query",
+            "name": "prefix",
+            "schema": {
+              "description": "The folder to list, ending in /, such as org/64a1/; empty for the top.",
+              "maxLength": 256,
+              "pattern": "^([a-z0-9][a-z0-9._-]*/)*$",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "default": "active",
+              "enum": [
+                "active",
+                "deleted",
+                "any"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "maxLength": 1024,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100,
+              "format": "int64",
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenFoldersResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the folders under a Haven path",
+        "tags": [
+          "Haven"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/haven/stats": {
+      "get": {
+        "description": "Returns how many secrets Haven holds by namespace, kind and state, and how many are past their rotation reminder. Platform admins only.",
+        "operationId": "get-haven-stats",
+        "parameters": [
+          {
+            "description": "Count only paths under this folder, ending in /; empty for every secret.",
+            "explode": false,
+            "in": "query",
+            "name": "prefix",
+            "schema": {
+              "description": "Count only paths under this folder, ending in /; empty for every secret.",
+              "maxLength": 256,
+              "pattern": "^([a-z0-9][a-z0-9._-]*/)*$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HavenStats"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Count Haven's secrets",
+        "tags": [
+          "Haven"
         ],
         "x-internal": true
       }
@@ -55655,6 +60099,48 @@
         ]
       }
     },
+    "/api/admin/resources/import": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nTags a disk, IP address, bucket or snapshot created outside the platform as a platform deployment, so its cost is charged to a resource group's allocation. The resource group must have an allocation, and the owner must be a member of the resource's organization whose groups can use its cloud account. Platform administrators can import any resource; organization administrators can import their organization's. A dry run checks the import and lists the owner's resource groups.",
+        "operationId": "import-resource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportResourceBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResourceResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Import a cloud resource the platform did not create",
+        "tags": [
+          "Resources"
+        ]
+      }
+    },
     "/api/admin/resources/orphan-mute": {
       "delete": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nRemoves orphan alert mutes. Deployment scope clears every mute of the deployment, including per-resource ones.",
@@ -56025,6 +60511,152 @@
         ]
       }
     },
+    "/api/agents/machines/{machine}/claude-code/accounts": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude Code accounts on a machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
+        "operationId": "get-agent-machine-claude-accounts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "account",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "refresh",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "namesOnly",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentClaudeAccount"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Claude Code accounts on a machine",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/claude-code/models": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude subscription models on a machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
+        "operationId": "get-agent-machine-claude-models",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "account",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "refresh",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "namesOnly",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentClaudeModel"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Claude subscription models on a machine",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/agents/machines/{machine}/sessions": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the pw code sessions one machine's daemon reports, with the machine's reachability.",
@@ -56286,6 +60918,87 @@
           }
         },
         "summary": "Answer a pw code approval request",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/claude-code/accounts": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude Code accounts on a session's machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
+        "operationId": "get-agent-session-claude-accounts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "account",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "refresh",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "namesOnly",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentClaudeAccount"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Claude Code accounts on a session's machine",
         "tags": [
           "Agents"
         ],
@@ -56834,6 +61547,87 @@
           }
         },
         "summary": "Send a message to a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/models": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude subscription models for a session. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
+        "operationId": "get-agent-session-claude-models",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "account",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "refresh",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "namesOnly",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentClaudeModel"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Claude subscription models for a session",
         "tags": [
           "Agents"
         ],
@@ -59911,6 +64705,38 @@
         "summary": "Validate New Cluster",
         "tags": [
           "Clusters"
+        ]
+      }
+    },
+    "/api/code/settings": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the pw code settings the caller's organization sets, such as the announcements pw code shows when it starts.",
+        "operationId": "get-code-settings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCodeSettingsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get pw code settings",
+        "tags": [
+          "Organization"
         ]
       }
     },
@@ -74213,6 +79039,108 @@
         "summary": "List the storage types available in a region",
         "tags": [
           "Storage"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/code-settings": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns what the organization sets for everyone who uses pw code, such as its startup announcements.",
+        "operationId": "get-organization-code-settings",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgCodeSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get organization pw code settings",
+        "tags": [
+          "Organization"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces what the organization sets for everyone who uses pw code, and returns the settings as stored.",
+        "operationId": "update-organization-code-settings",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgCodeSettings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgCodeSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update organization pw code settings",
+        "tags": [
+          "Organization"
         ]
       }
     },
@@ -114829,6 +119757,10 @@
     {
       "description": "Endpoints related to user and organization groups",
       "name": "Groups"
+    },
+    {
+      "description": "Endpoints related to Haven, the credential store: its secrets' metadata, keys, audit trail and access",
+      "name": "Haven"
     },
     {
       "description": "Administrative endpoints for creating and dropping predefined MongoDB indexes",
