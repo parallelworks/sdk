@@ -191,6 +191,46 @@ func (c *Client) GetBackgroundJobLogsIter(ctx context.Context, jobID string, opt
 	}
 }
 
+// StreamBackgroundJobLogsIter returns an iterator over paginated StreamBackgroundJobLogs results.
+// It advances offset by the number of items each page returns,
+// and stops on the first page that comes back empty.
+func (c *Client) StreamBackgroundJobLogsIter(ctx context.Context, jobID string, opts ...StreamBackgroundJobLogsParams) *PageIterator[BackgroundJobLogRun] {
+	return &PageIterator[BackgroundJobLogRun]{
+		fetch: func(cursor string) ([]BackgroundJobLogRun, string, error) {
+			p := StreamBackgroundJobLogsParams{}
+			if len(opts) > 0 {
+				p = opts[0]
+			}
+			// Where the iterator has reached rides in the cursor. The first page
+			// starts wherever the caller pointed it, so walking on from there
+			// counts from that point rather than from the beginning.
+			at := int64(0)
+			if p.Offset != nil {
+				at = int64(*p.Offset)
+			}
+			if cursor != "" {
+				parsed, err := strconv.ParseInt(cursor, 10, 64)
+				if err != nil {
+					return nil, "", fmt.Errorf("reading the offset to fetch: %w", err)
+				}
+				at = parsed
+				next := int64(at)
+				p.Offset = &next
+			}
+
+			result, err := c.StreamBackgroundJobLogs(ctx, jobID, p)
+			if err != nil {
+				return nil, "", err
+			}
+			items := result.Runs
+			if len(items) == 0 {
+				return items, "", nil
+			}
+			return items, strconv.FormatInt(at+int64(len(items)), 10), nil
+		},
+	}
+}
+
 // ListBillingRunsIter returns an iterator over paginated ListBillingRuns results.
 // It advances skip by the number of items each page returns,
 // and stops on the first page that comes back empty.

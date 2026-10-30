@@ -256,6 +256,8 @@ type ListBackgroundJobsParams struct {
 	State *[]string `json:"state,omitempty"`
 	// Continue after this job id, from the next field of the previous page.
 	After *string `json:"after,omitempty"`
+	// Insertion order: desc lists the newest jobs first, asc the oldest. Keep the same order when paging.
+	Order *string `json:"order,omitempty"`
 	// Page size.
 	Limit *int64 `json:"limit,omitempty"`
 }
@@ -266,7 +268,7 @@ type ListBackgroundJobsParams struct {
 //
 // > This is a platform-admin only route.
 //
-// Returns background jobs, waiting, running and finished, oldest first
+// Returns background jobs, waiting, running and finished, newest first by default
 func (c *Client) ListBackgroundJobs(ctx context.Context, opts ...ListBackgroundJobsParams) (*ListBackgroundJobsOutputBody, error) {
 
 	path := "/api/admin/background-jobs"
@@ -280,6 +282,8 @@ func (c *Client) ListBackgroundJobs(ctx context.Context, opts ...ListBackgroundJ
 	addQueryParam(queryValues, "state", "form", true, params.State)
 
 	addQueryParam(queryValues, "after", "form", false, params.After)
+
+	addQueryParam(queryValues, "order", "form", false, params.Order)
 
 	addQueryParam(queryValues, "limit", "form", false, params.Limit)
 
@@ -387,7 +391,7 @@ type GetBackgroundJobLogsParams struct {
 // > This is a platform-admin only route.
 //
 // Returns retained executions and a bounded slice of log output, including output from a running job. Poll using run and nextOffset to read only newly appended output.
-func (c *Client) GetBackgroundJobLogs(ctx context.Context, jobID string, opts ...GetBackgroundJobLogsParams) (*BackgroundJobLogsOutputBody, error) {
+func (c *Client) GetBackgroundJobLogs(ctx context.Context, jobID string, opts ...GetBackgroundJobLogsParams) (*BackgroundJobLogsBody, error) {
 
 	path := "/api/admin/background-jobs/{jobId}/logs"
 	path = pathReplace(path, "jobId", "simple", false, jobID)
@@ -408,11 +412,89 @@ func (c *Client) GetBackgroundJobLogs(ctx context.Context, jobID string, opts ..
 		path += "?" + encodeQuery(queryValues)
 	}
 
-	var result BackgroundJobLogsOutputBody
+	var result BackgroundJobLogsBody
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
+}
+
+// StreamBackgroundJobLogsParams contains the parameters for the StreamBackgroundJobLogs operation.
+// Required parameters are value fields; optional parameters are pointers.
+type StreamBackgroundJobLogsParams struct {
+	// Byte offset to read from, normally the nextOffset of the previous read. -1, the default, reads the end of the log.
+	Offset *int64 `json:"offset,omitempty"`
+	// Maximum number of bytes to return
+	Limit *int64 `json:"limit,omitempty"`
+	// Run id from a previous response. Empty follows the latest run.
+	Run *string `json:"run,omitempty"`
+	// Run the byte offset belongs to. A different selected run resets the read to its tail.
+	AfterRun *string `json:"afterRun,omitempty"`
+}
+
+// StreamBackgroundJobLogs - Follow background job logs
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Streams bounded log updates. Resume using run, afterRun and offset. Finished executions close after their final output; an active stream closes after one minute and can reconnect with its last cursor.
+func (c *Client) StreamBackgroundJobLogs(ctx context.Context, jobID string, opts ...StreamBackgroundJobLogsParams) (*BackgroundJobLogEvent, error) {
+
+	path := "/api/admin/background-jobs/{jobId}/logs/stream"
+	path = pathReplace(path, "jobId", "simple", false, jobID)
+	var params StreamBackgroundJobLogsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "offset", "form", false, params.Offset)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	addQueryParam(queryValues, "run", "form", false, params.Run)
+
+	addQueryParam(queryValues, "afterRun", "form", false, params.AfterRun)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result BackgroundJobLogEvent
+	if err := c.do(ctx, "GET", path, nil, "", &result, "text/event-stream", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// StreamBackgroundJobLogsStream is StreamBackgroundJobLogs with the response taken as it arrives, one
+// server-sent event at a time. Close the stream when finished with it.
+func (c *Client) StreamBackgroundJobLogsStream(ctx context.Context, jobID string, opts ...StreamBackgroundJobLogsParams) (*EventStream[BackgroundJobLogEvent], error) {
+
+	path := "/api/admin/background-jobs/{jobId}/logs/stream"
+	path = pathReplace(path, "jobId", "simple", false, jobID)
+	var params StreamBackgroundJobLogsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "offset", "form", false, params.Offset)
+
+	addQueryParam(queryValues, "limit", "form", false, params.Limit)
+
+	addQueryParam(queryValues, "run", "form", false, params.Run)
+
+	addQueryParam(queryValues, "afterRun", "form", false, params.AfterRun)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	resp, err := c.doStream(ctx, "GET", path, nil, "", "text/event-stream", true)
+	if err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return newEventStream[BackgroundJobLogEvent](resp), nil
 }
 
 // RetryBackgroundJob - Retry a background job
@@ -5066,6 +5148,8 @@ func (c *Client) ListCloudInstances(ctx context.Context) (*[]CloudBrowserCluster
 type GetClustersParams struct {
 	// Whose clusters to list: mine (default), all, or user:<username>. Widening requires administrator access.
 	Scope *string `json:"scope,omitempty"`
+	// Only clusters with one of these statuses. For running clusters, use active, on and updating.
+	Status *[]string `json:"status,omitempty"`
 }
 
 // GetClusters - Get Clusters
@@ -5082,6 +5166,8 @@ func (c *Client) GetClusters(ctx context.Context, opts ...GetClustersParams) (*[
 	}
 	queryValues := url.Values{}
 	addQueryParam(queryValues, "scope", "form", false, params.Scope)
+
+	addQueryParam(queryValues, "status", "form", true, params.Status)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
@@ -5136,6 +5222,22 @@ func (c *Client) GetCodeSettings(ctx context.Context) (*GetCodeSettingsOutputBod
 	path := "/api/code/settings"
 
 	var result GetCodeSettingsOutputBody
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetCodeSettingsSchema - Get the managed pw code settings schema
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// The JSON schema used to validate and complete the organization's managed pw code settings.
+func (c *Client) GetCodeSettingsSchema(ctx context.Context) (*map[string]any, error) {
+
+	path := "/api/code/settings/schema"
+
+	var result map[string]any
 	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -8021,6 +8123,8 @@ type ChatCompletionParams struct {
 	XAllocation *string `json:"X-Allocation,omitempty"`
 	// Comma-separated names of the read-only platform tools, from listAIChatTools, the server may run while streaming an answer. Calls arrive as tool_calls deltas, each followed by a chunk carrying toolResult.
 	XPlatformTools *string `json:"X-Platform-Tools,omitempty"`
+	// Comma-separated platform tool names whose successful results the client displays as rich UI. The assistant summarizes these results without repeating their rows.
+	XRenderedTools *string `json:"X-Rendered-Tools,omitempty"`
 }
 
 // ChatCompletion - Create chat completion
@@ -8042,6 +8146,7 @@ func (c *Client) ChatCompletion(ctx context.Context, body ChatCompletionRequest,
 	setHeader(headers, "X-User-Message-Id", false, params.XUserMessageID)
 	setHeader(headers, "X-Allocation", false, params.XAllocation)
 	setHeader(headers, "X-Platform-Tools", false, params.XPlatformTools)
+	setHeader(headers, "X-Rendered-Tools", false, params.XRenderedTools)
 
 	var result ChatCompletionResponse
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true, headers); err != nil {
@@ -8066,6 +8171,7 @@ func (c *Client) ChatCompletionStream(ctx context.Context, body ChatCompletionRe
 	setHeader(headers, "X-User-Message-Id", false, params.XUserMessageID)
 	setHeader(headers, "X-Allocation", false, params.XAllocation)
 	setHeader(headers, "X-Platform-Tools", false, params.XPlatformTools)
+	setHeader(headers, "X-Rendered-Tools", false, params.XRenderedTools)
 
 	resp, err := c.doStream(ctx, "POST", path, body, "application/json", "text/event-stream", true, headers)
 	if err != nil {
@@ -16607,6 +16713,25 @@ func (c *Client) GetClusterRunningProcesses(ctx context.Context, organization st
 	return &result, nil
 }
 
+// GetClusterRunningWork - Get cluster running work
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists what stopping, destroying, disconnecting or deleting the cluster would interrupt: its active sessions, the workflow runs a session or a placed job ties to it, and, for a cloud cluster that is on, what its scheduler says when its agent is asked live. Clients show it before those actions; the actions themselves never refuse because of it. Needs writer on a cloud cluster (what stopping or destroying it needs) or admin on an existing one.
+func (c *Client) GetClusterRunningWork(ctx context.Context, organization string, user string, clusterName string) (*ClusterRunningWork, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/running-work"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+
+	var result ClusterRunningWork
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetClusterSchedulerJobsParams contains the parameters for the GetClusterSchedulerJobs operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetClusterSchedulerJobsParams struct {
@@ -23086,7 +23211,7 @@ func (c *Client) CreateWorkflowRun(ctx context.Context, body CreateWorkflowRunIn
 
 	var result CreateWorkflowRunOutputBody
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
+		return nil, parseConsentRequiredErrorResponse(err)
 	}
 	return &result, nil
 }

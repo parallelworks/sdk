@@ -130,3 +130,32 @@ func parseErrorResponse(err error) error {
 	}
 	return err
 }
+
+// ConsentRequiredErrorResponse wraps an APIError with a parsed ConsentRequiredError body.
+type ConsentRequiredErrorResponse struct {
+	*APIError
+	Detail ConsentRequiredError
+}
+
+func (e *ConsentRequiredErrorResponse) Error() string {
+	if e.Detail.Message != "" {
+		return fmt.Sprintf("API error %s: %s", e.statusLabel(), e.Detail.Message)
+	}
+	return e.APIError.Error()
+}
+
+func (e *ConsentRequiredErrorResponse) Unwrap() error {
+	return e.APIError
+}
+
+func parseConsentRequiredErrorResponse(err error) error {
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) || len(apiErr.Body) == 0 {
+		return err
+	}
+	resp := &ConsentRequiredErrorResponse{APIError: apiErr}
+	if json.Unmarshal(apiErr.Body, &resp.Detail) == nil {
+		return resp
+	}
+	return err
+}

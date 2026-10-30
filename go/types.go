@@ -718,6 +718,10 @@ type AgentImageSaved struct {
 
 type AgentMachine struct {
 	AgentVersion *string `json:"agentVersion,omitempty"`
+	// Organization and host policy allow the Claude Code integration.
+	ClaudeCodeAllowed bool `json:"claudeCodeAllowed"`
+	// Claude Code is installed on the daemon host and available on its PATH.
+	ClaudeInstalled *bool `json:"claudeInstalled,omitempty"`
 	// Machine id the pw code daemon reported, when it answered. A local computer with the same id as a resource is the same host and is listed only as the resource.
 	DaemonID *string `json:"daemonId,omitempty"`
 	Error    *string `json:"error,omitempty"`
@@ -907,6 +911,7 @@ type AgentStreamEvent struct {
 	Decision      *ToolDecision    `json:"decision,omitempty"`
 	GoalProgress  *GoalProgress    `json:"goalProgress,omitempty"`
 	ID            *string          `json:"id,omitempty"`
+	Images        []ImageContent   `json:"images,omitempty"`
 	Interim       *bool            `json:"interim,omitempty"`
 	Interrupted   *bool            `json:"interrupted,omitempty"`
 	IsError       *bool            `json:"isError,omitempty"`
@@ -2215,6 +2220,27 @@ type BackgroundJobError struct {
 	Error string `json:"error"`
 }
 
+type BackgroundJobLogEvent struct {
+	// The selected execution has finished and all output has been sent.
+	Done bool `json:"done"`
+	// The stream failed; reconnect using the last received cursor.
+	Failed *bool `json:"failed,omitempty"`
+	// The requested slice of the log, empty when nothing has been written yet
+	Log string `json:"log"`
+	// Offset to request next to read only what has since been appended
+	NextOffset int64 `json:"nextOffset"`
+	// Byte offset the returned slice starts at. Lower than the requested offset when the log was replaced, meaning the slice replaces rather than appends to what was read before.
+	Offset int64 `json:"offset"`
+	// The run returned; empty when no output has been written.
+	Run string `json:"run"`
+	// Retained runs, oldest first.
+	Runs []BackgroundJobLogRun `json:"runs"`
+	// Current size of the log in bytes
+	Size int64 `json:"size"`
+	// Current job state.
+	State string `json:"state"`
+}
+
 type BackgroundJobLogRun struct {
 	// Attempt number, starting at one.
 	Attempt int64 `json:"attempt"`
@@ -2224,7 +2250,7 @@ type BackgroundJobLogRun struct {
 	Legacy bool `json:"legacy"`
 }
 
-type BackgroundJobLogsOutputBody struct {
+type BackgroundJobLogsBody struct {
 	// The requested slice of the log, empty when nothing has been written yet
 	Log string `json:"log"`
 	// Offset to request next to read only what has since been appended
@@ -3072,6 +3098,10 @@ type CloudAccountCredentialsInput struct {
 	AzureClientSecret *string `json:"azureClientSecret,omitempty"`
 	// Azure tenant ID
 	AzureTenantID *string `json:"azureTenantId,omitempty"`
+	// When true and credentialExpiresAt is not set, removes a manually set expiry date. Ignored on create.
+	ClearCredentialExpiresAt *bool `json:"clearCredentialExpiresAt,omitempty"`
+	// When the supplied credential secret expires at the provider. Ignored for Azure, where the expiry is discovered automatically.
+	CredentialExpiresAt *time.Time `json:"credentialExpiresAt,omitempty"`
 	// Cloud service provider ID
 	CspID string `json:"cspId"`
 	// When true, enables OS Login on provisioned GCE instances (required when the GCP org policy enforces constraints/compute.requireOsLogin)
@@ -3115,9 +3145,12 @@ type CloudAccountCredentialsInput struct {
 }
 
 type CloudAccountCredentialsResponse struct {
-	AwsAccessKeyID                  *string    `json:"awsAccessKeyId,omitempty"`
-	AzureClientID                   *string    `json:"azureClientId,omitempty"`
-	CredentialsCheckError           *string    `json:"credentialsCheckError,omitempty"`
+	AwsAccessKeyID        *string    `json:"awsAccessKeyId,omitempty"`
+	AzureClientID         *string    `json:"azureClientId,omitempty"`
+	CredentialsCheckError *string    `json:"credentialsCheckError,omitempty"`
+	ExpiresAt             *time.Time `json:"expiresAt,omitempty"`
+	// How the expiry was determined: provider, manual, or never
+	ExpirySource                    *string    `json:"expirySource,omitempty"`
 	GoogleServiceAccount            *string    `json:"googleServiceAccount,omitempty"`
 	MissingPermissions              []string   `json:"missingPermissions,omitempty"`
 	OpenstackServiceAccountUsername *string    `json:"openstackServiceAccountUsername,omitempty"`
@@ -3151,31 +3184,35 @@ type CloudAccountHaven struct {
 }
 
 type CloudAccountListItem struct {
-	Billing  *CloudAccountBillingResponse `json:"billing,omitempty"`
-	Csp      string                       `json:"csp"`
-	CspID    string                       `json:"cspId"`
-	GovCloud bool                         `json:"govCloud"`
-	Name     string                       `json:"name"`
+	Billing             *CloudAccountBillingResponse `json:"billing,omitempty"`
+	CredentialsExpireAt *time.Time                   `json:"credentialsExpireAt,omitempty"`
+	// How the expiry was determined: provider, manual, or never
+	CredentialsExpirySource *string `json:"credentialsExpirySource,omitempty"`
+	Csp                     string  `json:"csp"`
+	CspID                   string  `json:"cspId"`
+	GovCloud                bool    `json:"govCloud"`
+	Name                    string  `json:"name"`
 	// Distinct regions across the cloud account's networks. Returned by the user-scoped list only.
 	Regions []string `json:"regions,omitempty"`
 }
 
 type CloudAccountNetwork struct {
-	CloudAccount     string                `json:"cloudAccount"`
-	CloudResources   []RegionResource      `json:"cloudResources"`
-	CreatedAt        time.Time             `json:"createdAt"`
-	Csp              string                `json:"csp"`
-	DNSZoneID        *string               `json:"dnsZoneId,omitempty"`
-	DNSZoneName      *string               `json:"dnsZoneName,omitempty"`
-	FirewallRules    []NetworkFirewallRule `json:"firewallRules,omitempty"`
-	ID               string                `json:"id"`
-	Name             string                `json:"name"`
-	NatGateway       bool                  `json:"natGateway"`
-	Organization     string                `json:"organization"`
-	PeeredToPlatform bool                  `json:"peeredToPlatform"`
-	ProvisioningMode *string               `json:"provisioningMode,omitempty"`
-	RdmaProfile      *string               `json:"rdmaProfile,omitempty"`
-	Regions          []ConfigRegion        `json:"regions"`
+	CloudAccount       string                `json:"cloudAccount"`
+	CloudResources     []RegionResource      `json:"cloudResources"`
+	CreatedAt          time.Time             `json:"createdAt"`
+	Csp                string                `json:"csp"`
+	DNSZoneID          *string               `json:"dnsZoneId,omitempty"`
+	DNSZoneName        *string               `json:"dnsZoneName,omitempty"`
+	FirewallRules      []NetworkFirewallRule `json:"firewallRules,omitempty"`
+	IamInstanceProfile *string               `json:"iamInstanceProfile,omitempty"`
+	ID                 string                `json:"id"`
+	Name               string                `json:"name"`
+	NatGateway         bool                  `json:"natGateway"`
+	Organization       string                `json:"organization"`
+	PeeredToPlatform   bool                  `json:"peeredToPlatform"`
+	ProvisioningMode   *string               `json:"provisioningMode,omitempty"`
+	RdmaProfile        *string               `json:"rdmaProfile,omitempty"`
+	Regions            []ConfigRegion        `json:"regions"`
 	// True when the network can be provisioned again: it was deleted, or its failed attempt's cloud resources were rolled back
 	Retryable        bool      `json:"retryable"`
 	Status           string    `json:"status"`
@@ -3658,6 +3695,19 @@ type ClusterResourcesResponse struct {
 	Total int64 `json:"total"`
 }
 
+type ClusterRunningWork struct {
+	// How many other users' workflow runs are on the cluster. They are counted, never named.
+	OtherRuns int64 `json:"otherRuns"`
+	// How many other users' sessions are on the cluster. They are counted, never named.
+	OtherSessions int64 `json:"otherSessions"`
+	// Your workflow runs still running on the cluster: holding a session on it, or with a job placed on it.
+	Runs []ClusterWorkRun `json:"runs"`
+	// What the cluster's agent said when asked live for its scheduler's jobs: running when some have not finished, idle when none, unchecked when the agent is not connected or could not list them. Absent for an existing cluster, whose scheduler jobs outlive a disconnect, and for a cloud cluster that is not on.
+	Scheduler *string `json:"scheduler,omitempty"`
+	// Your sessions installing, starting or running on the cluster.
+	Sessions []ClusterWorkSession `json:"sessions"`
+}
+
 type ClusterRuntimeAlert struct {
 	Enabled       *bool  `json:"enabled,omitempty"`
 	IntervalHours *int64 `json:"intervalHours,omitempty"`
@@ -3738,6 +3788,16 @@ type ClusterUpdateVariables struct {
 	UserBootstrapCompute *bool `json:"userBootstrapCompute,omitempty"`
 	// Run the user bootstrap script on the controller
 	UserBootstrapController *bool `json:"userBootstrapController,omitempty"`
+}
+
+type ClusterWorkRun struct {
+	// Slug of the workflow run.
+	Slug string `json:"slug"`
+}
+
+type ClusterWorkSession struct {
+	// Name of the session.
+	Name string `json:"name"`
 }
 
 type CodexDeviceAuthorizationResponse struct {
@@ -3883,6 +3943,28 @@ type ConsentDecisionInputBody struct {
 type ConsentDecisionOutputBody struct {
 	// Where to send the browser to complete the flow
 	RedirectURI string `json:"redirectUri"`
+}
+
+type ConsentRequiredError struct {
+	// Always "consent_required" for this error type.
+	Code string `json:"code"`
+	// Will always be true, indicating this is an error response.
+	Error bool `json:"error"`
+	// A human-readable message describing the error.
+	Message string `json:"message"`
+	// For a repository run, the repository the approval applies to, as the server resolved it. Approving covers every workflow in it.
+	Repository *string `json:"repository,omitempty"`
+	// Workflow permissions that need approval before the workflow can run.
+	UnapprovedPermissions []string `json:"unapprovedPermissions,omitempty"`
+	// User variables that need approval before the workflow can run.
+	UnapprovedVariables []ConsentVariable `json:"unapprovedVariables,omitempty"`
+}
+
+type ConsentVariable struct {
+	// Whether the user has this variable defined in their account variables. An undefined variable resolves to an empty value when the workflow runs.
+	Defined bool    `json:"defined"`
+	Hint    *string `json:"hint,omitempty"`
+	Name    string  `json:"name"`
 }
 
 type ConversationResponse struct {
@@ -4223,8 +4305,12 @@ type CreateCloudAccountBody struct {
 	AzureClientSecret *string `json:"azureClientSecret,omitempty"`
 	// Azure tenant ID
 	AzureTenantID *string `json:"azureTenantId,omitempty"`
+	// When true and credentialExpiresAt is not set, removes a manually set expiry date. Ignored on create.
+	ClearCredentialExpiresAt *bool `json:"clearCredentialExpiresAt,omitempty"`
 	// When true, provision a user host for the organization in this cloud account after it is created
 	CreateUserhost *bool `json:"createUserhost,omitempty"`
+	// When the supplied credential secret expires at the provider. Ignored for Azure, where the expiry is discovered automatically.
+	CredentialExpiresAt *time.Time `json:"credentialExpiresAt,omitempty"`
 	// Cloud service provider
 	Csp string `json:"csp"`
 	// Cloud service provider ID
@@ -4532,6 +4618,8 @@ type CreateNamespaceInputBody struct {
 type CreateNetworkBody struct {
 	// Custom ingress security group rules applied to resources provisioned on this network
 	FirewallRules []NetworkFirewallRule `json:"firewallRules,omitempty"`
+	// IAM instance profile name or ARN that every instance launched on this network runs with. AWS only.
+	IamInstanceProfile *string `json:"iamInstanceProfile,omitempty"`
 	// Name of the network
 	Name string `json:"name"`
 	// Whether to provision a NAT gateway for outbound internet access (only applies when provisioning mode is private and not peered to platform)
@@ -5899,6 +5987,10 @@ type ExistingCluster struct {
 	Name string `json:"name"`
 	// Controller/login host the live agent is reporting; falls back to the first configured login node when the agent has not reported yet
 	RemoteHost string `json:"remoteHost"`
+	// Address the workspace reached the session host at; dialed directly on reconnect when the host name resolves to several login nodes
+	SessionAddress string `json:"sessionAddress"`
+	// Login node hosting the cluster's running desktop and VS Code sessions; the workspace tries it first when reconnecting so those sessions are re-adopted instead of left behind
+	SessionHost string `json:"sessionHost"`
 	// Whether the cluster's agent tunnel is currently registered on any ingress pod, with the user-disconnect veto applied
 	TunnelConnected bool `json:"tunnelConnected"`
 	// Provider type
@@ -8771,16 +8863,17 @@ type HelmReleaseValuesResponseBody struct {
 }
 
 type HistoryItem struct {
-	CallID   *string       `json:"callId,omitempty"`
-	Decision *ToolDecision `json:"decision,omitempty"`
-	FromMain *bool         `json:"fromMain,omitempty"`
-	Kind     string        `json:"kind"`
-	Pastes   []PasteView   `json:"pastes,omitempty"`
-	PlanBody *string       `json:"planBody,omitempty"`
-	Text     *string       `json:"text,omitempty"`
-	ToolArgs *string       `json:"toolArgs,omitempty"`
-	ToolName *string       `json:"toolName,omitempty"`
-	TurnEnd  *TurnEnd      `json:"turnEnd,omitempty"`
+	CallID   *string        `json:"callId,omitempty"`
+	Decision *ToolDecision  `json:"decision,omitempty"`
+	FromMain *bool          `json:"fromMain,omitempty"`
+	Images   []ImageContent `json:"images,omitempty"`
+	Kind     string         `json:"kind"`
+	Pastes   []PasteView    `json:"pastes,omitempty"`
+	PlanBody *string        `json:"planBody,omitempty"`
+	Text     *string        `json:"text,omitempty"`
+	ToolArgs *string        `json:"toolArgs,omitempty"`
+	ToolName *string        `json:"toolName,omitempty"`
+	TurnEnd  *TurnEnd       `json:"turnEnd,omitempty"`
 }
 
 type HostForwardSetting struct {
@@ -8849,6 +8942,11 @@ type ImageComplianceItem struct {
 	Region *string `json:"region,omitempty"`
 	// State of the base image
 	State string `json:"state"`
+}
+
+type ImageContent struct {
+	Data string `json:"data"`
+	Mime string `json:"mime"`
 }
 
 type ImportResourceBody struct {
@@ -9641,7 +9739,7 @@ type ListAttachmentsBody struct {
 }
 
 type ListBackgroundJobsOutputBody struct {
-	// One page of jobs, oldest first.
+	// One page of jobs in the requested insertion order, newest first by default.
 	Jobs []BackgroundJob `json:"jobs"`
 	// Pass as after to fetch the next page. Absent on the last page.
 	Next *string `json:"next,omitempty"`
@@ -10444,6 +10542,8 @@ type MigrationStepResponse struct {
 }
 
 type ModelEntry struct {
+	// Budget allocation the provider's resource group bills; absent for org and session models
+	Allocation        *string  `json:"allocation,omitempty"`
 	CachedInputRate   *float64 `json:"cached_input_rate,omitempty"`
 	ContextWindow     *int64   `json:"context_window,omitempty"`
 	Created           int64    `json:"created"`
@@ -10595,6 +10695,8 @@ type Network struct {
 	DNSZoneID   *string `json:"dnsZoneId,omitempty"`
 	// The DNS zone name associated with the network.
 	DnszoneName string `json:"dnszoneName"`
+	// IAM instance profile name or ARN that instances launched on the network run with (AWS only).
+	IamInstanceProfile *string `json:"iamInstanceProfile,omitempty"`
 	// The network ID.
 	ID string `json:"id"`
 	// The network name.
@@ -11488,6 +11590,8 @@ type OrgBillingSettings struct {
 type OrgCodeSettings struct {
 	// Messages pw code shows when it starts, one at random each launch. Control characters other than newlines are removed, and blank ones are dropped.
 	Announcements []string `json:"announcements,omitempty"`
+	// Disable Claude Code accounts, subscription models, and execution, even when Claude Code is installed on the agent host. Members cannot override an organization restriction.
+	DisableClaudeCode *bool `json:"disableClaudeCode,omitempty"`
 }
 
 type OrgConnectionPermissionsOutputBody struct {
@@ -11935,6 +12039,8 @@ type PatchModelConfigInputBody struct {
 type PatchNetworkBody struct {
 	// Custom ingress security group rules applied to resources provisioned on this network; omit to leave unchanged
 	FirewallRules []NetworkFirewallRule `json:"firewallRules,omitempty"`
+	// IAM instance profile name or ARN that every instance launched on this network runs with. AWS only. Omit to leave unchanged; send an empty string to clear.
+	IamInstanceProfile *string `json:"iamInstanceProfile,omitempty"`
 	// List of regions with corresponding CIDR ranges
 	Regions []map[string]string `json:"regions"`
 }
@@ -12059,6 +12165,8 @@ type PlatformAttachedStorage struct {
 	MountPoint *string `json:"mountPoint"`
 	// The name of the storage resource. Absent when the mount references a storage resource that no longer exists.
 	Name *string `json:"name,omitempty"`
+	// The username of the storage resource's owner. Absent when the mount references a storage resource that no longer exists.
+	Owner *string `json:"owner,omitempty"`
 	// Whether the storage resource is persistent. Absent when the mount references a storage resource that no longer exists.
 	Persistent *bool `json:"persistent,omitempty"`
 	// Whether the storage resource is provisioned. Absent when the mount references a storage resource that no longer exists.
@@ -12123,13 +12231,14 @@ type PlatformMauResponse struct {
 }
 
 type PlatformNotificationSettings struct {
-	BillingAlert    *NotificationChannelSettings `json:"billingAlert,omitempty"`
-	CostAlert       NotificationChannelSettings  `json:"costAlert"`
-	General         NotificationChannelSettings  `json:"general"`
-	ImageRetirement *NotificationChannelSettings `json:"imageRetirement,omitempty"`
-	OrphansAlert    *NotificationChannelSettings `json:"orphansAlert,omitempty"`
-	RuntimeAlert    NotificationChannelSettings  `json:"runtimeAlert"`
-	WorkspaceAlert  *NotificationChannelSettings `json:"workspaceAlert,omitempty"`
+	BillingAlert     *NotificationChannelSettings `json:"billingAlert,omitempty"`
+	CostAlert        NotificationChannelSettings  `json:"costAlert"`
+	CredentialExpiry *NotificationChannelSettings `json:"credentialExpiry,omitempty"`
+	General          NotificationChannelSettings  `json:"general"`
+	ImageRetirement  *NotificationChannelSettings `json:"imageRetirement,omitempty"`
+	OrphansAlert     *NotificationChannelSettings `json:"orphansAlert,omitempty"`
+	RuntimeAlert     NotificationChannelSettings  `json:"runtimeAlert"`
+	WorkspaceAlert   *NotificationChannelSettings `json:"workspaceAlert,omitempty"`
 }
 
 type PlatformSettings struct {
@@ -14224,7 +14333,7 @@ type Resource struct {
 	EndTime *time.Time `json:"endTime,omitempty"`
 	// Row id.
 	ID string `json:"id"`
-	// Why the import failed: too many tags, the cloud account may not tag it, it no longer exists, it was replaced, or another cloud error.
+	// Why the import failed: too many tags, the cloud account may not tag it, it no longer exists, it was replaced, Azure refused to move it into its own resource group, or another cloud error.
 	ImportFailure *string `json:"importFailure,omitempty"`
 	// Platform name the resource is imported under, while it is being imported or once imported.
 	ImportName *string `json:"importName,omitempty"`
@@ -15202,6 +15311,7 @@ type SessionState struct {
 	AutoName             *string       `json:"autoName,omitempty"`
 	BackgroundShells     *int64        `json:"backgroundShells,omitempty"`
 	ClaudeAccount        *string       `json:"claudeAccount,omitempty"`
+	EffectiveAllocation  *string       `json:"effectiveAllocation,omitempty"`
 	EffectiveEffort      *string       `json:"effectiveEffort,omitempty"`
 	Effort               *string       `json:"effort,omitempty"`
 	EffortActive         *bool         `json:"effortActive,omitempty"`

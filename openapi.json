@@ -1830,6 +1830,14 @@
           "agentVersion": {
             "type": "string"
           },
+          "claudeCodeAllowed": {
+            "description": "Organization and host policy allow the Claude Code integration.",
+            "type": "boolean"
+          },
+          "claudeInstalled": {
+            "description": "Claude Code is installed on the daemon host and available on its PATH.",
+            "type": "boolean"
+          },
           "daemonId": {
             "description": "Machine id the pw code daemon reported, when it answered. A local computer with the same id as a resource is the same host and is listed only as the resource.",
             "type": "string"
@@ -1913,7 +1921,8 @@
           "name",
           "kind",
           "owner",
-          "status"
+          "status",
+          "claudeCodeAllowed"
         ],
         "type": "object"
       },
@@ -2504,6 +2513,15 @@
           },
           "id": {
             "type": "string"
+          },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/ImageContent"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "interim": {
             "type": "boolean"
@@ -6985,6 +7003,64 @@
         ],
         "type": "object"
       },
+      "BackgroundJobLogEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "done": {
+            "description": "The selected execution has finished and all output has been sent.",
+            "type": "boolean"
+          },
+          "failed": {
+            "description": "The stream failed; reconnect using the last received cursor.",
+            "type": "boolean"
+          },
+          "log": {
+            "description": "The requested slice of the log, empty when nothing has been written yet",
+            "type": "string"
+          },
+          "nextOffset": {
+            "description": "Offset to request next to read only what has since been appended",
+            "format": "int64",
+            "type": "integer"
+          },
+          "offset": {
+            "description": "Byte offset the returned slice starts at. Lower than the requested offset when the log was replaced, meaning the slice replaces rather than appends to what was read before.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "run": {
+            "description": "The run returned; empty when no output has been written.",
+            "type": "string"
+          },
+          "runs": {
+            "description": "Retained runs, oldest first.",
+            "items": {
+              "$ref": "#/components/schemas/BackgroundJobLogRun"
+            },
+            "type": "array"
+          },
+          "size": {
+            "description": "Current size of the log in bytes",
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "description": "Current job state.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "done",
+          "runs",
+          "run",
+          "state",
+          "log",
+          "offset",
+          "nextOffset",
+          "size"
+        ],
+        "type": "object"
+      },
       "BackgroundJobLogRun": {
         "additionalProperties": false,
         "properties": {
@@ -7009,7 +7085,7 @@
         ],
         "type": "object"
       },
-      "BackgroundJobLogsOutputBody": {
+      "BackgroundJobLogsBody": {
         "additionalProperties": false,
         "properties": {
           "log": {
@@ -9441,6 +9517,15 @@
             "description": "Azure tenant ID",
             "type": "string"
           },
+          "clearCredentialExpiresAt": {
+            "description": "When true and credentialExpiresAt is not set, removes a manually set expiry date. Ignored on create.",
+            "type": "boolean"
+          },
+          "credentialExpiresAt": {
+            "description": "When the supplied credential secret expires at the provider. Ignored for Azure, where the expiry is discovered automatically.",
+            "format": "date-time",
+            "type": "string"
+          },
           "cspId": {
             "description": "Cloud service provider ID",
             "type": "string"
@@ -9537,6 +9622,14 @@
             "type": "string"
           },
           "credentialsCheckError": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expirySource": {
+            "description": "How the expiry was determined: provider, manual, or never",
             "type": "string"
           },
           "googleServiceAccount": {
@@ -9670,6 +9763,14 @@
           "billing": {
             "$ref": "#/components/schemas/CloudAccountBillingResponse"
           },
+          "credentialsExpireAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "credentialsExpirySource": {
+            "description": "How the expiry was determined: provider, manual, or never",
+            "type": "string"
+          },
           "csp": {
             "type": "string"
           },
@@ -9737,6 +9838,9 @@
               "array",
               "null"
             ]
+          },
+          "iamInstanceProfile": {
+            "type": "string"
           },
           "id": {
             "type": "string"
@@ -11239,6 +11343,51 @@
         ],
         "type": "object"
       },
+      "ClusterRunningWork": {
+        "additionalProperties": false,
+        "properties": {
+          "otherRuns": {
+            "description": "How many other users' workflow runs are on the cluster. They are counted, never named.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "otherSessions": {
+            "description": "How many other users' sessions are on the cluster. They are counted, never named.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "runs": {
+            "description": "Your workflow runs still running on the cluster: holding a session on it, or with a job placed on it.",
+            "items": {
+              "$ref": "#/components/schemas/ClusterWorkRun"
+            },
+            "type": "array"
+          },
+          "scheduler": {
+            "description": "What the cluster's agent said when asked live for its scheduler's jobs: running when some have not finished, idle when none, unchecked when the agent is not connected or could not list them. Absent for an existing cluster, whose scheduler jobs outlive a disconnect, and for a cloud cluster that is not on.",
+            "enum": [
+              "running",
+              "idle",
+              "unchecked"
+            ],
+            "type": "string"
+          },
+          "sessions": {
+            "description": "Your sessions installing, starting or running on the cluster.",
+            "items": {
+              "$ref": "#/components/schemas/ClusterWorkSession"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "sessions",
+          "runs",
+          "otherSessions",
+          "otherRuns"
+        ],
+        "type": "object"
+      },
       "ClusterRuntimeAlert": {
         "additionalProperties": false,
         "properties": {
@@ -11461,6 +11610,32 @@
             "type": "boolean"
           }
         },
+        "type": "object"
+      },
+      "ClusterWorkRun": {
+        "additionalProperties": false,
+        "properties": {
+          "slug": {
+            "description": "Slug of the workflow run.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug"
+        ],
+        "type": "object"
+      },
+      "ClusterWorkSession": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Name of the session.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
         "type": "object"
       },
       "CodexDeviceAuthorizationResponse": {
@@ -11913,6 +12088,73 @@
         },
         "required": [
           "redirectUri"
+        ],
+        "type": "object"
+      },
+      "ConsentRequiredError": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "Always \"consent_required\" for this error type.",
+            "type": "string"
+          },
+          "error": {
+            "description": "Will always be true, indicating this is an error response.",
+            "type": "boolean"
+          },
+          "message": {
+            "description": "A human-readable message describing the error.",
+            "type": "string"
+          },
+          "repository": {
+            "description": "For a repository run, the repository the approval applies to, as the server resolved it. Approving covers every workflow in it.",
+            "type": "string"
+          },
+          "unapprovedPermissions": {
+            "description": "Workflow permissions that need approval before the workflow can run.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "unapprovedVariables": {
+            "description": "User variables that need approval before the workflow can run.",
+            "items": {
+              "$ref": "#/components/schemas/ConsentVariable"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "error",
+          "message",
+          "code"
+        ],
+        "type": "object"
+      },
+      "ConsentVariable": {
+        "additionalProperties": false,
+        "properties": {
+          "defined": {
+            "description": "Whether the user has this variable defined in their account variables. An undefined variable resolves to an empty value when the workflow runs.",
+            "type": "boolean"
+          },
+          "hint": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "defined"
         ],
         "type": "object"
       },
@@ -12897,9 +13139,18 @@
             "description": "Azure tenant ID",
             "type": "string"
           },
+          "clearCredentialExpiresAt": {
+            "description": "When true and credentialExpiresAt is not set, removes a manually set expiry date. Ignored on create.",
+            "type": "boolean"
+          },
           "createUserhost": {
             "description": "When true, provision a user host for the organization in this cloud account after it is created",
             "type": "boolean"
+          },
+          "credentialExpiresAt": {
+            "description": "When the supplied credential secret expires at the provider. Ignored for Azure, where the expiry is discovered automatically.",
+            "format": "date-time",
+            "type": "string"
           },
           "csp": {
             "description": "Cloud service provider",
@@ -13853,6 +14104,11 @@
               "array",
               "null"
             ]
+          },
+          "iamInstanceProfile": {
+            "description": "IAM instance profile name or ARN that every instance launched on this network runs with. AWS only.",
+            "maxLength": 2048,
+            "type": "string"
           },
           "name": {
             "description": "Name of the network",
@@ -18046,6 +18302,14 @@
             "description": "Controller/login host the live agent is reporting; falls back to the first configured login node when the agent has not reported yet",
             "type": "string"
           },
+          "sessionAddress": {
+            "description": "Address the workspace reached the session host at; dialed directly on reconnect when the host name resolves to several login nodes",
+            "type": "string"
+          },
+          "sessionHost": {
+            "description": "Login node hosting the cluster's running desktop and VS Code sessions; the workspace tries it first when reconnecting so those sessions are re-adopted instead of left behind",
+            "type": "string"
+          },
           "tunnelConnected": {
             "description": "Whether the cluster's agent tunnel is currently registered on any ingress pod, with the user-disconnect veto applied",
             "type": "boolean"
@@ -18074,6 +18338,8 @@
           "remoteHost",
           "key",
           "tunnelConnected",
+          "sessionHost",
+          "sessionAddress",
           "variables",
           "hostKeys"
         ],
@@ -25525,6 +25791,15 @@
           "fromMain": {
             "type": "boolean"
           },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/ImageContent"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "kind": {
             "enum": [
               "user",
@@ -25537,7 +25812,8 @@
               "goal_view",
               "goal_progress",
               "turn_end",
-              "recap"
+              "recap",
+              "compaction"
             ],
             "type": "string"
           },
@@ -25764,6 +26040,23 @@
           "state",
           "dependentSnapshots",
           "atRiskResources"
+        ],
+        "type": "object"
+      },
+      "ImageContent": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "contentEncoding": "base64",
+            "type": "string"
+          },
+          "mime": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "mime",
+          "data"
         ],
         "type": "object"
       },
@@ -28406,7 +28699,7 @@
         "additionalProperties": false,
         "properties": {
           "jobs": {
-            "description": "One page of jobs, oldest first.",
+            "description": "One page of jobs in the requested insertion order, newest first by default.",
             "items": {
               "$ref": "#/components/schemas/BackgroundJob"
             },
@@ -31207,6 +31500,10 @@
       "ModelEntry": {
         "additionalProperties": false,
         "properties": {
+          "allocation": {
+            "description": "Budget allocation the provider's resource group bills; absent for org and session models",
+            "type": "string"
+          },
           "cached_input_rate": {
             "format": "double",
             "type": "number"
@@ -31685,6 +31982,10 @@
           },
           "dnszoneName": {
             "description": "The DNS zone name associated with the network.",
+            "type": "string"
+          },
+          "iamInstanceProfile": {
+            "description": "IAM instance profile name or ARN that instances launched on the network run with (AWS only).",
             "type": "string"
           },
           "id": {
@@ -34759,6 +35060,10 @@
             },
             "maxItems": 10,
             "type": "array"
+          },
+          "disableClaudeCode": {
+            "description": "Disable Claude Code accounts, subscription models, and execution, even when Claude Code is installed on the agent host. Members cannot override an organization restriction.",
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -36177,6 +36482,11 @@
               "null"
             ]
           },
+          "iamInstanceProfile": {
+            "description": "IAM instance profile name or ARN that every instance launched on this network runs with. AWS only. Omit to leave unchanged; send an empty string to clear.",
+            "maxLength": 2048,
+            "type": "string"
+          },
           "regions": {
             "description": "List of regions with corresponding CIDR ranges",
             "items": {
@@ -36561,6 +36871,13 @@
             ],
             "type": "string"
           },
+          "owner": {
+            "description": "The username of the storage resource's owner. Absent when the mount references a storage resource that no longer exists.",
+            "examples": [
+              "alice"
+            ],
+            "type": "string"
+          },
           "persistent": {
             "description": "Whether the storage resource is persistent. Absent when the mount references a storage resource that no longer exists.",
             "type": "boolean"
@@ -36751,6 +37068,10 @@
           "costAlert": {
             "$ref": "#/components/schemas/NotificationChannelSettings",
             "description": "Settings for cost alert notifications."
+          },
+          "credentialExpiry": {
+            "$ref": "#/components/schemas/NotificationChannelSettings",
+            "description": "Settings for cloud account credential expiry notifications."
           },
           "general": {
             "$ref": "#/components/schemas/NotificationChannelSettings",
@@ -43324,12 +43645,13 @@
             "type": "string"
           },
           "importFailure": {
-            "description": "Why the import failed: too many tags, the cloud account may not tag it, it no longer exists, it was replaced, or another cloud error.",
+            "description": "Why the import failed: too many tags, the cloud account may not tag it, it no longer exists, it was replaced, Azure refused to move it into its own resource group, or another cloud error.",
             "enum": [
               "tag_limit",
               "permission_denied",
               "not_found",
               "changed",
+              "move_refused",
               "other"
             ],
             "type": "string"
@@ -46266,6 +46588,9 @@
             "type": "integer"
           },
           "claudeAccount": {
+            "type": "string"
+          },
+          "effectiveAllocation": {
             "type": "string"
           },
           "effectiveEffort": {
@@ -53468,7 +53793,7 @@
     },
     "/api/admin/background-jobs": {
       "get": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns background jobs, waiting, running and finished, oldest first",
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns background jobs, waiting, running and finished, newest first by default",
         "operationId": "list-background-jobs",
         "parameters": [
           {
@@ -53514,6 +53839,21 @@
             "name": "after",
             "schema": {
               "description": "Continue after this job id, from the next field of the previous page.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Insertion order: desc lists the newest jobs first, asc the oldest. Keep the same order when paging.",
+            "explode": false,
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "default": "desc",
+              "description": "Insertion order: desc lists the newest jobs first, asc the oldest. Keep the same order when paging.",
+              "enum": [
+                "asc",
+                "desc"
+              ],
               "type": "string"
             }
           },
@@ -53792,7 +54132,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BackgroundJobLogsOutputBody"
+                  "$ref": "#/components/schemas/BackgroundJobLogsBody"
                 }
               }
             },
@@ -53810,6 +54150,98 @@
           }
         },
         "summary": "Get background job logs",
+        "tags": [
+          "Maintenance"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/admin/background-jobs/{jobId}/logs/stream": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nStreams bounded log updates. Resume using run, afterRun and offset. Finished executions close after their final output; an active stream closes after one minute and can reconnect with its last cursor.",
+        "operationId": "stream-background-job-logs",
+        "parameters": [
+          {
+            "description": "Job id.",
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "description": "Job id.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Byte offset to read from, normally the nextOffset of the previous read. -1, the default, reads the end of the log.",
+            "explode": false,
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": -1,
+              "description": "Byte offset to read from, normally the nextOffset of the previous read. -1, the default, reads the end of the log.",
+              "format": "int64",
+              "minimum": -1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of bytes to return",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100000,
+              "description": "Maximum number of bytes to return",
+              "format": "int64",
+              "maximum": 5000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Run id from a previous response. Empty follows the latest run.",
+            "explode": false,
+            "in": "query",
+            "name": "run",
+            "schema": {
+              "description": "Run id from a previous response. Empty follows the latest run.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Run the byte offset belongs to. A different selected run resets the read to its tail.",
+            "explode": false,
+            "in": "query",
+            "name": "afterRun",
+            "schema": {
+              "description": "Run the byte offset belongs to. A different selected run resets the read to its tail.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackgroundJobLogEvent"
+                }
+              }
+            },
+            "description": "Log updates"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Follow background job logs",
         "tags": [
           "Maintenance"
         ],
@@ -64526,6 +64958,38 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "description": "Only clusters with one of these statuses. For running clusters, use active, on and updating.",
+            "explode": true,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "description": "Only clusters with one of these statuses. For running clusters, use active, on and updating.",
+              "items": {
+                "enum": [
+                  "on",
+                  "off",
+                  "active",
+                  "provisioning",
+                  "stopping",
+                  "resuming",
+                  "stopped",
+                  "failed",
+                  "updating",
+                  "deleted",
+                  "destroying",
+                  "destroy-failed",
+                  "connecting",
+                  "input_needed"
+                ],
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
           }
         ],
         "responses": {
@@ -64735,6 +65199,39 @@
           }
         },
         "summary": "Get pw code settings",
+        "tags": [
+          "Organization"
+        ]
+      }
+    },
+    "/api/code/settings/schema": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nThe JSON schema used to validate and complete the organization's managed pw code settings.",
+        "operationId": "get-code-settings-schema",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get the managed pw code settings schema",
         "tags": [
           "Organization"
         ]
@@ -71998,6 +72495,15 @@
               "examples": [
                 "list_clusters,list_workflow_runs"
               ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated platform tool names whose successful results the client displays as rich UI. The assistant summarizes these results without repeating their rows.",
+            "in": "header",
+            "name": "X-Rendered-Tools",
+            "schema": {
+              "description": "Comma-separated platform tool names whose successful results the client displays as rich UI. The assistant summarizes these results without repeating their rows.",
               "type": "string"
             }
           }
@@ -98520,6 +99026,76 @@
         ]
       }
     },
+    "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/running-work": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists what stopping, destroying, disconnecting or deleting the cluster would interrupt: its active sessions, the workflow runs a session or a placed job ties to it, and, for a cloud cluster that is on, what its scheduler says when its agent is asked live. Clients show it before those actions; the actions themselves never refuse because of it. Needs writer on a cloud cluster (what stopping or destroying it needs) or admin on an existing one.",
+        "operationId": "get-cluster-running-work",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the cluster.",
+            "in": "path",
+            "name": "clusterName",
+            "required": true,
+            "schema": {
+              "description": "The name of the cluster.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterRunningWork"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get cluster running work",
+        "tags": [
+          "Clusters"
+        ]
+      }
+    },
     "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/scheduler-jobs": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns scheduler jobs for a cluster from the agent's cached state.",
@@ -118076,6 +118652,16 @@
               }
             },
             "description": "OK"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentRequiredError"
+                }
+              }
+            },
+            "description": "Forbidden. When the workflow needs your approval first, code is consent_required and the body lists the variables and permissions to approve."
           },
           "default": {
             "content": {
