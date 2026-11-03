@@ -2084,20 +2084,6 @@ func (c *Client) RestoreHavenSecretVersion(ctx context.Context, body HavenRestor
 	return &result, nil
 }
 
-// RevealHavenSecret - Reveal a Haven secret's value
-//
-// Returns one version's value, with the reason recorded in Haven's audit as haven.reveal. Only a platform admin's own browser session may, at most 20 times an hour. Platform admins only.
-func (c *Client) RevealHavenSecret(ctx context.Context, body HavenRevealRequest) (*HavenRevealed, error) {
-
-	path := "/api/admin/haven/secret/reveal"
-
-	var result HavenRevealed
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
 // RotateHavenSecret - Rotate a Haven secret
 //
 // Stores a new value as the secret's next version; the replaced one stays readable through its grace period. Refused for a secret Vault still backs, whose feature page changes it. Platform admins only.
@@ -2140,6 +2126,8 @@ type ListHavenSecretsParams struct {
 	State *string   `json:"state,omitempty"`
 	// By path, by the name label, or by when the value last changed, newest first.
 	Sort *string `json:"sort,omitempty"`
+	// In place of sort, up to three keys in turn, such as label:organization then name: path, name, updated, kind or label:<key>. A label sorts ignoring case, its missing values last. A leading - reverses a key.
+	Order *[]string `json:"order,omitempty"`
 	// Only credentials their cloud reported to expire before this time (RFC3339).
 	ExpiresBefore *time.Time `json:"expiresBefore,omitempty"`
 	// Only secrets past their rotation reminder.
@@ -2172,6 +2160,8 @@ func (c *Client) ListHavenSecrets(ctx context.Context, opts ...ListHavenSecretsP
 	addQueryParam(queryValues, "state", "form", false, params.State)
 
 	addQueryParam(queryValues, "sort", "form", false, params.Sort)
+
+	addQueryParam(queryValues, "order", "form", true, params.Order)
 
 	addQueryParam(queryValues, "expiresBefore", "form", false, params.ExpiresBefore)
 
@@ -3172,6 +3162,8 @@ type ListResourcesParams struct {
 	Organization *string `json:"organization,omitempty"`
 	// Only resources flagged as orphaned.
 	Orphan *bool `json:"orphan,omitempty"`
+	// Only orphans with these removal verdicts.
+	Removal *[]string `json:"removal,omitempty"`
 	// Only resources created by the platform (platform) or outside it (external).
 	Managed *string `json:"managed,omitempty"`
 	// Only resources that still exist in the cloud (hides terminated/deleted).
@@ -3213,6 +3205,8 @@ func (c *Client) ListResources(ctx context.Context, opts ...ListResourcesParams)
 
 	addQueryParam(queryValues, "orphan", "form", false, params.Orphan)
 
+	addQueryParam(queryValues, "removal", "form", true, params.Removal)
+
 	addQueryParam(queryValues, "managed", "form", false, params.Managed)
 
 	addQueryParam(queryValues, "live", "form", false, params.Live)
@@ -3251,6 +3245,8 @@ type ListResourceClustersParams struct {
 	Account *[]string `json:"account,omitempty"`
 	// Group by deployment id instead of cluster sessions: every group has at least one orphan-flagged resource and includes the deployment's other live resources.
 	Orphan *bool `json:"orphan,omitempty"`
+	// In orphan mode, only groups with an orphan whose removal verdict is one of these.
+	Removal *[]string `json:"removal,omitempty"`
 	// Case-insensitive match on resource name, id, user, cluster, or account.
 	Search *string `json:"search,omitempty"`
 	// Only resources last seen within this preset window.
@@ -3285,6 +3281,8 @@ func (c *Client) ListResourceClusters(ctx context.Context, opts ...ListResourceC
 	addQueryParam(queryValues, "account", "form", true, params.Account)
 
 	addQueryParam(queryValues, "orphan", "form", false, params.Orphan)
+
+	addQueryParam(queryValues, "removal", "form", true, params.Removal)
 
 	addQueryParam(queryValues, "search", "form", false, params.Search)
 
@@ -3356,7 +3354,7 @@ func (c *Client) ListResourceCredentials(ctx context.Context, opts ...ListResour
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Deletes every live cloud resource tagged with the deployment id (as session-id or pw-deployment-id). Resources with a live platform record are deleted through it; the rest are swept directly in the cloud by gaia. Platform administrators can delete any deployment; organization administrators can delete one whose resources all belong to their organization. Always dry-run first.
+// Deletes every live cloud resource tagged with the deployment id (as session-id or pw-deployment-id). Resources with a live platform record are deleted through it; the rest are swept directly in the cloud by gaia. Platform administrators can delete any deployment; organization administrators can delete one whose platform record belongs to an organization they administer, or, once no record remains, one whose resources are all in cloud accounts connected to organizations they administer, with credentials the platform has verified reach those accounts; accounts it can't verify, such as OpenStack ones, need a platform administrator. Always dry-run first.
 func (c *Client) DeleteDeploymentResources(ctx context.Context, body DeleteDeploymentBody) (*DeleteDeploymentResponse, error) {
 
 	path := "/api/admin/resources/delete-deployment"
@@ -3580,6 +3578,97 @@ func (c *Client) GetAgentMachineClaudeAccounts(ctx context.Context, machine stri
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
+}
+
+// StartAgentClaudeLogin - Start Claude Code sign-in
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Start Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.
+func (c *Client) StartAgentClaudeLogin(ctx context.Context, machine string, body AgentClaudeLoginRequest) (*AgentClaudeLoginEvent, error) {
+
+	path := "/api/agents/machines/{machine}/claude-code/logins"
+	path = pathReplace(path, "machine", "simple", false, machine)
+
+	var result AgentClaudeLoginEvent
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentClaudeLoginParams contains the parameters for the GetAgentClaudeLogin operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentClaudeLoginParams struct {
+	After  *int64  `json:"after,omitempty"`
+	Status *string `json:"status,omitempty"`
+	Wait   *bool   `json:"wait,omitempty"`
+}
+
+// GetAgentClaudeLogin - Read Claude Code sign-in output
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Read Claude Code sign-in output. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.
+func (c *Client) GetAgentClaudeLogin(ctx context.Context, machine string, loginID string, opts ...GetAgentClaudeLoginParams) (*AgentClaudeLoginEvent, error) {
+
+	path := "/api/agents/machines/{machine}/claude-code/logins/{loginId}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "loginId", "simple", false, loginID)
+	var params GetAgentClaudeLoginParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "after", "form", false, params.After)
+
+	addQueryParam(queryValues, "status", "form", false, params.Status)
+
+	addQueryParam(queryValues, "wait", "form", false, params.Wait)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result AgentClaudeLoginEvent
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CancelAgentClaudeLogin - Cancel Claude Code sign-in
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Cancel Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.
+func (c *Client) CancelAgentClaudeLogin(ctx context.Context, machine string, loginID string) error {
+
+	path := "/api/agents/machines/{machine}/claude-code/logins/{loginId}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "loginId", "simple", false, loginID)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// WriteAgentClaudeLogin - Send input to Claude Code sign-in
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Send input to Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.
+func (c *Client) WriteAgentClaudeLogin(ctx context.Context, machine string, loginID string, body AgentClaudeLoginInput) error {
+
+	path := "/api/agents/machines/{machine}/claude-code/logins/{loginId}/input"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "loginId", "simple", false, loginID)
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
 }
 
 // GetAgentMachineClaudeModelsParams contains the parameters for the GetAgentMachineClaudeModels operation.
@@ -5200,7 +5289,7 @@ func (c *Client) CreateCluster(ctx context.Context, body ClusterCreate) (*Genera
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Checks a cloud cluster create-cluster would make for the requesting user, without saving it. Returns what it would cost per hour, when its region is priced, or the same error create-cluster would return.
+// Checks a cloud cluster create-cluster would make for the requesting user, without saving it. Returns what it would cost per hour, when its region is priced, and what would keep it from starting, which create-cluster saves it with, or the same error create-cluster would return.
 func (c *Client) ValidateNewCluster(ctx context.Context, body ClusterCreate) (*NewClusterCheck, error) {
 
 	path := "/api/clusters/validate"
@@ -10589,7 +10678,7 @@ func (c *Client) ListRegionInstanceTypes(ctx context.Context, organization strin
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Returns a region's storage types and their pricing, per GB-month except where the provider bills a flat rate.
+// Returns a region's storage types and their pricing, per GB-month except where the provider bills a flat rate. Azure NetApp Files and Ultra Disk keep Azure's own meter units, so their capacity is per GiB-hour.
 func (c *Client) ListRegionStorageTypes(ctx context.Context, organization string, csp string, region string) (*StorageTypes, error) {
 
 	path := "/api/organizations/{organization}/clouds/{csp}/regions/{region}/storage-types"
@@ -13642,6 +13731,23 @@ func (c *Client) SetOrganizationMaxAPIKeyTTLPolicy(ctx context.Context, organiza
 	return &result, nil
 }
 
+// SetOrganizationMaxComputeTransferMbPolicy - Set organization policy: max-compute-transfer-mb
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets max-compute-transfer-mb policy for the organization: the megabytes one cluster or instance file download or upload can carry, 0 for unlimited.
+func (c *Client) SetOrganizationMaxComputeTransferMbPolicy(ctx context.Context, organization string, body int64) (*map[string]IntPolicyOutput, error) {
+
+	path := "/api/organizations/{organization}/policies/max-compute-transfer-mb"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result map[string]IntPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetOrganizationNitroInstancesOnlyPolicy - Set organization policy: nitro-instances-only
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -16160,11 +16266,30 @@ func (c *Client) PatchClusterDefinition(ctx context.Context, organization string
 	return &result, nil
 }
 
+// GetClusterDefinitionProblems - Get Cluster Definition Problems
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Lists what keeps a cloud cluster's definition from starting, such as partitions with the same name, an instance type the organization doesn't allow, a group the owner isn't in, or a root disk smaller than its image, each with the fields to change. A definition saves with these, and a start is refused with the first. Existing clusters have none.
+func (c *Client) GetClusterDefinitionProblems(ctx context.Context, organization string, user string, clusterName string) (*ClusterDefinitionProblems, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/definition/problems"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "clusterName", "simple", false, clusterName)
+
+	var result ClusterDefinitionProblems
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ValidateClusterDefinition - Validate Cluster Definition
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
 //
-// Checks a JSON merge patch (RFC 7396) against a cluster's definition without saving it. Returns the definition the patch would save and, for a cloud cluster in a priced region, what it would cost per hour, or the same error patch-cluster-definition would return.
+// Checks a JSON merge patch (RFC 7396) against a cluster's definition without saving it. Returns the definition the patch would save, what would keep it from starting, which the patch saves with, and, for a cloud cluster in a priced region, what it would cost per hour, or the same error patch-cluster-definition would return.
 func (c *Client) ValidateClusterDefinition(ctx context.Context, organization string, user string, clusterName string, body ClusterDefinitionPatch) (*ClusterDefinitionCheck, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/clusters/{clusterName}/definition/validate"
@@ -20869,6 +20994,22 @@ func (c *Client) SetPlatformFlexibleAllocationSystemPolicy(ctx context.Context, 
 func (c *Client) SetPlatformMaxAPIKeyTTLPolicy(ctx context.Context, body int64) (*map[string]IntPolicyOutput, error) {
 
 	path := "/api/platform/policies/max-api-key-ttl"
+
+	var result map[string]IntPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformMaxComputeTransferMbPolicy - Set platform policy: max-compute-transfer-mb
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets the max-compute-transfer-mb policy for the platform: the megabytes one cluster or instance file download or upload can carry, 0 for unlimited.
+func (c *Client) SetPlatformMaxComputeTransferMbPolicy(ctx context.Context, body int64) (*map[string]IntPolicyOutput, error) {
+
+	path := "/api/platform/policies/max-compute-transfer-mb"
 
 	var result map[string]IntPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {

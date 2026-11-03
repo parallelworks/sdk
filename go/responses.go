@@ -115,20 +115,6 @@ func (m *ResponseMeta) IssueHavenCredentialHeaders() IssueHavenCredentialHeaders
 	}
 }
 
-// RevealHavenSecretHeaders holds the headers RevealHavenSecret declares. A header the spec
-// types as something other than a string is nil when the response omits it.
-type RevealHavenSecretHeaders struct {
-	CacheControl string
-}
-
-// RevealHavenSecretHeaders reads the headers RevealHavenSecret declares out of the captured
-// response.
-func (m *ResponseMeta) RevealHavenSecretHeaders() RevealHavenSecretHeaders {
-	return RevealHavenSecretHeaders{
-		CacheControl: m.Header.Get("Cache-Control"),
-	}
-}
-
 // RegisterNodeHeaders holds the headers RegisterNode declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type RegisterNodeHeaders struct {
@@ -139,6 +125,34 @@ type RegisterNodeHeaders struct {
 // response.
 func (m *ResponseMeta) RegisterNodeHeaders() RegisterNodeHeaders {
 	return RegisterNodeHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// StartAgentClaudeLoginHeaders holds the headers StartAgentClaudeLogin declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type StartAgentClaudeLoginHeaders struct {
+	CacheControl string
+}
+
+// StartAgentClaudeLoginHeaders reads the headers StartAgentClaudeLogin declares out of the captured
+// response.
+func (m *ResponseMeta) StartAgentClaudeLoginHeaders() StartAgentClaudeLoginHeaders {
+	return StartAgentClaudeLoginHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// GetAgentClaudeLoginHeaders holds the headers GetAgentClaudeLogin declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetAgentClaudeLoginHeaders struct {
+	CacheControl string
+}
+
+// GetAgentClaudeLoginHeaders reads the headers GetAgentClaudeLogin declares out of the captured
+// response.
+func (m *ResponseMeta) GetAgentClaudeLoginHeaders() GetAgentClaudeLoginHeaders {
+	return GetAgentClaudeLoginHeaders{
 		CacheControl: m.Header.Get("Cache-Control"),
 	}
 }

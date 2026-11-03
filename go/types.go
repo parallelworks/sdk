@@ -643,6 +643,26 @@ type AgentClaudeAccount struct {
 	WeeklyUsedPercent   *float64   `json:"weeklyUsedPercent,omitempty"`
 }
 
+type AgentClaudeLoginEvent struct {
+	Data   *string     `json:"data,omitempty"`
+	Login  ClaudeLogin `json:"login"`
+	Next   int64       `json:"next"`
+	Offset int64       `json:"offset"`
+}
+
+type AgentClaudeLoginInput struct {
+	Columns *int32  `json:"columns,omitempty"`
+	Data    *string `json:"data,omitempty"`
+	Rows    *int32  `json:"rows,omitempty"`
+}
+
+type AgentClaudeLoginRequest struct {
+	Account   string  `json:"account"`
+	Columns   int32   `json:"columns"`
+	Rows      int32   `json:"rows"`
+	SessionID *string `json:"sessionId,omitempty"`
+}
+
 type AgentClaudeModel struct {
 	ID   string  `json:"id"`
 	Name *string `json:"name,omitempty"`
@@ -722,6 +742,8 @@ type AgentMachine struct {
 	ClaudeCodeAllowed bool `json:"claudeCodeAllowed"`
 	// Claude Code is installed on the daemon host and available on its PATH.
 	ClaudeInstalled *bool `json:"claudeInstalled,omitempty"`
+	// The daemon supports signing in to Claude Code from the web.
+	ClaudeLogin *bool `json:"claudeLogin,omitempty"`
 	// Machine id the pw code daemon reported, when it answered. A local computer with the same id as a resource is the same host and is listed only as the resource.
 	DaemonID *string `json:"daemonId,omitempty"`
 	Error    *string `json:"error,omitempty"`
@@ -1639,7 +1661,7 @@ type AwsLustreDefinition struct {
 	FsxThroughput *string `json:"fsxThroughput,omitempty"`
 	// S3 path the filesystem imports from.
 	ImportPath *string `json:"importPath,omitempty"`
-	// Provisioned capacity in GB.
+	// Provisioned capacity in GiB.
 	StorageCapacityGb *int32 `json:"storageCapacityGb,omitempty"`
 	// Type discriminator.
 	Type string `json:"type"`
@@ -1658,7 +1680,7 @@ type AwsLustreDefinitionPatch struct {
 	FsxThroughput *string `json:"fsxThroughput,omitempty"`
 	// S3 path the filesystem imports from.
 	ImportPath *string `json:"importPath,omitempty"`
-	// Provisioned capacity in GB.
+	// Provisioned capacity in GiB.
 	StorageCapacityGb *int32 `json:"storageCapacityGb,omitempty"`
 	// Type discriminator.
 	Type string `json:"type"`
@@ -1841,7 +1863,7 @@ type AzureAzfilesDefinition struct {
 	AzfilesName *string `json:"azfilesName,omitempty"`
 	// Azure resource group the storage account belongs to.
 	AzureResourceGroup *string `json:"azureResourceGroup,omitempty"`
-	// Share quota in GB.
+	// Share quota in GiB.
 	SizeGb *int64 `json:"sizeGb,omitempty"`
 	// Azure storage account hosting the share.
 	StorageAccountName *string `json:"storageAccountName,omitempty"`
@@ -1854,7 +1876,7 @@ type AzureAzfilesDefinitionPatch struct {
 	AzfilesName *string `json:"azfilesName,omitempty"`
 	// Azure resource group the storage account belongs to.
 	AzureResourceGroup *string `json:"azureResourceGroup,omitempty"`
-	// Share quota in GB.
+	// Share quota in GiB.
 	SizeGb *int64 `json:"sizeGb,omitempty"`
 	// Azure storage account hosting the share.
 	StorageAccountName *string `json:"storageAccountName,omitempty"`
@@ -1970,7 +1992,7 @@ type AzureManagedLustreDefinition struct {
 	MaintenanceWindowTime *string `json:"maintenanceWindowTime,omitempty"`
 	// AMLFS SKU, e.g. AMLFS-Durable-Premium-125.
 	Sku *string `json:"sku,omitempty"`
-	// Provisioned capacity in TB.
+	// Provisioned capacity in TiB.
 	StorageSizeTb *int32 `json:"storageSizeTb,omitempty"`
 	// Type discriminator.
 	Type string `json:"type"`
@@ -1985,7 +2007,7 @@ type AzureManagedLustreDefinitionPatch struct {
 	MaintenanceWindowTime *string `json:"maintenanceWindowTime,omitempty"`
 	// AMLFS SKU, e.g. AMLFS-Durable-Premium-125.
 	Sku *string `json:"sku,omitempty"`
-	// Provisioned capacity in TB.
+	// Provisioned capacity in TiB.
 	StorageSizeTb *int32 `json:"storageSizeTb,omitempty"`
 	// Type discriminator.
 	Type string `json:"type"`
@@ -2983,6 +3005,15 @@ type Choice struct {
 	Message *ChatMessage `json:"message,omitempty"`
 }
 
+type ClaudeLogin struct {
+	Account   string    `json:"account"`
+	Email     *string   `json:"email,omitempty"`
+	ExitCode  *int64    `json:"exitCode,omitempty"`
+	ExpiresAt time.Time `json:"expiresAt"`
+	ID        string    `json:"id"`
+	Status    string    `json:"status"`
+}
+
 type CleanupPreviewsOutputBody struct {
 	// Orphaned preview flags that were removed.
 	Removed []string `json:"removed"`
@@ -3514,6 +3545,17 @@ type ClusterDefinitionCheck struct {
 	CostEstimate *ClusterCostEstimate `json:"costEstimate,omitempty"`
 	// The definition the patch would save.
 	Definition ClusterDefinition `json:"definition"`
+	// The language each problem's detail is written in, as Content-Language names it.
+	Language *string `json:"language,omitempty"`
+	// What keeps the cluster from starting, each with the fields to change; empty when nothing does.
+	Problems []Problem `json:"problems"`
+}
+
+type ClusterDefinitionProblems struct {
+	// The language each problem's detail is written in, as Content-Language names it.
+	Language *string `json:"language,omitempty"`
+	// What keeps the cluster from starting, each with the fields to change; empty when nothing does.
+	Problems []Problem `json:"problems"`
 }
 
 type ClusterDeployment struct {
@@ -5588,7 +5630,7 @@ type DiskDefinition struct {
 	Encrypted *bool `json:"encrypted,omitempty"`
 	// Provisioned IOPS. AWS io1 and io2 only.
 	Iops *int64 `json:"iops,omitempty"`
-	// Provisioned capacity in GB.
+	// Provisioned capacity in GiB.
 	SizeGb *int64 `json:"sizeGb,omitempty"`
 	// Id of the snapshot the disk is restored from; empty when the disk starts blank.
 	Snapshot *string `json:"snapshot,omitempty"`
@@ -5609,7 +5651,7 @@ type DiskDefinitionPatch struct {
 	Encrypted *bool `json:"encrypted,omitempty"`
 	// Provisioned IOPS. AWS io1 and io2 only.
 	Iops *int64 `json:"iops,omitempty"`
-	// Provisioned capacity in GB.
+	// Provisioned capacity in GiB.
 	SizeGb *int64 `json:"sizeGb,omitempty"`
 	// Id of the snapshot the disk is restored from; empty when the disk starts blank.
 	Snapshot *string `json:"snapshot,omitempty"`
@@ -6703,6 +6745,8 @@ type GeneralCluster struct {
 	Type *string `json:"type"`
 	// True when a failed status came from a configuration update of a running cluster rather than from a failed start, which is the difference between a retryable update and a cluster that must be destroyed.
 	UpdateFailed bool `json:"updateFailed"`
+	// The cluster's pw:// URI, which a workflow's compute-clusters or compute-resources input takes: pw://<user>/<name>, or pw://<name> for a managed cluster.
+	URI *string `json:"uri,omitempty"`
 	// The owner of the resource.
 	User *string `json:"user,omitempty"`
 }
@@ -7045,7 +7089,7 @@ type GoogleFilestoreVersionSettings struct {
 type GoogleManagedLustreDefinition struct {
 	// Throughput tier in MBps per TiB, which is what the price is keyed on.
 	PerformanceMbpsPerTib *int64 `json:"performanceMbpsPerTib,omitempty"`
-	// Provisioned capacity in GB.
+	// Provisioned capacity in GiB.
 	SizeGb *int64 `json:"sizeGb,omitempty"`
 	// Type discriminator.
 	Type string `json:"type"`
@@ -7056,7 +7100,7 @@ type GoogleManagedLustreDefinition struct {
 type GoogleManagedLustreDefinitionPatch struct {
 	// Throughput tier in MBps per TiB, which is what the price is keyed on.
 	PerformanceMbpsPerTib *int64 `json:"performanceMbpsPerTib,omitempty"`
-	// Provisioned capacity in GB.
+	// Provisioned capacity in GiB.
 	SizeGb *int64 `json:"sizeGb,omitempty"`
 	// Type discriminator.
 	Type string `json:"type"`
@@ -7558,10 +7602,19 @@ type HavenIssueRequest struct {
 type HavenIssued struct {
 	ExpiresAt time.Time `json:"expiresAt"`
 	// The credential, such as an access key, a secret key and a session token.
-	Fields   []HavenRevealedField `json:"fields"`
-	IssuedAt time.Time            `json:"issuedAt"`
+	Fields   []HavenIssuedField `json:"fields"`
+	IssuedAt time.Time          `json:"issuedAt"`
 	// The name the cloud's audit log shows for the credential, such as in CloudTrail.
 	SessionName string `json:"sessionName"`
+}
+
+type HavenIssuedField struct {
+	// The field, such as accessKeyID, secretAccessKey or token.
+	Name string `json:"name"`
+	// Whether the field is secret, so the page masks it until asked.
+	Secret bool `json:"secret"`
+	// The value as text; render it as text, never as markup.
+	Value string `json:"value"`
 }
 
 type HavenItem struct {
@@ -7620,6 +7673,8 @@ type HavenKind struct {
 type HavenKindField struct {
 	// A list's entry fields.
 	Fields []HavenKindField `json:"fields,omitempty"`
+	// The derived label, without haven., holding a plain field's value or what its absence means, so a form can fill it without reading the value. A missing label means unknown.
+	Label *string `json:"label,omitempty"`
 	// Whether its value spans lines, such as a PEM key or a key file.
 	Multiline bool `json:"multiline"`
 	// The field's name, as its value's fields are named: a map's entries are <name>.<key>, a list's <name>[i].<field>.
@@ -7871,30 +7926,6 @@ type HavenRestoreVersionRequest struct {
 	Version int64 `json:"version"`
 }
 
-type HavenRevealRequest struct {
-	// The secret's path.
-	Path string `json:"path"`
-	// Why the value is needed, at most 256 bytes of UTF-8; Haven's audit keeps it with the reveal.
-	Reason string `json:"reason"`
-	// The version to reveal; 0 or absent for the current one.
-	Version *int64 `json:"version,omitempty"`
-}
-
-type HavenRevealed struct {
-	Fields  []HavenRevealedField `json:"fields"`
-	Kind    string               `json:"kind"`
-	Version int64                `json:"version"`
-}
-
-type HavenRevealedField struct {
-	// The field, such as secretAccessKey, data.DB_PASSWORD or keys[0].material.
-	Name string `json:"name"`
-	// Whether the field is secret, so the page masks it until asked.
-	Secret bool `json:"secret"`
-	// The value as text; render it as text, never as markup.
-	Value string `json:"value"`
-}
-
 type HavenRootKeyHealth struct {
 	Algorithm *string `json:"algorithm,omitempty"`
 	// Whether the key's service logs each use with the caller.
@@ -7955,7 +7986,7 @@ type HavenSecret struct {
 	Account *string `json:"account,omitempty"`
 	// A cloud credential's cloud.
 	Cloud *string `json:"cloud,omitempty"`
-	// What this page may do to the secret by Haven's policies now, such as reveal or rotate; the server checks again on every call.
+	// What this page may do to the secret by Haven's policies now, such as rotate or issue; the server checks again on every call.
 	ConsoleActions []string   `json:"consoleActions"`
 	CreatedAt      time.Time  `json:"createdAt"`
 	DeletedAt      *time.Time `json:"deletedAt,omitempty"`
@@ -10008,6 +10039,27 @@ type Lustre struct {
 	Zone *string `json:"zone,omitempty"`
 }
 
+type LustreCost struct {
+	// Data compression algorithm, e.g. LZ4. AWS only.
+	FsxCompression *string `json:"fsxCompression,omitempty"`
+	// FSx deployment type, e.g. PERSISTENT_2. AWS only.
+	FsxDeploymentType *string `json:"fsxDeploymentType,omitempty"`
+	// Per-unit throughput in MBps/TiB. AWS only.
+	FsxThroughput *string `json:"fsxThroughput,omitempty"`
+	// Throughput tier in MBps per TiB. Google only.
+	PerformanceMbpsPerTib *int64 `json:"performanceMbpsPerTib,omitempty"`
+	// Provisioned capacity in GiB. Google only.
+	SizeGb *int64 `json:"sizeGb,omitempty"`
+	// AMLFS SKU, e.g. AMLFS-Durable-Premium-125. Azure only.
+	Sku *string `json:"sku,omitempty"`
+	// Provisioned capacity in GiB. AWS only.
+	StorageCapacityGb *int32 `json:"storageCapacityGb,omitempty"`
+	// Provisioned capacity in TiB. Azure only.
+	StorageSizeTb *int32 `json:"storageSizeTb,omitempty"`
+	// The filesystem's type, which selects the fields that apply.
+	Type string `json:"type"`
+}
+
 type LustreTypes struct {
 	// PERSISTENT_1 prices per GB-month, keyed by throughput per TiB in MB/s
 	Persistent1 map[string]float64 `json:"PERSISTENT_1,omitempty"`
@@ -10569,6 +10621,7 @@ type ModelEntry struct {
 type ModelsResponse struct {
 	Data                []ModelEntry         `json:"data"`
 	Object              string               `json:"object"`
+	ProviderIssues      []ProviderIssue      `json:"provider_issues,omitempty"`
 	UnreachableSessions []UnreachableSession `json:"unreachable_sessions,omitempty"`
 }
 
@@ -10786,6 +10839,10 @@ type NetworkRegion struct {
 
 type NewClusterCheck struct {
 	CostEstimate *ClusterCostEstimate `json:"costEstimate,omitempty"`
+	// The language each problem's detail is written in, as Content-Language names it.
+	Language *string `json:"language,omitempty"`
+	// What keeps the cluster from starting, each with the fields to change; empty when nothing does.
+	Problems []Problem `json:"problems"`
 }
 
 type NewInstanceCheck struct {
@@ -11836,6 +11893,17 @@ type OrphanMuteResponse struct {
 	Muted bool `json:"muted"`
 }
 
+type OrphanRemovalSettings struct {
+	// Whether billing also deletes orphaned buckets, only while they are empty.
+	Buckets *bool `json:"buckets,omitempty"`
+	// Whether billing also deletes orphaned persistent disks, which destroys the data on them.
+	Disks *bool `json:"disks,omitempty"`
+	// Whether billing deletes orphaned IP addresses, network interfaces and snapshots that this platform made and no longer has a record of. Each kind below also needs this on.
+	Enabled *bool `json:"enabled,omitempty"`
+	// Whether billing also deletes orphaned Google Managed Lustre instances, which destroys the data on them.
+	ManagedLustre *bool `json:"managedLustre,omitempty"`
+}
+
 type OrphanedInfraItem struct {
 	// Infrastructure ID
 	ID string `json:"id"`
@@ -12077,6 +12145,8 @@ type PatchSessionBody struct {
 	Name *string `json:"name,omitempty"`
 	// Indicates if this is an OpenAI session.
 	OpenAi *bool `json:"openAI,omitempty"`
+	// Open the session in its own browser tab instead of embedding it in the web app. Re-running an endpoint resets it to what that run asks for.
+	OpenInNewTab *bool `json:"openInNewTab,omitempty"`
 	// Make the session's proxied content reachable by anyone with the link, without logging in (the session stays unlisted). Requires the allow-public-sessions policy.
 	Public *bool `json:"public,omitempty"`
 	// Remote host.
@@ -12157,6 +12227,7 @@ type PermissionEntry struct {
 }
 
 type PlatformAttachedStorage struct {
+	Cost *LustreCost `json:"cost,omitempty"`
 	// The resolved export path on the storage resource.
 	Export *string `json:"export,omitempty"`
 	// Kind discriminator.
@@ -12264,6 +12335,8 @@ type PlatformSettings struct {
 	MaintenanceMode *bool `json:"maintenanceMode,omitempty"`
 	// The maximum number of days an API key can be valid for, resolved from the max-api-key-ttl policy, or 730 when no policy is set. Omitted when the policy is Unlimited. Only returned if the user is authenticated.
 	MaxAPIKeyTTLDays *int64 `json:"maxApiKeyTtlDays,omitempty"`
+	// The megabytes one cluster or instance file download or upload can carry, resolved from the max-compute-transfer-mb policy, or 200 when no policy is set. Omitted when the policy is Unlimited or the compute explorer preview is off. Only returned if the user is authenticated.
+	MaxComputeTransferMb *int64 `json:"maxComputeTransferMb,omitempty"`
 	// Indicates if the platform needs a license update (no license, expired, or in grace period). Only returned when true.
 	NeedsLicense *bool `json:"needsLicense,omitempty"`
 	// Indicates if the user needs to complete onboarding. Only returned when true.
@@ -12369,7 +12442,10 @@ type PlatformSettingsAdmin struct {
 	// Indicates if the license is in the grace period.
 	LicenseGracePeriod *bool `json:"licenseGracePeriod,omitempty"`
 	// Minimum agent semantic version. Agents below this version are rejected at handshake and disconnected when already connected. Empty disables enforcement.
-	MinimumAgentVersion *string `json:"minimumAgentVersion,omitempty"`
+	MinimumAgentVersion *string               `json:"minimumAgentVersion,omitempty"`
+	OrphanRemovals      OrphanRemovalSettings `json:"orphanRemovals"`
+	// Whether ingress could not read the stored orphan removal switches, such as a value of the wrong type. Billing removes nothing while it can't read them either.
+	OrphanRemovalsUnreadable *bool `json:"orphanRemovalsUnreadable,omitempty"`
 	// Body served at /.well-known/pki-validation/{filename}.
 	PkiValidationContent *string `json:"pkiValidationContent,omitempty"`
 	// Filename served at /.well-known/pki-validation/. Empty disables the endpoint.
@@ -12550,6 +12626,8 @@ type PostSessionBody struct {
 	NewWorker *bool `json:"newWorker,omitempty"`
 	// If true, marks this as an OpenAI chat session (routes to /chat).
 	OpenAi *bool `json:"openAI,omitempty"`
+	// For tunnel and endpoint sessions, open the session in its own browser tab instead of embedding it in the web app, for apps that can't run inside a frame on another site (such as an app that signs in with the platform's OIDC).
+	OpenInNewTab *bool `json:"openInNewTab,omitempty"`
 	// Remote host (defaults to localhost).
 	RemoteHost *string `json:"remoteHost,omitempty"`
 	// Remote port.
@@ -12756,6 +12834,19 @@ type Project struct {
 type PromptTokensDetails struct {
 	// Prompt tokens served from the provider's prompt cache
 	CachedTokens int64 `json:"cached_tokens"`
+}
+
+type ProviderIssue struct {
+	// The provider's own explanation, when it gave one
+	Message *string `json:"message,omitempty"`
+	// Provider display name, matching the models it covers
+	Provider string `json:"provider"`
+	// Stable provider name
+	ProviderName string `json:"provider_name"`
+	// Provider owner's username; empty for organization connections
+	ProviderOwner *string `json:"provider_owner,omitempty"`
+	// Why the connection is unusable
+	Status string `json:"status"`
 }
 
 type ProvisionStatusAttribute struct {
@@ -13710,6 +13801,8 @@ type PutSessionBody struct {
 	Keep *bool `json:"keep,omitempty"`
 	// Expose this endpoint as an OpenAI-compatible chat model, reachable via the platform's OpenAI API and listed as an AI provider.
 	OpenAi *bool `json:"openAI,omitempty"`
+	// Open the endpoint in its own browser tab instead of embedding it in the web app, for apps that can't run inside a frame on another site (such as an app that signs in with the platform's OIDC). Omit to embed it.
+	OpenInNewTab *bool `json:"openInNewTab,omitempty"`
 	// Join this endpoint's connection pool instead of taking the name over: processes that PUT an already-pooled endpoint with this flag keep the current key generation, so their tunnels serve together and requests load-balance across them.
 	Pooled *bool `json:"pooled,omitempty"`
 	// Session slug for URL path.
@@ -14359,6 +14452,12 @@ type Resource struct {
 	PublicIP *string `json:"publicIp,omitempty"`
 	// Region.
 	Region string `json:"region"`
+	// When the orphan's delete was last queued.
+	RemovalQueuedAt *time.Time `json:"removalQueuedAt,omitempty"`
+	// For a disabled orphan, the switch that is off, or that billing could not read the switches; for one not eligible, the first check it fails, or why its delete queued within the day ended without deleting it (refused, failed, canceled, or finished with the resource still listed); for one it would remove, why it was not queued, such as a one-off pass that queues nothing.
+	RemovalReason *string `json:"removalReason,omitempty"`
+	// What the last orphan pass decided about removing this orphan: it would remove it but did not queue it, queued its delete, which is still pending, would remove it but removal or removal of its kind is off or its switches could not be read, leaves it because its alerts are muted, leaves it because a check failed or its delete queued within the day ended without deleting it, or cannot remove its kind on its cloud.
+	RemovalVerdict *string `json:"removalVerdict,omitempty"`
 	// Resource name.
 	ResourceName *string `json:"resourceName,omitempty"`
 	// Machine type or storage class.
@@ -15193,6 +15292,8 @@ type Session struct {
 	NodeHostname *string `json:"nodeHostname,omitempty"`
 	// Indicates if this is an OpenAI session.
 	OpenAi *bool `json:"openAI,omitempty"`
+	// Whether the web app opens the session in its own browser tab instead of embedding it.
+	OpenInNewTab *bool `json:"openInNewTab,omitempty"`
 	// Whether this endpoint's serving processes form a load-balanced connection pool.
 	Pooled *bool `json:"pooled,omitempty"`
 	// Remote host.
@@ -15219,6 +15320,12 @@ type Session struct {
 	TargetInfo     *KubernetesTunnelInfo `json:"targetInfo,omitempty"`
 	// Target name.
 	TargetName *string `json:"targetName,omitempty"`
+	// Operating system of the target existing cluster, as reported by its agent.
+	TargetOs *string `json:"targetOs,omitempty"`
+	// Operating system release of the target existing cluster, as reported by its agent.
+	TargetOsRelease *string `json:"targetOsRelease,omitempty"`
+	// Scheduler type of the target existing cluster.
+	TargetSchedulerType *string `json:"targetSchedulerType,omitempty"`
 	// Target resource type.
 	TargetType *string `json:"targetType,omitempty"`
 	// Session type.
@@ -15797,7 +15904,7 @@ type StoragePermissions struct {
 }
 
 type StorageTypes struct {
-	// Azure NetApp Files meters. Capacity pools are keyed by service level followed by Capacity, for example Standard Capacity.
+	// Azure NetApp Files meters. Capacity pools are keyed by service level followed by Capacity, for example Standard Capacity. Prices keep Azure's own meter units, so capacity is per GiB-hour, not per GB-month.
 	NetAppFiles map[string]float64 `json:"NetApp_Files,omitempty"`
 	// Azure Premium SSD sizes
 	PremiumSsd map[string]float64 `json:"Premium_SSD,omitempty"`
@@ -15807,7 +15914,7 @@ type StorageTypes struct {
 	StandardHdd map[string]float64 `json:"Standard_HDD,omitempty"`
 	// Azure Standard SSD sizes
 	StandardSsd map[string]float64 `json:"Standard_SSD,omitempty"`
-	// Azure Ultra Disk sizes
+	// Azure Ultra Disk meters. Prices keep Azure's own meter units, so provisioned capacity is per GiB-hour, not per GB-month.
 	UltraDisk map[string]float64 `json:"Ultra_Disk,omitempty"`
 	// Azure Files provisioned share rates, keyed by redundancy
 	Azfiles map[string]float64 `json:"azfiles,omitempty"`
@@ -16336,7 +16443,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	// Whether to enable maintenance mode.
 	MaintenanceMode *bool `json:"maintenanceMode,omitempty"`
 	// Minimum agent semantic version. Empty disables enforcement.
-	MinimumAgentVersion *string `json:"minimumAgentVersion,omitempty"`
+	MinimumAgentVersion *string                `json:"minimumAgentVersion,omitempty"`
+	OrphanRemovals      *OrphanRemovalSettings `json:"orphanRemovals,omitempty"`
 	// Body served at /.well-known/pki-validation/{filename}.
 	PkiValidationContent *string `json:"pkiValidationContent,omitempty"`
 	// Filename served at /.well-known/pki-validation/. Empty disables the endpoint.
