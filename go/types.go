@@ -1417,27 +1417,22 @@ type ApprovalAnswer struct {
 	Feedback    *string             `json:"feedback,omitempty"`
 	Mode        *string             `json:"mode,omitempty"`
 	Plan        *string             `json:"plan,omitempty"`
-	Text        *string             `json:"text,omitempty"`
 }
 
 type ApprovalRequest struct {
-	Agent       *string       `json:"agent,omitempty"`
-	CallID      *string       `json:"callId,omitempty"`
-	Command     *string       `json:"command,omitempty"`
-	CreatedAt   time.Time     `json:"createdAt"`
-	Header      *string       `json:"header,omitempty"`
-	ID          string        `json:"id"`
-	Kind        string        `json:"kind"`
-	Mode        *string       `json:"mode,omitempty"`
-	MultiSelect *bool         `json:"multiSelect,omitempty"`
-	Options     []AskOption   `json:"options,omitempty"`
-	Plan        *string       `json:"plan,omitempty"`
-	PlanPath    *string       `json:"planPath,omitempty"`
-	Question    *string       `json:"question,omitempty"`
-	Questions   []AskQuestion `json:"questions,omitempty"`
-	Reason      *string       `json:"reason,omitempty"`
-	SubagentID  *string       `json:"subagentId,omitempty"`
-	Tool        *string       `json:"tool,omitempty"`
+	Agent      *string       `json:"agent,omitempty"`
+	CallID     *string       `json:"callId,omitempty"`
+	Command    *string       `json:"command,omitempty"`
+	CreatedAt  time.Time     `json:"createdAt"`
+	ID         string        `json:"id"`
+	Kind       string        `json:"kind"`
+	Mode       *string       `json:"mode,omitempty"`
+	Plan       *string       `json:"plan,omitempty"`
+	PlanPath   *string       `json:"planPath,omitempty"`
+	Questions  []AskQuestion `json:"questions,omitempty"`
+	Reason     *string       `json:"reason,omitempty"`
+	SubagentID *string       `json:"subagentId,omitempty"`
+	Tool       *string       `json:"tool,omitempty"`
 }
 
 type AppsOutputBody struct {
@@ -1447,6 +1442,7 @@ type AppsOutputBody struct {
 type AskOption struct {
 	Description *string `json:"description,omitempty"`
 	Label       string  `json:"label"`
+	Preview     *string `json:"preview,omitempty"`
 }
 
 type AskQuestion struct {
@@ -1457,6 +1453,7 @@ type AskQuestion struct {
 }
 
 type AskQuestionAnswer struct {
+	Notes    *string  `json:"notes,omitempty"`
 	Picked   []string `json:"picked,omitempty"`
 	Question *string  `json:"question,omitempty"`
 	Text     *string  `json:"text,omitempty"`
@@ -15412,37 +15409,38 @@ type SessionSoftware struct {
 }
 
 type SessionState struct {
-	Allocation           *string       `json:"allocation,omitempty"`
-	Attribution          *bool         `json:"attribution,omitempty"`
-	AutoCompactWindow    *int64        `json:"autoCompactWindow,omitempty"`
-	AutoName             *string       `json:"autoName,omitempty"`
-	BackgroundShells     *int64        `json:"backgroundShells,omitempty"`
-	ClaudeAccount        *string       `json:"claudeAccount,omitempty"`
-	EffectiveAllocation  *string       `json:"effectiveAllocation,omitempty"`
-	EffectiveEffort      *string       `json:"effectiveEffort,omitempty"`
-	Effort               *string       `json:"effort,omitempty"`
-	EffortActive         *bool         `json:"effortActive,omitempty"`
-	Goal                 *GoalStatus   `json:"goal,omitempty"`
-	InputTokens          *int64        `json:"inputTokens,omitempty"`
-	Model                string        `json:"model"`
-	Name                 *string       `json:"name,omitempty"`
-	OutputTokens         *int64        `json:"outputTokens,omitempty"`
-	PasteInlineMaxBytes  *int64        `json:"pasteInlineMaxBytes,omitempty"`
-	PendingSubagentWork  *bool         `json:"pendingSubagentWork,omitempty"`
-	PermissionMode       *string       `json:"permissionMode,omitempty"`
-	RemoteControl        *bool         `json:"remoteControl,omitempty"`
-	RemotePolicy         RemotePolicy  `json:"remotePolicy"`
-	RemoteTunnel         *RemoteTunnel `json:"remoteTunnel,omitempty"`
-	RemoteURL            *string       `json:"remoteUrl,omitempty"`
-	SessionRetentionDays *int64        `json:"sessionRetentionDays,omitempty"`
-	SubagentConcurrency  *int64        `json:"subagentConcurrency,omitempty"`
-	SubagentDepth        *int64        `json:"subagentDepth,omitempty"`
-	SubagentModel        *string       `json:"subagentModel,omitempty"`
-	SubagentsDisabled    *bool         `json:"subagentsDisabled,omitempty"`
-	SupportedEfforts     []string      `json:"supportedEfforts,omitempty"`
-	ToolCallingMode      *string       `json:"toolCallingMode,omitempty"`
-	ToolsDisabled        *bool         `json:"toolsDisabled,omitempty"`
-	UsageStatusLine      *string       `json:"usageStatusLine,omitempty"`
+	Allocation           *string           `json:"allocation,omitempty"`
+	Attribution          *bool             `json:"attribution,omitempty"`
+	AutoCompactWindow    *int64            `json:"autoCompactWindow,omitempty"`
+	AutoName             *string           `json:"autoName,omitempty"`
+	BackgroundShells     *int64            `json:"backgroundShells,omitempty"`
+	ClaudeAccount        *string           `json:"claudeAccount,omitempty"`
+	EffectiveAllocation  *string           `json:"effectiveAllocation,omitempty"`
+	EffectiveEffort      *string           `json:"effectiveEffort,omitempty"`
+	Effort               *string           `json:"effort,omitempty"`
+	EffortActive         *bool             `json:"effortActive,omitempty"`
+	Goal                 *GoalStatus       `json:"goal,omitempty"`
+	InputTokens          *int64            `json:"inputTokens,omitempty"`
+	Model                string            `json:"model"`
+	ModelNames           map[string]string `json:"modelNames,omitempty"`
+	Name                 *string           `json:"name,omitempty"`
+	OutputTokens         *int64            `json:"outputTokens,omitempty"`
+	PasteInlineMaxBytes  *int64            `json:"pasteInlineMaxBytes,omitempty"`
+	PendingSubagentWork  *bool             `json:"pendingSubagentWork,omitempty"`
+	PermissionMode       *string           `json:"permissionMode,omitempty"`
+	RemoteControl        *bool             `json:"remoteControl,omitempty"`
+	RemotePolicy         RemotePolicy      `json:"remotePolicy"`
+	RemoteTunnel         *RemoteTunnel     `json:"remoteTunnel,omitempty"`
+	RemoteURL            *string           `json:"remoteUrl,omitempty"`
+	SessionRetentionDays *int64            `json:"sessionRetentionDays,omitempty"`
+	SubagentConcurrency  *int64            `json:"subagentConcurrency,omitempty"`
+	SubagentDepth        *int64            `json:"subagentDepth,omitempty"`
+	SubagentModel        *string           `json:"subagentModel,omitempty"`
+	SubagentsDisabled    *bool             `json:"subagentsDisabled,omitempty"`
+	SupportedEfforts     []string          `json:"supportedEfforts,omitempty"`
+	ToolCallingMode      *string           `json:"toolCallingMode,omitempty"`
+	ToolsDisabled        *bool             `json:"toolsDisabled,omitempty"`
+	UsageStatusLine      *string           `json:"usageStatusLine,omitempty"`
 }
 
 type SetActiveInputBody struct {

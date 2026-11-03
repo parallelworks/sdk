@@ -4232,9 +4232,6 @@
           },
           "plan": {
             "type": "string"
-          },
-          "text": {
-            "type": "string"
           }
         },
         "type": "object"
@@ -4255,9 +4252,6 @@
             "format": "date-time",
             "type": "string"
           },
-          "header": {
-            "type": "string"
-          },
           "id": {
             "type": "string"
           },
@@ -4272,25 +4266,10 @@
           "mode": {
             "type": "string"
           },
-          "multiSelect": {
-            "type": "boolean"
-          },
-          "options": {
-            "items": {
-              "$ref": "#/components/schemas/AskOption"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
           "plan": {
             "type": "string"
           },
           "planPath": {
-            "type": "string"
-          },
-          "question": {
             "type": "string"
           },
           "questions": {
@@ -4342,6 +4321,9 @@
           },
           "label": {
             "type": "string"
+          },
+          "preview": {
+            "type": "string"
           }
         },
         "required": [
@@ -4379,6 +4361,9 @@
       "AskQuestionAnswer": {
         "additionalProperties": false,
         "properties": {
+          "notes": {
+            "type": "string"
+          },
           "picked": {
             "items": {
               "type": "string"
@@ -46975,6 +46960,12 @@
           "model": {
             "type": "string"
           },
+          "modelNames": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
           "name": {
             "type": "string"
           },
@@ -47838,6 +47829,7 @@
                 "client-secret-key",
                 "windows-credential-key",
                 "auth-method-credential-key",
+                "tandem-credentials-key",
                 "platform-key",
                 "github-app",
                 "slack",
