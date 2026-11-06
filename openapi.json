@@ -1578,6 +1578,13 @@
           "error": {
             "type": "string"
           },
+          "errorCode": {
+            "type": "string"
+          },
+          "fetchedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
           "fiveHourResetsAt": {
             "format": "date-time",
             "type": "string"
@@ -1591,6 +1598,9 @@
           },
           "plan": {
             "type": "string"
+          },
+          "refreshing": {
+            "type": "boolean"
           },
           "signInRequired": {
             "type": "boolean"
@@ -1738,6 +1748,10 @@
       "AgentCommandOutput": {
         "additionalProperties": false,
         "properties": {
+          "note": {
+            "description": "A passing condition the command hit, such as subscription limits Claude Code has not reported yet. Running the command again may clear it.",
+            "type": "string"
+          },
           "output": {
             "description": "What the command printed.",
             "type": "string"
@@ -1778,6 +1792,16 @@
       "AgentDirectionBody": {
         "additionalProperties": false,
         "properties": {
+          "images": {
+            "description": "Images uploaded to the session with upload-agent-session-image, each named in the text by its placeholder, as a message's images are.",
+            "items": {
+              "$ref": "#/components/schemas/AgentImageRef"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "pastes": {
             "description": "Pastes saved with upload-agent-session-paste that the text mentions by placeholder, as a message's pastes are.",
             "items": {
@@ -1909,6 +1933,10 @@
         "properties": {
           "agentVersion": {
             "type": "string"
+          },
+          "claudeAccountRemove": {
+            "description": "The daemon supports removing Claude Code accounts from the web.",
+            "type": "boolean"
           },
           "claudeCodeAllowed": {
             "description": "Organization and host policy allow the Claude Code integration.",
@@ -2607,9 +2635,6 @@
               "null"
             ]
           },
-          "interim": {
-            "type": "boolean"
-          },
           "interrupted": {
             "type": "boolean"
           },
@@ -2630,6 +2655,9 @@
             "type": "string"
           },
           "noteId": {
+            "type": "string"
+          },
+          "notice": {
             "type": "string"
           },
           "pastes": {
@@ -7675,6 +7703,38 @@
         ],
         "type": "object"
       },
+      "BillingRunCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "failed": {
+            "description": "Runs where every credential failed",
+            "format": "int64",
+            "type": "integer"
+          },
+          "partial": {
+            "description": "Runs where some credentials failed",
+            "format": "int64",
+            "type": "integer"
+          },
+          "running": {
+            "description": "Runs still in progress",
+            "format": "int64",
+            "type": "integer"
+          },
+          "success": {
+            "description": "Runs where every credential succeeded",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "success",
+          "partial",
+          "failed",
+          "running"
+        ],
+        "type": "object"
+      },
       "BillingRunDetail": {
         "additionalProperties": false,
         "properties": {
@@ -7738,6 +7798,15 @@
       "BillingRunList": {
         "additionalProperties": false,
         "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/BillingRunCounts",
+            "description": "Billing runs by status, across every page"
+          },
+          "kept": {
+            "description": "How many of the most recent billing runs the billing service keeps; older runs are deleted, so the total and counts never cover more than this",
+            "format": "int64",
+            "type": "integer"
+          },
           "runs": {
             "description": "Paginated billing runs",
             "items": {
@@ -7756,7 +7825,9 @@
         },
         "required": [
           "runs",
-          "total"
+          "total",
+          "counts",
+          "kept"
         ],
         "type": "object"
       },
@@ -12297,6 +12368,16 @@
           },
           "name": {
             "type": "string"
+          },
+          "readBy": {
+            "description": "The variables the workflow requests whose values read this secret variable, when the workflow asks for it only through them.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "required": [
@@ -14098,6 +14179,22 @@
             "minimum": 0.25,
             "type": "number"
           },
+          "modules": {
+            "description": "Environment modules (Lmod or Environment Modules) loaded before the kernel starts, such as R/4.3.1. Not for workspace targets.",
+            "examples": [
+              [
+                "R/4.3.1"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "name": {
             "description": "Kernel name. Auto-generated if omitted.",
             "maxLength": 255,
@@ -15691,6 +15788,10 @@
             "description": "Run a repository's workflow.yaml: OWNER/REPO or a github.com URL, or the URL of a project on one of the organization's registered GitLab servers, each with an optional path to a workflow file or the directory holding one, and an optional @REF. Without a path it is the repository root. Read as the caller, treated as third-party code.",
             "type": "string"
           },
+          "savedInputs": {
+            "description": "Name of the workflow's saved inputs to fill in each value from that inputs gives as ********, the way the API shows a saved one: a password input's, or one under no input the workflow has, which the run then masks as it masks a password. Only with workflow.",
+            "type": "string"
+          },
           "sessionNames": {
             "additionalProperties": {
               "type": "string"
@@ -15740,6 +15841,10 @@
       "CreateWorkflowSavedInputsInputBody": {
         "additionalProperties": false,
         "properties": {
+          "from": {
+            "description": "Name of the saved inputs to keep each value from that inputs gives as ********, the way the API shows a saved one.",
+            "type": "string"
+          },
           "inputs": {
             "additionalProperties": {},
             "description": "Saved input values.",
@@ -15794,8 +15899,12 @@
       "CredentialListingError": {
         "additionalProperties": false,
         "properties": {
+          "internal": {
+            "description": "The failure was on our side; its details are in the billing service's log, not here.",
+            "type": "boolean"
+          },
           "message": {
-            "description": "What failed.",
+            "description": "The cloud provider's error response. Empty for an internal failure.",
             "type": "string"
           },
           "scope": {
@@ -18218,16 +18327,8 @@
             "type": "string"
           },
           "if": {
-            "description": "The job's condition: true or false once resolved, or the expression still to evaluate.",
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "JobCondition"
+            "description": "Whether the job's if: lets it run, when that was known as the run was created.",
+            "type": "boolean"
           },
           "needs": {
             "description": "Jobs this job waits for.",
@@ -18238,20 +18339,6 @@
               "array",
               "null"
             ]
-          },
-          "outputs": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "Outputs the job produced, or the expressions it declares until it finishes.",
-            "type": "object"
-          },
-          "ssh": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "Where the job runs, such as remoteHost and remoteUser, as resolved for this run.",
-            "type": "object"
           },
           "startedAt": {
             "format": "date-time",
@@ -18302,11 +18389,6 @@
           "totalingroup": {
             "format": "int64",
             "type": "integer"
-          },
-          "values": {
-            "additionalProperties": true,
-            "description": "This job's combination of matrix values.",
-            "type": "object"
           }
         },
         "required": [
@@ -18338,16 +18420,7 @@
             "type": "string"
           },
           "name": {
-            "type": "string"
-          },
-          "outputs": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object"
-          },
-          "run": {
-            "description": "The command the step runs.",
+            "description": "The step's name, or for a step that runs a command and has none, the first line of the command as the workflow writes it.",
             "type": "string"
           },
           "startedAt": {
@@ -18369,11 +18442,6 @@
           "uses": {
             "description": "The action or workflow the step uses.",
             "type": "string"
-          },
-          "with": {
-            "additionalProperties": true,
-            "description": "Inputs the step passes to what it uses, as resolved for this run.",
-            "type": "object"
           }
         },
         "type": "object"
@@ -18400,11 +18468,6 @@
           },
           "type": {
             "type": "string"
-          },
-          "variables": {
-            "additionalProperties": true,
-            "description": "Inputs the subworkflow was run with.",
-            "type": "object"
           },
           "workflowName": {
             "type": "string"
@@ -19183,6 +19246,36 @@
         ],
         "type": "object"
       },
+      "FirewallActivity": {
+        "additionalProperties": false,
+        "properties": {
+          "rules": {
+            "description": "Every rule that matched a request since then, the most matched first",
+            "items": {
+              "$ref": "#/components/schemas/FirewallRuleActivity"
+            },
+            "type": "array"
+          },
+          "since": {
+            "description": "Start of the first hour counted: matches are counted by the hour",
+            "format": "date-time",
+            "type": "string"
+          },
+          "window": {
+            "enum": [
+              "24h",
+              "7d"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "window",
+          "since",
+          "rules"
+        ],
+        "type": "object"
+      },
       "FirewallBlockedIP": {
         "additionalProperties": false,
         "properties": {
@@ -19335,6 +19428,36 @@
         ],
         "type": "object"
       },
+      "FirewallRouteActivity": {
+        "additionalProperties": false,
+        "properties": {
+          "blocked": {
+            "description": "Requests on the route it matched that the firewall refused",
+            "format": "int64",
+            "type": "integer"
+          },
+          "method": {
+            "description": "HTTP method, OTHER for one outside the standard methods, or * with the route *",
+            "type": "string"
+          },
+          "passed": {
+            "description": "Requests on the route it matched that went through",
+            "format": "int64",
+            "type": "integer"
+          },
+          "route": {
+            "description": "Route pattern, such as /api/users/{user}, never the request's path; * for the routes past the 20 a server keeps per hour",
+            "type": "string"
+          }
+        },
+        "required": [
+          "method",
+          "route",
+          "blocked",
+          "passed"
+        ],
+        "type": "object"
+      },
       "FirewallRule": {
         "additionalProperties": false,
         "properties": {
@@ -19441,6 +19564,55 @@
           "note",
           "createdAt",
           "createdBy"
+        ],
+        "type": "object"
+      },
+      "FirewallRuleActivity": {
+        "additionalProperties": false,
+        "properties": {
+          "blocked": {
+            "description": "Requests it matched that the firewall refused, by this rule or a later one, such as the anomaly score's that a CRS detection rule adds to",
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastSeen": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "logOnly": {
+            "description": "The rule only logs, such as one monitored before it denies: it never refuses a request",
+            "type": "boolean"
+          },
+          "message": {
+            "description": "The rule's message as written, each part the firewall would fill in with request data shown as …",
+            "type": "string"
+          },
+          "passed": {
+            "description": "Requests it matched that went through: the rule only logs, the firewall only detects, or the anomaly score stayed under the threshold",
+            "format": "int64",
+            "type": "integer"
+          },
+          "routes": {
+            "description": "The routes it matched most, at most 5",
+            "items": {
+              "$ref": "#/components/schemas/FirewallRouteActivity"
+            },
+            "type": "array"
+          },
+          "ruleId": {
+            "description": "Rule id, as block logs and evaluations report it",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ruleId",
+          "message",
+          "logOnly",
+          "blocked",
+          "passed",
+          "lastSeen",
+          "routes"
         ],
         "type": "object"
       },
@@ -19604,8 +19776,12 @@
             "description": "Cloud service provider",
             "type": "string"
           },
+          "internal": {
+            "description": "The failure was on our side, such as a database error; its details are in the billing service's log, not here.",
+            "type": "boolean"
+          },
           "message": {
-            "description": "Error message",
+            "description": "The cloud provider's error response. Empty for an internal failure.",
             "type": "string"
           },
           "organization": {
@@ -26157,6 +26333,16 @@
           },
           "mime": {
             "type": "string"
+          },
+          "originalMime": {
+            "type": "string"
+          },
+          "originalSize": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ref": {
+            "type": "string"
           }
         },
         "required": [
@@ -27365,6 +27551,17 @@
             "format": "double",
             "readOnly": true,
             "type": "number"
+          },
+          "modules": {
+            "description": "Environment modules loaded before the kernel starts.",
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "name": {
             "description": "Kernel name.",
@@ -35163,11 +35360,11 @@
               "null"
             ]
           },
-          "extraRecipients": {
-            "description": "Additional email addresses notified when the notify action is set.",
+          "notifyGroups": {
+            "description": "Groups whose members also receive the notify alert, on top of the allocation's own users. Used only with the notify action.",
             "examples": [
               [
-                "ops@example.com"
+                "finance"
               ]
             ],
             "items": {
@@ -35182,12 +35379,8 @@
             "description": "When true the threshold is evaluated against estimated (realtime) usage instead of billed usage.",
             "type": "boolean"
           },
-          "sendToGroup": {
-            "description": "When true and the notify action is set, members of the group that crossed the threshold are notified.",
-            "type": "boolean"
-          },
           "threshold": {
-            "description": "The allocation usage percent that trips this threshold. Values above 100 are allowed for groups that overspend their allocation.",
+            "description": "The allocation usage percent that trips this threshold. Values above 100 are allowed for allocations that are overspent.",
             "examples": [
               80
             ],
@@ -35198,9 +35391,7 @@
         "required": [
           "threshold",
           "actions",
-          "realtime",
-          "sendToGroup",
-          "extraRecipients"
+          "realtime"
         ],
         "type": "object"
       },
@@ -35248,6 +35439,10 @@
           },
           "disableClaudeCode": {
             "description": "Disable Claude Code accounts, subscription models, and execution, even when Claude Code is installed on the agent host. Members cannot override an organization restriction.",
+            "type": "boolean"
+          },
+          "includeCoAuthoredBy": {
+            "description": "Add pw code's Co-Authored-By trailer to the commits it makes and its attribution line to the pull requests it opens. Replaces each member's own includeCoAuthoredBy setting.",
             "type": "boolean"
           }
         },
@@ -36022,8 +36217,12 @@
       "OrphanRemovalSettings": {
         "additionalProperties": false,
         "properties": {
+          "azureFiles": {
+            "description": "Whether billing also deletes orphaned Azure Files storage, which destroys whatever its shares still hold.",
+            "type": "boolean"
+          },
           "buckets": {
-            "description": "Whether billing also deletes orphaned buckets, only while they are empty.",
+            "description": "Whether billing also deletes orphaned buckets: on AWS and Google Cloud only while empty, and on Azure the storage account with everything it holds.",
             "type": "boolean"
           },
           "disks": {
@@ -36036,6 +36235,10 @@
           },
           "managedLustre": {
             "description": "Whether billing also deletes orphaned Google Managed Lustre instances, which destroys the data on them.",
+            "type": "boolean"
+          },
+          "netAppFiles": {
+            "description": "Whether billing also deletes orphaned Azure NetApp Files storage, which destroys whatever its volumes still hold.",
             "type": "boolean"
           }
         },
@@ -43999,6 +44202,8 @@
               "disk_removal_off",
               "bucket_removal_off",
               "managed_lustre_removal_off",
+              "azure_files_removal_off",
+              "netapp_files_removal_off",
               "record_holds",
               "user_deleted",
               "delete_incomplete",
@@ -44186,7 +44391,7 @@
             "type": "string"
           },
           "credentialError": {
-            "description": "Last credential fetch error.",
+            "description": "The cloud provider's error from the last credential fetch. Empty when the fetch failed on our side, such as in the vault or database; those details are in the billing service's log.",
             "type": "string"
           },
           "credentialRefreshedAt": {
@@ -44899,8 +45104,12 @@
       "RunError": {
         "additionalProperties": false,
         "properties": {
+          "internal": {
+            "description": "The failure was on our side, such as a database error; its details are in the billing service's log, not here.",
+            "type": "boolean"
+          },
           "message": {
-            "description": "Error message",
+            "description": "The cloud provider's error response. Empty for an internal failure.",
             "type": "string"
           },
           "phase": {
@@ -47010,6 +47219,12 @@
           "subagentModel": {
             "type": "string"
           },
+          "subagentUsage": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SubagentUsage"
+            },
+            "type": "object"
+          },
           "subagentsDisabled": {
             "type": "boolean"
           },
@@ -47029,6 +47244,9 @@
             "type": "boolean"
           },
           "usageStatusLine": {
+            "type": "string"
+          },
+          "worktree": {
             "type": "string"
           }
         },
@@ -48634,6 +48852,24 @@
         "required": [
           "level"
         ],
+        "type": "object"
+      },
+      "SubagentUsage": {
+        "additionalProperties": false,
+        "properties": {
+          "inputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "latestInputTokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "outputTokens": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
         "type": "object"
       },
       "SubdomainAvailabilityResponse": {
@@ -51042,6 +51278,10 @@
       "UpdateWorkflowSavedInputsInputBody": {
         "additionalProperties": false,
         "properties": {
+          "from": {
+            "description": "Name of the saved inputs to keep each value from that inputs gives as ********, the way the API shows a saved one. Without it, each is kept from the saved inputs this updates.",
+            "type": "string"
+          },
           "inputs": {
             "additionalProperties": {},
             "description": "Saved input values.",
@@ -53190,7 +53430,7 @@
           },
           "inputs": {
             "additionalProperties": {},
-            "description": "Input values to load when selected.",
+            "description": "Input values to load when selected. A saved value is shown as ******** unless the workflow's inputs take it as a plain value, so passwords, and values of inputs the YAML no longer has, are masked. The list of workflows and the response to a delete leave these out.",
             "type": "object"
           },
           "name": {
@@ -61390,6 +61630,51 @@
         "x-internal": true
       }
     },
+    "/api/agents/machines/{machine}/claude-code/accounts/{name}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemove a Claude Code account from a machine. Signs the account out with the official Claude Code CLI and deletes its profile on the machine. The default account and an account a session uses cannot be removed. The daemon enforces its remote start policy.",
+        "operationId": "delete-agent-machine-claude-account",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9_.@-]{1,64}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Remove a Claude Code account from a machine",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/agents/machines/{machine}/claude-code/logins": {
       "post": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStart Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.",
@@ -62483,6 +62768,90 @@
           }
         },
         "summary": "Attach an image to a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/images/{ref}": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the full-size image a transcript item or event names by its ref, where the transcript itself carries only a small preview. The machine's daemon holds it to the same rules as the transcript.",
+        "operationId": "get-agent-session-image",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ref of an image in the session's transcript or event feed.",
+            "in": "path",
+            "name": "ref",
+            "required": true,
+            "schema": {
+              "description": "The ref of an image in the session's transcript or event feed.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/*": {
+                "schema": {
+                  "contentMediaType": "application/octet-stream",
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "The image, as PNG, JPEG, GIF or WebP.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get an image from a pw code session at full size",
         "tags": [
           "Agents"
         ],
@@ -67227,6 +67596,26 @@
             "name": "state",
             "schema": {
               "description": "State parameter for CSRF validation",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The App installation GitHub just made or changed, when an installation ends here",
+            "explode": false,
+            "in": "query",
+            "name": "installation_id",
+            "schema": {
+              "description": "The App installation GitHub just made or changed, when an installation ends here",
+              "type": "string"
+            }
+          },
+          {
+            "description": "What the installation did, when an installation ends here",
+            "explode": false,
+            "in": "query",
+            "name": "setup_action",
+            "schema": {
+              "description": "What the installation did, when an installation ends here",
               "type": "string"
             }
           }
@@ -111628,6 +112017,55 @@
           }
         },
         "summary": "Update Firewall Settings",
+        "tags": [
+          "Firewall"
+        ]
+      }
+    },
+    "/api/platform/firewall/activity": {
+      "get": {
+        "description": "\u003e This is a platform-admin only route.\n\nCounts the requests each firewall rule matched in the last 24 hours or 7 days, split into those the firewall refused and those that went through, with the routes it matched most. Only each request's method and route pattern are kept, never its contents",
+        "operationId": "get-firewall-activity",
+        "parameters": [
+          {
+            "description": "How far back to count: the last 24 hours or the last 7 days",
+            "explode": false,
+            "in": "query",
+            "name": "window",
+            "schema": {
+              "default": "24h",
+              "description": "How far back to count: the last 24 hours or the last 7 days",
+              "enum": [
+                "24h",
+                "7d"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirewallActivity"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Firewall Activity",
         "tags": [
           "Firewall"
         ]

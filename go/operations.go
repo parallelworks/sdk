@@ -3580,6 +3580,23 @@ func (c *Client) GetAgentMachineClaudeAccounts(ctx context.Context, machine stri
 	return &result, nil
 }
 
+// DeleteAgentMachineClaudeAccount - Remove a Claude Code account from a machine
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Remove a Claude Code account from a machine. Signs the account out with the official Claude Code CLI and deletes its profile on the machine. The default account and an account a session uses cannot be removed. The daemon enforces its remote start policy.
+func (c *Client) DeleteAgentMachineClaudeAccount(ctx context.Context, machine string, name string) error {
+
+	path := "/api/agents/machines/{machine}/claude-code/accounts/{name}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // StartAgentClaudeLogin - Start Claude Code sign-in
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -3958,6 +3975,25 @@ func (c *Client) UploadAgentSessionImage(ctx context.Context, machine string, id
 
 	var result AgentImageSaved
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentSessionImage - Get an image from a pw code session at full size
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the full-size image a transcript item or event names by its ref, where the transcript itself carries only a small preview. The machine's daemon holds it to the same rules as the transcript.
+func (c *Client) GetAgentSessionImage(ctx context.Context, machine string, id string, ref string) (*[]byte, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/images/{ref}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "ref", "simple", false, ref)
+
+	var result []byte
+	if err := c.do(ctx, "GET", path, nil, "", &result, "image/*", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5930,6 +5966,10 @@ type GithubOauthCallbackParams struct {
 	Code *string `json:"code,omitempty"`
 	// State parameter for CSRF validation
 	State *string `json:"state,omitempty"`
+	// The App installation GitHub just made or changed, when an installation ends here
+	InstallationID *string `json:"installation_id,omitempty"`
+	// What the installation did, when an installation ends here
+	SetupAction *string `json:"setup_action,omitempty"`
 }
 
 // GithubOauthCallback - Handle GitHub OAuth callback
@@ -5948,6 +5988,10 @@ func (c *Client) GithubOauthCallback(ctx context.Context, opts ...GithubOauthCal
 	addQueryParam(queryValues, "code", "form", false, params.Code)
 
 	addQueryParam(queryValues, "state", "form", false, params.State)
+
+	addQueryParam(queryValues, "installation_id", "form", false, params.InstallationID)
+
+	addQueryParam(queryValues, "setup_action", "form", false, params.SetupAction)
 
 	if len(queryValues) > 0 {
 		path += "?" + encodeQuery(queryValues)
@@ -20123,6 +20167,39 @@ func (c *Client) UpdateFirewallSettings(ctx context.Context, body UpdateFirewall
 
 	var result FirewallSettings
 	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetFirewallActivityParams contains the parameters for the GetFirewallActivity operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetFirewallActivityParams struct {
+	// How far back to count: the last 24 hours or the last 7 days
+	Window *string `json:"window,omitempty"`
+}
+
+// GetFirewallActivity - Get Firewall Activity
+//
+// > This is a platform-admin only route.
+//
+// Counts the requests each firewall rule matched in the last 24 hours or 7 days, split into those the firewall refused and those that went through, with the routes it matched most. Only each request's method and route pattern are kept, never its contents
+func (c *Client) GetFirewallActivity(ctx context.Context, opts ...GetFirewallActivityParams) (*FirewallActivity, error) {
+
+	path := "/api/platform/firewall/activity"
+	var params GetFirewallActivityParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "window", "form", false, params.Window)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result FirewallActivity
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil

@@ -633,10 +633,13 @@ type AdminProduct struct {
 type AgentClaudeAccount struct {
 	Email               *string    `json:"email,omitempty"`
 	Error               *string    `json:"error,omitempty"`
+	ErrorCode           *string    `json:"errorCode,omitempty"`
+	FetchedAt           *time.Time `json:"fetchedAt,omitempty"`
 	FiveHourResetsAt    *time.Time `json:"fiveHourResetsAt,omitempty"`
 	FiveHourUsedPercent *float64   `json:"fiveHourUsedPercent,omitempty"`
 	Name                string     `json:"name"`
 	Plan                *string    `json:"plan,omitempty"`
+	Refreshing          *bool      `json:"refreshing,omitempty"`
 	SignInRequired      *bool      `json:"signInRequired,omitempty"`
 	Usage               *string    `json:"usage,omitempty"`
 	WeeklyResetsAt      *time.Time `json:"weeklyResetsAt,omitempty"`
@@ -681,6 +684,8 @@ type AgentCommandBody struct {
 }
 
 type AgentCommandOutput struct {
+	// A passing condition the command hit, such as subscription limits Claude Code has not reported yet. Running the command again may clear it.
+	Note *string `json:"note,omitempty"`
 	// What the command printed.
 	Output string `json:"output"`
 }
@@ -697,6 +702,8 @@ type AgentCompacted struct {
 }
 
 type AgentDirectionBody struct {
+	// Images uploaded to the session with upload-agent-session-image, each named in the text by its placeholder, as a message's images are.
+	Images []AgentImageRef `json:"images,omitempty"`
 	// Pastes saved with upload-agent-session-paste that the text mentions by placeholder, as a message's pastes are.
 	Pastes []PasteRef `json:"pastes,omitempty"`
 	// What to tell the running turn.
@@ -738,6 +745,8 @@ type AgentImageSaved struct {
 
 type AgentMachine struct {
 	AgentVersion *string `json:"agentVersion,omitempty"`
+	// The daemon supports removing Claude Code accounts from the web.
+	ClaudeAccountRemove *bool `json:"claudeAccountRemove,omitempty"`
 	// Organization and host policy allow the Claude Code integration.
 	ClaudeCodeAllowed bool `json:"claudeCodeAllowed"`
 	// Claude Code is installed on the daemon host and available on its PATH.
@@ -934,7 +943,6 @@ type AgentStreamEvent struct {
 	GoalProgress  *GoalProgress    `json:"goalProgress,omitempty"`
 	ID            *string          `json:"id,omitempty"`
 	Images        []ImageContent   `json:"images,omitempty"`
-	Interim       *bool            `json:"interim,omitempty"`
 	Interrupted   *bool            `json:"interrupted,omitempty"`
 	IsError       *bool            `json:"isError,omitempty"`
 	Iters         *int64           `json:"iters,omitempty"`
@@ -942,6 +950,7 @@ type AgentStreamEvent struct {
 	Name          *string          `json:"name,omitempty"`
 	NewID         *string          `json:"newId,omitempty"`
 	NoteID        *string          `json:"noteId,omitempty"`
+	Notice        *string          `json:"notice,omitempty"`
 	Pastes        []PasteView      `json:"pastes,omitempty"`
 	Result        *string          `json:"result,omitempty"`
 	Seq           int64            `json:"seq"`
@@ -2427,6 +2436,17 @@ type BillingRun struct {
 	Summary RunSummary `json:"summary"`
 }
 
+type BillingRunCounts struct {
+	// Runs where every credential failed
+	Failed int64 `json:"failed"`
+	// Runs where some credentials failed
+	Partial int64 `json:"partial"`
+	// Runs still in progress
+	Running int64 `json:"running"`
+	// Runs where every credential succeeded
+	Success int64 `json:"success"`
+}
+
 type BillingRunDetail struct {
 	// When the run completed
 	CompletedAt *time.Time `json:"completedAt"`
@@ -2444,6 +2464,9 @@ type BillingRunDetail struct {
 }
 
 type BillingRunList struct {
+	Counts BillingRunCounts `json:"counts"`
+	// How many of the most recent billing runs the billing service keeps; older runs are deleted, so the total and counts never cover more than this
+	Kept int64 `json:"kept"`
 	// Paginated billing runs
 	Runs []BillingRun `json:"runs"`
 	// Total number of billing runs
@@ -4004,6 +4027,8 @@ type ConsentVariable struct {
 	Defined bool    `json:"defined"`
 	Hint    *string `json:"hint,omitempty"`
 	Name    string  `json:"name"`
+	// The variables the workflow requests whose values read this secret variable, when the workflow asks for it only through them.
+	ReadBy []string `json:"readBy,omitempty"`
 }
 
 type ConversationResponse struct {
@@ -4613,6 +4638,8 @@ type CreateKernelBody struct {
 	EnvironmentID *string `json:"environmentId,omitempty"`
 	// Memory ceiling (GB) for the kernel's processes. Workspace targets only; defaults to half the workspace's own limit and may not exceed it.
 	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
+	// Environment modules (Lmod or Environment Modules) loaded before the kernel starts, such as R/4.3.1. Not for workspace targets.
+	Modules []string `json:"modules,omitempty"`
 	// Kernel name. Auto-generated if omitted.
 	Name *string `json:"name,omitempty"`
 	// Python environment the notebook's cells run in. Omit, or pass platform-default, for the platform's own toolkit.
@@ -5123,6 +5150,8 @@ type CreateWorkflowRunInputBody struct {
 	Marketplace *string `json:"marketplace,omitempty"`
 	// Run a repository's workflow.yaml: OWNER/REPO or a github.com URL, or the URL of a project on one of the organization's registered GitLab servers, each with an optional path to a workflow file or the directory holding one, and an optional @REF. Without a path it is the repository root. Read as the caller, treated as third-party code.
 	Repository *string `json:"repository,omitempty"`
+	// Name of the workflow's saved inputs to fill in each value from that inputs gives as ********, the way the API shows a saved one: a password input's, or one under no input the workflow has, which the run then masks as it masks a password. Only with workflow.
+	SavedInputs *string `json:"savedInputs,omitempty"`
 	// Session names
 	SessionNames map[string]string `json:"sessionNames,omitempty"`
 	// User-provided slug
@@ -5144,6 +5173,8 @@ type CreateWorkflowRunOutputBody struct {
 }
 
 type CreateWorkflowSavedInputsInputBody struct {
+	// Name of the saved inputs to keep each value from that inputs gives as ********, the way the API shows a saved one.
+	From *string `json:"from,omitempty"`
 	// Saved input values.
 	Inputs map[string]any `json:"inputs"`
 	// Name for the saved inputs.
@@ -5164,7 +5195,9 @@ type CreatedStorage struct {
 }
 
 type CredentialListingError struct {
-	// What failed.
+	// The failure was on our side; its details are in the billing service's log, not here.
+	Internal *bool `json:"internal,omitempty"`
+	// The cloud provider's error response. Empty for an internal failure.
 	Message string `json:"message"`
 	// Failing slice of the listing: region, availability domain, or service.
 	Scope string `json:"scope"`
@@ -5951,15 +5984,11 @@ type EventsPageBody struct {
 type ExecutedJob struct {
 	Matrix      *ExecutedMatrix `json:"_matrix,omitempty"`
 	CompletedAt *time.Time      `json:"completedAt,omitempty"`
-	// The job's condition: true or false once resolved, or the expression still to evaluate.
-	If *JobCondition `json:"if,omitempty"`
+	// Whether the job's if: lets it run, when that was known as the run was created.
+	If *bool `json:"if,omitempty"`
 	// Jobs this job waits for.
-	Needs []string `json:"needs,omitempty"`
-	// Outputs the job produced, or the expressions it declares until it finishes.
-	Outputs map[string]string `json:"outputs,omitempty"`
-	// Where the job runs, such as remoteHost and remoteUser, as resolved for this run.
-	SSH       map[string]string `json:"ssh,omitempty"`
-	StartedAt *time.Time        `json:"startedAt,omitempty"`
+	Needs     []string   `json:"needs,omitempty"`
+	StartedAt *time.Time `json:"startedAt,omitempty"`
 	// Job status: running, completed, error, canceled, canceling, faulted, skipped or skipped-failed. Empty until the job starts.
 	Status *string        `json:"status,omitempty"`
 	Steps  []ExecutedStep `json:"steps,omitempty"`
@@ -5972,8 +6001,6 @@ type ExecutedMatrix struct {
 	Maxparallel  *int64   `json:"maxparallel,omitempty"`
 	Originaljob  string   `json:"originaljob"`
 	Totalingroup *int64   `json:"totalingroup,omitempty"`
-	// This job's combination of matrix values.
-	Values map[string]any `json:"values,omitempty"`
 }
 
 type ExecutedStep struct {
@@ -5981,11 +6008,9 @@ type ExecutedStep struct {
 	Annotations []Annotation `json:"annotations,omitempty"`
 	CompletedAt *time.Time   `json:"completedAt,omitempty"`
 	// For a cleanup step, the index of the step it cleans up after, or .job for the job's own cleanup.
-	LinkedStep *string           `json:"linkedStep,omitempty"`
-	Name       *string           `json:"name,omitempty"`
-	Outputs    map[string]string `json:"outputs,omitempty"`
-	// The command the step runs.
-	Run       *string    `json:"run,omitempty"`
+	LinkedStep *string `json:"linkedStep,omitempty"`
+	// The step's name, or for a step that runs a command and has none, the first line of the command as the workflow writes it.
+	Name      *string    `json:"name,omitempty"`
 	StartedAt *time.Time `json:"startedAt,omitempty"`
 	// Step status, with the same values as the job's.
 	Status      *string              `json:"status,omitempty"`
@@ -5993,8 +6018,6 @@ type ExecutedStep struct {
 	Summary     *StepSummary         `json:"summary,omitempty"`
 	// The action or workflow the step uses.
 	Uses *string `json:"uses,omitempty"`
-	// Inputs the step passes to what it uses, as resolved for this run.
-	With map[string]any `json:"with,omitempty"`
 }
 
 type ExecutedSubworkflow struct {
@@ -6002,12 +6025,10 @@ type ExecutedSubworkflow struct {
 	// The subworkflow's jobs keyed by name, in the order it declares them.
 	Jobs map[string]ExecutedJob `json:"jobs,omitempty"`
 	// Page for the referenced workflow's source.
-	SourceURL *string `json:"sourceUrl,omitempty"`
-	Status    *string `json:"status,omitempty"`
-	Type      *string `json:"type,omitempty"`
-	// Inputs the subworkflow was run with.
-	Variables    map[string]any `json:"variables,omitempty"`
-	WorkflowName *string        `json:"workflowName,omitempty"`
+	SourceURL    *string `json:"sourceUrl,omitempty"`
+	Status       *string `json:"status,omitempty"`
+	Type         *string `json:"type,omitempty"`
+	WorkflowName *string `json:"workflowName,omitempty"`
 }
 
 type ExistingCluster struct {
@@ -6260,6 +6281,14 @@ type FilesystemRefreshResponse struct {
 	Queued bool `json:"queued"`
 }
 
+type FirewallActivity struct {
+	// Every rule that matched a request since then, the most matched first
+	Rules []FirewallRuleActivity `json:"rules"`
+	// Start of the first hour counted: matches are counted by the hour
+	Since  time.Time `json:"since"`
+	Window string    `json:"window"`
+}
+
 type FirewallBlockedIP struct {
 	// Blocked address or range, in CIDR notation
 	Cidr      string    `json:"cidr"`
@@ -6307,6 +6336,17 @@ type FirewallExclusion struct {
 	Target *string `json:"target,omitempty"`
 }
 
+type FirewallRouteActivity struct {
+	// Requests on the route it matched that the firewall refused
+	Blocked int64 `json:"blocked"`
+	// HTTP method, OTHER for one outside the standard methods, or * with the route *
+	Method string `json:"method"`
+	// Requests on the route it matched that went through
+	Passed int64 `json:"passed"`
+	// Route pattern, such as /api/users/{user}, never the request's path; * for the routes past the 20 a server keeps per hour
+	Route string `json:"route"`
+}
+
 type FirewallRule struct {
 	// deny blocks a matching request; log only reports it
 	Action    string    `json:"action"`
@@ -6334,6 +6374,22 @@ type FirewallRule struct {
 	Transforms []string `json:"transforms"`
 	// Request fields it inspects, such as ARGS:json.name or REQUEST_HEADERS:User-Agent
 	Variables []string `json:"variables"`
+}
+
+type FirewallRuleActivity struct {
+	// Requests it matched that the firewall refused, by this rule or a later one, such as the anomaly score's that a CRS detection rule adds to
+	Blocked  int64     `json:"blocked"`
+	LastSeen time.Time `json:"lastSeen"`
+	// The rule only logs, such as one monitored before it denies: it never refuses a request
+	LogOnly bool `json:"logOnly"`
+	// The rule's message as written, each part the firewall would fill in with request data shown as …
+	Message string `json:"message"`
+	// Requests it matched that went through: the rule only logs, the firewall only detects, or the anomaly score stayed under the threshold
+	Passed int64 `json:"passed"`
+	// The routes it matched most, at most 5
+	Routes []FirewallRouteActivity `json:"routes"`
+	// Rule id, as block logs and evaluations report it
+	RuleID int64 `json:"ruleId"`
 }
 
 type FirewallServer struct {
@@ -6388,7 +6444,9 @@ type FiscalYearUsage struct {
 type FlatError struct {
 	// Cloud service provider
 	Csp string `json:"csp"`
-	// Error message
+	// The failure was on our side, such as a database error; its details are in the billing service's log, not here.
+	Internal *bool `json:"internal,omitempty"`
+	// The cloud provider's error response. Empty for an internal failure.
 	Message string `json:"message"`
 	// Organization
 	Organization string `json:"organization"`
@@ -8973,8 +9031,11 @@ type ImageComplianceItem struct {
 }
 
 type ImageContent struct {
-	Data string `json:"data"`
-	Mime string `json:"mime"`
+	Data         string  `json:"data"`
+	Mime         string  `json:"mime"`
+	OriginalMime *string `json:"originalMime,omitempty"`
+	OriginalSize *int64  `json:"originalSize,omitempty"`
+	Ref          *string `json:"ref,omitempty"`
 }
 
 type ImportResourceBody struct {
@@ -9354,6 +9415,8 @@ type KernelResponse struct {
 	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
 	// Memory ceiling (GB) applied to the kernel's processes.
 	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
+	// Environment modules loaded before the kernel starts.
+	Modules []string `json:"modules,omitempty"`
 	// Kernel name.
 	Name *string `json:"name,omitempty"`
 	// Hostname of the compute node the kernel runs on.
@@ -11622,13 +11685,11 @@ type OrgAiProviderResponse struct {
 type OrgAllocationThreshold struct {
 	// Actions taken when the threshold is crossed.
 	Actions []string `json:"actions"`
-	// Additional email addresses notified when the notify action is set.
-	ExtraRecipients []string `json:"extraRecipients"`
+	// Groups whose members also receive the notify alert, on top of the allocation's own users. Used only with the notify action.
+	NotifyGroups []string `json:"notifyGroups,omitempty"`
 	// When true the threshold is evaluated against estimated (realtime) usage instead of billed usage.
 	Realtime bool `json:"realtime"`
-	// When true and the notify action is set, members of the group that crossed the threshold are notified.
-	SendToGroup bool `json:"sendToGroup"`
-	// The allocation usage percent that trips this threshold. Values above 100 are allowed for groups that overspend their allocation.
+	// The allocation usage percent that trips this threshold. Values above 100 are allowed for allocations that are overspent.
 	Threshold float64 `json:"threshold"`
 }
 
@@ -11646,6 +11707,8 @@ type OrgCodeSettings struct {
 	Announcements []string `json:"announcements,omitempty"`
 	// Disable Claude Code accounts, subscription models, and execution, even when Claude Code is installed on the agent host. Members cannot override an organization restriction.
 	DisableClaudeCode *bool `json:"disableClaudeCode,omitempty"`
+	// Add pw code's Co-Authored-By trailer to the commits it makes and its attribution line to the pull requests it opens. Replaces each member's own includeCoAuthoredBy setting.
+	IncludeCoAuthoredBy *bool `json:"includeCoAuthoredBy,omitempty"`
 }
 
 type OrgConnectionPermissionsOutputBody struct {
@@ -11891,7 +11954,9 @@ type OrphanMuteResponse struct {
 }
 
 type OrphanRemovalSettings struct {
-	// Whether billing also deletes orphaned buckets, only while they are empty.
+	// Whether billing also deletes orphaned Azure Files storage, which destroys whatever its shares still hold.
+	AzureFiles *bool `json:"azureFiles,omitempty"`
+	// Whether billing also deletes orphaned buckets: on AWS and Google Cloud only while empty, and on Azure the storage account with everything it holds.
 	Buckets *bool `json:"buckets,omitempty"`
 	// Whether billing also deletes orphaned persistent disks, which destroys the data on them.
 	Disks *bool `json:"disks,omitempty"`
@@ -11899,6 +11964,8 @@ type OrphanRemovalSettings struct {
 	Enabled *bool `json:"enabled,omitempty"`
 	// Whether billing also deletes orphaned Google Managed Lustre instances, which destroys the data on them.
 	ManagedLustre *bool `json:"managedLustre,omitempty"`
+	// Whether billing also deletes orphaned Azure NetApp Files storage, which destroys whatever its volumes still hold.
+	NetAppFiles *bool `json:"netAppFiles,omitempty"`
 }
 
 type OrphanedInfraItem struct {
@@ -14513,7 +14580,7 @@ type ResourceCredential struct {
 	AccountID *string `json:"accountId,omitempty"`
 	// CloudAccount (or legacy key) name.
 	AccountName *string `json:"accountName,omitempty"`
-	// Last credential fetch error.
+	// The cloud provider's error from the last credential fetch. Empty when the fetch failed on our side, such as in the vault or database; those details are in the billing service's log.
 	CredentialError *string `json:"credentialError,omitempty"`
 	// Last successful credential fetch.
 	CredentialRefreshedAt *time.Time `json:"credentialRefreshedAt,omitempty"`
@@ -14812,7 +14879,9 @@ type RotateSecretInputBody struct {
 }
 
 type RunError struct {
-	// Error message
+	// The failure was on our side, such as a database error; its details are in the billing service's log, not here.
+	Internal *bool `json:"internal,omitempty"`
+	// The cloud provider's error response. Empty for an internal failure.
 	Message string `json:"message"`
 	// Pipeline phase where the error occurred
 	Phase string `json:"phase"`
@@ -15409,38 +15478,40 @@ type SessionSoftware struct {
 }
 
 type SessionState struct {
-	Allocation           *string           `json:"allocation,omitempty"`
-	Attribution          *bool             `json:"attribution,omitempty"`
-	AutoCompactWindow    *int64            `json:"autoCompactWindow,omitempty"`
-	AutoName             *string           `json:"autoName,omitempty"`
-	BackgroundShells     *int64            `json:"backgroundShells,omitempty"`
-	ClaudeAccount        *string           `json:"claudeAccount,omitempty"`
-	EffectiveAllocation  *string           `json:"effectiveAllocation,omitempty"`
-	EffectiveEffort      *string           `json:"effectiveEffort,omitempty"`
-	Effort               *string           `json:"effort,omitempty"`
-	EffortActive         *bool             `json:"effortActive,omitempty"`
-	Goal                 *GoalStatus       `json:"goal,omitempty"`
-	InputTokens          *int64            `json:"inputTokens,omitempty"`
-	Model                string            `json:"model"`
-	ModelNames           map[string]string `json:"modelNames,omitempty"`
-	Name                 *string           `json:"name,omitempty"`
-	OutputTokens         *int64            `json:"outputTokens,omitempty"`
-	PasteInlineMaxBytes  *int64            `json:"pasteInlineMaxBytes,omitempty"`
-	PendingSubagentWork  *bool             `json:"pendingSubagentWork,omitempty"`
-	PermissionMode       *string           `json:"permissionMode,omitempty"`
-	RemoteControl        *bool             `json:"remoteControl,omitempty"`
-	RemotePolicy         RemotePolicy      `json:"remotePolicy"`
-	RemoteTunnel         *RemoteTunnel     `json:"remoteTunnel,omitempty"`
-	RemoteURL            *string           `json:"remoteUrl,omitempty"`
-	SessionRetentionDays *int64            `json:"sessionRetentionDays,omitempty"`
-	SubagentConcurrency  *int64            `json:"subagentConcurrency,omitempty"`
-	SubagentDepth        *int64            `json:"subagentDepth,omitempty"`
-	SubagentModel        *string           `json:"subagentModel,omitempty"`
-	SubagentsDisabled    *bool             `json:"subagentsDisabled,omitempty"`
-	SupportedEfforts     []string          `json:"supportedEfforts,omitempty"`
-	ToolCallingMode      *string           `json:"toolCallingMode,omitempty"`
-	ToolsDisabled        *bool             `json:"toolsDisabled,omitempty"`
-	UsageStatusLine      *string           `json:"usageStatusLine,omitempty"`
+	Allocation           *string                  `json:"allocation,omitempty"`
+	Attribution          *bool                    `json:"attribution,omitempty"`
+	AutoCompactWindow    *int64                   `json:"autoCompactWindow,omitempty"`
+	AutoName             *string                  `json:"autoName,omitempty"`
+	BackgroundShells     *int64                   `json:"backgroundShells,omitempty"`
+	ClaudeAccount        *string                  `json:"claudeAccount,omitempty"`
+	EffectiveAllocation  *string                  `json:"effectiveAllocation,omitempty"`
+	EffectiveEffort      *string                  `json:"effectiveEffort,omitempty"`
+	Effort               *string                  `json:"effort,omitempty"`
+	EffortActive         *bool                    `json:"effortActive,omitempty"`
+	Goal                 *GoalStatus              `json:"goal,omitempty"`
+	InputTokens          *int64                   `json:"inputTokens,omitempty"`
+	Model                string                   `json:"model"`
+	ModelNames           map[string]string        `json:"modelNames,omitempty"`
+	Name                 *string                  `json:"name,omitempty"`
+	OutputTokens         *int64                   `json:"outputTokens,omitempty"`
+	PasteInlineMaxBytes  *int64                   `json:"pasteInlineMaxBytes,omitempty"`
+	PendingSubagentWork  *bool                    `json:"pendingSubagentWork,omitempty"`
+	PermissionMode       *string                  `json:"permissionMode,omitempty"`
+	RemoteControl        *bool                    `json:"remoteControl,omitempty"`
+	RemotePolicy         RemotePolicy             `json:"remotePolicy"`
+	RemoteTunnel         *RemoteTunnel            `json:"remoteTunnel,omitempty"`
+	RemoteURL            *string                  `json:"remoteUrl,omitempty"`
+	SessionRetentionDays *int64                   `json:"sessionRetentionDays,omitempty"`
+	SubagentConcurrency  *int64                   `json:"subagentConcurrency,omitempty"`
+	SubagentDepth        *int64                   `json:"subagentDepth,omitempty"`
+	SubagentModel        *string                  `json:"subagentModel,omitempty"`
+	SubagentUsage        map[string]SubagentUsage `json:"subagentUsage,omitempty"`
+	SubagentsDisabled    *bool                    `json:"subagentsDisabled,omitempty"`
+	SupportedEfforts     []string                 `json:"supportedEfforts,omitempty"`
+	ToolCallingMode      *string                  `json:"toolCallingMode,omitempty"`
+	ToolsDisabled        *bool                    `json:"toolsDisabled,omitempty"`
+	UsageStatusLine      *string                  `json:"usageStatusLine,omitempty"`
+	Worktree             *string                  `json:"worktree,omitempty"`
 }
 
 type SetActiveInputBody struct {
@@ -15940,6 +16011,12 @@ type StringPolicyOutput struct {
 	Name *string `json:"name,omitempty"`
 	// Value of the policy
 	Value *string `json:"value,omitempty"`
+}
+
+type SubagentUsage struct {
+	InputTokens       *int64 `json:"inputTokens,omitempty"`
+	LatestInputTokens *int64 `json:"latestInputTokens,omitempty"`
+	OutputTokens      *int64 `json:"outputTokens,omitempty"`
 }
 
 type SubdomainAvailabilityResponse struct {
@@ -16897,6 +16974,8 @@ type UpdateWorkflowRunInputBody struct {
 }
 
 type UpdateWorkflowSavedInputsInputBody struct {
+	// Name of the saved inputs to keep each value from that inputs gives as ********, the way the API shows a saved one. Without it, each is kept from the saved inputs this updates.
+	From *string `json:"from,omitempty"`
 	// Saved input values.
 	Inputs map[string]any `json:"inputs"`
 	// Name for the saved inputs; pass a different value to rename.
@@ -17582,7 +17661,7 @@ type WorkflowSavedInputs struct {
 	Builtin *bool `json:"builtin,omitempty"`
 	// ID of the saved inputs.
 	ID string `json:"id"`
-	// Input values to load when selected.
+	// Input values to load when selected. A saved value is shown as ******** unless the workflow's inputs take it as a plain value, so passwords, and values of inputs the YAML no longer has, are masked. The list of workflows and the response to a delete leave these out.
 	Inputs map[string]any `json:"inputs,omitempty"`
 	// Name of the saved inputs.
 	Name string `json:"name"`
@@ -18075,47 +18154,6 @@ func (u *StorageDefinition) UnmarshalJSON(data []byte) error {
 		}
 		return nil
 	}
-}
-
-// JobCondition - The job's condition: true or false once resolved, or the expression still to evaluate.
-
-// Variants: bool, string
-type JobCondition struct {
-	Value any
-}
-
-// unionValue hands the decoded variant to the parameter encoders, which write
-// the value a union carries rather than the wrapper carrying it.
-func (u JobCondition) unionValue() any {
-	return u.Value
-}
-
-// MarshalJSON implements json.Marshaler for JobCondition.
-func (u JobCondition) MarshalJSON() ([]byte, error) {
-	return json.Marshal(u.Value)
-}
-
-// UnmarshalJSON implements json.Unmarshaler for JobCondition.
-func (u *JobCondition) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
-	var errors []error
-	var variant0 bool
-	if err := json.Unmarshal(data, &variant0); err == nil {
-		u.Value = variant0
-		return nil
-	} else {
-		errors = append(errors, err)
-	}
-	var variant1 string
-	if err := json.Unmarshal(data, &variant1); err == nil {
-		u.Value = variant1
-		return nil
-	} else {
-		errors = append(errors, err)
-	}
-	return fmt.Errorf("data did not match any variant of JobCondition: %v", errors)
 }
 
 // MarketplaceItemBodyVersionsValue - Per-version settings; the shape matches the item's publish body for its subtype, plus a subtype discriminator.

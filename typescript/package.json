@@ -1,6 +1,6 @@
 {
   "name": "@parallelworks/client",
-  "version": "7.134.0",
+  "version": "7.136.0",
   "description": "Official TypeScript client for Parallel Works ACTIVATE API",
   "type": "module",
   "exports": {
@@ -19,7 +19,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@parallelworks/problem": "^0.6.0",
+    "@parallelworks/problem": "^0.6.1",
     "openapi-fetch": "^0.17.0"
   },
   "peerDependencies": {
