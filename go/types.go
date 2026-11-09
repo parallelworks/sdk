@@ -135,7 +135,7 @@ type AiProviderUsageLimit struct {
 }
 
 type APIKeyResponse struct {
-	// Budget allocation name (AI keys only).
+	// Budget allocation that AI usage through the key is billed to.
 	Allocation *string `json:"allocation,omitempty"`
 	// The timestamp the API key was created.
 	Created time.Time `json:"created"`
@@ -149,9 +149,11 @@ type APIKeyResponse struct {
 	KeyHint *string `json:"keyHint,omitempty"`
 	// When the key was last used.
 	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+	// What the key can do. platform is everything you can do, including scopes added later; ai:inference is only the OpenAI-compatible AI endpoints.
+	Scopes []string `json:"scopes"`
 	// The display name of the API key.
 	Title string `json:"title"`
-	// The key type: platform or ai.
+	// Deprecated: read scopes. platform for a key with the platform scope, ai for one limited to ai:inference.
 	Type string `json:"type"`
 }
 
@@ -819,36 +821,49 @@ type AgentPlanResult struct {
 	PlanPath *string `json:"planPath,omitempty"`
 }
 
+type AgentPullRequest struct {
+	// Absent when the machine could not read the pull request from GitHub.
+	State *string `json:"state,omitempty"`
+	URL   string  `json:"url"`
+}
+
+type AgentPullRequests struct {
+	// The pull requests the session opened, oldest first.
+	PullRequests []AgentPullRequest `json:"pullRequests"`
+}
+
 type AgentRenameBody struct {
 	// What to call the session in the list.
 	Name string `json:"name"`
 }
 
 type AgentSession struct {
-	Allocation     *string           `json:"allocation,omitempty"`
-	Approvals      []ApprovalRequest `json:"approvals,omitempty"`
-	ArchivedAt     *time.Time        `json:"archivedAt,omitempty"`
-	AutoName       *string           `json:"autoName,omitempty"`
-	Branch         *string           `json:"branch,omitempty"`
-	CreatedAt      time.Time         `json:"createdAt"`
-	Effort         *string           `json:"effort,omitempty"`
-	ID             string            `json:"id"`
-	InputTokens    *int64            `json:"inputTokens,omitempty"`
-	LastError      *string           `json:"lastError,omitempty"`
-	LiveHost       *string           `json:"liveHost,omitempty"`
-	MachineID      string            `json:"machineId"`
-	Messages       int64             `json:"messages"`
-	Model          string            `json:"model"`
-	Name           *string           `json:"name,omitempty"`
-	OutputTokens   *int64            `json:"outputTokens,omitempty"`
-	PermissionMode *string           `json:"permissionMode,omitempty"`
-	PinnedAt       *time.Time        `json:"pinnedAt,omitempty"`
-	Preview        string            `json:"preview"`
-	RemoteControl  *bool             `json:"remoteControl,omitempty"`
-	Status         string            `json:"status"`
-	TurnStartedAt  *time.Time        `json:"turnStartedAt,omitempty"`
-	UpdatedAt      time.Time         `json:"updatedAt"`
-	Workspace      string            `json:"workspace"`
+	Allocation        *string           `json:"allocation,omitempty"`
+	Approvals         []ApprovalRequest `json:"approvals,omitempty"`
+	ArchivedAt        *time.Time        `json:"archivedAt,omitempty"`
+	AutoName          *string           `json:"autoName,omitempty"`
+	Branch            *string           `json:"branch,omitempty"`
+	CreatedAt         time.Time         `json:"createdAt"`
+	Effort            *string           `json:"effort,omitempty"`
+	ID                string            `json:"id"`
+	InputTokens       *int64            `json:"inputTokens,omitempty"`
+	LastError         *string           `json:"lastError,omitempty"`
+	LiveHost          *string           `json:"liveHost,omitempty"`
+	MachineID         string            `json:"machineId"`
+	Messages          int64             `json:"messages"`
+	Model             string            `json:"model"`
+	Name              *string           `json:"name,omitempty"`
+	OutputTokens      *int64            `json:"outputTokens,omitempty"`
+	PermissionMode    *string           `json:"permissionMode,omitempty"`
+	PinnedAt          *time.Time        `json:"pinnedAt,omitempty"`
+	Preview           string            `json:"preview"`
+	PullRequestStates map[string]string `json:"pullRequestStates,omitempty"`
+	PullRequests      []string          `json:"pullRequests,omitempty"`
+	RemoteControl     *bool             `json:"remoteControl,omitempty"`
+	Status            string            `json:"status"`
+	TurnStartedAt     *time.Time        `json:"turnStartedAt,omitempty"`
+	UpdatedAt         time.Time         `json:"updatedAt"`
+	Workspace         string            `json:"workspace"`
 }
 
 type AgentSessionCleared struct {
@@ -857,35 +872,38 @@ type AgentSessionCleared struct {
 }
 
 type AgentSessionDetail struct {
-	Allocation         *string           `json:"allocation,omitempty"`
-	Approvals          []ApprovalRequest `json:"approvals,omitempty"`
-	ArchivedAt         *time.Time        `json:"archivedAt,omitempty"`
-	AutoName           *string           `json:"autoName,omitempty"`
-	Branch             *string           `json:"branch,omitempty"`
-	ClaudeAccount      *string           `json:"claudeAccount,omitempty"`
-	CreatedAt          time.Time         `json:"createdAt"`
-	Effort             *string           `json:"effort,omitempty"`
-	History            []HistoryItem     `json:"history"`
-	ID                 string            `json:"id"`
-	InputTokens        *int64            `json:"inputTokens,omitempty"`
-	LastError          *string           `json:"lastError,omitempty"`
-	LastSeq            *int64            `json:"lastSeq,omitempty"`
-	LiveHost           *string           `json:"liveHost,omitempty"`
-	MachineID          string            `json:"machineId"`
-	Messages           int64             `json:"messages"`
-	Model              string            `json:"model"`
-	Name               *string           `json:"name,omitempty"`
-	OutputTokens       *int64            `json:"outputTokens,omitempty"`
-	PermissionMode     *string           `json:"permissionMode,omitempty"`
-	PinnedAt           *time.Time        `json:"pinnedAt,omitempty"`
-	Preview            string            `json:"preview"`
-	RemoteControl      *bool             `json:"remoteControl,omitempty"`
-	Status             string            `json:"status"`
-	TurnID             *string           `json:"turnId,omitempty"`
-	TurnStartedAt      *time.Time        `json:"turnStartedAt,omitempty"`
-	UpdatedAt          time.Time         `json:"updatedAt"`
-	Workspace          string            `json:"workspace"`
-	WorkspaceUntrusted *bool             `json:"workspaceUntrusted,omitempty"`
+	Allocation           *string           `json:"allocation,omitempty"`
+	Approvals            []ApprovalRequest `json:"approvals,omitempty"`
+	ArchivedAt           *time.Time        `json:"archivedAt,omitempty"`
+	AutoName             *string           `json:"autoName,omitempty"`
+	Branch               *string           `json:"branch,omitempty"`
+	ClaudeAccount        *string           `json:"claudeAccount,omitempty"`
+	CreatedAt            time.Time         `json:"createdAt"`
+	Effort               *string           `json:"effort,omitempty"`
+	History              []HistoryItem     `json:"history"`
+	ID                   string            `json:"id"`
+	InputTokens          *int64            `json:"inputTokens,omitempty"`
+	LastError            *string           `json:"lastError,omitempty"`
+	LastSeq              *int64            `json:"lastSeq,omitempty"`
+	LiveHost             *string           `json:"liveHost,omitempty"`
+	MachineID            string            `json:"machineId"`
+	Messages             int64             `json:"messages"`
+	Model                string            `json:"model"`
+	Name                 *string           `json:"name,omitempty"`
+	OutputTokens         *int64            `json:"outputTokens,omitempty"`
+	PermissionMode       *string           `json:"permissionMode,omitempty"`
+	PinnedAt             *time.Time        `json:"pinnedAt,omitempty"`
+	Preview              string            `json:"preview"`
+	PullRequestStates    map[string]string `json:"pullRequestStates,omitempty"`
+	PullRequests         []string          `json:"pullRequests,omitempty"`
+	RemoteControl        *bool             `json:"remoteControl,omitempty"`
+	Status               string            `json:"status"`
+	TurnID               *string           `json:"turnId,omitempty"`
+	TurnStartedAt        *time.Time        `json:"turnStartedAt,omitempty"`
+	UpdatedAt            time.Time         `json:"updatedAt"`
+	WaitingForUsageLimit *bool             `json:"waitingForUsageLimit,omitempty"`
+	Workspace            string            `json:"workspace"`
+	WorkspaceUntrusted   *bool             `json:"workspaceUntrusted,omitempty"`
 }
 
 type AgentSessionForked struct {
@@ -4199,20 +4217,22 @@ type CreateAiProviderBody struct {
 }
 
 type CreateAPIKeyInputBody struct {
-	// Budget allocation name (required for AI keys)
+	// Budget allocation name that AI usage through the key is billed to. Optional: without one, a request to an organization's AI provider names its allocation in the X-Allocation header.
 	Allocation *string `json:"allocation,omitempty"`
 	// Days before the key expires, at most the organization's maximum API key lifetime, which is 730 days when no policy sets it. Empty or 0 creates a key that does not expire, which only an Unlimited policy allows. Not allowed with expiresIn.
 	Duration *string `json:"duration,omitempty"`
 	// Seconds before the key expires, as in OAuth 2.0 expires_in, for lifetimes that are not whole days. At least 900 (15 minutes) and at most the organization's maximum API key lifetime. Not allowed with duration.
 	ExpiresIn *int64 `json:"expiresIn,omitempty"`
+	// What the key can do (RFC 6749 scopes). platform is everything you can do, including scopes added later; ai:inference is only the OpenAI-compatible AI endpoints. Defaults to platform. Not allowed with type.
+	Scopes []string `json:"scopes,omitempty"`
 	// Display name for the API key, unique among your keys. When omitted, the key is named token-YYYYMMDD-HHMMSS-xxxx, the time in UTC with a random suffix.
 	Title *string `json:"title,omitempty"`
-	// Key type
+	// Deprecated: set scopes. platform is the platform scope and ai is ai:inference. Not allowed with scopes.
 	Type *string `json:"type,omitempty"`
 }
 
 type CreateAPIKeyOutputBody struct {
-	// Budget allocation name (AI keys only).
+	// Budget allocation that AI usage through the key is billed to.
 	Allocation *string `json:"allocation,omitempty"`
 	// The timestamp the API key was created.
 	Created time.Time `json:"created"`
@@ -4228,9 +4248,11 @@ type CreateAPIKeyOutputBody struct {
 	KeyHint *string `json:"keyHint,omitempty"`
 	// When the key was last used.
 	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+	// What the key can do. platform is everything you can do, including scopes added later; ai:inference is only the OpenAI-compatible AI endpoints.
+	Scopes []string `json:"scopes"`
 	// The display name of the API key.
 	Title string `json:"title"`
-	// The key type: platform or ai.
+	// Deprecated: read scopes. platform for a key with the platform scope, ai for one limited to ai:inference.
 	Type string `json:"type"`
 }
 
@@ -8960,6 +8982,7 @@ type HistoryItem struct {
 	ToolArgs *string        `json:"toolArgs,omitempty"`
 	ToolName *string        `json:"toolName,omitempty"`
 	TurnEnd  *TurnEnd       `json:"turnEnd,omitempty"`
+	TurnID   *string        `json:"turnId,omitempty"`
 }
 
 type HostForwardSetting struct {
@@ -9661,7 +9684,7 @@ type KubernetesWorkloadResponse struct {
 	Pods string `json:"pods"`
 	// Number of restarts
 	Restarts *int64 `json:"restarts,omitempty"`
-	// Status of the workload
+	// Status of the workload. Ok means every replica of a deployment, statefulset or daemonset is ready; pods and jobs report their phase
 	Status string `json:"status"`
 	// Type of workload
 	Type string `json:"type"`
@@ -11956,7 +11979,7 @@ type OrphanMuteResponse struct {
 type OrphanRemovalSettings struct {
 	// Whether billing also deletes orphaned Azure Files storage, which destroys whatever its shares still hold.
 	AzureFiles *bool `json:"azureFiles,omitempty"`
-	// Whether billing also deletes orphaned buckets: on AWS and Google Cloud only while empty, and on Azure the storage account with everything it holds.
+	// Whether billing also deletes orphaned buckets with everything they hold (on Azure, the storage account). On AWS and Google Cloud, a bucket where a hold, retention or lock keeps some data has everything else deleted and is left with an alert; on Azure such a storage account is left untouched, with an alert.
 	Buckets *bool `json:"buckets,omitempty"`
 	// Whether billing also deletes orphaned persistent disks, which destroys the data on them.
 	Disks *bool `json:"disks,omitempty"`

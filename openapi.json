@@ -138,7 +138,7 @@
         "additionalProperties": false,
         "properties": {
           "allocation": {
-            "description": "Budget allocation name (AI keys only).",
+            "description": "Budget allocation that AI usage through the key is billed to.",
             "type": "string"
           },
           "created": {
@@ -168,12 +168,23 @@
             "format": "date-time",
             "type": "string"
           },
+          "scopes": {
+            "description": "What the key can do. platform is everything you can do, including scopes added later; ai:inference is only the OpenAI-compatible AI endpoints.",
+            "items": {
+              "enum": [
+                "platform",
+                "ai:inference"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
           "title": {
             "description": "The display name of the API key.",
             "type": "string"
           },
           "type": {
-            "description": "The key type: platform or ai.",
+            "description": "Deprecated: read scopes. platform for a key with the platform scope, ai for one limited to ai:inference.",
             "enum": [
               "platform",
               "ai"
@@ -185,6 +196,7 @@
           "id",
           "title",
           "type",
+          "scopes",
           "created"
         ],
         "type": "object"
@@ -2194,6 +2206,47 @@
         ],
         "type": "object"
       },
+      "AgentPullRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "description": "Absent when the machine could not read the pull request from GitHub.",
+            "enum": [
+              "open",
+              "draft",
+              "merged",
+              "closed"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "type": "object"
+      },
+      "AgentPullRequests": {
+        "additionalProperties": false,
+        "properties": {
+          "pullRequests": {
+            "description": "The pull requests the session opened, oldest first.",
+            "items": {
+              "$ref": "#/components/schemas/AgentPullRequest"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "pullRequests"
+        ],
+        "type": "object"
+      },
       "AgentRenameBody": {
         "additionalProperties": false,
         "properties": {
@@ -2280,6 +2333,21 @@
           },
           "preview": {
             "type": "string"
+          },
+          "pullRequestStates": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "pullRequests": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "remoteControl": {
             "type": "boolean"
@@ -2419,6 +2487,21 @@
           "preview": {
             "type": "string"
           },
+          "pullRequestStates": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "pullRequests": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "remoteControl": {
             "type": "boolean"
           },
@@ -2441,6 +2524,9 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "waitingForUsageLimit": {
+            "type": "boolean"
           },
           "workspace": {
             "type": "string"
@@ -12895,7 +12981,7 @@
         "additionalProperties": false,
         "properties": {
           "allocation": {
-            "description": "Budget allocation name (required for AI keys)",
+            "description": "Budget allocation name that AI usage through the key is billed to. Optional: without one, a request to an organization's AI provider names its allocation in the X-Allocation header.",
             "type": "string"
           },
           "duration": {
@@ -12912,14 +12998,27 @@
             "minimum": 900,
             "type": "integer"
           },
+          "scopes": {
+            "description": "What the key can do (RFC 6749 scopes). platform is everything you can do, including scopes added later; ai:inference is only the OpenAI-compatible AI endpoints. Defaults to platform. Not allowed with type.",
+            "items": {
+              "enum": [
+                "platform",
+                "ai:inference"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "title": {
             "description": "Display name for the API key, unique among your keys. When omitted, the key is named token-YYYYMMDD-HHMMSS-xxxx, the time in UTC with a random suffix.",
             "minLength": 1,
             "type": "string"
           },
           "type": {
-            "default": "platform",
-            "description": "Key type",
+            "description": "Deprecated: set scopes. platform is the platform scope and ai is ai:inference. Not allowed with scopes.",
             "enum": [
               "platform",
               "ai"
@@ -12933,7 +13032,7 @@
         "additionalProperties": false,
         "properties": {
           "allocation": {
-            "description": "Budget allocation name (AI keys only).",
+            "description": "Budget allocation that AI usage through the key is billed to.",
             "type": "string"
           },
           "created": {
@@ -12967,12 +13066,23 @@
             "format": "date-time",
             "type": "string"
           },
+          "scopes": {
+            "description": "What the key can do. platform is everything you can do, including scopes added later; ai:inference is only the OpenAI-compatible AI endpoints.",
+            "items": {
+              "enum": [
+                "platform",
+                "ai:inference"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
           "title": {
             "description": "The display name of the API key.",
             "type": "string"
           },
           "type": {
-            "description": "The key type: platform or ai.",
+            "description": "Deprecated: read scopes. platform for a key with the platform scope, ai for one limited to ai:inference.",
             "enum": [
               "platform",
               "ai"
@@ -12985,6 +13095,7 @@
           "id",
           "title",
           "type",
+          "scopes",
           "created"
         ],
         "type": "object"
@@ -26089,6 +26200,7 @@
               "tool_call",
               "tool_result",
               "notice",
+              "error",
               "plan_view",
               "goal_view",
               "goal_progress",
@@ -26121,6 +26233,9 @@
           },
           "turnEnd": {
             "$ref": "#/components/schemas/TurnEnd"
+          },
+          "turnId": {
+            "type": "string"
           }
         },
         "required": [
@@ -28499,8 +28614,9 @@
             "type": "integer"
           },
           "status": {
-            "description": "Status of the workload",
+            "description": "Status of the workload. Ok means every replica of a deployment, statefulset or daemonset is ready; pods and jobs report their phase",
             "enum": [
+              "Ok",
               "Running",
               "Pending",
               "Failed",
@@ -36222,7 +36338,7 @@
             "type": "boolean"
           },
           "buckets": {
-            "description": "Whether billing also deletes orphaned buckets: on AWS and Google Cloud only while empty, and on Azure the storage account with everything it holds.",
+            "description": "Whether billing also deletes orphaned buckets with everything they hold (on Azure, the storage account). On AWS and Google Cloud, a bucket where a hold, retention or lock keeps some data has everything else deleted and is left with an alert; on Azure such a storage account is left untouched, with an alert.",
             "type": "boolean"
           },
           "disks": {
@@ -58815,46 +58931,6 @@
       }
     },
     "/api/admin/indexes": {
-      "delete": {
-        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nDrops a single predefined MongoDB index",
-        "operationId": "delete-predefined-index",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ModifyIndexBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteIndexBody"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Delete a predefined index",
-        "tags": [
-          "Indexes"
-        ]
-      },
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns every predefined MongoDB index and whether it currently exists",
         "operationId": "get-predefined-index-status",
@@ -62258,6 +62334,100 @@
         "x-internal": true
       }
     },
+    "/api/agents/machines/{machine}/sessions/{id}/archive": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nClears the session's archived mark, so it takes messages again.",
+        "operationId": "restore-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Restore an archived pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nShuts the session down and marks it archived, keeping its transcript: nothing runs in it, its schedules included, and it refuses messages until it is restored. Refused while another host holds it live.",
+        "operationId": "archive-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Archive a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/agents/machines/{machine}/sessions/{id}/claude-code/accounts": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude Code accounts on a session's machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
@@ -63107,6 +63277,100 @@
         "x-internal": true
       }
     },
+    "/api/agents/machines/{machine}/sessions/{id}/pin": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nClears the session's pinned mark.",
+        "operationId": "unpin-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Unpin a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nMarks the session pinned, which lists it ahead of the others in its group here and in pw agents.",
+        "operationId": "pin-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Pin a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
     "/api/agents/machines/{machine}/sessions/{id}/plan": {
       "post": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /plan and answers with what the caller owes next: prose to show, the session's plan, a request to send as a turn, a plan file only the terminal can open, or nothing.",
@@ -63166,6 +63430,61 @@
           }
         },
         "summary": "Run /plan in a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/pull-requests": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns each pull request the session opened and whether it is open, merged, or closed, as the machine's own GitHub login reads it. A state is absent when the machine could not read it.",
+        "operationId": "get-agent-session-pull-requests",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPullRequests"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get the state of a pw code session's pull requests",
         "tags": [
           "Agents"
         ],
@@ -63413,6 +63732,54 @@
           }
         },
         "summary": "Run a ! shell command in a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/agents/machines/{machine}/sessions/{id}/stop": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStops the running turn and pauses the session's goal, if it has one, so no further turn starts on its own. Background subagents keep running. Like interrupt, it is not held to the remote permission ceiling. A session with nothing running answers as stopped.",
+        "operationId": "stop-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Stop a pw code session's work",
         "tags": [
           "Agents"
         ],

@@ -2325,24 +2325,6 @@ func (c *Client) UpdatePredefinedIndex(ctx context.Context, body ModifyIndexBody
 	return &result, nil
 }
 
-// DeletePredefinedIndex - Delete a predefined index
-//
-// > This is a system-level route, so the response will be independent of the currently authenticated user.
-//
-// > This is a platform-admin only route.
-//
-// Drops a single predefined MongoDB index
-func (c *Client) DeletePredefinedIndex(ctx context.Context, body ModifyIndexBody) (*DeleteIndexBody, error) {
-
-	path := "/api/admin/indexes"
-
-	var result DeleteIndexBody
-	if err := c.do(ctx, "DELETE", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
 // CreateMissingPredefinedIndexes - Create all missing predefined indexes
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -3814,6 +3796,40 @@ func (c *Client) AnswerAgentSessionApproval(ctx context.Context, machine string,
 	return nil
 }
 
+// ArchiveAgentSession - Archive a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Shuts the session down and marks it archived, keeping its transcript: nothing runs in it, its schedules included, and it refuses messages until it is restored. Refused while another host holds it live.
+func (c *Client) ArchiveAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/archive"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// RestoreAgentSession - Restore an archived pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Clears the session's archived mark, so it takes messages again.
+func (c *Client) RestoreAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/archive"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetAgentSessionClaudeAccountsParams contains the parameters for the GetAgentSessionClaudeAccounts operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetAgentSessionClaudeAccountsParams struct {
@@ -4092,6 +4108,40 @@ func (c *Client) GetAgentSessionPalette(ctx context.Context, machine string, id 
 	return &result, nil
 }
 
+// PinAgentSession - Pin a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Marks the session pinned, which lists it ahead of the others in its group here and in pw agents.
+func (c *Client) PinAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/pin"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UnpinAgentSession - Unpin a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Clears the session's pinned mark.
+func (c *Client) UnpinAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/pin"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // RunAgentSessionPlan - Run /plan in a pw code session
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -4105,6 +4155,24 @@ func (c *Client) RunAgentSessionPlan(ctx context.Context, machine string, id str
 
 	var result AgentPlanResult
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentSessionPullRequests - Get the state of a pw code session's pull requests
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns each pull request the session opened and whether it is open, merged, or closed, as the machine's own GitHub login reads it. A state is absent when the machine could not read it.
+func (c *Client) GetAgentSessionPullRequests(ctx context.Context, machine string, id string) (*AgentPullRequests, error) {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/pull-requests"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentPullRequests
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -4179,6 +4247,23 @@ func (c *Client) RunAgentSessionShell(ctx context.Context, machine string, id st
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
+}
+
+// StopAgentSession - Stop a pw code session's work
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Stops the running turn and pauses the session's goal, if it has one, so no further turn starts on its own. Background subagents keep running. Like interrupt, it is not held to the remote permission ceiling. A session with nothing running answers as stopped.
+func (c *Client) StopAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/agents/machines/{machine}/sessions/{id}/stop"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
 }
 
 // UploadAgentSessionPaste - Save a large paste with a pw code session
