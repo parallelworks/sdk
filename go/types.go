@@ -15824,6 +15824,8 @@ type StorageClusterMount struct {
 	Name string `json:"name"`
 	// Whether the cluster is provisioned.
 	On bool `json:"on"`
+	// Whether it is a cluster or an instance.
+	Type string `json:"type"`
 	// Username of the cluster's owner.
 	User string `json:"user"`
 }
@@ -16090,9 +16092,15 @@ type TagRecommendationsBody struct {
 }
 
 type TandemNotificationSettings struct {
-	Assigned          NotificationChannelSettings `json:"assigned"`
-	Commented         NotificationChannelSettings `json:"commented"`
-	DecisionRequested NotificationChannelSettings `json:"decision_requested"`
+	Assigned          NotificationChannelSettings  `json:"assigned"`
+	Commented         NotificationChannelSettings  `json:"commented"`
+	DecisionRequested NotificationChannelSettings  `json:"decision_requested"`
+	Mentioned         *NotificationChannelSettings `json:"mentioned,omitempty"`
+	Reminder          *NotificationChannelSettings `json:"reminder,omitempty"`
+	RunFinished       *NotificationChannelSettings `json:"run_finished,omitempty"`
+	RunStopped        *NotificationChannelSettings `json:"run_stopped,omitempty"`
+	StatusChanged     *NotificationChannelSettings `json:"status_changed,omitempty"`
+	UpdatePosted      *NotificationChannelSettings `json:"update_posted,omitempty"`
 }
 
 type Theme struct {

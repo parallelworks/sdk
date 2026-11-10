@@ -17843,6 +17843,63 @@ func (c *Client) DeleteInstance(ctx context.Context, organization string, user s
 	return nil
 }
 
+// GetInstanceAttachedStorages - Get Instance Attached Storages
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Returns the filesystems mounted on an instance as a discriminated union of platform storage resources and custom NFS exports.
+func (c *Client) GetInstanceAttachedStorages(ctx context.Context, organization string, user string, instanceName string) (*[]AttachedStorage, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/instances/{instanceName}/attached-storages"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "instanceName", "simple", false, instanceName)
+
+	var result []AttachedStorage
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// AttachInstanceStorage - Attach Instance Storage
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Mounts one filesystem on an instance, leaving the rest untouched. Mounting a filesystem that is already mounted at the same path succeeds without changing anything.
+func (c *Client) AttachInstanceStorage(ctx context.Context, organization string, user string, instanceName string, body AttachedStorageWrite) (*[]AttachedStorage, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/instances/{instanceName}/attached-storages"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "instanceName", "simple", false, instanceName)
+
+	var result []AttachedStorage
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateInstanceAttachedStorages - Update Instance Attached Storages
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Replaces the filesystems mounted on an instance. Bucket mounts are forced read-only when the caller's or owner's bucket access is read-only.
+func (c *Client) UpdateInstanceAttachedStorages(ctx context.Context, organization string, user string, instanceName string, body []AttachedStorageWrite) (*[]AttachedStorage, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/instances/{instanceName}/attached-storages"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "instanceName", "simple", false, instanceName)
+
+	var result []AttachedStorage
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListInstanceKernels - List notebook kernels on an instance
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.

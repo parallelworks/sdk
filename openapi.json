@@ -48231,6 +48231,14 @@
             "description": "Whether the cluster is provisioned.",
             "type": "boolean"
           },
+          "type": {
+            "description": "Whether it is a cluster or an instance.",
+            "enum": [
+              "cluster",
+              "instance"
+            ],
+            "type": "string"
+          },
           "user": {
             "description": "Username of the cluster's owner.",
             "type": "string"
@@ -48239,7 +48247,8 @@
         "required": [
           "name",
           "user",
-          "on"
+          "on",
+          "type"
         ],
         "type": "object"
       },
@@ -49142,6 +49151,30 @@
           "decision_requested": {
             "$ref": "#/components/schemas/NotificationChannelSettings",
             "description": "Settings for an agent asking you a decision."
+          },
+          "mentioned": {
+            "$ref": "#/components/schemas/NotificationChannelSettings",
+            "description": "Settings for someone mentioning you."
+          },
+          "reminder": {
+            "$ref": "#/components/schemas/NotificationChannelSettings",
+            "description": "Settings for reminders you set in docs."
+          },
+          "run_finished": {
+            "$ref": "#/components/schemas/NotificationChannelSettings",
+            "description": "Settings for an agent you assigned finishing its work."
+          },
+          "run_stopped": {
+            "$ref": "#/components/schemas/NotificationChannelSettings",
+            "description": "Settings for an agent you assigned stopping before it finished."
+          },
+          "status_changed": {
+            "$ref": "#/components/schemas/NotificationChannelSettings",
+            "description": "Settings for someone moving an issue assigned to you to another status."
+          },
+          "update_posted": {
+            "$ref": "#/components/schemas/NotificationChannelSettings",
+            "description": "Settings for updates on projects you follow."
           }
         },
         "required": [
@@ -103515,6 +103548,336 @@
           }
         },
         "summary": "Get Instance",
+        "tags": [
+          "Instances"
+        ]
+      }
+    },
+    "/api/organizations/{organization}/users/{user}/instances/{instanceName}/attached-storages": {
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the filesystems mounted on an instance as a discriminated union of platform storage resources and custom NFS exports.",
+        "operationId": "get-instance-attached-storages",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The instance name",
+            "in": "path",
+            "name": "instanceName",
+            "required": true,
+            "schema": {
+              "description": "The instance name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "description": "A filesystem mounted on the cluster; the shape is selected by the kind discriminator.",
+                    "discriminator": {
+                      "mapping": {
+                        "nfs": "#/components/schemas/NfsAttachedStorage",
+                        "storage": "#/components/schemas/PlatformAttachedStorage"
+                      },
+                      "propertyName": "kind"
+                    },
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/PlatformAttachedStorage"
+                      },
+                      {
+                        "$ref": "#/components/schemas/NfsAttachedStorage"
+                      }
+                    ],
+                    "title": "AttachedStorage"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Instance Attached Storages",
+        "tags": [
+          "Instances"
+        ]
+      },
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nMounts one filesystem on an instance, leaving the rest untouched. Mounting a filesystem that is already mounted at the same path succeeds without changing anything.",
+        "operationId": "attach-instance-storage",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The instance name",
+            "in": "path",
+            "name": "instanceName",
+            "required": true,
+            "schema": {
+              "description": "The instance name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "A filesystem to mount on the cluster; the shape is selected by the kind discriminator.",
+                "discriminator": {
+                  "mapping": {
+                    "nfs": "#/components/schemas/PutNfsAttachedStorage",
+                    "storage": "#/components/schemas/PutPlatformAttachedStorage"
+                  },
+                  "propertyName": "kind"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/PutPlatformAttachedStorage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PutNfsAttachedStorage"
+                  }
+                ],
+                "title": "AttachedStorageWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "description": "A filesystem mounted on the cluster; the shape is selected by the kind discriminator.",
+                    "discriminator": {
+                      "mapping": {
+                        "nfs": "#/components/schemas/NfsAttachedStorage",
+                        "storage": "#/components/schemas/PlatformAttachedStorage"
+                      },
+                      "propertyName": "kind"
+                    },
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/PlatformAttachedStorage"
+                      },
+                      {
+                        "$ref": "#/components/schemas/NfsAttachedStorage"
+                      }
+                    ],
+                    "title": "AttachedStorage"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Attach Instance Storage",
+        "tags": [
+          "Instances"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReplaces the filesystems mounted on an instance. Bucket mounts are forced read-only when the caller's or owner's bucket access is read-only.",
+        "operationId": "update-instance-attached-storages",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The instance name",
+            "in": "path",
+            "name": "instanceName",
+            "required": true,
+            "schema": {
+              "description": "The instance name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "description": "A filesystem to mount on the cluster; the shape is selected by the kind discriminator.",
+                  "discriminator": {
+                    "mapping": {
+                      "nfs": "#/components/schemas/PutNfsAttachedStorage",
+                      "storage": "#/components/schemas/PutPlatformAttachedStorage"
+                    },
+                    "propertyName": "kind"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PutPlatformAttachedStorage"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PutNfsAttachedStorage"
+                    }
+                  ],
+                  "title": "AttachedStorageWrite"
+                },
+                "type": [
+                  "array",
+                  "null"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "description": "A filesystem mounted on the cluster; the shape is selected by the kind discriminator.",
+                    "discriminator": {
+                      "mapping": {
+                        "nfs": "#/components/schemas/NfsAttachedStorage",
+                        "storage": "#/components/schemas/PlatformAttachedStorage"
+                      },
+                      "propertyName": "kind"
+                    },
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/PlatformAttachedStorage"
+                      },
+                      {
+                        "$ref": "#/components/schemas/NfsAttachedStorage"
+                      }
+                    ],
+                    "title": "AttachedStorage"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update Instance Attached Storages",
         "tags": [
           "Instances"
         ]
