@@ -3523,783 +3523,6 @@ func (c *Client) RegisterNode(ctx context.Context, body RegisterNodeByTokenInput
 	return &result, nil
 }
 
-// GetAgentMachineClaudeAccountsParams contains the parameters for the GetAgentMachineClaudeAccounts operation.
-// Required parameters are value fields; optional parameters are pointers.
-type GetAgentMachineClaudeAccountsParams struct {
-	Account   *string `json:"account,omitempty"`
-	Refresh   *bool   `json:"refresh,omitempty"`
-	NamesOnly *bool   `json:"namesOnly,omitempty"`
-}
-
-// GetAgentMachineClaudeAccounts - List Claude Code accounts on a machine
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// List Claude Code accounts on a machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.
-func (c *Client) GetAgentMachineClaudeAccounts(ctx context.Context, machine string, opts ...GetAgentMachineClaudeAccountsParams) (*[]AgentClaudeAccount, error) {
-
-	path := "/api/agents/machines/{machine}/claude-code/accounts"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	var params GetAgentMachineClaudeAccountsParams
-	if len(opts) > 0 {
-		params = opts[0]
-	}
-	queryValues := url.Values{}
-	addQueryParam(queryValues, "account", "form", false, params.Account)
-
-	addQueryParam(queryValues, "refresh", "form", false, params.Refresh)
-
-	addQueryParam(queryValues, "namesOnly", "form", false, params.NamesOnly)
-
-	if len(queryValues) > 0 {
-		path += "?" + encodeQuery(queryValues)
-	}
-
-	var result []AgentClaudeAccount
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// DeleteAgentMachineClaudeAccount - Remove a Claude Code account from a machine
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Remove a Claude Code account from a machine. Signs the account out with the official Claude Code CLI and deletes its profile on the machine. The default account and an account a session uses cannot be removed. The daemon enforces its remote start policy.
-func (c *Client) DeleteAgentMachineClaudeAccount(ctx context.Context, machine string, name string) error {
-
-	path := "/api/agents/machines/{machine}/claude-code/accounts/{name}"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "name", "simple", false, name)
-
-	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// StartAgentClaudeLogin - Start Claude Code sign-in
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Start Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.
-func (c *Client) StartAgentClaudeLogin(ctx context.Context, machine string, body AgentClaudeLoginRequest) (*AgentClaudeLoginEvent, error) {
-
-	path := "/api/agents/machines/{machine}/claude-code/logins"
-	path = pathReplace(path, "machine", "simple", false, machine)
-
-	var result AgentClaudeLoginEvent
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetAgentClaudeLoginParams contains the parameters for the GetAgentClaudeLogin operation.
-// Required parameters are value fields; optional parameters are pointers.
-type GetAgentClaudeLoginParams struct {
-	After  *int64  `json:"after,omitempty"`
-	Status *string `json:"status,omitempty"`
-	Wait   *bool   `json:"wait,omitempty"`
-}
-
-// GetAgentClaudeLogin - Read Claude Code sign-in output
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Read Claude Code sign-in output. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.
-func (c *Client) GetAgentClaudeLogin(ctx context.Context, machine string, loginID string, opts ...GetAgentClaudeLoginParams) (*AgentClaudeLoginEvent, error) {
-
-	path := "/api/agents/machines/{machine}/claude-code/logins/{loginId}"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "loginId", "simple", false, loginID)
-	var params GetAgentClaudeLoginParams
-	if len(opts) > 0 {
-		params = opts[0]
-	}
-	queryValues := url.Values{}
-	addQueryParam(queryValues, "after", "form", false, params.After)
-
-	addQueryParam(queryValues, "status", "form", false, params.Status)
-
-	addQueryParam(queryValues, "wait", "form", false, params.Wait)
-
-	if len(queryValues) > 0 {
-		path += "?" + encodeQuery(queryValues)
-	}
-
-	var result AgentClaudeLoginEvent
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// CancelAgentClaudeLogin - Cancel Claude Code sign-in
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Cancel Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.
-func (c *Client) CancelAgentClaudeLogin(ctx context.Context, machine string, loginID string) error {
-
-	path := "/api/agents/machines/{machine}/claude-code/logins/{loginId}"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "loginId", "simple", false, loginID)
-
-	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// WriteAgentClaudeLogin - Send input to Claude Code sign-in
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Send input to Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.
-func (c *Client) WriteAgentClaudeLogin(ctx context.Context, machine string, loginID string, body AgentClaudeLoginInput) error {
-
-	path := "/api/agents/machines/{machine}/claude-code/logins/{loginId}/input"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "loginId", "simple", false, loginID)
-
-	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// GetAgentMachineClaudeModelsParams contains the parameters for the GetAgentMachineClaudeModels operation.
-// Required parameters are value fields; optional parameters are pointers.
-type GetAgentMachineClaudeModelsParams struct {
-	Account   *string `json:"account,omitempty"`
-	Refresh   *bool   `json:"refresh,omitempty"`
-	NamesOnly *bool   `json:"namesOnly,omitempty"`
-}
-
-// GetAgentMachineClaudeModels - List Claude subscription models on a machine
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// List Claude subscription models on a machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.
-func (c *Client) GetAgentMachineClaudeModels(ctx context.Context, machine string, opts ...GetAgentMachineClaudeModelsParams) (*[]AgentClaudeModel, error) {
-
-	path := "/api/agents/machines/{machine}/claude-code/models"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	var params GetAgentMachineClaudeModelsParams
-	if len(opts) > 0 {
-		params = opts[0]
-	}
-	queryValues := url.Values{}
-	addQueryParam(queryValues, "account", "form", false, params.Account)
-
-	addQueryParam(queryValues, "refresh", "form", false, params.Refresh)
-
-	addQueryParam(queryValues, "namesOnly", "form", false, params.NamesOnly)
-
-	if len(queryValues) > 0 {
-		path += "?" + encodeQuery(queryValues)
-	}
-
-	var result []AgentClaudeModel
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// ListAgentMachineSessions - List pw code sessions on one machine
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Returns the pw code sessions one machine's daemon reports, with the machine's reachability.
-func (c *Client) ListAgentMachineSessions(ctx context.Context, machine string) (*AgentMachineSessionsResponse, error) {
-
-	path := "/api/agents/machines/{machine}/sessions"
-	path = pathReplace(path, "machine", "simple", false, machine)
-
-	var result AgentMachineSessionsResponse
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// CreateAgentSession - Start a pw code session on a machine
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Starts a session in the given workspace on the machine. The machine allows this only when its owner turned remoteControl on, and clamps the session to the machine's remoteMaxPermissionMode.
-func (c *Client) CreateAgentSession(ctx context.Context, machine string, body CreateSessionBody) (*AgentSessionDetail, error) {
-
-	path := "/api/agents/machines/{machine}/sessions"
-	path = pathReplace(path, "machine", "simple", false, machine)
-
-	var result AgentSessionDetail
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetAgentSession - Get a pw code session transcript
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Returns one session's transcript and state as its machine's daemon reports them. Live updates stream from /ws/agents/machines/{machine}/sessions/{id}/events.
-func (c *Client) GetAgentSession(ctx context.Context, machine string, id string) (*AgentSessionDetail, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentSessionDetail
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// DeleteAgentSession - Delete a pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Removes the session and its transcripts from the machine. Destroying a session is wider than sending it a turn, so the machine's daemon holds it to the same limit: a session that refuses remote drive can only be deleted from the machine itself.
-func (c *Client) DeleteAgentSession(ctx context.Context, machine string, id string) error {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// AnswerAgentSessionApproval - Answer a pw code approval request
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Answers an approval the agent is waiting on. The machine's daemon decides whether the answer is allowed: a session running above the remote permission ceiling can only be answered from the machine itself, and an answer sent from here never grants standing directory access.
-func (c *Client) AnswerAgentSessionApproval(ctx context.Context, machine string, id string, approvalID string, body ApprovalAnswer) error {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/approvals/{approvalId}"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-	path = pathReplace(path, "approvalId", "simple", false, approvalID)
-
-	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// ArchiveAgentSession - Archive a pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Shuts the session down and marks it archived, keeping its transcript: nothing runs in it, its schedules included, and it refuses messages until it is restored. Refused while another host holds it live.
-func (c *Client) ArchiveAgentSession(ctx context.Context, machine string, id string) error {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/archive"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// RestoreAgentSession - Restore an archived pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Clears the session's archived mark, so it takes messages again.
-func (c *Client) RestoreAgentSession(ctx context.Context, machine string, id string) error {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/archive"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// GetAgentSessionClaudeAccountsParams contains the parameters for the GetAgentSessionClaudeAccounts operation.
-// Required parameters are value fields; optional parameters are pointers.
-type GetAgentSessionClaudeAccountsParams struct {
-	Account   *string `json:"account,omitempty"`
-	Refresh   *bool   `json:"refresh,omitempty"`
-	NamesOnly *bool   `json:"namesOnly,omitempty"`
-}
-
-// GetAgentSessionClaudeAccounts - List Claude Code accounts on a session's machine
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// List Claude Code accounts on a session's machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.
-func (c *Client) GetAgentSessionClaudeAccounts(ctx context.Context, machine string, id string, opts ...GetAgentSessionClaudeAccountsParams) (*[]AgentClaudeAccount, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/claude-code/accounts"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-	var params GetAgentSessionClaudeAccountsParams
-	if len(opts) > 0 {
-		params = opts[0]
-	}
-	queryValues := url.Values{}
-	addQueryParam(queryValues, "account", "form", false, params.Account)
-
-	addQueryParam(queryValues, "refresh", "form", false, params.Refresh)
-
-	addQueryParam(queryValues, "namesOnly", "form", false, params.NamesOnly)
-
-	if len(queryValues) > 0 {
-		path += "?" + encodeQuery(queryValues)
-	}
-
-	var result []AgentClaudeAccount
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// ClearAgentSession - Start a pw code session over
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Runs /clear: the conversation continues as a fresh session, whose id this answers with. Refused while a turn runs.
-func (c *Client) ClearAgentSession(ctx context.Context, machine string, id string) (*AgentSessionCleared, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/clear"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentSessionCleared
-	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// RunAgentSessionCommand - Run a built-in slash command in a pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Runs a built-in command such as /status, /model, or /cost and answers with its output. /clear, /compact, /goal, and /plan have routes of their own; skills and custom commands are sent as messages.
-func (c *Client) RunAgentSessionCommand(ctx context.Context, machine string, id string, body AgentCommandBody) (*AgentCommandOutput, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/commands"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentCommandOutput
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// CompactAgentSession - Summarize a pw code session's context
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Runs /compact, optionally focused on what to keep. Refused while a turn runs.
-func (c *Client) CompactAgentSession(ctx context.Context, machine string, id string, body AgentCompactBody) (*AgentCompacted, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/compact"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentCompacted
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// SteerAgentSession - Steer a pw code session's running turn
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Hands text to the turn in flight, which the model reads at its next step rather than after the turn ends, the way typing into a busy pw code terminal does. Not delivered means no turn was running to take it; send it as a message instead.
-func (c *Client) SteerAgentSession(ctx context.Context, machine string, id string, body AgentDirectionBody) (*AgentDirectionDelivered, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/direction"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentDirectionDelivered
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// ForkAgentSession - Copy a pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Copies the session and its subagent transcripts into a new one on the same machine, leaving the original untouched. Refused while the session is mid-turn, and while another host holds it live.
-func (c *Client) ForkAgentSession(ctx context.Context, machine string, id string) (*AgentSessionForked, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/fork"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentSessionForked
-	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// SetAgentSessionGoal - Set, show, or clear a pw code session's goal
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Runs /goal with the same arguments the terminal takes. Setting or resuming a goal starts a turn on the session.
-func (c *Client) SetAgentSessionGoal(ctx context.Context, machine string, id string, body AgentCommandArgs) (*AgentCommandOutput, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/goal"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentCommandOutput
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// UploadAgentSessionImage - Attach an image to a pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Saves an image on the machine for a message to carry, as pasting one into the pw code terminal does. Send the path it answers with in the message's images, and name the image in the text by its [Image #N] placeholder.
-func (c *Client) UploadAgentSessionImage(ctx context.Context, machine string, id string, body AgentImageBody) (*AgentImageSaved, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/images"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentImageSaved
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetAgentSessionImage - Get an image from a pw code session at full size
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Returns the full-size image a transcript item or event names by its ref, where the transcript itself carries only a small preview. The machine's daemon holds it to the same rules as the transcript.
-func (c *Client) GetAgentSessionImage(ctx context.Context, machine string, id string, ref string) (*[]byte, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/images/{ref}"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-	path = pathReplace(path, "ref", "simple", false, ref)
-
-	var result []byte
-	if err := c.do(ctx, "GET", path, nil, "", &result, "image/*", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// InterruptAgentSession - Stop the turn a pw code session is running
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Stops the work in flight and nothing else. This one route is not held to the remote permission ceiling: a session that refuses to be driven from here can still be stopped from here.
-func (c *Client) InterruptAgentSession(ctx context.Context, machine string, id string) error {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/interrupt"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// SendAgentSessionMessage - Send a message to a pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Sends a message to the session, starting a turn or queueing behind the one in flight. The machine's daemon decides whether it is allowed: a session running above the remote permission ceiling, or one whose lease another host holds, can only be driven from the machine itself.
-func (c *Client) SendAgentSessionMessage(ctx context.Context, machine string, id string, body SendMessageBody) (*AgentMessageAccepted, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/messages"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentMessageAccepted
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetAgentSessionClaudeModelsParams contains the parameters for the GetAgentSessionClaudeModels operation.
-// Required parameters are value fields; optional parameters are pointers.
-type GetAgentSessionClaudeModelsParams struct {
-	Account   *string `json:"account,omitempty"`
-	Refresh   *bool   `json:"refresh,omitempty"`
-	NamesOnly *bool   `json:"namesOnly,omitempty"`
-}
-
-// GetAgentSessionClaudeModels - List Claude subscription models for a session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// List Claude subscription models for a session. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.
-func (c *Client) GetAgentSessionClaudeModels(ctx context.Context, machine string, id string, opts ...GetAgentSessionClaudeModelsParams) (*[]AgentClaudeModel, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/models"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-	var params GetAgentSessionClaudeModelsParams
-	if len(opts) > 0 {
-		params = opts[0]
-	}
-	queryValues := url.Values{}
-	addQueryParam(queryValues, "account", "form", false, params.Account)
-
-	addQueryParam(queryValues, "refresh", "form", false, params.Refresh)
-
-	addQueryParam(queryValues, "namesOnly", "form", false, params.NamesOnly)
-
-	if len(queryValues) > 0 {
-		path += "?" + encodeQuery(queryValues)
-	}
-
-	var result []AgentClaudeModel
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetAgentSessionPalette - List a pw code session's slash commands
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Lists the built-in commands, skills, custom commands, and MCP prompts the session can run, as the terminal's / palette shows them.
-func (c *Client) GetAgentSessionPalette(ctx context.Context, machine string, id string) (*AgentPalette, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/palette"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentPalette
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// PinAgentSession - Pin a pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Marks the session pinned, which lists it ahead of the others in its group here and in pw agents.
-func (c *Client) PinAgentSession(ctx context.Context, machine string, id string) error {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/pin"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// UnpinAgentSession - Unpin a pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Clears the session's pinned mark.
-func (c *Client) UnpinAgentSession(ctx context.Context, machine string, id string) error {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/pin"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// RunAgentSessionPlan - Run /plan in a pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Runs /plan and answers with what the caller owes next: prose to show, the session's plan, a request to send as a turn, a plan file only the terminal can open, or nothing.
-func (c *Client) RunAgentSessionPlan(ctx context.Context, machine string, id string, body AgentCommandArgs) (*AgentPlanResult, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/plan"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentPlanResult
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// GetAgentSessionPullRequests - Get the state of a pw code session's pull requests
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Returns each pull request the session opened and whether it is open, merged, or closed, as the machine's own GitHub login reads it. A state is absent when the machine could not read it.
-func (c *Client) GetAgentSessionPullRequests(ctx context.Context, machine string, id string) (*AgentPullRequests, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/pull-requests"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentPullRequests
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// WithdrawAgentSessionMessage - Take back a queued message
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Removes a message waiting behind the running turn before its own turn starts. Refused with 409 once that turn has started.
-func (c *Client) WithdrawAgentSessionMessage(ctx context.Context, machine string, id string, turnID string) error {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/queued/{turnId}"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-	path = pathReplace(path, "turnId", "simple", false, turnID)
-
-	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// RenameAgentSession - Rename a pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Renames the session in the machine's store. Refused while the session is mid-turn, and while another host holds it live.
-func (c *Client) RenameAgentSession(ctx context.Context, machine string, id string, body AgentRenameBody) error {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/rename"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// UpdateAgentSessionSettings - Change a running pw code session's model, allocation or authority
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Changes what a live session runs as, and answers with its new state. The machine's daemon decides whether it is allowed: the session must be live, an org provider model needs an allocation, and a session already running above the remote permission ceiling can only be changed from the machine itself.
-func (c *Client) UpdateAgentSessionSettings(ctx context.Context, machine string, id string, body AgentSessionSettingsBody) (*SessionState, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/settings"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result SessionState
-	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// RunAgentSessionShell - Run a ! shell command in a pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Runs a command in the session's workspace, as typing ! in the terminal does, and answers with its output. The command and output join the conversation, and the session starts the model's reply to them. The machine refuses a command its owner could not approve from a remote origin or that its PreToolUse hooks deny, and stops one that runs longer than about 20 seconds.
-func (c *Client) RunAgentSessionShell(ctx context.Context, machine string, id string, body AgentShellBody) (*AgentShellOutput, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/shell"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentShellOutput
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// StopAgentSession - Stop a pw code session's work
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Stops the running turn and pauses the session's goal, if it has one, so no further turn starts on its own. Background subagents keep running. Like interrupt, it is not held to the remote permission ceiling. A session with nothing running answers as stopped.
-func (c *Client) StopAgentSession(ctx context.Context, machine string, id string) error {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/stop"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
-	}
-	return nil
-}
-
-// UploadAgentSessionPaste - Save a large paste with a pw code session
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Saves pasted text in the session's folder on the machine, so a message can refer to it by placeholder instead of carrying it. The machine holds it to the same checks as a message: remote control must be on, and a session running above the remote permission ceiling takes pastes only from the machine itself. A session keeps at most 256MiB of pastes, and one with tools off refuses a paste too large to send its model inline, since the model could not read it as a file.
-func (c *Client) UploadAgentSessionPaste(ctx context.Context, machine string, id string, body AgentPasteUpload) (*AgentPasteSaved, error) {
-
-	path := "/api/agents/machines/{machine}/sessions/{id}/texts"
-	path = pathReplace(path, "machine", "simple", false, machine)
-	path = pathReplace(path, "id", "simple", false, id)
-
-	var result AgentPasteSaved
-	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
-// ListAgentSessions - List pw code sessions across your machines
-//
-// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
-//
-// Asks every connected cluster and instance you can log in to for its pw code sessions and returns them together with each machine's reachability. Nothing is stored: the answer is what the machines report right now.
-func (c *Client) ListAgentSessions(ctx context.Context) (*AgentSessionsResponse, error) {
-
-	path := "/api/agents/sessions"
-
-	var result AgentSessionsResponse
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
-		return nil, parseErrorResponse(err)
-	}
-	return &result, nil
-}
-
 // GetUserAiUsageBreakdownParams contains the parameters for the GetUserAiUsageBreakdown operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetUserAiUsageBreakdownParams struct {
@@ -5417,6 +4640,836 @@ func (c *Client) ValidateNewCluster(ctx context.Context, body ClusterCreate) (*N
 
 	var result NewClusterCheck
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentMachineClaudeAccountsParams contains the parameters for the GetAgentMachineClaudeAccounts operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentMachineClaudeAccountsParams struct {
+	Account   *string `json:"account,omitempty"`
+	Refresh   *bool   `json:"refresh,omitempty"`
+	NamesOnly *bool   `json:"namesOnly,omitempty"`
+}
+
+// GetAgentMachineClaudeAccounts - List Claude Code accounts on a machine
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List Claude Code accounts on a machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.
+func (c *Client) GetAgentMachineClaudeAccounts(ctx context.Context, machine string, opts ...GetAgentMachineClaudeAccountsParams) (*[]AgentClaudeAccount, error) {
+
+	path := "/api/code/machines/{machine}/claude-code/accounts"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	var params GetAgentMachineClaudeAccountsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "account", "form", false, params.Account)
+
+	addQueryParam(queryValues, "refresh", "form", false, params.Refresh)
+
+	addQueryParam(queryValues, "namesOnly", "form", false, params.NamesOnly)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []AgentClaudeAccount
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteAgentMachineClaudeAccount - Remove a Claude Code account from a machine
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Remove a Claude Code account from a machine. Signs the account out with the official Claude Code CLI and deletes its profile on the machine. The default account and an account a session uses cannot be removed. The daemon enforces its remote start policy.
+func (c *Client) DeleteAgentMachineClaudeAccount(ctx context.Context, machine string, name string) error {
+
+	path := "/api/code/machines/{machine}/claude-code/accounts/{name}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// StartAgentClaudeLogin - Start Claude Code sign-in
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Start Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.
+func (c *Client) StartAgentClaudeLogin(ctx context.Context, machine string, body AgentClaudeLoginRequest) (*AgentClaudeLoginEvent, error) {
+
+	path := "/api/code/machines/{machine}/claude-code/logins"
+	path = pathReplace(path, "machine", "simple", false, machine)
+
+	var result AgentClaudeLoginEvent
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentClaudeLoginParams contains the parameters for the GetAgentClaudeLogin operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentClaudeLoginParams struct {
+	After  *int64  `json:"after,omitempty"`
+	Status *string `json:"status,omitempty"`
+	Wait   *bool   `json:"wait,omitempty"`
+}
+
+// GetAgentClaudeLogin - Read Claude Code sign-in output
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Read Claude Code sign-in output. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.
+func (c *Client) GetAgentClaudeLogin(ctx context.Context, machine string, loginID string, opts ...GetAgentClaudeLoginParams) (*AgentClaudeLoginEvent, error) {
+
+	path := "/api/code/machines/{machine}/claude-code/logins/{loginId}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "loginId", "simple", false, loginID)
+	var params GetAgentClaudeLoginParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "after", "form", false, params.After)
+
+	addQueryParam(queryValues, "status", "form", false, params.Status)
+
+	addQueryParam(queryValues, "wait", "form", false, params.Wait)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result AgentClaudeLoginEvent
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CancelAgentClaudeLogin - Cancel Claude Code sign-in
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Cancel Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.
+func (c *Client) CancelAgentClaudeLogin(ctx context.Context, machine string, loginID string) error {
+
+	path := "/api/code/machines/{machine}/claude-code/logins/{loginId}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "loginId", "simple", false, loginID)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// WriteAgentClaudeLogin - Send input to Claude Code sign-in
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Send input to Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.
+func (c *Client) WriteAgentClaudeLogin(ctx context.Context, machine string, loginID string, body AgentClaudeLoginInput) error {
+
+	path := "/api/code/machines/{machine}/claude-code/logins/{loginId}/input"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "loginId", "simple", false, loginID)
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// GetAgentMachineClaudeModelsParams contains the parameters for the GetAgentMachineClaudeModels operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentMachineClaudeModelsParams struct {
+	Account   *string `json:"account,omitempty"`
+	Refresh   *bool   `json:"refresh,omitempty"`
+	NamesOnly *bool   `json:"namesOnly,omitempty"`
+}
+
+// GetAgentMachineClaudeModels - List Claude subscription models on a machine
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List Claude subscription models on a machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.
+func (c *Client) GetAgentMachineClaudeModels(ctx context.Context, machine string, opts ...GetAgentMachineClaudeModelsParams) (*[]AgentClaudeModel, error) {
+
+	path := "/api/code/machines/{machine}/claude-code/models"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	var params GetAgentMachineClaudeModelsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "account", "form", false, params.Account)
+
+	addQueryParam(queryValues, "refresh", "form", false, params.Refresh)
+
+	addQueryParam(queryValues, "namesOnly", "form", false, params.NamesOnly)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []AgentClaudeModel
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListAgentMachineSessions - List pw code sessions on one machine
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the pw code sessions one machine's daemon reports, with the machine's reachability.
+func (c *Client) ListAgentMachineSessions(ctx context.Context, machine string) (*AgentMachineSessionsResponse, error) {
+
+	path := "/api/code/machines/{machine}/sessions"
+	path = pathReplace(path, "machine", "simple", false, machine)
+
+	var result AgentMachineSessionsResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CreateAgentSession - Start a pw code session on a machine
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Starts a session in the given workspace on the machine. The machine allows this only when its owner turned remoteControl on, and clamps the session to the machine's remoteMaxPermissionMode.
+func (c *Client) CreateAgentSession(ctx context.Context, machine string, body CreateSessionBody) (*AgentSessionDetail, error) {
+
+	path := "/api/code/machines/{machine}/sessions"
+	path = pathReplace(path, "machine", "simple", false, machine)
+
+	var result AgentSessionDetail
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentSession - Get a pw code session transcript
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns one session's transcript and state as its machine's daemon reports them. Live updates stream from /ws/code/machines/{machine}/sessions/{id}/events.
+func (c *Client) GetAgentSession(ctx context.Context, machine string, id string) (*AgentSessionDetail, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentSessionDetail
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteAgentSession - Delete a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes the session and its transcripts from the machine. Destroying a session is wider than sending it a turn, so the machine's daemon holds it to the same limit: a session that refuses remote drive can only be deleted from the machine itself.
+func (c *Client) DeleteAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// AnswerAgentSessionApproval - Answer a pw code approval request
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Answers an approval the agent is waiting on. The machine's daemon decides whether the answer is allowed: a session running above the remote permission ceiling can only be answered from the machine itself, and an answer sent from here never grants standing directory access.
+func (c *Client) AnswerAgentSessionApproval(ctx context.Context, machine string, id string, approvalID string, body ApprovalAnswer) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/approvals/{approvalId}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "approvalId", "simple", false, approvalID)
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// ArchiveAgentSession - Archive a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Shuts the session down and marks it archived, keeping its transcript: nothing runs in it, its schedules included, and it refuses messages until it is restored. Refused while another host holds it live.
+func (c *Client) ArchiveAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/archive"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// RestoreAgentSession - Restore an archived pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Clears the session's archived mark, so it takes messages again.
+func (c *Client) RestoreAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/archive"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// BackgroundAgentSessionCommands - Move a pw code session's running commands to the background
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Moves the Bash commands the agent is waiting on to the background, as ctrl+b does in the terminal: they keep running, the turn goes on without their output, and the agent is told when each exits. Nothing happens when no command is running.
+func (c *Client) BackgroundAgentSessionCommands(ctx context.Context, machine string, id string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/background"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// GetAgentSessionClaudeAccountsParams contains the parameters for the GetAgentSessionClaudeAccounts operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentSessionClaudeAccountsParams struct {
+	Account   *string `json:"account,omitempty"`
+	Refresh   *bool   `json:"refresh,omitempty"`
+	NamesOnly *bool   `json:"namesOnly,omitempty"`
+}
+
+// GetAgentSessionClaudeAccounts - List Claude Code accounts on a session's machine
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List Claude Code accounts on a session's machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.
+func (c *Client) GetAgentSessionClaudeAccounts(ctx context.Context, machine string, id string, opts ...GetAgentSessionClaudeAccountsParams) (*[]AgentClaudeAccount, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/claude-code/accounts"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	var params GetAgentSessionClaudeAccountsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "account", "form", false, params.Account)
+
+	addQueryParam(queryValues, "refresh", "form", false, params.Refresh)
+
+	addQueryParam(queryValues, "namesOnly", "form", false, params.NamesOnly)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []AgentClaudeAccount
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ClearAgentSession - Start a pw code session over
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Runs /clear: the conversation continues as a fresh session, whose id this answers with. Refused while a turn runs.
+func (c *Client) ClearAgentSession(ctx context.Context, machine string, id string) (*AgentSessionCleared, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/clear"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentSessionCleared
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RunAgentSessionCommand - Run a built-in slash command in a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Runs a built-in command such as /status, /model, or /cost and answers with its output. /clear, /compact, /goal, and /plan have routes of their own; skills and custom commands are sent as messages.
+func (c *Client) RunAgentSessionCommand(ctx context.Context, machine string, id string, body AgentCommandBody) (*AgentCommandOutput, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/commands"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentCommandOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// CompactAgentSession - Summarize a pw code session's context
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Runs /compact, optionally focused on what to keep. Refused while a turn runs.
+func (c *Client) CompactAgentSession(ctx context.Context, machine string, id string, body AgentCompactBody) (*AgentCompacted, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/compact"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentCompacted
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SteerAgentSession - Steer a pw code session's running turn
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Hands text to the turn in flight, which the model reads at its next step rather than after the turn ends, the way typing into a busy pw code terminal does. Not delivered means no turn was running to take it; send it as a message instead.
+func (c *Client) SteerAgentSession(ctx context.Context, machine string, id string, body AgentDirectionBody) (*AgentDirectionDelivered, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/direction"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentDirectionDelivered
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ForkAgentSession - Copy a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Copies the session and its subagent transcripts into a new one on the same machine, leaving the original untouched. Refused while the session is mid-turn, and while another host holds it live.
+func (c *Client) ForkAgentSession(ctx context.Context, machine string, id string) (*AgentSessionForked, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/fork"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentSessionForked
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentSessionGithubImage - Get an image attached to a pull request a pw code session opened
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns an image from the description of a pull request the session opened, read with the GitHub CLI login on the session's machine. A private repository's attachments load only that way, so a transcript that shows one reads it here.
+func (c *Client) GetAgentSessionGithubImage(ctx context.Context, machine string, id string, asset string) (*[]byte, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/github-images/{asset}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "asset", "simple", false, asset)
+
+	var result []byte
+	if err := c.do(ctx, "GET", path, nil, "", &result, "image/*", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetAgentSessionGoal - Set, show, or clear a pw code session's goal
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Runs /goal with the same arguments the terminal takes. Setting or resuming a goal starts a turn on the session.
+func (c *Client) SetAgentSessionGoal(ctx context.Context, machine string, id string, body AgentCommandArgs) (*AgentCommandOutput, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/goal"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentCommandOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UploadAgentSessionImage - Attach an image to a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Saves an image on the machine for a message to carry, as pasting one into the pw code terminal does. Send the path it answers with in the message's images, and name the image in the text by its [Image #N] placeholder.
+func (c *Client) UploadAgentSessionImage(ctx context.Context, machine string, id string, body AgentImageBody) (*AgentImageSaved, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/images"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentImageSaved
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentSessionImage - Get an image from a pw code session at full size
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the full-size image a transcript item or event names by its ref, where the transcript itself carries only a small preview. The machine's daemon holds it to the same rules as the transcript.
+func (c *Client) GetAgentSessionImage(ctx context.Context, machine string, id string, ref string) (*[]byte, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/images/{ref}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "ref", "simple", false, ref)
+
+	var result []byte
+	if err := c.do(ctx, "GET", path, nil, "", &result, "image/*", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// InterruptAgentSession - Stop the turn a pw code session is running
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Stops the work in flight and nothing else. This one route is not held to the remote permission ceiling: a session that refuses to be driven from here can still be stopped from here.
+func (c *Client) InterruptAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/interrupt"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// SendAgentSessionMessage - Send a message to a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Sends a message to the session, starting a turn or queueing behind the one in flight. The machine's daemon decides whether it is allowed: a session running above the remote permission ceiling, or one whose lease another host holds, can only be driven from the machine itself.
+func (c *Client) SendAgentSessionMessage(ctx context.Context, machine string, id string, body SendMessageBody) (*AgentMessageAccepted, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/messages"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentMessageAccepted
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentSessionClaudeModelsParams contains the parameters for the GetAgentSessionClaudeModels operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentSessionClaudeModelsParams struct {
+	Account   *string `json:"account,omitempty"`
+	Refresh   *bool   `json:"refresh,omitempty"`
+	NamesOnly *bool   `json:"namesOnly,omitempty"`
+}
+
+// GetAgentSessionClaudeModels - List Claude subscription models for a session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// List Claude subscription models for a session. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.
+func (c *Client) GetAgentSessionClaudeModels(ctx context.Context, machine string, id string, opts ...GetAgentSessionClaudeModelsParams) (*[]AgentClaudeModel, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/models"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	var params GetAgentSessionClaudeModelsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "account", "form", false, params.Account)
+
+	addQueryParam(queryValues, "refresh", "form", false, params.Refresh)
+
+	addQueryParam(queryValues, "namesOnly", "form", false, params.NamesOnly)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result []AgentClaudeModel
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentSessionPalette - List a pw code session's slash commands
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the built-in commands, skills, custom commands, and MCP prompts the session can run, as the terminal's / palette shows them.
+func (c *Client) GetAgentSessionPalette(ctx context.Context, machine string, id string) (*AgentPalette, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/palette"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentPalette
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// PinAgentSession - Pin a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Marks the session pinned, which lists it ahead of the others in its group here and in pw agents.
+func (c *Client) PinAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/pin"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UnpinAgentSession - Unpin a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Clears the session's pinned mark.
+func (c *Client) UnpinAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/pin"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// RunAgentSessionPlan - Run /plan in a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Runs /plan and answers with what the caller owes next: prose to show, the session's plan, a request to send as a turn, a plan file only the terminal can open, or nothing.
+func (c *Client) RunAgentSessionPlan(ctx context.Context, machine string, id string, body AgentCommandArgs) (*AgentPlanResult, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/plan"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentPlanResult
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentSessionPullRequests - Get the state of a pw code session's pull requests
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns each pull request the session opened and whether it is open, merged, or closed, as the machine's own GitHub login reads it. A state is absent when the machine could not read it.
+func (c *Client) GetAgentSessionPullRequests(ctx context.Context, machine string, id string) (*AgentPullRequests, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/pull-requests"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentPullRequests
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// WithdrawAgentSessionMessage - Take back a queued message
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Removes a message waiting behind the running turn before its own turn starts. Refused with 409 once that turn has started.
+func (c *Client) WithdrawAgentSessionMessage(ctx context.Context, machine string, id string, turnID string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/queued/{turnId}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "turnId", "simple", false, turnID)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// RecapAgentSession - Recap where a pw code session stands
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Has the session write a short recap of its goal and next step for a reader who stepped away. The recap arrives on the session's event feed as a recap event and stays in its history. The request stays open while the model writes it, up to about a minute, and ending the request stops it. The machine answers without writing one while its recaps are off, a turn or other work is under way, or too little has happened since the last recap.
+func (c *Client) RecapAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/recap"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// RenameAgentSession - Rename a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Renames the session in the machine's store. Refused while the session is mid-turn, and while another host holds it live.
+func (c *Client) RenameAgentSession(ctx context.Context, machine string, id string, body AgentRenameBody) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/rename"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UpdateAgentSessionSettings - Change a running pw code session's model, allocation or authority
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Changes what a live session runs as, and answers with its new state. The machine's daemon decides whether it is allowed: the session must be live, an org provider model needs an allocation, and a session already running above the remote permission ceiling can only be changed from the machine itself.
+func (c *Client) UpdateAgentSessionSettings(ctx context.Context, machine string, id string, body AgentSessionSettingsBody) (*SessionState, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/settings"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result SessionState
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// RunAgentSessionShell - Run a ! shell command in a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Runs a command in the session's workspace, as typing ! in the terminal does, and answers with its output. The command and output join the conversation, and the session starts the model's reply to them. The machine refuses a command its owner could not approve from a remote origin or that its PreToolUse hooks deny, and stops one that runs longer than about 20 seconds.
+func (c *Client) RunAgentSessionShell(ctx context.Context, machine string, id string, body AgentShellBody) (*AgentShellOutput, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/shell"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentShellOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// StopAgentSession - Stop a pw code session's work
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Stops the running turn and pauses the session's goal, if it has one, so no further turn starts on its own. Background subagents keep running. Like interrupt, it is not held to the remote permission ceiling. A session with nothing running answers as stopped.
+func (c *Client) StopAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/stop"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UploadAgentSessionPaste - Save a large paste with a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Saves pasted text in the session's folder on the machine, so a message can refer to it by placeholder instead of carrying it. The machine holds it to the same checks as a message: remote control must be on, and a session running above the remote permission ceiling takes pastes only from the machine itself. A session keeps at most 256MiB of pastes, and one with tools off refuses a paste too large to send its model inline, since the model could not read it as a file.
+func (c *Client) UploadAgentSessionPaste(ctx context.Context, machine string, id string, body AgentPasteUpload) (*AgentPasteSaved, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/texts"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentPasteSaved
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// ListAgentSessions - List pw code sessions across your machines
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Asks every connected cluster and instance you can log in to for its pw code sessions and returns them together with each machine's reachability. Nothing is stored: the answer is what the machines report right now.
+func (c *Client) ListAgentSessions(ctx context.Context) (*AgentSessionsResponse, error) {
+
+	path := "/api/code/sessions"
+
+	var result AgentSessionsResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -13928,6 +13981,23 @@ func (c *Client) SetOrganizationNoRootAccessPolicy(ctx context.Context, organiza
 	return &result, nil
 }
 
+// SetOrganizationNotebookKernelIdleTimeoutPolicy - Set organization policy: notebook-kernel-idle-timeout
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets how many seconds a member's notebook kernel can sit unused before it is stopped, unless the kernel sets its own: 0 never stops one, anything else from 15 minutes to 7 days; the platform default when unset. A kernel running code is never stopped. Unavailable when the platform sets the policy.
+func (c *Client) SetOrganizationNotebookKernelIdleTimeoutPolicy(ctx context.Context, organization string, body int64) (*map[string]IntPolicyOutput, error) {
+
+	path := "/api/organizations/{organization}/policies/notebook-kernel-idle-timeout"
+	path = pathReplace(path, "organization", "simple", false, organization)
+
+	var result map[string]IntPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // SetOrganizationWorkspaceSSHKeyTypePolicy - Set organization policy: workspace-ssh-key-type
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -18174,6 +18244,25 @@ func (c *Client) DeleteKernel(ctx context.Context, organization string, user str
 	return nil
 }
 
+// UpdateKernel - Update notebook kernel
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Changes how long a notebook kernel may sit unused before it is stopped.
+func (c *Client) UpdateKernel(ctx context.Context, organization string, user string, kernel string, body UpdateKernelBody) (*KernelResponse, error) {
+
+	path := "/api/organizations/{organization}/users/{user}/kernels/{kernel}"
+	path = pathReplace(path, "organization", "simple", false, organization)
+	path = pathReplace(path, "user", "simple", false, user)
+	path = pathReplace(path, "kernel", "simple", false, kernel)
+
+	var result KernelResponse
+	if err := c.do(ctx, "PATCH", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // RestartKernel - Restart notebook kernel
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -20902,6 +20991,76 @@ func (c *Client) PostSlackTestMessage(ctx context.Context) error {
 	return nil
 }
 
+// GetSMTPConfig - Get SMTP integration configuration
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Returns the SMTP server the platform sends email through. The password is never returned.
+func (c *Client) GetSMTPConfig(ctx context.Context) (*SMTPConfigResponse, error) {
+
+	path := "/api/platform/integrations/smtp"
+
+	var result SMTPConfigResponse
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// UpdateSMTPConfig - Update SMTP integration configuration
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Saves the SMTP server the platform sends all email through, such as password resets, notifications and reports.
+func (c *Client) UpdateSMTPConfig(ctx context.Context, body PutSMTPConfigInputBody) (*SMTPConfigResponse, error) {
+
+	path := "/api/platform/integrations/smtp"
+
+	var result SMTPConfigResponse
+	if err := c.do(ctx, "PUT", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DeleteSMTPConfig - Remove SMTP integration configuration
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Removes the SMTP integration and deletes the stored password. Email then uses the server's EMAIL_* environment variables, if set.
+func (c *Client) DeleteSMTPConfig(ctx context.Context) error {
+
+	path := "/api/platform/integrations/smtp"
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// PostSMTPTestEmail - Send an SMTP test email
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Sends a test email to the signed-in administrator through the configured SMTP server.
+func (c *Client) PostSMTPTestEmail(ctx context.Context) error {
+
+	path := "/api/platform/integrations/smtp/test"
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // GetKeys - List JWKs
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -21279,6 +21438,22 @@ func (c *Client) SetPlatformNoRootAccessPolicy(ctx context.Context, body bool) (
 	path := "/api/platform/policies/no-root-access"
 
 	var result map[string]BooleanPolicyOutput
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SetPlatformNotebookKernelIdleTimeoutPolicy - Set platform policy: notebook-kernel-idle-timeout
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// Sets how many seconds a notebook kernel can sit unused before it is stopped, unless the kernel sets its own, for every organization: 0 never stops one, anything else from 15 minutes to 7 days; the platform default when unset. A kernel running code is never stopped.
+func (c *Client) SetPlatformNotebookKernelIdleTimeoutPolicy(ctx context.Context, body int64) (*map[string]IntPolicyOutput, error) {
+
+	path := "/api/platform/policies/notebook-kernel-idle-timeout"
+
+	var result map[string]IntPolicyOutput
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}

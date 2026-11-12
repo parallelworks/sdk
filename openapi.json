@@ -16,7 +16,13 @@
       "AIModelConfig": {
         "additionalProperties": false,
         "properties": {
+          "cacheWriteRate": {
+            "description": "USD per prompt token written to the provider's prompt cache; omitted means 1.25 times the input rate",
+            "format": "double",
+            "type": "number"
+          },
           "cachedInputRate": {
+            "description": "USD per prompt token served from the provider's prompt cache; omitted means the input rate",
             "format": "double",
             "type": "number"
           },
@@ -2434,6 +2440,9 @@
           "effort": {
             "type": "string"
           },
+          "goal": {
+            "$ref": "#/components/schemas/GoalStatus"
+          },
           "history": {
             "items": {
               "$ref": "#/components/schemas/HistoryItem"
@@ -2522,6 +2531,10 @@
             "type": "string"
           },
           "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "usageLimitResumeAt": {
             "format": "date-time",
             "type": "string"
           },
@@ -2685,6 +2698,9 @@
           "approvalId": {
             "type": "string"
           },
+          "archive": {
+            "$ref": "#/components/schemas/ArchiveChange"
+          },
           "args": {
             "type": "string"
           },
@@ -2756,6 +2772,10 @@
             ]
           },
           "result": {
+            "type": "string"
+          },
+          "resumeAt": {
+            "format": "date-time",
             "type": "string"
           },
           "seq": {
@@ -4424,6 +4444,22 @@
         },
         "required": [
           "apps"
+        ],
+        "type": "object"
+      },
+      "ArchiveChange": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "remote": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "at"
         ],
         "type": "object"
       },
@@ -14283,6 +14319,13 @@
           "environmentId": {
             "description": "Environment to schedule the kernel's worker onto. Cluster targets only.",
             "type": "string"
+          },
+          "idleTimeoutMinutes": {
+            "description": "Minutes the kernel may sit unused before it is stopped, overriding the organization's default. 0 never stops it; anything else must be at least 15.",
+            "format": "int64",
+            "maximum": 10080,
+            "minimum": 0,
+            "type": "integer"
           },
           "memoryLimit": {
             "description": "Memory ceiling (GB) for the kernel's processes. Workspace targets only; defaults to half the workspace's own limit and may not exceed it.",
@@ -26222,6 +26265,10 @@
           "planBody": {
             "type": "string"
           },
+          "startLine": {
+            "format": "int64",
+            "type": "integer"
+          },
           "text": {
             "type": "string"
           },
@@ -27630,6 +27677,12 @@
             "readOnly": true,
             "type": "string"
           },
+          "effectiveIdleTimeoutMinutes": {
+            "description": "Minutes the kernel may sit unused before it is stopped, after falling back to the organization and platform defaults. 0 means never.",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
           "environmentId": {
             "description": "ID of the environment the kernel's worker was scheduled onto.",
             "type": "string"
@@ -27654,6 +27707,18 @@
             "description": "Kernel ID.",
             "readOnly": true,
             "type": "string"
+          },
+          "idleStopAt": {
+            "description": "When the kernel stops if nothing uses it before then. Set on a running kernel with an idle timeout.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "idleTimeoutMinutes": {
+            "description": "This kernel's own idle timeout in minutes, overriding its organization's. 0 never stops it. Absent when it inherits.",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
           },
           "lastUsedAt": {
             "description": "When the kernel last served a request from its notebook.",
@@ -27684,6 +27749,17 @@
           },
           "nodeHostname": {
             "description": "Hostname of the compute node the kernel runs on.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "nodeHourlyPrice": {
+            "description": "On-demand price per hour, in USD, of the cloud node the kernel's worker holds. Absent when the kernel holds no node of its own (controller, instance or workspace kernels) or the price is unknown.",
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
+          "nodeInstanceType": {
+            "description": "Instance type of the cloud node the kernel's worker holds.",
             "readOnly": true,
             "type": "string"
           },
@@ -27765,7 +27841,8 @@
         },
         "required": [
           "id",
-          "url"
+          "url",
+          "effectiveIdleTimeoutMinutes"
         ],
         "type": "object"
       },
@@ -31976,7 +32053,13 @@
             "description": "Budget allocation the provider's resource group bills; absent for org and session models",
             "type": "string"
           },
+          "cache_write_rate": {
+            "description": "USD per prompt token written to the provider's prompt cache; 0 means cache writes are free",
+            "format": "double",
+            "type": "number"
+          },
           "cached_input_rate": {
+            "description": "USD per prompt token served from the provider's prompt cache; 0 means cache reads are free",
             "format": "double",
             "type": "number"
           },
@@ -35716,8 +35799,13 @@
       "OrgModelEntry": {
         "additionalProperties": false,
         "properties": {
+          "cacheWriteRate": {
+            "description": "USD per prompt token written to the provider's prompt cache; omitted means 1.25 times the input rate",
+            "format": "double",
+            "type": "number"
+          },
           "cachedInputRate": {
-            "description": "USD per input token served from the provider's prompt cache (0 = the input rate)",
+            "description": "USD per prompt token served from the provider's prompt cache; omitted means the input rate",
             "format": "double",
             "type": "number"
           },
@@ -36967,10 +37055,23 @@
       "PatchModelConfigInputBody": {
         "additionalProperties": false,
         "properties": {
-          "cachedInputRate": {
-            "description": "USD per input token served from the provider's prompt cache (0 = the input rate)",
+          "cacheWriteRate": {
+            "description": "USD per prompt token written to the provider's prompt cache (0 = free)",
             "format": "double",
             "type": "number"
+          },
+          "cachedInputRate": {
+            "description": "USD per prompt token served from the provider's prompt cache (0 = free)",
+            "format": "double",
+            "type": "number"
+          },
+          "clearCacheWriteRate": {
+            "description": "When true and cacheWriteRate is not set, removes the cache write rate so cache writes cost 1.25 times the input rate",
+            "type": "boolean"
+          },
+          "clearCachedInputRate": {
+            "description": "When true and cachedInputRate is not set, removes the cached input rate so cache reads cost the input rate",
+            "type": "boolean"
           },
           "contextWindow": {
             "description": "Model context window in tokens (0 = unknown)",
@@ -37096,6 +37197,10 @@
       "PatchSessionBody": {
         "additionalProperties": false,
         "properties": {
+          "allowConnect": {
+            "description": "For endpoint sessions: Let users the endpoint is shared with connect scripts and SDKs to it with pw sessions connect, which relays raw TCP so the app gets whatever headers the client sends, including Authorization. The platform doesn't set or check X-PW-User on these connections, so the app must authenticate them itself.",
+            "type": "boolean"
+          },
           "apiKey": {
             "description": "API key for the session.",
             "type": "string",
@@ -38531,6 +38636,11 @@
       "PostSessionBody": {
         "additionalProperties": false,
         "properties": {
+          "allowConnect": {
+            "description": "For endpoint sessions: Let users the endpoint is shared with connect scripts and SDKs to it with pw sessions connect, which relays raw TCP so the app gets whatever headers the client sends, including Authorization. The platform doesn't set or check X-PW-User on these connections, so the app must authenticate them itself.",
+            "type": "boolean",
+            "writeOnly": true
+          },
           "apiKey": {
             "description": "API key for the session.",
             "type": "string",
@@ -39225,6 +39335,11 @@
       "PromptTokensDetails": {
         "additionalProperties": false,
         "properties": {
+          "cache_write_tokens": {
+            "description": "Prompt tokens written to the provider's prompt cache",
+            "format": "int64",
+            "type": "integer"
+          },
           "cached_tokens": {
             "description": "Prompt tokens served from the provider's prompt cache",
             "format": "int64",
@@ -42112,9 +42227,52 @@
         ],
         "type": "object"
       },
+      "PutSMTPConfigInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "fromAddress": {
+            "description": "Address emails are sent from. Defaults to noreply@parallelworks.com.",
+            "format": "email",
+            "type": "string"
+          },
+          "host": {
+            "description": "SMTP server host name.",
+            "maxLength": 253,
+            "minLength": 1,
+            "type": "string"
+          },
+          "password": {
+            "description": "Password to sign in to the SMTP server with. Stored as a credential and never returned. Leave it out to keep the saved password; it is required when the host changes.",
+            "type": "string"
+          },
+          "port": {
+            "description": "SMTP server port, usually 587.",
+            "format": "int64",
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "username": {
+            "description": "User name to sign in to the SMTP server with.",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "port",
+          "username"
+        ],
+        "type": "object"
+      },
       "PutSessionBody": {
         "additionalProperties": false,
         "properties": {
+          "allowConnect": {
+            "description": "Let users the endpoint is shared with connect scripts and SDKs to it with pw sessions connect, which relays raw TCP so the app gets whatever headers the client sends, including Authorization. The platform doesn't set or check X-PW-User on these connections, so the app must authenticate them itself. Omit to leave a takeover's existing value unchanged.",
+            "type": "boolean",
+            "writeOnly": true
+          },
           "description": {
             "description": "Human-readable session description.",
             "maxLength": 255,
@@ -46770,6 +46928,11 @@
       "Session": {
         "additionalProperties": false,
         "properties": {
+          "allowConnect": {
+            "description": "Whether users the endpoint is shared with can relay connections to it with pw sessions connect.",
+            "readOnly": true,
+            "type": "boolean"
+          },
           "createdAt": {
             "description": "Session creation time.",
             "format": "date-time",
@@ -47867,6 +48030,41 @@
         ],
         "type": "object"
       },
+      "SmtpConfigResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "configured": {
+            "description": "Whether an SMTP server is saved in the admin panel.",
+            "type": "boolean"
+          },
+          "environmentConfigured": {
+            "description": "Whether the server's EMAIL_* environment variables set up SMTP. They are used while no SMTP server is saved in the admin panel.",
+            "type": "boolean"
+          },
+          "fromAddress": {
+            "description": "Address emails are sent from.",
+            "type": "string"
+          },
+          "host": {
+            "description": "SMTP server host name.",
+            "type": "string"
+          },
+          "port": {
+            "description": "SMTP server port.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "username": {
+            "description": "User name the platform signs in to the SMTP server with.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "configured",
+          "environmentConfigured"
+        ],
+        "type": "object"
+      },
       "Snapshot": {
         "additionalProperties": false,
         "properties": {
@@ -48167,6 +48365,7 @@
                 "platform-key",
                 "github-app",
                 "slack",
+                "smtp",
                 "gitlab-server",
                 "github-token",
                 "gitlab-token",
@@ -50573,6 +50772,25 @@
         "required": [
           "organization",
           "groups"
+        ],
+        "type": "object"
+      },
+      "UpdateKernelBody": {
+        "additionalProperties": false,
+        "properties": {
+          "idleTimeoutMinutes": {
+            "description": "Minutes the kernel may sit unused before it is stopped. 0 never stops it; anything else must be at least 15. Null uses the organization's default.",
+            "format": "int64",
+            "maximum": 10080,
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "idleTimeoutMinutes"
         ],
         "type": "object"
       },
@@ -61666,2257 +61884,6 @@
         ]
       }
     },
-    "/api/agents/machines/{machine}/claude-code/accounts": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude Code accounts on a machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
-        "operationId": "get-agent-machine-claude-accounts",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "account",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "refresh",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "namesOnly",
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/AgentClaudeAccount"
-                  },
-                  "type": [
-                    "array",
-                    "null"
-                  ]
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "List Claude Code accounts on a machine",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/claude-code/accounts/{name}": {
-      "delete": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemove a Claude Code account from a machine. Signs the account out with the official Claude Code CLI and deletes its profile on the machine. The default account and an account a session uses cannot be removed. The daemon enforces its remote start policy.",
-        "operationId": "delete-agent-machine-claude-account",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "pattern": "^[A-Za-z0-9_.@-]{1,64}$",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Remove a Claude Code account from a machine",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/claude-code/logins": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStart Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.",
-        "operationId": "start-agent-claude-login",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentClaudeLoginRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentClaudeLoginEvent"
-                }
-              }
-            },
-            "description": "OK",
-            "headers": {
-              "Cache-Control": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Start Claude Code sign-in",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/claude-code/logins/{loginId}": {
-      "delete": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nCancel Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.",
-        "operationId": "cancel-agent-claude-login",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "loginId",
-            "required": true,
-            "schema": {
-              "pattern": "^[0-9a-f]{32}$",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Cancel Claude Code sign-in",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      },
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRead Claude Code sign-in output. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.",
-        "operationId": "get-agent-claude-login",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "loginId",
-            "required": true,
-            "schema": {
-              "pattern": "^[0-9a-f]{32}$",
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "after",
-            "schema": {
-              "format": "int64",
-              "minimum": 0,
-              "type": "integer"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "status",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "wait",
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentClaudeLoginEvent"
-                }
-              }
-            },
-            "description": "OK",
-            "headers": {
-              "Cache-Control": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Read Claude Code sign-in output",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/claude-code/logins/{loginId}/input": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSend input to Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.",
-        "operationId": "write-agent-claude-login",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "loginId",
-            "required": true,
-            "schema": {
-              "pattern": "^[0-9a-f]{32}$",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentClaudeLoginInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Send input to Claude Code sign-in",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/claude-code/models": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude subscription models on a machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
-        "operationId": "get-agent-machine-claude-models",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "account",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "refresh",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "namesOnly",
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/AgentClaudeModel"
-                  },
-                  "type": [
-                    "array",
-                    "null"
-                  ]
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "List Claude subscription models on a machine",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the pw code sessions one machine's daemon reports, with the machine's reachability.",
-        "operationId": "list-agent-machine-sessions",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentMachineSessionsResponse"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "List pw code sessions on one machine",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      },
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStarts a session in the given workspace on the machine. The machine allows this only when its owner turned remoteControl on, and clamps the session to the machine's remoteMaxPermissionMode.",
-        "operationId": "create-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSessionBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentSessionDetail"
-                }
-              }
-            },
-            "description": "Created"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Start a pw code session on a machine",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}": {
-      "delete": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves the session and its transcripts from the machine. Destroying a session is wider than sending it a turn, so the machine's daemon holds it to the same limit: a session that refuses remote drive can only be deleted from the machine itself.",
-        "operationId": "delete-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Delete a pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      },
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns one session's transcript and state as its machine's daemon reports them. Live updates stream from /ws/agents/machines/{machine}/sessions/{id}/events.",
-        "operationId": "get-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentSessionDetail"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Get a pw code session transcript",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/approvals/{approvalId}": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nAnswers an approval the agent is waiting on. The machine's daemon decides whether the answer is allowed: a session running above the remote permission ceiling can only be answered from the machine itself, and an answer sent from here never grants standing directory access.",
-        "operationId": "answer-agent-session-approval",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Approval id from the session detail or an approval_request event.",
-            "in": "path",
-            "name": "approvalId",
-            "required": true,
-            "schema": {
-              "description": "Approval id from the session detail or an approval_request event.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ApprovalAnswer"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Answer a pw code approval request",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/archive": {
-      "delete": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nClears the session's archived mark, so it takes messages again.",
-        "operationId": "restore-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Restore an archived pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      },
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nShuts the session down and marks it archived, keeping its transcript: nothing runs in it, its schedules included, and it refuses messages until it is restored. Refused while another host holds it live.",
-        "operationId": "archive-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Archive a pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/claude-code/accounts": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude Code accounts on a session's machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
-        "operationId": "get-agent-session-claude-accounts",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "account",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "refresh",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "namesOnly",
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/AgentClaudeAccount"
-                  },
-                  "type": [
-                    "array",
-                    "null"
-                  ]
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "List Claude Code accounts on a session's machine",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/clear": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /clear: the conversation continues as a fresh session, whose id this answers with. Refused while a turn runs.",
-        "operationId": "clear-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentSessionCleared"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Start a pw code session over",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/commands": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns a built-in command such as /status, /model, or /cost and answers with its output. /clear, /compact, /goal, and /plan have routes of their own; skills and custom commands are sent as messages.",
-        "operationId": "run-agent-session-command",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentCommandBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentCommandOutput"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Run a built-in slash command in a pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/compact": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /compact, optionally focused on what to keep. Refused while a turn runs.",
-        "operationId": "compact-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentCompactBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentCompacted"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Summarize a pw code session's context",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/direction": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nHands text to the turn in flight, which the model reads at its next step rather than after the turn ends, the way typing into a busy pw code terminal does. Not delivered means no turn was running to take it; send it as a message instead.",
-        "operationId": "steer-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentDirectionBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentDirectionDelivered"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Steer a pw code session's running turn",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/fork": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nCopies the session and its subagent transcripts into a new one on the same machine, leaving the original untouched. Refused while the session is mid-turn, and while another host holds it live.",
-        "operationId": "fork-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentSessionForked"
-                }
-              }
-            },
-            "description": "Created"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Copy a pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/goal": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /goal with the same arguments the terminal takes. Setting or resuming a goal starts a turn on the session.",
-        "operationId": "set-agent-session-goal",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentCommandArgs"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentCommandOutput"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Set, show, or clear a pw code session's goal",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/images": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSaves an image on the machine for a message to carry, as pasting one into the pw code terminal does. Send the path it answers with in the message's images, and name the image in the text by its [Image #N] placeholder.",
-        "operationId": "upload-agent-session-image",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentImageBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentImageSaved"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Attach an image to a pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/images/{ref}": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the full-size image a transcript item or event names by its ref, where the transcript itself carries only a small preview. The machine's daemon holds it to the same rules as the transcript.",
-        "operationId": "get-agent-session-image",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "The ref of an image in the session's transcript or event feed.",
-            "in": "path",
-            "name": "ref",
-            "required": true,
-            "schema": {
-              "description": "The ref of an image in the session's transcript or event feed.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "image/*": {
-                "schema": {
-                  "contentMediaType": "application/octet-stream",
-                  "format": "binary",
-                  "type": "string"
-                }
-              }
-            },
-            "description": "The image, as PNG, JPEG, GIF or WebP.",
-            "headers": {
-              "Cache-Control": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Content-Type": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "X-Content-Type-Options": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Get an image from a pw code session at full size",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/interrupt": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStops the work in flight and nothing else. This one route is not held to the remote permission ceiling: a session that refuses to be driven from here can still be stopped from here.",
-        "operationId": "interrupt-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Stop the turn a pw code session is running",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/messages": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSends a message to the session, starting a turn or queueing behind the one in flight. The machine's daemon decides whether it is allowed: a session running above the remote permission ceiling, or one whose lease another host holds, can only be driven from the machine itself.",
-        "operationId": "send-agent-session-message",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SendMessageBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentMessageAccepted"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Send a message to a pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/models": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude subscription models for a session. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
-        "operationId": "get-agent-session-claude-models",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "account",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "refresh",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "namesOnly",
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/AgentClaudeModel"
-                  },
-                  "type": [
-                    "array",
-                    "null"
-                  ]
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "List Claude subscription models for a session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/palette": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists the built-in commands, skills, custom commands, and MCP prompts the session can run, as the terminal's / palette shows them.",
-        "operationId": "get-agent-session-palette",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentPalette"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "List a pw code session's slash commands",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/pin": {
-      "delete": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nClears the session's pinned mark.",
-        "operationId": "unpin-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Unpin a pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      },
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nMarks the session pinned, which lists it ahead of the others in its group here and in pw agents.",
-        "operationId": "pin-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Pin a pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/plan": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /plan and answers with what the caller owes next: prose to show, the session's plan, a request to send as a turn, a plan file only the terminal can open, or nothing.",
-        "operationId": "run-agent-session-plan",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentCommandArgs"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentPlanResult"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Run /plan in a pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/pull-requests": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns each pull request the session opened and whether it is open, merged, or closed, as the machine's own GitHub login reads it. A state is absent when the machine could not read it.",
-        "operationId": "get-agent-session-pull-requests",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentPullRequests"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Get the state of a pw code session's pull requests",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/queued/{turnId}": {
-      "delete": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves a message waiting behind the running turn before its own turn starts. Refused with 409 once that turn has started.",
-        "operationId": "withdraw-agent-session-message",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "The turn id the message was accepted as.",
-            "in": "path",
-            "name": "turnId",
-            "required": true,
-            "schema": {
-              "description": "The turn id the message was accepted as.",
-              "pattern": "^tn-[0-9a-f]+$",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Take back a queued message",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/rename": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRenames the session in the machine's store. Refused while the session is mid-turn, and while another host holds it live.",
-        "operationId": "rename-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentRenameBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Rename a pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/settings": {
-      "patch": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nChanges what a live session runs as, and answers with its new state. The machine's daemon decides whether it is allowed: the session must be live, an org provider model needs an allocation, and a session already running above the remote permission ceiling can only be changed from the machine itself.",
-        "operationId": "update-agent-session-settings",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentSessionSettingsBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SessionState"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Change a running pw code session's model, allocation or authority",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/shell": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns a command in the session's workspace, as typing ! in the terminal does, and answers with its output. The command and output join the conversation, and the session starts the model's reply to them. The machine refuses a command its owner could not approve from a remote origin or that its PreToolUse hooks deny, and stops one that runs longer than about 20 seconds.",
-        "operationId": "run-agent-session-shell",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentShellBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentShellOutput"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Run a ! shell command in a pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/stop": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStops the running turn and pauses the session's goal, if it has one, so no further turn starts on its own. Background subagents keep running. Like interrupt, it is not held to the remote permission ceiling. A session with nothing running answers as stopped.",
-        "operationId": "stop-agent-session",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Stop a pw code session's work",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/machines/{machine}/sessions/{id}/texts": {
-      "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSaves pasted text in the session's folder on the machine, so a message can refer to it by placeholder instead of carrying it. The machine holds it to the same checks as a message: remote control must be on, and a session running above the remote permission ceiling takes pastes only from the machine itself. A session keeps at most 256MiB of pastes, and one with tools off refuses a paste too large to send its model inline, since the model could not read it as a file.",
-        "operationId": "upload-agent-session-paste",
-        "parameters": [
-          {
-            "description": "Machine id from the machines list.",
-            "in": "path",
-            "name": "machine",
-            "required": true,
-            "schema": {
-              "description": "Machine id from the machines list.",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Session id as the daemon reports it.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "description": "Session id as the daemon reports it.",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentPasteUpload"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentPasteSaved"
-                }
-              }
-            },
-            "description": "Created"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Save a large paste with a pw code session",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
-    "/api/agents/sessions": {
-      "get": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nAsks every connected cluster and instance you can log in to for its pw code sessions and returns them together with each machine's reachability. Nothing is stored: the answer is what the machines report right now.",
-        "operationId": "list-agent-sessions",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentSessionsResponse"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "List pw code sessions across your machines",
-        "tags": [
-          "Agents"
-        ],
-        "x-internal": true
-      }
-    },
     "/api/ai-usage/breakdown": {
       "get": {
         "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nGet AI usage breakdown for the current user.",
@@ -66556,6 +64523,2437 @@
         "tags": [
           "Clusters"
         ]
+      }
+    },
+    "/api/code/machines/{machine}/claude-code/accounts": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude Code accounts on a machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
+        "operationId": "get-agent-machine-claude-accounts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "account",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "refresh",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "namesOnly",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentClaudeAccount"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Claude Code accounts on a machine",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/claude-code/accounts/{name}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemove a Claude Code account from a machine. Signs the account out with the official Claude Code CLI and deletes its profile on the machine. The default account and an account a session uses cannot be removed. The daemon enforces its remote start policy.",
+        "operationId": "delete-agent-machine-claude-account",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9_.@-]{1,64}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Remove a Claude Code account from a machine",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/claude-code/logins": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStart Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.",
+        "operationId": "start-agent-claude-login",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentClaudeLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentClaudeLoginEvent"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Start Claude Code sign-in",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/claude-code/logins/{loginId}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nCancel Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.",
+        "operationId": "cancel-agent-claude-login",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "loginId",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{32}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Cancel Claude Code sign-in",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRead Claude Code sign-in output. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.",
+        "operationId": "get-agent-claude-login",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "loginId",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{32}$",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "wait",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentClaudeLoginEvent"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Read Claude Code sign-in output",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/claude-code/logins/{loginId}/input": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSend input to Claude Code sign-in. Runs the official Claude Code sign-in on the chosen host. Authentication stays with Claude Code and does not change the conversation or selected model.",
+        "operationId": "write-agent-claude-login",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "loginId",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{32}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentClaudeLoginInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Send input to Claude Code sign-in",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/claude-code/models": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude subscription models on a machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
+        "operationId": "get-agent-machine-claude-models",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "account",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "refresh",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "namesOnly",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentClaudeModel"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Claude subscription models on a machine",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the pw code sessions one machine's daemon reports, with the machine's reachability.",
+        "operationId": "list-agent-machine-sessions",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentMachineSessionsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List pw code sessions on one machine",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStarts a session in the given workspace on the machine. The machine allows this only when its owner turned remoteControl on, and clamps the session to the machine's remoteMaxPermissionMode.",
+        "operationId": "create-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSessionDetail"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Start a pw code session on a machine",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves the session and its transcripts from the machine. Destroying a session is wider than sending it a turn, so the machine's daemon holds it to the same limit: a session that refuses remote drive can only be deleted from the machine itself.",
+        "operationId": "delete-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      },
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns one session's transcript and state as its machine's daemon reports them. Live updates stream from /ws/code/machines/{machine}/sessions/{id}/events.",
+        "operationId": "get-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSessionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a pw code session transcript",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/approvals/{approvalId}": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nAnswers an approval the agent is waiting on. The machine's daemon decides whether the answer is allowed: a session running above the remote permission ceiling can only be answered from the machine itself, and an answer sent from here never grants standing directory access.",
+        "operationId": "answer-agent-session-approval",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Approval id from the session detail or an approval_request event.",
+            "in": "path",
+            "name": "approvalId",
+            "required": true,
+            "schema": {
+              "description": "Approval id from the session detail or an approval_request event.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovalAnswer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Answer a pw code approval request",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/archive": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nClears the session's archived mark, so it takes messages again.",
+        "operationId": "restore-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Restore an archived pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nShuts the session down and marks it archived, keeping its transcript: nothing runs in it, its schedules included, and it refuses messages until it is restored. Refused while another host holds it live.",
+        "operationId": "archive-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Archive a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/background": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nMoves the Bash commands the agent is waiting on to the background, as ctrl+b does in the terminal: they keep running, the turn goes on without their output, and the agent is told when each exits. Nothing happens when no command is running.",
+        "operationId": "background-agent-session-commands",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Move a pw code session's running commands to the background",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/claude-code/accounts": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude Code accounts on a session's machine. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
+        "operationId": "get-agent-session-claude-accounts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "account",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "refresh",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "namesOnly",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentClaudeAccount"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Claude Code accounts on a session's machine",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/clear": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /clear: the conversation continues as a fresh session, whose id this answers with. Refused while a turn runs.",
+        "operationId": "clear-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSessionCleared"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Start a pw code session over",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/commands": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns a built-in command such as /status, /model, or /cost and answers with its output. /clear, /compact, /goal, and /plan have routes of their own; skills and custom commands are sent as messages.",
+        "operationId": "run-agent-session-command",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentCommandBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentCommandOutput"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Run a built-in slash command in a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/compact": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /compact, optionally focused on what to keep. Refused while a turn runs.",
+        "operationId": "compact-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentCompactBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentCompacted"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Summarize a pw code session's context",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/direction": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nHands text to the turn in flight, which the model reads at its next step rather than after the turn ends, the way typing into a busy pw code terminal does. Not delivered means no turn was running to take it; send it as a message instead.",
+        "operationId": "steer-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentDirectionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDirectionDelivered"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Steer a pw code session's running turn",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/fork": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nCopies the session and its subagent transcripts into a new one on the same machine, leaving the original untouched. Refused while the session is mid-turn, and while another host holds it live.",
+        "operationId": "fork-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSessionForked"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Copy a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/github-images/{asset}": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns an image from the description of a pull request the session opened, read with the GitHub CLI login on the session's machine. A private repository's attachments load only that way, so a transcript that shows one reads it here.",
+        "operationId": "get-agent-session-github-image",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The id in the attachment's github.com/user-attachments/assets/{asset} URL.",
+            "in": "path",
+            "name": "asset",
+            "required": true,
+            "schema": {
+              "description": "The id in the attachment's github.com/user-attachments/assets/{asset} URL.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/*": {
+                "schema": {
+                  "contentMediaType": "application/octet-stream",
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "The image, as PNG, JPEG, GIF or WebP.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get an image attached to a pull request a pw code session opened",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/goal": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /goal with the same arguments the terminal takes. Setting or resuming a goal starts a turn on the session.",
+        "operationId": "set-agent-session-goal",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentCommandArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentCommandOutput"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set, show, or clear a pw code session's goal",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/images": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSaves an image on the machine for a message to carry, as pasting one into the pw code terminal does. Send the path it answers with in the message's images, and name the image in the text by its [Image #N] placeholder.",
+        "operationId": "upload-agent-session-image",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentImageBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentImageSaved"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Attach an image to a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/images/{ref}": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns the full-size image a transcript item or event names by its ref, where the transcript itself carries only a small preview. The machine's daemon holds it to the same rules as the transcript.",
+        "operationId": "get-agent-session-image",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ref of an image in the session's transcript or event feed.",
+            "in": "path",
+            "name": "ref",
+            "required": true,
+            "schema": {
+              "description": "The ref of an image in the session's transcript or event feed.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/*": {
+                "schema": {
+                  "contentMediaType": "application/octet-stream",
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "The image, as PNG, JPEG, GIF or WebP.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get an image from a pw code session at full size",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/interrupt": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStops the work in flight and nothing else. This one route is not held to the remote permission ceiling: a session that refuses to be driven from here can still be stopped from here.",
+        "operationId": "interrupt-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Stop the turn a pw code session is running",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/messages": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSends a message to the session, starting a turn or queueing behind the one in flight. The machine's daemon decides whether it is allowed: a session running above the remote permission ceiling, or one whose lease another host holds, can only be driven from the machine itself.",
+        "operationId": "send-agent-session-message",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentMessageAccepted"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Send a message to a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/models": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nList Claude subscription models for a session. Uses the machine's existing Claude Code login. The daemon enforces its remote start or session control policy.",
+        "operationId": "get-agent-session-claude-models",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "account",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "refresh",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "namesOnly",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentClaudeModel"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List Claude subscription models for a session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/palette": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nLists the built-in commands, skills, custom commands, and MCP prompts the session can run, as the terminal's / palette shows them.",
+        "operationId": "get-agent-session-palette",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPalette"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List a pw code session's slash commands",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/pin": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nClears the session's pinned mark.",
+        "operationId": "unpin-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Unpin a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      },
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nMarks the session pinned, which lists it ahead of the others in its group here and in pw agents.",
+        "operationId": "pin-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Pin a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/plan": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns /plan and answers with what the caller owes next: prose to show, the session's plan, a request to send as a turn, a plan file only the terminal can open, or nothing.",
+        "operationId": "run-agent-session-plan",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentCommandArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPlanResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Run /plan in a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/pull-requests": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nReturns each pull request the session opened and whether it is open, merged, or closed, as the machine's own GitHub login reads it. A state is absent when the machine could not read it.",
+        "operationId": "get-agent-session-pull-requests",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPullRequests"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get the state of a pw code session's pull requests",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/queued/{turnId}": {
+      "delete": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRemoves a message waiting behind the running turn before its own turn starts. Refused with 409 once that turn has started.",
+        "operationId": "withdraw-agent-session-message",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The turn id the message was accepted as.",
+            "in": "path",
+            "name": "turnId",
+            "required": true,
+            "schema": {
+              "description": "The turn id the message was accepted as.",
+              "pattern": "^tn-[0-9a-f]+$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Take back a queued message",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/recap": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nHas the session write a short recap of its goal and next step for a reader who stepped away. The recap arrives on the session's event feed as a recap event and stays in its history. The request stays open while the model writes it, up to about a minute, and ending the request stops it. The machine answers without writing one while its recaps are off, a turn or other work is under way, or too little has happened since the last recap.",
+        "operationId": "recap-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Recap where a pw code session stands",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/rename": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRenames the session in the machine's store. Refused while the session is mid-turn, and while another host holds it live.",
+        "operationId": "rename-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRenameBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Rename a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/settings": {
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nChanges what a live session runs as, and answers with its new state. The machine's daemon decides whether it is allowed: the session must be live, an org provider model needs an allocation, and a session already running above the remote permission ceiling can only be changed from the machine itself.",
+        "operationId": "update-agent-session-settings",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentSessionSettingsBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionState"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Change a running pw code session's model, allocation or authority",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/shell": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nRuns a command in the session's workspace, as typing ! in the terminal does, and answers with its output. The command and output join the conversation, and the session starts the model's reply to them. The machine refuses a command its owner could not approve from a remote origin or that its PreToolUse hooks deny, and stops one that runs longer than about 20 seconds.",
+        "operationId": "run-agent-session-shell",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentShellBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentShellOutput"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Run a ! shell command in a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/stop": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nStops the running turn and pauses the session's goal, if it has one, so no further turn starts on its own. Background subagents keep running. Like interrupt, it is not held to the remote permission ceiling. A session with nothing running answers as stopped.",
+        "operationId": "stop-agent-session",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Stop a pw code session's work",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/machines/{machine}/sessions/{id}/texts": {
+      "post": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nSaves pasted text in the session's folder on the machine, so a message can refer to it by placeholder instead of carrying it. The machine holds it to the same checks as a message: remote control must be on, and a session running above the remote permission ceiling takes pastes only from the machine itself. A session keeps at most 256MiB of pastes, and one with tools off refuses a paste too large to send its model inline, since the model could not read it as a file.",
+        "operationId": "upload-agent-session-paste",
+        "parameters": [
+          {
+            "description": "Machine id from the machines list.",
+            "in": "path",
+            "name": "machine",
+            "required": true,
+            "schema": {
+              "description": "Machine id from the machines list.",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Session id as the daemon reports it.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Session id as the daemon reports it.",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentPasteUpload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPasteSaved"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Save a large paste with a pw code session",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
+      }
+    },
+    "/api/code/sessions": {
+      "get": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nAsks every connected cluster and instance you can log in to for its pw code sessions and returns them together with each machine's reachability. Nothing is stored: the answer is what the machines report right now.",
+        "operationId": "list-agent-sessions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSessionsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List pw code sessions across your machines",
+        "tags": [
+          "Agents"
+        ],
+        "x-internal": true
       }
     },
     "/api/code/settings": {
@@ -90826,6 +91224,74 @@
         ]
       }
     },
+    "/api/organizations/{organization}/policies/notebook-kernel-idle-timeout": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets how many seconds a member's notebook kernel can sit unused before it is stopped, unless the kernel sets its own: 0 never stops one, anything else from 15 minutes to 7 days; the platform default when unset. A kernel running code is never stopped. Unavailable when the platform sets the policy.",
+        "operationId": "set-organization-notebook-kernel-idle-timeout-policy",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Seconds a notebook kernel can sit unused before it is stopped, unless the kernel sets its own: 0 never stops one, anything else from 15 minutes to 7 days",
+                "examples": [
+                  86400
+                ],
+                "format": "int64",
+                "maximum": 604800,
+                "minimum": 0,
+                "type": "integer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/IntPolicyOutput"
+                  },
+                  "description": "Map of int policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set organization policy: notebook-kernel-idle-timeout",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
     "/api/organizations/{organization}/policies/workspace-ssh-key-type": {
       "post": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets the type of newly generated workspace SSH keys for the organization: ecdsa-p256 (the default), rsa-4096, rsa-3072 or ed25519. Existing keys change type at their next rotation.",
@@ -104870,6 +105336,87 @@
         "tags": [
           "Notebooks"
         ]
+      },
+      "patch": {
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nChanges how long a notebook kernel may sit unused before it is stopped.",
+        "operationId": "update-kernel",
+        "parameters": [
+          {
+            "description": "The name of the organization.",
+            "in": "path",
+            "name": "organization",
+            "required": true,
+            "schema": {
+              "description": "The name of the organization.",
+              "examples": [
+                "parallelworks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Username of the target user.",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "description": "Username of the target user.",
+              "examples": [
+                "Jake.Thayne"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kernel ID.",
+            "in": "path",
+            "name": "kernel",
+            "required": true,
+            "schema": {
+              "description": "Kernel ID.",
+              "examples": [
+                "60c72b2f9b1e8d001c8e4f3a"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKernelBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KernelResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update notebook kernel",
+        "tags": [
+          "Notebooks"
+        ]
       }
     },
     "/api/organizations/{organization}/users/{user}/kernels/{kernel}/restart": {
@@ -113968,6 +114515,126 @@
         ]
       }
     },
+    "/api/platform/integrations/smtp": {
+      "delete": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nRemoves the SMTP integration and deletes the stored password. Email then uses the server's EMAIL_* environment variables, if set.",
+        "operationId": "delete-smtp-config",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Remove SMTP integration configuration",
+        "tags": [
+          "Platform"
+        ]
+      },
+      "get": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nReturns the SMTP server the platform sends email through. The password is never returned.",
+        "operationId": "get-smtp-config",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmtpConfigResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get SMTP integration configuration",
+        "tags": [
+          "Platform"
+        ]
+      },
+      "put": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nSaves the SMTP server the platform sends all email through, such as password resets, notifications and reports.",
+        "operationId": "update-smtp-config",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutSMTPConfigInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmtpConfigResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update SMTP integration configuration",
+        "tags": [
+          "Platform"
+        ]
+      }
+    },
+    "/api/platform/integrations/smtp/test": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\n\u003e This is a platform-admin only route.\n\nSends a test email to the signed-in administrator through the configured SMTP server.",
+        "operationId": "post-smtp-test-email",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Send an SMTP test email",
+        "tags": [
+          "Platform"
+        ]
+      }
+    },
     "/api/platform/keys": {
       "get": {
         "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nReturns the list of JWKS, these are public keys used for verifying JWTs",
@@ -115148,6 +115815,59 @@
           }
         },
         "summary": "Set platform policy: no-root-access",
+        "tags": [
+          "Policies"
+        ]
+      }
+    },
+    "/api/platform/policies/notebook-kernel-idle-timeout": {
+      "post": {
+        "description": "\u003e This is a system-level route, so the response will be independent of the currently authenticated user.\n\nSets how many seconds a notebook kernel can sit unused before it is stopped, unless the kernel sets its own, for every organization: 0 never stops one, anything else from 15 minutes to 7 days; the platform default when unset. A kernel running code is never stopped.",
+        "operationId": "set-platform-notebook-kernel-idle-timeout-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Seconds a notebook kernel can sit unused before it is stopped, unless the kernel sets its own: 0 never stops one, anything else from 15 minutes to 7 days",
+                "examples": [
+                  86400
+                ],
+                "format": "int64",
+                "maximum": 604800,
+                "minimum": 0,
+                "type": "integer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/IntPolicyOutput"
+                  },
+                  "description": "Map of int policies",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Set platform policy: notebook-kernel-idle-timeout",
         "tags": [
           "Policies"
         ]
@@ -122498,7 +123218,7 @@
   "webhooks": {
     "agentSessionEvents": {
       "get": {
-        "description": "One JSON frame per message on the WebSocket at /ws/agents/machines/{machine}/sessions/{id}/events?after=N. Pass the last seq seen as after to resume; a replay_truncated frame means the transcript must be refetched.",
+        "description": "One JSON frame per message on the WebSocket at /ws/code/machines/{machine}/sessions/{id}/events?after=N. Pass the last seq seen as after to resume; a replay_truncated frame means the transcript must be refetched.",
         "operationId": "agent-session-events",
         "responses": {
           "200": {

@@ -129,52 +129,6 @@ func (m *ResponseMeta) RegisterNodeHeaders() RegisterNodeHeaders {
 	}
 }
 
-// StartAgentClaudeLoginHeaders holds the headers StartAgentClaudeLogin declares. A header the spec
-// types as something other than a string is nil when the response omits it.
-type StartAgentClaudeLoginHeaders struct {
-	CacheControl string
-}
-
-// StartAgentClaudeLoginHeaders reads the headers StartAgentClaudeLogin declares out of the captured
-// response.
-func (m *ResponseMeta) StartAgentClaudeLoginHeaders() StartAgentClaudeLoginHeaders {
-	return StartAgentClaudeLoginHeaders{
-		CacheControl: m.Header.Get("Cache-Control"),
-	}
-}
-
-// GetAgentClaudeLoginHeaders holds the headers GetAgentClaudeLogin declares. A header the spec
-// types as something other than a string is nil when the response omits it.
-type GetAgentClaudeLoginHeaders struct {
-	CacheControl string
-}
-
-// GetAgentClaudeLoginHeaders reads the headers GetAgentClaudeLogin declares out of the captured
-// response.
-func (m *ResponseMeta) GetAgentClaudeLoginHeaders() GetAgentClaudeLoginHeaders {
-	return GetAgentClaudeLoginHeaders{
-		CacheControl: m.Header.Get("Cache-Control"),
-	}
-}
-
-// GetAgentSessionImageHeaders holds the headers GetAgentSessionImage declares. A header the spec
-// types as something other than a string is nil when the response omits it.
-type GetAgentSessionImageHeaders struct {
-	CacheControl        string
-	ContentType         string
-	XContentTypeOptions string
-}
-
-// GetAgentSessionImageHeaders reads the headers GetAgentSessionImage declares out of the captured
-// response.
-func (m *ResponseMeta) GetAgentSessionImageHeaders() GetAgentSessionImageHeaders {
-	return GetAgentSessionImageHeaders{
-		CacheControl:        m.Header.Get("Cache-Control"),
-		ContentType:         m.Header.Get("Content-Type"),
-		XContentTypeOptions: m.Header.Get("X-Content-Type-Options"),
-	}
-}
-
 // DownloadAiChatAttachmentDirectHeaders holds the headers DownloadAiChatAttachmentDirect declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type DownloadAiChatAttachmentDirectHeaders struct {
@@ -350,6 +304,70 @@ func (m *ResponseMeta) GetChangelogAuthorAvatarHeaders() GetChangelogAuthorAvata
 	return GetChangelogAuthorAvatarHeaders{
 		CacheControl: m.Header.Get("Cache-Control"),
 		ContentType:  m.Header.Get("Content-Type"),
+	}
+}
+
+// StartAgentClaudeLoginHeaders holds the headers StartAgentClaudeLogin declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type StartAgentClaudeLoginHeaders struct {
+	CacheControl string
+}
+
+// StartAgentClaudeLoginHeaders reads the headers StartAgentClaudeLogin declares out of the captured
+// response.
+func (m *ResponseMeta) StartAgentClaudeLoginHeaders() StartAgentClaudeLoginHeaders {
+	return StartAgentClaudeLoginHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// GetAgentClaudeLoginHeaders holds the headers GetAgentClaudeLogin declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetAgentClaudeLoginHeaders struct {
+	CacheControl string
+}
+
+// GetAgentClaudeLoginHeaders reads the headers GetAgentClaudeLogin declares out of the captured
+// response.
+func (m *ResponseMeta) GetAgentClaudeLoginHeaders() GetAgentClaudeLoginHeaders {
+	return GetAgentClaudeLoginHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+	}
+}
+
+// GetAgentSessionGithubImageHeaders holds the headers GetAgentSessionGithubImage declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetAgentSessionGithubImageHeaders struct {
+	CacheControl        string
+	ContentType         string
+	XContentTypeOptions string
+}
+
+// GetAgentSessionGithubImageHeaders reads the headers GetAgentSessionGithubImage declares out of the captured
+// response.
+func (m *ResponseMeta) GetAgentSessionGithubImageHeaders() GetAgentSessionGithubImageHeaders {
+	return GetAgentSessionGithubImageHeaders{
+		CacheControl:        m.Header.Get("Cache-Control"),
+		ContentType:         m.Header.Get("Content-Type"),
+		XContentTypeOptions: m.Header.Get("X-Content-Type-Options"),
+	}
+}
+
+// GetAgentSessionImageHeaders holds the headers GetAgentSessionImage declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetAgentSessionImageHeaders struct {
+	CacheControl        string
+	ContentType         string
+	XContentTypeOptions string
+}
+
+// GetAgentSessionImageHeaders reads the headers GetAgentSessionImage declares out of the captured
+// response.
+func (m *ResponseMeta) GetAgentSessionImageHeaders() GetAgentSessionImageHeaders {
+	return GetAgentSessionImageHeaders{
+		CacheControl:        m.Header.Get("Cache-Control"),
+		ContentType:         m.Header.Get("Content-Type"),
+		XContentTypeOptions: m.Header.Get("X-Content-Type-Options"),
 	}
 }
 

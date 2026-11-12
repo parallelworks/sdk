@@ -94,6 +94,9 @@ func encodeObject(members []jsonMember) ([]byte, error) {
 }
 
 type AiModelConfig struct {
+	// USD per prompt token written to the provider's prompt cache; omitted means 1.25 times the input rate
+	CacheWriteRate *float64 `json:"cacheWriteRate,omitempty"`
+	// USD per prompt token served from the provider's prompt cache; omitted means the input rate
 	CachedInputRate   *float64 `json:"cachedInputRate,omitempty"`
 	ContextWindow     *int64   `json:"contextWindow,omitempty"`
 	Enabled           bool     `json:"enabled"`
@@ -880,6 +883,7 @@ type AgentSessionDetail struct {
 	ClaudeAccount        *string           `json:"claudeAccount,omitempty"`
 	CreatedAt            time.Time         `json:"createdAt"`
 	Effort               *string           `json:"effort,omitempty"`
+	Goal                 *GoalStatus       `json:"goal,omitempty"`
 	History              []HistoryItem     `json:"history"`
 	ID                   string            `json:"id"`
 	InputTokens          *int64            `json:"inputTokens,omitempty"`
@@ -901,6 +905,7 @@ type AgentSessionDetail struct {
 	TurnID               *string           `json:"turnId,omitempty"`
 	TurnStartedAt        *time.Time        `json:"turnStartedAt,omitempty"`
 	UpdatedAt            time.Time         `json:"updatedAt"`
+	UsageLimitResumeAt   *time.Time        `json:"usageLimitResumeAt,omitempty"`
 	WaitingForUsageLimit *bool             `json:"waitingForUsageLimit,omitempty"`
 	Workspace            string            `json:"workspace"`
 	WorkspaceUntrusted   *bool             `json:"workspaceUntrusted,omitempty"`
@@ -951,6 +956,7 @@ type AgentStreamEvent struct {
 	AgentType     *string          `json:"agentType,omitempty"`
 	Approval      *ApprovalRequest `json:"approval,omitempty"`
 	ApprovalID    *string          `json:"approvalId,omitempty"`
+	Archive       *ArchiveChange   `json:"archive,omitempty"`
 	Args          *string          `json:"args,omitempty"`
 	Background    *bool            `json:"background,omitempty"`
 	CallID        *string          `json:"callId,omitempty"`
@@ -971,6 +977,7 @@ type AgentStreamEvent struct {
 	Notice        *string          `json:"notice,omitempty"`
 	Pastes        []PasteView      `json:"pastes,omitempty"`
 	Result        *string          `json:"result,omitempty"`
+	ResumeAt      *time.Time       `json:"resumeAt,omitempty"`
 	Seq           int64            `json:"seq"`
 	ShellProgress *ShellProgress   `json:"shellProgress,omitempty"`
 	StartLine     *int64           `json:"startLine,omitempty"`
@@ -1464,6 +1471,11 @@ type ApprovalRequest struct {
 
 type AppsOutputBody struct {
 	Apps []App `json:"apps"`
+}
+
+type ArchiveChange struct {
+	At     time.Time `json:"at"`
+	Remote *bool     `json:"remote,omitempty"`
 }
 
 type AskOption struct {
@@ -4658,6 +4670,8 @@ type CreateKernelBody struct {
 	Buckets []string `json:"buckets,omitempty"`
 	// Environment to schedule the kernel's worker onto. Cluster targets only.
 	EnvironmentID *string `json:"environmentId,omitempty"`
+	// Minutes the kernel may sit unused before it is stopped, overriding the organization's default. 0 never stops it; anything else must be at least 15.
+	IdleTimeoutMinutes *int64 `json:"idleTimeoutMinutes,omitempty"`
 	// Memory ceiling (GB) for the kernel's processes. Workspace targets only; defaults to half the workspace's own limit and may not exceed it.
 	MemoryLimit *float64 `json:"memoryLimit,omitempty"`
 	// Environment modules (Lmod or Environment Modules) loaded before the kernel starts, such as R/4.3.1. Not for workspace targets.
@@ -8971,18 +8985,19 @@ type HelmReleaseValuesResponseBody struct {
 }
 
 type HistoryItem struct {
-	CallID   *string        `json:"callId,omitempty"`
-	Decision *ToolDecision  `json:"decision,omitempty"`
-	FromMain *bool          `json:"fromMain,omitempty"`
-	Images   []ImageContent `json:"images,omitempty"`
-	Kind     string         `json:"kind"`
-	Pastes   []PasteView    `json:"pastes,omitempty"`
-	PlanBody *string        `json:"planBody,omitempty"`
-	Text     *string        `json:"text,omitempty"`
-	ToolArgs *string        `json:"toolArgs,omitempty"`
-	ToolName *string        `json:"toolName,omitempty"`
-	TurnEnd  *TurnEnd       `json:"turnEnd,omitempty"`
-	TurnID   *string        `json:"turnId,omitempty"`
+	CallID    *string        `json:"callId,omitempty"`
+	Decision  *ToolDecision  `json:"decision,omitempty"`
+	FromMain  *bool          `json:"fromMain,omitempty"`
+	Images    []ImageContent `json:"images,omitempty"`
+	Kind      string         `json:"kind"`
+	Pastes    []PasteView    `json:"pastes,omitempty"`
+	PlanBody  *string        `json:"planBody,omitempty"`
+	StartLine *int64         `json:"startLine,omitempty"`
+	Text      *string        `json:"text,omitempty"`
+	ToolArgs  *string        `json:"toolArgs,omitempty"`
+	ToolName  *string        `json:"toolName,omitempty"`
+	TurnEnd   *TurnEnd       `json:"turnEnd,omitempty"`
+	TurnID    *string        `json:"turnId,omitempty"`
 }
 
 type HostForwardSetting struct {
@@ -9426,6 +9441,8 @@ type KernelResponse struct {
 	CanStop *bool `json:"canStop,omitempty"`
 	// Creation time.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// Minutes the kernel may sit unused before it is stopped, after falling back to the organization and platform defaults. 0 means never.
+	EffectiveIdleTimeoutMinutes int64 `json:"effectiveIdleTimeoutMinutes"`
 	// ID of the environment the kernel's worker was scheduled onto.
 	EnvironmentID *string `json:"environmentId,omitempty"`
 	// Why the kernel failed to start.
@@ -9434,6 +9451,10 @@ type KernelResponse struct {
 	Events []KernelEvent `json:"events,omitempty"`
 	// Kernel ID.
 	ID string `json:"id"`
+	// When the kernel stops if nothing uses it before then. Set on a running kernel with an idle timeout.
+	IdleStopAt *time.Time `json:"idleStopAt,omitempty"`
+	// This kernel's own idle timeout in minutes, overriding its organization's. 0 never stops it. Absent when it inherits.
+	IdleTimeoutMinutes *int64 `json:"idleTimeoutMinutes,omitempty"`
 	// When the kernel last served a request from its notebook.
 	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
 	// Memory ceiling (GB) applied to the kernel's processes.
@@ -9443,7 +9464,11 @@ type KernelResponse struct {
 	// Kernel name.
 	Name *string `json:"name,omitempty"`
 	// Hostname of the compute node the kernel runs on.
-	NodeHostname      *string               `json:"nodeHostname,omitempty"`
+	NodeHostname *string `json:"nodeHostname,omitempty"`
+	// On-demand price per hour, in USD, of the cloud node the kernel's worker holds. Absent when the kernel holds no node of its own (controller, instance or workspace kernels) or the price is unknown.
+	NodeHourlyPrice *float64 `json:"nodeHourlyPrice,omitempty"`
+	// Instance type of the cloud node the kernel's worker holds.
+	NodeInstanceType  *string               `json:"nodeInstanceType,omitempty"`
 	Owner             *KernelOwner          `json:"owner,omitempty"`
 	PythonEnvironment *PythonEnvironmentRef `json:"pythonEnvironment,omitempty"`
 	// Scheduling parameters used for the kernel's worker.
@@ -10678,7 +10703,10 @@ type MigrationStepResponse struct {
 
 type ModelEntry struct {
 	// Budget allocation the provider's resource group bills; absent for org and session models
-	Allocation        *string  `json:"allocation,omitempty"`
+	Allocation *string `json:"allocation,omitempty"`
+	// USD per prompt token written to the provider's prompt cache; 0 means cache writes are free
+	CacheWriteRate *float64 `json:"cache_write_rate,omitempty"`
+	// USD per prompt token served from the provider's prompt cache; 0 means cache reads are free
 	CachedInputRate   *float64 `json:"cached_input_rate,omitempty"`
 	ContextWindow     *int64   `json:"context_window,omitempty"`
 	Created           int64    `json:"created"`
@@ -11788,7 +11816,9 @@ type OrgMarketplaceItemBody struct {
 }
 
 type OrgModelEntry struct {
-	// USD per input token served from the provider's prompt cache (0 = the input rate)
+	// USD per prompt token written to the provider's prompt cache; omitted means 1.25 times the input rate
+	CacheWriteRate *float64 `json:"cacheWriteRate,omitempty"`
+	// USD per prompt token served from the provider's prompt cache; omitted means the input rate
 	CachedInputRate *float64 `json:"cachedInputRate,omitempty"`
 	// Model context window in tokens (0 = unknown)
 	ContextWindow int64 `json:"contextWindow"`
@@ -12179,8 +12209,14 @@ type PatchInstanceStatusBody struct {
 }
 
 type PatchModelConfigInputBody struct {
-	// USD per input token served from the provider's prompt cache (0 = the input rate)
+	// USD per prompt token written to the provider's prompt cache (0 = free)
+	CacheWriteRate *float64 `json:"cacheWriteRate,omitempty"`
+	// USD per prompt token served from the provider's prompt cache (0 = free)
 	CachedInputRate *float64 `json:"cachedInputRate,omitempty"`
+	// When true and cacheWriteRate is not set, removes the cache write rate so cache writes cost 1.25 times the input rate
+	ClearCacheWriteRate *bool `json:"clearCacheWriteRate,omitempty"`
+	// When true and cachedInputRate is not set, removes the cached input rate so cache reads cost the input rate
+	ClearCachedInputRate *bool `json:"clearCachedInputRate,omitempty"`
 	// Model context window in tokens (0 = unknown)
 	ContextWindow *int64 `json:"contextWindow,omitempty"`
 	// Whether the model is enabled
@@ -12218,6 +12254,8 @@ type PatchResourceBody struct {
 }
 
 type PatchSessionBody struct {
+	// For endpoint sessions: Let users the endpoint is shared with connect scripts and SDKs to it with pw sessions connect, which relays raw TCP so the app gets whatever headers the client sends, including Authorization. The platform doesn't set or check X-PW-User on these connections, so the app must authenticate them itself.
+	AllowConnect *bool `json:"allowConnect,omitempty"`
 	// API key for the session.
 	APIKey *string `json:"apiKey,omitempty"`
 	// Human-readable session description.
@@ -12695,6 +12733,8 @@ type PostSessionAccessBody struct {
 }
 
 type PostSessionBody struct {
+	// For endpoint sessions: Let users the endpoint is shared with connect scripts and SDKs to it with pw sessions connect, which relays raw TCP so the app gets whatever headers the client sends, including Authorization. The platform doesn't set or check X-PW-User on these connections, so the app must authenticate them itself.
+	AllowConnect *bool `json:"allowConnect,omitempty"`
 	// API key for the session.
 	APIKey *string `json:"apiKey,omitempty"`
 	// Human-readable session description.
@@ -12919,6 +12959,8 @@ type Project struct {
 }
 
 type PromptTokensDetails struct {
+	// Prompt tokens written to the provider's prompt cache
+	CacheWriteTokens *int64 `json:"cache_write_tokens,omitempty"`
 	// Prompt tokens served from the provider's prompt cache
 	CachedTokens int64 `json:"cached_tokens"`
 }
@@ -13881,7 +13923,22 @@ type PutPlatformAttachedStorage struct {
 	StorageID string `json:"storageId"`
 }
 
+type PutSMTPConfigInputBody struct {
+	// Address emails are sent from. Defaults to noreply@parallelworks.com.
+	FromAddress *string `json:"fromAddress,omitempty"`
+	// SMTP server host name.
+	Host string `json:"host"`
+	// Password to sign in to the SMTP server with. Stored as a credential and never returned. Leave it out to keep the saved password; it is required when the host changes.
+	Password *string `json:"password,omitempty"`
+	// SMTP server port, usually 587.
+	Port int64 `json:"port"`
+	// User name to sign in to the SMTP server with.
+	Username string `json:"username"`
+}
+
 type PutSessionBody struct {
+	// Let users the endpoint is shared with connect scripts and SDKs to it with pw sessions connect, which relays raw TCP so the app gets whatever headers the client sends, including Authorization. The platform doesn't set or check X-PW-User on these connections, so the app must authenticate them itself. Omit to leave a takeover's existing value unchanged.
+	AllowConnect *bool `json:"allowConnect,omitempty"`
 	// Human-readable session description.
 	Description *string `json:"description,omitempty"`
 	// Keep the endpoint session after the serving process exits. Without it a stopped endpoint session is deleted after a grace period. Omit to leave a takeover's existing value unchanged.
@@ -15338,6 +15395,8 @@ type SentrySettings struct {
 }
 
 type Session struct {
+	// Whether users the endpoint is shared with can relay connections to it with pw sessions connect.
+	AllowConnect *bool `json:"allowConnect,omitempty"`
 	// Session creation time.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// Human-readable session description.
@@ -15697,6 +15756,21 @@ type Slice struct {
 	Offset int64 `json:"offset"`
 	// Current size of the log in bytes
 	Size int64 `json:"size"`
+}
+
+type SMTPConfigResponse struct {
+	// Whether an SMTP server is saved in the admin panel.
+	Configured bool `json:"configured"`
+	// Whether the server's EMAIL_* environment variables set up SMTP. They are used while no SMTP server is saved in the admin panel.
+	EnvironmentConfigured bool `json:"environmentConfigured"`
+	// Address emails are sent from.
+	FromAddress *string `json:"fromAddress,omitempty"`
+	// SMTP server host name.
+	Host *string `json:"host,omitempty"`
+	// SMTP server port.
+	Port *int64 `json:"port,omitempty"`
+	// User name the platform signs in to the SMTP server with.
+	Username *string `json:"username,omitempty"`
 }
 
 type Snapshot struct {
@@ -16695,6 +16769,11 @@ type UpdateInstancePermissionsInputBody struct {
 	Groups map[string]map[string]bool `json:"groups"`
 	// Map of permission names to whether to share with entire organization
 	Organization map[string]bool `json:"organization"`
+}
+
+type UpdateKernelBody struct {
+	// Minutes the kernel may sit unused before it is stopped. 0 never stops it; anything else must be at least 15. Null uses the organization's default.
+	IdleTimeoutMinutes *int64 `json:"idleTimeoutMinutes"`
 }
 
 type UpdateManagedClusterInputBody struct {
