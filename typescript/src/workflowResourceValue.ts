@@ -1,4 +1,4 @@
-import type { components } from '@parallelworks/client'
+import type { components } from './types/api'
 
 export function computeResourceValue(
   cluster: components['schemas']['GeneralCluster']
