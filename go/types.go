@@ -615,6 +615,11 @@ type AddWorkspaceMountBody struct {
 	WorkspacePath string `json:"workspacePath"`
 }
 
+type AddedDirectory struct {
+	Path   string   `json:"path"`
+	Scopes []string `json:"scopes,omitempty"`
+}
+
 type AdminPasswordResetInputBody struct {
 	// Confirmation of the new password
 	ConfirmPassword string `json:"confirmPassword"`
@@ -633,6 +638,16 @@ type AdminProduct struct {
 	OrganizationScope     string                 `json:"organizationScope"`
 	ProviderScope         string                 `json:"providerScope"`
 	SetupStatus           string                 `json:"setupStatus"`
+}
+
+type AgentArchiveBody struct {
+	// Archive once the running turn ends instead of stopping it. A message sent, the turn stopped, or the turn ending in an error cancels the archive. Archives at once when no turn is running.
+	AfterTurn *bool `json:"afterTurn,omitempty"`
+}
+
+type AgentArchived struct {
+	// The session archives once its running turn ends.
+	Deferred *bool `json:"deferred,omitempty"`
 }
 
 type AgentClaudeAccount struct {
@@ -748,8 +763,17 @@ type AgentImageSaved struct {
 	Path string `json:"path"`
 }
 
+type AgentLeaveWorktreeBody struct {
+	// Also remove the worktree, with its branch and everything in it; it stays on the machine otherwise.
+	Remove *bool `json:"remove,omitempty"`
+	// With remove, the worktree's root as the session's worktree last showed it. Nothing changes when the session no longer works there.
+	WorktreeRoot *string `json:"worktreeRoot,omitempty"`
+}
+
 type AgentMachine struct {
 	AgentVersion *string `json:"agentVersion,omitempty"`
+	// The daemon can archive a session once its running turn ends.
+	ArchiveAfterTurn *bool `json:"archiveAfterTurn,omitempty"`
 	// The daemon supports removing Claude Code accounts from the web.
 	ClaudeAccountRemove *bool `json:"claudeAccountRemove,omitempty"`
 	// Organization and host policy allow the Claude Code integration.
@@ -774,7 +798,9 @@ type AgentMachine struct {
 	PermissionModes         []string `json:"permissionModes,omitempty"`
 	RemoteMaxPermissionMode *string  `json:"remoteMaxPermissionMode,omitempty"`
 	RemoteStart             *bool    `json:"remoteStart,omitempty"`
-	Status                  string   `json:"status"`
+	// The daemon stores which of the reader's groups a session is in.
+	SessionGroups *bool  `json:"sessionGroups,omitempty"`
+	Status        string `json:"status"`
 	// Session store the pw code daemon reported, when it answered. Machines with the same store list the same sessions, which are listed once.
 	StoreID *string `json:"storeId,omitempty"`
 }
@@ -825,7 +851,7 @@ type AgentPlanResult struct {
 }
 
 type AgentPullRequest struct {
-	// Absent when the machine could not read the pull request from GitHub.
+	// Absent when the machine could not read the pull request from GitHub, or the merge request from GitLab.
 	State *string `json:"state,omitempty"`
 	URL   string  `json:"url"`
 }
@@ -848,6 +874,7 @@ type AgentSession struct {
 	Branch            *string           `json:"branch,omitempty"`
 	CreatedAt         time.Time         `json:"createdAt"`
 	Effort            *string           `json:"effort,omitempty"`
+	Group             *string           `json:"group,omitempty"`
 	ID                string            `json:"id"`
 	InputTokens       *int64            `json:"inputTokens,omitempty"`
 	LastError         *string           `json:"lastError,omitempty"`
@@ -875,40 +902,43 @@ type AgentSessionCleared struct {
 }
 
 type AgentSessionDetail struct {
-	Allocation           *string           `json:"allocation,omitempty"`
-	Approvals            []ApprovalRequest `json:"approvals,omitempty"`
-	ArchivedAt           *time.Time        `json:"archivedAt,omitempty"`
-	AutoName             *string           `json:"autoName,omitempty"`
-	Branch               *string           `json:"branch,omitempty"`
-	ClaudeAccount        *string           `json:"claudeAccount,omitempty"`
-	CreatedAt            time.Time         `json:"createdAt"`
-	Effort               *string           `json:"effort,omitempty"`
-	Goal                 *GoalStatus       `json:"goal,omitempty"`
-	History              []HistoryItem     `json:"history"`
-	ID                   string            `json:"id"`
-	InputTokens          *int64            `json:"inputTokens,omitempty"`
-	LastError            *string           `json:"lastError,omitempty"`
-	LastSeq              *int64            `json:"lastSeq,omitempty"`
-	LiveHost             *string           `json:"liveHost,omitempty"`
-	MachineID            string            `json:"machineId"`
-	Messages             int64             `json:"messages"`
-	Model                string            `json:"model"`
-	Name                 *string           `json:"name,omitempty"`
-	OutputTokens         *int64            `json:"outputTokens,omitempty"`
-	PermissionMode       *string           `json:"permissionMode,omitempty"`
-	PinnedAt             *time.Time        `json:"pinnedAt,omitempty"`
-	Preview              string            `json:"preview"`
-	PullRequestStates    map[string]string `json:"pullRequestStates,omitempty"`
-	PullRequests         []string          `json:"pullRequests,omitempty"`
-	RemoteControl        *bool             `json:"remoteControl,omitempty"`
-	Status               string            `json:"status"`
-	TurnID               *string           `json:"turnId,omitempty"`
-	TurnStartedAt        *time.Time        `json:"turnStartedAt,omitempty"`
-	UpdatedAt            time.Time         `json:"updatedAt"`
-	UsageLimitResumeAt   *time.Time        `json:"usageLimitResumeAt,omitempty"`
-	WaitingForUsageLimit *bool             `json:"waitingForUsageLimit,omitempty"`
-	Workspace            string            `json:"workspace"`
-	WorkspaceUntrusted   *bool             `json:"workspaceUntrusted,omitempty"`
+	AddDirs              []AddedDirectory   `json:"addDirs,omitempty"`
+	Allocation           *string            `json:"allocation,omitempty"`
+	AllowedDirs          []AllowedDirectory `json:"allowedDirs,omitempty"`
+	Approvals            []ApprovalRequest  `json:"approvals,omitempty"`
+	ArchivedAt           *time.Time         `json:"archivedAt,omitempty"`
+	AutoName             *string            `json:"autoName,omitempty"`
+	Branch               *string            `json:"branch,omitempty"`
+	ClaudeAccount        *string            `json:"claudeAccount,omitempty"`
+	CreatedAt            time.Time          `json:"createdAt"`
+	Effort               *string            `json:"effort,omitempty"`
+	Goal                 *GoalStatus        `json:"goal,omitempty"`
+	Group                *string            `json:"group,omitempty"`
+	History              []HistoryItem      `json:"history"`
+	ID                   string             `json:"id"`
+	InputTokens          *int64             `json:"inputTokens,omitempty"`
+	LastError            *string            `json:"lastError,omitempty"`
+	LastSeq              *int64             `json:"lastSeq,omitempty"`
+	LiveHost             *string            `json:"liveHost,omitempty"`
+	MachineID            string             `json:"machineId"`
+	Messages             int64              `json:"messages"`
+	Model                string             `json:"model"`
+	Name                 *string            `json:"name,omitempty"`
+	OutputTokens         *int64             `json:"outputTokens,omitempty"`
+	PermissionMode       *string            `json:"permissionMode,omitempty"`
+	PinnedAt             *time.Time         `json:"pinnedAt,omitempty"`
+	Preview              string             `json:"preview"`
+	PullRequestStates    map[string]string  `json:"pullRequestStates,omitempty"`
+	PullRequests         []string           `json:"pullRequests,omitempty"`
+	RemoteControl        *bool              `json:"remoteControl,omitempty"`
+	Status               string             `json:"status"`
+	TurnID               *string            `json:"turnId,omitempty"`
+	TurnStartedAt        *time.Time         `json:"turnStartedAt,omitempty"`
+	UpdatedAt            time.Time          `json:"updatedAt"`
+	UsageLimitResumeAt   *time.Time         `json:"usageLimitResumeAt,omitempty"`
+	WaitingForUsageLimit *bool              `json:"waitingForUsageLimit,omitempty"`
+	Workspace            string             `json:"workspace"`
+	WorkspaceUntrusted   *bool              `json:"workspaceUntrusted,omitempty"`
 }
 
 type AgentSessionForked struct {
@@ -917,15 +947,41 @@ type AgentSessionForked struct {
 	MachineID string `json:"machineId"`
 }
 
+type AgentSessionGroupBody struct {
+	// Id of one of the reader's groups, as their preferences name it.
+	Group string `json:"group"`
+}
+
 type AgentSessionSettingsBody struct {
 	// Allocation to bill; the daemon requires one for org provider models.
 	Allocation *string `json:"allocation,omitempty"`
 	// An existing Claude Code account on the machine; applies after the current turn.
 	ClaudeAccount *string `json:"claudeAccount,omitempty"`
+	// Reasoning effort from the session's next turn on: low, medium, high, xhigh or max, which a model runs at the nearest level it takes. default, none and minimal are earlier names for high, low and low.
+	Effort *string `json:"effort,omitempty"`
 	// Model id to switch the session to.
 	Model *string `json:"model,omitempty"`
 	// Authority the session runs with; the machine refuses anything above its remoteMaxPermissionMode.
 	PermissionMode *string `json:"permissionMode,omitempty"`
+}
+
+type AgentSessionWorktree struct {
+	// The branch git made for the worktree.
+	Branch *string `json:"branch,omitempty"`
+	// How many commits on the worktree's branch since it was made removing it would delete.
+	CommitCount *int64 `json:"commitCount,omitempty"`
+	// The first of those commits, as git log --oneline lists them.
+	Commits []string `json:"commits,omitempty"`
+	// How many uncommitted files removing the worktree would delete.
+	FileCount *int64 `json:"fileCount,omitempty"`
+	// The first of those files, as git status --porcelain lists them.
+	Files []string `json:"files,omitempty"`
+	// Deleting the session can remove the worktree with it. False for a worktree the session didn't create, or one a WorktreeCreate hook made.
+	Removable *bool `json:"removable,omitempty"`
+	// The worktree's checkout on the machine.
+	Root *string `json:"root,omitempty"`
+	// git could not read what removing the worktree would delete.
+	Unchecked *bool `json:"unchecked,omitempty"`
 }
 
 type AgentSessionsResponse struct {
@@ -976,6 +1032,7 @@ type AgentStreamEvent struct {
 	NoteID        *string          `json:"noteId,omitempty"`
 	Notice        *string          `json:"notice,omitempty"`
 	Pastes        []PasteView      `json:"pastes,omitempty"`
+	Recorded      *bool            `json:"recorded,omitempty"`
 	Result        *string          `json:"result,omitempty"`
 	ResumeAt      *time.Time       `json:"resumeAt,omitempty"`
 	Seq           int64            `json:"seq"`
@@ -986,6 +1043,16 @@ type AgentStreamEvent struct {
 	TurnEnd       *TurnEnd         `json:"turnEnd,omitempty"`
 	TurnID        *string          `json:"turnId,omitempty"`
 	Type          string           `json:"type"`
+}
+
+type AgentSubagents struct {
+	// The session's subagents in the order they started. Their status is empty when the machine's pw code is too old to say how its subagents stand.
+	Subagents []Subagent `json:"subagents"`
+}
+
+type AgentWorktreeLeft struct {
+	// left keeps the worktree on the machine; remove_failed is a session that left it, but whose worktree could not be removed and stays.
+	Outcome string `json:"outcome"`
 }
 
 type AiConnectionInventory struct {
@@ -1151,7 +1218,7 @@ type Allocation struct {
 	ID *string `json:"id,omitempty"`
 	// Allocation name
 	Name string `json:"name"`
-	// Not chargeable: the allocation only holds budget for the allocations under it, and nothing can bill it directly.
+	// Not chargeable: the allocation only holds budget for the allocations under it, and can't be billed directly.
 	NonChargeable *bool `json:"nonChargeable,omitempty"`
 	// Parent allocation name
 	Parent *string `json:"parent,omitempty"`
@@ -1286,6 +1353,12 @@ type Allocations struct {
 	Total *float64 `json:"total,omitempty"`
 	// Used allocation
 	Used *float64 `json:"used,omitempty"`
+}
+
+type AllowedDirectory struct {
+	Edit    *bool  `json:"edit,omitempty"`
+	Path    string `json:"path"`
+	Subtree *bool  `json:"subtree,omitempty"`
 }
 
 type AllowedInstanceTypes struct {
@@ -1454,19 +1527,20 @@ type ApprovalAnswer struct {
 }
 
 type ApprovalRequest struct {
-	Agent      *string       `json:"agent,omitempty"`
-	CallID     *string       `json:"callId,omitempty"`
-	Command    *string       `json:"command,omitempty"`
-	CreatedAt  time.Time     `json:"createdAt"`
-	ID         string        `json:"id"`
-	Kind       string        `json:"kind"`
-	Mode       *string       `json:"mode,omitempty"`
-	Plan       *string       `json:"plan,omitempty"`
-	PlanPath   *string       `json:"planPath,omitempty"`
-	Questions  []AskQuestion `json:"questions,omitempty"`
-	Reason     *string       `json:"reason,omitempty"`
-	SubagentID *string       `json:"subagentId,omitempty"`
-	Tool       *string       `json:"tool,omitempty"`
+	Agent      *string           `json:"agent,omitempty"`
+	AllowDir   *AllowedDirectory `json:"allowDir,omitempty"`
+	CallID     *string           `json:"callId,omitempty"`
+	Command    *string           `json:"command,omitempty"`
+	CreatedAt  time.Time         `json:"createdAt"`
+	ID         string            `json:"id"`
+	Kind       string            `json:"kind"`
+	Mode       *string           `json:"mode,omitempty"`
+	Plan       *string           `json:"plan,omitempty"`
+	PlanPath   *string           `json:"planPath,omitempty"`
+	Questions  []AskQuestion     `json:"questions,omitempty"`
+	Reason     *string           `json:"reason,omitempty"`
+	SubagentID *string           `json:"subagentId,omitempty"`
+	Tool       *string           `json:"tool,omitempty"`
 }
 
 type AppsOutputBody struct {
@@ -1474,6 +1548,7 @@ type AppsOutputBody struct {
 }
 
 type ArchiveChange struct {
+	Agent  *bool     `json:"agent,omitempty"`
 	At     time.Time `json:"at"`
 	Remote *bool     `json:"remote,omitempty"`
 }
@@ -4562,10 +4637,10 @@ type CreateFirewallBlockedIPInputBody struct {
 
 type CreateFirewallExclusionInputBody struct {
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
-	// HTTP methods it applies to; absent applies to every method
+	// HTTP methods it applies to; defaults to every method
 	Methods []string `json:"methods,omitempty"`
 	Note    *string  `json:"note,omitempty"`
-	// Route it applies to, such as /api/organizations/{organization}/users, where each {param} stands for one path segment and a trailing /* covers every path below; absent applies to every route
+	// Route it applies to, such as /api/organizations/{organization}/users, where each {param} stands for one path segment and a trailing /* covers every path below; defaults to every route
 	Path *string `json:"path,omitempty"`
 	// CRS detection rule to remove; give it or tag
 	RuleID *int64 `json:"ruleId,omitempty"`
@@ -4583,11 +4658,11 @@ type CreateFirewallRuleInputBody struct {
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 	// What block logs and evaluations report when it matches
 	Message string `json:"message"`
-	// HTTP methods it applies to; absent applies to every method
+	// HTTP methods it applies to; defaults to every method
 	Methods  []string `json:"methods,omitempty"`
 	Note     *string  `json:"note,omitempty"`
 	Operator string   `json:"operator"`
-	// Route it applies to, such as /api/organizations/{organization}/users, where each {param} stands for one path segment and a trailing /* covers every path below; absent applies to every route
+	// Route it applies to, such as /api/organizations/{organization}/users, where each {param} stands for one path segment and a trailing /* covers every path below; defaults to every route
 	Path *string `json:"path,omitempty"`
 	// 1 inspects the request line and headers, and also runs on routes whose shipped exemption turns the rest of the firewall off; 2 also inspects the body
 	Phase  *int64 `json:"phase,omitempty"`
@@ -5027,6 +5102,8 @@ type CreateSessionBody struct {
 	Allocation *string `json:"allocation,omitempty"`
 	// An existing Claude Code account on the machine; used for subscription models.
 	ClaudeAccount *string `json:"claudeAccount,omitempty"`
+	// Reasoning effort: low, medium, high, xhigh or max, which a model runs at the nearest level it takes. The machine's saved level is used when empty. default, none and minimal are earlier names for high, low and low.
+	Effort *string `json:"effort,omitempty"`
 	// Model id; the machine's default is used when empty.
 	Model *string `json:"model,omitempty"`
 	// Authority the session runs with, clamped by the machine to its remoteMaxPermissionMode; the machine's default is used when empty.
@@ -5231,7 +5308,7 @@ type CreatedStorage struct {
 }
 
 type CredentialListingError struct {
-	// The failure was on our side; its details are in the billing service's log, not here.
+	// The failure was internal to the platform; its details are in the billing service's log, not here.
 	Internal *bool `json:"internal,omitempty"`
 	// The cloud provider's error response. Empty for an internal failure.
 	Message string `json:"message"`
@@ -5291,7 +5368,7 @@ type CustomResourceTag struct {
 type CustomResourceTagsOutputBody struct {
 	// Tag keys the platform applies automatically and reserves; they cannot be used as custom keys. Keys beginning with 'pw-' are also reserved.
 	ReservedKeys []string `json:"reservedKeys"`
-	// Custom tags applied to every cloud resource provisioned for the organization. Cloud providers cap how many tags a resource can hold (for example 10 on Oracle and 15 on Azure DNS zones); when a resource would exceed its cap, tags are applied best effort with essential platform tags taking priority.
+	// Custom tags applied to every cloud resource provisioned for the organization. Cloud providers cap how many tags a resource can hold (for example 10 on Oracle and 15 on Azure DNS zones); when a resource would exceed its cap, the platform's tracking tags are applied first, then as many custom tags as fit.
 	Tags []CustomResourceTag `json:"tags"`
 }
 
@@ -5903,7 +5980,7 @@ type ErrorLogItem struct {
 type EvaluateFirewallRequestInputBody struct {
 	// Request body; give a Content-Type header too, so it is parsed the way the server would parse it
 	Body *string `json:"body,omitempty"`
-	// Address the request comes from; defaults to 192.0.2.1, which nothing blocks
+	// Address the request comes from; defaults to 192.0.2.1, an address reserved for documentation
 	ClientIP *string `json:"clientIp,omitempty"`
 	// Request headers; Host defaults to localhost
 	Headers map[string]string `json:"headers,omitempty"`
@@ -6354,7 +6431,7 @@ type FirewallEvaluationMatch struct {
 type FirewallExclusion struct {
 	CreatedAt time.Time `json:"createdAt"`
 	CreatedBy string    `json:"createdBy"`
-	// When it stops applying; absent applies until deleted
+	// When it stops applying; without it, applies until deleted
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 	// Rule id that block logs and evaluations report for this exclusion
 	FirewallRuleID int64 `json:"firewallRuleId"`
@@ -6389,7 +6466,7 @@ type FirewallRule struct {
 	Argument  string    `json:"argument"`
 	CreatedAt time.Time `json:"createdAt"`
 	CreatedBy string    `json:"createdBy"`
-	// When it stops applying; absent applies until deleted
+	// When it stops applying; without it, applies until deleted
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 	// Rule id that block logs and evaluations report for this rule
 	FirewallRuleID int64 `json:"firewallRuleId"`
@@ -6480,7 +6557,7 @@ type FiscalYearUsage struct {
 type FlatError struct {
 	// Cloud service provider
 	Csp string `json:"csp"`
-	// The failure was on our side, such as a database error; its details are in the billing service's log, not here.
+	// The failure was internal to the platform, such as a database error; its details are in the billing service's log, not here.
 	Internal *bool `json:"internal,omitempty"`
 	// The cloud provider's error response. Empty for an internal failure.
 	Message string `json:"message"`
@@ -12483,7 +12560,7 @@ type PlatformSettings struct {
 	PlatformName *string `json:"platformName,omitempty"`
 	// Platform-wide enabled previews.
 	Previews []string `json:"previews"`
-	// Indicates if the platform advertises the QUIC tunnel transport. Clients use this to decide whether to dial QUIC first (falling back to websocket) so they don't pay the fallback cost where QUIC isn't offered.
+	// Indicates if the platform advertises the QUIC tunnel transport. Clients use this to decide whether to dial QUIC first, falling back to WebSocket, and skip it where QUIC isn't offered.
 	QuicTunnelEnabled bool `json:"quicTunnelEnabled"`
 	// Whether Sentry error tracking is enabled.
 	SentryEnabled *bool `json:"sentryEnabled,omitempty"`
@@ -12569,13 +12646,13 @@ type PlatformSettingsAdmin struct {
 	// Minimum agent semantic version. Agents below this version are rejected at handshake and disconnected when already connected. Empty disables enforcement.
 	MinimumAgentVersion *string               `json:"minimumAgentVersion,omitempty"`
 	OrphanRemovals      OrphanRemovalSettings `json:"orphanRemovals"`
-	// Whether ingress could not read the stored orphan removal switches, such as a value of the wrong type. Billing removes nothing while it can't read them either.
+	// Whether the stored orphan removal switches could not be read, such as a value of the wrong type. No orphaned resources are removed while they can't be read.
 	OrphanRemovalsUnreadable *bool `json:"orphanRemovalsUnreadable,omitempty"`
 	// Body served at /.well-known/pki-validation/{filename}.
 	PkiValidationContent *string `json:"pkiValidationContent,omitempty"`
 	// Filename served at /.well-known/pki-validation/. Empty disables the endpoint.
 	PkiValidationFilename *string `json:"pkiValidationFilename,omitempty"`
-	// Whether to advertise the QUIC tunnel transport to clients. When on (and the listener is bound), clients discover QUIC via /api/settings and dial it first; off by default so nobody pays the websocket fallback cost where QUIC isn't offered.
+	// Whether to advertise the QUIC tunnel transport to clients. When on, and the QUIC listener bound at startup, clients discover QUIC via /api/settings and dial it first, falling back to WebSocket. Off by default, so that clients don't try QUIC first where it isn't routed.
 	QuicTunnelEnabled bool `json:"quicTunnelEnabled"`
 	// Sentry DSN for backend services.
 	SentryDsn *string `json:"sentryDsn,omitempty"`
@@ -12593,8 +12670,10 @@ type PlatformSettingsAdmin struct {
 	SentryTracesSampleRate float64 `json:"sentryTracesSampleRate"`
 	// Whether SSH clients verify server host keys: off (the default) skips verification; warn connects to a host with no recorded key and reports it; enforce refuses that host. Under warn and enforce a recorded key that differs from the presented one always fails.
 	SSHHostKeyVerification string `json:"sshHostKeyVerification"`
-	// Whether to advertise resumable SSH sessions, letting tunneled connections to supporting agents survive tunnel drops and ingress restarts. Off by default; turning it off instantly falls new connections back to plain bridging.
+	// Whether to advertise resumable SSH sessions, letting tunneled connections to supporting agents survive tunnel drops and ingress restarts. Off by default; turning it off takes effect at once: new connections are no longer resumable.
 	SSHResumeEnabled bool `json:"sshResumeEnabled"`
+	// Whether the stuck-run sweeper only reports the runs it would end, in its job log on Background jobs (queue ingress-sweep-kept), and ends none. It wins over stuckRunSweeperEnabled. Off by default.
+	StuckRunSweeperDryRun bool `json:"stuckRunSweeperDryRun"`
 	// Whether the stuck-run sweeper is enabled. When on, workflow runs whose executor stops sending heartbeats are automatically finalized. On by default; turn it off only if a deployment cannot keep executor heartbeats flowing.
 	StuckRunSweeperEnabled bool `json:"stuckRunSweeperEnabled"`
 	// Markdown Terms & Conditions shown to new users during onboarding. Empty disables the prompt.
@@ -14503,7 +14582,7 @@ type ReservationItem struct {
 }
 
 type ReserveSubdomainBody struct {
-	// The subdomain to reserve: a label ("my-app"), which lands on the platform's default sessions domain, or the full host under any registered sessions domain ("my-app.<sessions domain>").
+	// The subdomain to reserve: a label ("my-app"), which is placed under the platform's default sessions domain, or the full host under any registered sessions domain ("my-app.<sessions domain>").
 	Subdomain string `json:"subdomain"`
 }
 
@@ -14660,7 +14739,7 @@ type ResourceCredential struct {
 	AccountID *string `json:"accountId,omitempty"`
 	// CloudAccount (or legacy key) name.
 	AccountName *string `json:"accountName,omitempty"`
-	// The cloud provider's error from the last credential fetch. Empty when the fetch failed on our side, such as in the vault or database; those details are in the billing service's log.
+	// The cloud provider's error from the last credential fetch. Empty when the failure was internal to the platform, such as in the vault or database; those details are in the billing service's log.
 	CredentialError *string `json:"credentialError,omitempty"`
 	// Last successful credential fetch.
 	CredentialRefreshedAt *time.Time `json:"credentialRefreshedAt,omitempty"`
@@ -14959,7 +15038,7 @@ type RotateSecretInputBody struct {
 }
 
 type RunError struct {
-	// The failure was on our side, such as a database error; its details are in the billing service's log, not here.
+	// The failure was internal to the platform, such as a database error; its details are in the billing service's log, not here.
 	Internal *bool `json:"internal,omitempty"`
 	// The cloud provider's error response. Empty for an internal failure.
 	Message string `json:"message"`
@@ -15560,7 +15639,9 @@ type SessionSoftware struct {
 }
 
 type SessionState struct {
+	AddDirs              []AddedDirectory         `json:"addDirs,omitempty"`
 	Allocation           *string                  `json:"allocation,omitempty"`
+	AllowedDirs          []AllowedDirectory       `json:"allowedDirs,omitempty"`
 	Attribution          *bool                    `json:"attribution,omitempty"`
 	AutoCompactWindow    *int64                   `json:"autoCompactWindow,omitempty"`
 	AutoName             *string                  `json:"autoName,omitempty"`
@@ -16112,6 +16193,39 @@ type StringPolicyOutput struct {
 	Value *string `json:"value,omitempty"`
 }
 
+type Subagent struct {
+	AgentType        *string        `json:"agentType,omitempty"`
+	AwaitingApproval *bool          `json:"awaitingApproval,omitempty"`
+	Background       *bool          `json:"background,omitempty"`
+	Color            *string        `json:"color,omitempty"`
+	Current          *bool          `json:"current,omitempty"`
+	Description      *string        `json:"description,omitempty"`
+	EndedAt          *time.Time     `json:"endedAt,omitempty"`
+	ID               string         `json:"id"`
+	Model            *string        `json:"model,omitempty"`
+	StartedAt        *time.Time     `json:"startedAt,omitempty"`
+	Status           string         `json:"status"`
+	Usage            *SubagentUsage `json:"usage,omitempty"`
+}
+
+type SubagentDetail struct {
+	AgentType        *string           `json:"agentType,omitempty"`
+	Approvals        []ApprovalRequest `json:"approvals"`
+	AwaitingApproval *bool             `json:"awaitingApproval,omitempty"`
+	Background       *bool             `json:"background,omitempty"`
+	Color            *string           `json:"color,omitempty"`
+	Current          *bool             `json:"current,omitempty"`
+	Description      *string           `json:"description,omitempty"`
+	EndedAt          *time.Time        `json:"endedAt,omitempty"`
+	History          []HistoryItem     `json:"history"`
+	ID               string            `json:"id"`
+	LastSeq          int64             `json:"lastSeq"`
+	Model            *string           `json:"model,omitempty"`
+	StartedAt        *time.Time        `json:"startedAt,omitempty"`
+	Status           string            `json:"status"`
+	Usage            *SubagentUsage    `json:"usage,omitempty"`
+}
+
 type SubagentUsage struct {
 	InputTokens       *int64 `json:"inputTokens,omitempty"`
 	LatestInputTokens *int64 `json:"latestInputTokens,omitempty"`
@@ -16655,6 +16769,8 @@ type UpdateAdminPlatformSettingsInputBody struct {
 	SSHHostKeyVerification *string `json:"sshHostKeyVerification,omitempty"`
 	// Whether to advertise resumable SSH sessions to clients.
 	SSHResumeEnabled *bool `json:"sshResumeEnabled,omitempty"`
+	// Whether the stuck-run sweeper only reports the runs it would end.
+	StuckRunSweeperDryRun *bool `json:"stuckRunSweeperDryRun,omitempty"`
 	// Whether the stuck-run sweeper is enabled.
 	StuckRunSweeperEnabled *bool `json:"stuckRunSweeperEnabled,omitempty"`
 	// Markdown Terms & Conditions shown to new users during onboarding. Empty disables the prompt.

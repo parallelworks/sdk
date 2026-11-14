@@ -3441,6 +3441,24 @@ func (c *Client) GetResourcesSummary(ctx context.Context, opts ...GetResourcesSu
 	return &result, nil
 }
 
+// StartStuckRunDryRun - Start a stuck-run dry run
+//
+// > This is a system-level route, so the response will be independent of the currently authenticated user.
+//
+// > This is a platform-admin only route.
+//
+// Queues a stuck-run sweep that only reports, in its job log, the runs it would end now, whatever the sweeper's mode. Returns the job, or the dry run already waiting or running
+func (c *Client) StartStuckRunDryRun(ctx context.Context) (*BackgroundJob, error) {
+
+	path := "/api/admin/stuck-run-sweeper/dry-runs"
+
+	var result BackgroundJob
+	if err := c.do(ctx, "POST", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // KillUserWorkspace - Kill User Workspace
 //
 // > This is a system-level route, so the response will be independent of the currently authenticated user.
@@ -4831,6 +4849,40 @@ func (c *Client) GetAgentMachineClaudeModels(ctx context.Context, machine string
 	return &result, nil
 }
 
+// GetAgentWorkspacePaletteParams contains the parameters for the GetAgentWorkspacePalette operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentWorkspacePaletteParams struct {
+	// Absolute path of the directory the session would start in.
+	Workspace string `json:"workspace"`
+	// Model the session would start with: a Claude model leaves out the commands Claude Code does not support.
+	Model *string `json:"model,omitempty"`
+}
+
+// GetAgentWorkspacePalette - List the slash commands a new pw code session could start with
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the skills, custom commands, and prompt commands a session started in the workspace could take as its first prompt, loaded as that session would load them. The machine answers only when its owner lets sessions start remotely.
+func (c *Client) GetAgentWorkspacePalette(ctx context.Context, machine string, params GetAgentWorkspacePaletteParams) (*AgentPalette, error) {
+
+	path := "/api/code/machines/{machine}/palette"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "workspace", "form", false, params.Workspace)
+
+	addQueryParam(queryValues, "model", "form", false, params.Model)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result AgentPalette
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ListAgentMachineSessions - List pw code sessions on one machine
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -4883,16 +4935,37 @@ func (c *Client) GetAgentSession(ctx context.Context, machine string, id string)
 	return &result, nil
 }
 
+// DeleteAgentSessionParams contains the parameters for the DeleteAgentSession operation.
+// Required parameters are value fields; optional parameters are pointers.
+type DeleteAgentSessionParams struct {
+	// remove also removes the worktree EnterWorktree made for the session, with its branch and everything in it; it stays otherwise.
+	Worktree *string `json:"worktree,omitempty"`
+	// With worktree=remove, the worktree's root as the session's worktree last showed it. The machine refuses when the session no longer works there.
+	WorktreeRoot *string `json:"worktreeRoot,omitempty"`
+}
+
 // DeleteAgentSession - Delete a pw code session
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Removes the session and its transcripts from the machine. Destroying a session is wider than sending it a turn, so the machine's daemon holds it to the same limit: a session that refuses remote drive can only be deleted from the machine itself.
-func (c *Client) DeleteAgentSession(ctx context.Context, machine string, id string) error {
+// Removes the session and its transcripts from the machine. Destroying a session is wider than sending it a turn, so the machine's daemon holds it to the same limit: a session that refuses remote drive can only be deleted from the machine itself. The worktree the session works in stays on disk unless worktree=remove asks to remove it too, which the machine refuses, deleting nothing, when the session no longer works there, another session does, the session is working, or its permission mode can't edit files.
+func (c *Client) DeleteAgentSession(ctx context.Context, machine string, id string, opts ...DeleteAgentSessionParams) error {
 
 	path := "/api/code/machines/{machine}/sessions/{id}"
 	path = pathReplace(path, "machine", "simple", false, machine)
 	path = pathReplace(path, "id", "simple", false, id)
+	var params DeleteAgentSessionParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "worktree", "form", false, params.Worktree)
+
+	addQueryParam(queryValues, "worktreeRoot", "form", false, params.WorktreeRoot)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
 
 	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
 		return parseErrorResponse(err)
@@ -4922,17 +4995,18 @@ func (c *Client) AnswerAgentSessionApproval(ctx context.Context, machine string,
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Shuts the session down and marks it archived, keeping its transcript: nothing runs in it, its schedules included, and it refuses messages until it is restored. Refused while another host holds it live.
-func (c *Client) ArchiveAgentSession(ctx context.Context, machine string, id string) error {
+// Shuts the session down and marks it archived, keeping its transcript. Archiving stops its work and its scheduled tasks, and the session refuses messages until it is restored. A running turn is stopped, unless afterTurn asks to archive once it ends. Refused while another host holds it live.
+func (c *Client) ArchiveAgentSession(ctx context.Context, machine string, id string, body *AgentArchiveBody) (*AgentArchived, error) {
 
 	path := "/api/code/machines/{machine}/sessions/{id}/archive"
 	path = pathReplace(path, "machine", "simple", false, machine)
 	path = pathReplace(path, "id", "simple", false, id)
 
-	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
-		return parseErrorResponse(err)
+	var result AgentArchived
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
 	}
-	return nil
+	return &result, nil
 }
 
 // RestoreAgentSession - Restore an archived pw code session
@@ -5136,6 +5210,40 @@ func (c *Client) SetAgentSessionGoal(ctx context.Context, machine string, id str
 	return &result, nil
 }
 
+// GroupAgentSession - Put a pw code session in one of your groups
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Records on the session's machine which of your groups the session is in, replacing any other. The groups themselves, with their names, are kept in your preferences. Refused by a machine whose pw predates groups.
+func (c *Client) GroupAgentSession(ctx context.Context, machine string, id string, body AgentSessionGroupBody) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/group"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "PUT", path, body, "application/json", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// UngroupAgentSession - Take a pw code session out of its group
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Clears the group recorded on the session.
+func (c *Client) UngroupAgentSession(ctx context.Context, machine string, id string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/group"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "DELETE", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // UploadAgentSessionImage - Attach an image to a pw code session
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -5322,7 +5430,7 @@ func (c *Client) RunAgentSessionPlan(ctx context.Context, machine string, id str
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Returns each pull request the session opened and whether it is open, merged, or closed, as the machine's own GitHub login reads it. A state is absent when the machine could not read it.
+// Returns each GitHub pull request and GitLab merge request the session opened and whether it is open, merged, or closed, as the machine's own GitHub or GitLab login reads it. A state is absent when the machine could not read it.
 func (c *Client) GetAgentSessionPullRequests(ctx context.Context, machine string, id string) (*AgentPullRequests, error) {
 
 	path := "/api/code/machines/{machine}/sessions/{id}/pull-requests"
@@ -5388,7 +5496,7 @@ func (c *Client) RenameAgentSession(ctx context.Context, machine string, id stri
 	return nil
 }
 
-// UpdateAgentSessionSettings - Change a running pw code session's model, allocation or authority
+// UpdateAgentSessionSettings - Change a running pw code session's model, effort, allocation or authority
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
@@ -5441,6 +5549,116 @@ func (c *Client) StopAgentSession(ctx context.Context, machine string, id string
 	return nil
 }
 
+// ListAgentSessionSubagents - List a pw code session's subagents
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the subagents the session started, running or finished, in the order they started, with how each one's latest run stands. Only a session its machine is running answers: reading the list never opens a saved session, which answers 404.
+func (c *Client) ListAgentSessionSubagents(ctx context.Context, machine string, id string) (*AgentSubagents, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/subagents"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentSubagents
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// StopAgentSessionSubagents - Stop every subagent of a pw code session
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Stops the work in flight on each of the session's subagents and leaves the session's own turn running. Like interrupt, it is not held to the remote permission ceiling. A session with no subagent running answers as stopped.
+func (c *Client) StopAgentSessionSubagents(ctx context.Context, machine string, id string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/subagents/stop-all"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
+// GetAgentSessionSubagent - Get a pw code subagent's transcript
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns one subagent's conversation, the approvals it is waiting on, and how its latest run stands. lastSeq is where the session's event feed stood at this read: the events after it, under the subagent's id, carry what the transcript does not hold yet. A turn sent to the subagent as a message streams there in full; a task the session delegated shows only as subagent_action events, so read this again to follow one.
+func (c *Client) GetAgentSessionSubagent(ctx context.Context, machine string, id string, subID string) (*SubagentDetail, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/subagents/{subId}"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "subId", "simple", false, subID)
+
+	var result SubagentDetail
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SteerAgentSessionSubagent - Steer a pw code subagent's running work
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Hands text to the subagent's task or turn in flight, which its model reads at its next step. Not delivered means the subagent was not running; send it as a message instead.
+func (c *Client) SteerAgentSessionSubagent(ctx context.Context, machine string, id string, subID string, body AgentDirectionBody) (*AgentDirectionDelivered, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/subagents/{subId}/direction"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "subId", "simple", false, subID)
+
+	var result AgentDirectionDelivered
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// SendAgentSessionSubagentMessage - Send a message to a pw code subagent
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Starts a turn on a subagent that is not running one. Its events arrive on the session's event feed under the subagent's id and the turn id this answers with. Refused with 409 while the subagent is mid-turn; steer it instead. The machine's daemon holds it to the rules of a message to the session.
+func (c *Client) SendAgentSessionSubagentMessage(ctx context.Context, machine string, id string, subID string, body SendMessageBody) (*AgentMessageAccepted, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/subagents/{subId}/messages"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "subId", "simple", false, subID)
+
+	var result AgentMessageAccepted
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// StopAgentSessionSubagent - Stop a pw code subagent
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Stops the subagent's task or turn in flight and nothing else: the session and its other subagents keep running. Like interrupt, it is not held to the remote permission ceiling. A subagent with nothing running answers as stopped.
+func (c *Client) StopAgentSessionSubagent(ctx context.Context, machine string, id string, subID string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/subagents/{subId}/stop"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "subId", "simple", false, subID)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // UploadAgentSessionPaste - Save a large paste with a pw code session
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -5453,6 +5671,42 @@ func (c *Client) UploadAgentSessionPaste(ctx context.Context, machine string, id
 	path = pathReplace(path, "id", "simple", false, id)
 
 	var result AgentPasteSaved
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// GetAgentSessionWorktree - Get the worktree a pw code session works in
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the git worktree the session moved into with EnterWorktree, what removing it would delete, and whether deleting the session can remove it. Empty while the session works where it launched, or once its worktree is gone. A session the machine isn't running answers from its saved transcript.
+func (c *Client) GetAgentSessionWorktree(ctx context.Context, machine string, id string) (*AgentSessionWorktree, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/worktree"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentSessionWorktree
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// LeaveAgentSessionWorktree - Move a pw code session out of its worktree
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Moves the session back to the directory it launched in, keeping its worktree on the machine, or with remove, removing the worktree and its branch too. Opens the session first when the machine isn't running it. Refused, changing nothing, while the session is working, when it no longer works in the worktree named, when another session works there, or, for remove, when the session's permission mode can't edit files.
+func (c *Client) LeaveAgentSessionWorktree(ctx context.Context, machine string, id string, body AgentLeaveWorktreeBody) (*AgentWorktreeLeft, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/worktree/leave"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentWorktreeLeft
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -17724,7 +17978,7 @@ func (c *Client) ListUserGitlabProjects(ctx context.Context, organization string
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Links the user's account on a server that allows personal access tokens. The token must be active and carry the read_api scope; it is verified against the server before it is stored, and it is forgotten, never revoked, on disconnect.
+// Links the user's account on a server that allows personal access tokens. The token must be active and carry the read_api scope; it is verified against the server before it is stored in the vault, and deleted from the vault on disconnect. The platform never revokes it on the GitLab server.
 func (c *Client) ConnectUserGitlabToken(ctx context.Context, organization string, user string, server string, body ConnectWithTokenInputBody) (*GitLabConnection, error) {
 
 	path := "/api/organizations/{organization}/users/{user}/gitlab-connections/{server}/token"

@@ -49,6 +49,7 @@ cd "$ROOT_DIR/cmd/ingress"
 go run -trimpath ./internal/routes/generate/generate-openapi.go
 cd "$ROOT_DIR"
 echo "OpenAPI spec generated"
+pnpm -F @parallelworks/code generate-api
 echo ""
 
 # ============ TypeScript ============
@@ -116,7 +117,7 @@ if [[ "$PUSH" == true ]]; then
     echo "Committing and pushing regenerated files..."
     cd "$ROOT_DIR"
 
-    PATHS_TO_ADD=("sdk/openapi.json")
+    PATHS_TO_ADD=("sdk/openapi.json" "packages/code/src/api.d.ts")
     should_generate ts && PATHS_TO_ADD+=("sdk/typescript")
     should_generate go && PATHS_TO_ADD+=("sdk/go")
     should_generate python && PATHS_TO_ADD+=("sdk/python")
