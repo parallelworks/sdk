@@ -4719,6 +4719,24 @@ func (c *Client) DeleteAgentMachineClaudeAccount(ctx context.Context, machine st
 	return nil
 }
 
+// MoveAgentMachineClaudeAccountSessions - Move a Claude Code account's sessions to another account
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Move a Claude Code account's sessions to another account. Switches every live session running Claude Code on the account to another, as the session settings route does for one: a turn waiting at the account's usage limit continues at once, and a running one switches after it. Every session on an account shares its usage limit, so this moves them off a spent one together. The daemon enforces each session's control policy.
+func (c *Client) MoveAgentMachineClaudeAccountSessions(ctx context.Context, machine string, name string, body AgentClaudeAccountMoveBody) (*AgentClaudeAccountMoved, error) {
+
+	path := "/api/code/machines/{machine}/claude-code/accounts/{name}/move"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "name", "simple", false, name)
+
+	var result AgentClaudeAccountMoved
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // StartAgentClaudeLogin - Start Claude Code sign-in
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -4849,6 +4867,44 @@ func (c *Client) GetAgentMachineClaudeModels(ctx context.Context, machine string
 	return &result, nil
 }
 
+// ListAgentMachineDirectoriesParams contains the parameters for the ListAgentMachineDirectories operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListAgentMachineDirectoriesParams struct {
+	// Directory to list: an absolute path, or one starting at ~ for the home directory, which an empty path lists.
+	Path *string `json:"path,omitempty"`
+	// Keeps the folders whose names hold this text, in any case, those starting with it first.
+	Filter *string `json:"filter,omitempty"`
+}
+
+// ListAgentMachineDirectories - List the folders a new pw code session could start in
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Lists the folders in one directory of the machine, as the account its sessions run as sees them, leaving out files and anything the machine's deny rules cover. The machine answers only when its owner lets sessions start remotely.
+func (c *Client) ListAgentMachineDirectories(ctx context.Context, machine string, opts ...ListAgentMachineDirectoriesParams) (*AgentDirectories, error) {
+
+	path := "/api/code/machines/{machine}/directories"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	var params ListAgentMachineDirectoriesParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "path", "form", false, params.Path)
+
+	addQueryParam(queryValues, "filter", "form", false, params.Filter)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+
+	var result AgentDirectories
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetAgentWorkspacePaletteParams contains the parameters for the GetAgentWorkspacePalette operation.
 // Required parameters are value fields; optional parameters are pointers.
 type GetAgentWorkspacePaletteParams struct {
@@ -4917,19 +4973,40 @@ func (c *Client) CreateAgentSession(ctx context.Context, machine string, body Cr
 	return &result, nil
 }
 
+// GetAgentSessionParams contains the parameters for the GetAgentSession operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentSessionParams struct {
+	// Set to refs, each image in the history that has a ref comes with empty data: its preview is read from the session's image route with preview=true. Previews are most of what a transcript with pictures weighs. A machine whose pw predates this sends every preview.
+	Previews *string `json:"previews,omitempty"`
+	// The ETag of a transcript you hold. While the session has not changed, the answer is 304 with no body, and its machine does not send the transcript again.
+	IfNoneMatch *string `json:"If-None-Match,omitempty"`
+}
+
 // GetAgentSession - Get a pw code session transcript
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Returns one session's transcript and state as its machine's daemon reports them. Live updates stream from /ws/code/machines/{machine}/sessions/{id}/events.
-func (c *Client) GetAgentSession(ctx context.Context, machine string, id string) (*AgentSessionDetail, error) {
+func (c *Client) GetAgentSession(ctx context.Context, machine string, id string, opts ...GetAgentSessionParams) (*AgentSessionDetail, error) {
 
 	path := "/api/code/machines/{machine}/sessions/{id}"
 	path = pathReplace(path, "machine", "simple", false, machine)
 	path = pathReplace(path, "id", "simple", false, id)
+	var params GetAgentSessionParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "previews", "form", false, params.Previews)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+	headers := make(http.Header)
+	setHeader(headers, "If-None-Match", false, params.IfNoneMatch)
 
 	var result AgentSessionDetail
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true, headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil
@@ -5155,6 +5232,24 @@ func (c *Client) SteerAgentSession(ctx context.Context, machine string, id strin
 	return &result, nil
 }
 
+// WithdrawAgentSessionDirection - Take back text steered into a pw code session's turn
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Takes back text steered into the running turn that the model has not read yet, as removing a pending message does in the pw code terminal. Answers with the ids taken back; the model already read the rest. Like taking back a queued message, it is not held to the remote permission ceiling.
+func (c *Client) WithdrawAgentSessionDirection(ctx context.Context, machine string, id string, body AgentDirectionWithdrawBody) (*AgentDirectionWithdrawn, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/direction/withdraw"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+
+	var result AgentDirectionWithdrawn
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // ForkAgentSession - Copy a pw code session
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -5196,14 +5291,14 @@ func (c *Client) GetAgentSessionGithubImage(ctx context.Context, machine string,
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Runs /goal with the same arguments the terminal takes. Setting or resuming a goal starts a turn on the session.
-func (c *Client) SetAgentSessionGoal(ctx context.Context, machine string, id string, body AgentCommandArgs) (*AgentCommandOutput, error) {
+// Runs /goal with the same arguments the terminal takes, and answers with the goal as the call left it. Setting or resuming a goal starts a turn on the session. A bare edit only reads the goal, and is the one form that joins nothing to the conversation.
+func (c *Client) SetAgentSessionGoal(ctx context.Context, machine string, id string, body AgentCommandArgs) (*AgentGoalResult, error) {
 
 	path := "/api/code/machines/{machine}/sessions/{id}/goal"
 	path = pathReplace(path, "machine", "simple", false, machine)
 	path = pathReplace(path, "id", "simple", false, id)
 
-	var result AgentCommandOutput
+	var result AgentGoalResult
 	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
 		return nil, parseErrorResponse(err)
 	}
@@ -5262,17 +5357,34 @@ func (c *Client) UploadAgentSessionImage(ctx context.Context, machine string, id
 	return &result, nil
 }
 
+// GetAgentSessionImageParams contains the parameters for the GetAgentSessionImage operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentSessionImageParams struct {
+	// Answers the image's preview, as the transcript carries it unless read with previews=refs, in place of the image at full size.
+	Preview *bool `json:"preview,omitempty"`
+}
+
 // GetAgentSessionImage - Get an image from a pw code session at full size
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Returns the full-size image a transcript item or event names by its ref, where the transcript itself carries only a small preview. The machine's daemon holds it to the same rules as the transcript.
-func (c *Client) GetAgentSessionImage(ctx context.Context, machine string, id string, ref string) (*[]byte, error) {
+func (c *Client) GetAgentSessionImage(ctx context.Context, machine string, id string, ref string, opts ...GetAgentSessionImageParams) (*[]byte, error) {
 
 	path := "/api/code/machines/{machine}/sessions/{id}/images/{ref}"
 	path = pathReplace(path, "machine", "simple", false, machine)
 	path = pathReplace(path, "id", "simple", false, id)
 	path = pathReplace(path, "ref", "simple", false, ref)
+	var params GetAgentSessionImageParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "preview", "form", false, params.Preview)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
 
 	var result []byte
 	if err := c.do(ctx, "GET", path, nil, "", &result, "image/*", true); err != nil {
@@ -5622,6 +5734,43 @@ func (c *Client) SteerAgentSessionSubagent(ctx context.Context, machine string, 
 	return &result, nil
 }
 
+// WithdrawAgentSessionSubagentDirection - Take back text steered into a pw code subagent's work
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Takes back text steered into the subagent's work in flight that its model has not read yet. Answers with the ids taken back; the model already read the rest.
+func (c *Client) WithdrawAgentSessionSubagentDirection(ctx context.Context, machine string, id string, subID string, body AgentDirectionWithdrawBody) (*AgentDirectionWithdrawn, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/subagents/{subId}/direction/withdraw"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "subId", "simple", false, subID)
+
+	var result AgentDirectionWithdrawn
+	if err := c.do(ctx, "POST", path, body, "application/json", &result, "application/json", true); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
+// DismissAgentSessionSubagent - Take a pw code subagent off the session's list
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Takes a subagent that is not running off the session's list for every window showing the session, and says so with a subagent_dismissed event on its feed. It is not deleted: its transcript still opens, a message or the session's model can still give it work, and running again lists it again. Refused with 409 while it runs; stop it first. Like stop, it is not held to the remote permission ceiling.
+func (c *Client) DismissAgentSessionSubagent(ctx context.Context, machine string, id string, subID string) error {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/subagents/{subId}/dismiss"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	path = pathReplace(path, "subId", "simple", false, subID)
+
+	if err := c.do(ctx, "POST", path, nil, "", nil, "application/json", true); err != nil {
+		return parseErrorResponse(err)
+	}
+	return nil
+}
+
 // SendAgentSessionSubagentMessage - Send a message to a pw code subagent
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -5677,6 +5826,49 @@ func (c *Client) UploadAgentSessionPaste(ctx context.Context, machine string, id
 	return &result, nil
 }
 
+// GetAgentSessionTranscriptParams contains the parameters for the GetAgentSessionTranscript operation.
+// Required parameters are value fields; optional parameters are pointers.
+type GetAgentSessionTranscriptParams struct {
+	// Set to refs, each image in the history that has a ref comes with empty data: its preview is read from the session's image route with preview=true.
+	Previews *string `json:"previews,omitempty"`
+	// About how many history items the tail holds. It is longer when no item that near the end starts cleanly: a tool result is never parted from its call.
+	Tail *int64 `json:"tail,omitempty"`
+	// The ETag of a transcript you hold. While the session has not changed, the answer is 304 with no body, and its machine does not send the transcript again.
+	IfNoneMatch *string `json:"If-None-Match,omitempty"`
+}
+
+// GetAgentSessionTranscript - Get a pw code session transcript, its end first
+//
+// > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
+//
+// Returns the session as get-agent-session does, with its history in two parts: tail holds the session and the end of its history, and older the history before it. The tail is written first, so a reader on a slow connection can show where the conversation stands while the rest arrives.
+func (c *Client) GetAgentSessionTranscript(ctx context.Context, machine string, id string, opts ...GetAgentSessionTranscriptParams) (*AgentTranscript, error) {
+
+	path := "/api/code/machines/{machine}/sessions/{id}/transcript"
+	path = pathReplace(path, "machine", "simple", false, machine)
+	path = pathReplace(path, "id", "simple", false, id)
+	var params GetAgentSessionTranscriptParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	queryValues := url.Values{}
+	addQueryParam(queryValues, "previews", "form", false, params.Previews)
+
+	addQueryParam(queryValues, "tail", "form", false, params.Tail)
+
+	if len(queryValues) > 0 {
+		path += "?" + encodeQuery(queryValues)
+	}
+	headers := make(http.Header)
+	setHeader(headers, "If-None-Match", false, params.IfNoneMatch)
+
+	var result AgentTranscript
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true, headers); err != nil {
+		return nil, parseErrorResponse(err)
+	}
+	return &result, nil
+}
+
 // GetAgentSessionWorktree - Get the worktree a pw code session works in
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
@@ -5713,17 +5905,30 @@ func (c *Client) LeaveAgentSessionWorktree(ctx context.Context, machine string, 
 	return &result, nil
 }
 
+// ListAgentSessionsParams contains the parameters for the ListAgentSessions operation.
+// Required parameters are value fields; optional parameters are pointers.
+type ListAgentSessionsParams struct {
+	// The ETag of a listing you hold. While nothing in it has changed, the answer is 304 with no body, and the machines are not asked to send their sessions again.
+	IfNoneMatch *string `json:"If-None-Match,omitempty"`
+}
+
 // ListAgentSessions - List pw code sessions across your machines
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
 // Asks every connected cluster and instance you can log in to for its pw code sessions and returns them together with each machine's reachability. Nothing is stored: the answer is what the machines report right now.
-func (c *Client) ListAgentSessions(ctx context.Context) (*AgentSessionsResponse, error) {
+func (c *Client) ListAgentSessions(ctx context.Context, opts ...ListAgentSessionsParams) (*AgentSessionsResponse, error) {
 
 	path := "/api/code/sessions"
+	var params ListAgentSessionsParams
+	if len(opts) > 0 {
+		params = opts[0]
+	}
+	headers := make(http.Header)
+	setHeader(headers, "If-None-Match", false, params.IfNoneMatch)
 
 	var result AgentSessionsResponse
-	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true); err != nil {
+	if err := c.do(ctx, "GET", path, nil, "", &result, "application/json", true, headers); err != nil {
 		return nil, parseErrorResponse(err)
 	}
 	return &result, nil

@@ -660,10 +660,23 @@ type AgentClaudeAccount struct {
 	Name                string     `json:"name"`
 	Plan                *string    `json:"plan,omitempty"`
 	Refreshing          *bool      `json:"refreshing,omitempty"`
+	Sessions            []string   `json:"sessions,omitempty"`
 	SignInRequired      *bool      `json:"signInRequired,omitempty"`
 	Usage               *string    `json:"usage,omitempty"`
 	WeeklyResetsAt      *time.Time `json:"weeklyResetsAt,omitempty"`
 	WeeklyUsedPercent   *float64   `json:"weeklyUsedPercent,omitempty"`
+}
+
+type AgentClaudeAccountMoveBody struct {
+	// Session id to leave on its account, such as the one the caller switches itself.
+	Except *string `json:"except,omitempty"`
+	// Claude Code account on the machine to move the sessions to.
+	To string `json:"to"`
+}
+
+type AgentClaudeAccountMoved struct {
+	// Ids of the sessions now on the account moved to. A session the caller may not drive stays where it is.
+	Moved []string `json:"moved"`
 }
 
 type AgentClaudeLoginEvent struct {
@@ -733,6 +746,35 @@ type AgentDirectionBody struct {
 type AgentDirectionDelivered struct {
 	// False when no turn was running to take the text; send it as a message instead.
 	Delivered bool `json:"delivered"`
+	// Names the delivered text, for taking it back before the model reads it and for matching the user_note event that reports it did. Empty from a machine whose pw code is too old to take it back.
+	ID *string `json:"id,omitempty"`
+}
+
+type AgentDirectionWithdrawBody struct {
+	// The ids steering the text answered with.
+	Ids []string `json:"ids"`
+}
+
+type AgentDirectionWithdrawn struct {
+	// The ids taken back. The model already read the rest.
+	Withdrawn []string `json:"withdrawn"`
+}
+
+type AgentDirectories struct {
+	// The folders in the directory, by name.
+	Entries []AgentDirectory `json:"entries"`
+	// Home directory of the account the machine's sessions run as.
+	Home *string `json:"home,omitempty"`
+	// Absolute path of the directory listed, with ~ expanded.
+	Path string `json:"path"`
+	// The directory holds more folders than one answer lists; a filter reaches the rest.
+	Truncated *bool `json:"truncated,omitempty"`
+}
+
+type AgentDirectory struct {
+	Name string `json:"name"`
+	// The folder holds a .git, as a repository or one of its worktrees does.
+	Repository *bool `json:"repository,omitempty"`
 }
 
 type AgentEnrollmentBody struct {
@@ -740,6 +782,20 @@ type AgentEnrollmentBody struct {
 	Cluster string `json:"cluster"`
 	// Host name of the node the agent runs on, as the node reported it
 	Host string `json:"host"`
+}
+
+type AgentGoalResult struct {
+	// The unfinished goal's condition, empty with none standing.
+	Condition *string `json:"condition,omitempty"`
+	// What /goal printed.
+	Output string `json:"output"`
+	// Why the last check found the goal unmet.
+	Reason *string     `json:"reason,omitempty"`
+	Status *GoalStatus `json:"status,omitempty"`
+	// Tokens the session has spent over those turns.
+	Tokens *int64 `json:"tokens,omitempty"`
+	// Checks the unfinished goal has made since it was set, or since the session was last restored. A machine from before this field leaves it out.
+	Turns *int64 `json:"turns,omitempty"`
 }
 
 type AgentImageBody struct {
@@ -784,7 +840,9 @@ type AgentMachine struct {
 	ClaudeLogin *bool `json:"claudeLogin,omitempty"`
 	// Machine id the pw code daemon reported, when it answered. A local computer with the same id as a resource is the same host and is listed only as the resource.
 	DaemonID *string `json:"daemonId,omitempty"`
-	Error    *string `json:"error,omitempty"`
+	// The daemon lists the machine's folders, for choosing where a session starts.
+	Directories *bool   `json:"directories,omitempty"`
+	Error       *string `json:"error,omitempty"`
 	// Hostname the daemon reported, when it answered.
 	Hostname *string `json:"hostname,omitempty"`
 	// Hex ObjectID of the cluster, pool, or instance document; for a local computer, the id its pw code daemon registered.
@@ -867,33 +925,35 @@ type AgentRenameBody struct {
 }
 
 type AgentSession struct {
-	Allocation        *string           `json:"allocation,omitempty"`
-	Approvals         []ApprovalRequest `json:"approvals,omitempty"`
-	ArchivedAt        *time.Time        `json:"archivedAt,omitempty"`
-	AutoName          *string           `json:"autoName,omitempty"`
-	Branch            *string           `json:"branch,omitempty"`
-	CreatedAt         time.Time         `json:"createdAt"`
-	Effort            *string           `json:"effort,omitempty"`
-	Group             *string           `json:"group,omitempty"`
-	ID                string            `json:"id"`
-	InputTokens       *int64            `json:"inputTokens,omitempty"`
-	LastError         *string           `json:"lastError,omitempty"`
-	LiveHost          *string           `json:"liveHost,omitempty"`
-	MachineID         string            `json:"machineId"`
-	Messages          int64             `json:"messages"`
-	Model             string            `json:"model"`
-	Name              *string           `json:"name,omitempty"`
-	OutputTokens      *int64            `json:"outputTokens,omitempty"`
-	PermissionMode    *string           `json:"permissionMode,omitempty"`
-	PinnedAt          *time.Time        `json:"pinnedAt,omitempty"`
-	Preview           string            `json:"preview"`
-	PullRequestStates map[string]string `json:"pullRequestStates,omitempty"`
-	PullRequests      []string          `json:"pullRequests,omitempty"`
-	RemoteControl     *bool             `json:"remoteControl,omitempty"`
-	Status            string            `json:"status"`
-	TurnStartedAt     *time.Time        `json:"turnStartedAt,omitempty"`
-	UpdatedAt         time.Time         `json:"updatedAt"`
-	Workspace         string            `json:"workspace"`
+	Allocation           *string           `json:"allocation,omitempty"`
+	Approvals            []ApprovalRequest `json:"approvals,omitempty"`
+	ArchivedAt           *time.Time        `json:"archivedAt,omitempty"`
+	AutoName             *string           `json:"autoName,omitempty"`
+	Branch               *string           `json:"branch,omitempty"`
+	CreatedAt            time.Time         `json:"createdAt"`
+	Effort               *string           `json:"effort,omitempty"`
+	Group                *string           `json:"group,omitempty"`
+	ID                   string            `json:"id"`
+	InputTokens          *int64            `json:"inputTokens,omitempty"`
+	LastError            *string           `json:"lastError,omitempty"`
+	LiveHost             *string           `json:"liveHost,omitempty"`
+	MachineID            string            `json:"machineId"`
+	Messages             int64             `json:"messages"`
+	Model                string            `json:"model"`
+	Name                 *string           `json:"name,omitempty"`
+	OutputTokens         *int64            `json:"outputTokens,omitempty"`
+	PermissionMode       *string           `json:"permissionMode,omitempty"`
+	PinnedAt             *time.Time        `json:"pinnedAt,omitempty"`
+	Preview              string            `json:"preview"`
+	PullRequestStates    map[string]string `json:"pullRequestStates,omitempty"`
+	PullRequests         []string          `json:"pullRequests,omitempty"`
+	RemoteControl        *bool             `json:"remoteControl,omitempty"`
+	Status               string            `json:"status"`
+	TurnStartedAt        *time.Time        `json:"turnStartedAt,omitempty"`
+	UpdatedAt            time.Time         `json:"updatedAt"`
+	UsageLimitResumeAt   *time.Time        `json:"usageLimitResumeAt,omitempty"`
+	WaitingForUsageLimit *bool             `json:"waitingForUsageLimit,omitempty"`
+	Workspace            string            `json:"workspace"`
 }
 
 type AgentSessionCleared struct {
@@ -1048,6 +1108,12 @@ type AgentStreamEvent struct {
 type AgentSubagents struct {
 	// The session's subagents in the order they started. Their status is empty when the machine's pw code is too old to say how its subagents stand.
 	Subagents []Subagent `json:"subagents"`
+}
+
+type AgentTranscript struct {
+	// The history before the tail's, oldest first. The whole history is older followed by tail.history.
+	Older []HistoryItem      `json:"older"`
+	Tail  AgentSessionDetail `json:"tail"`
 }
 
 type AgentWorktreeLeft struct {
@@ -7182,6 +7248,7 @@ type GoalProgress struct {
 	ResumeAt  *time.Time `json:"resumeAt,omitempty"`
 	Tokens    *int64     `json:"tokens,omitempty"`
 	Turns     *int64     `json:"turns,omitempty"`
+	WaitedMs  *int64     `json:"waitedMs,omitempty"`
 }
 
 type GoalStatus struct {
@@ -9062,19 +9129,20 @@ type HelmReleaseValuesResponseBody struct {
 }
 
 type HistoryItem struct {
-	CallID    *string        `json:"callId,omitempty"`
-	Decision  *ToolDecision  `json:"decision,omitempty"`
-	FromMain  *bool          `json:"fromMain,omitempty"`
-	Images    []ImageContent `json:"images,omitempty"`
-	Kind      string         `json:"kind"`
-	Pastes    []PasteView    `json:"pastes,omitempty"`
-	PlanBody  *string        `json:"planBody,omitempty"`
-	StartLine *int64         `json:"startLine,omitempty"`
-	Text      *string        `json:"text,omitempty"`
-	ToolArgs  *string        `json:"toolArgs,omitempty"`
-	ToolName  *string        `json:"toolName,omitempty"`
-	TurnEnd   *TurnEnd       `json:"turnEnd,omitempty"`
-	TurnID    *string        `json:"turnId,omitempty"`
+	CallID     *string        `json:"callId,omitempty"`
+	Decision   *ToolDecision  `json:"decision,omitempty"`
+	DurationMs *int64         `json:"durationMs,omitempty"`
+	FromMain   *bool          `json:"fromMain,omitempty"`
+	Images     []ImageContent `json:"images,omitempty"`
+	Kind       string         `json:"kind"`
+	Pastes     []PasteView    `json:"pastes,omitempty"`
+	PlanBody   *string        `json:"planBody,omitempty"`
+	StartLine  *int64         `json:"startLine,omitempty"`
+	Text       *string        `json:"text,omitempty"`
+	ToolArgs   *string        `json:"toolArgs,omitempty"`
+	ToolName   *string        `json:"toolName,omitempty"`
+	TurnEnd    *TurnEnd       `json:"turnEnd,omitempty"`
+	TurnID     *string        `json:"turnId,omitempty"`
 }
 
 type HostForwardSetting struct {
@@ -9147,10 +9215,12 @@ type ImageComplianceItem struct {
 
 type ImageContent struct {
 	Data         string  `json:"data"`
+	Height       *int64  `json:"height,omitempty"`
 	Mime         string  `json:"mime"`
 	OriginalMime *string `json:"originalMime,omitempty"`
 	OriginalSize *int64  `json:"originalSize,omitempty"`
 	Ref          *string `json:"ref,omitempty"`
+	Width        *int64  `json:"width,omitempty"`
 }
 
 type ImportResourceBody struct {
@@ -9240,6 +9310,8 @@ type Instance struct {
 	Architecture *string `json:"architecture,omitempty"`
 	// Features the instance's connected agent supports, such as files and files-write. Absent when no agent is connected.
 	Capabilities []string `json:"capabilities,omitempty"`
+	// When the Instance was created and first provisioned (RFC 3339).
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// The cloud service provider for the Instance.
 	Csp string `json:"csp"`
 	// The cloud service provider's unique identifier for the instance.
@@ -9290,6 +9362,8 @@ type Instance struct {
 	Status *string `json:"status,omitempty"`
 	// User-facing message describing the current status (e.g., why a create job was skipped).
 	StatusDescription *string `json:"statusDescription,omitempty"`
+	// When the Instance last changed status, such as when it started running (RFC 3339).
+	StatusUpdatedAt *time.Time `json:"statusUpdatedAt,omitempty"`
 	// The tags associated with the Instance.
 	Tags []string `json:"tags"`
 	// The type of the compute resource.
@@ -15645,6 +15719,7 @@ type SessionState struct {
 	Attribution          *bool                    `json:"attribution,omitempty"`
 	AutoCompactWindow    *int64                   `json:"autoCompactWindow,omitempty"`
 	AutoName             *string                  `json:"autoName,omitempty"`
+	BackgroundMonitors   *int64                   `json:"backgroundMonitors,omitempty"`
 	BackgroundShells     *int64                   `json:"backgroundShells,omitempty"`
 	ClaudeAccount        *string                  `json:"claudeAccount,omitempty"`
 	EffectiveAllocation  *string                  `json:"effectiveAllocation,omitempty"`

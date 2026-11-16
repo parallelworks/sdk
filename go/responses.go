@@ -335,6 +335,22 @@ func (m *ResponseMeta) GetAgentClaudeLoginHeaders() GetAgentClaudeLoginHeaders {
 	}
 }
 
+// GetAgentSessionHeaders holds the headers GetAgentSession declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetAgentSessionHeaders struct {
+	CacheControl string
+	ETag         string
+}
+
+// GetAgentSessionHeaders reads the headers GetAgentSession declares out of the captured
+// response.
+func (m *ResponseMeta) GetAgentSessionHeaders() GetAgentSessionHeaders {
+	return GetAgentSessionHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+		ETag:         m.Header.Get("ETag"),
+	}
+}
+
 // GetAgentSessionGithubImageHeaders holds the headers GetAgentSessionGithubImage declares. A header the spec
 // types as something other than a string is nil when the response omits it.
 type GetAgentSessionGithubImageHeaders struct {
@@ -368,6 +384,38 @@ func (m *ResponseMeta) GetAgentSessionImageHeaders() GetAgentSessionImageHeaders
 		CacheControl:        m.Header.Get("Cache-Control"),
 		ContentType:         m.Header.Get("Content-Type"),
 		XContentTypeOptions: m.Header.Get("X-Content-Type-Options"),
+	}
+}
+
+// GetAgentSessionTranscriptHeaders holds the headers GetAgentSessionTranscript declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type GetAgentSessionTranscriptHeaders struct {
+	CacheControl string
+	ETag         string
+}
+
+// GetAgentSessionTranscriptHeaders reads the headers GetAgentSessionTranscript declares out of the captured
+// response.
+func (m *ResponseMeta) GetAgentSessionTranscriptHeaders() GetAgentSessionTranscriptHeaders {
+	return GetAgentSessionTranscriptHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+		ETag:         m.Header.Get("ETag"),
+	}
+}
+
+// ListAgentSessionsHeaders holds the headers ListAgentSessions declares. A header the spec
+// types as something other than a string is nil when the response omits it.
+type ListAgentSessionsHeaders struct {
+	CacheControl string
+	ETag         string
+}
+
+// ListAgentSessionsHeaders reads the headers ListAgentSessions declares out of the captured
+// response.
+func (m *ResponseMeta) ListAgentSessionsHeaders() ListAgentSessionsHeaders {
+	return ListAgentSessionsHeaders{
+		CacheControl: m.Header.Get("Cache-Control"),
+		ETag:         m.Header.Get("ETag"),
 	}
 }
 
