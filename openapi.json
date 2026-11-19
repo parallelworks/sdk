@@ -2199,6 +2199,10 @@
             "description": "The daemon supports signing in to Claude Code from the web.",
             "type": "boolean"
           },
+          "csp": {
+            "description": "Cloud provider of a cloud cluster or instance.",
+            "type": "string"
+          },
           "daemonId": {
             "description": "Machine id the pw code daemon reported, when it answered. A local computer with the same id as a resource is the same host and is listed only as the resource.",
             "type": "string"
@@ -2218,6 +2222,10 @@
             "description": "Hex ObjectID of the cluster, pool, or instance document; for a local computer, the id its pw code daemon registered.",
             "type": "string"
           },
+          "imageUrl": {
+            "description": "The icon uploaded for the resource.",
+            "type": "string"
+          },
           "kind": {
             "description": "local is a computer whose pw code daemon connected itself; the others are resources reached through their pw agent.",
             "enum": [
@@ -2229,6 +2237,10 @@
             "type": "string"
           },
           "name": {
+            "type": "string"
+          },
+          "os": {
+            "description": "Operating system as Go names it (darwin, linux, windows): the one the machine's pw code daemon reported when it answered, else the one an existing cluster's agent reported.",
             "type": "string"
           },
           "owner": {
@@ -2265,6 +2277,10 @@
           },
           "remoteStart": {
             "type": "boolean"
+          },
+          "schedulerType": {
+            "description": "Scheduler of an existing cluster.",
+            "type": "string"
           },
           "sessionGroups": {
             "description": "The daemon stores which of the reader's groups a session is in.",

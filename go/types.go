@@ -838,6 +838,8 @@ type AgentMachine struct {
 	ClaudeInstalled *bool `json:"claudeInstalled,omitempty"`
 	// The daemon supports signing in to Claude Code from the web.
 	ClaudeLogin *bool `json:"claudeLogin,omitempty"`
+	// Cloud provider of a cloud cluster or instance.
+	Csp *string `json:"csp,omitempty"`
 	// Machine id the pw code daemon reported, when it answered. A local computer with the same id as a resource is the same host and is listed only as the resource.
 	DaemonID *string `json:"daemonId,omitempty"`
 	// The daemon lists the machine's folders, for choosing where a session starts.
@@ -847,15 +849,21 @@ type AgentMachine struct {
 	Hostname *string `json:"hostname,omitempty"`
 	// Hex ObjectID of the cluster, pool, or instance document; for a local computer, the id its pw code daemon registered.
 	ID string `json:"id"`
+	// The icon uploaded for the resource.
+	ImageURL *string `json:"imageUrl,omitempty"`
 	// local is a computer whose pw code daemon connected itself; the others are resources reached through their pw agent.
 	Kind string `json:"kind"`
 	Name string `json:"name"`
+	// Operating system as Go names it (darwin, linux, windows): the one the machine's pw code daemon reported when it answered, else the one an existing cluster's agent reported.
+	Os *string `json:"os,omitempty"`
 	// Platform username of the resource owner.
 	Owner string `json:"owner"`
 	// Modes the machine's pw code daemon accepts. Absent when the daemon predates the list, in which case it accepts read-only, accept-edits, bypass-permissions and plan.
 	PermissionModes         []string `json:"permissionModes,omitempty"`
 	RemoteMaxPermissionMode *string  `json:"remoteMaxPermissionMode,omitempty"`
 	RemoteStart             *bool    `json:"remoteStart,omitempty"`
+	// Scheduler of an existing cluster.
+	SchedulerType *string `json:"schedulerType,omitempty"`
 	// The daemon stores which of the reader's groups a session is in.
 	SessionGroups *bool  `json:"sessionGroups,omitempty"`
 	Status        string `json:"status"`
