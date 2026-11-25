@@ -1870,6 +1870,11 @@
       "AgentCompactBody": {
         "additionalProperties": false,
         "properties": {
+          "client": {
+            "description": "Names this request on the session's event feed, whose command_started event carries it once the compaction begins.",
+            "maxLength": 128,
+            "type": "string"
+          },
           "focus": {
             "description": "What the summary should keep.",
             "type": "string"
@@ -2214,12 +2219,20 @@
           "error": {
             "type": "string"
           },
+          "forkMidTurn": {
+            "description": "The daemon can fork a session while a turn runs, copying it up to its last reply.",
+            "type": "boolean"
+          },
+          "home": {
+            "description": "Home directory of the daemon's user, when it answered, where a session starts on a machine with no recent directory.",
+            "type": "string"
+          },
           "hostname": {
             "description": "Hostname the daemon reported, when it answered.",
             "type": "string"
           },
           "id": {
-            "description": "Hex ObjectID of the cluster, pool, or instance document; for a local computer, the id its pw code daemon registered.",
+            "description": "Hex ObjectID of the cluster, pool, or instance document; for a local computer, the id its pw code daemon registered; workspace for the caller's own workspace.",
             "type": "string"
           },
           "imageUrl": {
@@ -2227,12 +2240,13 @@
             "type": "string"
           },
           "kind": {
-            "description": "local is a computer whose pw code daemon connected itself; the others are resources reached through their pw agent.",
+            "description": "local is a computer whose pw code daemon connected itself; workspace is the caller's own workspace, which is always listed; the others are resources reached through their pw agent.",
             "enum": [
               "cloud",
               "existing",
               "instance",
-              "local"
+              "local",
+              "workspace"
             ],
             "type": "string"
           },
@@ -2292,7 +2306,8 @@
               "no_daemon",
               "no_agent",
               "unreachable",
-              "unsupported_agent"
+              "unsupported_agent",
+              "starting"
             ],
             "type": "string"
           },
@@ -2738,6 +2753,11 @@
               "null"
             ]
           },
+          "historyStart": {
+            "description": "Where history begins in the session's whole history: on the tail of a transcript, how many items older holds. Absent when history is the whole of it.",
+            "format": "int64",
+            "type": "integer"
+          },
           "id": {
             "type": "string"
           },
@@ -3148,6 +3168,9 @@
           "resumeAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "scheduled": {
+            "$ref": "#/components/schemas/ScheduledRun"
           },
           "seq": {
             "format": "int64",
@@ -26749,6 +26772,9 @@
           "planBody": {
             "type": "string"
           },
+          "scheduled": {
+            "$ref": "#/components/schemas/ScheduledRun"
+          },
           "startLine": {
             "format": "int64",
             "type": "integer"
@@ -36145,6 +36171,10 @@
             },
             "maxItems": 10,
             "type": "array"
+          },
+          "autoUpdate": {
+            "description": "Whether pw code installs the platform's newer pw on members' computers by itself. Replaces each member's own autoUpdate setting, on every operating system. pw code never updates pw on a computer that runs a pw agent.",
+            "type": "boolean"
           },
           "disableClaudeCode": {
             "description": "Disable Claude Code accounts, subscription models, and execution, even when Claude Code is installed on the agent host. Members cannot override an organization restriction.",
@@ -46879,6 +46909,15 @@
           "createdAt",
           "updatedAt"
         ],
+        "type": "object"
+      },
+      "ScheduledRun": {
+        "additionalProperties": false,
+        "properties": {
+          "taskId": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "SchedulerCommandBody": {
@@ -66746,7 +66785,7 @@
     },
     "/api/code/machines/{machine}/sessions/{id}/fork": {
       "post": {
-        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nCopies the session and its subagent transcripts into a new one on the same machine, leaving the original untouched. Refused while the session is mid-turn, and while another host holds it live.",
+        "description": "\u003e This is a user-centric route, so the response will always be in the context of the currently authenticated user.\n\nCopies the session and its subagent transcripts into a new one on the same machine, leaving the original untouched. While a turn runs, the copy ends with the reply before it, and a machine whose pw predates forkMidTurn refuses it. Refused while another host holds the session live.",
         "operationId": "fork-agent-session",
         "parameters": [
           {

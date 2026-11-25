@@ -724,6 +724,8 @@ type AgentCommandOutput struct {
 }
 
 type AgentCompactBody struct {
+	// Names this request on the session's event feed, whose command_started event carries it once the compaction begins.
+	Client *string `json:"client,omitempty"`
 	// What the summary should keep.
 	Focus *string `json:"focus,omitempty"`
 }
@@ -845,13 +847,17 @@ type AgentMachine struct {
 	// The daemon lists the machine's folders, for choosing where a session starts.
 	Directories *bool   `json:"directories,omitempty"`
 	Error       *string `json:"error,omitempty"`
+	// The daemon can fork a session while a turn runs, copying it up to its last reply.
+	ForkMidTurn *bool `json:"forkMidTurn,omitempty"`
+	// Home directory of the daemon's user, when it answered, where a session starts on a machine with no recent directory.
+	Home *string `json:"home,omitempty"`
 	// Hostname the daemon reported, when it answered.
 	Hostname *string `json:"hostname,omitempty"`
-	// Hex ObjectID of the cluster, pool, or instance document; for a local computer, the id its pw code daemon registered.
+	// Hex ObjectID of the cluster, pool, or instance document; for a local computer, the id its pw code daemon registered; workspace for the caller's own workspace.
 	ID string `json:"id"`
 	// The icon uploaded for the resource.
 	ImageURL *string `json:"imageUrl,omitempty"`
-	// local is a computer whose pw code daemon connected itself; the others are resources reached through their pw agent.
+	// local is a computer whose pw code daemon connected itself; workspace is the caller's own workspace, which is always listed; the others are resources reached through their pw agent.
 	Kind string `json:"kind"`
 	Name string `json:"name"`
 	// Operating system as Go names it (darwin, linux, windows): the one the machine's pw code daemon reported when it answered, else the one an existing cluster's agent reported.
@@ -970,43 +976,45 @@ type AgentSessionCleared struct {
 }
 
 type AgentSessionDetail struct {
-	AddDirs              []AddedDirectory   `json:"addDirs,omitempty"`
-	Allocation           *string            `json:"allocation,omitempty"`
-	AllowedDirs          []AllowedDirectory `json:"allowedDirs,omitempty"`
-	Approvals            []ApprovalRequest  `json:"approvals,omitempty"`
-	ArchivedAt           *time.Time         `json:"archivedAt,omitempty"`
-	AutoName             *string            `json:"autoName,omitempty"`
-	Branch               *string            `json:"branch,omitempty"`
-	ClaudeAccount        *string            `json:"claudeAccount,omitempty"`
-	CreatedAt            time.Time          `json:"createdAt"`
-	Effort               *string            `json:"effort,omitempty"`
-	Goal                 *GoalStatus        `json:"goal,omitempty"`
-	Group                *string            `json:"group,omitempty"`
-	History              []HistoryItem      `json:"history"`
-	ID                   string             `json:"id"`
-	InputTokens          *int64             `json:"inputTokens,omitempty"`
-	LastError            *string            `json:"lastError,omitempty"`
-	LastSeq              *int64             `json:"lastSeq,omitempty"`
-	LiveHost             *string            `json:"liveHost,omitempty"`
-	MachineID            string             `json:"machineId"`
-	Messages             int64              `json:"messages"`
-	Model                string             `json:"model"`
-	Name                 *string            `json:"name,omitempty"`
-	OutputTokens         *int64             `json:"outputTokens,omitempty"`
-	PermissionMode       *string            `json:"permissionMode,omitempty"`
-	PinnedAt             *time.Time         `json:"pinnedAt,omitempty"`
-	Preview              string             `json:"preview"`
-	PullRequestStates    map[string]string  `json:"pullRequestStates,omitempty"`
-	PullRequests         []string           `json:"pullRequests,omitempty"`
-	RemoteControl        *bool              `json:"remoteControl,omitempty"`
-	Status               string             `json:"status"`
-	TurnID               *string            `json:"turnId,omitempty"`
-	TurnStartedAt        *time.Time         `json:"turnStartedAt,omitempty"`
-	UpdatedAt            time.Time          `json:"updatedAt"`
-	UsageLimitResumeAt   *time.Time         `json:"usageLimitResumeAt,omitempty"`
-	WaitingForUsageLimit *bool              `json:"waitingForUsageLimit,omitempty"`
-	Workspace            string             `json:"workspace"`
-	WorkspaceUntrusted   *bool              `json:"workspaceUntrusted,omitempty"`
+	AddDirs       []AddedDirectory   `json:"addDirs,omitempty"`
+	Allocation    *string            `json:"allocation,omitempty"`
+	AllowedDirs   []AllowedDirectory `json:"allowedDirs,omitempty"`
+	Approvals     []ApprovalRequest  `json:"approvals,omitempty"`
+	ArchivedAt    *time.Time         `json:"archivedAt,omitempty"`
+	AutoName      *string            `json:"autoName,omitempty"`
+	Branch        *string            `json:"branch,omitempty"`
+	ClaudeAccount *string            `json:"claudeAccount,omitempty"`
+	CreatedAt     time.Time          `json:"createdAt"`
+	Effort        *string            `json:"effort,omitempty"`
+	Goal          *GoalStatus        `json:"goal,omitempty"`
+	Group         *string            `json:"group,omitempty"`
+	History       []HistoryItem      `json:"history"`
+	// Where history begins in the session's whole history: on the tail of a transcript, how many items older holds. Absent when history is the whole of it.
+	HistoryStart         *int64            `json:"historyStart,omitempty"`
+	ID                   string            `json:"id"`
+	InputTokens          *int64            `json:"inputTokens,omitempty"`
+	LastError            *string           `json:"lastError,omitempty"`
+	LastSeq              *int64            `json:"lastSeq,omitempty"`
+	LiveHost             *string           `json:"liveHost,omitempty"`
+	MachineID            string            `json:"machineId"`
+	Messages             int64             `json:"messages"`
+	Model                string            `json:"model"`
+	Name                 *string           `json:"name,omitempty"`
+	OutputTokens         *int64            `json:"outputTokens,omitempty"`
+	PermissionMode       *string           `json:"permissionMode,omitempty"`
+	PinnedAt             *time.Time        `json:"pinnedAt,omitempty"`
+	Preview              string            `json:"preview"`
+	PullRequestStates    map[string]string `json:"pullRequestStates,omitempty"`
+	PullRequests         []string          `json:"pullRequests,omitempty"`
+	RemoteControl        *bool             `json:"remoteControl,omitempty"`
+	Status               string            `json:"status"`
+	TurnID               *string           `json:"turnId,omitempty"`
+	TurnStartedAt        *time.Time        `json:"turnStartedAt,omitempty"`
+	UpdatedAt            time.Time         `json:"updatedAt"`
+	UsageLimitResumeAt   *time.Time        `json:"usageLimitResumeAt,omitempty"`
+	WaitingForUsageLimit *bool             `json:"waitingForUsageLimit,omitempty"`
+	Workspace            string            `json:"workspace"`
+	WorkspaceUntrusted   *bool             `json:"workspaceUntrusted,omitempty"`
 }
 
 type AgentSessionForked struct {
@@ -1103,6 +1111,7 @@ type AgentStreamEvent struct {
 	Recorded      *bool            `json:"recorded,omitempty"`
 	Result        *string          `json:"result,omitempty"`
 	ResumeAt      *time.Time       `json:"resumeAt,omitempty"`
+	Scheduled     *ScheduledRun    `json:"scheduled,omitempty"`
 	Seq           int64            `json:"seq"`
 	ShellProgress *ShellProgress   `json:"shellProgress,omitempty"`
 	StartLine     *int64           `json:"startLine,omitempty"`
@@ -9145,6 +9154,7 @@ type HistoryItem struct {
 	Kind       string         `json:"kind"`
 	Pastes     []PasteView    `json:"pastes,omitempty"`
 	PlanBody   *string        `json:"planBody,omitempty"`
+	Scheduled  *ScheduledRun  `json:"scheduled,omitempty"`
 	StartLine  *int64         `json:"startLine,omitempty"`
 	Text       *string        `json:"text,omitempty"`
 	ToolArgs   *string        `json:"toolArgs,omitempty"`
@@ -11915,6 +11925,8 @@ type OrgBillingSettings struct {
 type OrgCodeSettings struct {
 	// Messages pw code shows when it starts, one at random each launch. Control characters other than newlines are removed, and blank ones are dropped.
 	Announcements []string `json:"announcements,omitempty"`
+	// Whether pw code installs the platform's newer pw on members' computers by itself. Replaces each member's own autoUpdate setting, on every operating system. pw code never updates pw on a computer that runs a pw agent.
+	AutoUpdate *bool `json:"autoUpdate,omitempty"`
 	// Disable Claude Code accounts, subscription models, and execution, even when Claude Code is installed on the agent host. Members cannot override an organization restriction.
 	DisableClaudeCode *bool `json:"disableClaudeCode,omitempty"`
 	// Add pw code's Co-Authored-By trailer to the commits it makes and its attribution line to the pull requests it opens. Replaces each member's own includeCoAuthoredBy setting.
@@ -15385,6 +15397,10 @@ type SavedReportDto struct {
 	Subscribed bool      `json:"subscribed"`
 	TimeRange  string    `json:"timeRange"`
 	UpdatedAt  time.Time `json:"updatedAt"`
+}
+
+type ScheduledRun struct {
+	TaskID *string `json:"taskId,omitempty"`
 }
 
 type SchedulerCommandBody struct {

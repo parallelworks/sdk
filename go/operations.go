@@ -5254,7 +5254,7 @@ func (c *Client) WithdrawAgentSessionDirection(ctx context.Context, machine stri
 //
 // > This is a user-centric route, so the response will always be in the context of the currently authenticated user.
 //
-// Copies the session and its subagent transcripts into a new one on the same machine, leaving the original untouched. Refused while the session is mid-turn, and while another host holds it live.
+// Copies the session and its subagent transcripts into a new one on the same machine, leaving the original untouched. While a turn runs, the copy ends with the reply before it, and a machine whose pw predates forkMidTurn refuses it. Refused while another host holds the session live.
 func (c *Client) ForkAgentSession(ctx context.Context, machine string, id string) (*AgentSessionForked, error) {
 
 	path := "/api/code/machines/{machine}/sessions/{id}/fork"
